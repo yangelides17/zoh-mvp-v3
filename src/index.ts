@@ -2,6 +2,7 @@ import { buildApp } from "./app.js";
 import { createClaudeReplier } from "./claude/replier.js";
 import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
+import { safeError } from "./errors.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
@@ -14,7 +15,13 @@ try {
   process.exit(1);
 }
 
-const { db, close: closeDb } = createDb(config.databaseUrl);
+const { db, close: closeDb, migrate } = createDb(config.databaseUrl);
+try {
+  await migrate();
+} catch (err) {
+  console.error("Database migration failed:", safeError(err));
+  process.exit(1);
+}
 
 const sb = config.sendblue;
 const sendblue =

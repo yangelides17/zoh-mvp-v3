@@ -12,6 +12,7 @@ import {
 } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
+import { safeError } from "../errors.js";
 
 export type Logger = Pick<FastifyBaseLogger, "info" | "warn" | "error" | "debug">;
 
@@ -69,7 +70,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   if (inbound.mediaUrl) {
     const result = await handleMedia(deps, inbound, timings).catch((err: unknown) => {
       errors.push(`media: ${errorMessage(err)}`);
-      log.error({ ...ctx, err }, "Media handling failed");
+      log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
       return undefined;
     });
     transcript = result?.transcript;
@@ -88,7 +89,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     } catch (err) {
       timings.claude_ms = now().getTime() - claudeStart.getTime();
       errors.push(`claude: ${errorMessage(err)}`);
-      log.error({ ...ctx, err }, "Claude reply failed; sending fallback");
+      log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; sending fallback");
     }
   } else {
     errors.push("claude: ANTHROPIC_API_KEY not configured");
@@ -114,7 +115,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     });
   } catch (err) {
     errors.push(`send: ${errorMessage(err)}`);
-    log.error({ ...ctx, err }, "Sending the reply failed");
+    log.error({ ...ctx, err: safeError(err) }, "Sending the reply failed");
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,

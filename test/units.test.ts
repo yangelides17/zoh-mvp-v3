@@ -110,3 +110,34 @@ describe("GET /health", () => {
     await t.close();
   });
 });
+
+describe("safeError", () => {
+  it("keeps the database cause and drops query parameters", async () => {
+    const { safeError } = await import("../src/errors.js");
+    const cause = Object.assign(new Error('relation "messages" does not exist'), { code: "42P01" });
+    const err = Object.assign(new Error('Failed query: insert into "messages" ...\nparams: inbound,+19085782266,secret text'), {
+      name: "DrizzleQueryError",
+      cause,
+    });
+    const safe = safeError(err);
+    expect(safe).toEqual({ name: "DrizzleQueryError", message: 'relation "messages" does not exist', code: "42P01" });
+    expect(JSON.stringify(safe)).not.toContain("+1908");
+  });
+});
+
+describe("route errors", () => {
+  it("returns a generic 500 when storing fails, without leaking details", async () => {
+    const t = await makeApp();
+    const { db } = t;
+    (db as unknown as { insert: () => never }).insert = () => {
+      throw Object.assign(new Error("Failed query: insert ...\nparams: +19085782266,hello"), {
+        cause: new Error("connection refused"),
+      });
+    };
+    const { inboundEvent, postWebhook } = await import("./helpers.js");
+    const res = await postWebhook(t, inboundEvent());
+    expect(res.statusCode).toBe(500);
+    expect(res.body).not.toContain("+1908");
+    await t.close();
+  });
+});

@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import type { PipelineDeps } from "./pipeline/inbound.js";
 import { TaskQueue } from "./pipeline/task-queue.js";
+import { safeError } from "./errors.js";
 import { healthRoutes, type HealthRouteOptions } from "./routes/health.js";
 import { webhookRoutes } from "./routes/webhook.js";
 
@@ -25,7 +26,15 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
     bodyLimit: 1_000_000,
   });
 
-  const queue = new TaskQueue((err) => app.log.error({ err }, "Background task failed"));
+  const queue = new TaskQueue((err) => app.log.error({ err: safeError(err) }, "Background task failed"));
+
+  // Never let a raw error (which can embed phone numbers or message text) reach the logs or the response.
+  app.setErrorHandler((err: unknown, request, reply) => {
+    const statusCode = (err as { statusCode?: unknown }).statusCode;
+    const status = typeof statusCode === "number" && statusCode < 500 ? statusCode : 500;
+    request.log.error({ err: safeError(err), route: request.routeOptions.url }, "Request failed");
+    void reply.code(status).send({ error: status === 500 ? "internal error" : safeError(err).message });
+  });
   const pipeline: PipelineDeps = { ...deps.pipeline, log: app.log };
 
   const health: HealthRouteOptions = {
