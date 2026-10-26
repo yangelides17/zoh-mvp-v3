@@ -7,3 +7,7 @@
 - **Typing indicator timing:** consider holding the bubble a minimum time, or only sending it
   when a reply will take longer than ~2 s.
 - **Testers naming their own coach** (from the launch plan).
+- **Goal exploration:** people often don't know what they want until they try it ("read more"
+  was really "be more interesting in conversations"). Make refining or discovering the real goal
+  feel natural over time. The MVP only supports plan tweaks and switching goals within the
+  starting list. Raised October 26, 2026.
