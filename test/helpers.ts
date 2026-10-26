@@ -1,4 +1,5 @@
 import { PGlite } from "@electric-sql/pglite";
+import sharp from "sharp";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { buildApp, type AppDeps } from "../src/app.js";
@@ -80,9 +81,21 @@ export class FakeTranscriber implements Transcriber {
   async check() {}
 }
 
+let photoBytes: Promise<Uint8Array> | undefined;
+/** A real (tiny) PNG, so image conversion runs for real in tests. */
+export function testPhoto(): Promise<Uint8Array> {
+  photoBytes ??= sharp({ create: { width: 64, height: 48, channels: 3, background: "#e33" } })
+    .png()
+    .toBuffer()
+    .then((b) => new Uint8Array(b));
+  return photoBytes;
+}
+
 export const fakeFetchMedia: MediaFetcher = async (url) => {
   if (url.endsWith(".caf")) return { bytes: new Uint8Array([1, 2, 3]), contentType: "audio/x-caf" };
-  if (url.endsWith(".jpg")) return { bytes: new Uint8Array([4, 5, 6]), contentType: "image/jpeg" };
+  // iPhone photos often arrive mislabeled; ".jpg" here is really a PNG.
+  if (url.endsWith(".jpg")) return { bytes: await testPhoto(), contentType: "image/jpeg" };
+  if (url.endsWith("/unlabeled")) return { bytes: await testPhoto(), contentType: "application/octet-stream" };
   return { bytes: new Uint8Array([7]), contentType: "application/octet-stream" };
 };
 

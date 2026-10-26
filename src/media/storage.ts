@@ -60,13 +60,6 @@ export function mediaKind(contentType: string | undefined, url: string): MediaKi
   return "other";
 }
 
-/** Formats Claude can read directly from a URL. */
-export function isClaudeReadableImage(contentType: string | undefined, url: string): boolean {
-  const ct = (contentType ?? "").toLowerCase();
-  if (["image/jpeg", "image/png", "image/gif", "image/webp"].includes(ct)) return true;
-  return ["jpg", "jpeg", "png", "gif", "webp"].includes(extensionOf(url));
-}
-
 export interface DownloadedMedia {
   bytes: Uint8Array;
   contentType: string;

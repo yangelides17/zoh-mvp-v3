@@ -122,7 +122,20 @@ describe("POST /webhooks/sendblue", () => {
     expect(inbound?.mediaContentType).toBe("image/jpeg");
     expect(t.media.objects.size).toBe(1);
     const lastTurn = t.replier.received[0]?.at(-1);
-    expect(lastTurn?.imageUrl).toBe(url);
+    expect(lastTurn?.image?.mediaType).toBe("image/jpeg");
+    expect(lastTurn?.image?.data.length).toBeGreaterThan(100);
+    expect(lastTurn?.text).toBe("[Sent a photo]");
+    expect(inbound?.timings.image_format).toBe("png");
+  });
+
+  it("recognizes a photo even when the CDN doesn't label it as one", async () => {
+    await postWebhook(t, inboundEvent({ content: "look", media_url: "https://cdn.sendblue.test/media/unlabeled" }));
+    await t.queue.idle();
+    const [inbound] = await allMessages(t);
+    expect(inbound?.mediaContentType).toBe("image/png");
+    const lastTurn = t.replier.received[0]?.at(-1);
+    expect(lastTurn?.image).toBeDefined();
+    expect(lastTurn?.text).toBe("[Sent a photo]\nlook");
   });
 
   it("transcribes a voice note and gives Claude the transcript", async () => {

@@ -4,8 +4,8 @@ import Anthropic from "@anthropic-ai/sdk";
 export interface Turn {
   role: "user" | "assistant";
   text: string;
-  /** Public image URL to show Claude (only for the latest inbound photo). */
-  imageUrl?: string;
+  /** Image to show Claude (only for the latest inbound photo), already converted to JPEG. */
+  image?: { mediaType: "image/jpeg"; data: string };
 }
 
 export interface Replier {
@@ -19,12 +19,13 @@ export const GENERIC_SYSTEM_PROMPT = [
   "You are a friendly assistant replying to someone over iMessage.",
   "Keep replies short and natural, like a text message: usually one to three sentences.",
   "No markdown, bullet points or headings. Plain text only.",
-  "If they send a photo, respond to what you see. If a message says it's a voice note transcript, respond to what they said.",
+  "If they send a photo, respond to what you actually see in it. If a message says it's a voice note transcript, respond to what they said.",
+  "Never describe or guess at the contents of a photo, link or file you can't actually see; if a photo didn't come through, say so plainly.",
 ].join(" ");
 
 type ContentBlock =
   | { type: "text"; text: string }
-  | { type: "image"; source: { type: "url"; url: string } };
+  | { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } };
 
 /**
  * Turns into Claude messages: starts with a user turn, merges consecutive
@@ -34,7 +35,9 @@ export function toClaudeMessages(turns: Turn[]): Anthropic.MessageParam[] {
   const out: { role: "user" | "assistant"; content: ContentBlock[] }[] = [];
   for (const turn of turns) {
     const blocks: ContentBlock[] = [];
-    if (turn.imageUrl) blocks.push({ type: "image", source: { type: "url", url: turn.imageUrl } });
+    if (turn.image) {
+      blocks.push({ type: "image", source: { type: "base64", media_type: turn.image.mediaType, data: turn.image.data } });
+    }
     if (turn.text.trim()) blocks.push({ type: "text", text: turn.text });
     if (blocks.length === 0) continue;
     const last = out[out.length - 1];

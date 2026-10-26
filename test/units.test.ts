@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { toClaudeMessages } from "../src/claude/replier.js";
 import { loadConfig, missingSettings, normalizePhone } from "../src/config.js";
-import { isClaudeReadableImage, mediaKind } from "../src/media/storage.js";
+import { mediaKind } from "../src/media/storage.js";
+import sharp from "sharp";
+import { prepareImageForClaude, sniffImageFormat } from "../src/media/images.js";
 import { createSendblueClient, SendblueError } from "../src/sendblue/client.js";
 import { makeApp } from "./helpers.js";
 
@@ -36,7 +38,7 @@ describe("toClaudeMessages", () => {
     const out = toClaudeMessages([
       { role: "assistant", text: "Welcome!" },
       { role: "user", text: "Hi" },
-      { role: "user", text: "Anyone there?", imageUrl: "https://x.test/a.jpg" },
+      { role: "user", text: "Anyone there?", image: { mediaType: "image/jpeg", data: "AAAA" } },
       { role: "assistant", text: "Yes" },
       { role: "user", text: "Cool" },
       { role: "assistant", text: "trailing" },
@@ -51,8 +53,6 @@ describe("media helpers", () => {
     expect(mediaKind("audio/x-caf", "https://x/a")).toBe("audio");
     expect(mediaKind(undefined, "https://x/a/voice.CAF")).toBe("audio");
     expect(mediaKind("application/octet-stream", "https://x/p.heic")).toBe("image");
-    expect(isClaudeReadableImage("image/heic", "https://x/p.heic")).toBe(false);
-    expect(isClaudeReadableImage("image/jpeg", "https://x/p")).toBe(true);
   });
 });
 
@@ -139,5 +139,27 @@ describe("route errors", () => {
     expect(res.statusCode).toBe(500);
     expect(res.body).not.toContain("+1908");
     await t.close();
+  });
+});
+
+describe("images for Claude", () => {
+  const ascii = (str: string) => [...str].map((c) => c.charCodeAt(0));
+
+  it("recognizes formats from their bytes, not labels", () => {
+    expect(sniffImageFormat(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))).toBe("jpeg");
+    expect(sniffImageFormat(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe("png");
+    expect(sniffImageFormat(new Uint8Array([0, 0, 0, 0x18, ...ascii("ftypheic"), 0, 0]))).toBe("heic");
+    expect(sniffImageFormat(new Uint8Array([0, 0, 0, 0x18, ...ascii("ftypmif1"), 0, 0]))).toBe("heic");
+    expect(sniffImageFormat(new Uint8Array([...ascii("RIFF"), 0, 0, 0, 0, ...ascii("WEBP")]))).toBe("webp");
+    expect(sniffImageFormat(new Uint8Array([0, 0, 0, 0x18, ...ascii("ftypM4A "), 0, 0]))).toBeUndefined();
+    expect(sniffImageFormat(new Uint8Array([1, 2, 3]))).toBeUndefined();
+  });
+
+  it("converts to JPEG and shrinks large photos", async () => {
+    const big = await sharp({ create: { width: 4000, height: 3000, channels: 3, background: "#3a6" } }).png().toBuffer();
+    const img = await prepareImageForClaude(new Uint8Array(big));
+    expect(img).toMatchObject({ mediaType: "image/jpeg", format: "png", width: 1568, height: 1176 });
+    expect(sniffImageFormat(Buffer.from(img!.data, "base64"))).toBe("jpeg");
+    expect(await prepareImageForClaude(new Uint8Array([1, 2, 3]))).toBeUndefined();
   });
 });

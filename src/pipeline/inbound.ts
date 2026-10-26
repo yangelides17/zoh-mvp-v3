@@ -3,13 +3,8 @@ import type { Turn, Replier } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
 import type { Message } from "../db/schema.js";
-import {
-  extensionOf,
-  isClaudeReadableImage,
-  mediaKind,
-  type MediaFetcher,
-  type MediaStore,
-} from "../media/storage.js";
+import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
+import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
@@ -66,7 +61,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
 
   // 2. Media: keep a private copy; transcribe voice notes.
   let transcript: string | undefined;
-  let imageUrlForClaude: string | undefined;
+  let image: ClaudeImage | undefined;
   if (inbound.mediaUrl) {
     const result = await handleMedia(deps, inbound, timings).catch((err: unknown) => {
       errors.push(`media: ${errorMessage(err)}`);
@@ -74,7 +69,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
       return undefined;
     });
     transcript = result?.transcript;
-    imageUrlForClaude = result?.imageUrlForClaude;
+    image = result?.image;
   }
 
   // 3. Reply text from Claude, or the fallback.
@@ -83,7 +78,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     const claudeStart = now();
     try {
       const history = await recentConversation(db, inbound.contactNumber, deps.historyLimit);
-      const turns = toTurns(history, inbound.id, { transcript, imageUrl: imageUrlForClaude });
+      const turns = toTurns(history, inbound.id, { transcript, image });
       replyText = await deps.replier.reply(turns);
       timings.claude_ms = now().getTime() - claudeStart.getTime();
     } catch (err) {
@@ -139,7 +134,7 @@ async function handleMedia(
   deps: PipelineDeps,
   inbound: Message,
   timings: Record<string, string | number>,
-): Promise<{ transcript?: string; imageUrlForClaude?: string }> {
+): Promise<{ transcript?: string; image?: ClaudeImage }> {
   const url = inbound.mediaUrl!;
   const downloaded = await deps.fetchMedia(url);
   const kind = mediaKind(downloaded.contentType, url);
@@ -163,17 +158,23 @@ async function handleMedia(
     await updateMessage(deps.db, inbound.id, { transcript });
     return { transcript };
   }
-  if (kind === "image" && isClaudeReadableImage(downloaded.contentType, url)) {
-    return { imageUrlForClaude: url };
-  }
-  return {};
+  if (kind === "audio" || kind === "video") return {};
+
+  // Anything else may be a photo, whatever the CDN labels it: check the bytes.
+  const t0 = Date.now();
+  const image = await prepareImageForClaude(downloaded.bytes);
+  if (!image) return {};
+  timings.image_format = image.format;
+  timings.image_prep_ms = Date.now() - t0;
+  if (kind !== "image") await updateMessage(deps.db, inbound.id, { mediaContentType: `image/${image.format}` });
+  return { image };
 }
 
 /** Flattens stored messages into turns for Claude. Only the newest photo is sent as an image. */
 export function toTurns(
   history: Message[],
   currentId: string,
-  current: { transcript?: string; imageUrl?: string },
+  current: { transcript?: string; image?: ClaudeImage },
 ): Turn[] {
   return history.map((m) => {
     const role = m.direction === "inbound" ? "user" : "assistant";
@@ -183,12 +184,13 @@ export function toTurns(
     if (m.mediaUrl) {
       const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl);
       if (kind === "audio") parts.push(transcript ? `[Voice note transcript]: ${transcript}` : "[Sent a voice note]");
-      else if (kind === "image") parts.push(isCurrent && current.imageUrl ? "[Sent a photo]" : "[Sent a photo earlier]");
+      else if (isCurrent && current.image) parts.push("[Sent a photo]");
+      else if (kind === "image") parts.push(isCurrent ? "[Sent a photo that couldn't be opened]" : "[Sent a photo earlier]");
       else parts.push(`[Sent a ${kind} attachment]`);
     }
     if (m.content?.trim()) parts.push(m.content.trim());
     const turn: Turn = { role, text: parts.join("\n") };
-    if (isCurrent && current.imageUrl) turn.imageUrl = current.imageUrl;
+    if (isCurrent && current.image) turn.image = { mediaType: current.image.mediaType, data: current.image.data };
     return turn;
   });
 }
