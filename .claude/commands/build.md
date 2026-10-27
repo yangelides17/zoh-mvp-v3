@@ -24,9 +24,11 @@ needs first and stop.
 4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
 5. **Decisions:** if you have to deviate in a small way, keep going and record it as an issue comment starting
    `Decision:` (what and why). If it changes what the tester experiences or the spec's intent, stop and ask Yanni.
-6. **Eval** (only if the spec has **Should** items): add the rubric and scenarios in `eval/`, iterate with
-   `npm run eval -- <feature> --persona <name>`, and do one full run at the end. The budget is $2 per branch and
-   the eval enforces it; never use `--over-budget` without Yanni's OK. Fix causes in the coach's instructions, not
+6. **Eval** (only if ZOH's words change): run only the cases this change touches, adding a regression case in
+   `eval/cases/<feature>/` when none covers it: `npm run eval -- <feature> --case <id> [--case <id>]` (check the
+   cost first with `--dry-run`; it's free). A full run (no `--case`) only for changes that affect every
+   conversation, and only with Yanni's OK. The budget is $1 per branch and the eval enforces it; never use
+   `--over-budget` without Yanni's OK. Fix causes in the coach's instructions, not
    one-off cases (see "Changing what ZOH says" in `CLAUDE.md`). If the budget runs out before the target, stop and
    report honestly; live testing and the beta will catch the rest.
 7. `npm run check` green, rebased on the latest `main`.

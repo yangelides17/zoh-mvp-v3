@@ -56,7 +56,13 @@ async function main(): Promise<number> {
   const pages = await readPages(feature);
   const scenarios = loadScenarios(feature);
   const cases = await loadCases(feature.name);
-  const plans = planConversations(scenarios, cases, { persona: args.persona, runs: args.runs });
+  let plans;
+  try {
+    plans = planConversations(scenarios, cases, { cases: args.cases, persona: args.persona, runs: args.runs });
+  } catch (err) {
+    console.error((err as Error).message);
+    return 1;
+  }
   if (plans.length === 0) {
     console.error("Nothing to run: no scenario matches that persona and there are no regression cases.");
     return 1;
@@ -130,14 +136,14 @@ async function main(): Promise<number> {
   restoreFetch();
 
   const summary = aggregate(graded);
-  const previous = await latestReport(feature.name, args.persona);
+  const previous = await latestReport(feature.name, args.persona, args.cases);
   const report: ReportData = {
     feature: feature.name,
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
     models: { coach: coachModel, eval: evalModel, sim: simModel },
     costUsd,
-    options: { persona: args.persona, runs: args.runs, maxTurns: args.maxTurns },
+    options: { persona: args.persona, cases: args.cases, runs: args.runs, maxTurns: args.maxTurns },
     rubric,
     summary,
     worst: worstReplies(graded, 3),
@@ -158,8 +164,8 @@ async function main(): Promise<number> {
   return 0;
 }
 
-/** The most recent earlier report for this feature run over the same personas, if any. */
-async function latestReport(feature: string, persona: string | undefined): Promise<{ name: string; data: ReportData } | undefined> {
+/** The most recent earlier report for this feature run over the same personas and cases, if any. */
+async function latestReport(feature: string, persona: string | undefined, cases: string[] | undefined): Promise<{ name: string; data: ReportData } | undefined> {
   let files: string[];
   try {
     files = await readdir(REPORTS_DIR);
@@ -170,7 +176,7 @@ async function latestReport(feature: string, persona: string | undefined): Promi
   for (const name of mine) {
     try {
       const data = JSON.parse(await readFile(`${REPORTS_DIR}${name}`, "utf8")) as ReportData;
-      if (sameScope(data.options, persona)) return { name, data };
+      if (sameScope(data.options, persona, cases)) return { name, data };
     } catch {
       // An unreadable report is skipped; an older one may still compare.
     }

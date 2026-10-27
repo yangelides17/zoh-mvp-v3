@@ -7,6 +7,7 @@ separate Claude grade every ZOH text against the feature's approved checks and t
 # once: put your key in .env (gitignored)
 ANTHROPIC_API_KEY=sk-ant-...
 
+npm run eval -- onboarding --case recap-invents-details   # only that case: the usual, cheap run
 npm run eval -- onboarding                    # every scenario once + every regression case
 npm run eval -- onboarding --persona terse    # only terse scenarios (cases still run)
 npm run eval -- onboarding --runs 3           # each scenario three times
@@ -22,9 +23,10 @@ Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, d
 `EVAL_MODEL` sets the grader model (default: the coach's `CLAUDE_MODEL`); `EVAL_SIM_MODEL` the
 simulated tester (default `claude-haiku-5-5`).
 
-**Budget:** $2 of eval spend per branch (`EVAL_BUDGET_USD`), tracked in `eval/reports/spend.json`.
-A run that would likely go past it refuses to start. A full onboarding run is about $1.30–$1.90, so
-iterate with `--persona <name>` and do one full run at the end. Not part of `npm run check`: tests never
+**Budget:** $1 of eval spend per branch (`EVAL_BUDGET_USD`), tracked in `eval/reports/spend.json`.
+A run that would likely go past it refuses to start. Run only the cases a change touches (`--case <id>`,
+repeatable, about $0.10–0.20 each); a full onboarding run is about $1.30–$1.90, so it's only for changes
+that affect every conversation, with Yanni's OK. Not part of `npm run check`: tests never
 call Claude.
 
 ## What happens

@@ -337,6 +337,9 @@ describe("eval: report", () => {
     expect(sameScope({}, "terse")).toBe(false);
     expect(sameScope({ persona: "terse" }, undefined)).toBe(false);
     expect(sameScope({ persona: "terse" }, "chatty")).toBe(false);
+    expect(sameScope({ cases: ["b", "a"] }, undefined, ["a", "b"])).toBe(true);
+    expect(sameScope({ cases: ["a"] }, undefined)).toBe(false);
+    expect(sameScope({}, undefined, ["a"])).toBe(false);
   });
 
   it("draws each live check's example from a different conversation when it can", () => {
@@ -376,7 +379,9 @@ describe("eval: report", () => {
 
 describe("eval: command line and cost", () => {
   it("parses arguments and explains mistakes", () => {
-    expect(parseEvalArgs(["onboarding"])).toEqual({ feature: "onboarding", runs: 1, maxTurns: 20, concurrency: 3, dryRun: false, overBudget: false, persona: undefined });
+    expect(parseEvalArgs(["onboarding"])).toEqual({ feature: "onboarding", runs: 1, maxTurns: 20, concurrency: 3, dryRun: false, overBudget: false, persona: undefined, cases: undefined });
+    expect(parseEvalArgs(["onboarding", "--case", "a", "--case", "b"]).cases).toEqual(["a", "b"]);
+    expect(() => parseEvalArgs(["onboarding", "--case", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--over-budget"]).overBudget).toBe(true);
     expect(parseEvalArgs(["onboarding", "--persona", "terse", "--runs", "3"])).toMatchObject({ persona: "terse", runs: 3 });
     expect(() => parseEvalArgs([])).toThrow(UsageError);
@@ -391,6 +396,13 @@ describe("eval: command line and cost", () => {
     expect(missingKeyMessage({ ANTHROPIC_API_KEY: "sk-ant-x" })).toBeUndefined();
     expect(missingKeyMessage({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" })).toBeUndefined();
     expect(evalConfig({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" }, "+12125550101").claude.apiKey).toBe("sk-ant-y");
+  });
+
+  it("plays only the named cases on a targeted run", async () => {
+    const cases = await loadCases("onboarding");
+    const plans = planConversations(loadScenarios(onboarding), cases, { cases: ["recap-invents-details"], runs: 1 });
+    expect(plans.map((p) => p.key)).toEqual(["case:recap-invents-details"]);
+    expect(() => planConversations([], cases, { cases: ["nope"], runs: 1 })).toThrow(/Unknown case id: nope/);
   });
 
   it("estimates more for longer runs and pricier models", async () => {

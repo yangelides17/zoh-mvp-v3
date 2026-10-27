@@ -59,7 +59,7 @@ issues" sections only when something big changes.
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.
-- Eval: $2 per feature; graded against the checks Yanni approves in each spec, judged reasonably.
+- Eval: $1 per branch, targeted runs (`--case`) by default, full runs only with Yanni's OK; graded against the checks Yanni approves in each spec, judged reasonably.
 
 ## Known issues and adjustments
 Filed as GitHub issues (label `decide`, `bug` or `idea`):

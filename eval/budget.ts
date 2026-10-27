@@ -4,9 +4,10 @@ import { dirname } from "node:path";
 
 /**
  * Eval spend per branch (one branch = one feature), kept in eval/reports/spend.json (gitignored).
- * The default budget is $2 per feature (Yanni, Oct 27): bugs beyond that get found live and in the beta.
+ * The default budget is $1 per branch (Yanni, Oct 27, down from $2): run only the cases a change
+ * touches (--case); bugs beyond that get found live and in the beta.
  */
-export const DEFAULT_BUDGET_USD = 2;
+export const DEFAULT_BUDGET_USD = 1;
 
 export type Ledger = Record<string, { spentUsd: number; runs: number }>;
 
@@ -49,7 +50,7 @@ export function overBudgetMessage(opts: { spentUsd: number; estimateUsd: { low: 
   if (opts.spentUsd + likely <= opts.budgetUsd) return undefined;
   return [
     `Eval budget: $${opts.spentUsd.toFixed(2)} of $${opts.budgetUsd.toFixed(2)} already spent on ${opts.branch}; this run would likely cost about $${likely.toFixed(2)}.`,
-    "Run fewer conversations (--persona <name>), or ask Yanni before rerunning with --over-budget.",
+    "Run only the cases this change touches (--case <id>), or ask Yanni before rerunning with --over-budget.",
   ].join("\n");
 }
 

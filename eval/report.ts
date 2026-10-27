@@ -57,7 +57,7 @@ export interface ReportData {
   models: { coach: string; eval: string; sim?: string };
   /** Dollars this run spent (simulator and grader measured, coach estimated). */
   costUsd?: number;
-  options: { persona?: string; runs: number; maxTurns: number };
+  options: { persona?: string; cases?: string[]; runs: number; maxTurns: number };
   rubric: RubricRule[];
   summary: Summary;
   worst: WorstReply[];
@@ -136,11 +136,17 @@ function zohTextsWithContext(conv: GradedConversation): { text: string; after?: 
 }
 
 /**
- * Whether an earlier run is comparable with this one: same persona filter, so a one-persona run
- * isn't compared with the full suite (or the other way round). Run counts may differ.
+ * Whether an earlier run is comparable with this one: same persona filter and same targeted cases,
+ * so a one-persona or one-case run isn't compared with the full suite (or the other way round).
+ * Run counts may differ.
  */
-export function sameScope(previous: Pick<ReportData["options"], "persona">, persona: string | undefined): boolean {
-  return (previous.persona ?? undefined) === (persona ?? undefined);
+export function sameScope(
+  previous: Pick<ReportData["options"], "persona" | "cases">,
+  persona: string | undefined,
+  cases?: string[],
+): boolean {
+  const key = (ids: string[] | undefined) => (ids?.length ? [...ids].sort().join(",") : "");
+  return (previous.persona ?? undefined) === (persona ?? undefined) && key(previous.cases) === key(cases);
 }
 
 /** What moved since the previous run. Rates within `threshold` of each other count as unchanged. */
@@ -228,7 +234,7 @@ export function renderMarkdown(r: ReportData): string {
   lines.push(`# Coach judgment: ${r.feature}`, "");
   lines.push(
     `Run ${r.startedAt} → ${r.finishedAt}. Coach model \`${r.models.coach}\`, simulator \`${r.models.sim ?? r.models.eval}\`, grader \`${r.models.eval}\`.${r.costUsd !== undefined ? ` Cost about $${r.costUsd.toFixed(2)}.` : ""}`,
-    `${r.conversations.length} conversations (runs per scenario: ${r.options.runs}, turn cap: ${r.options.maxTurns}${r.options.persona ? `, persona: ${r.options.persona}` : ""}). Tokens used by the simulator and grader: ${r.usage.input.toLocaleString("en-US")} in, ${r.usage.output.toLocaleString("en-US")} out.`,
+    `${r.conversations.length} conversations (runs per scenario: ${r.options.runs}, turn cap: ${r.options.maxTurns}${r.options.persona ? `, persona: ${r.options.persona}` : ""}${r.options.cases?.length ? `, cases: ${r.options.cases.join(", ")}` : ""}). Tokens used by the simulator and grader: ${r.usage.input.toLocaleString("en-US")} in, ${r.usage.output.toLocaleString("en-US")} out.`,
     "",
     `**Overall: ${pct(r.summary.overall.rate)}** of checks passed (${r.summary.overall.pass}/${r.summary.overall.total}, ${r.summary.overall.borderline} borderline).`,
     "",

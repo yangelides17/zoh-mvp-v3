@@ -47,8 +47,10 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - `npm run build`: compile to `dist/`.
 - `npm run db:generate`: after editing `src/db/schema.ts`, generate a migration in `drizzle/`. Commit both.
 - `npm run dev`: run locally with `tsx` (needs a `.env`, see `.env.example`).
-- `npm run eval -- <feature> [--persona <name>]`: simulated testers against the real coach, graded by
-  a separate Claude. Costs money: **$2 per branch**, enforced (see `eval/README.md`).
+- `npm run eval -- <feature> --case <id>`: replays only the regression cases a change touches against the
+  real coach, graded by a separate Claude (about $0.10–0.20 a case). Costs money: **$1 per branch**, enforced
+  (see `eval/README.md`). A full run (no `--case`, $1.30–1.90) only for changes that affect every
+  conversation, and only with Yanni's OK. `npm run check` is free: tests never call Claude.
 
 ## Layout
 - `src/index.ts`: startup. `src/wiring.ts`: builds every dependency (production and the eval share it).

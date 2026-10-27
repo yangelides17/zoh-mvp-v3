@@ -3,9 +3,10 @@ import { FEATURES } from "./features.js";
 import { PERSONAS } from "./types.js";
 
 export const USAGE = [
-  "Usage: npm run eval -- <feature> [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
+  "Usage: npm run eval -- <feature> [--case <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
   "",
   `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}`,
+  "  --case           only this regression case (repeatable), no simulated conversations: the cheap targeted run",
   `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); regression cases always run`,
   "  --runs           times to play each scenario (default 1)",
   "  --max-turns      tester texts before a conversation is cut off (default 20)",
@@ -15,11 +16,13 @@ export const USAGE = [
   "",
   "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
   "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the grader model (default: CLAUDE_MODEL); EVAL_SIM_MODEL the",
-  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: 2).",
+  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: 1).",
 ].join("\n");
 
 export interface EvalArgs {
   feature: string;
+  /** Only these regression case ids, and no scenarios. */
+  cases?: string[];
   persona?: string;
   runs: number;
   maxTurns: number;
@@ -37,6 +40,7 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
       args: argv,
       allowPositionals: true,
       options: {
+        case: { type: "string", multiple: true },
         persona: { type: "string" },
         runs: { type: "string" },
         "max-turns": { type: "string" },
@@ -55,11 +59,13 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
   if (!feature) throw new UsageError("Which feature? e.g. npm run eval -- onboarding");
   if (positionals.length > 1) throw new UsageError(`Unexpected argument: ${positionals[1]}`);
   if (!Object.hasOwn(FEATURES, feature)) throw new UsageError(`Unknown feature "${feature}"`);
+  if (values.case && values.persona) throw new UsageError("--case runs only the named cases; drop --persona");
   if (values.persona && !(PERSONAS as readonly string[]).includes(values.persona)) {
     throw new UsageError(`Unknown persona "${values.persona}"`);
   }
   return {
     feature,
+    cases: values.case,
     persona: values.persona,
     runs: positiveInt(values.runs, "--runs", 1),
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),

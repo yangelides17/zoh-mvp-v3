@@ -53,6 +53,8 @@ export async function loadCases(feature: string, dir = `${CASES_DIR}${feature}/`
 }
 
 export interface PlanOptions {
+  /** Only these case ids, and no scenarios (a targeted run). */
+  cases?: string[];
   persona?: string;
   runs: number;
 }
@@ -60,9 +62,15 @@ export interface PlanOptions {
 /**
  * What a run will play: each matching scenario `runs` times, then every regression case once.
  * Cases always run whatever the persona filter, so a fixed mistake can't sneak back in.
+ * A targeted run (`cases`) plays only those cases; unknown ids throw.
  */
 export function planConversations(scenarios: Scenario[], cases: RegressionCase[], opts: PlanOptions): ConversationPlan[] {
-  const picked = opts.persona ? scenarios.filter((s) => s.persona === opts.persona) : scenarios;
+  if (opts.cases) {
+    const unknown = opts.cases.filter((id) => !cases.some((c) => c.id === id));
+    if (unknown.length) throw new Error(`Unknown case id: ${unknown.join(", ")} (known: ${cases.map((c) => c.id).join(", ") || "none"})`);
+    cases = cases.filter((c) => opts.cases!.includes(c.id));
+  }
+  const picked = opts.cases ? [] : opts.persona ? scenarios.filter((s) => s.persona === opts.persona) : scenarios;
   const plans: ConversationPlan[] = [];
   for (const s of picked) {
     for (let run = 1; run <= opts.runs; run++) {

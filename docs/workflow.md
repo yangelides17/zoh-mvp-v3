@@ -73,7 +73,9 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
-- **Eval budget: $2 per feature**, enforced by the eval itself. Live testing and the beta catch the rest.
+- **Eval budget: $1 per branch**, enforced by the eval itself. Each change runs only the cases it touches
+  (about $0.10–0.20 each); a full run ($1.30–1.90) only for changes to every conversation, with your OK. The
+  tests in `npm run check` are free. Live testing and the beta catch the rest.
 
 ## Quick fixes and changes outside the flow
 
