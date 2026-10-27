@@ -34,6 +34,8 @@ export const seedSchema = z.object({
     tracks_with: z.string().optional(),
   }),
   history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  /** How long before the run's first line the seeded conversation ended (default: a minute before). */
+  history_hours_ago: z.number().min(0).max(72).default(0),
   plan: z
     .object({
       setup_step: z.string().optional(),
@@ -44,6 +46,10 @@ export const seedSchema = z.object({
       proof: z.enum(["photo", "screenshot", "voice"]),
       proof_note: z.string().optional(),
       reason: z.string(),
+      /** How long the step takes, in minutes. */
+      minutes: z.number().int().min(0).max(600).optional(),
+      /** Day 1 this many days before the run's day (0: day 1 is today). */
+      started_days_ago: z.number().int().min(0).max(30).default(0),
     })
     .optional(),
 });
@@ -82,6 +88,10 @@ export const caseSchema = z.object({
   title: z.string(),
   /** When and how it went wrong (grader run, Yanni live, a beta tester). */
   origin: z.string(),
+  /**
+   * The tester's texts, in order. A line "advance to HH:MM" is not a text: the clock moves to that local
+   * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
+   */
   testerLines: z.array(z.string().min(1)).min(1),
   whatWentWrong: z.string(),
   shouldHaveHappened: z.string(),
@@ -98,6 +108,8 @@ export interface TranscriptLine {
   text: string;
   /** ISO time on the injected clock. */
   at: string;
+  /** A text ZOH started itself (a nudge), not a reply. */
+  started?: boolean;
 }
 
 /** One conversation to run: a scenario (simulated tester) or a case (scripted lines). */

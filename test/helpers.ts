@@ -3,7 +3,16 @@ import sharp from "sharp";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { buildApp, type AppDeps } from "../src/app.js";
-import type { ClaudeModel, ModelBlock, ModelRequest, ModelResponse, Replier, ReplyInput, Turn } from "../src/claude/replier.js";
+import type {
+  ClaudeModel,
+  ModelBlock,
+  ModelRequest,
+  ModelResponse,
+  NudgeRequest,
+  Replier,
+  ReplyInput,
+  Turn,
+} from "../src/claude/replier.js";
 import type { Db } from "../src/db/client.js";
 import { migrationsFolder } from "../src/db/paths.js";
 import * as schema from "../src/db/schema.js";
@@ -32,7 +41,7 @@ export async function makeDb(): Promise<{ db: Db; client: PGlite }> {
   })();
   const handle = await shared;
   // Goals are seed data from the migration, so they stay.
-  await handle.client.exec("TRUNCATE messages, testers, plan_inputs, flags CASCADE");
+  await handle.client.exec("TRUNCATE messages, testers, plan_inputs, flags, plans, step_days, nudges CASCADE");
   return handle;
 }
 
@@ -72,6 +81,16 @@ export class FakeReplier implements Replier {
     const next = this.failures.shift();
     if (next) throw next;
     return "Hey! Thanks for the message.";
+  }
+  /** Every nudge asked for, in order. */
+  nudges: NudgeRequest[] = [];
+  /** Thrown one per nudge call, in order, before any nudge succeeds. */
+  nudgeFailures: Error[] = [];
+  async nudge(input: NudgeRequest) {
+    this.nudges.push(input);
+    const next = this.nudgeFailures.shift();
+    if (next) throw next;
+    return `Yo, ${input.moment} text`;
   }
   async check() {}
 }

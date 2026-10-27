@@ -7,6 +7,7 @@ import {
   EXAMPLES,
   FIXED_INSTRUCTIONS,
   fullVoiceInstructions,
+  NUDGES,
   ONBOARDING,
   PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
@@ -425,6 +426,7 @@ describe("instructions", () => {
     expect(ONBOARDING.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.onboarding);
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
     expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
+    expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
@@ -482,6 +484,8 @@ describe("the voice page", () => {
     expect(fixed.text).toContain(TOOL_RULES);
     expect(fixed.text).toContain(PLAN_AGREEMENT);
     expect(FIXED_INSTRUCTIONS).toContain(PLAN_AGREEMENT);
+    expect(fixed.text).toContain(NUDGES);
+    expect(FIXED_INSTRUCTIONS).toContain(NUDGES);
     expect(fixed.text).not.toContain(ONBOARDING);
     expect(fixed.text).not.toContain("Yanni's coaching voice");
   });

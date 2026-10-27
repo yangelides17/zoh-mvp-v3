@@ -10,7 +10,9 @@ import type { Replier } from "../src/claude/replier.js";
 import type { MediaFetcher } from "../src/media/storage.js";
 import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
-import { appDeps } from "../src/wiring.js";
+import type { NudgeScheduler } from "../src/nudges/scheduler.js";
+import type { Logger } from "../src/pipeline/inbound.js";
+import { appDeps, nudgeSchedulerFor } from "../src/wiring.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
 import { localDate } from "../src/coach/state.js";
@@ -86,8 +88,12 @@ export interface EvalApp {
   sendblue: RecordingSendblue;
   clock: EvalClock;
   phone: string;
+  /** The production nudge tick on the same app; the eval runs it when a case says "advance to". */
+  nudger: NudgeScheduler;
   close(): Promise<void>;
 }
+
+const quietLog = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
 
 /** The production app, built through src/wiring.ts, on a fresh in-memory database. */
 export async function startEvalApp(opts: {
@@ -116,6 +122,7 @@ export async function startEvalApp(opts: {
     { webhookSecret: WEBHOOK_SECRET, logger: false },
   );
   const built = await buildApp(deps);
+  const nudger = nudgeSchedulerFor(deps, quietLog, LINE);
   return {
     built,
     db: db as unknown as Db,
@@ -123,7 +130,9 @@ export async function startEvalApp(opts: {
     sendblue,
     clock: opts.clock,
     phone: opts.phone,
+    nudger,
     async close() {
+      await nudger.stop();
       await built.queue.idle();
       await built.app.close();
       await client.close();
@@ -158,6 +167,27 @@ export async function textZoh(app: EvalApp, text: string, handle: string): Promi
   if (res.statusCode !== 200) throw new Error(`Webhook answered ${res.statusCode}`);
   await app.built.queue.idle();
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+}
+
+/** A case line that moves time instead of texting: "advance to 18:50". */
+export const ADVANCE_LINE = /^advance to (\d{2}:\d{2})$/i;
+
+/**
+ * Moves the clock minute by minute to the next local `hhmm`, running the nudge tick each minute
+ * as production does, and returns the texts ZOH started on the way.
+ */
+export async function advanceTo(app: EvalApp, hhmm: string, timeZone: string): Promise<TranscriptLine[]> {
+  const now = app.clock.now();
+  let target = zonedDate(localDate(now, timeZone), hhmm, timeZone);
+  if (target <= now) target = zonedDate(localDate(now, timeZone, 1), hhmm, timeZone);
+  const before = app.sendblue.sent.length;
+  let next = Math.ceil(now.getTime() / 60_000) * 60_000;
+  for (; next <= target.getTime(); next += 60_000) {
+    app.clock.set(new Date(next));
+    await app.nudger.tick(app.clock.now());
+  }
+  app.clock.set(target);
+  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true }));
 }
 
 /** Plays the tester's side: returns the next text, or null when the tester is done. */
@@ -201,10 +231,11 @@ const SEED_STEP_MS = 60_000;
  */
 export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLine[]> {
   const now = app.clock.now();
-  const startedAt = new Date(now.getTime() - (seed.history.length + 1) * SEED_STEP_MS);
+  const gap = (seed.history.length + 1) * SEED_STEP_MS + seed.history_hours_ago * 60 * 60_000;
+  const startedAt = new Date(now.getTime() - gap);
   // Stored rows get real times, like the messages the app itself stores (database default);
   // the eval clock only sets what the coach reads as "now" and the times the grader sees.
-  const storedStart = new Date(Date.now() - (seed.history.length + 1) * SEED_STEP_MS);
+  const storedStart = new Date(Date.now() - gap);
   const { timeZone, status } = guessTimeZone(app.phone);
   const [tester] = await app.db
     .insert(schema.testers)
@@ -244,10 +275,12 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       proof: p.proof,
       proofNote: p.proof_note,
       reason: p.reason,
-      startDate: localDate(now, timeZone),
+      minutes: p.minutes,
+      startDate: localDate(now, timeZone, -p.started_days_ago),
       commitment: "I'm in",
       needsReview: true,
-      lockedAt: storedStart,
+      // Locked the day before the run (on the eval clock), so today's kickoff isn't skipped as "just locked".
+      lockedAt: new Date(startedAt.getTime() - 24 * 60 * 60_000),
     });
   }
   const context: TranscriptLine[] = [];
@@ -259,6 +292,8 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       lineNumber: LINE,
       content: line.text,
       createdAt: new Date(storedStart.getTime() + i * SEED_STEP_MS),
+      // What the nudge tick reads as the text's time, on the eval clock.
+      sentAt: at,
     });
     context.push({ from: line.from, text: line.text, at: at.toISOString() });
   }
@@ -280,6 +315,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       if (text === null) {
         endedBy = tester.endReason;
         break;
+      }
+      const advance = ADVANCE_LINE.exec(text.trim());
+      if (advance) {
+        transcript.push(...(await advanceTo(app, advance[1]!, plan.timeZone)));
+        continue;
       }
       transcript.push({ from: "tester", text, at: clock.now().toISOString() });
       clock.advance(5_000);

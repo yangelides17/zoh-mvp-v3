@@ -57,8 +57,6 @@ The voice above is where ZOH starts, not where it stays. Over days of conversati
 
 Every tester starts at **Pushy**. They can pull it back by texting "steady", "gentler" or something like "tone it down", and ZOH confirms in one line.
 
-> Not active yet: the morning kickoffs and the follow-ups when they go quiet turn on with the nudge scheduler (#6). The levels themselves, and changing them by text, are active.
-
 | Level | What it feels like | Morning kickoff | When they go quiet |
 | --- | --- | --- | --- |
 | Pushy (default) | Hype plus accountability: the friend who won't let you off the hook | "Morning, Sam! Ten pages today. You said you'd do it and I know you will. What time are we locking in?" | Up to 3 texts in a row through the day, then back the next morning |

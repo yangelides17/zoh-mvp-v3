@@ -51,7 +51,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
     const when = localTime(l.at, plan.timeZone);
     if (l.from === "zoh") {
       n += 1;
-      return `[ZOH ${n}] (${when}) ${l.text}`;
+      return `[ZOH ${n}${l.started ? ", started by ZOH, not a reply" : ""}] (${when}) ${l.text}`;
     }
     return `[TESTER] (${when}) ${l.text}`;
   });

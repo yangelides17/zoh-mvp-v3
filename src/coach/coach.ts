@@ -1,11 +1,18 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { NoReplyTextError, toClaudeMessages, type ClaudeModel, type Replier, type ReplyInput } from "../claude/replier.js";
+import {
+  NoReplyTextError,
+  toClaudeMessages,
+  type ClaudeModel,
+  type NudgeRequest,
+  type Replier,
+  type ReplyInput,
+} from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
 import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions } from "./prompt.js";
-import { loadCoachState, onboardingComplete, type CoachState } from "./state.js";
+import { loadCoachState, localTime, onboardingComplete, type CoachState } from "./state.js";
 import { runTool, TOOL_DEFINITIONS } from "./tools.js";
 import { loadVoiceDoc } from "./voice.js";
 
@@ -119,6 +126,28 @@ export function createCoach(opts: CoachOptions): Replier {
         messages.push({ role: "user", content: results });
       }
       throw new Error("unreachable: the last round always returns");
+    },
+    /**
+     * A text ZOH starts itself: one call with the same prompt and tools (so the cache holds), no
+     * tool use, and a note in place of a tester text naming the moment (the state block says it too).
+     */
+    async nudge({ tester, turns, now, moment }: NudgeRequest) {
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.]`;
+      const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
+      const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment });
+      const response = await model.create({
+        system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state),
+        messages,
+        tools: toolsFor(tester),
+        toolChoice: "none",
+      });
+      const text = response.content
+        .filter((b) => b.type === "text")
+        .map((b) => b.text)
+        .join("\n")
+        .trim();
+      if (!text) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
+      return text;
     },
     check: () => model.check(),
   };

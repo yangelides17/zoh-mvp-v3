@@ -8,6 +8,10 @@ export class EvalClock {
   advance(ms: number): void {
     this.ms += ms;
   }
+  /** Moves to an instant; never backwards. */
+  set(at: Date): void {
+    this.ms = Math.max(this.ms, at.getTime());
+  }
 }
 
 /** All runs happen on the same ordinary weekday, so results don't drift with the calendar. */

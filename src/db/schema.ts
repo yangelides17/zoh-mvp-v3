@@ -15,8 +15,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Every text in and out, what onboarding knows about each tester, and the plans they agree.
- * Steps and the coach's memory get designed later.
+ * Every text in and out, what onboarding knows about each tester, the plans they agree, each
+ * day's step and the texts ZOH starts. The coach's memory gets designed later.
  */
 export const messages = pgTable(
   "messages",
@@ -89,6 +89,8 @@ export const testers = pgTable(
     consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
     /** Set when they opt out; cleared when they text again. */
     stoppedAt: timestamp("stopped_at", { withTimezone: true }),
+    /** Set when ZOH stops its own texts after days of silence (a `went_quiet` flag); cleared when they text. */
+    autoTextsPausedAt: timestamp("auto_texts_paused_at", { withTimezone: true }),
     /** The coach never sees messages from before this (moved by "reset"). */
     contextStartedAt: timestamp("context_started_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -177,10 +179,14 @@ export const plans = pgTable(
     /** Which photo, screenshot or voice note ("Whoop strain screenshot"). */
     proofNote: text("proof_note"),
     reason: text("reason").notNull(),
+    /** How long the step takes, in minutes (when the follow-up goes out); null if unknown. */
+    minutes: integer("minutes"),
     /** Their local day 1, set on lock. */
     startDate: date("start_date", { mode: "string" }),
     /** Their words when they committed. */
     commitment: text("commitment"),
+    /** A temporary lighter plan's last local day; after it, the version before applies again. */
+    endsOn: date("ends_on", { mode: "string" }),
     /** Every locked version waits for a founder look. Nobody is notified yet. */
     needsReview: boolean("needs_review").notNull().default(false),
     lockedAt: timestamp("locked_at", { withTimezone: true }),
@@ -210,9 +216,75 @@ export const flags = pgTable(
   (t) => [index("flags_tester_idx").on(t.testerId)],
 );
 
+export const STEP_DAY_STATUSES = ["done", "done_reduced", "missed"] as const;
+export type StepDayStatus = (typeof STEP_DAY_STATUSES)[number];
+
+/**
+ * One row per tester and local day that has something to record: the step done (full or reduced)
+ * or missed, a time moved for today only, or when they said they were on it.
+ */
+export const stepDays = pgTable(
+  "step_days",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    /** Their local date. */
+    date: date("date", { mode: "string" }).notNull(),
+    /** The plan version that applied that day. */
+    planId: uuid("plan_id").references(() => plans.id, { onDelete: "set null" }),
+    status: text("status", { enum: STEP_DAY_STATUSES }),
+    /** Local "HH:MM" for this day only. */
+    movedTime: text("moved_time"),
+    /** When they said they were doing it or about to: skips that day's check-in. */
+    onItAt: timestamp("on_it_at", { withTimezone: true }),
+    /** What they did, in a few words. */
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("step_days_tester_date_unique").on(t.testerId, t.date),
+    check("step_days_status_check", sql`${t.status} in ('done', 'done_reduced', 'missed')`),
+  ],
+);
+
+export const NUDGE_STATUSES = ["claimed", "sent", "failed"] as const;
+
+/**
+ * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
+ * at most once per tester, local date and kind, across ticks and restarts.
+ */
+export const nudges = pgTable(
+  "nudges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    /** Their local date. */
+    date: date("date", { mode: "string" }).notNull(),
+    /** The slot: kickoff, checkin, followup, stall… */
+    kind: text("kind").notNull(),
+    /** What the coach was asked to write (kickoff, rest_day, checkin…). */
+    moment: text("moment").notNull(),
+    messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
+    status: text("status", { enum: NUDGE_STATUSES }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed')`),
+  ],
+);
+
 export type Tester = typeof testers.$inferSelect;
 export type NewTester = typeof testers.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
 export type PlanInput = typeof planInputs.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
 export type Plan = typeof plans.$inferSelect;
+export type StepDay = typeof stepDays.$inferSelect;
+export type NewStepDay = typeof stepDays.$inferInsert;
+export type Nudge = typeof nudges.$inferSelect;

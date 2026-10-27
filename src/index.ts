@@ -2,7 +2,8 @@ import { buildApp } from "./app.js";
 import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
 import { safeError } from "./errors.js";
-import { appDeps } from "./wiring.js";
+import type { NudgeScheduler } from "./nudges/scheduler.js";
+import { appDeps, nudgeSchedulerFor } from "./wiring.js";
 
 let config;
 try {
@@ -20,9 +21,9 @@ try {
   process.exit(1);
 }
 
-const { app, queue } = await buildApp(
-  appDeps(config, db, {}, { version: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) }),
-);
+const deps = appDeps(config, db, {}, { version: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) });
+const { app, queue } = await buildApp(deps);
+let nudger: NudgeScheduler | undefined;
 
 const missing = missingSettings(config);
 if (missing.length) app.log.warn({ missing }, "Some settings are missing; those features stay off until they are set");
@@ -32,6 +33,7 @@ async function shutdown(signal: string) {
   if (shuttingDown) return;
   shuttingDown = true;
   app.log.info({ signal, inFlight: queue.size }, "Shutting down");
+  await nudger?.stop();
   await app.close();
   await Promise.race([queue.idle(), new Promise((r) => setTimeout(r, 20_000))]);
   await closeDb();
@@ -51,3 +53,7 @@ try {
     throw err;
   }
 }
+
+// ZOH's own texts: one tick a minute, once the app is taking texts.
+nudger = nudgeSchedulerFor(deps, app.log, config.sendblue.number);
+nudger.start();

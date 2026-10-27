@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Replier, ReplyInput } from "../src/claude/replier.js";
+import type { NudgeRequest, Replier, ReplyInput } from "../src/claude/replier.js";
 import { createSendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import type { Completer, CompletionRequest } from "../eval/claude.js";
@@ -99,6 +99,43 @@ describe("eval: scenarios and cases", () => {
     await expect(loadCases("x", `${dir}/`)).rejects.toThrow(/003-broken.json/);
     await rm(dir, { recursive: true });
     expect(await loadCases("no-such-feature")).toEqual([]);
+  });
+});
+
+/** Echoes like EchoReplier, and writes nudges as "nudge: <moment>". */
+class NudgingEcho extends EchoReplier {
+  async nudge({ moment }: NudgeRequest) {
+    return `nudge: ${moment}`;
+  }
+}
+
+describe("eval: nudge cases", () => {
+  it("\"advance to\" lines move the clock, run the tick each minute and add ZOH's own texts to the transcript", async () => {
+    const cases = await loadCases("nudges");
+    const silent = cases.find((c) => c.id === "silent-day")!;
+    const plan = planConversations([], [silent], { runs: 1 })[0]!;
+    const result = await runConversation(plan, scriptedTester(silent.testerLines), {
+      maxTurns: silent.testerLines.length + 1,
+      index: 2,
+      env: {},
+      replier: new NudgingEcho(),
+    });
+    expect(result.error).toBeUndefined();
+    const local = (at: string) =>
+      new Intl.DateTimeFormat("en-GB", { timeZone: plan.timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(at));
+    expect(result.transcript.map((l) => `${local(l.at)} ${l.text}${l.started ? " (started)" : ""}`)).toEqual([
+      "09:00 nudge: kickoff (started)",
+      "17:50 nudge: checkin (started)",
+      "19:00 nudge: followup (started)",
+    ]);
+    expect(graderUserPrompt({ plan, transcript: result.transcript })).toContain("[ZOH 1, started by ZOH, not a reply]");
+    expect(result.savedState).toMatchObject({ nudges: [{ kind: "kickoff" }, { kind: "checkin" }, { kind: "followup" }] });
+  });
+
+  it("every nudge case loads, with a seeded locked plan", async () => {
+    const cases = await loadCases("nudges");
+    expect(cases.map((c) => c.id)).toEqual(["full-pushy-day", "silent-day", "off-day", "cant-today"]);
+    expect(cases.every((c) => c.seed?.plan)).toBe(true);
   });
 });
 

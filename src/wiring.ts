@@ -4,6 +4,8 @@ import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import type { Db } from "./db/client.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
+import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
+import type { Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 
@@ -48,6 +50,20 @@ export function appDeps(
     },
     ...extra,
   };
+}
+
+/** The nudge tick over the same database, Sendblue client, coach, allowed numbers and clock as the app. */
+export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string): NudgeScheduler {
+  const p = deps.pipeline;
+  return createNudgeScheduler({
+    db: p.db,
+    log,
+    sendblue: p.sendblue,
+    replier: p.replier,
+    allowedNumbers: p.allowedNumbers,
+    lineNumber,
+    now: p.now,
+  });
 }
 
 function makeSendblue(config: Config) {
