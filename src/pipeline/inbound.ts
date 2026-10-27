@@ -2,12 +2,14 @@ import type { FastifyBaseLogger } from "fastify";
 import type { Turn, Replier } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
-import type { Message } from "../db/schema.js";
+import type { Message, Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
+import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
+import { getOrCreateTester, resetTester, updateTester } from "../testers/testers.js";
 
 export type Logger = Pick<FastifyBaseLogger, "info" | "warn" | "error" | "debug">;
 
@@ -17,6 +19,8 @@ export interface PipelineDeps {
   db: Db;
   log: Logger;
   allowedNumbers: string[];
+  /** Dev accounts: test users who can text "reset". */
+  devNumbers: string[];
   historyLimit: number;
   typingIndicator: boolean;
   sendblue?: SendblueClient;
@@ -28,8 +32,8 @@ export interface PipelineDeps {
 }
 
 /**
- * Handles one stored inbound message: typing indicator, media copy and
- * transcription, a reply from Claude (or the fallback), then the send.
+ * Handles one stored inbound message: tester lookup and commands ("stop", "reset"),
+ * typing indicator, media copy and transcription, a reply from Claude (or the fallback), then the send.
  */
 export async function processInbound(deps: PipelineDeps, inbound: Message): Promise<void> {
   const now = deps.now ?? (() => new Date());
@@ -44,6 +48,12 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     await updateMessage(db, inbound.id, { status: "RECEIVED_NOT_ALLOWED" });
     return;
   }
+
+  // 0. Who's texting, and the commands that never depend on the model.
+  const commands = await runCommands(deps, inbound);
+  if (commands.handled) return;
+  const tester = commands.tester;
+
   if (!deps.sendblue) {
     log.warn(ctx, "Sendblue keys are not configured; cannot reply");
     return;
@@ -77,7 +87,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   if (deps.replier) {
     const claudeStart = now();
     try {
-      const history = await recentConversation(db, inbound.contactNumber, deps.historyLimit);
+      const history = await recentConversation(db, inbound.contactNumber, deps.historyLimit, tester.contextStartedAt);
       const turns = toTurns(history, inbound.id, { transcript, image });
       replyText = await deps.replier.reply(turns);
       timings.claude_ms = now().getTime() - claudeStart.getTime();
@@ -128,6 +138,74 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     error: errors.length ? errors.join("; ") : null,
   });
   log.info({ ...ctx, timings, errors }, "Inbound message handled");
+}
+
+/**
+ * Gets or creates the tester, then handles opt-outs (stop and reply with the confirmation, no Claude)
+ * and dev-account "reset" (fresh start, then the normal reply). Any other text from a stopped tester un-stops them.
+ */
+async function runCommands(
+  deps: PipelineDeps,
+  inbound: Message,
+): Promise<{ handled: true } | { handled: false; tester: Tester }> {
+  const { db, log } = deps;
+  const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
+  const at = inbound.createdAt;
+  let tester = await getOrCreateTester(db, inbound.contactNumber, {
+    firstTextAt: at,
+    isTestUser: deps.devNumbers.includes(inbound.contactNumber),
+  });
+
+  if (isOptOutText(inbound.content)) {
+    await optOut(db, tester, at);
+    log.info(ctx, "Tester opted out");
+    await sendCommandReply(deps, inbound, OPT_OUT_CONFIRMATION);
+    return { handled: true };
+  }
+
+  if (tester.isTestUser && isResetText(inbound.content)) {
+    tester = await resetTester(db, tester, at);
+    log.info(ctx, "Dev account reset; starting fresh");
+  } else if (tester.stoppedAt) {
+    tester = await updateTester(db, tester.id, { stoppedAt: null });
+    log.info(ctx, "Opted-out tester texted again; un-stopped");
+  }
+  return { handled: false, tester };
+}
+
+/** Sends a fixed reply (no typing bubble, no Claude) and records it. */
+async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: string): Promise<void> {
+  const { db, log } = deps;
+  const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
+  if (!deps.sendblue) {
+    log.warn(ctx, "Sendblue keys are not configured; cannot reply");
+    return;
+  }
+  try {
+    const sent = await deps.sendblue.sendMessage({ number: inbound.contactNumber, content });
+    await insertOutbound(db, {
+      contactNumber: inbound.contactNumber,
+      lineNumber: inbound.lineNumber,
+      content,
+      sendblueHandle: sent.messageHandle ?? null,
+      status: sent.status ?? null,
+      inReplyTo: inbound.id,
+      sentAt: (deps.now ?? (() => new Date()))(),
+      raw: sent.raw as object,
+    });
+    await updateMessage(db, inbound.id, { status: "REPLIED", error: null });
+  } catch (err) {
+    log.error({ ...ctx, err: safeError(err) }, "Sending the command reply failed");
+    await insertOutbound(db, {
+      contactNumber: inbound.contactNumber,
+      lineNumber: inbound.lineNumber,
+      content,
+      status: "SEND_FAILED",
+      error: errorMessage(err),
+      inReplyTo: inbound.id,
+    });
+    await updateMessage(db, inbound.id, { status: "REPLIED_WITH_ERRORS", error: `send: ${errorMessage(err)}` });
+  }
 }
 
 async function handleMedia(

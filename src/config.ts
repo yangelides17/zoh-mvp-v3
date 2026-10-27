@@ -58,6 +58,8 @@ const envSchema = z.object({
 
   /** Comma-separated E.164 numbers that get replies while we build. */
   ALLOWED_NUMBERS: phoneList,
+  /** Comma-separated E.164 dev accounts (test users who can text "reset"). */
+  DEV_NUMBERS: phoneList,
 
   BUCKET_ENDPOINT: optionalString,
   BUCKET_NAME: optionalString,
@@ -79,6 +81,7 @@ export interface Config {
   logLevel: string;
   databaseUrl: string;
   allowedNumbers: string[];
+  devNumbers: string[];
   typingIndicator: boolean;
   sendblue: {
     baseUrl: string;
@@ -125,6 +128,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     logLevel: e.LOG_LEVEL,
     databaseUrl: e.DATABASE_URL,
     allowedNumbers: e.ALLOWED_NUMBERS,
+    devNumbers: e.DEV_NUMBERS,
     typingIndicator: e.TYPING_INDICATOR,
     sendblue: {
       baseUrl: e.SENDBLUE_BASE_URL.replace(/\/+$/, ""),

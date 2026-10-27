@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import type { Db } from "./client.js";
 import { messages, type Message, type NewMessage } from "./schema.js";
 
@@ -59,12 +59,19 @@ export async function updateStatusByHandle(
   return updated.length;
 }
 
-/** The latest messages with one contact, oldest first. */
-export async function recentConversation(db: Db, contactNumber: string, limit: number): Promise<Message[]> {
+/** The latest messages with one contact, oldest first; none from before `since` (the tester's context start). */
+export async function recentConversation(
+  db: Db,
+  contactNumber: string,
+  limit: number,
+  since?: Date,
+): Promise<Message[]> {
   const rows = await db
     .select()
     .from(messages)
-    .where(eq(messages.contactNumber, contactNumber))
+    .where(
+      and(eq(messages.contactNumber, contactNumber), since ? gte(messages.createdAt, since) : undefined),
+    )
     .orderBy(desc(messages.createdAt), desc(messages.id))
     .limit(limit);
   return rows.reverse();

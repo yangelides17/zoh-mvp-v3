@@ -54,6 +54,7 @@ const { app, queue } = await buildApp({
   pipeline: {
     db,
     allowedNumbers: config.allowedNumbers,
+    devNumbers: config.devNumbers,
     historyLimit: config.claude.historyLimit,
     typingIndicator: config.typingIndicator,
     sendblue,
