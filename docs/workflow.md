@@ -49,7 +49,8 @@ You never need an issue number. Every command takes a number, a description, or 
 | `/status` | The whole board, grouped by stage, ending with what's waiting on you. |
 | `/status nudges` · `/status what's in review` | Focused on one feature (spec, plan, decisions) or one stage. |
 | `/spec` | Lists open ideas, bugs and decisions, recommends one, and asks you to pick or describe something new. |
-| `/spec plan agreement` · `/spec 12` | Starts on that feature (an existing issue is reused, not duplicated). |
+| `/spec plan agreement` · `/spec 12` | Starts on that feature. A brand-new idea becomes a new issue when you approve its spec; if an issue already covers it, that one is reused. |
+| `/idea <a sentence or two>` | Files a new idea (or `bug`, if something's broken) as an issue to spec later, without speccing it now. |
 | `/plan` · `/plan the nudges one` · `/plan 12` | With nothing, lists approved specs waiting for a plan. |
 | `/build` · `/build plan agreement` · `/build 12` | With nothing, lists approved plans waiting to be built. |
 | `/review` · `/review nudges` · `/review 12` | With nothing, lists PRs waiting for review and merged work waiting for your live check. |

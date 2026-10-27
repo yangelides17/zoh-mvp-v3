@@ -17,7 +17,8 @@ One feature, one flow, using the commands in `.claude/commands/`:
 2. `/plan <n>`: read the code, propose the build; the approved plan is posted on the issue. **Gate 2.**
 3. `/build <n>`: build on `feature/<n>-<slug>`, tests first, draft PR early, eval if ZOH's words change.
 4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges when Yanni says so.
-5. Live check on Yanni's phone; problems become `bug` issues. `/status` shows the board anytime.
+5. Live check on Yanni's phone; problems become `bug` issues. `/status` shows the board anytime;
+   `/idea` files a new idea or bug to spec later.
 
 Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch
 branches in the main folder; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
