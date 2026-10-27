@@ -15,6 +15,10 @@ export const SECRET = "test-webhook-secret";
 export const ME = "+19085782266";
 export const LINE = "+19177412162";
 export const STRANGER = "+15555550123";
+/** Stamati's number: a dev account in tests (ME is not, so "reset" from ME is ordinary). */
+export const DEV = "+19084721920";
+/** An allowed number outside Eastern Time (Denver). */
+export const WESTERN = "+13035550123";
 
 let shared: Promise<{ db: Db; client: PGlite }> | undefined;
 
@@ -27,7 +31,8 @@ export async function makeDb(): Promise<{ db: Db; client: PGlite }> {
     return { db: db as unknown as Db, client };
   })();
   const handle = await shared;
-  await handle.client.exec("TRUNCATE messages CASCADE");
+  // Goals are seed data from the migration, so they stay.
+  await handle.client.exec("TRUNCATE messages, testers, plan_inputs, flags CASCADE");
   return handle;
 }
 
@@ -118,7 +123,8 @@ export async function makeApp(overrides: Partial<AppDeps["pipeline"]> & { webhoo
   const built = await buildApp({
     pipeline: {
       db,
-      allowedNumbers: [ME],
+      allowedNumbers: [ME, DEV, WESTERN],
+      devNumbers: [DEV],
       historyLimit: 12,
       typingIndicator: true,
       sendblue,
