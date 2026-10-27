@@ -62,7 +62,7 @@ issues" sections only when something big changes.
 - Eval: $2 per feature; graded against the checks Yanni approves in each spec, judged reasonably.
 
 ## Known issues and adjustments
-Filed as issues by `scripts/setup-github.sh` (label `decide`, `bug` or `idea`):
+Filed as GitHub issues (label `decide`, `bug` or `idea`):
 - The onboarding recap sometimes adds details the tester never gave.
 - Optional onboarding questions often go unasked; the city isn't required before onboarding ends.
 - An empty or refused Claude reply sends "Got it" instead of retrying.
