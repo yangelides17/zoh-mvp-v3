@@ -1,11 +1,16 @@
 ---
 description: Shape a feature with Yanni and save the approved spec as a GitHub issue
-argument-hint: <feature idea, or an issue number to refine>
+argument-hint: [issue number or new idea; leave empty to pick from the list]
 ---
 
 You're helping Yanni define a feature for ZOH: **$ARGUMENTS**
 
 This step is only the spec. Don't plan the implementation or write code here.
+
+**Which feature?** If no feature was given, run `gh issue list --label idea --label decide --state open` (and
+`--label bug`), show them as a short numbered list (issue number, title, one line each), say which one you'd do
+next and why, and ask Yanni to pick one or describe something new. If an issue number was given, that's the
+feature. If a description was given, check whether an open issue already covers it and use that one if so.
 
 1. **Get context, quietly.** Read `CLAUDE.md` and `docs/coach-voice.md`. Run `gh issue list --state all --limit 50`
    to see what exists. If `$ARGUMENTS` is an issue number, read it with `gh issue view`. Skim the code only as far
