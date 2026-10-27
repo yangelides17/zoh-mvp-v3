@@ -1,11 +1,8 @@
 import { buildApp } from "./app.js";
-import { createClaudeReplier } from "./claude/replier.js";
 import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
 import { safeError } from "./errors.js";
-import { createS3MediaStore, fetchMedia } from "./media/storage.js";
-import { createSendblueClient } from "./sendblue/client.js";
-import { createSpeachesTranscriber } from "./transcription/speaches.js";
+import { appDeps } from "./wiring.js";
 
 let config;
 try {
@@ -23,56 +20,9 @@ try {
   process.exit(1);
 }
 
-const sb = config.sendblue;
-const sendblue =
-  sb.apiKeyId && sb.apiKeySecret && sb.number
-    ? createSendblueClient({ baseUrl: sb.baseUrl, apiKeyId: sb.apiKeyId, apiKeySecret: sb.apiKeySecret, fromNumber: sb.number })
-    : undefined;
-
-const replier = config.claude.apiKey
-  ? createClaudeReplier({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: config.claude.maxTokens })
-  : undefined;
-
-const b = config.bucket;
-const media =
-  b.endpoint && b.name && b.accessKeyId && b.secretAccessKey
-    ? createS3MediaStore({
-        endpoint: b.endpoint,
-        bucket: b.name,
-        region: b.region,
-        accessKeyId: b.accessKeyId,
-        secretAccessKey: b.secretAccessKey,
-        forcePathStyle: b.forcePathStyle,
-      })
-    : undefined;
-
-const transcriber = config.speaches.url
-  ? createSpeachesTranscriber({ url: config.speaches.url, apiKey: config.speaches.apiKey, model: config.speaches.model })
-  : undefined;
-
-const { app, queue } = await buildApp({
-  pipeline: {
-    db,
-    allowedNumbers: config.allowedNumbers,
-    historyLimit: config.claude.historyLimit,
-    typingIndicator: config.typingIndicator,
-    sendblue,
-    replier,
-    media,
-    transcriber,
-    fetchMedia,
-  },
-  webhookSecret: config.sendblue.webhookSecret,
-  missingSettings: () => missingSettings(config),
-  version: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7),
-  logger: {
-    level: config.logLevel,
-    redact: {
-      paths: ["req.headers.authorization", 'req.headers["sb-signing-secret"]', 'req.headers["sb-api-secret-key"]'],
-      censor: "[redacted]",
-    },
-  },
-});
+const { app, queue } = await buildApp(
+  appDeps(config, db, {}, { version: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) }),
+);
 
 const missing = missingSettings(config);
 if (missing.length) app.log.warn({ missing }, "Some settings are missing; those features stay off until they are set");
