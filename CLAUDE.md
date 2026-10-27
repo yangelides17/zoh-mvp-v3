@@ -24,6 +24,13 @@ Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-wo
 branches in the main folder; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
+**When a request skips the flow.** If someone asks for a change directly (not through a command), first judge
+its size. Small (docs, wording, config, a few-line fix): do it the `/quick` way, tests and a record included.
+Bigger (a new feature, a behavior change testers would notice, anything in the database or the coach's voice):
+say in one or two sentences that this is feature-sized and offer `/idea` to file it or `/spec` to shape it now.
+If they still want it done directly, do it, but on a branch with a PR, and record it on an issue. Never refuse,
+never lecture, never skip the tests.
+
 **Branches and PRs.** Feature work (anything from an issue, anything testers would notice, any
 database change) goes through a PR so the tests run on the exact code before it reaches `main`,
 which Railway deploys to the live line. Small things (docs, wording, eval checks, config cleanup,

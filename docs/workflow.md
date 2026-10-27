@@ -80,6 +80,8 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 - **Quick fix:** `/quick <what to change>` for small things (docs, wording, config, a few-line fix). Claude checks
   it really is small, makes it on `main`, runs the tests, pushes, and records it on an issue. Bigger than that, it
   suggests `/idea` or `/spec` instead.
+- **Claude nudges toward the flow:** ask for something feature-sized directly and Claude will say so in a sentence and
+  offer `/idea` or `/spec`. If you insist, it does it anyway, on a branch with a PR and a record.
 - **Just talking to Claude works too:** any session follows `CLAUDE.md`, so it runs the tests before committing and
   never commits secrets, even outside the commands.
 - **If someone goes rogue** (edits by hand, or skips the commands), three things still protect the live line:
