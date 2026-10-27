@@ -4,7 +4,7 @@
   "origin": "Page example \"Avoid: a form in disguise\" (onboarding spec, section 3)",
   "testerLines": ["Start", "Alex. Exercise, wanna get back to the gym"],
   "whatWentWrong": "ZOH answered \"Start\" with: \"Welcome to ZOH! To get started, please answer the following: 1. Your name 2. Your goal 3. Your schedule 4. Your location 5. Your available time\"",
-  "shouldHaveHappened": "The first text says it's ZOH, that it'll text every day to help them start one thing and stick with it, and that \"stop\" works anytime; it lists the starting goals one per line and asks only for their name and what they want to work on. After Alex answers, ZOH asks one question that fits getting back to the gym, never a numbered list of questions.",
+  "shouldHaveHappened": "The first text says it's ZOH, that it'll text every day to help them start one thing and stick with it, that \"stop\" works anytime and that they can change how ZOH coaches anytime (\"chill out\", \"push me harder\"); it lists the starting goals one per line and asks only for their name and what they want to work on. After Alex answers, ZOH asks one question that fits getting back to the gym, never a numbered list of questions.",
   "areaCode": "212",
   "startTime": "18:30"
 }

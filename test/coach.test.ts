@@ -74,6 +74,9 @@ describe("first text", () => {
     const req = model.requests[0]!;
     expect(req.system[0]).toMatchObject({ text: FIXED_INSTRUCTIONS, cache_control: { type: "ephemeral" } });
     expect(req.system[0]!.text).toContain('they can text "stop" anytime');
+    // The coaching-style line belongs in the intro, not dropped mid-conversation.
+    expect(req.system[0]!.text).toContain('"stop" anytime, and they can change how you coach anytime');
+    expect(req.system[0]!.text.match(/change how you coach/g)).toHaveLength(1);
     expect(req.system[0]!.text).toContain("start one thing and actually stick with it");
     const state = model.stateOf();
     expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);

@@ -4,6 +4,6 @@
   "origin": "Grader runs 2026-10-27 (maya-all-at-once, sam-reality-check, terse-nutrition)",
   "testerLines": ["hey wanna hit 150g protein a day"],
   "whatWentWrong": "\"Hey, I'm ZOH! I'll text you every day to help you start one thing and actually stick with it, and you can text \"stop\" anytime. 150g of protein a day is a solid target, and we're going to hit it. Do you already track your protein with an app or a food tracker, or is this new?\"",
-  "shouldHaveHappened": "One text of at most three sentences plus one question: it says it's ZOH, what it does and that \"stop\" works anytime, reacts to the protein goal in a few words inside the greeting (no stand-alone praise like \"X is a solid target\"), skips the goal list because the goal is given, and asks exactly one thing (their name, since it's missing).",
+  "shouldHaveHappened": "One text of at most four short sentences plus one question: it says it's ZOH, what it does, that \"stop\" works anytime and that they can change how ZOH coaches, reacts to the protein goal in a few words inside the greeting (no stand-alone praise like \"X is a solid target\"), skips the goal list because the goal is given, and asks exactly one thing (their name, since it's missing).",
   "persona": "terse"
 }

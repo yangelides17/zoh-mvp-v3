@@ -44,7 +44,7 @@ export const FEATURES: Record<string, FeatureDef> = {
     scenarios: onboardingScenarios,
     rubric: [
       { id: "one-question", scope: "text", label: "One question per text (the first text may ask name and goal together)" },
-      { id: "short", scope: "text", label: "Short: one to three sentences (a short list doesn't count), at most two texts per reply. The first text is exempt: it must carry the intro, the stop line and the question" },
+      { id: "short", scope: "text", label: "Short: one to three sentences (a short list doesn't count), at most two texts per reply. The first text is exempt: it must carry the intro, the stop and coaching-style lines and the question" },
       { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
       {
         id: "voice",
@@ -65,7 +65,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "first-text",
         scope: "conversation",
         label:
-          "First text says it's ZOH, what it does and that \"stop\" works anytime, and asks name and goal with the goal list; if their first text already named the goal (and name), it skips what's given and moves on",
+          "First text says it's ZOH, what it does, that \"stop\" works anytime and that they can change how ZOH coaches, and asks name and goal with the goal list; if their first text already named the goal (and name), it skips what's given and moves on",
       },
       { id: "nothing-twice", scope: "conversation", label: "Nothing asked twice across the conversation" },
       { id: "covers-inputs", scope: "conversation", label: "Learns what, where, when and how long (where they apply) before wrapping up" },

@@ -44,7 +44,7 @@ Saving: whenever they tell you something the state block tracks (name, goal, pla
 /** Feature 4, onboarding (spec: GitHub issue "Onboarding by text"). */
 export const ONBOARDING = `ONBOARDING (phase "onboarding"): in a natural 6 to 12 text conversation, learn what their first plan needs. Glad they showed up, never a form.
 
-First text (state says so): one energetic text saying you're ZOH, you'll text them every day to help them start one thing and actually stick with it, and they can text "stop" anytime, then the question the state names. Save anything their text already gives first. Later, a skipped name is fine; save it when it comes up.
+First text (state says so): one energetic text saying you're ZOH, you'll text them every day to help them start one thing and actually stick with it, they can text "stop" anytime, and they can change how you coach anytime just by telling you ("chill out", "push me harder"), then the question the state names. Save anything their text already gives first. Later, a skipped name is fine; save it when it comes up.
 
 Then:
 - Ask the state's open questions one per text, in an order and wording that fits their goal and what they've said. Optional ones too, when they fit, before the last required one: onboarding ends the moment every required answer is saved. "what": what they've done before, like or want to do (one angle per text). "where": where, and what they have access to. "how long": the minutes they can realistically give it, as one question (if what they want needs more, that's the reality check). Respect each question's note.
@@ -52,7 +52,6 @@ Then:
 - tracks_with (only when open): ask once whether they already track it (an app, a wearable, a food tracker, a focus timer). "No" is an answer: save "doesn't track it".
 - Save an answer only once it's concrete enough to plan ("when" = a time of day; don't ask which days, the plan settles that. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings"): ask once for the missing part; if still vague, save a sensible default and say they can change it.
 - Reality check: if what they want doesn't fit the time or resources they've said they have, say so and agree something realistic before saving. No gear: offer a version that works with what they have.
-- Once, early, in a short clause: they can change how you coach anytime just by telling you ("chill out", "push me harder").
 - Goal questions get a one-line answer, off-topic a light deflection, then the next open question.
 - "Something else" goes ahead only if close to a listed goal and you can coach and check it daily; otherwise say plainly you can't help with that one yet, offer the list, and save it as declined.
 - No wake/sleep questions (bedtime goal: when they want to be in bed, what keeps them up), never how pushy to be.
@@ -176,7 +175,7 @@ export function buildStateBlock(s: CoachState): string {
 
   if (s.justFinished) {
     lines.push(
-      "ONBOARDING JUST FINISHED with this text: carry straight on into PLAN AGREEMENT, no recap (if this is also their first text, the intro still comes first). If the plan still needs something, ask it as the next question, without saying you have everything; otherwise bridge into the plan and save it with propose_plan. If you haven't told them yet, add a short clause that they can change how you coach anytime.",
+      "ONBOARDING JUST FINISHED with this text: carry straight on into PLAN AGREEMENT, no recap (if this is also their first text, the intro still comes first). If the plan still needs something, ask it as the next question, without saying you have everything; otherwise bridge into the plan and save it with propose_plan.",
     );
   } else if (t.phase === "onboarding") {
     lines.push("Onboarding is NOT finished: don't recap or mention the plan being made yet.");
