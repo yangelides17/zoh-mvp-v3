@@ -12,7 +12,8 @@ export const USAGE = [
   "  --concurrency    conversations at once (default 3)",
   "  --dry-run        print what would run and the cost estimate, then stop",
   "",
-  "Needs ANTHROPIC_API_KEY in .env. EVAL_MODEL sets the simulator and grader model (default: CLAUDE_MODEL).",
+  "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
+  "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the simulator and grader model (default: CLAUDE_MODEL).",
 ].join("\n");
 
 export interface EvalArgs {
@@ -70,9 +71,17 @@ function positiveInt(raw: string | undefined, name: string, fallback: number): n
   return n;
 }
 
+/**
+ * The key the eval (and the coach it runs) uses. EVAL_ANTHROPIC_API_KEY is for Claude Code cloud
+ * environments, where ANTHROPIC_API_KEY is reserved for Claude Code's own login.
+ */
+export function evalApiKey(env: NodeJS.ProcessEnv): string | undefined {
+  return env.ANTHROPIC_API_KEY?.trim() || env.EVAL_ANTHROPIC_API_KEY?.trim() || undefined;
+}
+
 /** The message to show when the key is missing, or undefined when it's there. */
 export function missingKeyMessage(env: NodeJS.ProcessEnv): string | undefined {
-  if (env.ANTHROPIC_API_KEY?.trim()) return undefined;
+  if (evalApiKey(env)) return undefined;
   return [
     "ANTHROPIC_API_KEY is not set, so the eval can't talk to Claude.",
     "Add it to .env in the repo root (ANTHROPIC_API_KEY=sk-ant-...), then run: npm run eval -- onboarding",

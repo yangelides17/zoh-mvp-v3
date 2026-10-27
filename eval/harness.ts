@@ -11,6 +11,7 @@ import type { MediaFetcher } from "../src/media/storage.js";
 import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
+import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
 import type { ConversationPlan, ConversationResult, TokenUsage, TranscriptLine } from "./types.js";
 
@@ -54,7 +55,7 @@ export function fakeNumber(areaCode: string, index: number): string {
 export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
   return loadConfig({
     DATABASE_URL: "pglite://in-memory",
-    ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY,
+    ANTHROPIC_API_KEY: evalApiKey(env),
     CLAUDE_MODEL: env.CLAUDE_MODEL,
     CLAUDE_MAX_TOKENS: env.CLAUDE_MAX_TOKENS,
     CLAUDE_HISTORY_LIMIT: env.CLAUDE_HISTORY_LIMIT,

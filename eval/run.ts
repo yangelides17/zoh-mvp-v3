@@ -9,7 +9,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "../src/config.js";
 import { addUsage, createCompleter } from "./claude.js";
-import { USAGE, UsageError, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
+import { USAGE, UsageError, evalApiKey, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
 import { estimateCost } from "./cost.js";
 import { REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor } from "./features.js";
 import { gradeConversation } from "./grader.js";
@@ -80,7 +80,7 @@ async function main(): Promise<number> {
   }
 
   const restoreFetch = guardFetch();
-  const complete = createCompleter({ apiKey: env.ANTHROPIC_API_KEY!.trim(), model: evalModel });
+  const complete = createCompleter({ apiKey: evalApiKey(env)!, model: evalModel });
   const startedAt = new Date();
   let done = 0;
 
@@ -175,7 +175,7 @@ function rel(path: string): string {
 }
 
 function errorText(err: unknown): string {
-  if (err instanceof Anthropic.AuthenticationError) return "ANTHROPIC_API_KEY was rejected (401)";
+  if (err instanceof Anthropic.AuthenticationError) return "The Anthropic API key was rejected (401)";
   if (err instanceof Anthropic.APIError) return `Claude API error ${err.status ?? ""}: ${err.message}`.trim();
   return err instanceof Error ? err.message : String(err);
 }

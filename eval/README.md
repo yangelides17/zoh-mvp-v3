@@ -13,6 +13,10 @@ npm run eval -- onboarding --runs 3           # each scenario three times
 npm run eval -- onboarding --dry-run          # what would run and the cost estimate; no Claude calls
 ```
 
+In a Claude Code cloud environment, add the key as `EVAL_ANTHROPIC_API_KEY` instead (Claude Code
+reserves `ANTHROPIC_API_KEY` for its own login there), and run with `env -u ANTHROPIC_BASE_URL npm run
+eval -- onboarding` so calls go to the Anthropic API rather than the session's own proxy.
+
 Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, default 20),
 `--concurrency <n>` (conversations at once, default 3). `EVAL_MODEL` sets the simulator and
 grader model; it defaults to the coach's `CLAUDE_MODEL`. Not part of `npm run check`: tests never

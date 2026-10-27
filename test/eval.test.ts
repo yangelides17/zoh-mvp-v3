@@ -347,6 +347,8 @@ describe("eval: command line and cost", () => {
     expect(missingKeyMessage({})).toMatch(/ANTHROPIC_API_KEY is not set.*\n.*\.env/);
     expect(missingKeyMessage({ ANTHROPIC_API_KEY: "  " })).toBeDefined();
     expect(missingKeyMessage({ ANTHROPIC_API_KEY: "sk-ant-x" })).toBeUndefined();
+    expect(missingKeyMessage({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" })).toBeUndefined();
+    expect(evalConfig({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" }, "+12125550101").claude.apiKey).toBe("sk-ant-y");
   });
 
   it("estimates more for longer runs and pricier models", async () => {
