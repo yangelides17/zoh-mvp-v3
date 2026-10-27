@@ -27,8 +27,8 @@ issues" sections only when something big changes.
 - **The coach and onboarding** (PR #3): Claude with tools that save name, goal and plan answers; the
   app (not the model) decides when onboarding is done, then ZOH sends a recap and a "your plan is
   buffering" line and waits for the plan feature. The coach sees the whole conversation since the
-  tester started (a stopgap until coach memory). Its voice: `docs/coach-voice.md`, condensed in
-  `src/coach/prompt.ts`. The spec is the closed GitHub issue "Onboarding by text".
+  tester started (a stopgap until coach memory). Its voice: during onboarding, the condensed
+  version in `src/coach/prompt.ts`; after onboarding, `docs/coach-voice.md` itself (issue #26). The spec is the closed GitHub issue "Onboarding by text".
 - **The eval** (PR #2): `npm run eval -- onboarding`. Last full run before the rubric fix: 85 to 89%
   of checks passed. Not rerun since the rubric was corrected and softened.
 

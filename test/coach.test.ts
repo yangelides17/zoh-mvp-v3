@@ -1,7 +1,18 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { COACH_HISTORY_CAP, createCoach, MAX_ROUNDS } from "../src/coach/coach.js";
-import { buildStateBlock, CORE_VOICE, EXAMPLES, FIXED_INSTRUCTIONS, ONBOARDING, PROMPT_BUDGET_CHARS } from "../src/coach/prompt.js";
+import {
+  buildStateBlock,
+  CORE_VOICE,
+  EXAMPLES,
+  FIXED_INSTRUCTIONS,
+  fullVoiceInstructions,
+  ONBOARDING,
+  PROMPT_BUDGET_CHARS,
+  TOOL_RULES,
+} from "../src/coach/prompt.js";
+import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
+import { readFileSync } from "node:fs";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import type { Db } from "../src/db/client.js";
@@ -404,5 +415,50 @@ describe("instructions", () => {
     expect(CORE_VOICE.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.core);
     expect(ONBOARDING.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.onboarding);
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
+    expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
+  });
+
+  it("allow at most 3 Greek words a day, in the onboarding prompt and the voice page", () => {
+    expect(CORE_VOICE).toContain("At most 3 a day");
+    expect(loadVoiceDoc()).toContain("At most 3 a day");
+  });
+});
+
+describe("the voice page", () => {
+  it("is read as the coach sees it: people-only parts left out, not-active notes kept", () => {
+    const raw = readFileSync(VOICE_DOC_PATH, "utf8");
+    const voice = loadVoiceDoc();
+    expect(raw).toContain("## Yanni's coaching voice");
+    expect(voice).not.toContain("Yanni's coaching voice");
+    expect(voice).not.toContain("people only");
+    expect(voice).not.toContain("**Decision:**");
+    expect(voice).not.toContain("This is a first draft, to be refined");
+    expect(voice).toContain("ZOH is the friend you wish you'd had");
+    expect(voice).toContain("Not active yet: turns on with coach memory (#8).");
+    expect(voice).toContain("Not active yet: turns on with the nudge scheduler (#6) and step log and next step (#9).");
+    expect(voice).toContain('never reuse these lines or the name "Sam"');
+  });
+
+  it("refuses a missing page or an unclosed marker, so the app can't start without its voice", () => {
+    expect(() => loadVoiceDoc("/nope/coach-voice.md")).toThrow(/Can't read the coach's voice page/);
+    expect(() => voiceForCoach("a <!-- people only --> b")).toThrow(/unclosed/);
+    expect(voiceForCoach("a\n<!-- people only -->\nsecret\n<!-- /people only -->\n\n\nb")).toBe("a\n\nb");
+  });
+
+  it("onboarding uses the condensed prompt; after onboarding the coach reads the whole page", async () => {
+    model.script("Yo! I'm ZOH…");
+    await text(ME, "Start");
+    expect(model.requests.at(-1)!.system[0]!.text).toBe(FIXED_INSTRUCTIONS);
+
+    await updateTester(t.db, (await tester()).id, { phase: "planning" });
+    model.script("On its way!");
+    await text(ME, "when's my plan coming?");
+    const fixed = model.requests.at(-1)!.system[0]!;
+    expect(fixed).toMatchObject({ text: fullVoiceInstructions(loadVoiceDoc()), cache_control: { type: "ephemeral" } });
+    expect(fixed.text).toContain("## When they start to slip");
+    expect(fixed.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
+    expect(fixed.text).toContain(TOOL_RULES);
+    expect(fixed.text).not.toContain(ONBOARDING);
+    expect(fixed.text).not.toContain("Yanni's coaching voice");
   });
 });
