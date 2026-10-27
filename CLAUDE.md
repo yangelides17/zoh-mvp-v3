@@ -48,6 +48,7 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - `src/sendblue/`, `src/claude/`, `src/media/`, `src/transcription/`: one small client each.
 - `test/`: Vitest with an in-memory Postgres (PGlite) and fakes for every outside service.
 - `eval/`: the judgment harness. `docs/coach-voice.md`: how ZOH talks (applies to every feature).
+- `docs/project-state.md`: where things stand, decisions to carry forward and known issues (read once).
 
 ## Rules
 - TypeScript strict. No `any` without a comment saying why.
