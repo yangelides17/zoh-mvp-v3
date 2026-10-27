@@ -79,8 +79,12 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
   become `idea` issues, not code.
 
 ## Changing what ZOH says
-- `docs/coach-voice.md` is the source for ZOH's voice; `src/coach/prompt.ts` is its condensed form.
-  Change both together, and flag voice changes that affect every feature for Yanni.
+- Two files are live prompts, so edit them with care: **`docs/coach-voice.md`** is read word for word by
+  the coach after onboarding (minus `<!-- people only -->` parts, loaded at startup), and
+  **`src/coach/prompt.ts`** holds the condensed voice and rules for onboarding plus the rules for every
+  phase. Any edit to either changes the live coach: flag it for Yanni, keep the condensed voice in sync
+  with the page, stay within the prompt budgets, and run the eval cases it touches. Mark sections for
+  features that aren't built yet "Not active yet" (the coach is told not to act on them).
 - Keep instructions lean: sharpen an existing line before adding one, fix the cause rather than the
   instance, keep examples in `eval/cases/` rather than the prompt, and stay within the prompt budgets.
 - When the coach gets something wrong (eval, live or beta): save the exchange as a regression case in

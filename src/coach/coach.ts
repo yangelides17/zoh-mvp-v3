@@ -4,9 +4,10 @@ import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
-import { buildStateBlock, FIXED_INSTRUCTIONS } from "./prompt.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions } from "./prompt.js";
 import { loadCoachState, onboardingComplete, type CoachState } from "./state.js";
 import { runTool, TOOL_DEFINITIONS } from "./tools.js";
+import { loadVoiceDoc } from "./voice.js";
 
 /** Claude calls per reply. The last one can't use tools, so it always ends in text. */
 export const MAX_ROUNDS = 4;
@@ -26,6 +27,8 @@ export const COACH_MAX_TOKENS = 2000;
 export interface CoachOptions {
   db: Db;
   model: ClaudeModel;
+  /** The voice page as the coach reads it; defaults to docs/coach-voice.md, read once here. */
+  voice?: string;
 }
 
 /**
@@ -35,6 +38,8 @@ export interface CoachOptions {
  */
 export function createCoach(opts: CoachOptions): Replier {
   const { db, model } = opts;
+  // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
+  const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
   return {
     async reply({ tester: initial, turns, now }: ReplyInput) {
       const messages = toClaudeMessages(turns);
@@ -47,6 +52,8 @@ export function createCoach(opts: CoachOptions): Replier {
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
+      // Onboarding keeps its condensed prompt so its rules stay sharp; afterwards, the whole voice page.
+      const fixed = initial.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding;
       /** Tool names and outcomes per round (never their inputs), for the error if no text comes back. */
       const trail: string[] = [];
       let retried = false;
@@ -54,7 +61,7 @@ export function createCoach(opts: CoachOptions): Replier {
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
         const response = await model.create({
-          system: systemBlocks(state),
+          system: systemBlocks(fixed, state),
           messages,
           tools,
           toolChoice: last ? "none" : "auto",
@@ -113,9 +120,9 @@ export function createCoach(opts: CoachOptions): Replier {
 }
 
 /** Fixed instructions first, cached (tools are cached with them); the state block after. */
-export function systemBlocks(state: CoachState): Anthropic.TextBlockParam[] {
+export function systemBlocks(fixed: string, state: CoachState): Anthropic.TextBlockParam[] {
   return [
-    { type: "text", text: FIXED_INSTRUCTIONS, cache_control: { type: "ephemeral" } },
+    { type: "text", text: fixed, cache_control: { type: "ephemeral" } },
     { type: "text", text: buildStateBlock(state) },
   ];
 }
