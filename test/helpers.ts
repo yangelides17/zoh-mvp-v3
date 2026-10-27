@@ -32,7 +32,7 @@ export async function makeDb(): Promise<{ db: Db; client: PGlite }> {
   })();
   const handle = await shared;
   // Goals are seed data from the migration, so they stay.
-  await handle.client.exec("TRUNCATE messages, testers, plan_inputs, flags CASCADE");
+  await handle.client.exec("TRUNCATE messages, testers, plan_inputs, flags, plans, step_days, nudges CASCADE");
   return handle;
 }
 

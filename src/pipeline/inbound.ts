@@ -179,7 +179,8 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
 
 /**
  * Gets or creates the tester, then handles opt-outs (stop and reply with the confirmation, no Claude)
- * and dev-account "reset" (fresh start, then the normal reply). Any other text from a stopped tester un-stops them.
+ * and dev-account "reset" (fresh start, then the normal reply). Any other text from a stopped tester un-stops them,
+ * and any text lifts a pause on ZOH's own texts.
  */
 async function runCommands(
   deps: PipelineDeps,
@@ -192,6 +193,12 @@ async function runCommands(
     firstTextAt: at,
     isTestUser: deps.devNumbers.includes(inbound.contactNumber),
   });
+
+  // Texting again lifts the pause ZOH put on its own texts after a silence.
+  if (tester.autoTextsPausedAt) {
+    tester = await updateTester(db, tester.id, { autoTextsPausedAt: null });
+    log.info(ctx, "Tester texted again; ZOH's own texts resume");
+  }
 
   if (isOptOutText(inbound.content)) {
     await optOut(db, tester, at);
