@@ -176,6 +176,19 @@ describe("locking", () => {
     expect((await tester()).phase).toBe("active");
     expect(t.sendblue.sends.at(-1)!.content).toBe("LET'S GO 🔒");
   });
+
+  it("checks every text since ZOH's last reply, not just the newest", async () => {
+    await run("propose_plan", GYM);
+    model.script({ tools: [{ name: "lock_plan", input: { commitment: "I'm in", start: "today" } }] }, "LET'S GO 🔒");
+    const coach = createCoach({ db: t.db, model });
+    const turns = [
+      { role: "assistant" as const, text: "This is yours now. You in?" },
+      { role: "user" as const, text: "I'm in" },
+      { role: "user" as const, text: "🔥🔥" },
+    ];
+    expect(await coach.reply({ tester: await tester(), turns, now: at })).toBe("LET'S GO 🔒");
+    expect((await tester()).phase).toBe("active");
+  });
 });
 
 describe("at least 3 days a week", () => {

@@ -45,7 +45,11 @@ export function createCoach(opts: CoachOptions): Replier {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       const isFirstText = !turns.some((t) => t.role === "assistant");
-      const lastTesterText = turns.at(-1)?.role === "user" ? turns.at(-1)!.text : "";
+      // Every text since ZOH's last reply: the model reads them as one message, so a commitment can be in any.
+      const lastTesterText = turns
+        .slice(turns.findLastIndex((t) => t.role === "assistant") + 1)
+        .map((t) => t.text)
+        .join("\n");
 
       let tester: Tester = initial;
       let justFinished = false;
