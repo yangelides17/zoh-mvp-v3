@@ -1,6 +1,6 @@
 /**
  * Best-guess time zone from a US number's area code. Static on purpose: it only has to be
- * good enough to know whether to ask the tester's city (feature 4 asks only outside Eastern).
+ * good enough to note whether the tester may be outside Eastern (the city is asked at plan agreement).
  */
 
 export type TimeZoneGuess = { timeZone: string; status: "assumed_eastern" | "needs_city" };
@@ -55,7 +55,7 @@ const OTHER_ZONES: Record<string, string> = {
   ...zone("Pacific/Honolulu", "808"),
 };
 
-/** Eastern area codes are assumed Eastern; anything else is a best guess and the coach asks the city. */
+/** Eastern area codes are assumed Eastern; anything else is a best guess, possibly outside Eastern. */
 export function guessTimeZone(phone: string): TimeZoneGuess {
   const code = /^\+1(\d{3})\d{7}$/.exec(phone)?.[1];
   if (code && EASTERN_CODES.has(code)) return { timeZone: EASTERN, status: "assumed_eastern" };

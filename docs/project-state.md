@@ -20,7 +20,7 @@ issues" sections only when something big changes.
 - **Photos** (iPhone HEIC included) copied to the private bucket and shown to Claude. **Voice notes**
   and recorded audio transcribed by Speaches and passed to Claude.
 - **Testers, goals, "stop" and "reset"** (PR #1): a tester row on the first text, time zone from the
-  area code (Eastern assumed; elsewhere ZOH asks the city), quiet hours 10 pm to 9 am. "stop" and
+  area code (Eastern assumed; elsewhere noted as possibly outside Eastern, and the city is asked at plan agreement, #5), quiet hours 10 pm to 9 am. "stop" and
   similar opt-outs get "Thank you very much. Noted. We will stop sending you messages." with no
   founder notification yet. A stopped tester who texts again is un-stopped. "reset" from a dev
   number starts onboarding from scratch.
@@ -63,9 +63,7 @@ issues" sections only when something big changes.
 
 ## Known issues and adjustments
 Filed as GitHub issues (label `decide`, `bug` or `idea`):
-- The onboarding recap sometimes adds details the tester never gave.
-- Optional onboarding questions often go unasked; the city isn't required before onboarding ends.
-- An empty or refused Claude reply sends "Got it" instead of retrying.
+- Optional onboarding questions often go unasked.
 - Goal changes are refused after onboarding until plans ship; a goal named in the first text skips
   the list (agent decisions to confirm).
 
