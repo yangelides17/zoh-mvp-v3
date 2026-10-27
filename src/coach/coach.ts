@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { toClaudeMessages, type ClaudeModel, type Replier, type ReplyInput } from "../claude/replier.js";
+import { NoReplyTextError, toClaudeMessages, type ClaudeModel, type Replier, type ReplyInput } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
@@ -74,7 +74,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (calls.length === 0 || last) {
           const reply = text || fallbackText;
           if (!reply) {
-            throw new Error(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
+            throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
           return reply;
         }

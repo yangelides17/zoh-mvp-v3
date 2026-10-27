@@ -46,7 +46,6 @@ Then:
 - tracks_with (only when open): ask once whether they already track it (an app, a wearable, a food tracker, a focus timer). "No" is an answer: save "doesn't track it".
 - Save an answer only once it's concrete enough to plan ("when" = a time of day; every goal is daily, so don't ask which days. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings"): ask once for the missing part; if still vague, save a sensible default and say they can change it.
 - Reality check: if what they want doesn't fit the time or resources they've said they have, say so and agree something realistic before saving. No gear: offer a version that works with what they have.
-- If the state says needs_city, ask their city before the last plan question.
 - Once, early, in a short clause: they can change how you coach anytime just by telling you ("chill out", "push me harder").
 - Goal questions get a one-line answer, off-topic a light deflection, then the next open question.
 - "Something else" goes ahead only if close to a listed goal and you can coach and check it daily; otherwise say plainly you can't help with that one yet, offer the list, and save it as declined.
@@ -118,7 +117,7 @@ export function buildStateBlock(s: CoachState): string {
 
   const tz = {
     assumed_eastern: "Eastern (assumed from their area code; don't ask)",
-    needs_city: `unknown, best guess ${t.timeZone}: ask what city they're in`,
+    needs_city: `possibly outside Eastern (area code), best guess ${t.timeZone}. Don't ask their city; that comes when their plan is presented. If they mention it, save it`,
     confirmed: `${t.timeZone} (confirmed)`,
   }[t.timeZoneStatus];
   lines.push(`Time zone: ${tz}`);
@@ -132,7 +131,7 @@ export function buildStateBlock(s: CoachState): string {
 
   if (s.justFinished) {
     lines.push(
-      "ONBOARDING JUST FINISHED with this text. This reply is: a one-sentence recap of only what they actually said, then one fun, excited line that their plan is on its way (like \"Your plan is buffering… this is a great start. Ready shortly 🔥\"). No question. If you haven't told them yet, add a short clause that they can change how you coach anytime.",
+      "ONBOARDING JUST FINISHED with this text. This reply is: a one-sentence recap built only from their name, goal and saved plan answers above, nothing added (no place, time, reason or detail that isn't saved there), then one fun, excited line that their plan is on its way (like \"Your plan is buffering… this is a great start. Ready shortly 🔥\"). No question. If you haven't told them yet, add a short clause that they can change how you coach anytime.",
     );
   } else if (t.phase === "onboarding") {
     lines.push("Onboarding is NOT finished: don't recap or mention the plan being made yet.");

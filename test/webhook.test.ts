@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { messages } from "../src/db/schema.js";
-import { FALLBACK_REPLY } from "../src/pipeline/inbound.js";
+import { NoReplyTextError } from "../src/claude/replier.js";
+import { FALLBACK_REPLY, SYSTEM_DOWN_REPLY } from "../src/pipeline/inbound.js";
 import { ME, STRANGER, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
 
 async function allMessages(t: TestApp) {
@@ -94,14 +95,47 @@ describe("POST /webhooks/sendblue", () => {
     expect(t.sendblue.calls).toHaveLength(0);
   });
 
-  it("falls back to a fixed reply if Claude fails", async () => {
+  it("tells the tester the system is down if Claude keeps failing after two retries", async () => {
     t.replier.fail = true;
     await postWebhook(t, inboundEvent());
     await t.queue.idle();
-    expect(t.sendblue.sends[0]?.content).toBe(FALLBACK_REPLY);
+    expect(t.replier.received).toHaveLength(3);
+    expect(t.sendblue.sends).toHaveLength(1);
+    expect(t.sendblue.sends[0]?.content).toBe(SYSTEM_DOWN_REPLY);
     const [inbound] = await allMessages(t);
     expect(inbound?.status).toBe("REPLIED_WITH_ERRORS");
-    expect(inbound?.error).toContain("claude");
+    expect(inbound?.error).toContain("claude (attempt 3)");
+  });
+
+  it("sends the real reply when a retry succeeds", async () => {
+    t.replier.failures = [new Error("Claude timed out"), new Error("HTTP 529 overloaded")];
+    await postWebhook(t, inboundEvent());
+    await t.queue.idle();
+    expect(t.replier.received).toHaveLength(3);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Hey! Thanks for the message."]);
+  });
+
+  it("retries once when Claude returns no text, then sends the fallback", async () => {
+    t.replier.failures = [new NoReplyTextError("no text"), new NoReplyTextError("no text")];
+    await postWebhook(t, inboundEvent());
+    await t.queue.idle();
+    expect(t.replier.received).toHaveLength(2);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual([FALLBACK_REPLY]);
+  });
+
+  it("sends the real reply when Claude has text on the retry after an empty answer", async () => {
+    t.replier.failures = [new NoReplyTextError("no text")];
+    await postWebhook(t, inboundEvent());
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Hey! Thanks for the message."]);
+  });
+
+  it("sends the fallback when Claude isn't configured", async () => {
+    await t.close();
+    t = await makeApp({ replier: undefined });
+    await postWebhook(t, inboundEvent());
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual([FALLBACK_REPLY]);
   });
 
   it("records a failed send without crashing", async () => {

@@ -16,6 +16,11 @@ export interface ReplyInput {
   now: Date;
 }
 
+/** Claude answered but wrote nothing to send (a refusal or an empty turn), as opposed to failing. */
+export class NoReplyTextError extends Error {
+  override name = "NoReplyTextError";
+}
+
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
   reply(input: ReplyInput): Promise<string>;
@@ -86,7 +91,7 @@ export interface ClaudeModelOptions {
 }
 
 export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
-  const client = opts.client ?? new Anthropic({ apiKey: opts.apiKey, maxRetries: 2, timeout: 30_000 });
+  const client = opts.client ?? new Anthropic({ apiKey: opts.apiKey, maxRetries: 1, timeout: 30_000 });
   return {
     async create(req) {
       const response = await client.messages.create({

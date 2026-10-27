@@ -7,7 +7,7 @@ Closes #
 <!-- The spec's Must list, ticked. -->
 
 ## Should (eval), if ZOH's words changed
-<!-- Pass rate per check vs the target, the three worst replies, instruction changes before/after, eval spend of the $2. -->
+<!-- Pass rate per check vs the target, the three worst replies, instruction changes before/after, eval spend of the $1. -->
 
 ## Watch (live checks for Yanni)
 <!-- The spec's Watch list, plus anything the build showed is worth trying. -->

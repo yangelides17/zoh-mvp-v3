@@ -63,10 +63,14 @@ export class FakeReplier implements Replier {
   received: Turn[][] = [];
   inputs: ReplyInput[] = [];
   fail = false;
+  /** Thrown one per call, in order, before any reply succeeds. */
+  failures: Error[] = [];
   async reply(input: ReplyInput) {
     this.received.push(input.turns);
     this.inputs.push(input);
     if (this.fail) throw new Error("Claude unavailable");
+    const next = this.failures.shift();
+    if (next) throw next;
     return "Hey! Thanks for the message.";
   }
   async check() {}
@@ -169,6 +173,7 @@ export async function makeApp(overrides: Partial<AppDeps["pipeline"]> & { webhoo
       media,
       transcriber,
       fetchMedia: fakeFetchMedia,
+      retryDelaysMs: [0, 0],
       ...pipelineOverrides,
     },
     webhookSecret: webhookSecret === null ? undefined : (webhookSecret ?? SECRET),
