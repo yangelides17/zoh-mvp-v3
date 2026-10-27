@@ -1,15 +1,19 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, ne } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
   flags,
   goals,
   planInputs,
+  plans,
+  WEEKDAYS,
   type Goal,
+  type Plan,
   type PlanInput,
   type PlanQuestion,
   type PlanQuestionKey,
   type Tester,
+  type Weekday,
 } from "../db/schema.js";
 
 /** Plan input columns by question key. */
@@ -36,6 +40,14 @@ export interface CoachState {
   /** Applicable questions not answered yet. */
   openRequired: PlanQuestion[];
   openOptional: PlanQuestion[];
+  /** The plan ZOH is proposing, not locked yet. */
+  draft?: Plan;
+  /** The latest locked plan for their current goal. */
+  plan?: Plan;
+  /** Answers saved for goals they switched away from, to reuse where they fit. */
+  earlierAnswers: PlanInput[];
+  /** Their latest text: what lock_plan checks the commitment against. */
+  lastTesterText: string;
   /** No first reply has been sent since the tester's context started. */
   isFirstText: boolean;
   /** Onboarding finished during this reply: it must be the recap turn. */
@@ -46,7 +58,7 @@ export interface CoachState {
 export async function loadCoachState(
   db: Db,
   tester: Tester,
-  opts: { now: Date; isFirstText: boolean; justFinished?: boolean },
+  opts: { now: Date; isFirstText: boolean; justFinished?: boolean; lastTesterText?: string },
 ): Promise<CoachState> {
   const allGoals = await db.select().from(goals).orderBy(asc(goals.sortOrder));
   const goal = allGoals.find((g) => g.slug === tester.goalSlug);
@@ -64,6 +76,13 @@ export async function loadCoachState(
     .from(flags)
     .where(and(eq(flags.testerId, tester.id), eq(flags.kind, "off_list_goal")))
     .orderBy(asc(flags.createdAt));
+  const testerPlans = await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version));
+  const earlierAnswers = goal
+    ? await db
+        .select()
+        .from(planInputs)
+        .where(and(eq(planInputs.testerId, tester.id), ne(planInputs.goalSlug, goal.slug)))
+    : [];
   const open = goal ? openQuestions(goal, inputs) : [];
   const description = inputs?.extraNotes.goal_description;
   return {
@@ -76,6 +95,10 @@ export async function loadCoachState(
     declinedGoals: declined.filter((f) => f.createdAt >= tester.contextStartedAt).map((f) => f.detail ?? ""),
     openRequired: open.filter((q) => q.required),
     openOptional: open.filter((q) => !q.required),
+    draft: testerPlans.find((p) => p.status === "draft"),
+    plan: testerPlans.find((p) => p.status === "locked" && p.goalSlug === goal?.slug),
+    earlierAnswers,
+    lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
     now: opts.now,
@@ -109,4 +132,34 @@ export function localTime(now: Date, timeZone: string): string {
 
 export function isDefaultQuietHours(t: Tester): boolean {
   return t.quietHoursStart === DEFAULT_QUIET_HOURS.start && t.quietHoursEnd === DEFAULT_QUIET_HOURS.end;
+}
+
+/** "HH:MM" as minutes after midnight. */
+function minutes(clock: string): number {
+  const [h, m] = clock.split(":").map(Number);
+  return h! * 60 + m!;
+}
+
+/** Whether a local "HH:MM" falls inside the tester's quiet hours, which may run past midnight. */
+export function insideQuietHours(time: string, t: Pick<Tester, "quietHoursStart" | "quietHoursEnd">): boolean {
+  const at = minutes(time);
+  const start = minutes(t.quietHoursStart);
+  const end = minutes(t.quietHoursEnd);
+  return start < end ? at >= start && at < end : at >= start || at < end;
+}
+
+/** The tester's local calendar date ("YYYY-MM-DD"), plus a number of days. */
+export function localDate(now: Date, timeZone: string, addDays = 0): string {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  const date = new Date(`${today}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + addDays);
+  return date.toISOString().slice(0, 10);
+}
+
+/** "every day", or "Mon, Wed, Fri" in week order. */
+export function describeDays(days: readonly Weekday[]): string {
+  if (days.length === WEEKDAYS.length) return "every day";
+  return WEEKDAYS.filter((d) => days.includes(d))
+    .map((d) => d[0]!.toUpperCase() + d.slice(1))
+    .join(", ");
 }

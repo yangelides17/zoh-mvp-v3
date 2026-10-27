@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -14,8 +15,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Every text in and out, plus what onboarding knows about each tester.
- * Plans, steps and the coach's memory get designed later.
+ * Every text in and out, what onboarding knows about each tester, and the plans they agree.
+ * Steps and the coach's memory get designed later.
  */
 export const messages = pgTable(
   "messages",
@@ -57,7 +58,8 @@ export const messages = pgTable(
 export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 
-export const TESTER_PHASES = ["onboarding", "planning"] as const;
+/** Onboarding questions, then agreeing the plan, then a locked plan. */
+export const TESTER_PHASES = ["onboarding", "planning", "active"] as const;
 export const TIME_ZONE_STATUSES = ["assumed_eastern", "needs_city", "confirmed"] as const;
 export const DEFAULT_QUIET_HOURS = { start: "22:00", end: "09:00" } as const;
 export const DEFAULT_PUSHINESS = "pushy";
@@ -93,7 +95,7 @@ export const testers = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    check("testers_phase_check", sql`${t.phase} in ('onboarding', 'planning')`),
+    check("testers_phase_check", sql`${t.phase} in ('onboarding', 'planning', 'active')`),
     check("testers_time_zone_status_check", sql`${t.timeZoneStatus} in ('assumed_eastern', 'needs_city', 'confirmed')`),
   ],
 );
@@ -139,6 +141,60 @@ export const planInputs = pgTable(
   (t) => [unique("plan_inputs_tester_goal_unique").on(t.testerId, t.goalSlug)],
 );
 
+export const PLAN_STATUSES = ["draft", "locked"] as const;
+export const PROOF_METHODS = ["photo", "screenshot", "voice"] as const;
+export const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+export type Weekday = (typeof WEEKDAYS)[number];
+/** A plan can't lock with fewer step days than this (spec: "Plan agreement"). */
+export const MIN_DAYS_PER_WEEK = 3;
+
+/**
+ * A tester's plan. At most one draft (what ZOH is proposing) per tester; locked versions are never
+ * changed or deleted: a change after lock is a new version. The latest locked one is the plan.
+ */
+export const plans = pgTable(
+  "plans",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    goalSlug: text("goal_slug")
+      .notNull()
+      .references(() => goals.slug),
+    status: text("status", { enum: PLAN_STATUSES }).notNull(),
+    /** Locked versions count up from 1 per tester; null for a draft. */
+    version: integer("version"),
+    /** A one-time step for day 1, when one helps ("dumbbells next to your bed"). */
+    setupStep: text("setup_step"),
+    /** What they do, specific enough to just do it. */
+    step: text("step").notNull(),
+    place: text("place"),
+    /** Local "HH:MM". */
+    stepTime: text("step_time").notNull(),
+    days: jsonb("days").$type<Weekday[]>().notNull(),
+    proof: text("proof", { enum: PROOF_METHODS }).notNull(),
+    /** Which photo, screenshot or voice note ("Whoop strain screenshot"). */
+    proofNote: text("proof_note"),
+    reason: text("reason").notNull(),
+    /** Their local day 1, set on lock. */
+    startDate: date("start_date", { mode: "string" }),
+    /** Their words when they committed. */
+    commitment: text("commitment"),
+    /** Every locked version waits for a founder look. Nobody is notified yet. */
+    needsReview: boolean("needs_review").notNull().default(false),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("plans_tester_version_unique").on(t.testerId, t.version),
+    index("plans_tester_idx").on(t.testerId),
+    check("plans_status_check", sql`${t.status} in ('draft', 'locked')`),
+    check("plans_proof_check", sql`${t.proof} in ('photo', 'screenshot', 'voice')`),
+  ],
+);
+
 /** Things for the founders to look at later (e.g. an off-list goal). Saved only; nobody is notified. */
 export const flags = pgTable(
   "flags",
@@ -159,3 +215,4 @@ export type NewTester = typeof testers.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
 export type PlanInput = typeof planInputs.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
+export type Plan = typeof plans.$inferSelect;

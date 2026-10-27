@@ -4,6 +4,7 @@ import {
   DEFAULT_PUSHINESS,
   DEFAULT_QUIET_HOURS,
   planInputs,
+  plans,
   testers,
   type NewTester,
   type Tester,
@@ -79,11 +80,12 @@ export async function updateTester(db: Db, id: string, patch: TesterPatch): Prom
 
 /**
  * Dev-account "reset": back to a brand-new tester whose context starts at `at`.
- * Messages and flags stay in the database; plan inputs are deleted.
+ * Messages and flags stay in the database; plan inputs and plans are deleted.
  */
 export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tester> {
   const { timeZone, status } = guessTimeZone(tester.phone);
   await db.delete(planInputs).where(eq(planInputs.testerId, tester.id));
+  await db.delete(plans).where(eq(plans.testerId, tester.id));
   return updateTester(db, tester.id, {
     name: null,
     phase: "onboarding",

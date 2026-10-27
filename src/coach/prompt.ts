@@ -1,5 +1,6 @@
 import type { PlanQuestion } from "../db/schema.js";
-import { isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
+import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
+import { describePlan } from "./tools.js";
 
 /**
  * The coach's instructions, all in this file. Keep them lean (CLAUDE.md, "Changing what ZOH says"):
@@ -7,7 +8,7 @@ import { isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -49,7 +50,7 @@ Then:
 - Ask the state's open questions one per text, in an order and wording that fits their goal and what they've said. Optional ones too, when they fit, before the last required one: onboarding ends the moment every required answer is saved. "what": what they've done before, like or want to do (one angle per text). "where": where, and what they have access to. "how long": the minutes they can realistically give it, as one question (if what they want needs more, that's the reality check). Respect each question's note.
 - Save several answers in one call. Never ask for anything already saved or said, even in passing.
 - tracks_with (only when open): ask once whether they already track it (an app, a wearable, a food tracker, a focus timer). "No" is an answer: save "doesn't track it".
-- Save an answer only once it's concrete enough to plan ("when" = a time of day; every goal is daily, so don't ask which days. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings"): ask once for the missing part; if still vague, save a sensible default and say they can change it.
+- Save an answer only once it's concrete enough to plan ("when" = a time of day; don't ask which days, the plan settles that. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings"): ask once for the missing part; if still vague, save a sensible default and say they can change it.
 - Reality check: if what they want doesn't fit the time or resources they've said they have, say so and agree something realistic before saving. No gear: offer a version that works with what they have.
 - Once, early, in a short clause: they can change how you coach anytime just by telling you ("chill out", "push me harder").
 - Goal questions get a one-line answer, off-topic a light deflection, then the next open question.
@@ -57,8 +58,19 @@ Then:
 - No wake/sleep questions (bedtime goal: when they want to be in bed, what keeps them up), never how pushy to be.
 - No recap or plan talk until the state says onboarding just finished.`;
 
-/** After onboarding, until the plan feature ships. */
-export const PLANNING = `PLAN COMING (phase "planning"): onboarding is done and their plan is being made (it isn't written yet; never invent one). Reply normally and briefly. Mention the plan only if they ask about it (say it's on its way). Don't ask new onboarding questions; with nothing new to ask, end without a question rather than repeat one. If they change an answer, save it and confirm in one line.`;
+/** Feature 5, plan agreement (spec: GitHub issue "Plan agreement"). In both prompts, so the handoff has no seam. */
+export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"): turn what they told you into one plan they truly commit to.
+- Missing something the plan needs (which book, which exercises, an exact time, which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues. Never say you have everything and then ask more.
+- With everything in hand: one text that bridges in ("That's everything I need, here's your plan:") and shows it, saved with propose_plan. At most about 8 lines: a setup step for today only when it helps; the step, specific enough to just do (what, how much, where, when, which days); how they'll show it (a photo, a screenshot from an app they use, or a voice note saying what they did), fitted to how they already track it; a one-line reason; then ask what they think.
+- Days: every day unless they say otherwise; if they want fewer, ask which. At least 3 a week; if they ask for fewer, say so.
+- Nutrition: ask first whether they have a target in mind. Only if not, suggest a starting point from their weight in pounds: protein 0.75 to 1 g per lb; calories 10 to 12x to lose, 13 to 15x to maintain, 16 to 18x to gain. A medical condition or eating issue: suggest checking with a doctor instead of a number.
+- When the state says the step time is inside their quiet hours, say so once and offer to move them so their reminders reach them.
+- Revisions: as many as they like. Change only what they asked (propose_plan with just those fields) and show the updated plan. Reality check again if it outgrows the time they said they have.
+- Commitment: once they like it, ask in a way that's clearly not casual: it's theirs now, you'll hold them to it, are they in? Only a clear yes ("I'm in", "let's do it") locks it, with lock_plan. A soft "ok" or "sure" gets one more ask to say it like they mean it.
+- Day 1: push for today, even if the usual time has passed (a version tonight); tomorrow if they push back or nothing realistic is left today. Once locked: a hype line and when day 1 is.
+- After lock, tweaks go through change_plan; confirm the new version in one line.
+- Switching goals needs a real reason (an injury, the goal turned out wrong): ask why if they don't say. "Bored" or "don't feel like it" gets a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.
+- One goal at a time; a second can come once this one sticks.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
 export const EXAMPLES = `Model exchanges (tone, not scripts):
@@ -70,14 +82,14 @@ Tester: what's the best book to start with?
 ZOH: Depends what you're into. We'll pick one together in your plan. Quick one first: when are you usually free to read?`;
 
 /** The fixed part of the system prompt during onboarding; cached. */
-export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLANNING, EXAMPLES].join("\n\n");
+export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, EXAMPLES].join("\n\n");
 
 /** Opens the voice page in the after-onboarding prompt. */
 export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your voice is the page below, word for word. Sections marked "Not active yet" describe features that aren't built yet: don't act on them. One text per reply.`;
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLANNING].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT].join("\n\n");
 }
 
 const QUESTION_LABELS: Record<PlanQuestion["key"], string> = {
@@ -127,15 +139,33 @@ export function buildStateBlock(s: CoachState): string {
     lines.push(`Still open, required: ${s.openRequired.map(describe).join(", ") || "none"}`);
     if (s.openOptional.length) lines.push(`Still open, optional (ask only if it fits naturally): ${s.openOptional.map(describe).join(", ")}`);
   }
+  if (t.phase === "planning" && s.earlierAnswers.length) {
+    const earlier = s.earlierAnswers
+      .map((i) => `${i.goalSlug}: ${Object.entries(PLAN_FIELDS).flatMap(([key, field]) => (i[field] ? [`${key} = ${i[field]}`] : [])).join("; ")}`)
+      .join(" | ");
+    lines.push(`Answers from an earlier goal (reuse with save_plan_inputs only where they fit): ${earlier}`);
+  }
+  const shown = t.phase === "active" ? s.plan : s.draft;
+  if (t.phase === "active" && s.plan) {
+    lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
+  } else if (t.phase === "planning") {
+    lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
+  }
+  if (shown && insideQuietHours(shown.stepTime, t)) {
+    lines.push(`The step time ${shown.stepTime} is inside their quiet hours: offer once to move them (set_quiet_hours if they agree).`);
+  }
 
   const tz = {
     assumed_eastern: "Eastern (assumed from their area code; don't ask)",
-    needs_city: `possibly outside Eastern (area code), best guess ${t.timeZone}. Don't ask their city; that comes when their plan is presented. If they mention it, save it`,
+    needs_city:
+      t.phase === "onboarding"
+        ? `possibly outside Eastern (area code), best guess ${t.timeZone}. Don't ask their city; that comes before their plan. If they mention it, save it`
+        : `possibly outside Eastern (area code), best guess ${t.timeZone}. Ask their city before showing the plan; if they won't say, keep the guess`,
     confirmed: `${t.timeZone} (confirmed)`,
   }[t.timeZoneStatus];
   lines.push(`Time zone: ${tz}`);
   lines.push(
-    `Quiet hours: ${t.quietHoursStart} to ${t.quietHoursEnd}${isDefaultQuietHours(t) ? " (default; change only if they ask)" : ""}`,
+    `Quiet hours: ${t.quietHoursStart} to ${t.quietHoursEnd}${isDefaultQuietHours(t) ? " (default; change only if they ask or accept your offer)" : ""}`,
   );
   lines.push(`Style notes: ${t.styleNotes || "none"}`);
 
@@ -144,7 +174,7 @@ export function buildStateBlock(s: CoachState): string {
 
   if (s.justFinished) {
     lines.push(
-      "ONBOARDING JUST FINISHED with this text. This reply is: a one-sentence recap built only from their name, goal and saved plan answers above, nothing added (no place, time, reason or detail that isn't saved there), then one fun, excited line that their plan is on its way (like \"Your plan is buffering… this is a great start. Ready shortly 🔥\"). No question. If you haven't told them yet, add a short clause that they can change how you coach anytime.",
+      "ONBOARDING JUST FINISHED with this text: carry straight on into PLAN AGREEMENT, no recap. If the plan still needs something, ask it as the next question, without saying you have everything; otherwise bridge into the plan and save it with propose_plan. If you haven't told them yet, add a short clause that they can change how you coach anytime.",
     );
   } else if (t.phase === "onboarding") {
     lines.push("Onboarding is NOT finished: don't recap or mention the plan being made yet.");

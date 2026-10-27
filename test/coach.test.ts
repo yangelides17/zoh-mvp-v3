@@ -8,6 +8,7 @@ import {
   FIXED_INSTRUCTIONS,
   fullVoiceInstructions,
   ONBOARDING,
+  PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
   TOOL_RULES,
 } from "../src/coach/prompt.js";
@@ -240,7 +241,7 @@ describe("tools", () => {
 });
 
 describe("finishing onboarding", () => {
-  it("moves to planning when the last required answer is saved; that reply is the recap; later texts don't restart onboarding", async () => {
+  it("moves to planning when the last required answer is saved; that reply carries on into the plan with no recap; later texts don't restart onboarding", async () => {
     model.script(
       "intro",
       { tools: [{ name: "save_name", input: { name: "Alex" } }, { name: "choose_goal", input: { slug: "exercise" } }] },
@@ -258,27 +259,32 @@ describe("finishing onboarding", () => {
     expect(model.stateOf()).toContain("Still open, required: tracks with [tracks_with]");
     expect(model.stateOf()).toContain("Onboarding is NOT finished");
 
-    model.script({ tools: [{ name: "save_plan_inputs", input: { tracks_with: "doesn't track it" } }] }, "Recap… Your plan is buffering 🔥");
+    model.script({ tools: [{ name: "save_plan_inputs", input: { tracks_with: "doesn't track it" } }] }, "Which exercises do you like doing with the dumbbells?");
     await text(ME, "nah I don't track it");
     expect((await tester()).phase).toBe("planning");
     expect(await inputs()).toMatchObject({ tracksWith: "doesn't track it" });
-    const recapState = model.stateOf();
-    expect(recapState).toContain("ONBOARDING JUST FINISHED");
-    expect(recapState).toContain("plan is on its way");
-    expect(recapState).toContain("recap built only from their name, goal and saved plan answers above, nothing added");
-    expect(recapState).toContain("Still open, required: none");
+    const handoff = model.stateOf();
+    expect(handoff).toContain("ONBOARDING JUST FINISHED");
+    expect(handoff).toContain("carry straight on into PLAN AGREEMENT, no recap");
+    expect(handoff).toContain("without saying you have everything");
+    expect(handoff).not.toMatch(/buffering|on its way/);
+    expect(handoff).toContain("Still open, required: none");
+    expect(handoff).toContain("Plan: not proposed yet");
     expect(model.requests.at(-1)!.messages.at(-1)!.content).toEqual([
-      expect.objectContaining({ content: expect.stringContaining("Onboarding finished") }),
+      expect.objectContaining({ content: expect.stringContaining("Onboarding finished: ask the next thing the plan needs, or bridge into the plan") }),
     ]);
-    expect(sent().at(-1)).toBe("Recap… Your plan is buffering 🔥");
+    // The reply that finishes onboarding can already propose the plan.
+    expect(model.requests.at(-1)!.tools.map((x) => x.name)).toEqual(expect.arrayContaining(["propose_plan", "lock_plan"]));
 
-    model.script("It's on its way!");
-    await text(ME, "so when's my plan coming?");
+    model.script("Here's your plan…");
+    await text(ME, "rows and presses mostly");
     const later = model.stateOf();
     expect(later).toContain("Phase: planning");
     expect(later).not.toContain("ONBOARDING JUST FINISHED");
     expect(later).toContain("Still open, required: none");
-    expect(model.requests.at(-1)!.system[0]!.text).toContain('PLAN COMING (phase "planning")');
+    const fixed = model.requests.at(-1)!.system[0]!.text;
+    expect(fixed).toContain('PLAN AGREEMENT (phases "planning" and "active")');
+    expect(fixed).not.toContain("PLAN COMING");
     expect(model.requests.at(-1)!.tools.map((x) => x.name)).not.toContain("choose_goal");
     expect((await tester()).phase).toBe("planning");
   });
@@ -415,6 +421,7 @@ describe("instructions", () => {
     expect(CORE_VOICE.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.core);
     expect(ONBOARDING.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.onboarding);
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
+    expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
@@ -458,6 +465,8 @@ describe("the voice page", () => {
     expect(fixed.text).toContain("## When they start to slip");
     expect(fixed.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
     expect(fixed.text).toContain(TOOL_RULES);
+    expect(fixed.text).toContain(PLAN_AGREEMENT);
+    expect(FIXED_INSTRUCTIONS).toContain(PLAN_AGREEMENT);
     expect(fixed.text).not.toContain(ONBOARDING);
     expect(fixed.text).not.toContain("Yanni's coaching voice");
   });

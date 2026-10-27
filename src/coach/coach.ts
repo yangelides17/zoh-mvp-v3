@@ -34,7 +34,7 @@ export interface CoachOptions {
 /**
  * The coach: one reply per inbound text, from a short tool loop. Tools save what it learns;
  * the app (not the model) moves the tester to `planning` once the goal and every required
- * plan question are saved, and tells the model that this reply is the recap.
+ * plan question are saved, and tells the model to carry straight on into the plan.
  */
 export function createCoach(opts: CoachOptions): Replier {
   const { db, model } = opts;
@@ -45,10 +45,11 @@ export function createCoach(opts: CoachOptions): Replier {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       const isFirstText = !turns.some((t) => t.role === "assistant");
+      const lastTesterText = turns.at(-1)?.role === "user" ? turns.at(-1)!.text : "";
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText });
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText });
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -93,11 +94,11 @@ export function createCoach(opts: CoachOptions): Replier {
           if (result.ok && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText });
             }
           }
           results.push({
@@ -134,7 +135,7 @@ function toolsFor(tester: Tester): Anthropic.Tool[] {
 /** Short progress note on each successful tool result, so the next round sees what's left. */
 function progress(state: CoachState): string {
   if (!state.goal) return " Goal: not chosen yet.";
-  if (state.justFinished) return " Onboarding finished: this reply is the recap and plan-is-coming line.";
+  if (state.justFinished && !state.draft) return " Onboarding finished: ask the next thing the plan needs, or bridge into the plan with propose_plan.";
   const open = state.openRequired.map((q) => q.key).join(", ");
   return open ? ` Still open: ${open}.` : "";
 }
