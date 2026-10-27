@@ -1,0 +1,12 @@
+{
+  "id": "thinking-ate-the-reply",
+  "title": "Every reply was \"Got it\": thinking used the whole token budget",
+  "origin": "Grader run 2026-10-27 (close-goal-stretching): CLAUDE_MAX_TOKENS 400 also covers thinking, so Claude stopped before writing any text and the pipeline fell back to \"Got it\" nine times in a row",
+  "testerLines": [
+    "hey ZOH, so my back has apparently decided sitting 9 hours a day is a bad lifestyle choice lol. want to stretch every morning for like 10 min. never been good at sticking to stuff tho 😅",
+    "lol \"got it\" is that all I get? 😂"
+  ],
+  "whatWentWrong": "ZOH replied \"Got it\" to every text, and later \"Sorry about the 'got it' loop, that's on me.\"",
+  "shouldHaveHappened": "Every ZOH text is a real reply, never just \"Got it\". The first one says it's ZOH, that it'll text every day to help them start one thing and stick with it, and that \"stop\" works anytime; it treats morning stretching as close enough to exercise and asks one question that moves the plan forward. No apologies.",
+  "persona": "joking"
+}

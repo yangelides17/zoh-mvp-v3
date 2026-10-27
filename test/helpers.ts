@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { buildApp, type AppDeps } from "../src/app.js";
-import type { Replier, Turn } from "../src/claude/replier.js";
+import type { ClaudeModel, ModelBlock, ModelRequest, ModelResponse, Replier, ReplyInput, Turn } from "../src/claude/replier.js";
 import type { Db } from "../src/db/client.js";
 import { migrationsFolder } from "../src/db/paths.js";
 import * as schema from "../src/db/schema.js";
@@ -58,15 +58,53 @@ export class FakeSendblue implements SendblueClient {
   }
 }
 
+/** Stands in for the whole coach: records the turns it was asked about. */
 export class FakeReplier implements Replier {
   received: Turn[][] = [];
+  inputs: ReplyInput[] = [];
   fail = false;
-  async reply(turns: Turn[]) {
-    this.received.push(turns);
+  async reply(input: ReplyInput) {
+    this.received.push(input.turns);
+    this.inputs.push(input);
     if (this.fail) throw new Error("Claude unavailable");
     return "Hey! Thanks for the message.";
   }
   async check() {}
+}
+
+/** One scripted Claude response: plain text, or tool calls (with optional text alongside). */
+export type FakeStep = string | { tools: { name: string; input: unknown }[]; text?: string } | Error;
+
+/**
+ * Stands in for Claude under the real coach (src/coach): returns scripted responses in order,
+ * then a default text, and records every request (system prompt, messages, tools).
+ */
+export class FakeClaudeModel implements ClaudeModel {
+  requests: ModelRequest[] = [];
+  private steps: FakeStep[] = [];
+  private ids = 0;
+  constructor(public defaultText = "Hey! Thanks for the message.") {}
+  /** Queue responses for the next Claude calls. */
+  script(...steps: FakeStep[]): this {
+    this.steps.push(...steps);
+    return this;
+  }
+  async create(req: ModelRequest): Promise<ModelResponse> {
+    this.requests.push(structuredClone(req));
+    const step = this.steps.shift() ?? this.defaultText;
+    if (step instanceof Error) throw step;
+    if (typeof step === "string") return { content: [{ type: "text", text: step }], stopReason: "end_turn" };
+    if (req.toolChoice === "none") return { content: [{ type: "text", text: step.text ?? this.defaultText }], stopReason: "end_turn" };
+    const content: ModelBlock[] = [];
+    if (step.text) content.push({ type: "text", text: step.text });
+    for (const t of step.tools) content.push({ type: "tool_use", id: `toolu_${++this.ids}`, name: t.name, input: t.input });
+    return { content, stopReason: "tool_use" };
+  }
+  async check() {}
+  /** The state block (second system block) of a request. */
+  stateOf(i = -1): string {
+    return this.requests.at(i)?.system[1]?.text ?? "";
+  }
 }
 
 export class FakeMedia implements MediaStore {
@@ -125,7 +163,6 @@ export async function makeApp(overrides: Partial<AppDeps["pipeline"]> & { webhoo
       db,
       allowedNumbers: [ME, DEV, WESTERN],
       devNumbers: [DEV],
-      historyLimit: 12,
       typingIndicator: true,
       sendblue,
       replier,

@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Replier, Turn } from "../src/claude/replier.js";
+import type { Replier, ReplyInput } from "../src/claude/replier.js";
 import { createSendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import type { Completer, CompletionRequest } from "../eval/claude.js";
@@ -22,7 +22,7 @@ const rubric = rubricFor(onboarding);
 
 /** Echoes the tester so tests can see which text each reply answered. */
 class EchoReplier implements Replier {
-  async reply(turns: Turn[]) {
+  async reply({ turns }: ReplyInput) {
     return `got: ${turns.at(-1)?.text}`;
   }
   async check() {}

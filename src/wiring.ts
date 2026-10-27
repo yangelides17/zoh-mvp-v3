@@ -1,5 +1,6 @@
 import type { AppDeps } from "./app.js";
-import { createClaudeReplier } from "./claude/replier.js";
+import { createClaudeModel } from "./claude/replier.js";
+import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import type { Db } from "./db/client.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
@@ -29,10 +30,9 @@ export function appDeps(
       db,
       allowedNumbers: pick("allowedNumbers", () => config.allowedNumbers),
       devNumbers: pick("devNumbers", () => config.devNumbers),
-      historyLimit: pick("historyLimit", () => config.claude.historyLimit),
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       sendblue: pick("sendblue", () => makeSendblue(config)),
-      replier: pick("replier", () => makeReplier(config)),
+      replier: pick("replier", () => makeCoach(config, db)),
       media: pick("media", () => makeMedia(config)),
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
@@ -57,9 +57,17 @@ function makeSendblue(config: Config) {
     : undefined;
 }
 
-function makeReplier(config: Config) {
+function makeCoach(config: Config, db: Db) {
   return config.claude.apiKey
-    ? createClaudeReplier({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: config.claude.maxTokens })
+    ? createCoach({
+        db,
+        model: createClaudeModel({
+          apiKey: config.claude.apiKey,
+          model: config.claude.model,
+          maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
+          effort: "medium",
+        }),
+      })
     : undefined;
 }
 
