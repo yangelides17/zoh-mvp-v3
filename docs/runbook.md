@@ -38,9 +38,9 @@ How a ticket goes from `docs/tickets/` to the live line. Short on purpose.
 
 | Ticket | What | Starts after | Owner session | PR | State |
 | --- | --- | --- | --- | --- | --- |
-| T1 | Testers, goals, stop and reset | — | | | ready |
-| T2 | Coach engine and onboarding conversation | T1 | | | waiting |
-| T3 | Coach judgment harness (simulate + grade) | — | | | ready |
+| T1 | Testers, goals, stop and reset | — | | #1 | merged Oct 26 |
+| T2 | Coach engine and onboarding conversation | T1 | | #3 | merged Oct 27 |
+| T3 | Coach judgment harness (simulate + grade) | — | | #2 | merged Oct 26 |
 
 Tonight: start **T1 and T3 together**; start **T2** as soon as T1 is merged. T2 runs the eval from T3
 before handing off (if T3 isn't merged yet, T2 notes that and the eval runs as soon as it is).
