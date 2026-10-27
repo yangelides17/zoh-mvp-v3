@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type { Tester } from "../db/schema.js";
 
 /** One turn of the text conversation, already flattened to what Claude should see. */
 export interface Turn {
@@ -8,20 +9,19 @@ export interface Turn {
   image?: { mediaType: "image/jpeg"; data: string };
 }
 
+export interface ReplyInput {
+  tester: Tester;
+  /** The conversation since the tester's context started, oldest first, ending with their text. */
+  turns: Turn[];
+  now: Date;
+}
+
+/** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
-  reply(turns: Turn[]): Promise<string>;
+  reply(input: ReplyInput): Promise<string>;
   /** Cheap connectivity check for /health?deep=1. */
   check(): Promise<void>;
 }
-
-/** Placeholder until the coach exists: a generic, friendly texting assistant. */
-export const GENERIC_SYSTEM_PROMPT = [
-  "You are a friendly assistant replying to someone over iMessage.",
-  "Keep replies short and natural, like a text message: usually one to three sentences.",
-  "No markdown, bullet points or headings. Plain text only.",
-  "If they send a photo, respond to what you actually see in it. If a message says it's a voice note transcript, respond to what they said.",
-  "Never describe or guess at the contents of a photo, link or file you can't actually see; if a photo didn't come through, say so plainly.",
-].join(" ");
 
 type ContentBlock =
   | { type: "text"; text: string }
@@ -49,33 +49,55 @@ export function toClaudeMessages(turns: Turn[]): Anthropic.MessageParam[] {
   return out as Anthropic.MessageParam[];
 }
 
-export interface ClaudeReplierOptions {
+/** One Claude call with tools, narrowed to what the coach uses. */
+export interface ModelRequest {
+  system: Anthropic.TextBlockParam[];
+  messages: Anthropic.MessageParam[];
+  tools: Anthropic.Tool[];
+  /** "none" forces a text answer (the coach's last tool round). */
+  toolChoice?: "auto" | "none";
+}
+
+export type ModelBlock =
+  | { type: "text"; text: string }
+  | { type: "tool_use"; id: string; name: string; input: unknown };
+
+export interface ModelResponse {
+  content: ModelBlock[];
+  stopReason: string | null;
+}
+
+/** The seam between the coach and Anthropic's API; `test/helpers.ts` has a scripted fake. */
+export interface ClaudeModel {
+  create(req: ModelRequest): Promise<ModelResponse>;
+  check(): Promise<void>;
+}
+
+export interface ClaudeModelOptions {
   apiKey: string;
   model: string;
   maxTokens: number;
-  systemPrompt?: string;
   client?: Anthropic;
 }
 
-export function createClaudeReplier(opts: ClaudeReplierOptions): Replier {
+export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
   const client = opts.client ?? new Anthropic({ apiKey: opts.apiKey, maxRetries: 2, timeout: 30_000 });
   return {
-    async reply(turns) {
-      const messages = toClaudeMessages(turns);
-      if (messages.length === 0) throw new Error("Nothing to reply to");
+    async create(req) {
       const response = await client.messages.create({
         model: opts.model,
         max_tokens: opts.maxTokens,
-        system: opts.systemPrompt ?? GENERIC_SYSTEM_PROMPT,
-        messages,
+        system: req.system,
+        messages: req.messages,
+        tools: req.tools,
+        ...(req.toolChoice === "none" ? { tool_choice: { type: "none" } } : {}),
       });
-      const text = response.content
-        .filter((b): b is Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
-        .join("\n")
-        .trim();
-      if (!text) throw new Error(`Claude returned no text (stop_reason: ${response.stop_reason})`);
-      return text;
+      const content: ModelBlock[] = [];
+      for (const b of response.content) {
+        if (b.type === "text") content.push({ type: "text", text: b.text });
+        else if (b.type === "tool_use") content.push({ type: "tool_use", id: b.id, name: b.name, input: b.input });
+      }
+      return { content, stopReason: response.stop_reason };
     },
     async check() {
       await client.models.retrieve(opts.model);

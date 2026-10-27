@@ -1,5 +1,6 @@
 import type { FastifyBaseLogger } from "fastify";
 import type { Turn, Replier } from "../claude/replier.js";
+import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
 import type { Message, Tester } from "../db/schema.js";
@@ -21,9 +22,9 @@ export interface PipelineDeps {
   allowedNumbers: string[];
   /** Dev accounts: test users who can text "reset". */
   devNumbers: string[];
-  historyLimit: number;
   typingIndicator: boolean;
   sendblue?: SendblueClient;
+  /** The coach (src/coach); missing when ANTHROPIC_API_KEY isn't set. */
   replier?: Replier;
   media?: MediaStore;
   transcriber?: Transcriber;
@@ -33,7 +34,7 @@ export interface PipelineDeps {
 
 /**
  * Handles one stored inbound message: tester lookup and commands ("stop", "reset"),
- * typing indicator, media copy and transcription, a reply from Claude (or the fallback), then the send.
+ * typing indicator, media copy and transcription, a reply from the coach (or the fallback), then the send.
  */
 export async function processInbound(deps: PipelineDeps, inbound: Message): Promise<void> {
   const now = deps.now ?? (() => new Date());
@@ -82,14 +83,14 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     image = result?.image;
   }
 
-  // 3. Reply text from Claude, or the fallback.
+  // 3. Reply text from the coach, or the fallback. The coach sees everything since the tester's context started.
   let replyText = FALLBACK_REPLY;
   if (deps.replier) {
     const claudeStart = now();
     try {
-      const history = await recentConversation(db, inbound.contactNumber, deps.historyLimit, tester.contextStartedAt);
+      const history = await recentConversation(db, inbound.contactNumber, COACH_HISTORY_CAP, tester.contextStartedAt);
       const turns = toTurns(history, inbound.id, { transcript, image });
-      replyText = await deps.replier.reply(turns);
+      replyText = await deps.replier.reply({ tester, turns, now: now() });
       timings.claude_ms = now().getTime() - claudeStart.getTime();
     } catch (err) {
       timings.claude_ms = now().getTime() - claudeStart.getTime();

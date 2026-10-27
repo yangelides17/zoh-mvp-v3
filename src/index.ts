@@ -1,5 +1,6 @@
 import { buildApp } from "./app.js";
-import { createClaudeReplier } from "./claude/replier.js";
+import { createClaudeModel } from "./claude/replier.js";
+import { createCoach } from "./coach/coach.js";
 import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
 import { safeError } from "./errors.js";
@@ -30,7 +31,10 @@ const sendblue =
     : undefined;
 
 const replier = config.claude.apiKey
-  ? createClaudeReplier({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: config.claude.maxTokens })
+  ? createCoach({
+      db,
+      model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: config.claude.maxTokens }),
+    })
   : undefined;
 
 const b = config.bucket;
@@ -55,7 +59,6 @@ const { app, queue } = await buildApp({
     db,
     allowedNumbers: config.allowedNumbers,
     devNumbers: config.devNumbers,
-    historyLimit: config.claude.historyLimit,
     typingIndicator: config.typingIndicator,
     sendblue,
     replier,
