@@ -62,14 +62,26 @@ describe("first text", () => {
     const req = model.requests[0]!;
     expect(req.system[0]).toMatchObject({ text: FIXED_INSTRUCTIONS, cache_control: { type: "ephemeral" } });
     expect(req.system[0]!.text).toContain('they can text "stop" anytime');
-    expect(req.system[0]!.text).toContain("What's your name, and what are you looking to work on?");
     expect(req.system[0]!.text).toContain("start one thing and actually stick with it");
     const state = model.stateOf();
-    expect(state).toContain("First text from this tester: yes");
+    expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);
     expect(state).toContain(GOAL_LINES.join("\n"));
     expect(state).toContain("Time zone: Eastern (assumed");
     expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start" }] }]);
     expect(sent()).toEqual(["Yo! I'm ZOH…"]);
+  });
+
+  it("asks only for the name when the first text gives a goal without one", async () => {
+    model.script({ tools: [{ name: "choose_goal", input: { slug: "nutrition" } }] }, "150g a day, let's go! I'm ZOH… What's your name?");
+    await text(ME, "hey wanna hit 150g protein a day");
+    expect(model.stateOf()).toContain("Their goal is known: skip the list");
+    expect(model.stateOf()).toContain("Your one question: their name.");
+  });
+
+  it("asks only for the goal when the first text gives a name without one", async () => {
+    model.script({ tools: [{ name: "save_name", input: { name: "Pat" } }] }, "Pat! I'm ZOH…");
+    await text(ME, "hi, I'm Pat");
+    expect(model.stateOf()).toContain('ask "What are you looking to work on?" followed by the goal list');
   });
 
   it("is no longer the first text once ZOH has replied", async () => {
@@ -86,6 +98,9 @@ describe("first text", () => {
     );
     await text(ME, "hi! I'm Maya, I want to journal every morning at home before work, maybe 10 min");
     expect(await tester()).toMatchObject({ name: "Maya", goalSlug: "reflection" });
+    expect(model.stateOf(0)).toContain('ask "What\'s your name, and what are you looking to work on?"');
+    expect(model.stateOf(1)).toContain("Their goal is known: skip the list");
+    expect(model.stateOf(1)).toContain("Then ask the next open question.");
     expect(model.stateOf(1)).toContain("Name: Maya");
     expect(model.stateOf(1)).toContain("Goal: Daily reflection and planning [reflection]");
     // All of reflection's required questions were answered at once, so this is already the recap turn.
@@ -339,8 +354,32 @@ describe("opting out and failures", () => {
     model.script(loop, loop, loop, loop, loop);
     await text(ME, "more hype pls");
     expect(model.requests).toHaveLength(MAX_ROUNDS);
-    expect(model.requests.at(-1)!.toolChoice).toBe("none");
+    const lastRequest = model.requests.at(-1)!;
+    expect(lastRequest.toolChoice).toBe("none");
+    expect(lastRequest.messages.at(-1)!.content).toContainEqual({
+      type: "text",
+      text: "No more tool calls for this reply: write your text to the tester now.",
+    });
+    // The tool list stays the same for every round of one reply.
+    expect(new Set(model.requests.map((r) => r.tools.map((x) => x.name).join()))).toHaveProperty("size", 1);
     expect(sent()).toEqual(["Hype it is!"]);
+  });
+
+  it("tries a round again once when it comes back with neither text nor a tool call", async () => {
+    model.script("", "Hey, I'm ZOH!");
+    await text(ME, "Start");
+    expect(model.requests).toHaveLength(2);
+    expect(sent()).toEqual(["Hey, I'm ZOH!"]);
+  });
+
+  it("records which tools ran when Claude never writes text, without tester content", async () => {
+    const silent = { tools: [{ name: "save_style_note", input: { note: "secret words" } }] };
+    model.script(silent, silent, silent, "");
+    await text(ME, "more hype pls");
+    expect(sent()).toEqual([FALLBACK_REPLY]);
+    const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
+    expect(inbound!.error).toContain("rounds: save_style_note:ok | save_style_note:ok | save_style_note:ok");
+    expect(inbound!.error).not.toContain("secret words");
   });
 });
 

@@ -1,6 +1,6 @@
 import type { AppDeps } from "./app.js";
 import { createClaudeModel } from "./claude/replier.js";
-import { createCoach } from "./coach/coach.js";
+import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import type { Db } from "./db/client.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
@@ -61,7 +61,12 @@ function makeCoach(config: Config, db: Db) {
   return config.claude.apiKey
     ? createCoach({
         db,
-        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: config.claude.maxTokens }),
+        model: createClaudeModel({
+          apiKey: config.claude.apiKey,
+          model: config.claude.model,
+          maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
+          effort: "medium",
+        }),
       })
     : undefined;
 }

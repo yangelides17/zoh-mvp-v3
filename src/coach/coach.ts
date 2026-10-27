@@ -17,6 +17,12 @@ export const MAX_ROUNDS = 4;
  */
 export const COACH_HISTORY_CAP = 200;
 
+/**
+ * Output budget per Claude call. Thinking counts against it, so it sits well above a text's
+ * length (CLAUDE_MAX_TOKENS' default of 400 left some calls with no room for any text).
+ */
+export const COACH_MAX_TOKENS = 2000;
+
 export interface CoachOptions {
   db: Db;
   model: ClaudeModel;
@@ -39,13 +45,18 @@ export function createCoach(opts: CoachOptions): Replier {
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText });
       let fallbackText = "";
+      // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
+      const tools = toolsFor(initial);
+      /** Tool names and outcomes per round (never their inputs), for the error if no text comes back. */
+      const trail: string[] = [];
+      let retried = false;
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
         const response = await model.create({
           system: systemBlocks(state),
           messages,
-          tools: toolsFor(tester),
+          tools,
           toolChoice: last ? "none" : "auto",
         });
         const text = response.content
@@ -54,14 +65,22 @@ export function createCoach(opts: CoachOptions): Replier {
           .join("\n")
           .trim();
         const calls = response.content.filter((b) => b.type === "tool_use");
+        // Rarely a round comes back with neither text nor a tool call we can run: try that round again.
+        if (!text && calls.length === 0 && !last && !retried) {
+          retried = true;
+          trail.push(`empty:${response.stopReason}:${(response.raw ?? []).map((b) => b.type).join("+") || "no blocks"}`);
+          continue;
+        }
         if (calls.length === 0 || last) {
           const reply = text || fallbackText;
-          if (!reply) throw new Error(`Claude returned no text (stop_reason: ${response.stopReason})`);
+          if (!reply) {
+            throw new Error(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
+          }
           return reply;
         }
         if (text) fallbackText = text;
 
-        const results: Anthropic.ToolResultBlockParam[] = [];
+        const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
           const result = await runTool(db, state, call.name, call.input, now);
           if (result.ok && result.optedOut) return OPT_OUT_CONFIRMATION;
@@ -81,7 +100,10 @@ export function createCoach(opts: CoachOptions): Replier {
           });
         }
 
-        messages.push({ role: "assistant", content: response.content as Anthropic.ContentBlockParam[] });
+        trail.push(calls.map((c, i) => `${c.name}:${(results[i] as Anthropic.ToolResultBlockParam).is_error ? "error" : "ok"}`).join(","));
+        // The model sometimes answers a forced-text round with nothing unless it's told why.
+        if (round + 1 === MAX_ROUNDS) results.push({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." });
+        messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
         messages.push({ role: "user", content: results });
       }
       throw new Error("unreachable: the last round always returns");

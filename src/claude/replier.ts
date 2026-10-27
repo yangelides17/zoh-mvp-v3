@@ -64,6 +64,8 @@ export type ModelBlock =
 
 export interface ModelResponse {
   content: ModelBlock[];
+  /** Every block as returned, thinking included: tool loops must send these back unchanged. */
+  raw?: Anthropic.ContentBlockParam[];
   stopReason: string | null;
 }
 
@@ -76,7 +78,10 @@ export interface ClaudeModel {
 export interface ClaudeModelOptions {
   apiKey: string;
   model: string;
+  /** Includes thinking tokens, so leave room beyond the visible reply. */
   maxTokens: number;
+  /** Thinking depth (the coach uses "medium"). */
+  effort?: "low" | "medium" | "high";
   client?: Anthropic;
 }
 
@@ -90,6 +95,7 @@ export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
         system: req.system,
         messages: req.messages,
         tools: req.tools,
+        ...(opts.effort ? { output_config: { effort: opts.effort } } : {}),
         ...(req.toolChoice === "none" ? { tool_choice: { type: "none" } } : {}),
       });
       const content: ModelBlock[] = [];
@@ -97,7 +103,7 @@ export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
         if (b.type === "text") content.push({ type: "text", text: b.text });
         else if (b.type === "tool_use") content.push({ type: "tool_use", id: b.id, name: b.name, input: b.input });
       }
-      return { content, stopReason: response.stop_reason };
+      return { content, raw: response.content as Anthropic.ContentBlockParam[], stopReason: response.stop_reason };
     },
     async check() {
       await client.models.retrieve(opts.model);

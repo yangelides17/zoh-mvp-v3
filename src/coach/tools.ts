@@ -58,7 +58,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_plan_inputs",
     description:
-      "Save one or more plan answers for their goal, in their words (short). Only keys their goal uses. Pass everything they said at once.",
+      'Save one or more plan answers for their goal, in their words (short). Only keys their goal uses. Pass everything they said at once, but only answers concrete enough to plan: "when" needs a time of day ("7:30", "after dinner"), not just "night" or "mornings".',
     input_schema: {
       type: "object",
       properties: {
