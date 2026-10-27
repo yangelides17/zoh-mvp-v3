@@ -237,14 +237,22 @@ describe("rule 2: step days and rest days", () => {
 });
 
 describe("rule 4: never more than 3 unanswered texts in a row", () => {
-  it("Pushy: a reply earlier in the day counts toward the 3; their text resets the count", async () => {
+  it("Pushy: chatting with ZOH doesn't count toward the 3; only texts ZOH started do", async () => {
     const tester = await setup();
     await say(tester, "inbound", at(MON, "08:00"), "up early");
     await say(tester, "outbound", at(MON, "08:00"), "Love it");
-    expect(await day(MON, "09:00", "19:55")).toEqual(["kickoff@09:00", "checkin@18:50"]);
-    await say(tester, "inbound", at(MON, "20:00"), "reading now");
-    await say(tester, "outbound", at(MON, "20:00"), "Let's go");
-    expect(await day(MON, "20:01", "21:59")).toEqual(["followup@20:01"]);
+    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+  });
+
+  it("three unanswered nudges stop the day; their text resets the count", async () => {
+    const tester = await setup({ days: ["mon"] });
+    for (const kind of ["a", "b", "c"]) {
+      await t.db.insert(nudges).values({ testerId: tester.id, date: MON, kind, moment: "kickoff", status: "sent", createdAt: at(MON, "09:00") });
+    }
+    expect(await day(MON, "09:00", "21:59")).toEqual([]);
+    await say(tester, "inbound", at(MON, "19:30"), "reading now");
+    await say(tester, "outbound", at(MON, "19:30"), "Let's go");
+    expect(await day(MON, "19:35", "21:59")).toEqual(["followup@19:50"]);
   });
 
   it("Steady: kickoff and follow-up", async () => {
@@ -252,11 +260,11 @@ describe("rule 4: never more than 3 unanswered texts in a row", () => {
     expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "followup@19:50"]);
   });
 
-  it("Steady: two in a row at most", async () => {
+  it("Steady: an early chat still leaves kickoff and follow-up", async () => {
     const tester = await setup({ pushiness: "steady" });
     await say(tester, "inbound", at(MON, "08:00"), "up early");
     await say(tester, "outbound", at(MON, "08:00"), "Love it");
-    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00"]);
+    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "followup@19:50"]);
   });
 
   it("Gentle: kickoff only", async () => {
@@ -471,7 +479,7 @@ describe("dueNudge", () => {
     },
     plan: { stepTime: "19:00", days: ["mon"], startDate: MON, minutes: 20, lockedAt: at(SUN, "12:00") },
     claimedToday: [],
-    outboundSinceReply: 0,
+    nudgesSinceReply: 0,
     stallsSinceReply: 0,
   };
 
@@ -480,7 +488,7 @@ describe("dueNudge", () => {
     expect(dueNudge({ ...base, now: at(MON, "08:59") })).toMatchObject({ reason: "quiet hours" });
     expect(dueNudge({ ...base, tester: { ...base.tester, autoTextsPausedAt: at(SUN, "09:00") } })).toMatchObject({ reason: "paused" });
     expect(dueNudge({ ...base, today: { status: "done", movedTime: null, onItAt: null } })).toMatchObject({ reason: "today is done" });
-    expect(dueNudge({ ...base, outboundSinceReply: 3 })).toMatchObject({ reason: "unanswered cap" });
+    expect(dueNudge({ ...base, nudgesSinceReply: 3 })).toMatchObject({ reason: "unanswered cap" });
     expect(dueNudge({ ...base, claimedToday: ["kickoff"] })).toMatchObject({ reason: "no slot open" });
   });
 

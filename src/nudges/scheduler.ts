@@ -121,10 +121,11 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
   const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
   const midnight = zonedTime(date, "00:00", tester.timeZone);
   const since = lastInboundAt && lastInboundAt > midnight ? lastInboundAt : midnight;
-  const [outbound] = await db
+  // The cap counts only texts ZOH started: chatting with ZOH never costs them a nudge.
+  const [started] = await db
     .select({ n: count() })
-    .from(messages)
-    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "outbound"), delivered(), gte(sentTime, since)));
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.status, "sent"), gte(nudges.createdAt, since)));
   const [stalls] = await db
     .select({ n: count() })
     .from(nudges)
@@ -145,7 +146,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     claimedToday: claimed.map((c) => c.kind),
     lastInboundAt,
     lastOutboundAt,
-    outboundSinceReply: outbound?.n ?? 0,
+    nudgesSinceReply: started?.n ?? 0,
     stallsSinceReply: stalls?.n ?? 0,
   });
 

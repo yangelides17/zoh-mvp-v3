@@ -73,13 +73,13 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - One goal at a time; a second can come once this one sticks.`;
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
-export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to their commitment in their words. No guilt, no fake urgency, no apology for the timing.
+export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. No guilt, no fake urgency, no apology for the timing. Ask for proof once a day, not in every text.
 - kickoff (step day): today's step (what, when, where), then a question that gets them committing to it. kickoff_checkin: the same, and it starts soon.
-- rest_day: short and light: rest day, back at it on their next step day. No push.
+- rest_day: short and light: rest day, back at it on their next step day. No push, no question. A rest day stays light all day: if they reply, keep it easy; no lock-in ask for tomorrow.
 - checkin: it starts in about 10 minutes: get set up.
 - followup: no word yet: ask how it went.
 - stall (plan not locked yet): pick up where you left off, aimed at finishing onboarding or locking the plan.
-When they text (phase "active"): done, or proof → celebrate and mark_step_done (reduced if they did a smaller version). Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are).`;
+When they text (phase "active"): done, or proof → celebrate and mark_step_done (reduced if they did a smaller version). Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
 export const EXAMPLES = `Model exchanges (tone, not scripts):

@@ -166,7 +166,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_step_done",
     description:
-      "Today's step is done (they say so or send proof). how: full, or reduced for a smaller version. note: what they did, in a few words. Your texts stop for today.",
+      "Today's step is done: only once it has happened (they say so or send proof), never when they agree to do it, or a smaller version, later. how: full, or reduced for a smaller version. note: what they did, in a few words. Your texts stop for today.",
     input_schema: {
       type: "object",
       properties: { how: { type: "string", enum: ["full", "reduced"] }, note: { type: "string" } },

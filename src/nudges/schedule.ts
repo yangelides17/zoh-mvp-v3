@@ -28,7 +28,7 @@ export const FOLLOWUP_AFTER_MS = 30 * MINUTE;
 /** How long a step takes when the plan doesn't say. */
 export const DEFAULT_STEP_MINUTES = 60;
 
-/** Texts ZOH may start in a row without a reply, per level; never more than 3 (voice page). */
+/** Nudges ZOH may send in a row without a reply, per level; never more than 3 (voice page). */
 export const CAP_BY_LEVEL: Record<string, number> = { pushy: 3, steady: 2, gentle: 1 };
 const DEFAULT_CAP = 3;
 
@@ -50,8 +50,8 @@ export interface NudgeInput {
   claimedToday: string[];
   lastInboundAt?: Date;
   lastOutboundAt?: Date;
-  /** ZOH's texts since the later of their last text and the service date's local midnight. */
-  outboundSinceReply: number;
+  /** Nudges ZOH sent since the later of their last text and the service date's local midnight (replies don't count). */
+  nudgesSinceReply: number;
   /** Stall nudges since their last text. */
   stallsSinceReply: number;
 }
@@ -110,7 +110,7 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
   if (!plan.startDate || plan.startDate > date) return none("day 1 not yet");
   if (today?.status) return none(`today is ${today.status}`);
   const cap = CAP_BY_LEVEL[tester.pushiness] ?? DEFAULT_CAP;
-  if (input.outboundSinceReply >= cap) return none("unanswered cap");
+  if (input.nudgesSinceReply >= cap) return none("unanswered cap");
 
   const level = tester.pushiness in CAP_BY_LEVEL ? tester.pushiness : "pushy";
   const day = dayBounds(date, tester);
