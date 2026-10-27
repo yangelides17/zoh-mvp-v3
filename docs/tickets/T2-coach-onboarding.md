@@ -81,8 +81,9 @@ memory system (feature 8), pause/gentler/pushier commands (feature 12), console.
 - [ ] Several answers in one tool call are all saved; nothing saved is shown as "still open".
 - [ ] When the last required answer is saved, phase becomes `planning` and that reply is the recap
       plus plan-is-coming turn; later texts don't restart onboarding questions.
-- [ ] Required questions follow the goal: `tracks_with` only for exercise, nutrition, bedtime and
-      deep work.
+- [ ] Required questions follow the goal (T1's `goals.plan_questions`): `tracks_with` only for
+      exercise, nutrition, bedtime and deep work, and "I don't track it" is a valid answer that
+      completes it.
 - [ ] A declined "something else" saves an `off_list_goal` flag; an accepted one is stored with
       its description.
 - [ ] The coach sees the whole conversation since context start (more than 12 messages) and
