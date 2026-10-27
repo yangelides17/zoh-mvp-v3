@@ -64,11 +64,15 @@ export function simulatorPrompt(transcript: TranscriptLine[]): string {
 export function simulatedTester(scenario: Scenario, complete: Completer, doneWhen: string): Tester {
   const system = simulatorSystemPrompt(scenario, doneWhen);
   let usage = { input: 0, output: 0 };
+  let started = false;
   return {
     endReason: "simulator",
     usage: () => usage,
     async next(transcript) {
-      if (transcript.length === 0 && scenario.opening) return scenario.opening;
+      // A seeded conversation already has lines, so "first" means this tester's first text.
+      const first = !started;
+      started = true;
+      if (first && scenario.opening) return scenario.opening;
       const res = await complete({
         system,
         messages: [{ role: "user", content: simulatorPrompt(transcript) }],

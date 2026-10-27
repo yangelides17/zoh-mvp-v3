@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { onboardingScenarios } from "./scenarios/onboarding.js";
+import { planScenarios } from "./scenarios/plan.js";
 import type { ScenarioInput } from "./types.js";
 
 export const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -39,7 +40,7 @@ export const FEATURES: Record<string, FeatureDef> = {
   onboarding: {
     name: "onboarding",
     doneWhen:
-      "ZOH has wrapped up onboarding: it recapped what you agreed and said your plan is on its way (or started proposing the plan).",
+      "ZOH has finished the onboarding questions and moved on to your plan: it showed you a proposed plan, or started asking details for it.",
     scenarios: onboardingScenarios,
     rubric: [
       { id: "one-question", scope: "text", label: "One question per text (the first text may ask name and goal together)" },
@@ -83,9 +84,57 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "wrap-up",
         scope: "conversation",
-        label: "Ends with a one-line recap and the plan-is-coming line, only once every plan question is answered",
+        label: "Only once every plan question is answered, carries straight on into the plan (asks what it still needs, or shows it), with no recap or plan-is-coming line",
       },
       { id: "length", scope: "conversation", label: "No longer than about 12 ZOH texts and five minutes; fewer is fine when the tester gives several answers at once" },
+    ],
+  },
+  plan: {
+    name: "plan",
+    doneWhen:
+      "your plan is locked: you committed and ZOH confirmed it and when day 1 is (or, if you came to switch goals, the new plan is locked or you've clearly decided to keep the current one).",
+    scenarios: planScenarios,
+    rubric: [
+      { id: "one-question", scope: "text", label: "One question per text, at the end" },
+      {
+        id: "short",
+        scope: "text",
+        label: "Short: one to three sentences, except a text presenting or changing the plan, which can run to about 8 lines",
+      },
+      { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
+      {
+        id: "voice",
+        scope: "text",
+        label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
+      },
+      { id: "honest", scope: "text", label: "No invented facts about the tester: the plan uses what they said plus ZOH's concrete suggestions" },
+      {
+        id: "no-seam",
+        scope: "conversation",
+        label:
+          "No seam: extra questions the plan needs come before any \"that's everything\" line, one at a time (changes the tester asks for afterwards don't count against it)",
+      },
+      {
+        id: "plan-shape",
+        scope: "conversation",
+        label:
+          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a reason and a proof method (photo, screenshot or voice note) that fits what they use",
+      },
+      {
+        id: "commitment",
+        scope: "conversation",
+        label: "The commitment ask feels like a real commitment, not a casual question; a soft yes (\"ok\", \"sure\") gets one re-ask",
+      },
+      { id: "day-one", scope: "conversation", label: "Pushes for day 1 today; accepts tomorrow on pushback" },
+      { id: "quiet-hours", scope: "conversation", label: "A step time inside quiet hours (10 pm to 9 am by default) gets the offer to adjust them" },
+      {
+        id: "nutrition",
+        scope: "conversation",
+        label:
+          "Nutrition: asks for their target first, and suggests one only if they have none, from their weight in pounds: protein 0.75 to 1 g per lb; calories 10 to 12x to lose, 13 to 15x to maintain, 16 to 18x to gain",
+      },
+      { id: "goal-switch", scope: "conversation", label: "An unjustified goal switch gets a warm push back; a justified one goes ahead" },
+      { id: "revisions", scope: "conversation", label: "Revisions keep what they didn't ask to change" },
     ],
   },
 };

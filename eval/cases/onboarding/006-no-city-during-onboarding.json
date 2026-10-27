@@ -9,7 +9,7 @@
     "nah I don't track it"
   ],
   "whatWentWrong": "Before the fix, ZOH asked \"What city are you in?\" before the last plan question for any number outside Eastern.",
-  "shouldHaveHappened": "ZOH never asks Jordan's city, location or time zone during onboarding, and never mentions time zones. Onboarding otherwise proceeds normally and ends with a one-sentence recap of only what Jordan said, then that the plan is on its way.",
+  "shouldHaveHappened": "ZOH never asks Jordan's city, location or time zone during onboarding, and never mentions time zones. Reading's onboarding questions are only what, when and how long, so onboarding is over once \"before bed around 10, like 20 min\" is answered; the later \"nah I don't track it\" answers nothing onboarding asked. Once onboarding's questions are done, ZOH carries straight on into the plan (asks what the plan still needs, or shows it), with no recap and no \"plan is on its way\" line, and only then may it ask Jordan's city for the plan.",
   "areaCode": "312",
   "startTime": "18:30",
   "timeZone": "America/Chicago"

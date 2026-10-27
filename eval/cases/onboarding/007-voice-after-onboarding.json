@@ -12,7 +12,7 @@
     "lol ok"
   ],
   "whatWentWrong": "New case, not a past mistake: checks the replies after onboarding, which now come from the full voice page.",
-  "shouldHaveHappened": "Onboarding ends with a recap of only what Riley said and that the plan is on its way. After that: \"less emojis pls\" gets a one-line confirmation and no emoji in any later text. \"is 20 min even worth it?\" gets a short, specific answer tied to Riley's reading (it may run a little longer than usual, up to a few short lines), blunt and believing, not generic. \"lol ok\" gets a short reply that may mirror the casual tone. ZOH never invents a plan and never reuses a line from the voice page's \"Sounds like\" table or calls Riley \"Sam\". At most 3 Greek words in the whole conversation.",
+  "shouldHaveHappened": "When onboarding's questions are done, ZOH carries straight on into the plan (asks what the plan still needs, or shows it), with no recap and no \"plan is on its way\" line. After that: \"less emojis pls\" gets a one-line confirmation and no emoji in any later text. \"is 20 min even worth it?\" gets a short, specific answer tied to Riley's reading (it may run a little longer than usual, up to a few short lines), blunt and believing, not generic. \"lol ok\" gets a short reply that may mirror the casual tone; it may move the plan forward (e.g. the commitment ask), still short. Any plan ZOH shows uses only what Riley said plus concrete suggestions, and ZOH never reuses a line from the voice page's \"Sounds like\" table or calls Riley \"Sam\". At most 3 Greek words in the whole conversation.",
   "areaCode": "212",
   "startTime": "18:30",
   "timeZone": "America/New_York"

@@ -17,6 +17,38 @@ export const hiddenFacts = z.object({
 });
 export type HiddenFacts = z.infer<typeof hiddenFacts>;
 
+/**
+ * Where a conversation starts, when not from a brand-new tester: a tester already partway in, with
+ * their saved answers and the conversation so far (shown to the simulator and grader as context,
+ * not graded). With a plan, the tester has locked it and is "active".
+ */
+export const seedSchema = z.object({
+  name: z.string(),
+  goal: z.string(),
+  phase: z.enum(["onboarding", "planning", "active"]),
+  answers: z.object({
+    what: z.string().optional(),
+    where: z.string().optional(),
+    when: z.string().optional(),
+    how_long: z.string().optional(),
+    tracks_with: z.string().optional(),
+  }),
+  history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  plan: z
+    .object({
+      setup_step: z.string().optional(),
+      step: z.string(),
+      place: z.string().optional(),
+      time: z.string().regex(/^\d{2}:\d{2}$/),
+      days: z.array(z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"])).min(3),
+      proof: z.enum(["photo", "screenshot", "voice"]),
+      proof_note: z.string().optional(),
+      reason: z.string(),
+    })
+    .optional(),
+});
+export type Seed = z.infer<typeof seedSchema>;
+
 /** A simulated conversation: a tester the simulator plays against the real coach. */
 export const scenarioSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -39,6 +71,7 @@ export const scenarioSchema = z.object({
   /** Where this scenario comes from (page example, persona coverage...). Report only. */
   source: z.string(),
   maxTurns: z.number().int().positive().optional(),
+  seed: seedSchema.optional(),
 });
 export type Scenario = z.infer<typeof scenarioSchema>;
 export type ScenarioInput = z.input<typeof scenarioSchema>;
@@ -56,6 +89,7 @@ export const caseSchema = z.object({
   startTime: z.string().regex(/^\d{2}:\d{2}$/).default("18:30"),
   timeZone: z.string().default("America/New_York"),
   persona: z.enum(PERSONAS).optional(),
+  seed: seedSchema.optional(),
 });
 export type RegressionCase = z.infer<typeof caseSchema>;
 
@@ -79,11 +113,14 @@ export interface ConversationPlan {
   timeZone: string;
   scenario?: Scenario;
   regression?: RegressionCase;
+  seed?: Seed;
 }
 
 export interface ConversationResult {
   plan: ConversationPlan;
   phone: string;
+  /** The seeded conversation before this run's first text; context only, never graded. */
+  context: TranscriptLine[];
   transcript: TranscriptLine[];
   endedBy: "simulator" | "turn-cap" | "script" | "error";
   error?: string;

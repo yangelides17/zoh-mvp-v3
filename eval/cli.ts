@@ -3,10 +3,11 @@ import { FEATURES } from "./features.js";
 import { PERSONAS } from "./types.js";
 
 export const USAGE = [
-  "Usage: npm run eval -- <feature> [--case <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
+  "Usage: npm run eval -- <feature> [--case <id>]... [--scenario <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
   "",
   `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}`,
   "  --case           only this regression case (repeatable), no simulated conversations: the cheap targeted run",
+  "  --scenario       only this simulated conversation (repeatable), no regression cases unless --case is given too",
   `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); regression cases always run`,
   "  --runs           times to play each scenario (default 1)",
   "  --max-turns      tester texts before a conversation is cut off (default 20)",
@@ -23,6 +24,8 @@ export interface EvalArgs {
   feature: string;
   /** Only these regression case ids, and no scenarios. */
   cases?: string[];
+  /** Only these scenario ids. */
+  scenarios?: string[];
   persona?: string;
   runs: number;
   maxTurns: number;
@@ -41,6 +44,7 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
       allowPositionals: true,
       options: {
         case: { type: "string", multiple: true },
+        scenario: { type: "string", multiple: true },
         persona: { type: "string" },
         runs: { type: "string" },
         "max-turns": { type: "string" },
@@ -59,13 +63,14 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
   if (!feature) throw new UsageError("Which feature? e.g. npm run eval -- onboarding");
   if (positionals.length > 1) throw new UsageError(`Unexpected argument: ${positionals[1]}`);
   if (!Object.hasOwn(FEATURES, feature)) throw new UsageError(`Unknown feature "${feature}"`);
-  if (values.case && values.persona) throw new UsageError("--case runs only the named cases; drop --persona");
+  if ((values.case || values.scenario) && values.persona) throw new UsageError("--case and --scenario pick exactly what runs; drop --persona");
   if (values.persona && !(PERSONAS as readonly string[]).includes(values.persona)) {
     throw new UsageError(`Unknown persona "${values.persona}"`);
   }
   return {
     feature,
     cases: values.case,
+    scenarios: values.scenario,
     persona: values.persona,
     runs: positiveInt(values.runs, "--runs", 1),
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),

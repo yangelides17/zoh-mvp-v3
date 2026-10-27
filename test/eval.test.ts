@@ -23,7 +23,9 @@ const rubric = rubricFor(onboarding);
 
 /** Echoes the tester so tests can see which text each reply answered. */
 class EchoReplier implements Replier {
+  received: ReplyInput["turns"][] = [];
   async reply({ turns }: ReplyInput) {
+    this.received.push(turns);
     return `got: ${turns.at(-1)?.text}`;
   }
   async check() {}
@@ -44,6 +46,7 @@ function conv(key: string, persona: ConversationPlan["persona"], grade: Grade, t
   return {
     plan: { key, kind: "scenario", id: key, title: `Title ${key}`, persona, areaCode: "212", startTime: "18:30", timeZone: "America/New_York" },
     phone: "+12125550101",
+    context: [],
     transcript: lines,
     endedBy: "simulator",
     savedState: {},
@@ -128,6 +131,36 @@ describe("eval: running a conversation through the real app", () => {
     expect(result.transcript[5]!.at > result.transcript[0]!.at).toBe(true);
   });
 
+  it("starts a seeded scenario partway in: saved state, a locked plan and the earlier conversation as context", async () => {
+    const scenario = loadScenarios(FEATURES.plan!).find((s) => s.id === "switch-goal")!;
+    const plan = planConversations([scenario], [], { runs: 1 })[0]!;
+    const replier = new EchoReplier();
+    let seen: string[] = [];
+    const sim: Completer = async (req) => {
+      seen = [String(req.messages[0]!.content)];
+      return { text: DONE, usage: { input: 1, output: 1 }, stopReason: "end_turn" };
+    };
+    const result = await runConversation(plan, simulatedTester(scenario, sim, FEATURES.plan!.doneWhen), {
+      maxTurns: 5,
+      index: 3,
+      env: {},
+      replier,
+    });
+    // The opening is this tester's first text even though the seed already has lines.
+    expect(result.transcript[0]).toMatchObject({ from: "tester", text: scenario.opening });
+    expect(result.context.map((l) => l.from)).toEqual(["zoh", "tester", "zoh"]);
+    expect(result.context.at(-1)!.at < result.transcript[0]!.at).toBe(true);
+    // The coach sees the seeded conversation before the new text.
+    expect(replier.received.at(0)!.map((t) => t.text)).toEqual([...scenario.seed!.history.map((h) => h.text), scenario.opening]);
+    // The simulator sees it too.
+    expect(seen[0]).toContain("LET'S GO 🔒");
+    expect(result.savedState).toMatchObject({
+      testers: [{ name: "Taylor", goal_slug: "reading", phase: "active" }],
+      plans: [{ status: "locked", version: 1, step_time: "21:00", start_date: "2026-11-02T00:00:00.000Z" }],
+      plan_inputs: [{ what: "The Midnight Library" }],
+    });
+  });
+
   it("stops at the turn cap and when the simulator says it's done", async () => {
     const scenario = loadScenarios(onboarding).find((s) => s.id === "all-at-once-reading-11pm")!;
     const plan = planConversations([scenario], [], { runs: 1 })[0]!;
@@ -183,6 +216,22 @@ describe("eval: running a conversation through the real app", () => {
 });
 
 describe("eval: grader", () => {
+  it("shows a seeded conversation as context, separate from the graded texts", () => {
+    const at = "2026-11-02T23:00:00Z";
+    const prompt = graderUserPrompt({
+      plan: { key: "k", kind: "scenario", id: "k", title: "t", persona: "terse", areaCode: "212", startTime: "18:00", timeZone: "America/New_York" },
+      context: [{ from: "zoh", text: "Earlier ZOH line", at }],
+      transcript: [
+        { from: "tester", text: "hi", at },
+        { from: "zoh", text: "New ZOH line", at },
+      ],
+    });
+    expect(prompt).toContain("=== Earlier conversation (context only");
+    expect(prompt).toContain("[ZOH earlier] (6:00 pm) Earlier ZOH line");
+    expect(prompt).toContain("[ZOH 1] (6:00 pm) New ZOH line");
+    expect(prompt.indexOf("Earlier ZOH line")).toBeLessThan(prompt.indexOf("=== Transcript ==="));
+  });
+
   const good: Grade = {
     texts: [{ zohText: 1, checks: [ok("one-question"), bad("short")] }],
     conversation: [bad("first-text")],
@@ -379,7 +428,19 @@ describe("eval: report", () => {
 
 describe("eval: command line and cost", () => {
   it("parses arguments and explains mistakes", () => {
-    expect(parseEvalArgs(["onboarding"])).toEqual({ feature: "onboarding", runs: 1, maxTurns: 20, concurrency: 3, dryRun: false, overBudget: false, persona: undefined, cases: undefined });
+    expect(parseEvalArgs(["onboarding"])).toEqual({
+      feature: "onboarding",
+      runs: 1,
+      maxTurns: 20,
+      concurrency: 3,
+      dryRun: false,
+      overBudget: false,
+      persona: undefined,
+      cases: undefined,
+      scenarios: undefined,
+    });
+    expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);
+    expect(() => parseEvalArgs(["plan", "--scenario", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--case", "a", "--case", "b"]).cases).toEqual(["a", "b"]);
     expect(() => parseEvalArgs(["onboarding", "--case", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--over-budget"]).overBudget).toBe(true);
@@ -396,6 +457,14 @@ describe("eval: command line and cost", () => {
     expect(missingKeyMessage({ ANTHROPIC_API_KEY: "sk-ant-x" })).toBeUndefined();
     expect(missingKeyMessage({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" })).toBeUndefined();
     expect(evalConfig({ EVAL_ANTHROPIC_API_KEY: "sk-ant-y" }, "+12125550101").claude.apiKey).toBe("sk-ant-y");
+  });
+
+  it("plays only the named scenarios with --scenario", async () => {
+    const plan = FEATURES.plan!;
+    const plans = planConversations(loadScenarios(plan), await loadCases("onboarding"), { scenarios: ["bedtime-late"], runs: 1 });
+    expect(plans.map((p) => p.key)).toEqual(["bedtime-late"]);
+    expect(plans[0]!.seed).toMatchObject({ goal: "bedtime", phase: "onboarding" });
+    expect(() => planConversations(loadScenarios(plan), [], { scenarios: ["nope"], runs: 1 })).toThrow(/Unknown scenario id: nope/);
   });
 
   it("plays only the named cases on a targeted run", async () => {
