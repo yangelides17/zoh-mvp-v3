@@ -7,7 +7,7 @@ export interface GraderInput {
   plan: ConversationPlan;
   transcript: TranscriptLine[];
   rubric: RubricRule[];
-  /** The feature page's rules section and the voice page, read at run time. */
+  /** The feature's approved checks and the voice page, read at run time. */
   pages: { rules: string; voice: string };
 }
 
@@ -17,9 +17,10 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   return [
     "You grade text conversations between ZOH, an AI coach that texts people over iMessage, and a new tester.",
     "You have never seen ZOH's code or instructions. Judge only what is in the transcript, against the written rules below.",
-    "Be strict and specific: a rule passes only if the text clearly follows it. Quote or point at the exact words when something fails.",
+    "Judge like a reasonable person reading these texts: pass when the text follows the spirit of the rule, fail only on a clear miss,",
+    "and mark borderline when it could go either way. Quote or point at the exact words when something fails.",
     "",
-    "=== Feature page rules ===",
+    "=== This feature's rules (approved by the founders) ===",
     input.pages.rules,
     "",
     "=== Coach voice page (applies to every feature) ===",

@@ -4,7 +4,8 @@ import { onboardingScenarios } from "./scenarios/onboarding.js";
 import type { ScenarioInput } from "./types.js";
 
 export const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
-export const FEATURES_DIR = `${REPO_ROOT}docs/features/`;
+/** The coach voice page: applies to every feature, read at run time. */
+export const VOICE_PATH = `${REPO_ROOT}docs/coach-voice.md`;
 export const CASES_DIR = `${REPO_ROOT}eval/cases/`;
 export const REPORTS_DIR = `${REPO_ROOT}eval/reports/`;
 
@@ -17,11 +18,10 @@ export interface RubricRule {
 
 export interface FeatureDef {
   name: string;
-  /** The feature page in docs/features/. */
-  page: string;
-  /** Heading of the page section with the rules the grader applies. */
-  rulesHeading: string;
-  /** Stable ids so pass rates can be compared run to run. The page text stays the authority. */
+  /**
+   * The judgment checks Yanni approved in the feature's spec (its "Should" list), close to word
+   * for word. The grader applies exactly these plus the voice page; ids keep pass rates comparable.
+   */
   rubric: RubricRule[];
   scenarios: ScenarioInput[];
   /** Tells the simulator when the coach has finished this feature's conversation. */
@@ -38,8 +38,6 @@ export const REGRESSION_RULE: RubricRule = {
 export const FEATURES: Record<string, FeatureDef> = {
   onboarding: {
     name: "onboarding",
-    page: "04-onboarding.md",
-    rulesHeading: "## 4. Rules",
     doneWhen:
       "ZOH has wrapped up onboarding: it recapped what you agreed and said your plan is on its way (or started proposing the plan).",
     scenarios: onboardingScenarios,
@@ -100,19 +98,9 @@ export function rubricFor(feature: FeatureDef): RubricRule[] {
   return [...feature.rubric, REGRESSION_RULE];
 }
 
-/** Read at run time so page edits flow straight into grading. */
+/** The feature's approved checks as text, and the voice page read at run time so edits flow into grading. */
 export async function readPages(feature: FeatureDef): Promise<{ rules: string; voice: string }> {
-  const [page, voice] = await Promise.all([
-    readFile(`${FEATURES_DIR}${feature.page}`, "utf8"),
-    readFile(`${FEATURES_DIR}coach-voice.md`, "utf8"),
-  ]);
-  return { rules: extractSection(page, feature.rulesHeading), voice };
-}
-
-/** The text of one "## " section, heading included. Throws if the page no longer has it. */
-export function extractSection(markdown: string, heading: string): string {
-  const start = markdown.indexOf(`${heading}\n`);
-  if (start < 0) throw new Error(`Section "${heading}" not found on the feature page`);
-  const next = markdown.indexOf("\n## ", start + heading.length);
-  return markdown.slice(start, next < 0 ? undefined : next).trim();
+  const voice = await readFile(VOICE_PATH, "utf8");
+  const rules = feature.rubric.map((r) => `- ${r.label}`).join("\n");
+  return { rules, voice };
 }

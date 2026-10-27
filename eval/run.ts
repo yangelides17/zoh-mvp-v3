@@ -10,7 +10,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "../src/config.js";
 import { addUsage, createCompleter } from "./claude.js";
 import { USAGE, UsageError, evalApiKey, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
-import { estimateCost } from "./cost.js";
+import { budgetFrom, currentBranch, overBudgetMessage, readLedger, recordSpend } from "./budget.js";
+import { COACH, dollarsFor, estimateCost } from "./cost.js";
 import { REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor } from "./features.js";
 import { gradeConversation } from "./grader.js";
 import { guardFetch, runConversation, scriptedTester } from "./harness.js";
@@ -50,6 +51,7 @@ async function main(): Promise<number> {
   const feature = getFeature(args.feature)!;
   const coachModel = loadConfig({ DATABASE_URL: "unused", CLAUDE_MODEL: env.CLAUDE_MODEL }).claude.model;
   const evalModel = env.EVAL_MODEL?.trim() || coachModel;
+  const simModel = env.EVAL_SIM_MODEL?.trim() || "claude-haiku-5-5";
   const rubric = rubricFor(feature);
   const pages = await readPages(feature);
   const scenarios = loadScenarios(feature);
@@ -65,15 +67,26 @@ async function main(): Promise<number> {
     pagesChars: pages.rules.length + pages.voice.length,
     coachModel,
     evalModel,
+    simModel,
   });
   const scenarioCount = plans.filter((p) => p.kind === "scenario").length;
   console.log(
     [
       `Eval: ${feature.name}. ${est.conversations} conversations (${scenarioCount} simulated, ${plans.length - scenarioCount} regression cases), up to ${est.maxTurns} tester texts.`,
-      `Models: coach ${coachModel}, simulator + grader ${evalModel}.`,
+      `Models: coach ${coachModel}, simulator ${simModel}, grader ${evalModel}.`,
       `Rough cost: ${fmtTokens(est.tokens.low)}–${fmtTokens(est.tokens.high)} tokens, about $${est.dollars.low.toFixed(2)}–$${est.dollars.high.toFixed(2)}.`,
     ].join("\n"),
   );
+  const ledgerPath = `${REPORTS_DIR}spend.json`;
+  const branch = currentBranch(REPO_ROOT);
+  const budgetUsd = budgetFrom(env);
+  const spentUsd = (await readLedger(ledgerPath))[branch]?.spentUsd ?? 0;
+  console.log(`Budget: $${spentUsd.toFixed(2)} of $${budgetUsd.toFixed(2)} spent on ${branch}.`);
+  const tooMuch = overBudgetMessage({ spentUsd, estimateUsd: est.dollars, budgetUsd, branch });
+  if (tooMuch && !args.dryRun && !args.overBudget) {
+    console.error(tooMuch);
+    return 1;
+  }
   if (args.dryRun) {
     for (const p of plans) console.log(`  - ${p.key} (${p.persona}): ${p.title}`);
     if (keyProblem) console.log(`\nNote: ${keyProblem.split("\n")[0]}`);
@@ -82,22 +95,28 @@ async function main(): Promise<number> {
 
   const restoreFetch = guardFetch();
   const complete = createCompleter({ apiKey: evalApiKey(env)!, model: evalModel });
+  const simulate = createCompleter({ apiKey: evalApiKey(env)!, model: simModel });
+  let costUsd = 0;
   const startedAt = new Date();
   let done = 0;
 
   const graded = await mapLimit(plans, args.concurrency, async (plan, index): Promise<GradedConversation> => {
     const tester =
-      plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, complete, feature.doneWhen);
+      plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, simulate, feature.doneWhen);
     // A case gets one turn past its script so it ends "by script", not by the cap.
     const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
     const result = await runConversation(plan, tester, { maxTurns, index, env });
     const graded: GradedConversation = { ...result };
+    // Simulator measured; the coach runs inside the app, so its share is estimated per ZOH text.
+    const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
+    costUsd += dollarsFor(result.usage, simModel) + dollarsFor({ input: COACH.input * zohCount, output: COACH.output * zohCount }, coachModel);
     if (!result.error || result.transcript.length > 0) {
       try {
         const g = await gradeConversation({ plan, transcript: result.transcript, rubric, pages }, complete);
         graded.grade = g.grade;
         graded.gradeError = g.error;
         graded.usage = addUsage(graded.usage, g.usage);
+        costUsd += dollarsFor(g.usage, evalModel);
       } catch (err) {
         graded.gradeError = errorText(err);
       }
@@ -116,7 +135,8 @@ async function main(): Promise<number> {
     feature: feature.name,
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
-    models: { coach: coachModel, eval: evalModel },
+    models: { coach: coachModel, eval: evalModel, sim: simModel },
+    costUsd,
     options: { persona: args.persona, runs: args.runs, maxTurns: args.maxTurns },
     rubric,
     summary,
@@ -133,6 +153,8 @@ async function main(): Promise<number> {
   await writeFile(files.md, renderMarkdown(report));
   await writeFile(files.json, JSON.stringify(report, null, 2));
   for (const line of summaryLines(report, { md: rel(files.md), json: rel(files.json) })) console.log(line);
+  const ledger = await recordSpend(ledgerPath, branch, costUsd);
+  console.log(`Cost about $${costUsd.toFixed(2)}; $${ledger[branch]!.spentUsd.toFixed(2)} of $${budgetUsd.toFixed(2)} spent on ${branch}.`);
   return 0;
 }
 

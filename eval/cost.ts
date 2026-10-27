@@ -29,13 +29,13 @@ export interface Estimate {
  * the coach sees up to its history window; the simulator rereads the whole conversation;
  * the grader reads both pages plus the transcript once per conversation.
  */
-const COACH = { input: 900, output: 250 };
+export const COACH = { input: 900, output: 250 };
 const SIM = { inputBase: 600, perTurn: 120, output: 150 };
 const GRADER = { inputBase: 1_500, perTurn: 120, output: 4_000 };
 
 export function estimateCost(
   plans: ConversationPlan[],
-  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string },
+  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string },
 ): Estimate {
   const pagesTokens = Math.ceil(opts.pagesChars / 4);
   const run = (turns: number, simulated: boolean) => {
@@ -46,18 +46,24 @@ export function estimateCost(
       sim = { input: SIM.inputBase * turns + (SIM.perTurn * turns * (turns - 1)) / 2, output: SIM.output * turns };
     }
     const grader = { input: GRADER.inputBase + pagesTokens + GRADER.perTurn * turns, output: GRADER.output };
-    return { coach, evalIn: sim.input + grader.input, evalOut: sim.output + grader.output };
+    return { coach, sim, grader };
   };
   const coachPrice = priceOf(opts.coachModel);
   const evalPrice = priceOf(opts.evalModel);
+  const simPrice = priceOf(opts.simModel ?? opts.evalModel);
   const total = (turnsFor: (p: ConversationPlan) => number) => {
     let tokens = 0;
     let dollars = 0;
     for (const p of plans) {
       const r = run(turnsFor(p), p.kind === "scenario");
-      tokens += r.coach.input + r.coach.output + r.evalIn + r.evalOut;
+      tokens += r.coach.input + r.coach.output + r.sim.input + r.sim.output + r.grader.input + r.grader.output;
       dollars +=
-        (r.coach.input * coachPrice.input + r.coach.output * coachPrice.output + r.evalIn * evalPrice.input + r.evalOut * evalPrice.output) /
+        (r.coach.input * coachPrice.input +
+          r.coach.output * coachPrice.output +
+          r.sim.input * simPrice.input +
+          r.sim.output * simPrice.output +
+          r.grader.input * evalPrice.input +
+          r.grader.output * evalPrice.output) /
         1_000_000;
     }
     return { tokens, dollars };
@@ -72,4 +78,10 @@ export function estimateCost(
     tokens: { low: low.tokens, high: high.tokens },
     dollars: { low: low.dollars, high: high.dollars },
   };
+}
+
+/** Dollars for measured token usage at one model's prices. */
+export function dollarsFor(usage: { input: number; output: number }, model: string): number {
+  const p = priceOf(model);
+  return (usage.input * p.input + usage.output * p.output) / 1_000_000;
 }

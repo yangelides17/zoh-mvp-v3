@@ -1,7 +1,7 @@
 # Coach judgment harness
 
 Plays simulated testers (and replayed regression cases) against the **real app** and has a
-separate Claude grade every ZOH text against the feature page's rules and the voice page.
+separate Claude grade every ZOH text against the feature's approved checks and the voice page.
 
 ```bash
 # once: put your key in .env (gitignored)
@@ -18,8 +18,13 @@ reserves `ANTHROPIC_API_KEY` for its own login there), and run with `env -u ANTH
 eval -- onboarding` so calls go to the Anthropic API rather than the session's own proxy.
 
 Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, default 20),
-`--concurrency <n>` (conversations at once, default 3). `EVAL_MODEL` sets the simulator and
-grader model; it defaults to the coach's `CLAUDE_MODEL`. Not part of `npm run check`: tests never
+`--concurrency <n>` (conversations at once, default 3), `--over-budget` (only with Yanni's OK).
+`EVAL_MODEL` sets the grader model (default: the coach's `CLAUDE_MODEL`); `EVAL_SIM_MODEL` the
+simulated tester (default `claude-haiku-5-5`).
+
+**Budget:** $2 of eval spend per branch (`EVAL_BUDGET_USD`), tracked in `eval/reports/spend.json`.
+A run that would likely go past it refuses to start. A full onboarding run is about $1.30–$1.90, so
+iterate with `--persona <name>` and do one full run at the end. Not part of `npm run check`: tests never
 call Claude.
 
 ## What happens
@@ -34,8 +39,8 @@ call Claude.
 3. **Simulate.** For scenarios, a Claude plays the tester from the persona, goal and hidden facts
    and stops when ZOH wraps up (or at the turn cap). Cases send their scripted lines instead.
 4. **Grade.** A separate Claude call sees only the transcript (with local times and the tester's
-   area code), section 4 of the feature page and the whole voice page, read from `docs/features/`
-   at run time. It scores each ZOH text per rule and the conversation as a whole, as structured
+   area code), the feature's approved checks (the rubric in `eval/features.ts`, copied from the
+   spec's "Should" list) and the whole voice page (`docs/coach-voice.md`), read at run time. It scores each ZOH text per rule and the conversation as a whole, as structured
    JSON, retrying once if the output is unusable.
 5. **Report.** `eval/reports/<timestamp>-<feature>.md` and `.json` (gitignored): pass rate per rule
    and per persona, the three worst replies, what changed since the previous report, 3 to 5 live
