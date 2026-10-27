@@ -1,5 +1,5 @@
 import type { FastifyBaseLogger } from "fastify";
-import type { Turn, Replier } from "../claude/replier.js";
+import { NoReplyTextError, type Turn, type Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
@@ -10,11 +10,19 @@ import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
 import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
-import { getOrCreateTester, resetTester, updateTester } from "../testers/testers.js";
+import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
 
 export type Logger = Pick<FastifyBaseLogger, "info" | "warn" | "error" | "debug">;
 
+/** Sent when Claude has nothing to say even after a retry, or isn't configured. */
 export const FALLBACK_REPLY = "Got it";
+
+/** Sent when the reply still fails after every retry (Claude down, timeouts, an app error). */
+export const SYSTEM_DOWN_REPLY =
+  "We're very sorry, the system is down at the moment and our team is on it. Please give us some time to fix it and come back later.";
+
+/** Waits before each retry of a failed reply; its length is the number of retries. */
+export const RETRY_DELAYS_MS = [2_000, 5_000];
 
 export interface PipelineDeps {
   db: Db;
@@ -30,6 +38,8 @@ export interface PipelineDeps {
   transcriber?: Transcriber;
   fetchMedia: MediaFetcher;
   now?: () => Date;
+  /** Defaults to RETRY_DELAYS_MS; tests pass zeros. */
+  retryDelaysMs?: number[];
 }
 
 /**
@@ -87,16 +97,42 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   let replyText = FALLBACK_REPLY;
   if (deps.replier) {
     const claudeStart = now();
-    try {
-      const history = await recentConversation(db, inbound.contactNumber, COACH_HISTORY_CAP, tester.contextStartedAt);
-      const turns = toTurns(history, inbound.id, { transcript, image });
-      replyText = await deps.replier.reply({ tester, turns, now: now() });
-      timings.claude_ms = now().getTime() - claudeStart.getTime();
-    } catch (err) {
-      timings.claude_ms = now().getTime() - claudeStart.getTime();
-      errors.push(`claude: ${errorMessage(err)}`);
-      log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; sending fallback");
+    const replier = deps.replier;
+    const delays = deps.retryDelaysMs ?? RETRY_DELAYS_MS;
+    let emptyRetried = false;
+    let failures = 0;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        // Reloaded each attempt: a failed attempt may already have saved answers or moved the tester on.
+        const current = (attempt > 1 && (await getTester(db, tester.id))) || tester;
+        const history = await recentConversation(db, inbound.contactNumber, COACH_HISTORY_CAP, current.contextStartedAt);
+        const turns = toTurns(history, inbound.id, { transcript, image });
+        replyText = await replier.reply({ tester: current, turns, now: now() });
+        break;
+      } catch (err) {
+        errors.push(`claude (attempt ${attempt}): ${errorMessage(err)}`);
+        if (err instanceof NoReplyTextError) {
+          // Nothing to say: once more, then treat it as a text that needed no real answer.
+          if (!emptyRetried) {
+            emptyRetried = true;
+            log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text; retrying");
+            continue;
+          }
+          replyText = FALLBACK_REPLY;
+          log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text again; sending fallback");
+          break;
+        }
+        const delay = delays[failures++];
+        if (delay === undefined) {
+          replyText = SYSTEM_DOWN_REPLY;
+          log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
+          break;
+        }
+        log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; retrying");
+        await sleep(delay);
+      }
     }
+    timings.claude_ms = now().getTime() - claudeStart.getTime();
   } else {
     errors.push("claude: ANTHROPIC_API_KEY not configured");
   }
@@ -280,4 +316,8 @@ export function maskNumber(n: string): string {
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+function sleep(ms: number): Promise<void> {
+  return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
 }

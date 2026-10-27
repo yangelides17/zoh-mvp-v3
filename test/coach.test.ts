@@ -6,7 +6,7 @@ import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import type { Db } from "../src/db/client.js";
 import { flags, messages, planInputs, type Tester } from "../src/db/schema.js";
-import { FALLBACK_REPLY } from "../src/pipeline/inbound.js";
+import { FALLBACK_REPLY, SYSTEM_DOWN_REPLY } from "../src/pipeline/inbound.js";
 import { OPT_OUT_CONFIRMATION } from "../src/testers/commands.js";
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, ME, WESTERN, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
@@ -121,6 +121,14 @@ describe("tools", () => {
     db = t.db;
     await text(ME, "Start");
     await text(WESTERN, "Start");
+  });
+
+  it("notes a possibly non-Eastern time zone without asking the city during onboarding", async () => {
+    await text(WESTERN, "hey");
+    const westernState = model.stateOf();
+    expect(westernState).toContain("Time zone: possibly outside Eastern (area code), best guess America/Denver. Don't ask their city");
+    expect(FIXED_INSTRUCTIONS).not.toMatch(/ask (their|what) city/);
+    expect((await tester(WESTERN)).timeZoneStatus).toBe("needs_city");
   });
 
   it("save_name saves the name and rejects an empty one", async () => {
@@ -246,6 +254,7 @@ describe("finishing onboarding", () => {
     const recapState = model.stateOf();
     expect(recapState).toContain("ONBOARDING JUST FINISHED");
     expect(recapState).toContain("plan is on its way");
+    expect(recapState).toContain("recap built only from their name, goal and saved plan answers above, nothing added");
     expect(recapState).toContain("Still open, required: none");
     expect(model.requests.at(-1)!.messages.at(-1)!.content).toEqual([
       expect.objectContaining({ content: expect.stringContaining("Onboarding finished") }),
@@ -341,12 +350,19 @@ describe("opting out and failures", () => {
     expect(model.requests).toHaveLength(2);
   });
 
-  it('Claude failing still sends "Got it" and records the error', async () => {
-    model.script(new Error("Claude overloaded"));
+  it("Claude failing three times sends the system-down text and records the errors", async () => {
+    model.script(new Error("Claude overloaded"), new Error("Claude overloaded"), new Error("Claude overloaded"));
     await text(ME, "Start");
-    expect(sent()).toEqual([FALLBACK_REPLY]);
+    expect(sent()).toEqual([SYSTEM_DOWN_REPLY]);
     const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
-    expect(inbound).toMatchObject({ status: "REPLIED_WITH_ERRORS", error: expect.stringContaining("claude: Claude overloaded") });
+    expect(inbound).toMatchObject({ status: "REPLIED_WITH_ERRORS", error: expect.stringContaining("claude (attempt 3): Claude overloaded") });
+  });
+
+  it("a failed attempt that already saved answers is retried with the tester as saved", async () => {
+    model.script({ tools: [{ name: "save_name", input: { name: "Alex" } }] }, new Error("Claude overloaded"), "Hey Alex!");
+    await text(ME, "Start, I'm Alex");
+    expect(sent()).toEqual(["Hey Alex!"]);
+    expect(model.stateOf()).toContain("Name: Alex");
   });
 
   it(`caps the tool loop at ${MAX_ROUNDS} Claude calls, the last without tools`, async () => {
@@ -374,7 +390,7 @@ describe("opting out and failures", () => {
 
   it("records which tools ran when Claude never writes text, without tester content", async () => {
     const silent = { tools: [{ name: "save_style_note", input: { note: "secret words" } }] };
-    model.script(silent, silent, silent, "");
+    model.script(silent, silent, silent, "", silent, silent, silent, "");
     await text(ME, "more hype pls");
     expect(sent()).toEqual([FALLBACK_REPLY]);
     const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));

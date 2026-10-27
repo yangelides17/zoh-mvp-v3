@@ -72,7 +72,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "set_time_zone",
-    description: "Only when the state says needs_city: save their city and its IANA time zone (e.g. America/Denver).",
+    description: "Only when the state says their time zone is possibly outside Eastern and they tell you their city: save it and its IANA time zone (e.g. America/Denver).",
     input_schema: {
       type: "object",
       properties: { city: { type: "string" }, time_zone: { type: "string" } },

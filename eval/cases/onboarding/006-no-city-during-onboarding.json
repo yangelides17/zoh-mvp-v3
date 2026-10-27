@@ -1,0 +1,16 @@
+{
+  "id": "no-city-during-onboarding",
+  "title": "Asked a non-Eastern tester for their city during onboarding",
+  "origin": "Decision on GitHub issue #21 (Yanni, Oct 27): the city question moves to plan agreement",
+  "testerLines": [
+    "Hey! I'm Jordan, I want to read every day",
+    "mostly sci-fi, I've got a kindle and read in bed",
+    "before bed around 10, like 20 min",
+    "nah I don't track it"
+  ],
+  "whatWentWrong": "Before the fix, ZOH asked \"What city are you in?\" before the last plan question for any number outside Eastern.",
+  "shouldHaveHappened": "ZOH never asks Jordan's city, location or time zone during onboarding, and never mentions time zones. Onboarding otherwise proceeds normally and ends with a one-sentence recap of only what Jordan said, then that the plan is on its way.",
+  "areaCode": "312",
+  "startTime": "18:30",
+  "timeZone": "America/Chicago"
+}
