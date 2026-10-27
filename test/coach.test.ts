@@ -430,6 +430,18 @@ describe("instructions", () => {
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
+  it("keep follow-ups, the commitment ask and the quiet-hours offer natural", () => {
+    // The coach echoed "say it like you mean it" back word for word.
+    expect(PLAN_AGREEMENT).not.toContain("say it like they mean it");
+    expect(PLAN_AGREEMENT).toContain("never pick apart their wording");
+    expect(PLAN_AGREEMENT).toContain("ask nothing else in that text");
+    // "Ha, I need a number" after "yea" to an either/or question.
+    expect(ONBOARDING).toContain("never correcting them");
+    expect(PLAN_AGREEMENT).toContain("a vague answer gets one kind follow-up, never a correction");
+    // Testers were asked to move quiet hours without ever hearing what they are.
+    expect(PLAN_AGREEMENT).toContain("explain that by default you stay quiet then");
+  });
+
   it("allow at most 3 Greek words a day, in the onboarding prompt and the voice page", () => {
     expect(CORE_VOICE).toContain("At most 3 a day");
     expect(loadVoiceDoc()).toContain("At most 3 a day");

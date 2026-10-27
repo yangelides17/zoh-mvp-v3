@@ -124,10 +124,10 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "commitment",
         scope: "conversation",
-        label: "The commitment ask feels like a real commitment, not a casual question; a soft yes (\"ok\", \"sure\") gets one re-ask",
+        label: "The commitment ask feels like a real commitment, not a casual question, in natural words (no stock lines); a soft yes (\"ok\", \"sure\") gets one natural re-ask that doesn't pick apart their wording",
       },
       { id: "day-one", scope: "conversation", label: "Pushes for day 1 today; accepts tomorrow on pushback" },
-      { id: "quiet-hours", scope: "conversation", label: "A step time inside quiet hours (10 pm to 9 am by default) gets the offer to adjust them" },
+      { id: "quiet-hours", scope: "conversation", label: "A step time inside quiet hours (10 pm to 9 am by default) gets the offer to adjust them, with a plain explanation of what quiet hours are" },
       {
         id: "nutrition",
         scope: "conversation",

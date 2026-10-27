@@ -1,0 +1,23 @@
+{
+  "id": "quiet-hours-unexplained",
+  "title": "Quiet-hours offer without saying what quiet hours are",
+  "origin": "Yanni live, 2026-10-27 (issue #36)",
+  "testerLines": [
+    "I think I should be done eating for the day around 11pm because usually I like to have a late night snack every day",
+    "Oh ok yeah move them"
+  ],
+  "whatWentWrong": "ZOH replied \"Want me to move quiet hours to 11:30 pm to 9 am so my reminders reach you at 11?\" The tester had never heard of quiet hours.",
+  "shouldHaveHappened": "Before the plan, ZOH explains in plain words that by default it doesn't text between 10 pm and 9 am so it won't wake or bother them, then offers once to move that window so it can still reach them around 11; one question in that text. After the yes, it saves the new quiet hours and carries on toward the plan, without asking about quiet hours again.",
+  "areaCode": "212",
+  "startTime": "19:00",
+  "seed": {
+    "name": "Yanni",
+    "goal": "nutrition",
+    "phase": "planning",
+    "answers": { "what": "hit a protein target, about 160 g a day", "tracks_with": "MyFitnessPal" },
+    "history": [
+      { "from": "tester", "text": "I log everything in MyFitnessPal" },
+      { "from": "zoh", "text": "Perfect. What time are you usually done eating for the day? That's when you'll send me your log." }
+    ]
+  }
+}

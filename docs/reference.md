@@ -1,0 +1,45 @@
+# ZOH reference
+
+Facts and decisions that aren't on any GitHub issue. Where things stand (what's live, what's being
+built, known bugs) is the issue board: `/status`. Update this page in the same change that alters
+anything here (a new service or variable, a reversed decision, a new outside limit).
+
+## Infrastructure
+- **Railway project `zoh-mvp-v3`** (region us-east4): `app` (deploys `main`; build runs type check,
+  tests and build; migrations run at startup; health check `/health`, `?deep=1` pings Claude),
+  `Postgres`, `Speaches` (Whisper, CPU), bucket `zoh-media`.
+- **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
+  `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS` and
+  `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
+  `SPEACHES_API_KEY`, `LOG_LEVEL`. Model: `claude-sonnet-5-5`.
+- **Sendblue:** AI Agent plan, line +1 917 741 2162. Webhooks for received and outbound status point
+  at the app's `/webhooks/sendblue`.
+- **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
+  environments use `EVAL_ANTHROPIC_API_KEY` and run with `env -u ANTHROPIC_BASE_URL` (see
+  `eval/README.md`). Use a separate key with a low spending limit.
+
+## Decisions to carry forward (beyond `docs/coach-voice.md`)
+- Starting goals: daily reading, exercise, nutrition (calorie or protein target), reflection and
+  planning, deep work target, same bedtime every night (no wake-time goal), and a strict
+  "something else" (only if close to a listed goal and ZOH can coach and check it).
+- Onboarding asks name and goal together in the first text; no "why" question; no wake, sleep or
+  pushiness questions; asks whether they already track the goal where it applies.
+- How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
+  onboarding learned about how they already track it.
+- Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always
+  replies. After 3 days of silence ZOH stops automatic texts and the founders decide.
+- No founder notifications of any kind yet; flags (declined goals, goal switches, plans to review)
+  are only saved. How we get notified is decided with the founder console and commands.
+- Plans start right away and get founder review in the background; if we'd change something, the
+  coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
+  for our OK.
+- Eval: $1 per branch, targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
+  against the checks Yanni approves in each spec, judged reasonably.
+- The launch plan doc is the source for timeline and strategy. The coach voice page in Yanni's
+  Business Ideas doc is an older copy; `docs/coach-voice.md` is the real one.
+
+## Outside limits
+- **Sendblue:** replies within 24 hours of a tester's last text are unlimited; after that the coach
+  can still text first, up to 200 contacts per line per day; 150 outbound texts in a row with no
+  reply is the only other cap. Photo links expire after 30 days (we keep our own copy).
+- **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s).
