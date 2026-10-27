@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Tester } from "../db/schema.js";
+import type { NudgeMoment } from "../nudges/schedule.js";
 
 /** One turn of the text conversation, already flattened to what Claude should see. */
 export interface Turn {
@@ -21,9 +22,21 @@ export class NoReplyTextError extends Error {
   override name = "NoReplyTextError";
 }
 
+/** A text ZOH starts itself (src/nudges): no new text from the tester. */
+export interface NudgeRequest {
+  tester: Tester;
+  /** The conversation since the tester's context started, oldest first. */
+  turns: Turn[];
+  now: Date;
+  /** Which nudge to write (kickoff, rest_day, checkin…); the coach's prompt defines each. */
+  moment: NudgeMoment;
+}
+
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
   reply(input: ReplyInput): Promise<string>;
+  /** Writes a nudge; repliers without it never start texts. */
+  nudge?(input: NudgeRequest): Promise<string>;
   /** Cheap connectivity check for /health?deep=1. */
   check(): Promise<void>;
 }

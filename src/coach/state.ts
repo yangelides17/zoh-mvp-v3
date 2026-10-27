@@ -6,15 +6,18 @@ import {
   goals,
   planInputs,
   plans,
+  stepDays,
   WEEKDAYS,
   type Goal,
   type Plan,
   type PlanInput,
   type PlanQuestion,
   type PlanQuestionKey,
+  type StepDay,
   type Tester,
   type Weekday,
 } from "../db/schema.js";
+import { serviceDate, type NudgeMoment } from "../nudges/schedule.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -42,8 +45,14 @@ export interface CoachState {
   openOptional: PlanQuestion[];
   /** The plan ZOH is proposing, not locked yet. */
   draft?: Plan;
-  /** The latest locked plan for their current goal. */
+  /** The latest locked plan for their current goal (a temporary one only until its end date). */
   plan?: Plan;
+  /** Their local day (`serviceDate`): what "today" means for their step. */
+  today: string;
+  /** What's recorded for today's step: done, a moved time, "on it". */
+  todayRow?: StepDay;
+  /** Set when ZOH is starting a text itself rather than replying. */
+  nudgeMoment?: NudgeMoment;
   /** Answers saved for goals they switched away from, to reuse where they fit. */
   earlierAnswers: PlanInput[];
   /** Their latest text: what lock_plan checks the commitment against. */
@@ -58,8 +67,9 @@ export interface CoachState {
 export async function loadCoachState(
   db: Db,
   tester: Tester,
-  opts: { now: Date; isFirstText: boolean; justFinished?: boolean; lastTesterText?: string },
+  opts: { now: Date; isFirstText: boolean; justFinished?: boolean; lastTesterText?: string; nudgeMoment?: NudgeMoment },
 ): Promise<CoachState> {
+  const today = serviceDate(opts.now, tester);
   const allGoals = await db.select().from(goals).orderBy(asc(goals.sortOrder));
   const goal = allGoals.find((g) => g.slug === tester.goalSlug);
   const inputs = goal
@@ -83,6 +93,11 @@ export async function loadCoachState(
         .from(planInputs)
         .where(and(eq(planInputs.testerId, tester.id), ne(planInputs.goalSlug, goal.slug)))
     : [];
+  const [todayRow] = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today)))
+    .limit(1);
   const open = goal ? openQuestions(goal, inputs) : [];
   const description = inputs?.extraNotes.goal_description;
   return {
@@ -96,13 +111,38 @@ export async function loadCoachState(
     openRequired: open.filter((q) => q.required),
     openOptional: open.filter((q) => !q.required),
     draft: testerPlans.find((p) => p.status === "draft"),
-    plan: testerPlans.find((p) => p.status === "locked" && p.goalSlug === goal?.slug),
+    plan: goal ? currentPlan(testerPlans, goal.slug, today) : undefined,
+    today,
+    todayRow,
+    nudgeMoment: opts.nudgeMoment,
     earlierAnswers,
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
     now: opts.now,
   };
+}
+
+/**
+ * The plan that applies on a local date: the newest locked version for the goal, skipping a
+ * temporary lighter one whose end date has passed (the version before it applies again).
+ */
+export function currentPlan(testerPlans: Plan[], goalSlug: string, date: string): Plan | undefined {
+  return testerPlans
+    .filter((p) => p.status === "locked" && p.goalSlug === goalSlug)
+    .sort((a, b) => (b.version ?? 0) - (a.version ?? 0))
+    .find((p) => !p.endsOn || p.endsOn >= date);
+}
+
+/** The latest locked plan for the tester's current goal on a local date (see `currentPlan`). */
+export async function loadCurrentPlan(db: Db, tester: Tester, date: string): Promise<Plan | undefined> {
+  if (!tester.goalSlug) return undefined;
+  const rows = await db
+    .select()
+    .from(plans)
+    .where(and(eq(plans.testerId, tester.id), eq(plans.goalSlug, tester.goalSlug), eq(plans.status, "locked")))
+    .orderBy(desc(plans.version));
+  return currentPlan(rows, tester.goalSlug, date);
 }
 
 /** The goal's questions that have no saved answer yet. Questions a goal doesn't list never apply. */

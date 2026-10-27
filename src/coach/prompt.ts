@@ -1,4 +1,5 @@
-import type { PlanQuestion } from "../db/schema.js";
+import type { Plan, PlanQuestion, StepDayStatus, Weekday } from "../db/schema.js";
+import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
 import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan } from "./tools.js";
 
@@ -8,7 +9,7 @@ import { describePlan } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1600, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -71,6 +72,15 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - Switching goals needs a real reason (an injury, the goal turned out wrong): ask why if they don't say. "Bored" or "don't feel like it" gets a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.
 - One goal at a time; a second can come once this one sticks.`;
 
+/** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
+export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to their commitment in their words. No guilt, no fake urgency, no apology for the timing.
+- kickoff (step day): today's step (what, when, where), then a question that gets them committing to it. kickoff_checkin: the same, and it starts soon.
+- rest_day: short and light: rest day, back at it on their next step day. No push.
+- checkin: it starts in about 10 minutes: get set up.
+- followup: no word yet: ask how it went.
+- stall (plan not locked yet): pick up where you left off, aimed at finishing onboarding or locking the plan.
+When they text (phase "active"): done, or proof → celebrate and mark_step_done (reduced if they did a smaller version). Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are).`;
+
 /** A handful of model exchanges; every other example lives in eval/cases. */
 export const EXAMPLES = `Model exchanges (tone, not scripts):
 Tester: Alex. Exercise, wanna get back to the gym
@@ -81,15 +91,41 @@ Tester: what's the best book to start with?
 ZOH: Depends what you're into. We'll pick one together in your plan. Quick one first: when are you usually free to read?`;
 
 /** The fixed part of the system prompt during onboarding; cached. */
-export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, EXAMPLES].join("\n\n");
+export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, NUDGES, EXAMPLES].join("\n\n");
 
 /** Opens the voice page in the after-onboarding prompt. */
 export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your voice is the page below, word for word. Sections marked "Not active yet" describe features that aren't built yet: don't act on them. One text per reply.`;
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES].join("\n\n");
 }
+
+/** Today's step, as the nudge scheduler sees it, and the next step day. */
+function todayLines(s: CoachState, plan: Plan): string[] {
+  const day = (date: string) => `${label(weekdayOf(date))} ${date}`;
+  const row = s.todayRow;
+  if (plan.startDate && plan.startDate > s.today) return [`Today: ${day(s.today)}. Day 1 is ${day(plan.startDate)}: nothing to do yet.`];
+  const status = row?.status ? STATUS_LABELS[row.status] : "not marked done yet";
+  const onIt = row?.onItAt ? ` They said they're on it (${localTime(row.onItAt, s.tester.timeZone)}).` : "";
+  const today = isStepDay(plan, s.today, row)
+    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt}`
+    : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
+  const next = nextStepDay(plan, s.today);
+  return [today, next ? `Next step day: ${day(next)}.` : ""].filter(Boolean);
+}
+
+function nextStepDay(plan: Plan, today: string): string | undefined {
+  for (let i = 1; i <= 7; i++) {
+    const date = addDays(today, i);
+    if (isStepDay(plan, date)) return date;
+  }
+  return undefined;
+}
+
+const STATUS_LABELS: Record<StepDayStatus, string> = { done: "done", done_reduced: "done (reduced version)", missed: "missed" };
+
+const label = (d: Weekday) => d[0]!.toUpperCase() + d.slice(1);
 
 const QUESTION_LABELS: Record<PlanQuestion["key"], string> = {
   what: "what",
@@ -147,6 +183,8 @@ export function buildStateBlock(s: CoachState): string {
   const shown = t.phase === "active" ? s.plan : s.draft;
   if (t.phase === "active" && s.plan) {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
+    if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
+    lines.push(...todayLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }
@@ -173,6 +211,9 @@ export function buildStateBlock(s: CoachState): string {
   lines.push(`Goal list (use exactly these lines when you show it):\n${s.goals.map((g) => `• ${g.title}`).join("\n")}`);
   lines.push(`Goal slugs for choose_goal: ${s.goals.map((g) => `${g.slug} = ${g.title} (${g.description})`).join("; ")}`);
 
+  if (s.nudgeMoment) {
+    lines.push(`NUDGE MOMENT: ${s.nudgeMoment}. They haven't texted: you're starting this text yourself (see NUDGES).`);
+  }
   if (s.justFinished) {
     lines.push(
       "ONBOARDING JUST FINISHED with this text: carry straight on into PLAN AGREEMENT, no recap (if this is also their first text, the intro still comes first). If the plan still needs something, ask it as the next question, without saying you have everything; otherwise bridge into the plan and save it with propose_plan.",

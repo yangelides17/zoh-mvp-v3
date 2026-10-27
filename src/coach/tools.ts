@@ -8,13 +8,16 @@ import {
   planInputs,
   plans,
   PROOF_METHODS,
+  stepDays,
   WEEKDAYS,
+  type NewStepDay,
   type Plan,
   type PlanInput,
   type Tester,
 } from "../db/schema.js";
 import { optOut } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
+import { isStepDay } from "../nudges/schedule.js";
 import { describeDays, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
@@ -33,6 +36,7 @@ const planFields = {
   proof: z.enum(PROOF_METHODS).optional(),
   proof_note: z.string().trim().max(120).optional(),
   reason: text(200).optional(),
+  minutes: z.number().int().min(0).max(600).optional(),
 };
 
 const schemas = {
@@ -58,6 +62,9 @@ const schemas = {
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
   change_plan: z.object(planFields).strict(),
   switch_goal: z.object({ slug: text(40), reason: text(300) }).strict(),
+  mark_step_done: z.object({ how: z.enum(["full", "reduced"]), note: z.string().trim().max(200).optional() }).strict(),
+  mark_on_it: z.object({}).strict(),
+  move_today: z.object({ time: clock }).strict(),
 };
 
 export type ToolName = keyof typeof schemas;
@@ -156,6 +163,28 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
       required: ["slug", "reason"],
     },
   },
+  {
+    name: "mark_step_done",
+    description:
+      "Today's step is done (they say so or send proof). how: full, or reduced for a smaller version. note: what they did, in a few words. Your texts stop for today.",
+    input_schema: {
+      type: "object",
+      properties: { how: { type: "string", enum: ["full", "reduced"] }, note: { type: "string" } },
+      required: ["how"],
+    },
+  },
+  {
+    name: "mark_on_it",
+    description:
+      'They are doing today\'s step now or about to ("heading to the gym now"). Not for chatting or answering a question. Skips today\'s check-in.',
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "move_today",
+    description:
+      'They\'ll do today\'s step at another time, today only (also a one-off day-1 time right after lock_plan). Local 24-hour "HH:MM".',
+    input_schema: { type: "object", properties: { time: { type: "string" } }, required: ["time"] },
+  },
 ];
 
 function planProperties(): Record<string, unknown> {
@@ -168,6 +197,7 @@ function planProperties(): Record<string, unknown> {
     proof: { type: "string", enum: [...PROOF_METHODS] },
     proof_note: { type: "string", description: 'Which one ("Whoop strain screenshot")' },
     reason: { type: "string", description: "One line on why this plan" },
+    minutes: { type: "integer", description: "How long the step takes, in minutes" },
   };
 }
 
@@ -289,7 +319,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .set({ status: "locked", version, startDate, commitment, needsReview: true, lockedAt: at, updatedAt: at })
         .where(eq(plans.id, draft.id));
       const updated = await updateTester(db, tester.id, { phase: "active" });
-      return saved(updated, `Locked (version ${version}). Day 1 is ${start} (${startDate}).`);
+      const oneOff = start === "today" ? " For a one-off time today, also call move_today." : "";
+      return saved(updated, `Locked (version ${version}). Day 1 is ${start} (${startDate}).${oneOff}`);
     }
 
     case "change_plan": {
@@ -327,11 +358,50 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const updated = await updateTester(db, tester.id, { goalSlug: slug, phase: "planning" });
       return saved(updated, `Switched to ${goal.title}, saved for the founders with the reason.`);
     }
+
+    case "mark_step_done": {
+      const { how, note } = input as z.infer<typeof schemas.mark_step_done>;
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      const status = how === "full" ? "done" : "done_reduced";
+      await saveToday(db, state, { status, note: note || null }, at);
+      return saved(tester, `Today (${state.today}) marked ${how === "full" ? "done" : "done, reduced"}. No more texts from you today unless they write.`);
+    }
+
+    case "mark_on_it": {
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      await saveToday(db, state, { onItAt: at }, at);
+      return saved(tester, "Noted they're on it: today's check-in is skipped.");
+    }
+
+    case "move_today": {
+      const { time } = input as z.infer<typeof schemas.move_today>;
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
+      if (!isStepDay(plan, state.today) && plan.startDate !== state.today) {
+        return { ok: false, error: "Today isn't a step day: nothing to move." };
+      }
+      await saveToday(db, state, { movedTime: time }, at);
+      return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
+    }
   }
 }
 
+/** Creates or updates the tester's row for today's step. */
+async function saveToday(
+  db: Db,
+  state: CoachState,
+  values: Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt">>,
+  at: Date,
+): Promise<void> {
+  const set = { ...values, planId: state.plan?.id ?? null, updatedAt: at };
+  await db
+    .insert(stepDays)
+    .values({ testerId: state.tester.id, date: state.today, ...set })
+    .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
+}
+
 type PlanFieldsInput = z.infer<typeof schemas.propose_plan>;
-type PlanValues = Pick<Plan, "setupStep" | "step" | "place" | "stepTime" | "days" | "proof" | "proofNote" | "reason">;
+type PlanValues = Pick<Plan, "setupStep" | "step" | "place" | "stepTime" | "days" | "proof" | "proofNote" | "reason" | "minutes">;
 
 /** The input merged onto a base plan, or what's still missing or wrong. */
 function mergePlan(base: Plan | undefined, input: PlanFieldsInput): PlanValues | string {
@@ -347,6 +417,7 @@ function mergePlan(base: Plan | undefined, input: PlanFieldsInput): PlanValues |
     proof: input.proof ?? base?.proof,
     proofNote: optional(input.proof_note, base?.proofNote),
     reason: input.reason ?? base?.reason,
+    minutes: input.minutes ?? base?.minutes ?? null,
   };
   const missing = (["step", "stepTime", "days", "proof", "reason"] as const).filter((k) => merged[k] === undefined);
   if (missing.length) return `Missing: ${missing.map((k) => (k === "stepTime" ? "time" : k)).join(", ")}`;
@@ -363,6 +434,7 @@ export function describePlan(p: PlanValues): string {
     `step: ${p.step}`,
     p.place && `where: ${p.place}`,
     `at ${p.stepTime}, ${describeDays(p.days)}`,
+    p.minutes != null && `takes ${p.minutes} min`,
     `proof: ${p.proof}${p.proofNote ? ` (${p.proofNote})` : ""}`,
     `reason: ${p.reason}`,
   ]

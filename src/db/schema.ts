@@ -286,4 +286,5 @@ export type PlanInput = typeof planInputs.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
 export type Plan = typeof plans.$inferSelect;
 export type StepDay = typeof stepDays.$inferSelect;
+export type NewStepDay = typeof stepDays.$inferInsert;
 export type Nudge = typeof nudges.$inferSelect;
