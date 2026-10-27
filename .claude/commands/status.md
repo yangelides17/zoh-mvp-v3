@@ -1,8 +1,10 @@
 ---
 description: Show where every feature stands
+argument-hint: [optional: a feature or stage to focus on]
 ---
 
-Give Yanni a short status of the work, from GitHub:
+Give Yanni a short status of the work, from GitHub. If `$ARGUMENTS` names a feature or a stage ("nudges",
+"what's in review"), focus on that, including its spec, plan and latest decisions.
 
 1. `gh issue list --state open --limit 100 --json number,title,labels,assignees` and
    `gh pr list --json number,title,isDraft,headRefName`.

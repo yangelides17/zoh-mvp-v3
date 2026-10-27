@@ -1,9 +1,15 @@
 ---
 description: Independently review an issue's PR, then merge it when Yanni says so
-argument-hint: <issue number>
+argument-hint: [issue number or description; leave empty to pick]
 ---
 
 Review the PR for issue **#$ARGUMENTS** with fresh eyes. Best run in a new session that didn't build it.
+
+**Which issue?** `$ARGUMENTS` may be an issue number, a description ("the nudges one") or empty. If it isn't a
+number, run `gh issue list --state open --label in-review` and match the description to an issue; if it's empty or
+matches more than one, show those issues as a short numbered list and ask Yanni which one. Call the chosen
+number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `in-review` label, check `gh issue list --state closed --label live-check` too (for step 6; merged issues are closed), otherwise say nothing is
+waiting for review and stop.
 
 1. `gh issue view $ARGUMENTS --comments` (spec, approved plan, decisions) and find the PR: `gh pr list --search "$ARGUMENTS"`.
    Read `gh pr view <pr>` and `gh pr diff <pr>`.

@@ -1,9 +1,15 @@
 ---
 description: Build an issue from its approved plan, test it, and open a PR
-argument-hint: <issue number>
+argument-hint: [issue number or description; leave empty to pick]
 ---
 
 Build issue **#$ARGUMENTS** on your own, following its approved plan.
+
+**Which issue?** `$ARGUMENTS` may be an issue number, a description ("the nudges one") or empty. If it isn't a
+number, run `gh issue list --state open --label plan-approved` and match the description to an issue; if it's empty or
+matches more than one, show those issues as a short numbered list and ask Yanni which one. Call the chosen
+number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `plan-approved` label, say what building
+needs first and stop.
 
 1. `gh issue view $ARGUMENTS --comments`. It must be labeled `plan-approved` and have a `## Plan (approved by Yanni...)`
    comment; if not, stop and say `/plan` comes first. The spec and plan are the contract.
