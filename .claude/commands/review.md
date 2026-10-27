@@ -12,7 +12,9 @@ number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has th
 waiting for review and stop.
 
 1. `gh issue view $ARGUMENTS --comments` (spec, approved plan, decisions) and find the PR: `gh pr list --search "$ARGUMENTS"`.
-   Read `gh pr view <pr>` and `gh pr diff <pr>`.
+   Read `gh pr view <pr>` and `gh pr diff <pr>`. To run the tests, check the branch out in its own worktree
+   (`git fetch origin && git worktree add ../zoh-worktrees/review-$ARGUMENTS origin/<branch>`, then `npm install`),
+   never by switching branches in the main folder.
 2. Check it against the spec and plan:
    - Every **Must** item has a real test, and `npm run check` passes on the PR branch.
    - **Should** results: read the eval summary in the PR. Don't rerun the eval.
@@ -22,7 +24,9 @@ waiting for review and stop.
 3. Fix small problems yourself (push to the PR branch). For bigger ones, list them and don't merge.
 4. Post the review as a PR comment and tell Yanni in plain words: verdict (merge / fix first), what changed for the
    tester, any risk, and the **Watch** list to try on his phone.
-5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`, then
+5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`, remove the worktrees for this issue
+   (`git worktree list`, then `git worktree remove --force <path>` for the review and build ones, and
+   `git worktree prune`), then
    `gh issue edit $ARGUMENTS --add-label live-check --remove-label in-review`. Railway deploys `main` in a couple of minutes.
 6. After Yanni's live check: if it's good, `gh issue edit $ARGUMENTS --add-label done --remove-label live-check`.
    Anything wrong becomes a new issue (`--label bug`) and, for the coach, a regression case in `eval/cases/`.

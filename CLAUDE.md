@@ -19,7 +19,8 @@ One feature, one flow, using the commands in `.claude/commands/`:
 4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges when Yanni says so.
 5. Live check on Yanni's phone; problems become `bug` issues. `/status` shows the board anytime.
 
-Run at most 2 or 3 builds at once. The issue is the record: spec in the body, plan and `Decision:`
+Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch
+branches in the main folder; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
 **Branches and PRs.** Feature work (anything from an issue, anything testers would notice, any

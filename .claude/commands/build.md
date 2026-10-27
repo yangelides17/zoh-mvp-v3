@@ -13,7 +13,11 @@ needs first and stop.
 
 1. `gh issue view $ARGUMENTS --comments`. It must be labeled `plan-approved` and have a `## Plan (approved by Yanni...)`
    comment; if not, stop and say `/plan` comes first. The spec and plan are the contract.
-2. Start clean: `git checkout main && git pull`, then `git checkout -b feature/$ARGUMENTS-<short-slug>`.
+2. **Work in your own worktree,** so other sessions in this repo aren't disturbed (never switch branches in the
+   main folder). If this session already runs in a worktree (the desktop app can create one per session), use it.
+   Otherwise: `git fetch origin`, then
+   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/main`,
+   `cd` into it and run `npm install`. Do everything below from there.
    `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
 3. Open a **draft PR** early (`gh pr create --draft`, body from `.github/pull_request_template.md`, first line
    `Closes #$ARGUMENTS`) and push as you go, so Yanni can watch progress.

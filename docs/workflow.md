@@ -67,7 +67,9 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 - **Approve carefully at steps 1 and 2.** That's where you control what gets built and how strict the
   tests are. Keep the "Done means" list to what you actually care about.
 - **Review in a fresh session**, not the one that built it, so it checks the work with fresh eyes.
-- **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session.
+- **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session. Each
+  build works in its own copy of the repo (a git worktree in `../zoh-worktrees/`), so parallel builds never
+  trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
 - **Eval budget: $2 per feature**, enforced by the eval itself. Live testing and the beta catch the rest.
