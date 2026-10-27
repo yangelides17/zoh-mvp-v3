@@ -6,8 +6,8 @@ issues" sections only when something big changes.
 
 ## Timeline (from Yanni's launch plan)
 - **Build:** Mon Oct 26 to Wed Oct 28. Monday's goal (text the coach and get through onboarding)
-  is done. Tuesday's planned work hasn't started: plan agreement, nudges, photo and voice
-  verification, coach memory. Wednesday: step log and next step, founder console, commands, metrics,
+  is done. Tuesday: plan agreement is done (#5); nudges (#6) are being built; photo and voice
+  verification and coach memory haven't started. Wednesday: step log and next step, founder console, commands, metrics,
   test mode (memes only if there's time).
 - **Internal testing:** Thu Oct 29 to Sat Oct 31, with go/no-go Saturday evening.
 - **Beta:** recruiting texts early Sun Nov 1, about 10 iPhone testers, four weeks, review every Sunday.
@@ -25,10 +25,13 @@ issues" sections only when something big changes.
   founder notification yet. A stopped tester who texts again is un-stopped. "reset" from a dev
   number starts onboarding from scratch.
 - **The coach and onboarding** (PR #3): Claude with tools that save name, goal and plan answers; the
-  app (not the model) decides when onboarding is done, then ZOH sends a recap and a "your plan is
-  buffering" line and waits for the plan feature. The coach sees the whole conversation since the
+  app (not the model) decides when onboarding is done, then ZOH carries straight on into the plan.
+  The coach sees the whole conversation since the
   tester started (a stopgap until coach memory). Its voice: during onboarding, the condensed
   version in `src/coach/prompt.ts`; after onboarding, `docs/coach-voice.md` itself (issue #26). The spec is the closed GitHub issue "Onboarding by text".
+- **Plan agreement** (PR #31, issue #5): ZOH asks what the plan still needs, shows it as a short
+  list, and locks it only on a clear "I'm in". Locked plans are versioned in the `plans` table and
+  flagged for founder review; goal switches need a reason. Live-checked by Yanni Oct 27.
 - **The eval** (PR #2): `npm run eval -- onboarding`. Last full run before the rubric fix: 85 to 89%
   of checks passed. Not rerun since the rubric was corrected and softened.
 
@@ -64,13 +67,12 @@ issues" sections only when something big changes.
 ## Known issues and adjustments
 Filed as GitHub issues (label `decide`, `bug` or `idea`):
 - Optional onboarding questions often go unasked.
-- Goal changes are refused after onboarding until plans ship; a goal named in the first text skips
-  the list (agent decisions to confirm).
+- Back-to-back texts each get their own reply, photo plus caption included (#16).
+- A goal named in the first text skips the list (agent decision to confirm).
 
 Not yet filed, worth knowing:
 - **Audio is kept.** Voice notes are stored in the bucket; the launch plan says to keep the
   transcript and delete the audio. Handle with photo and voice verification.
-- **Photo plus caption** arrive as two webhooks and get two replies (backlog: batching).
 - **Typing indicator** rarely shows because replies are fast.
 - The coach voice page in Yanni's Business Ideas doc is an older copy; `docs/coach-voice.md` is the
   real one. The launch plan doc stays the source for timeline and strategy.
