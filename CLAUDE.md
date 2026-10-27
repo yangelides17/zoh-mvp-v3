@@ -31,6 +31,10 @@ say in one or two sentences that this is feature-sized and offer `/idea` to file
 If they still want it done directly, do it, but on a branch with a PR, and record it on an issue. Never refuse,
 never lecture, never skip the tests.
 
+**Naming issues and PRs.** When talking to Yanni, never use a bare number: always pair it with the
+title or a few words saying what it is, e.g. "#21 (note a possible non-Eastern time zone)" or
+"plan agreement (#5)". Nobody memorizes the numbers.
+
 **Branches and PRs.** Feature work (anything from an issue, anything testers would notice, any
 database change) goes through a PR so the tests run on the exact code before it reaches `main`,
 which Railway deploys to the live line. Small things (docs, wording, eval checks, config cleanup,
