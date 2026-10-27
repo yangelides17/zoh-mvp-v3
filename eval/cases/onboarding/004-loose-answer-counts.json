@@ -6,7 +6,7 @@
     "Hi, I'm Priya, one of the beta testers. I want to build a daily reading habit. I read a few books a year but want it consistent. I read on my Kindle in bed at home, every night around 10:30 before sleep, about 20 pages or 25 min."
   ],
   "whatWentWrong": "ZOH's first reply asked how many minutes a night she wants to read.",
-  "shouldHaveHappened": "ZOH doesn't ask for how long, when, where or what again: \"about 20 pages or 25 min\" is an answer. With everything given, onboarding can finish right away with the intro, the recap of only what she said and the plan-is-coming line.",
+  "shouldHaveHappened": "ZOH doesn't ask for how long, when, where or what again: \"about 20 pages or 25 min\" is an answer. With everything given, onboarding can finish right away: the intro, then ZOH carries straight on into the plan (asks what the plan still needs, or shows it), with no recap and no \"plan is on its way\" line, using only what she said.",
   "startTime": "23:05",
   "persona": "all-at-once"
 }

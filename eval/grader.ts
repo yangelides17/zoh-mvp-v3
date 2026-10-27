@@ -5,6 +5,8 @@ import { gradeSchema, type ConversationPlan, type Grade, type TokenUsage, type T
 
 export interface GraderInput {
   plan: ConversationPlan;
+  /** A seeded conversation before the graded part; shown for context only. */
+  context?: TranscriptLine[];
   transcript: TranscriptLine[];
   rubric: RubricRule[];
   /** The feature's approved checks and the voice page, read at run time. */
@@ -42,8 +44,8 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   ].join("\n");
 }
 
-export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript">): string {
-  const { plan, transcript } = input;
+export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context">): string {
+  const { plan, transcript, context: earlier = [] } = input;
   let n = 0;
   const lines = transcript.map((l) => {
     const when = localTime(l.at, plan.timeZone);
@@ -65,7 +67,14 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript">
       `What should happen: ${plan.regression.shouldHaveHappened}`,
     );
   }
-  return [...context, "", "=== Transcript ===", ...lines].join("\n");
+  const before = earlier.length
+    ? [
+        "",
+        "=== Earlier conversation (context only: don't grade these texts, and don't count them as ZOH n) ===",
+        ...earlier.map((l) => `${l.from === "zoh" ? "[ZOH earlier]" : "[TESTER]"} (${localTime(l.at, plan.timeZone)}) ${l.text}`),
+      ]
+    : [];
+  return [...context, ...before, "", "=== Transcript ===", ...lines].join("\n");
 }
 
 /** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */

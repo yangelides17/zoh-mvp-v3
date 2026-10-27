@@ -55,6 +55,8 @@ export async function loadCases(feature: string, dir = `${CASES_DIR}${feature}/`
 export interface PlanOptions {
   /** Only these case ids, and no scenarios (a targeted run). */
   cases?: string[];
+  /** Only these scenario ids, and no cases (iterating on one conversation). */
+  scenarios?: string[];
   persona?: string;
   runs: number;
 }
@@ -70,7 +72,18 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
     if (unknown.length) throw new Error(`Unknown case id: ${unknown.join(", ")} (known: ${cases.map((c) => c.id).join(", ") || "none"})`);
     cases = cases.filter((c) => opts.cases!.includes(c.id));
   }
-  const picked = opts.cases ? [] : opts.persona ? scenarios.filter((s) => s.persona === opts.persona) : scenarios;
+  if (opts.scenarios) {
+    const unknown = opts.scenarios.filter((id) => !scenarios.some((s) => s.id === id));
+    if (unknown.length) throw new Error(`Unknown scenario id: ${unknown.join(", ")} (known: ${scenarios.map((s) => s.id).join(", ")})`);
+    cases = opts.cases ? cases : [];
+  }
+  const picked = opts.scenarios
+    ? scenarios.filter((s) => opts.scenarios!.includes(s.id))
+    : opts.cases
+      ? []
+      : opts.persona
+        ? scenarios.filter((s) => s.persona === opts.persona)
+        : scenarios;
   const plans: ConversationPlan[] = [];
   for (const s of picked) {
     for (let run = 1; run <= opts.runs; run++) {
@@ -84,6 +97,7 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
         startTime: s.startTime,
         timeZone: s.timeZone,
         scenario: s,
+        seed: s.seed,
       });
     }
   }
@@ -98,6 +112,7 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
       startTime: c.startTime,
       timeZone: c.timeZone,
       regression: c,
+      seed: c.seed,
     });
   }
   return plans;

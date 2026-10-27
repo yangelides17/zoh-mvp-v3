@@ -58,7 +58,7 @@ async function main(): Promise<number> {
   const cases = await loadCases(feature.name);
   let plans;
   try {
-    plans = planConversations(scenarios, cases, { cases: args.cases, persona: args.persona, runs: args.runs });
+    plans = planConversations(scenarios, cases, { cases: args.cases, scenarios: args.scenarios, persona: args.persona, runs: args.runs });
   } catch (err) {
     console.error((err as Error).message);
     return 1;
@@ -118,7 +118,7 @@ async function main(): Promise<number> {
     costUsd += dollarsFor(result.usage, simModel) + dollarsFor({ input: COACH.input * zohCount, output: COACH.output * zohCount }, coachModel);
     if (!result.error || result.transcript.length > 0) {
       try {
-        const g = await gradeConversation({ plan, transcript: result.transcript, rubric, pages }, complete);
+        const g = await gradeConversation({ plan, context: result.context, transcript: result.transcript, rubric, pages }, complete);
         graded.grade = g.grade;
         graded.gradeError = g.error;
         graded.usage = addUsage(graded.usage, g.usage);

@@ -13,7 +13,9 @@ import type { SendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
-import type { ConversationPlan, ConversationResult, TokenUsage, TranscriptLine } from "./types.js";
+import { localDate } from "../src/coach/state.js";
+import { guessTimeZone } from "../src/testers/area-codes.js";
+import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
 
 const WEBHOOK_SECRET = "eval-webhook-secret";
 const LINE = "+15555550100";
@@ -190,17 +192,91 @@ export interface RunOptions {
   replier?: Replier;
 }
 
+/** Gap between seeded texts, which end a minute before the run's first text. */
+const SEED_STEP_MS = 60_000;
+
+/**
+ * Puts a tester partway in: their row, saved answers, the conversation so far and, for an
+ * active seed, a locked plan starting today. Returns that conversation as context lines.
+ */
+export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLine[]> {
+  const now = app.clock.now();
+  const startedAt = new Date(now.getTime() - (seed.history.length + 1) * SEED_STEP_MS);
+  // Stored rows get real times, like the messages the app itself stores (database default);
+  // the eval clock only sets what the coach reads as "now" and the times the grader sees.
+  const storedStart = new Date(Date.now() - (seed.history.length + 1) * SEED_STEP_MS);
+  const { timeZone, status } = guessTimeZone(app.phone);
+  const [tester] = await app.db
+    .insert(schema.testers)
+    .values({
+      phone: app.phone,
+      name: seed.name,
+      goalSlug: seed.goal,
+      phase: seed.plan ? "active" : seed.phase,
+      timeZone,
+      timeZoneStatus: status,
+      consentAt: storedStart,
+      contextStartedAt: storedStart,
+    })
+    .returning();
+  const a = seed.answers;
+  await app.db.insert(schema.planInputs).values({
+    testerId: tester!.id,
+    goalSlug: seed.goal,
+    what: a.what,
+    where: a.where,
+    when: a.when,
+    howLong: a.how_long,
+    tracksWith: a.tracks_with,
+  });
+  if (seed.plan) {
+    const p = seed.plan;
+    await app.db.insert(schema.plans).values({
+      testerId: tester!.id,
+      goalSlug: seed.goal,
+      status: "locked",
+      version: 1,
+      setupStep: p.setup_step,
+      step: p.step,
+      place: p.place,
+      stepTime: p.time,
+      days: p.days,
+      proof: p.proof,
+      proofNote: p.proof_note,
+      reason: p.reason,
+      startDate: localDate(now, timeZone),
+      commitment: "I'm in",
+      needsReview: true,
+      lockedAt: storedStart,
+    });
+  }
+  const context: TranscriptLine[] = [];
+  for (const [i, line] of seed.history.entries()) {
+    const at = new Date(startedAt.getTime() + i * SEED_STEP_MS);
+    await app.db.insert(schema.messages).values({
+      direction: line.from === "tester" ? "inbound" : "outbound",
+      contactNumber: app.phone,
+      lineNumber: LINE,
+      content: line.text,
+      createdAt: new Date(storedStart.getTime() + i * SEED_STEP_MS),
+    });
+    context.push({ from: line.from, text: line.text, at: at.toISOString() });
+  }
+  return context;
+}
+
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */
 export async function runConversation(plan: ConversationPlan, tester: Tester, opts: RunOptions): Promise<ConversationResult> {
   const phone = fakeNumber(plan.areaCode, opts.index);
   const clock = new EvalClock(zonedDate(EVAL_DAY, plan.startTime, plan.timeZone));
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier });
+  const context = plan.seed ? await seedTester(app, plan.seed) : [];
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
   let error: string | undefined;
   try {
     for (let turn = 1; turn <= opts.maxTurns; turn++) {
-      const text = await tester.next(transcript);
+      const text = await tester.next([...context, ...transcript]);
       if (text === null) {
         endedBy = tester.endReason;
         break;
@@ -223,6 +299,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
     return {
       plan,
       phone,
+      context,
       transcript,
       endedBy,
       error,
