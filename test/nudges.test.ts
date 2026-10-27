@@ -7,6 +7,7 @@ import { runTool } from "../src/coach/tools.js";
 import { flags, messages, nudges, plans, stepDays, testers, type Plan, type Tester } from "../src/db/schema.js";
 import { dueNudge, serviceDate, zonedTime, type NudgeInput } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
+import { summarizeDays } from "../src/nudges/streak.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, LINE, ME, STRANGER, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
@@ -232,7 +233,9 @@ describe("rule 2: step days and rest days", () => {
     const tester = await setup({ days: ["mon", "wed", "fri"] });
     expect(await day(TUE, "08:00", "23:59")).toEqual(["rest_day@09:00"]);
     expect(await stepDay(tester, TUE)).toBeUndefined();
-    expect(await day(WED, "08:00", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    // Monday (day 1, never ticked) was closed as a miss; the rest day in between doesn't break the ladder.
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "missed" });
+    expect(await day(WED, "08:00", "21:59")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:50"]);
   });
 });
 
@@ -564,5 +567,108 @@ describe("the state block for an active tester", () => {
     const latest = await loadCurrentPlan(t.db, tester, MON);
     expect(latest).toMatchObject({ version: 2, minutes: 30 });
     expect(await tool("change_plan", { minutes: 900 }, at(MON, "12:00"))).toMatchObject({ ok: false });
+  });
+});
+
+describe("the slip ladder", () => {
+  it("miss → harder kickoff → one text a day → day-3 check-in → pause and flag; texting again lifts it", async () => {
+    const tester = await setup();
+    // Monday: kickoff, check-in, follow-up, no reply: a miss at 10 pm.
+    expect(await day(MON, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "missed" });
+    // The day after a miss: the kickoff pushes harder; the rest of the day as usual.
+    expect(await day(TUE, "09:00", "22:05")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:50"]);
+    // Two misses in a row: one text a day at their usual time.
+    expect(await day(WED, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    // Three: that text is the honest day-3 check-in.
+    expect(await day(THU, "09:00", "22:05")).toEqual(["day_three@18:50"]);
+    // No reply by the next step day's slot: no text; ZOH pauses and flags it.
+    expect(await day(FRI, "09:00", "18:45")).toEqual([]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+    expect(await day(FRI, "18:50", "22:05")).toEqual([]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).not.toBeNull();
+    expect(await t.db.select().from(flags).where(eq(flags.kind, "went_quiet"))).toHaveLength(1);
+    // Texting again lifts the pause.
+    const res = await postWebhook(t, inboundEvent({ content: "sorry, rough week" }));
+    expect(res.statusCode).toBe(200);
+    await t.queue.idle();
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+  });
+
+  it("a reply after the day-3 check-in keeps the one text a day going instead of a pause", async () => {
+    const tester = await setup();
+    await day(MON, "09:00", "22:05");
+    await day(TUE, "09:00", "22:05");
+    await day(WED, "09:00", "22:05");
+    expect(await day(THU, "09:00", "19:00")).toEqual(["day_three@18:50"]);
+    await say(tester, "inbound", at(THU, "19:10"), "yeah I still want this");
+    await say(tester, "outbound", at(THU, "19:10"), "Then let's go. Tomorrow, full ten.");
+    expect(await day(THU, "19:15", "22:05")).toEqual([]);
+    expect(await day(FRI, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+  });
+
+  it("a done day ends the ladder: back to the normal day", async () => {
+    await setup();
+    await day(MON, "09:00", "22:05");
+    await day(TUE, "09:00", "22:05");
+    expect(await day(WED, "09:00", "18:55")).toEqual(["one_a_day@18:50"]);
+    await tool("mark_step_done", { how: "reduced", note: "5 pages" }, at(WED, "19:30"));
+    expect(await day(THU, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+  });
+
+  it("reworking the plan starts the ladder fresh", async () => {
+    await setup();
+    await day(MON, "09:00", "22:05");
+    await day(TUE, "09:00", "22:05");
+    expect(await tool("change_plan", { step: "5 pages of Dune", time: "21:00" }, at(WED, "08:00"))).toMatchObject({ ok: true });
+    // Wednesday (untouched) is the new plan's first miss: Thursday is "after a miss", not day 3.
+    expect(await day(THU, "09:00", "21:55")).toEqual(["after_miss@09:00", "checkin@20:50", "followup@21:50"]);
+  });
+});
+
+describe("streaks (rule 6)", () => {
+  const row = (date: string, status: "done" | "done_reduced" | "missed", planId = "p1") => ({ date, status, planId });
+
+  it("counts done and reduced days, and stops at a miss", () => {
+    expect(summarizeDays([row(WED, "done"), row(TUE, "done_reduced"), row(MON, "done"), row(SUN, "missed")], [])).toEqual({
+      streak: 3,
+      missesInARow: 0,
+      reducedInARow: 0,
+    });
+    expect(summarizeDays([row(WED, "missed"), row(TUE, "missed"), row(MON, "done")], [])).toMatchObject({ streak: 0, missesInARow: 2 });
+  });
+
+  it("a second reduced day in a row doesn't count unless the plan changed or a temporary plan runs", () => {
+    const twoReduced = [row(TUE, "done_reduced"), row(MON, "done_reduced"), row(SUN, "done")];
+    expect(summarizeDays(twoReduced, [])).toMatchObject({ streak: 0, reducedInARow: 2 });
+    expect(summarizeDays([row(TUE, "done_reduced", "p2"), row(MON, "done_reduced"), row(SUN, "done")], [])).toMatchObject({ streak: 3 });
+    expect(summarizeDays(twoReduced, [{ id: "p1", endsOn: FRI }])).toMatchObject({ streak: 3 });
+    expect(summarizeDays([row(WED, "done"), ...twoReduced], [])).toMatchObject({ streak: 1 });
+  });
+});
+
+describe("a temporary lighter plan (rule 7)", () => {
+  it("change_plan with until saves a flagged version with an end date; the usual plan comes back after it", async () => {
+    const tester = await setup();
+    expect(await tool("change_plan", { step: "5 pages of Dune", until: MON }, at(MON, "10:00"))).toMatchObject({ ok: false });
+    expect(await tool("change_plan", { step: "5 pages of Dune", until: WED }, at(MON, "10:00"))).toMatchObject({ ok: true });
+    const temp = (await t.db.select().from(plans).orderBy(asc(plans.version))).at(-1)!;
+    expect(temp).toMatchObject({ version: 2, endsOn: WED, needsReview: true, step: "5 pages of Dune" });
+    expect(await loadCurrentPlan(t.db, tester, WED)).toMatchObject({ version: 2 });
+    expect(await loadCurrentPlan(t.db, tester, THU)).toMatchObject({ version: 1, step: "10 pages of Dune" });
+  });
+
+  it("the state block shows the streak, and asks which it is after two reduced days in a row", async () => {
+    const tester = await setup();
+    const plan = (await t.db.select().from(plans))[0]!;
+    await t.db.insert(stepDays).values([
+      { testerId: tester.id, date: MON, planId: plan.id, status: "done_reduced" },
+      { testerId: tester.id, date: TUE, planId: plan.id, status: "done_reduced" },
+    ]);
+    const block = buildStateBlock(await loadCoachState(t.db, tester, { now: at(WED, "10:00"), isFirstText: false }));
+    expect(block).toContain("Recent step days, newest first: Tue done (reduced version), Mon done (reduced version).");
+    expect(block).toContain("Streak: 0 step days. Missed in a row: 0. Reduced in a row: 2.");
+    expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
   });
 });

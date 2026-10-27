@@ -134,8 +134,9 @@ describe("eval: nudge cases", () => {
 
   it("every nudge case loads, with a seeded locked plan", async () => {
     const cases = await loadCases("nudges");
-    expect(cases.map((c) => c.id)).toEqual(["full-pushy-day", "silent-day", "off-day", "cant-today"]);
+    expect(cases.map((c) => c.id)).toEqual(["full-pushy-day", "silent-day", "off-day", "cant-today", "day-after-a-miss", "day-three"]);
     expect(cases.every((c) => c.seed?.plan)).toBe(true);
+    expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);
   });
 });
 

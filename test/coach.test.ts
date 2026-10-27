@@ -459,7 +459,7 @@ describe("the voice page", () => {
     expect(voice).not.toContain("This is a first draft, to be refined");
     expect(voice).toContain("ZOH is the friend you wish you'd had");
     expect(voice).toContain("Not active yet: turns on with coach memory (#8).");
-    expect(voice).toContain("Not active yet: turns on with the nudge scheduler (#6) and step log and next step (#9).");
+    expect(voice).not.toContain("Not active yet: turns on with the nudge scheduler");
     expect(voice).toContain('never reuse these lines or the name "Sam"');
   });
 

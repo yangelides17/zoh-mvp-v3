@@ -33,7 +33,17 @@ export const CAP_BY_LEVEL: Record<string, number> = { pushy: 3, steady: 2, gentl
 const DEFAULT_CAP = 3;
 
 /** What the coach is asked to write; the NUDGES block in the prompt defines each one. */
-export const NUDGE_MOMENTS = ["kickoff", "kickoff_checkin", "rest_day", "checkin", "followup", "stall"] as const;
+export const NUDGE_MOMENTS = [
+  "kickoff",
+  "kickoff_checkin",
+  "rest_day",
+  "checkin",
+  "followup",
+  "stall",
+  "after_miss",
+  "one_a_day",
+  "day_three",
+] as const;
 export type NudgeMoment = (typeof NUDGE_MOMENTS)[number];
 
 export interface NudgeInput {
@@ -54,6 +64,10 @@ export interface NudgeInput {
   nudgesSinceReply: number;
   /** Stall nudges since their last text. */
   stallsSinceReply: number;
+  /** Missed step days in a row before the service date (the slip ladder). */
+  missesInARow?: number;
+  /** When the latest day-3 check-in went out. */
+  lastDayThreeAt?: Date;
 }
 
 export interface DueNudge {
@@ -67,8 +81,13 @@ export interface DueNudge {
 export type NudgeDecision =
   | { action: "none"; reason: string }
   | { action: "send"; nudge: DueNudge }
-  /** Silent too long before the plan was locked: pause ZOH's texts and flag it. */
+  /** Silent too long (before lock, or after the day-3 check-in): pause ZOH's texts and flag it. */
   | { action: "pause"; date: string };
+
+/** After this many misses in a row, one text a day at their usual time (voice page, "When they start to slip"). */
+export const ONE_A_DAY_AFTER_MISSES = 2;
+/** The miss that makes the day's text the honest day-3 check-in. */
+export const DAY_THREE_MISSES = 3;
 
 /** Decides, from saved state alone, whether ZOH should start a text right now. */
 export function dueNudge(input: NudgeInput): NudgeDecision {
@@ -117,6 +136,19 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
   const lockedAt = plan.lockedAt?.getTime() ?? 0;
   const lockedToday = plan.lockedAt !== null && serviceDate(plan.lockedAt, tester) === date;
   const slots: Slot[] = [];
+  const misses = input.missesInARow ?? 0;
+
+  if (isStepDay(plan, date, today) && misses >= ONE_A_DAY_AFTER_MISSES) {
+    // Slipping: one text a day at their usual time, in place of kickoff, check-in and follow-up.
+    const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
+    const from = Math.max(stepAt - CHECKIN_LEAD_MS, day.start);
+    const at = now.getTime();
+    if (input.claimedToday.includes("daily") || at < from || at >= day.end) return none("no slot open");
+    // No reply since the day-3 check-in, through the next step day's slot: stop and flag.
+    const { lastDayThreeAt: dayThree, lastInboundAt } = input;
+    if (misses > DAY_THREE_MISSES && dayThree && !(lastInboundAt && lastInboundAt > dayThree)) return { action: "pause", date };
+    return { action: "send", nudge: { kind: "daily", moment: misses === DAY_THREE_MISSES ? "day_three" : "one_a_day", date } };
+  }
 
   if (!isStepDay(plan, date, today)) {
     if (!lockedToday) slots.push({ kind: "kickoff", moment: "rest_day", from: day.start, until: day.start + KICKOFF_WINDOW_MS });
@@ -128,7 +160,9 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     const merged = !lockedToday && stepAt > day.start && stepAt - day.start <= MERGE_WITHIN_MS;
     if (!lockedToday) {
       const until = merged ? stepAt : checkinAt > day.start ? Math.min(day.start + KICKOFF_WINDOW_MS, checkinAt) : day.start + KICKOFF_WINDOW_MS;
-      slots.push({ kind: "kickoff", moment: merged ? "kickoff_checkin" : "kickoff", from: day.start, until });
+      // The day after a miss matters most: the kickoff pushes harder.
+      const moment = misses === 1 ? "after_miss" : merged ? "kickoff_checkin" : "kickoff";
+      slots.push({ kind: "kickoff", moment, from: day.start, until });
     }
     // A time moved for today gets its own check-in and follow-up, even if the original ones went out.
     const suffix = today?.movedTime ? `@${today.movedTime}` : "";

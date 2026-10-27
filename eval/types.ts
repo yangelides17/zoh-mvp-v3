@@ -52,6 +52,10 @@ export const seedSchema = z.object({
       started_days_ago: z.number().int().min(0).max(30).default(0),
     })
     .optional(),
+  /** How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }. */
+  step_days: z
+    .array(z.object({ days_ago: z.number().int().min(1).max(30), status: z.enum(["done", "done_reduced", "missed"]) }))
+    .default([]),
 });
 export type Seed = z.infer<typeof seedSchema>;
 

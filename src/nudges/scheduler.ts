@@ -1,7 +1,7 @@
 import { and, count, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
 import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
-import { loadCurrentPlan } from "../coach/state.js";
+import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, recentConversation } from "../db/messages.js";
 import { flags, messages, nudges, stepDays, testers, type Tester } from "../db/schema.js";
@@ -9,6 +9,7 @@ import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import { updateTester } from "../testers/testers.js";
+import { summarizeDays } from "./streak.js";
 import { addDays, daysToClose, dueNudge, serviceDate, zonedTime, type DueNudge, type NudgeDecision } from "./schedule.js";
 
 export const WENT_QUIET_FLAG = "went_quiet";
@@ -138,6 +139,14 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
       ),
     );
 
+  // The slip ladder counts misses on this version of the plan: reworking it starts fresh.
+  const sinceLock = plan?.lockedAt ? serviceDate(plan.lockedAt, tester) : undefined;
+  const recent = plan ? (await loadRecentDays(db, tester, date)).filter((d) => !sinceLock || d.date >= sinceLock) : [];
+  const [dayThree] = await db
+    .select({ at: max(nudges.createdAt) })
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, "day_three"), eq(nudges.status, "sent")));
+
   const decision = dueNudge({
     now,
     tester,
@@ -148,6 +157,8 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     lastOutboundAt,
     nudgesSinceReply: started?.n ?? 0,
     stallsSinceReply: stalls?.n ?? 0,
+    missesInARow: summarizeDays(recent, []).missesInARow,
+    lastDayThreeAt: dayThree?.at ? new Date(dayThree.at) : undefined,
   });
 
   if (decision.action === "pause") {

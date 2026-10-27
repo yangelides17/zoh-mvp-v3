@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ne } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, lt, ne } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
@@ -18,6 +18,7 @@ import {
   type Weekday,
 } from "../db/schema.js";
 import { serviceDate, type NudgeMoment } from "../nudges/schedule.js";
+import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -51,6 +52,10 @@ export interface CoachState {
   today: string;
   /** What's recorded for today's step: done, a moved time, "on it". */
   todayRow?: StepDay;
+  /** Closed step days before today, newest first (the last two weeks). */
+  recentDays: StepDay[];
+  /** Streak and in-a-row counts, today included once it's closed. */
+  days: DaySummary;
   /** Set when ZOH is starting a text itself rather than replying. */
   nudgeMoment?: NudgeMoment;
   /** Answers saved for goals they switched away from, to reuse where they fit. */
@@ -98,6 +103,7 @@ export async function loadCoachState(
     .from(stepDays)
     .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today)))
     .limit(1);
+  const recentDays = await loadRecentDays(db, tester, today);
   const open = goal ? openQuestions(goal, inputs) : [];
   const description = inputs?.extraNotes.goal_description;
   return {
@@ -114,6 +120,8 @@ export async function loadCoachState(
     plan: goal ? currentPlan(testerPlans, goal.slug, today) : undefined,
     today,
     todayRow,
+    recentDays,
+    days: summarizeDays(todayRow?.status ? [todayRow, ...recentDays] : recentDays, testerPlans),
     nudgeMoment: opts.nudgeMoment,
     earlierAnswers,
     lastTesterText: opts.lastTesterText ?? "",
@@ -121,6 +129,17 @@ export async function loadCoachState(
     justFinished: opts.justFinished ?? false,
     now: opts.now,
   };
+}
+
+/** Their closed step days before `date`, newest first: the last two weeks. */
+export async function loadRecentDays(db: Db, tester: Tester, date: string): Promise<StepDay[]> {
+  const rows = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), lt(stepDays.date, date), isNotNull(stepDays.status)))
+    .orderBy(desc(stepDays.date))
+    .limit(14);
+  return rows;
 }
 
 /**

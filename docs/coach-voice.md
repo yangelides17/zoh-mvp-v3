@@ -69,8 +69,6 @@ Every tester starts at **Pushy**. They can pull it back by texting "steady", "ge
 
 ## When they start to slip
 
-> Not active yet: turns on with the nudge scheduler (#6) and step log and next step (#9).
-
 Holding them to the full commitment always comes first. When that won't happen, something beats nothing. One miss is a slip; two in a row starts building a new habit, the wrong one, so the day after a miss matters most.
 
 1. **Hold the line.** Push for the full step, at their level, before anything slips: "You said 30 minutes. Let's go."

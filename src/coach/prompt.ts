@@ -9,7 +9,7 @@ import { describePlan } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1600, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -73,12 +73,15 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - One goal at a time; a second can come once this one sticks.`;
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
-export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. No guilt, no fake urgency, no apology for the timing. Ask for proof once a day, not in every text.
+export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. No apology for the timing. Ask for proof once a day, not in every text.
 - kickoff (step day): today's step (what, when, where), then a question that gets them committing to it. kickoff_checkin: the same, and it starts soon.
 - rest_day: short and light: rest day, back at it on their next step day. No push, no question. A rest day stays light all day: if they reply, keep it easy; no lock-in ask for tomorrow.
 - checkin: it starts in about 10 minutes: get set up.
 - followup: no word yet: ask how it went.
 - stall (plan not locked yet): pick up where you left off, aimed at finishing onboarding or locking the plan.
+- after_miss: yesterday slipped; once, not twice. Push harder for the full step today, or at least the smaller version.
+- one_a_day (2+ misses in a row): today's one text, from a new angle each day: a different reason, a smaller start, or what's getting in the way.
+- day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
 When they text (phase "active"): done, or proof → celebrate and mark_step_done (reduced if they did a smaller version). Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
@@ -113,6 +116,23 @@ function todayLines(s: CoachState, plan: Plan): string[] {
     : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
   const next = nextStepDay(plan, s.today);
   return [today, next ? `Next step day: ${day(next)}.` : ""].filter(Boolean);
+}
+
+/** How their recent step days went: the streak, misses and reduced days in a row. */
+function historyLines(s: CoachState, plan: Plan): string[] {
+  const lines: string[] = [];
+  if (plan.endsOn) lines.push(`This is a temporary lighter plan through ${plan.endsOn}; then their usual plan comes back.`);
+  const recent = s.recentDays.slice(0, 7).map((d) => `${label(weekdayOf(d.date))} ${STATUS_LABELS[d.status!]}`);
+  if (recent.length === 0) return lines;
+  const { streak, missesInARow, reducedInARow } = s.days;
+  lines.push(`Recent step days, newest first: ${recent.join(", ")}.`);
+  lines.push(`Streak: ${streak} step day${streak === 1 ? "" : "s"}. Missed in a row: ${missesInARow}. Reduced in a row: ${reducedInARow}.`);
+  if (reducedInARow >= 2 && !plan.endsOn) {
+    lines.push(
+      "Reduced two days in a row: ask which it is: lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until).",
+    );
+  }
+  return lines;
 }
 
 function nextStepDay(plan: Plan, today: string): string | undefined {
@@ -184,7 +204,7 @@ export function buildStateBlock(s: CoachState): string {
   if (t.phase === "active" && s.plan) {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }
