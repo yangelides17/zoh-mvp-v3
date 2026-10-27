@@ -283,7 +283,7 @@ describe("finishing onboarding", () => {
     expect(later).not.toContain("ONBOARDING JUST FINISHED");
     expect(later).toContain("Still open, required: none");
     const fixed = model.requests.at(-1)!.system[0]!.text;
-    expect(fixed).toContain('PLAN AGREEMENT (phases "planning" and "active")');
+    expect(fixed).toContain('PLAN AGREEMENT (phases "planning" and "active"; none of this applies during onboarding)');
     expect(fixed).not.toContain("PLAN COMING");
     expect(model.requests.at(-1)!.tools.map((x) => x.name)).not.toContain("choose_goal");
     expect((await tester()).phase).toBe("planning");

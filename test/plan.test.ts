@@ -304,7 +304,7 @@ describe("quiet hours", () => {
 
   it("flags a step time inside quiet hours, and a change agreed during planning is saved", async () => {
     await run("propose_plan", { ...GYM, time: "23:30" });
-    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their quiet hours: offer once to move them");
+    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their quiet hours. If you haven't offered yet, offer once");
     expect(await run("set_quiet_hours", { start: "00:00", end: "09:00" })).toMatchObject({ ok: true });
     expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00" });
     expect(buildStateBlock(await state())).not.toContain("inside their quiet hours");

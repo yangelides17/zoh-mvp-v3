@@ -111,7 +111,8 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "no-seam",
         scope: "conversation",
-        label: "No seam: extra questions the plan needs come before any \"that's everything\" line, one at a time",
+        label:
+          "No seam: extra questions the plan needs come before any \"that's everything\" line, one at a time (changes the tester asks for afterwards don't count against it)",
       },
       {
         id: "plan-shape",

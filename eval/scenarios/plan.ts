@@ -30,7 +30,7 @@ export const planScenarios: ScenarioInput[] = [
       city: "Denver",
     },
     directions: [
-      "When ZOH shows you the plan, ask to do it at 7 instead of 7:30.",
+      "When ZOH shows you the plan, reply that you'd rather start at 7 than 7:30.",
       "When ZOH asks you to commit, say you're in.",
     ],
     seed: {

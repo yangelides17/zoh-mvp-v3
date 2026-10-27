@@ -57,7 +57,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
   });
   const context = [
     `Tester's phone number: area code ${plan.areaCode}, time zone ${plan.timeZone}${plan.timeZone === "America/New_York" ? " (Eastern)" : " (outside Eastern Time)"}.`,
-    "Times are the tester's local time.",
+    `Times are the tester's local time; the conversation starts on ${new Intl.DateTimeFormat("en-US", { timeZone: plan.timeZone, weekday: "long", month: "long", day: "numeric" }).format(new Date(transcript[0]?.at ?? Date.now()))}.`,
   ];
   if (plan.regression) {
     context.push(
