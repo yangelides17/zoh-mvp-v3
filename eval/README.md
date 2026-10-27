@@ -10,6 +10,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 npm run eval -- onboarding --case recap-invents-details   # only that case: the usual, cheap run
 npm run eval -- onboarding                    # every scenario once + every regression case
 npm run eval -- onboarding --persona terse    # only terse scenarios (cases still run)
+npm run eval -- plan --scenario bedtime-late  # only that scenario: cheap while iterating
 npm run eval -- onboarding --runs 3           # each scenario three times
 npm run eval -- onboarding --dry-run          # what would run and the cost estimate; no Claude calls
 ```
@@ -57,7 +58,10 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
 ## Adding things
 
 - **A scenario:** add it to `eval/scenarios/<feature>.ts`. Hidden facts are what the simulated
-  tester answers from; `directions` are stage directions ("midway, text: no emojis pls").
+  tester answers from; `directions` are stage directions ("midway, text: no emojis pls"). A `seed`
+  starts it partway in (saved answers, the conversation so far, optionally a locked plan), so a
+  later feature's run skips onboarding; the seeded lines are context for the simulator and grader,
+  never graded. Cases take a `seed` too.
 - **A rule:** the grader applies the page text, but pass rates are tracked by the ids in
   `eval/features.ts`. Add an id there when a page gains a rule that none of the ids covers.
 - **A regression case:** see `eval/cases/README.md`.
