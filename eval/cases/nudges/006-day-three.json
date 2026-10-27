@@ -1,0 +1,38 @@
+{
+  "id": "day-three",
+  "title": "Three misses in a row: the honest day-3 check-in, then reworking the plan",
+  "origin": "Spec #6 (nudge scheduler), part 2: \"Day 3\"",
+  "seed": {
+    "name": "Sam",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 24,
+    "answers": { "what": "Dune", "where": "the couch", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Sam! Ten pages of Dune on the couch at 7 tonight. Ready?" },
+      { "from": "zoh", "text": "Sam, two nights slipped. Forget the ten: just open Dune tonight and read one page. What's getting in the way?" }
+    ],
+    "plan": {
+      "step": "10 pages of Dune",
+      "place": "the couch",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "missed" },
+      { "days_ago": 2, "status": "missed" },
+      { "days_ago": 3, "status": "missed" },
+      { "days_ago": 4, "status": "done" }
+    ]
+  },
+  "testerLines": ["advance to 18:50", "honestly evenings are chaos with my new job, the plan isn't working", "mornings before work could work, like 7am", "yes do that"],
+  "whatWentWrong": "New case, not a past mistake: the day-3 check-in.",
+  "shouldHaveHappened": "No text before about 6:50 pm, then one text: the voice page's honest day-3 check-in, sincere and without guilt. It goes back to their commitment (reading every day, ten pages of Dune), asks whether that's still true, says stopping is fine and so is changing the plan, and doesn't give up on it. When Sam says evenings don't work, ZOH treats it as the plan not working, not Sam: it helps rework the plan (a morning time). Since 7 am is inside the default quiet hours, offering to move them first is right. By the end the morning plan is saved with change_plan and confirmed briefly. The day-3 check-in itself may run longer than three sentences: it follows the voice page's day-3 message.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

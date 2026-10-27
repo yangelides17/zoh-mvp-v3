@@ -262,7 +262,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   });
   if (seed.plan) {
     const p = seed.plan;
-    await app.db.insert(schema.plans).values({
+    const [plan] = await app.db.insert(schema.plans).values({
       testerId: tester!.id,
       goalSlug: seed.goal,
       status: "locked",
@@ -279,9 +279,15 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       startDate: localDate(now, timeZone, -p.started_days_ago),
       commitment: "I'm in",
       needsReview: true,
-      // Locked the day before the run (on the eval clock), so today's kickoff isn't skipped as "just locked".
-      lockedAt: new Date(startedAt.getTime() - 24 * 60 * 60_000),
-    });
+      // Locked the day before day 1 (on the eval clock), so today's kickoff isn't skipped as "just
+      // locked" and seeded step days count toward the slip ladder.
+      lockedAt: new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000),
+    }).returning();
+    for (const d of seed.step_days) {
+      await app.db
+        .insert(schema.stepDays)
+        .values({ testerId: tester!.id, date: localDate(now, timeZone, -d.days_ago), planId: plan!.id, status: d.status });
+    }
   }
   const context: TranscriptLine[] = [];
   for (const [i, line] of seed.history.entries()) {

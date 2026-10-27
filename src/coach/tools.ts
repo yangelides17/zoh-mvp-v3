@@ -60,7 +60,9 @@ const schemas = {
   opt_out: z.object({}).strict(),
   propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
-  change_plan: z.object(planFields).strict(),
+  change_plan: z
+    .object({ ...planFields, until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
+    .strict(),
   switch_goal: z.object({ slug: text(40), reason: text(300) }).strict(),
   mark_step_done: z.object({ how: z.enum(["full", "reduced"]), note: z.string().trim().max(200).optional() }).strict(),
   mark_on_it: z.object({}).strict(),
@@ -151,8 +153,12 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "change_plan",
-    description: "After the plan is locked: save a change they asked for as a new version. Only the fields that change.",
-    input_schema: { type: "object", properties: planProperties() },
+    description:
+      "After the plan is locked: save a change they asked for as a new version. Only the fields that change. until: only for a lighter plan for a short stretch (a trip, a rough week): its last day; then the plan before it comes back.",
+    input_schema: {
+      type: "object",
+      properties: { ...planProperties(), until: { type: "string", description: 'Last day, "YYYY-MM-DD"' } },
+    },
   },
   {
     name: "switch_goal",
@@ -325,7 +331,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "change_plan": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet: use propose_plan." };
-      const merged = mergePlan(state.plan, input as PlanFieldsInput);
+      const { until, ...fields } = input as z.infer<typeof schemas.change_plan>;
+      if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
+      const merged = mergePlan(state.plan, fields);
       if (typeof merged === "string") return { ok: false, error: merged };
       const version = await nextVersion(db, tester.id);
       const { startDate, commitment } = state.plan;
@@ -337,10 +345,12 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         ...merged,
         startDate,
         commitment,
+        endsOn: until ?? null,
         needsReview: true,
         lockedAt: at,
       });
-      return saved(tester, `Changed (version ${version}): ${describePlan(merged)}`);
+      const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
+      return saved(tester, `Changed (version ${version}): ${describePlan(merged)}.${lasts}`);
     }
 
     case "switch_goal": {
