@@ -3,7 +3,8 @@
 Text-based coach for the ZOH beta. Testers text an iMessage number (Sendblue); ZOH, a Claude-powered
 coach, onboards them and helps them start one small daily habit and stick with it.
 
-- **How we work:** `CLAUDE.md` (GitHub Issues + `/spec`, `/plan`, `/build`, `/review`, `/status`).
+- **How we work (start here):** `docs/workflow.md`: setup, the flow and the commands.
+- **Rules for Claude and agents:** `CLAUDE.md`.
 - **Where things stand:** `docs/project-state.md`.
 - **How ZOH talks:** `docs/coach-voice.md`.
 
