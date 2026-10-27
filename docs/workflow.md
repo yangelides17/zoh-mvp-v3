@@ -21,7 +21,7 @@ Start Claude Code in the repo folder. Everything below happens there.
 | Every feature, bug and idea | GitHub Issues: the spec in the issue, the plan and decisions as comments |
 | Where each one stands | Its label (below), or ask `/status` |
 | How ZOH talks | `docs/coach-voice.md` |
-| Where the project stands, past decisions | `docs/project-state.md` |
+| Infrastructure, past decisions, outside limits | `docs/reference.md` |
 | Rules for Claude and agents | `CLAUDE.md` |
 | Timeline and strategy | Yanni's launch plan doc |
 

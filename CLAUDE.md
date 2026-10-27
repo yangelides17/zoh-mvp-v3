@@ -63,7 +63,8 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - `src/sendblue/`, `src/claude/`, `src/media/`, `src/transcription/`: one small client each.
 - `test/`: Vitest with an in-memory Postgres (PGlite) and fakes for every outside service.
 - `eval/`: the judgment harness. `docs/coach-voice.md`: how ZOH talks (applies to every feature).
-- `docs/project-state.md`: where things stand, decisions to carry forward and known issues (read once).
+- `docs/reference.md`: infrastructure, decisions to carry forward and outside limits (read once). Where things
+  stand is the issue board (`/status`).
 - `docs/workflow.md`: the same flow written for people (setup, commands, habits). Keep it in sync when
   the commands change.
 
@@ -75,6 +76,8 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - Never log or commit secrets, API keys or full phone numbers (use `maskNumber`).
 - Webhook handler stays fast: store, answer 2xx, then do slow work in the `TaskQueue`.
 - Replies only go to `ALLOWED_NUMBERS` until launch.
+- A change that adds a service or Railway variable, reverses a recorded decision or hits a new outside limit updates
+  `docs/reference.md` in the same commit or PR.
 - Keep changes to the issue's spec and plan. Product questions go to Yanni; ideas beyond scope
   become `idea` issues, not code.
 

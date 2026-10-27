@@ -5,7 +5,7 @@ coach, onboards them and helps them start one small daily habit and stick with i
 
 - **How we work (start here):** `docs/workflow.md`: setup, the flow and the commands.
 - **Rules for Claude and agents:** `CLAUDE.md`.
-- **Where things stand:** `docs/project-state.md`.
+- **Where things stand:** the GitHub issue board (`/status`). Infrastructure and past decisions: `docs/reference.md`.
 - **How ZOH talks:** `docs/coach-voice.md`.
 
 ## How a text flows
