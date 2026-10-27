@@ -18,6 +18,11 @@ Railway with Postgres, a private bucket and a Speaches (Whisper) transcription s
 - `src/sendblue/`, `src/claude/`, `src/media/`, `src/transcription/`: one small client each.
 - `test/`: Vitest with an in-memory Postgres (PGlite) and fakes for every outside service.
 
+## Specs and tickets
+- `docs/runbook.md`: how tickets are picked, built, reviewed and merged by parallel agents.
+- `docs/tickets/`: one file per ticket, with the prompt to start it.
+- `docs/features/`: the feature pages (copies of Yanni's launch-plan pages; read, don't edit).
+
 ## Rules
 - TypeScript strict. No `any` without a comment saying why.
 - Every outside service sits behind an interface with a fake in `test/helpers.ts`. Tests never call
