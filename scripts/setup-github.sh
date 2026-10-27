@@ -59,6 +59,5 @@ issue "Recap adds details the tester never gave" bug "The onboarding recap somet
 issue "Retry instead of 'Got it' when Claude returns nothing" decide "If Claude refuses or returns no text, try once more (or another model) instead of sending the 'Got it' fallback."
 issue "Confirm: goal can't change after onboarding (until plans ship)" decide "T2 decision: goal changes are refused once onboarding is done; answers like time or place can still change."
 issue "Confirm: a goal named in the first text skips the goal list" decide "T2 decision, matching the Maya example."
-issue "Remove the unused CLAUDE_HISTORY_LIMIT setting" idea "No longer used since the coach sees the whole conversation. Small cleanup."
 
 echo "Done. Ask Claude for /status to see the board."

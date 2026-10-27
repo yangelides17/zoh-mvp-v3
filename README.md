@@ -1,19 +1,22 @@
 # ZOH MVP v3
 
-Text-based coach for the ZOH MVP beta. Testers text an iMessage number (Sendblue); the app stores
-every message and replies with Claude. This is the bare-bones foundation: the coach, onboarding,
-plans and memory come next.
+Text-based coach for the ZOH beta. Testers text an iMessage number (Sendblue); ZOH, a Claude-powered
+coach, onboards them and helps them start one small daily habit and stick with it.
+
+- **How we work:** `CLAUDE.md` (GitHub Issues + `/spec`, `/plan`, `/build`, `/review`, `/status`).
+- **Where things stand:** `docs/project-state.md`.
+- **How ZOH talks:** `docs/coach-voice.md`.
 
 ## How a text flows
 
-1. Sendblue POSTs to `/webhooks/sendblue` with the `sb-signing-secret` header.
-2. The app checks the secret, skips retries (same message handle) and our own outgoing messages,
-   stores the text, and answers Sendblue immediately.
-3. In the background: typing bubble → photo copied to the private bucket / voice note transcribed
-   by Speaches → Claude writes a reply from the recent conversation → reply sent and stored.
-4. Each stage's time is saved in `messages.timings`. If Claude fails, the reply is "Got it".
+1. Sendblue POSTs to `/webhooks/sendblue`; the app checks the secret, skips retries and our own
+   outgoing messages, stores the text and answers right away.
+2. In the background: find or create the tester, handle "stop" and dev-account "reset", show the
+   typing bubble, copy photos to the private bucket and transcribe voice notes (Speaches).
+3. The coach (Claude with tools) replies from the conversation and the tester's saved state, saving
+   what it learns; the reply is sent and stored with timings. If Claude fails, the reply is "Got it".
 
-Only numbers in `ALLOWED_NUMBERS` get replies; everyone else is stored without an answer.
+Only numbers in `ALLOWED_NUMBERS` get replies until launch.
 
 ## Stack
 
@@ -24,28 +27,19 @@ S3 client for the Railway bucket · Speaches (faster-whisper) · Vitest + PGlite
 
 ```bash
 npm install
-npm run check        # type check + tests (no outside services needed)
-npm run dev          # local server; needs .env (copy .env.example)
+npm run check                    # type check + tests (no outside services needed)
+npm run dev                      # local server; needs .env (copy .env.example)
+npm run eval -- onboarding       # judgment eval; needs ANTHROPIC_API_KEY in .env, $2 budget per branch
 ```
 
 ## Deploy (Railway)
 
-Project `zoh-mvp-v3`: services **app** (this repo, `main`), **Postgres**, **Speaches**, and the
-**zoh-media** bucket, all in US East (Virginia). `railway.json` makes each build run the type check
-and tests, runs migrations before deploy, and gates on `GET /health`.
+Project `zoh-mvp-v3`: **app** (this repo, deploys `main`), **Postgres**, **Speaches** and the
+**zoh-media** bucket, in US East. Each build runs the type check and tests; migrations run at
+startup; deploys gate on `GET /health` (`?deep=1` also pings Claude, and it lists missing settings
+by name).
 
-### Railway variables (app service)
-
-Set by Claude (references, not secrets): `DATABASE_URL`, `BUCKET_*`, `SPEACHES_URL`,
-`SPEACHES_API_KEY`, `SENDBLUE_NUMBER`, `ALLOWED_NUMBERS`.
-
-Added by Yanni in the Railway dashboard (secrets):
-
-| Variable | Where it comes from |
-|---|---|
-| `SENDBLUE_API_KEY_ID` | Sendblue dashboard → API keys (or `sendblue show-keys`) |
-| `SENDBLUE_API_KEY_SECRET` | Same place |
-| `SENDBLUE_WEBHOOK_SECRET` | A random string you generate; the same value goes in Sendblue's webhook settings |
-| `ANTHROPIC_API_KEY` | Claude Console → API keys (set a monthly spend limit) |
-
-`GET /health` lists any setting still missing (names only).
+App variables: `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`, `SENDBLUE_NUMBER`,
+`SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`, `DEV_NUMBERS`, `BUCKET_*`,
+`SPEACHES_URL`, `SPEACHES_API_KEY`, `LOG_LEVEL`. Real phone numbers and secrets live only there,
+never in the repo.

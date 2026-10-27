@@ -54,7 +54,6 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: optionalString,
   CLAUDE_MODEL: withDefault("claude-sonnet-5-5"),
   CLAUDE_MAX_TOKENS: intWithDefault(400),
-  CLAUDE_HISTORY_LIMIT: intWithDefault(12),
 
   /** Comma-separated E.164 numbers that get replies while we build. */
   ALLOWED_NUMBERS: phoneList,
@@ -94,7 +93,6 @@ export interface Config {
     apiKey?: string;
     model: string;
     maxTokens: number;
-    historyLimit: number;
   };
   bucket: {
     endpoint?: string;
@@ -141,7 +139,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       apiKey: e.ANTHROPIC_API_KEY,
       model: e.CLAUDE_MODEL,
       maxTokens: e.CLAUDE_MAX_TOKENS,
-      historyLimit: e.CLAUDE_HISTORY_LIMIT,
     },
     bucket: {
       endpoint: e.BUCKET_ENDPOINT,

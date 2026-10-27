@@ -12,11 +12,11 @@ describe("config", () => {
     const c = loadConfig({
       DATABASE_URL: "postgres://x",
       ANTHROPIC_API_KEY: "",
-      ALLOWED_NUMBERS: " +1 (908) 578-2266, 9175551234 ,",
+      ALLOWED_NUMBERS: " +1 (908) 555-0100, 9175551234 ,",
       TYPING_INDICATOR: "",
     });
     expect(c.claude.apiKey).toBeUndefined();
-    expect(c.allowedNumbers).toEqual(["+19085782266", "+19175551234"]);
+    expect(c.allowedNumbers).toEqual(["+19085550100", "+19175551234"]);
     expect(c.typingIndicator).toBe(true);
     expect(c.claude.model).toBe("claude-sonnet-5-5");
     expect(missingSettings(c)).toContain("ANTHROPIC_API_KEY");
@@ -70,11 +70,11 @@ describe("sendblue client", () => {
         return respond();
       }) as unknown as typeof fetch,
     });
-    const sent = await client.sendMessage({ number: "+19085782266", content: "hi" });
+    const sent = await client.sendMessage({ number: "+19085550100", content: "hi" });
     expect(sent.messageHandle).toBe("h1");
     expect(requests[0]?.url).toBe("https://api.sendblue.test/api/send-message");
     expect(JSON.parse(String(requests[0]?.init.body))).toEqual({
-      number: "+19085782266",
+      number: "+19085550100",
       from_number: "+19177412162",
       content: "hi",
     });
@@ -85,7 +85,7 @@ describe("sendblue client", () => {
     await expect(client.sendMessage({ number: "+1", content: "x" })).rejects.toBeInstanceOf(SendblueError);
 
     respond = () => new Response("", { status: 503 });
-    expect(await client.sendTypingIndicator("+19085782266")).toBe(false);
+    expect(await client.sendTypingIndicator("+19085550100")).toBe(false);
   });
 });
 
@@ -115,7 +115,7 @@ describe("safeError", () => {
   it("keeps the database cause and drops query parameters", async () => {
     const { safeError } = await import("../src/errors.js");
     const cause = Object.assign(new Error('relation "messages" does not exist'), { code: "42P01" });
-    const err = Object.assign(new Error('Failed query: insert into "messages" ...\nparams: inbound,+19085782266,secret text'), {
+    const err = Object.assign(new Error('Failed query: insert into "messages" ...\nparams: inbound,+19085550100,secret text'), {
       name: "DrizzleQueryError",
       cause,
     });
@@ -130,7 +130,7 @@ describe("route errors", () => {
     const t = await makeApp();
     const { db } = t;
     (db as unknown as { insert: () => never }).insert = () => {
-      throw Object.assign(new Error("Failed query: insert ...\nparams: +19085782266,hello"), {
+      throw Object.assign(new Error("Failed query: insert ...\nparams: +19085550100,hello"), {
         cause: new Error("connection refused"),
       });
     };

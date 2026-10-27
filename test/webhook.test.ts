@@ -118,7 +118,7 @@ describe("POST /webhooks/sendblue", () => {
     await postWebhook(t, inboundEvent({ content: "", media_url: url }));
     await t.queue.idle();
     const [inbound] = await allMessages(t);
-    expect(inbound?.mediaKey).toMatch(/^media\/19085782266\/.+\.jpg$/);
+    expect(inbound?.mediaKey).toMatch(/^media\/19085550100\/.+\.jpg$/);
     expect(inbound?.mediaContentType).toBe("image/jpeg");
     expect(t.media.objects.size).toBe(1);
     const lastTurn = t.replier.received[0]?.at(-1);

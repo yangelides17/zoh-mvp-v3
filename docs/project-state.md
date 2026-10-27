@@ -68,7 +68,6 @@ Filed as issues by `scripts/setup-github.sh` (label `decide`, `bug` or `idea`):
 - An empty or refused Claude reply sends "Got it" instead of retrying.
 - Goal changes are refused after onboarding until plans ship; a goal named in the first text skips
   the list (agent decisions to confirm).
-- `CLAUDE_HISTORY_LIMIT` is unused.
 
 Not yet filed, worth knowing:
 - **Audio is kept.** Voice notes are stored in the bucket; the launch plan says to keep the

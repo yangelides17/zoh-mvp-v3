@@ -12,11 +12,11 @@ import type { SendblueClient } from "../src/sendblue/client.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
 
 export const SECRET = "test-webhook-secret";
-export const ME = "+19085782266";
+export const ME = "+19085550100";
 export const LINE = "+19177412162";
 export const STRANGER = "+15555550123";
 /** Stamati's number: a dev account in tests (ME is not, so "reset" from ME is ordinary). */
-export const DEV = "+19084721920";
+export const DEV = "+19085550101";
 /** An allowed number outside Eastern Time (Denver). */
 export const WESTERN = "+13035550123";
 

@@ -58,7 +58,6 @@ export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
     ANTHROPIC_API_KEY: evalApiKey(env),
     CLAUDE_MODEL: env.CLAUDE_MODEL,
     CLAUDE_MAX_TOKENS: env.CLAUDE_MAX_TOKENS,
-    CLAUDE_HISTORY_LIMIT: env.CLAUDE_HISTORY_LIMIT,
     ALLOWED_NUMBERS: phone,
     TYPING_INDICATOR: "false",
     LOG_LEVEL: "silent",

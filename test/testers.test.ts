@@ -239,7 +239,7 @@ describe("commands and time zones", () => {
   });
 
   it("guesses time zones from area codes", () => {
-    expect(guessTimeZone("+19085782266")).toEqual({ timeZone: "America/New_York", status: "assumed_eastern" });
+    expect(guessTimeZone("+19085550100")).toEqual({ timeZone: "America/New_York", status: "assumed_eastern" });
     expect(guessTimeZone("+12125550123")).toEqual({ timeZone: "America/New_York", status: "assumed_eastern" });
     expect(guessTimeZone("+13125550123")).toEqual({ timeZone: "America/Chicago", status: "needs_city" });
     expect(guessTimeZone("+14155550123")).toEqual({ timeZone: "America/Los_Angeles", status: "needs_city" });
@@ -251,8 +251,8 @@ describe("commands and time zones", () => {
   });
 
   it("parses DEV_NUMBERS like ALLOWED_NUMBERS", () => {
-    const c = loadConfig({ DATABASE_URL: "postgres://x", DEV_NUMBERS: " +1 (908) 578-2266, 9084721920 ," });
-    expect(c.devNumbers).toEqual(["+19085782266", "+19084721920"]);
+    const c = loadConfig({ DATABASE_URL: "postgres://x", DEV_NUMBERS: " +1 (908) 555-0100, 9085550101 ," });
+    expect(c.devNumbers).toEqual(["+19085550100", "+19085550101"]);
     expect(loadConfig({ DATABASE_URL: "postgres://x" }).devNumbers).toEqual([]);
   });
 });
