@@ -75,6 +75,23 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   on the issue; anything that changes what testers experience waits for you.
 - **Eval budget: $2 per feature**, enforced by the eval itself. Live testing and the beta catch the rest.
 
+## Quick fixes and changes outside the flow
+
+- **Quick fix:** `/quick <what to change>` for small things (docs, wording, config, a few-line fix). Claude checks
+  it really is small, makes it on `main`, runs the tests, pushes, and records it on an issue. Bigger than that, it
+  suggests `/idea` or `/spec` instead.
+- **Just talking to Claude works too:** any session follows `CLAUDE.md`, so it runs the tests before committing and
+  never commits secrets, even outside the commands.
+- **If someone goes rogue** (edits by hand, or skips the commands), three things still protect the live line:
+  1. Railway runs the type check and tests on every push; if they fail, nothing deploys and the old version keeps
+     running.
+  2. Builds in progress pick up whatever landed on `main` when they rebase, and the PR's tests run on the combined code.
+  3. `/status` lists commits from the last week that didn't come through an issue or PR, flags risky ones, and
+     offers to record them.
+- **Never outside a PR:** database changes (`src/db/schema.ts`, `drizzle/`). A bad migration runs at startup and can
+  take the app down.
+- **Something broke live?** Tell Claude "roll back the last deploy" (Railway keeps every deploy), then fix it properly.
+
 ## Branches and PRs
 
 Claude handles all of it. Feature work goes through a PR so the tests run on the exact code before it

@@ -10,5 +10,10 @@ Give Yanni a short status of the work, from GitHub. If `$ARGUMENTS` names a feat
    `gh pr list --json number,title,isDraft,headRefName`.
 2. Group by stage, in this order: `in-review`, `building`, `plan-approved`, `spec-approved`, `live-check`, `decide`,
    `bug`, `idea`. One line per issue: number, title, linked PR if any.
-3. End with what needs Yanni right now: specs or plans waiting for approval, PRs waiting for "merge", live checks to
+3. **Changes outside the flow:** `git fetch origin && git log origin/main --since="7 days ago" --no-merges --format="%h %an %ar %s"`.
+   List commits on `main` from the last week that aren't from a merged PR and aren't mentioned on any issue (a
+   rogue or hand-made change). For each: who, when, what it touched, and whether it touched risky areas
+   (`src/db/schema.ts` or `drizzle/`, `src/coach/prompt.ts`, `src/pipeline/`, config). Offer to file each as a
+   closed `Quick:` issue so the record is complete. Skip this section if there are none.
+4. End with what needs Yanni right now: specs or plans waiting for approval, PRs waiting for "merge", live checks to
    try, and `decide` items waiting for Yes / Later / No.
