@@ -1,0 +1,33 @@
+{
+  "id": "off-day",
+  "title": "An off day: one light rest-day text, no push",
+  "origin": "Spec #6 (nudge scheduler), Watch: an off day",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "running", "where": "the park by my place", "when": "6 pm", "how_long": "30 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "zoh", "text": "Plan's yours, Jordan. I'll hold you to it. You in?" },
+      { "from": "tester", "text": "let's do it" },
+      { "from": "zoh", "text": "Enjoy the weekend. Rest day tomorrow, back at it Tuesday 🏃" }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": ["tue", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Four runs a week builds the base without wrecking your legs.",
+      "minutes": 30,
+      "started_days_ago": 5
+    }
+  },
+  "testerLines": ["advance to 09:00", "nice, legs needed it", "advance to 21:59"],
+  "whatWentWrong": "New case, not a past mistake: a rest day.",
+  "shouldHaveHappened": "One morning text ZOH starts itself: short and light, uses Jordan's name, says today is a rest day and the next run is tomorrow (Tuesday). No push, no check-in, no follow-up later. \"nice, legs needed it\" gets a short, warm reply that doesn't push today's step (there isn't one). Nothing else that day.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

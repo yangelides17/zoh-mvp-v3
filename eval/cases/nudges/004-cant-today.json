@@ -1,0 +1,41 @@
+{
+  "id": "cant-today",
+  "title": "\"Can't today\": hold the line once, then a smaller version, moved later and done",
+  "origin": "Spec #6 (nudge scheduler), Watch: \"can't today\" and moving the time",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "running", "where": "the park by my place", "when": "6 pm", "how_long": "30 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "zoh", "text": "Plan's yours, Jordan. I'll hold you to it. You in?" },
+      { "from": "tester", "text": "let's do it" },
+      { "from": "zoh", "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃" }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Four runs a week builds the base without wrecking your legs.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": [
+    "advance to 09:00",
+    "can't today, slammed at work until 8",
+    "seriously no way I get 30 min in",
+    "ok 15 min at 8:30 I can do",
+    "advance to 20:20",
+    "done, 15 min ✅",
+    "advance to 21:59"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the hold-the-line, then smaller-version path.",
+  "shouldHaveHappened": "A warm morning kickoff naming the 30 minute run at 6. The first \"can't today\" gets the line held once, warmly and without guilt (the full 30, maybe at a later time). The second gets a smaller version in the same ballpark (about 15 minutes, or a nearby option). \"15 min at 8:30\" gets a short confirmation. Around 8:20 pm ZOH starts a short check-in for the 8:30 run (not the original 6 pm time; nothing goes out around 5:50 pm or 7 pm). \"done, 15 min\" gets a real celebration that counts it. Nothing after that.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

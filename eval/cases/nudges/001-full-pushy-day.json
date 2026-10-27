@@ -1,0 +1,39 @@
+{
+  "id": "full-pushy-day",
+  "title": "A full Pushy reading day: kickoff, check-in, on it, done",
+  "origin": "Spec #6 (nudge scheduler), Watch: a full step day",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "Project Hail Mary", "where": "the couch", "when": "7 pm", "how_long": "20 min", "tracks_with": "doesn't track it" },
+    "history": [
+      { "from": "zoh", "text": "That's your plan, Maya. It's yours now and I'll hold you to it. Are you in?" },
+      { "from": "tester", "text": "I'm in" },
+      { "from": "zoh", "text": "LET'S GO 🔒 Day 1 is tomorrow." }
+    ],
+    "plan": {
+      "step": "20 pages of Project Hail Mary",
+      "place": "the couch",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stopped on",
+      "reason": "Twenty pages a night finishes the book in two weeks.",
+      "minutes": 25
+    }
+  },
+  "testerLines": [
+    "advance to 09:00",
+    "yep, 7 tonight",
+    "advance to 18:50",
+    "heading to the couch now",
+    "done!! 20 pages, this book is so good",
+    "advance to 21:45"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the daily rhythm on a Pushy step day.",
+  "shouldHaveHappened": "At 9 am ZOH starts a warm kickoff that uses Maya's name and names her commitment (20 pages of Project Hail Mary, on the couch, at 7) and asks one question. Her reply gets a short answer. Around 6:50 pm a short check-in names the step and says to get set up. \"heading to the couch now\" gets a short push, no extra question needed. \"done!!\" gets a real, specific celebration. Nothing after that: no follow-up text later in the evening. No guilt or fake urgency anywhere.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

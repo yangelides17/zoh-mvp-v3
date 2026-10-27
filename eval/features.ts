@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { onboardingScenarios } from "./scenarios/onboarding.js";
+import { nudgeScenarios } from "./scenarios/nudges.js";
 import { planScenarios } from "./scenarios/plan.js";
 import type { ScenarioInput } from "./types.js";
 
@@ -135,6 +136,40 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "goal-switch", scope: "conversation", label: "An unjustified goal switch gets a warm push back; a justified one goes ahead" },
       { id: "revisions", scope: "conversation", label: "Revisions keep what they didn't ask to change" },
+    ],
+  },
+  /** Target: 80% of checks passing (spec "Should"). */
+  nudges: {
+    name: "nudges",
+    doneWhen: "the day is over: you've done today's step, or it's late evening.",
+    scenarios: nudgeScenarios,
+    rubric: [
+      {
+        id: "names-commitment",
+        scope: "text",
+        label: "Every step-day nudge (a text ZOH starts itself on a step day) names their actual commitment: what, and when or where",
+      },
+      { id: "warm-open", scope: "text", label: "A text ZOH starts itself opens warm with their name" },
+      { id: "off-day-light", scope: "text", label: "Off-day (rest day) text is light, with no push" },
+      { id: "no-guilt", scope: "text", label: "No guilt or fake urgency" },
+      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
+      { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
+      {
+        id: "voice",
+        scope: "text",
+        label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
+      },
+      {
+        id: "miss-ladder",
+        scope: "conversation",
+        label: "Day-after-a-miss and day-3 texts follow the voice page's \"When they start to slip\"",
+      },
+      {
+        id: "daily-rhythm",
+        scope: "conversation",
+        label:
+          "Once the step is done ZOH celebrates and starts no more texts that day; \"can't today\" gets the line held once, then a smaller version",
+      },
     ],
   },
 };

@@ -1,0 +1,33 @@
+{
+  "id": "silent-day",
+  "title": "A silent Pushy day: kickoff, check-in, follow-up, then nothing",
+  "origin": "Spec #6 (nudge scheduler): no reply all day",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "running", "where": "the park by my place", "when": "6 pm", "how_long": "30 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "zoh", "text": "Plan's yours, Jordan. I'll hold you to it. You in?" },
+      { "from": "tester", "text": "let's do it" },
+      { "from": "zoh", "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃" }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Four runs a week builds the base without wrecking your legs.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": ["advance to 09:00", "advance to 17:50", "advance to 21:59"],
+  "whatWentWrong": "New case, not a past mistake: three unanswered texts on a step day.",
+  "shouldHaveHappened": "Exactly three texts ZOH starts itself: a morning kickoff (Jordan's name, the 30 minute run around the park at 6), a check-in about 10 minutes before 6, and a follow-up around 7 asking how it went. Each one is short, warm and names the run; none guilt-trips, invents urgency or repeats the previous one word for word. Nothing after the third.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}
