@@ -3,7 +3,7 @@ import { FEATURES } from "./features.js";
 import { PERSONAS } from "./types.js";
 
 export const USAGE = [
-  "Usage: npm run eval -- <feature> [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run]",
+  "Usage: npm run eval -- <feature> [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
   "",
   `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}`,
   `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); regression cases always run`,
@@ -11,9 +11,11 @@ export const USAGE = [
   "  --max-turns      tester texts before a conversation is cut off (default 20)",
   "  --concurrency    conversations at once (default 3)",
   "  --dry-run        print what would run and the cost estimate, then stop",
+  "  --over-budget    run even past this branch's eval budget (only with Yanni's OK)",
   "",
   "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
-  "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the simulator and grader model (default: CLAUDE_MODEL).",
+  "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the grader model (default: CLAUDE_MODEL); EVAL_SIM_MODEL the",
+  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: 2).",
 ].join("\n");
 
 export interface EvalArgs {
@@ -23,6 +25,7 @@ export interface EvalArgs {
   maxTurns: number;
   concurrency: number;
   dryRun: boolean;
+  overBudget: boolean;
 }
 
 export class UsageError extends Error {}
@@ -39,6 +42,7 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
         "max-turns": { type: "string" },
         concurrency: { type: "string" },
         "dry-run": { type: "boolean" },
+        "over-budget": { type: "boolean" },
         help: { type: "boolean", short: "h" },
       },
     });
@@ -61,6 +65,7 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),
     concurrency: positiveInt(values.concurrency, "--concurrency", 3),
     dryRun: values["dry-run"] ?? false,
+    overBudget: values["over-budget"] ?? false,
   };
 }
 

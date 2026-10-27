@@ -54,7 +54,9 @@ export interface ReportData {
   feature: string;
   startedAt: string;
   finishedAt: string;
-  models: { coach: string; eval: string };
+  models: { coach: string; eval: string; sim?: string };
+  /** Dollars this run spent (simulator and grader measured, coach estimated). */
+  costUsd?: number;
   options: { persona?: string; runs: number; maxTurns: number };
   rubric: RubricRule[];
   summary: Summary;
@@ -225,7 +227,7 @@ export function renderMarkdown(r: ReportData): string {
   const label = new Map(r.rubric.map((x) => [x.id, x.label]));
   lines.push(`# Coach judgment: ${r.feature}`, "");
   lines.push(
-    `Run ${r.startedAt} → ${r.finishedAt}. Coach model \`${r.models.coach}\`, simulator and grader \`${r.models.eval}\`.`,
+    `Run ${r.startedAt} → ${r.finishedAt}. Coach model \`${r.models.coach}\`, simulator \`${r.models.sim ?? r.models.eval}\`, grader \`${r.models.eval}\`.${r.costUsd !== undefined ? ` Cost about $${r.costUsd.toFixed(2)}.` : ""}`,
     `${r.conversations.length} conversations (runs per scenario: ${r.options.runs}, turn cap: ${r.options.maxTurns}${r.options.persona ? `, persona: ${r.options.persona}` : ""}). Tokens used by the simulator and grader: ${r.usage.input.toLocaleString("en-US")} in, ${r.usage.output.toLocaleString("en-US")} out.`,
     "",
     `**Overall: ${pct(r.summary.overall.rate)}** of checks passed (${r.summary.overall.pass}/${r.summary.overall.total}, ${r.summary.overall.borderline} borderline).`,

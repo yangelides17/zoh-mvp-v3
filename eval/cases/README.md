@@ -5,7 +5,7 @@ exchange goes here so the fix stays fixed. `npm run eval -- <feature>` replays *
 `eval/cases/<feature>/` on every run and grades it alongside the simulated conversations.
 
 A case scripts the tester's side only. ZOH's replies are generated fresh by the current coach each
-run, then the grader checks them against the page rules **and** against `shouldHaveHappened`
+run, then the grader checks them against the feature's checks **and** against `shouldHaveHappened`
 (reported as the `regression` rule).
 
 ## Format

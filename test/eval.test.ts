@@ -9,7 +9,8 @@ import type { Completer, CompletionRequest } from "../eval/claude.js";
 import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
 import { zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
-import { FEATURES, extractSection, readPages, rubricFor } from "../eval/features.js";
+import { FEATURES, readPages, rubricFor } from "../eval/features.js";
+import { overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
 import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
@@ -193,13 +194,11 @@ describe("eval: grader", () => {
     { from: "zoh", text: "Welcome! 1. name 2. goal", at: "2026-11-03T04:05:10Z" },
   ];
 
-  it("reads the rules section from the feature page", async () => {
+  it("grades against the feature's approved checks and the voice page", async () => {
     const pages = await readPages(onboarding);
-    expect(pages.rules.startsWith("## 4. Rules")).toBe(true);
     expect(pages.rules).toContain("One question per text");
-    expect(pages.rules).not.toContain("## 5.");
+    expect(pages.rules.split("\n")).toHaveLength(onboarding.rubric.length);
     expect(pages.voice).toContain("Coach voice");
-    expect(() => extractSection("# x\n## 1. A\nb", "## 4. Rules")).toThrow(/not found/);
   });
 
   it("labels ZOH texts and shows local time and the regression expectation", () => {
@@ -377,7 +376,8 @@ describe("eval: report", () => {
 
 describe("eval: command line and cost", () => {
   it("parses arguments and explains mistakes", () => {
-    expect(parseEvalArgs(["onboarding"])).toEqual({ feature: "onboarding", runs: 1, maxTurns: 20, concurrency: 3, dryRun: false, persona: undefined });
+    expect(parseEvalArgs(["onboarding"])).toEqual({ feature: "onboarding", runs: 1, maxTurns: 20, concurrency: 3, dryRun: false, overBudget: false, persona: undefined });
+    expect(parseEvalArgs(["onboarding", "--over-budget"]).overBudget).toBe(true);
     expect(parseEvalArgs(["onboarding", "--persona", "terse", "--runs", "3"])).toMatchObject({ persona: "terse", runs: 3 });
     expect(() => parseEvalArgs([])).toThrow(UsageError);
     expect(() => parseEvalArgs(["checkins"])).toThrow(/Unknown feature/);
@@ -401,6 +401,20 @@ describe("eval: command line and cost", () => {
     expect(est.tokens.high).toBeGreaterThan(est.tokens.low);
     expect(estimateCost(plans, { ...base, evalModel: "claude-opus-5-5" }).dollars.high).toBeGreaterThan(est.dollars.high);
     expect(estimateCost(plans, { ...base, maxTurns: 5 }).tokens.high).toBeLessThan(est.tokens.high);
+    expect(estimateCost(plans, { ...base, simModel: "claude-haiku-5-5" }).dollars.high).toBeLessThan(est.dollars.high);
+  });
+
+  it("keeps each branch within its eval budget", async () => {
+    const fit = { spentUsd: 0.5, estimateUsd: { low: 0.5, high: 1.5 }, budgetUsd: 2, branch: "feature/x" };
+    expect(overBudgetMessage(fit)).toBeUndefined();
+    expect(overBudgetMessage({ ...fit, spentUsd: 1.2 })).toMatch(/\$1\.20 of \$2\.00 already spent on feature\/x/);
+    const { mkdtemp } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const path = `${await mkdtemp(`${tmpdir()}/ledger-`)}/spend.json`;
+    expect(await readLedger(path)).toEqual({});
+    await recordSpend(path, "feature/x", 0.75);
+    const ledger = await recordSpend(path, "feature/x", 0.5);
+    expect(ledger["feature/x"]).toEqual({ spentUsd: 1.25, runs: 2 });
   });
 
   it("cleans up what the simulator writes", () => {
