@@ -1,0 +1,29 @@
+{
+  "id": "commitment-ask-gimmicky",
+  "title": "Commitment ask and soft-yes re-ask sound scripted",
+  "origin": "Yanni live, 2026-10-27 (issue #33)",
+  "testerLines": ["Looks good", "Ok", "I'm in!"],
+  "whatWentWrong": "\"Glad you like it! This is yours now, and I'll hold you to it: 75 minutes at Crunch, 6:30 pm, Mon, Tue, Wed, Fri, Sat, with a Whoop screenshot as proof. Are you in? Also, what's your name?\" then, after \"Ok\": \"Ok isn't quite the same as \\\"I'm in.\\\" This one's yours and I'm going to hold you to it, so say it like you mean it: are you in?\"",
+  "shouldHaveHappened": "After \"Looks good\", ZOH asks for the commitment in natural words that make clear it's a real commitment, with no other question in that text. After \"Ok\", it asks once more, naturally (it wants to be sure they're in before locking it), without picking apart their wording, quoting \"I'm in\" back at them, or lines like \"say it like you mean it\". After \"I'm in!\", it locks the plan with a hype line and day 1.",
+  "areaCode": "212",
+  "startTime": "17:00",
+  "seed": {
+    "name": "Yanni",
+    "goal": "exercise",
+    "phase": "planning",
+    "answers": {
+      "what": "lifting",
+      "where": "Crunch",
+      "when": "6:30 pm after work",
+      "how_long": "75 min",
+      "tracks_with": "Whoop"
+    },
+    "history": [
+      { "from": "tester", "text": "Yea I track everything on my whoop app" },
+      {
+        "from": "zoh",
+        "text": "That's everything I need, here's your plan:\n• Mon, Tue, Wed, Fri, Sat at 6:30 pm: 75 min lifting at Crunch\n• After: a Whoop strain screenshot\nFive days after work builds the habit without eating your weekend. What do you think?"
+      }
+    ]
+  }
+}
