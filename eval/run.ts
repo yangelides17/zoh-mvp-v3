@@ -19,6 +19,7 @@ import {
   aggregate,
   diffRuns,
   renderMarkdown,
+  sameScope,
   suggestLiveChecks,
   summaryLines,
   worstReplies,
@@ -110,7 +111,7 @@ async function main(): Promise<number> {
   restoreFetch();
 
   const summary = aggregate(graded);
-  const previous = await latestReport(feature.name);
+  const previous = await latestReport(feature.name, args.persona);
   const report: ReportData = {
     feature: feature.name,
     startedAt: startedAt.toISOString(),
@@ -135,22 +136,24 @@ async function main(): Promise<number> {
   return 0;
 }
 
-/** The most recent earlier report for this feature, if any. */
-async function latestReport(feature: string): Promise<{ name: string; data: ReportData } | undefined> {
+/** The most recent earlier report for this feature run over the same personas, if any. */
+async function latestReport(feature: string, persona: string | undefined): Promise<{ name: string; data: ReportData } | undefined> {
   let files: string[];
   try {
     files = await readdir(REPORTS_DIR);
   } catch {
     return undefined;
   }
-  const mine = files.filter((f) => f.endsWith(`-${feature}.json`)).sort();
-  const last = mine.at(-1);
-  if (!last) return undefined;
-  try {
-    return { name: last, data: JSON.parse(await readFile(`${REPORTS_DIR}${last}`, "utf8")) as ReportData };
-  } catch {
-    return undefined;
+  const mine = files.filter((f) => f.endsWith(`-${feature}.json`)).sort().reverse();
+  for (const name of mine) {
+    try {
+      const data = JSON.parse(await readFile(`${REPORTS_DIR}${name}`, "utf8")) as ReportData;
+      if (sameScope(data.options, persona)) return { name, data };
+    } catch {
+      // An unreadable report is skipped; an older one may still compare.
+    }
   }
+  return undefined;
 }
 
 async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {

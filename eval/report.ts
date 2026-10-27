@@ -133,6 +133,14 @@ function zohTextsWithContext(conv: GradedConversation): { text: string; after?: 
   return out;
 }
 
+/**
+ * Whether an earlier run is comparable with this one: same persona filter, so a one-persona run
+ * isn't compared with the full suite (or the other way round). Run counts may differ.
+ */
+export function sameScope(previous: Pick<ReportData["options"], "persona">, persona: string | undefined): boolean {
+  return (previous.persona ?? undefined) === (persona ?? undefined);
+}
+
 /** What moved since the previous run. Rates within `threshold` of each other count as unchanged. */
 export function diffRuns(current: Summary, previous: Summary, previousRun: string, threshold = 0.05): RunDiff {
   const moved = (a: Record<string, Tally>, b: Record<string, Tally>): RuleChange[] => {
@@ -152,7 +160,8 @@ export function diffRuns(current: Summary, previous: Summary, previousRun: strin
 
 /**
  * 3 to 5 things for Yanni to try on his phone: the rules that failed most first (one per rule,
- * from the conversation where it failed), then borderline passes to fill up.
+ * from the conversation where it failed), then borderline passes to fill up. Each check's example
+ * comes from a conversation no earlier check used, when there is one, so they don't all repeat.
  */
 export function suggestLiveChecks(convs: GradedConversation[], rubric: RubricRule[], max = 5): LiveCheck[] {
   const label = new Map(rubric.map((r) => [r.id, r.label]));
@@ -170,11 +179,13 @@ export function suggestLiveChecks(convs: GradedConversation[], rubric: RubricRul
   const ranked = (m: Map<string, Hit[]>) => [...m.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
   const out: LiveCheck[] = [];
   const used = new Set<string>();
+  const usedConvs = new Set<string>();
   for (const [rule, hits] of [...ranked(fails), ...ranked(borderline)]) {
     if (out.length >= max) break;
     if (used.has(rule)) continue;
     used.add(rule);
-    const first = hits[0]!;
+    const first = hits.find((h) => !usedConvs.has(h.conv.plan.key)) ?? hits[0]!;
+    usedConvs.add(first.conv.plan.key);
     const kind = first.check.pass ? "borderline" : `failed ${hits.length}x`;
     out.push({
       rule,

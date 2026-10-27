@@ -10,10 +10,10 @@ import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
 import { zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, extractSection, readPages, rubricFor } from "../eval/features.js";
-import { gradeConversation, graderUserPrompt, parseGrade } from "../eval/grader.js";
+import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
 import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
-import { aggregate, diffRuns, renderMarkdown, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
+import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
 import { DONE, cleanSimulatorText, simulatedTester } from "../eval/simulator.js";
 import type { Check, ConversationPlan, Grade, GradedConversation, TranscriptLine } from "../eval/types.js";
 
@@ -209,12 +209,35 @@ describe("eval: grader", () => {
     expect(prompt).toContain("What should happen: S");
   });
 
-  it("rejects output with unknown rules, wrong scopes or texts that don't exist", () => {
+  it("rejects output with unknown rules or texts that don't exist", () => {
     expect(parseGrade(JSON.stringify(good), rubric, 1)).toEqual(good);
     expect(() => parseGrade("not json", rubric, 1)).toThrow(/not JSON/);
     expect(() => parseGrade(JSON.stringify({ ...good, texts: [{ zohText: 2, checks: [] }] }), rubric, 1)).toThrow(/only 1/);
-    expect(() => parseGrade(JSON.stringify({ ...good, conversation: [bad("short")] }), rubric, 1)).toThrow(/not a conversation check/);
-    expect(() => parseGrade(JSON.stringify({ ...good, conversation: [bad("vibes")] }), rubric, 1)).toThrow(/not a conversation check/);
+    expect(() => parseGrade(JSON.stringify({ ...good, conversation: [bad("vibes")] }), rubric, 1)).toThrow(/not a rubric rule/);
+    expect(() => parseGrade(JSON.stringify({ ...good, texts: [{ zohText: 1, checks: [bad("vibes")] }] }), rubric, 1)).toThrow(/not a rubric rule/);
+  });
+
+  it("repairs rules filed under the wrong scope instead of discarding the grade", () => {
+    // Seen live: the grader scored first-text on ZOH text 1 instead of the whole conversation.
+    const moved = parseGrade(JSON.stringify({ ...good, texts: [{ zohText: 1, checks: [ok("one-question"), bad("first-text", "no stop line")] }], conversation: [] }), rubric, 1);
+    expect(moved.texts[0]!.checks).toEqual([ok("one-question")]);
+    expect(moved.conversation).toEqual([bad("first-text", "no stop line")]);
+    // Already scored on the conversation: the conversation's own check wins.
+    const kept = parseGrade(JSON.stringify({ ...good, texts: [{ zohText: 1, checks: [ok("first-text")] }] }), rubric, 1);
+    expect(kept.texts[0]!.checks).toEqual([]);
+    expect(kept.conversation).toEqual(good.conversation);
+    // A per-text rule on the whole conversation is dropped.
+    expect(parseGrade(JSON.stringify({ ...good, conversation: [bad("short"), bad("first-text")] }), rubric, 1).conversation).toEqual([bad("first-text")]);
+  });
+
+  it("limits each scope's rule ids in the structured-output schema", () => {
+    const schema = gradeJsonSchema(rubric) as any; // nested JSON schema; typing it fully adds nothing here
+    const textIds: string[] = schema.properties.texts.items.properties.checks.items.properties.rule.enum;
+    const convIds: string[] = schema.properties.conversation.items.properties.rule.enum;
+    expect(textIds).toContain("short");
+    expect(textIds).not.toContain("first-text");
+    expect(convIds).toContain("first-text");
+    expect(convIds).not.toContain("short");
   });
 
   it("retries once on malformed output, then gives up with a reason", async () => {
@@ -307,6 +330,25 @@ describe("eval: report", () => {
       { rule: "voice", suggestion: expect.stringContaining("Title c"), evidence: "borderline in the sim; e.g. c: a bit much" },
     ]);
     expect(suggestLiveChecks([a, b], rubric, 3)).toHaveLength(3);
+  });
+
+  it("only compares with an earlier run over the same personas", () => {
+    expect(sameScope({}, undefined)).toBe(true);
+    expect(sameScope({ persona: "terse" }, "terse")).toBe(true);
+    expect(sameScope({}, "terse")).toBe(false);
+    expect(sameScope({ persona: "terse" }, undefined)).toBe(false);
+    expect(sameScope({ persona: "terse" }, "chatty")).toBe(false);
+  });
+
+  it("draws each live check's example from a different conversation when it can", () => {
+    const c = conv("c", "joking", { texts: [{ zohText: 1, checks: [bad("short", "rambles"), bad("one-question")] }], conversation: [bad("first-text")], summary: "" });
+    const checks = suggestLiveChecks([a, c, b], rubric, 3);
+    expect(checks.map((k) => k.rule)).toEqual(["first-text", "one-question", "short"]);
+    expect(checks.map((k) => k.evidence.split(":")[0])).toEqual([
+      "failed 3x in the sim; e.g. a",
+      "failed 3x in the sim; e.g. c",
+      "failed 3x in the sim; e.g. b",
+    ]);
   });
 
   it("renders a report with every section", () => {

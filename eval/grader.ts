@@ -67,19 +67,19 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript">
   return [...context, "", "=== Transcript ===", ...lines].join("\n");
 }
 
-/** JSON schema for structured output; rule ids are limited to the rubric. */
+/** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */
 export function gradeJsonSchema(rubric: RubricRule[]): Record<string, unknown> {
-  const check = {
+  const check = (scope: RubricRule["scope"]) => ({
     type: "object",
     additionalProperties: false,
     required: ["rule", "pass", "borderline", "reason"],
     properties: {
-      rule: { type: "string", enum: rubric.map((r) => r.id) },
+      rule: { type: "string", enum: rubric.filter((r) => r.scope === scope).map((r) => r.id) },
       pass: { type: "boolean" },
       borderline: { type: "boolean" },
       reason: { type: "string" },
     },
-  };
+  });
   return {
     type: "object",
     additionalProperties: false,
@@ -91,16 +91,21 @@ export function gradeJsonSchema(rubric: RubricRule[]): Record<string, unknown> {
           type: "object",
           additionalProperties: false,
           required: ["zohText", "checks"],
-          properties: { zohText: { type: "integer" }, checks: { type: "array", items: check } },
+          properties: { zohText: { type: "integer" }, checks: { type: "array", items: check("text") } },
         },
       },
-      conversation: { type: "array", items: check },
+      conversation: { type: "array", items: check("conversation") },
       summary: { type: "string" },
     },
   };
 }
 
-/** Parses and sanity-checks grader output. Throws with a short reason when it's unusable. */
+/**
+ * Parses and sanity-checks grader output. Throws with a short reason when it's unusable. A rubric
+ * rule filed under the wrong scope is repaired rather than thrown away with the whole grade: a
+ * conversation check scored on one text moves to the conversation checks (unless it's already
+ * there), and a per-text rule scored on the whole conversation is dropped.
+ */
 export function parseGrade(raw: string, rubric: RubricRule[], zohTexts: number): Grade {
   let json: unknown;
   try {
@@ -112,16 +117,23 @@ export function parseGrade(raw: string, rubric: RubricRule[], zohTexts: number):
   if (!parsed.success) throw new Error(`grader output has the wrong shape: ${parsed.error.issues[0]?.message ?? "?"}`);
   const grade = parsed.data;
   const scopeOf = new Map(rubric.map((r) => [r.id, r.scope]));
-  for (const t of grade.texts) {
+  const conversation = grade.conversation.filter((c) => {
+    const scope = scopeOf.get(c.rule);
+    if (!scope) throw new Error(`"${c.rule}" is not a rubric rule`);
+    return scope === "conversation";
+  });
+  const texts = grade.texts.map((t) => {
     if (t.zohText > zohTexts) throw new Error(`grader scored ZOH text ${t.zohText} but there are only ${zohTexts}`);
-    for (const c of t.checks) {
-      if (scopeOf.get(c.rule) !== "text") throw new Error(`"${c.rule}" is not a per-text rule`);
-    }
-  }
-  for (const c of grade.conversation) {
-    if (scopeOf.get(c.rule) !== "conversation") throw new Error(`"${c.rule}" is not a conversation check`);
-  }
-  return grade;
+    const checks = t.checks.filter((c) => {
+      const scope = scopeOf.get(c.rule);
+      if (!scope) throw new Error(`"${c.rule}" is not a rubric rule`);
+      if (scope === "text") return true;
+      if (!conversation.some((k) => k.rule === c.rule)) conversation.push(c);
+      return false;
+    });
+    return { ...t, checks };
+  });
+  return { ...grade, texts, conversation };
 }
 
 /** Grades one conversation, retrying once if the output is malformed. */
