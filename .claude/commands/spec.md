@@ -7,8 +7,8 @@ You're helping Yanni define a feature for ZOH: **$ARGUMENTS**
 
 This step is only the spec. Don't plan the implementation or write code here.
 
-**Which feature?** If no feature was given, run `gh issue list --label idea --label decide --state open` (and
-`--label bug`), show them as a short numbered list (issue number, title, one line each), say which one you'd do
+**Which feature?** If no feature was given, run `gh issue list --state open --label idea`, then the same with
+`--label bug` and `--label decide` (separate calls: several `--label` flags mean "all of them"), show them as a short numbered list (issue number, title, one line each), say which one you'd do
 next and why, and ask Yanni to pick one or describe something new. If an issue number was given, that's the
 feature. If a description was given, check whether an open issue already covers it and use that one if so.
 
