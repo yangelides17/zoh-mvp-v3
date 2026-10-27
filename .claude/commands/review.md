@@ -26,7 +26,8 @@ waiting for review and stop.
    tester, any risk, and the **Watch** list to try on his phone.
 5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`, remove the worktrees for this issue
    (`git worktree list`, then `git worktree remove --force <path>` for the review and build ones, and
-   `git worktree prune`), then
+   `git worktree prune`), bring the main folder up to date (`git -C <main folder> pull --ff-only`; if it isn't on a
+   clean `main`, skip this and say so), then
    `gh issue edit $ARGUMENTS --add-label live-check --remove-label in-review`. Railway deploys `main` in a couple of minutes.
 6. After Yanni's live check: if it's good, `gh issue edit $ARGUMENTS --add-label done --remove-label live-check`.
    Anything wrong becomes a new issue (`--label bug`) and, for the coach, a regression case in `eval/cases/`.

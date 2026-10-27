@@ -34,7 +34,7 @@ Each feature goes through five steps. You're needed at the two approvals, the me
 | 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
 | 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
-| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it deploys in about 2 minutes (`live-check`). |
+| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it deploys in about 2 minutes (`live-check`), and Claude cleans up the branch and worktrees and updates your main folder. |
 | 5. Live check | | You | Try the spec's Watch list on your phone. Good: `done`. Not good: Claude files a `bug`. |
 
 Each command checks that the step before it is done, and ends by naming the next one, so the order
