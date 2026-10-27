@@ -58,7 +58,7 @@ Then:
 - No recap or plan talk until the state says onboarding just finished.`;
 
 /** After onboarding, until the plan feature ships. */
-export const PLANNING = `PLAN COMING (phase "planning"): onboarding is done and their plan is being made (it isn't written yet; never invent one). Reply normally and briefly. If they ask about the plan, say it's on its way. Don't ask new onboarding questions. If they change an answer, save it and confirm in one line.`;
+export const PLANNING = `PLAN COMING (phase "planning"): onboarding is done and their plan is being made (it isn't written yet; never invent one). Reply normally and briefly. Mention the plan only if they ask about it (say it's on its way). Don't ask new onboarding questions; with nothing new to ask, end without a question rather than repeat one. If they change an answer, save it and confirm in one line.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
 export const EXAMPLES = `Model exchanges (tone, not scripts):
