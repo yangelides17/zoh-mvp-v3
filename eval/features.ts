@@ -28,6 +28,11 @@ export interface FeatureDef {
   scenarios: ScenarioInput[];
   /** Tells the simulator when the coach has finished this feature's conversation. */
   doneWhen: string;
+  /**
+   * The overnight memory pass runs (on the real model) whenever the clock passes 3 am, and the
+   * grader sees the pages it wrote. Only for features that grade memory: it costs a pass per day.
+   */
+  memory?: boolean;
 }
 
 /** Applies to every feature: only judged on a regression case. */
@@ -170,6 +175,22 @@ export const FEATURES: Record<string, FeatureDef> = {
         label:
           "Once the step is done ZOH celebrates and starts no more texts that day; \"can't today\" gets the line held once, then a smaller version",
       },
+    ],
+  },
+  /** Coach memory (#8). Part 1 grades what the overnight pass files; Part 2 adds how the coach uses it. */
+  memory: {
+    name: "memory",
+    doneWhen: "the day is over and you've said what you wanted to say.",
+    scenarios: [],
+    memory: true,
+    rubric: [
+      {
+        id: "pages-real",
+        scope: "conversation",
+        label:
+          "Makes pages for real parts of the tester's life, files general likes and opinions on the right person's page, and makes no pages for passing mentions or general topics",
+      },
+      { id: "learned-not-single", scope: "conversation", label: "Doesn't record a learned preference from a single instance" },
     ],
   },
 };

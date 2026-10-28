@@ -12,7 +12,11 @@ import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
-import { appDeps, nudgeSchedulerFor } from "../src/wiring.js";
+import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
+import type { MemoryKeeper } from "../src/memory/keeper.js";
+import { renderPage } from "../src/memory/render.js";
+import { getPages } from "../src/memory/store.js";
+import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
 import { localDate } from "../src/coach/state.js";
@@ -90,6 +94,8 @@ export interface EvalApp {
   phone: string;
   /** The production nudge tick on the same app; the eval runs it when a case says "advance to". */
   nudger: NudgeScheduler;
+  /** The overnight memory pass, for features that grade memory; ticked alongside the nudger. */
+  keeper?: MemoryKeeper;
   close(): Promise<void>;
 }
 
@@ -102,6 +108,8 @@ export async function startEvalApp(opts: {
   clock: EvalClock;
   /** Tests pass a fake coach; the eval leaves this out and gets the real one from wiring. */
   replier?: Replier;
+  /** Run the overnight memory pass when the clock passes 3 am (the memory feature). */
+  memory?: boolean;
 }): Promise<EvalApp> {
   const client = new PGlite();
   const db = drizzle({ client, schema });
@@ -123,6 +131,7 @@ export async function startEvalApp(opts: {
   );
   const built = await buildApp(deps);
   const nudger = nudgeSchedulerFor(deps, quietLog, LINE);
+  const keeper = opts.memory ? memoryKeeperFor(opts.config, deps, quietLog) : undefined;
   return {
     built,
     db: db as unknown as Db,
@@ -131,8 +140,10 @@ export async function startEvalApp(opts: {
     clock: opts.clock,
     phone: opts.phone,
     nudger,
+    keeper,
     async close() {
       await nudger.stop();
+      await keeper?.stop();
       await built.queue.idle();
       await built.app.close();
       await client.close();
@@ -185,6 +196,7 @@ export async function advanceTo(app: EvalApp, hhmm: string, timeZone: string): P
   for (; next <= target.getTime(); next += 60_000) {
     app.clock.set(new Date(next));
     await app.nudger.tick(app.clock.now());
+    await app.keeper?.tick(app.clock.now());
   }
   app.clock.set(target);
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true }));
@@ -220,6 +232,8 @@ export interface RunOptions {
   index: number;
   env: NodeJS.ProcessEnv;
   replier?: Replier;
+  /** The feature grades memory: run the overnight pass and read back what it wrote. */
+  memory?: boolean;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -310,7 +324,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
 export async function runConversation(plan: ConversationPlan, tester: Tester, opts: RunOptions): Promise<ConversationResult> {
   const phone = fakeNumber(plan.areaCode, opts.index);
   const clock = new EvalClock(zonedDate(EVAL_DAY, plan.startTime, plan.timeZone));
-  const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier });
+  const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, memory: opts.memory });
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
@@ -349,6 +363,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
+      ...(opts.memory ? { memory: await readMemory(app) } : {}),
       savedState,
       messageCount: row?.n ?? 0,
       appErrors: row?.errors ?? [],
@@ -390,6 +405,16 @@ export async function readSavedState(client: PGlite, phone: string): Promise<Rec
   const out: Record<string, unknown[]> = {};
   for (const [table, rows] of picked) out[table] = [...rows].map((row) => plainRow(row, phone));
   return out;
+}
+
+/** The tester's memory as the coach would read it: every page, core pages first, daily docs last. */
+export async function readMemory(app: EvalApp): Promise<string> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return "(no tester)";
+  const order = ["self", "preferences", "goal", "person", "subject", "daily"];
+  const pages = (await getPages(app.db, tester.id)).sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+  if (pages.length === 0) return "(nothing in memory: the overnight pass didn't run or found no texts)";
+  return (await Promise.all(pages.map((p) => renderPage(app.db, tester, p)))).join("\n\n");
 }
 
 /** JSON-friendly, with the (fake) number masked like everywhere else. */

@@ -1,0 +1,40 @@
+{
+  "id": "one-ignored-hype",
+  "title": "One ignored hype text is not a learned preference",
+  "origin": "Spec #8 (coach memory), part 1: learned preferences need a pattern over several days",
+  "seed": {
+    "name": "Jess",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "push-ups and squats", "where": "home", "when": "7 am", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Jess! 15 minutes of push-ups and squats at home, 7 am. Let's get it." },
+      { "from": "tester", "text": "done" },
+      { "from": "zoh", "text": "LET'S GO. Day 2 in the books." }
+    ],
+    "plan": {
+      "step": "15 minutes of push-ups and squats",
+      "place": "home",
+      "time": "12:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a selfie after",
+      "reason": "Fifteen minutes at lunch fits the day and builds the habit.",
+      "minutes": 15,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "startTime": "08:55",
+  "testerLines": [
+    "advance to 19:30",
+    "sorry crazy day at work, did it at lunch though",
+    "advance to 03:30"
+  ],
+  "whatWentWrong": "New case, not a past mistake: one quiet stretch on one day.",
+  "shouldHaveHappened": "ZOH's texts through the day went unanswered until the evening, once. After the overnight pass, memory has no learned preference about it (at most an observation on the preferences page, like 'didn't reply to the morning texts on a busy work day'). Nothing invented, and one daily doc for the day."
+}

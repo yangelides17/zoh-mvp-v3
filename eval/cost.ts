@@ -30,12 +30,14 @@ export interface Estimate {
  * the grader reads both pages plus the transcript once per conversation.
  */
 export const COACH = { input: 900, output: 250 };
+/** One overnight memory pass (several tool rounds over the day's texts and pages); memory feature only. */
+export const KEEPER = { input: 25_000, output: 3_000 };
 const SIM = { inputBase: 600, perTurn: 120, output: 150 };
 const GRADER = { inputBase: 1_500, perTurn: 120, output: 4_000 };
 
 export function estimateCost(
   plans: ConversationPlan[],
-  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string },
+  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string; memory?: boolean },
 ): Estimate {
   const pagesTokens = Math.ceil(opts.pagesChars / 4);
   const run = (turns: number, simulated: boolean) => {
@@ -56,6 +58,11 @@ export function estimateCost(
     let dollars = 0;
     for (const p of plans) {
       const r = run(turnsFor(p), p.kind === "scenario");
+      if (opts.memory) {
+        // One overnight pass per conversation, on the coach's model.
+        r.coach.input += KEEPER.input;
+        r.coach.output += KEEPER.output;
+      }
       tokens += r.coach.input + r.coach.output + r.sim.input + r.sim.output + r.grader.input + r.grader.output;
       dollars +=
         (r.coach.input * coachPrice.input +

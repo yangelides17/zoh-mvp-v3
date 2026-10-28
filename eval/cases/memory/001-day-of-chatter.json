@@ -1,0 +1,43 @@
+{
+  "id": "day-of-chatter",
+  "title": "A chatty day gets filed into the right pages overnight",
+  "origin": "Spec #8 (coach memory), part 1: pages for real parts of their life, likes on the right page, nothing for passing mentions",
+  "seed": {
+    "name": "Mike",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "Project Hail Mary", "where": "bed", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Mike! Ten pages of Project Hail Mary in bed at 9 tonight. You in?" },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "10 pages of Project Hail Mary",
+      "place": "bed",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "startTime": "18:30",
+  "testerLines": [
+    "my sister Ana started reading with me this week lol, she's way faster than me",
+    "and my dog Max sleeps on my feet while I read, honestly helps me wind down",
+    "saw the cutest dog on my walk today btw",
+    "I just love dogs tbh",
+    "advance to 21:25",
+    "ok done, 10 pages. Ana's already 3 chapters ahead smh",
+    "advance to 03:30"
+  ],
+  "whatWentWrong": "New case, not a past mistake: what the overnight pass files from a chatty day.",
+  "shouldHaveHappened": "After the overnight pass, memory has a page for Ana (his sister, reads with him, faster than him) and one for Max (his dog, sleeps on his feet while he reads, helps him wind down), each with facts taken from his texts. 'Likes dogs' is a fact on Mike's own page, not a page of its own. There is no page for the dog he saw on his walk or for dogs in general. Nothing in memory is invented or embellished, and there's one daily doc for the day."
+}
