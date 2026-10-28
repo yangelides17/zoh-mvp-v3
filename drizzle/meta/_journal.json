@@ -29,6 +29,13 @@
       "when": 1793137613548,
       "tag": "0003_nudges",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793200623640,
+      "tag": "0004_memory",
+      "breakpoints": true
     }
   ]
 }

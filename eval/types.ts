@@ -140,6 +140,8 @@ export interface ConversationResult {
   transcript: TranscriptLine[];
   endedBy: "simulator" | "turn-cap" | "script" | "error";
   error?: string;
+  /** The tester's memory pages after the run (memory feature only), as the coach reads them. */
+  memory?: string;
   /** Rows in the database that belong to this tester, other than messages. */
   savedState: Record<string, unknown[]>;
   messageCount: number;

@@ -307,6 +307,7 @@ export function renderMarkdown(r: ReportData): string {
       lines.push(`- ${c.pass ? (c.borderline ? "~" : "✓") : "✗"} \`${c.rule}\` (${label.get(c.rule) ?? c.rule}): ${c.reason}`);
     }
     lines.push("", "</details>", "");
+    if (conv.memory) lines.push("Memory after the overnight pass:", "", "```", conv.memory, "```", "");
     lines.push("Saved state:", "");
     const tables = Object.keys(conv.savedState);
     if (tables.length === 0) lines.push(`Nothing saved for this tester besides the ${conv.messageCount} messages.`);

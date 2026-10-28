@@ -11,7 +11,7 @@ import { loadConfig } from "../src/config.js";
 import { addUsage, createCompleter } from "./claude.js";
 import { USAGE, UsageError, evalApiKey, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
 import { budgetFrom, currentBranch, overBudgetMessage, readLedger, recordSpend } from "./budget.js";
-import { COACH, dollarsFor, estimateCost } from "./cost.js";
+import { COACH, dollarsFor, estimateCost, KEEPER } from "./cost.js";
 import { REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor } from "./features.js";
 import { gradeConversation } from "./grader.js";
 import { guardFetch, runConversation, scriptedTester } from "./harness.js";
@@ -74,6 +74,7 @@ async function main(): Promise<number> {
     coachModel,
     evalModel,
     simModel,
+    memory: feature.memory,
   });
   const scenarioCount = plans.filter((p) => p.kind === "scenario").length;
   console.log(
@@ -111,14 +112,18 @@ async function main(): Promise<number> {
       plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, simulate, feature.doneWhen);
     // A case gets one turn past its script so it ends "by script", not by the cap.
     const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
-    const result = await runConversation(plan, tester, { maxTurns, index, env });
+    const result = await runConversation(plan, tester, { maxTurns, index, env, memory: feature.memory });
     const graded: GradedConversation = { ...result };
     // Simulator measured; the coach runs inside the app, so its share is estimated per ZOH text.
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
     costUsd += dollarsFor(result.usage, simModel) + dollarsFor({ input: COACH.input * zohCount, output: COACH.output * zohCount }, coachModel);
+    if (feature.memory) costUsd += dollarsFor(KEEPER, coachModel);
     if (!result.error || result.transcript.length > 0) {
       try {
-        const g = await gradeConversation({ plan, context: result.context, transcript: result.transcript, rubric, pages }, complete);
+        const g = await gradeConversation(
+          { plan, context: result.context, transcript: result.transcript, memory: result.memory, rubric, pages },
+          complete,
+        );
         graded.grade = g.grade;
         graded.gradeError = g.error;
         graded.usage = addUsage(graded.usage, g.usage);

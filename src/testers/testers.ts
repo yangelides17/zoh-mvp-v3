@@ -3,6 +3,9 @@ import type { Db } from "../db/client.js";
 import {
   DEFAULT_PUSHINESS,
   DEFAULT_QUIET_HOURS,
+  memoryFacts,
+  memoryForgotten,
+  memoryPages,
   nudges,
   planInputs,
   plans,
@@ -30,6 +33,8 @@ export type TesterPatch = Partial<
     | "stoppedAt"
     | "autoTextsPausedAt"
     | "contextStartedAt"
+    | "memoryThrough"
+    | "memorySince"
   >
 >;
 
@@ -83,10 +88,13 @@ export async function updateTester(db: Db, id: string, patch: TesterPatch): Prom
 
 /**
  * Dev-account "reset": back to a brand-new tester whose context starts at `at`.
- * Messages and flags stay in the database; plan inputs, plans, step days and nudges are deleted.
+ * Messages and flags stay in the database; plan inputs, plans, step days, nudges and memory are deleted.
  */
 export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tester> {
   const { timeZone, status } = guessTimeZone(tester.phone);
+  await db.delete(memoryFacts).where(eq(memoryFacts.testerId, tester.id));
+  await db.delete(memoryPages).where(eq(memoryPages.testerId, tester.id));
+  await db.delete(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
   await db.delete(planInputs).where(eq(planInputs.testerId, tester.id));
   await db.delete(stepDays).where(eq(stepDays.testerId, tester.id));
   await db.delete(nudges).where(eq(nudges.testerId, tester.id));
@@ -104,5 +112,7 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
     stoppedAt: null,
     autoTextsPausedAt: null,
     contextStartedAt: at,
+    memoryThrough: null,
+    memorySince: null,
   });
 }

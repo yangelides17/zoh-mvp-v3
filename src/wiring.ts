@@ -4,6 +4,8 @@ import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import type { Db } from "./db/client.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
+import { createMediaDescriber } from "./memory/describe.js";
+import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
 import type { Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
@@ -38,6 +40,7 @@ export function appDeps(
       media: pick("media", () => makeMedia(config)),
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
+      describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,
     missingSettings: () => missingSettings(config),
@@ -64,6 +67,32 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
     lineNumber,
     now: p.now,
   });
+}
+
+/** The overnight memory pass over the same database, allowed numbers and clock as the app, on the coach's model. */
+export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): MemoryKeeper {
+  const p = deps.pipeline;
+  return createMemoryKeeper({
+    db: p.db,
+    log,
+    model: config.claude.apiKey
+      ? createClaudeModel({
+          apiKey: config.claude.apiKey,
+          model: config.claude.model,
+          maxTokens: KEEPER_MAX_TOKENS,
+          effort: "medium",
+          timeoutMs: 120_000,
+        })
+      : undefined,
+    allowedNumbers: p.allowedNumbers,
+    now: p.now,
+  });
+}
+
+function makeDescriber(config: Config) {
+  return config.claude.apiKey
+    ? createMediaDescriber(createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: 1000, effort: "low" }))
+    : undefined;
 }
 
 function makeSendblue(config: Config) {

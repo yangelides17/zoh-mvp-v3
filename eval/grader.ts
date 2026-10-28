@@ -8,6 +8,8 @@ export interface GraderInput {
   /** A seeded conversation before the graded part; shown for context only. */
   context?: TranscriptLine[];
   transcript: TranscriptLine[];
+  /** ZOH's memory pages after the overnight pass (memory feature), graded with the conversation. */
+  memory?: string;
   rubric: RubricRule[];
   /** The feature's approved checks and the voice page, read at run time. */
   pages: { rules: string; voice: string };
@@ -44,7 +46,7 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   ].join("\n");
 }
 
-export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context">): string {
+export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory">): string {
   const { plan, transcript, context: earlier = [] } = input;
   let n = 0;
   const lines = transcript.map((l) => {
@@ -74,17 +76,29 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
         ...earlier.map((l) => `${l.from === "zoh" ? "[ZOH earlier]" : "[TESTER]"} (${localTime(l.at, plan.timeZone)}) ${l.text}`),
       ]
     : [];
-  return [...context, ...before, "", "=== Transcript ===", ...lines].join("\n");
+  const memory = input.memory
+    ? [
+        "",
+        "=== ZOH's memory after the overnight pass (pages it filed from these texts; grade the memory rules against it) ===",
+        input.memory,
+      ]
+    : [];
+  return [...context, ...before, "", "=== Transcript ===", ...lines, ...memory].join("\n");
 }
 
 /** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */
 export function gradeJsonSchema(rubric: RubricRule[]): Record<string, unknown> {
+  const idsFor = (scope: RubricRule["scope"]) => {
+    const ids = rubric.filter((r) => r.scope === scope).map((r) => r.id);
+    // An enum can't be empty (memory grades no single text); parseGrade moves misfiled checks.
+    return ids.length ? ids : rubric.map((r) => r.id);
+  };
   const check = (scope: RubricRule["scope"]) => ({
     type: "object",
     additionalProperties: false,
     required: ["rule", "pass", "borderline", "reason"],
     properties: {
-      rule: { type: "string", enum: rubric.filter((r) => r.scope === scope).map((r) => r.id) },
+      rule: { type: "string", enum: idsFor(scope) },
       pass: { type: "boolean" },
       borderline: { type: "boolean" },
       reason: { type: "string" },

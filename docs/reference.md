@@ -35,6 +35,11 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   for our OK.
 - Eval: $1 per branch, targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
   against the checks Yanni approves in each spec, judged reasonably.
+- Coach memory (#8) is a small wiki per tester in Postgres (no outside search service): pages of
+  facts that each cite the text they came from, written by one pass per tester at 3 am their time
+  (first run reads back up to 14 days). Photos get a one-line description as they arrive. Search
+  is Postgres full-text. Learned preferences need 3 observations on 3 different days, checked in
+  code. `npm run memory -- <last 4 digits>` prints a tester's pages (needs `DATABASE_URL`).
 - The launch plan doc is the source for timeline and strategy. The coach voice page in Yanni's
   Business Ideas doc is an older copy; `docs/coach-voice.md` is the real one.
 

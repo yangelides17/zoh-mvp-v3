@@ -10,13 +10,14 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 /**
  * Every text in and out, what onboarding knows about each tester, the plans they agree, each
- * day's step and the texts ZOH starts. The coach's memory gets designed later.
+ * day's step, the texts ZOH starts and the coach's memory (pages of cited facts).
  */
 export const messages = pgTable(
   "messages",
@@ -35,6 +36,8 @@ export const messages = pgTable(
     mediaContentType: text("media_content_type"),
     /** Voice-note transcript from Speaches. */
     transcript: text("transcript"),
+    /** One line on what a photo or video shows, written as it arrives (coach memory). */
+    description: text("description"),
     /** Sendblue's message handle: dedupes webhook retries and links status updates. */
     sendblueHandle: text("sendblue_handle").unique(),
     service: text("service"),
@@ -93,6 +96,10 @@ export const testers = pgTable(
     autoTextsPausedAt: timestamp("auto_texts_paused_at", { withTimezone: true }),
     /** The coach never sees messages from before this (moved by "reset"). */
     contextStartedAt: timestamp("context_started_at", { withTimezone: true }).notNull(),
+    /** The last local day the overnight memory pass has written; null until its first run. */
+    memoryThrough: date("memory_through", { mode: "string" }),
+    /** Set by "forget everything": memory never reads or searches texts from before this. */
+    memorySince: timestamp("memory_since", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -279,6 +286,116 @@ export const nudges = pgTable(
   ],
 );
 
+export const MEMORY_PAGE_KINDS = ["self", "preferences", "goal", "person", "subject", "daily"] as const;
+export type MemoryPageKind = (typeof MEMORY_PAGE_KINDS)[number];
+export const MEMORY_LINK_KINDS = ["related", "leads_to"] as const;
+export type MemoryLinkKind = (typeof MEMORY_LINK_KINDS)[number];
+
+/**
+ * Coach memory (spec: GitHub issue "Coach memory"): one small wiki per tester. Their own page,
+ * preferences, a page per goal, people and subjects in their life, and one daily doc per day they
+ * texted. Facts live in `memory_facts`; a daily doc's text is its body.
+ */
+export const memoryPages = pgTable(
+  "memory_pages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: MEMORY_PAGE_KINDS }).notNull(),
+    /** Descriptive enough to make sense on its own in the index. */
+    title: text("title").notNull(),
+    /** One line saying who or what this is. */
+    summary: text("summary").notNull().default(""),
+    /** A daily doc's text; empty on other pages. */
+    body: text("body").notNull().default(""),
+    /** Goal pages only. */
+    goalSlug: text("goal_slug").references(() => goals.slug),
+    /** "past" for a goal they've moved on from. */
+    status: text("status", { enum: ["active", "past"] }).notNull().default("active"),
+    /** Daily docs only: their local date. */
+    date: date("date", { mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("memory_pages_tester_updated_idx").on(t.testerId, t.updatedAt),
+    uniqueIndex("memory_pages_one_daily_idx").on(t.testerId, t.date).where(sql`${t.kind} = 'daily'`),
+    uniqueIndex("memory_pages_one_core_idx").on(t.testerId, t.kind).where(sql`${t.kind} in ('self', 'preferences')`),
+    uniqueIndex("memory_pages_one_goal_idx").on(t.testerId, t.goalSlug).where(sql`${t.kind} = 'goal'`),
+    check("memory_pages_kind_check", sql`${t.kind} in ('self', 'preferences', 'goal', 'person', 'subject', 'daily')`),
+    check("memory_pages_status_check", sql`${t.status} in ('active', 'past')`),
+  ],
+);
+
+/**
+ * One fact on a page, pointing to the text it came from. On the preferences page, `section` says
+ * whether it's stated, learned or an observation, and `label` groups observations of one pattern.
+ */
+export const memoryFacts = pgTable(
+  "memory_facts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    pageId: uuid("page_id")
+      .notNull()
+      .references(() => memoryPages.id, { onDelete: "cascade" }),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    section: text("section").notNull().default(""),
+    label: text("label"),
+    text: text("text").notNull(),
+    /** The text it came from; null only for facts carried over from before memory (style notes). */
+    sourceMessageId: uuid("source_message_id").references(() => messages.id, { onDelete: "set null" }),
+    /** The tester's local day it was learned. */
+    day: date("day", { mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("memory_facts_page_idx").on(t.pageId), index("memory_facts_tester_idx").on(t.testerId)],
+);
+
+/** "related" links read both ways; "leads_to" is a path (goal → next goal) walked forward or back. */
+export const memoryLinks = pgTable(
+  "memory_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    fromPageId: uuid("from_page_id")
+      .notNull()
+      .references(() => memoryPages.id, { onDelete: "cascade" }),
+    toPageId: uuid("to_page_id")
+      .notNull()
+      .references(() => memoryPages.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: MEMORY_LINK_KINDS }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("memory_links_unique").on(t.fromPageId, t.toPageId, t.kind),
+    index("memory_links_tester_idx").on(t.testerId),
+    check("memory_links_kind_check", sql`${t.kind} in ('related', 'leads_to')`),
+  ],
+);
+
+/** Texts behind a forgotten fact: memory search skips them from then on. */
+export const memoryForgotten = pgTable(
+  "memory_forgotten",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => messages.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique("memory_forgotten_unique").on(t.testerId, t.messageId)],
+);
+
 export type Tester = typeof testers.$inferSelect;
 export type NewTester = typeof testers.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
@@ -288,3 +405,6 @@ export type Plan = typeof plans.$inferSelect;
 export type StepDay = typeof stepDays.$inferSelect;
 export type NewStepDay = typeof stepDays.$inferInsert;
 export type Nudge = typeof nudges.$inferSelect;
+export type MemoryPage = typeof memoryPages.$inferSelect;
+export type MemoryFact = typeof memoryFacts.$inferSelect;
+export type MemoryLink = typeof memoryLinks.$inferSelect;

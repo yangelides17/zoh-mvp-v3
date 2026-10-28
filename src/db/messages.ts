@@ -25,7 +25,7 @@ export async function insertOutbound(db: Db, row: Omit<NewMessage, "direction">)
 export async function updateMessage(
   db: Db,
   id: string,
-  patch: Partial<Pick<NewMessage, "mediaKey" | "mediaContentType" | "transcript" | "status" | "error">>,
+  patch: Partial<Pick<NewMessage, "mediaKey" | "mediaContentType" | "transcript" | "description" | "status" | "error">>,
 ): Promise<void> {
   await db
     .update(messages)
