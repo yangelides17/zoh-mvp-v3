@@ -152,7 +152,45 @@ export const planInputs = pgTable(
   (t) => [unique("plan_inputs_tester_goal_unique").on(t.testerId, t.goalSlug)],
 );
 
+export const GOAL_ROLES = ["focus", "maintenance", "dropped"] as const;
+export type GoalRole = (typeof GOAL_ROLES)[number];
+
+/**
+ * Every goal a tester has (spec: GitHub issues "Step log and next step" and "Founder console"). The
+ * focus goal has nudges, proof and the streak; maintenance goals get light check-ins; a dropped goal
+ * was replaced and its streak is frozen. `testers.goal_slug` stays the focus goal.
+ */
+export const testerGoals = pgTable(
+  "tester_goals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    goalSlug: text("goal_slug")
+      .notNull()
+      .references(() => goals.slug),
+    role: text("role", { enum: GOAL_ROLES }).notNull(),
+    nudges: boolean("nudges").notNull().default(true),
+    proof: boolean("proof").notNull().default(true),
+    /** Maintenance check-ins a week; 0 for the focus goal. */
+    checkinsPerWeek: integer("checkins_per_week").notNull().default(0),
+    /** When it took its current role. */
+    roleSince: timestamp("role_since", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("tester_goals_tester_goal_unique").on(t.testerId, t.goalSlug),
+    uniqueIndex("tester_goals_one_focus_idx").on(t.testerId).where(sql`${t.role} = 'focus'`),
+    check("tester_goals_role_check", sql`${t.role} in ('focus', 'maintenance', 'dropped')`),
+  ],
+);
+
 export const PLAN_STATUSES = ["draft", "locked"] as const;
+/** How a version after lock differs: deepen keeps the streak, upgrade starts a new one, other keeps it. */
+export const CHANGE_KINDS = ["deepen", "upgrade", "other"] as const;
+export type ChangeKind = (typeof CHANGE_KINDS)[number];
 export const PROOF_METHODS = ["photo", "screenshot", "voice"] as const;
 export const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
@@ -196,6 +234,8 @@ export const plans = pgTable(
     commitment: text("commitment"),
     /** A temporary lighter plan's last local day; after it, the version before applies again. */
     endsOn: date("ends_on", { mode: "string" }),
+    /** Versions after the first: how it differs from the one before. Null for a goal's first lock. */
+    changeKind: text("change_kind", { enum: CHANGE_KINDS }),
     /** Every locked version waits for a founder look. Nobody is notified yet. */
     needsReview: boolean("needs_review").notNull().default(false),
     lockedAt: timestamp("locked_at", { withTimezone: true }),
@@ -207,6 +247,139 @@ export const plans = pgTable(
     index("plans_tester_idx").on(t.testerId),
     check("plans_status_check", sql`${t.status} in ('draft', 'locked')`),
     check("plans_proof_check", sql`${t.proof} in ('photo', 'screenshot', 'voice')`),
+    check("plans_change_kind_check", sql`${t.changeKind} in ('deepen', 'upgrade', 'other')`),
+  ],
+);
+
+export const CHECKIN_ANSWERS = ["kept_up", "mostly", "stopped"] as const;
+export type CheckinAnswer = (typeof CHECKIN_ANSWERS)[number];
+
+/** A maintenance goal's light self-reported question, folded into a kickoff; the answer, once they give one. */
+export const maintenanceCheckins = pgTable(
+  "maintenance_checkins",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    goalSlug: text("goal_slug")
+      .notNull()
+      .references(() => goals.slug),
+    /** Their local date it was asked. */
+    date: date("date", { mode: "string" }).notNull(),
+    /** The text that asked it. */
+    messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
+    /** Null until they answer; "mostly" still counts as kept up. */
+    answer: text("answer", { enum: CHECKIN_ANSWERS }),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("maintenance_checkins_tester_goal_idx").on(t.testerId, t.goalSlug, t.date),
+    check("maintenance_checkins_answer_check", sql`${t.answer} in ('kept_up', 'mostly', 'stopped')`),
+  ],
+);
+
+export const SUGGESTION_KINDS = ["deepen", "upgrade", "new_focus"] as const;
+export const SUGGESTION_SOURCES = ["coach", "tester", "founder"] as const;
+export const SUGGESTION_DECISIONS = ["waiting", "approved", "changed", "rejected"] as const;
+export const SUGGESTION_OUTCOMES = ["delivered", "agreed", "declined"] as const;
+
+/**
+ * One record per next step: who raised it, what and why, the founders' decision and what happened
+ * after. Never deleted: it's the coach's future training material.
+ */
+export const suggestions = pgTable(
+  "suggestions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    /** The goal it builds on. */
+    goalSlug: text("goal_slug")
+      .notNull()
+      .references(() => goals.slug),
+    kind: text("kind", { enum: SUGGESTION_KINDS }).notNull(),
+    raisedBy: text("raised_by", { enum: SUGGESTION_SOURCES }).notNull(),
+    /** A founder's name, when a founder raised it. */
+    raisedByName: text("raised_by_name"),
+    proposal: text("proposal").notNull(),
+    /** The coach's reasoning (or the tester's words, for their own request). */
+    reasoning: text("reasoning"),
+    /** new_focus only: the goal they'd move to. */
+    newGoalSlug: text("new_goal_slug").references(() => goals.slug),
+    decision: text("decision", { enum: SUGGESTION_DECISIONS }).notNull().default("waiting"),
+    decidedBy: text("decided_by"),
+    decisionReason: text("decision_reason"),
+    /** What was approved, when the founders changed it. */
+    decidedKind: text("decided_kind", { enum: SUGGESTION_KINDS }),
+    decidedProposal: text("decided_proposal"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    outcome: text("outcome", { enum: SUGGESTION_OUTCOMES }),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    outcomeAt: timestamp("outcome_at", { withTimezone: true }),
+    /** The plan version it made. */
+    planId: uuid("plan_id").references(() => plans.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("suggestions_tester_idx").on(t.testerId, t.createdAt),
+    check("suggestions_kind_check", sql`${t.kind} in ('deepen', 'upgrade', 'new_focus')`),
+    check("suggestions_raised_by_check", sql`${t.raisedBy} in ('coach', 'tester', 'founder')`),
+    check("suggestions_decision_check", sql`${t.decision} in ('waiting', 'approved', 'changed', 'rejected')`),
+    check("suggestions_decided_kind_check", sql`${t.decidedKind} in ('deepen', 'upgrade', 'new_focus')`),
+    check("suggestions_outcome_check", sql`${t.outcome} in ('delivered', 'agreed', 'declined')`),
+  ],
+);
+
+export const CONSOLE_KINDS = ["founder", "coach", "alert", "summary", "note", "request"] as const;
+export type ConsoleKind = (typeof CONSOLE_KINDS)[number];
+export const REQUEST_STATUSES = ["pending", "sent", "done", "cancelled"] as const;
+
+/**
+ * One console thread per tester (spec: GitHub issue "Founder console"): the founders' messages, the
+ * console coach's replies, alerts, weekly summaries, notes for the coach and requests to reach the tester.
+ */
+export const consoleMessages = pgTable(
+  "console_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: CONSOLE_KINDS }).notNull(),
+    /** A founder's name, "zoh" for the coach, null for alerts and summaries. */
+    author: text("author"),
+    body: text("body").notNull(),
+    /** Alerts: what kind of event (a flag kind, milestone, second_miss…). */
+    topic: text("topic"),
+    /** Alerts: one per event, so each fires once. */
+    eventKey: text("event_key").unique(),
+    /** Alerts: the one-line why, written in the background. */
+    why: text("why"),
+    planId: uuid("plan_id").references(() => plans.id, { onDelete: "set null" }),
+    suggestionId: uuid("suggestion_id").references(() => suggestions.id, { onDelete: "set null" }),
+    /** Requests: where they stand. */
+    requestStatus: text("request_status", { enum: REQUEST_STATUSES }),
+    /** Requests: send the body word for word, not in ZOH's words. */
+    exact: boolean("exact").notNull().default(false),
+    /** Requests: skip quiet hours (and only that). */
+    sendNow: boolean("send_now").notNull().default(false),
+    /** Requests: not before this. */
+    dueAt: timestamp("due_at", { withTimezone: true }),
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    /** Requests: the text to the tester that carried it. */
+    messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
+    seenAt: timestamp("seen_at", { withTimezone: true }),
+    seenBy: text("seen_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("console_messages_tester_created_idx").on(t.testerId, t.createdAt),
+    check("console_messages_kind_check", sql`${t.kind} in ('founder', 'coach', 'alert', 'summary', 'note', 'request')`),
+    check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sent', 'done', 'cancelled')`),
   ],
 );
 
@@ -420,3 +593,7 @@ export type Nudge = typeof nudges.$inferSelect;
 export type MemoryPage = typeof memoryPages.$inferSelect;
 export type MemoryFact = typeof memoryFacts.$inferSelect;
 export type MemoryLink = typeof memoryLinks.$inferSelect;
+export type TesterGoal = typeof testerGoals.$inferSelect;
+export type MaintenanceCheckin = typeof maintenanceCheckins.$inferSelect;
+export type Suggestion = typeof suggestions.$inferSelect;
+export type ConsoleMessage = typeof consoleMessages.$inferSelect;

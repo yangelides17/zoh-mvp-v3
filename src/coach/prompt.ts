@@ -150,16 +150,25 @@ function historyLines(s: CoachState, plan: Plan): string[] {
   const lines: string[] = [];
   if (plan.endsOn) lines.push(`This is a temporary lighter plan through ${plan.endsOn}; then their usual plan comes back.`);
   const recent = s.recentDays.slice(0, 7).map((d) => `${label(weekdayOf(d.date))} ${STATUS_LABELS[d.status!]}`);
-  if (recent.length === 0) return lines;
   const { streak, missesInARow, reducedInARow } = s.days;
-  lines.push(`Recent step days, newest first: ${recent.join(", ")}.`);
-  lines.push(`Streak: ${streak} step day${streak === 1 ? "" : "s"}. Missed in a row: ${missesInARow}. Reduced in a row: ${reducedInARow}.`);
+  if (recent.length === 0 && streak === 0) return lines;
+  if (recent.length) lines.push(`Recent step days, newest first: ${recent.join(", ")}.`);
+  lines.push(`Streak: ${streakLine(s, plan)}. Missed in a row: ${missesInARow}. Reduced in a row: ${reducedInARow}.`);
   if (reducedInARow >= 2 && !plan.endsOn) {
     lines.push(
       "Reduced two days in a row: ask which it is: lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until).",
     );
   }
   return lines;
+}
+
+/** The streak as a number to say as is: whether today is already in it (spec #46: today counted once). */
+function streakLine(s: CoachState, plan: Plan): string {
+  const days = (n: number) => `${n} step day${n === 1 ? "" : "s"}`;
+  const { streak, streakThrough } = s.days;
+  if (streakThrough === s.today) return `${days(streak)}, today included`;
+  if (isStepDay(plan, s.today, s.todayRow) && !s.todayRow?.status) return `${days(streak)}, not counting today (done today makes it ${streak + 1})`;
+  return days(streak);
 }
 
 function nextStepDay(plan: Plan, today: string): string | undefined {

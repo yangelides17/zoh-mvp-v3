@@ -3,7 +3,7 @@ import { and, eq, max } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
 import {
-  flags,
+  CHANGE_KINDS,
   MIN_DAYS_PER_WEEK,
   planInputs,
   plans,
@@ -15,10 +15,12 @@ import {
   type PlanInput,
   type Tester,
 } from "../db/schema.js";
+import { raiseAlert, saveFlag } from "../console/alerts.js";
 import { optOut } from "../testers/commands.js";
+import { setFocusGoal } from "../testers/goals.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, isStepDay } from "../nudges/schedule.js";
-import { describeDays, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
+import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -61,7 +63,11 @@ const schemas = {
   propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
   change_plan: z
-    .object({ ...planFields, until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
+    .object({
+      ...planFields,
+      kind: z.enum(CHANGE_KINDS).optional(),
+      until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional(),
+    })
     .strict(),
   switch_goal: z.object({ slug: text(40), reason: text(300) }).strict(),
   mark_step_done: z
@@ -164,7 +170,15 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
       "After the plan is locked: save a change they asked for as a new version. Only the fields that change. until: only for a lighter plan for a short stretch (a trip, a rough week): its last day; then the plan before it comes back.",
     input_schema: {
       type: "object",
-      properties: { ...planProperties(), until: { type: "string", description: 'Last day, "YYYY-MM-DD"' } },
+      properties: {
+        ...planProperties(),
+        kind: {
+          type: "string",
+          enum: [...CHANGE_KINDS],
+          description: "deepen: same activity, more of it (streak goes on). upgrade: a different or harder activity (a new streak starts). other (default): time, days, proof, lighter",
+        },
+        until: { type: "string", description: 'Last day, "YYYY-MM-DD"' },
+      },
     },
   },
   {
@@ -274,13 +288,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           return { ok: false, error: "something_else needs a description and accepted (true or false)" };
         }
         if (!accepted) {
-          await db.insert(flags).values({ testerId: tester.id, kind: OFF_LIST_GOAL_FLAG, detail: description });
+          await saveFlag(db, tester.id, OFF_LIST_GOAL_FLAG, description);
           return saved(tester, `Declined and saved for the founders: ${description}. No goal set.`);
         }
       } else if (description !== undefined || accepted !== undefined) {
         return { ok: false, error: "description and accepted are only for something_else" };
       }
       await upsertPlanInputs(db, tester.id, slug, {}, description ? { goal_description: description } : undefined);
+      await setFocusGoal(db, tester.id, slug, at, "remove");
       return saved(await updateTester(db, tester.id, { goalSlug: slug }), `Goal saved: ${goal.title}`);
     }
 
@@ -354,6 +369,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .update(plans)
         .set({ status: "locked", version, startDate, commitment, needsReview: true, lockedAt: at, updatedAt: at })
         .where(eq(plans.id, draft.id));
+      await alertPlanReview(db, tester, draft.id, version, at);
       const updated = await updateTester(db, tester.id, { phase: "active" });
       const oneOff = start === "today" ? " For a one-off time today, also call move_today." : "";
       return saved(updated, `Locked (version ${version}). Day 1 is ${start} (${startDate}).${oneOff}`);
@@ -361,13 +377,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "change_plan": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet: use propose_plan." };
-      const { until, ...fields } = input as z.infer<typeof schemas.change_plan>;
+      const { until, kind = "other", ...fields } = input as z.infer<typeof schemas.change_plan>;
       if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
+      if (until !== undefined && kind !== "other") return { ok: false, error: "A temporary lighter plan is kind other." };
       const merged = mergePlan(state.plan, fields);
       if (typeof merged === "string") return { ok: false, error: merged };
       const version = await nextVersion(db, tester.id);
       const { startDate, commitment } = state.plan;
-      await db.insert(plans).values({
+      const [changed] = await db.insert(plans).values({
         testerId: tester.id,
         goalSlug: state.plan.goalSlug,
         status: "locked",
@@ -376,11 +393,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         startDate,
         commitment,
         endsOn: until ?? null,
+        changeKind: kind,
         needsReview: true,
         lockedAt: at,
-      });
+      }).returning({ id: plans.id });
+      await alertPlanReview(db, tester, changed!.id, version, at);
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
-      return saved(tester, `Changed (version ${version}): ${describePlan(merged)}.${lasts}`);
+      const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}`);
     }
 
     case "switch_goal": {
@@ -392,9 +412,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return { ok: false, error: `Switch only to a starting goal: ${listed.join(", ")}` };
       }
       if (slug === tester.goalSlug) return { ok: false, error: "That's already their goal." };
-      await db.insert(flags).values({ testerId: tester.id, kind: GOAL_SWITCH_FLAG, detail: `${tester.goalSlug} → ${slug}: ${reason}` });
+      await saveFlag(db, tester.id, GOAL_SWITCH_FLAG, `${tester.goalSlug} → ${slug}: ${reason}`);
       await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
       await db.insert(planInputs).values({ testerId: tester.id, goalSlug: slug }).onConflictDoNothing();
+      await setFocusGoal(db, tester.id, slug, at, "dropped");
       const updated = await updateTester(db, tester.id, { goalSlug: slug, phase: "planning" });
       return saved(updated, `Switched to ${goal.title}, saved for the founders with the reason.`);
     }
@@ -417,13 +438,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, yesterday)));
         if (row?.status && row.status !== "missed") return { ok: false, error: `Yesterday is already ${row.status}.` };
         await saveDay(db, state, yesterday, { ...values, proofSeen: `${seen} (dated ${dated})` }, at);
-        return saved(tester, `Yesterday (${yesterday}) marked ${marked}. Today is unchanged.`);
+        return saved(tester, `Yesterday (${yesterday}) marked ${marked}. Today is unchanged. ${await streakNow(db, state)}`);
       }
       if (state.proof.today === 0) {
         return { ok: false, error: "No photo, screenshot or voice note from them today: words alone don't mark it done. Ask for the proof." };
       }
       await saveDay(db, state, state.today, values, at);
-      return saved(tester, `Today (${state.today}) marked ${marked}. No more texts from you today unless they write.`);
+      return saved(tester, `Today (${state.today}) marked ${marked}. ${await streakNow(db, state)} No more texts from you today unless they write.`);
     }
 
     case "proof_unclear": {
@@ -448,7 +469,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "flag_proof_pattern": {
       const { reason } = input as z.infer<typeof schemas.flag_proof_pattern>;
-      await db.insert(flags).values({ testerId: tester.id, kind: PROOF_PATTERN_FLAG, detail: reason });
+      await saveFlag(db, tester.id, PROOF_PATTERN_FLAG, reason);
       return saved(tester, "Saved for the founders. Say nothing about it to them.");
     }
 
@@ -469,6 +490,18 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
     }
   }
+}
+
+/** The streak after a day was marked, as a number to say as is (spec #46: today counted once). */
+async function streakNow(db: Db, state: CoachState): Promise<string> {
+  const { streak, streakThrough } = await loadDaySummary(db, state.tester.id, state.plan!.goalSlug, state.today);
+  const today = streakThrough === state.today ? ", today included" : "";
+  return `Streak now: ${streak} step day${streak === 1 ? "" : "s"}${today}.`;
+}
+
+/** Every locked version waits for a founder look: one console alert each. */
+async function alertPlanReview(db: Db, tester: Tester, planId: string, version: number, at: Date): Promise<void> {
+  await raiseAlert(db, { testerId: tester.id, topic: "plan_review", key: `plan_review:${planId}`, body: `Plan version ${version} to review`, planId, at });
 }
 
 type DayValues = Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "proofVerdict" | "proofSeen" | "proofPendingAt">>;

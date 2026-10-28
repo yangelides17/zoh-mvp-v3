@@ -1,0 +1,39 @@
+{
+  "id": "streak-counts-today-once",
+  "title": "The done celebration's streak counts today once",
+  "origin": "Bug #46: the celebration gave a streak one higher than the record (seen in memory/progress-path and memory/what-you-know-and-forget)",
+  "seed": {
+    "name": "Dana",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "Atomic Habits", "where": "the couch", "when": "8 pm", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Night 5 in the books, Dana. Same deal tomorrow: 15 pages at 8." },
+      { "from": "tester", "text": "🙌" }
+    ],
+    "plan": {
+      "step": "15 pages of Atomic Habits",
+      "place": "the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note saying what you read",
+      "reason": "Fifteen pages keeps the book moving without eating the evening.",
+      "minutes": 25,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" },
+      { "days_ago": 5, "status": "done" }
+    ]
+  },
+  "startTime": "20:35",
+  "timeZone": "America/New_York",
+  "testerLines": ["[voice: Just finished fifteen pages of Atomic Habits on the couch, I am on page ninety four now] done!"],
+  "whatWentWrong": "In #46, ZOH said \"that's 6 days in a row\" with 5 step days on record, today included: it counted today twice.",
+  "shouldHaveHappened": "ZOH counts the voice note as proof and celebrates in one or two short sentences. If it mentions the streak, the number is 6 (five days before today, plus today, counted once), never 7. It doesn't invent other numbers."
+}
