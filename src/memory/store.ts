@@ -42,6 +42,13 @@ function prefixOf(ref: string, kind: "p" | "f" | "m"): string | undefined {
   return /^[0-9a-f-]{4,36}$/.test(raw) ? raw : undefined;
 }
 
+/**
+ * When a text happened: Sendblue's sent time (what the nudge tick reads too), else when it was
+ * stored. Memory files texts into days by this.
+ */
+export const sentTime = sql<Date>`coalesce(${messages.sentAt}, ${messages.createdAt})`;
+export const messageTime = (m: Pick<Message, "sentAt" | "createdAt">): Date => m.sentAt ?? m.createdAt;
+
 /** Texts memory may read for this tester: since their context started and since "forget everything". */
 export function memoryStart(tester: Pick<Tester, "contextStartedAt" | "memorySince">): Date {
   return tester.memorySince && tester.memorySince > tester.contextStartedAt ? tester.memorySince : tester.contextStartedAt;
@@ -356,11 +363,11 @@ export async function timeline(db: Db, tester: Tester, limit = 30): Promise<Time
     .select()
     .from(messages)
     .where(and(eq(messages.contactNumber, tester.phone), isNotNull(messages.mediaUrl), gte(messages.createdAt, memoryStart(tester))))
-    .orderBy(desc(messages.createdAt), desc(messages.id))
+    .orderBy(desc(sentTime), desc(messages.id))
     .limit(limit);
   const items: TimelineItem[] = [
     ...pages.map((p) => ({ ref: pageRef(p.id), kind: p.kind, title: p.title, summary: p.summary, at: p.updatedAt })),
-    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: mediaLabel(m), summary: mediaText(m), at: m.createdAt })),
+    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: mediaLabel(m), summary: mediaText(m), at: messageTime(m) })),
   ];
   return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
 }
@@ -439,7 +446,7 @@ export async function searchMemory(db: Db, tester: Tester, query: string, limit 
       ref: messageRef(r.message.id),
       where: r.message.direction === "inbound" ? (r.message.mediaUrl ? `their ${mediaLabel(r.message)}` : "their text") : "ZOH's text",
       text: r.message.mediaUrl ? mediaText(r.message) : (r.message.content ?? ""),
-      at: r.message.createdAt,
+      at: messageTime(r.message),
       score: r.score,
     })),
   ];
@@ -453,12 +460,19 @@ export async function searchMemory(db: Db, tester: Tester, query: string, limit 
 export async function textsOn(db: Db, tester: Tester, date: string): Promise<Message[]> {
   const start = zonedTime(date, "00:00", tester.timeZone);
   const end = zonedTime(addDays(date, 1), "00:00", tester.timeZone);
-  const from = memoryStart(tester) > start ? memoryStart(tester) : start;
   return db
     .select()
     .from(messages)
-    .where(and(eq(messages.contactNumber, tester.phone), gte(messages.createdAt, from), lt(messages.createdAt, end)))
-    .orderBy(asc(messages.createdAt), asc(messages.id));
+    .where(
+      and(
+        eq(messages.contactNumber, tester.phone),
+        // Context start is a stored time (like the coach's history); the day is by sent time.
+        gte(messages.createdAt, memoryStart(tester)),
+        gte(sentTime, start),
+        lt(sentTime, end),
+      ),
+    )
+    .orderBy(asc(sentTime), asc(messages.id));
 }
 
 /** Locked plan versions for a goal, oldest first: the step path. */

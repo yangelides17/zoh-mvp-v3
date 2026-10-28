@@ -88,12 +88,17 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
 
 /** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */
 export function gradeJsonSchema(rubric: RubricRule[]): Record<string, unknown> {
+  const idsFor = (scope: RubricRule["scope"]) => {
+    const ids = rubric.filter((r) => r.scope === scope).map((r) => r.id);
+    // An enum can't be empty (memory grades no single text); parseGrade moves misfiled checks.
+    return ids.length ? ids : rubric.map((r) => r.id);
+  };
   const check = (scope: RubricRule["scope"]) => ({
     type: "object",
     additionalProperties: false,
     required: ["rule", "pass", "borderline", "reason"],
     properties: {
-      rule: { type: "string", enum: rubric.filter((r) => r.scope === scope).map((r) => r.id) },
+      rule: { type: "string", enum: idsFor(scope) },
       pass: { type: "boolean" },
       borderline: { type: "boolean" },
       reason: { type: "string" },

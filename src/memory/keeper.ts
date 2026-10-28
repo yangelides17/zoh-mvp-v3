@@ -24,6 +24,7 @@ import {
   mediaLabel,
   mediaText,
   messageRef,
+  messageTime,
   observationCount,
   pageRef,
   removeFact,
@@ -291,7 +292,7 @@ async function writeDailyDoc(db: Db, tester: Tester, date: string, doc: { title:
 export function transcriptLine(m: Message, tester: Tester): string {
   const who = m.direction === "inbound" ? "Tester" : "ZOH";
   const media = m.mediaUrl ? `[${mediaLabel(m)}: ${m.description ?? m.transcript ?? "not described"}] ` : "";
-  return `[${localClock(m.createdAt, tester.timeZone)}] ${messageRef(m.id)} ${who}: ${media}${m.content ?? ""}`.trimEnd();
+  return `[${localClock(messageTime(m), tester.timeZone)}] ${messageRef(m.id)} ${who}: ${media}${m.content ?? ""}`.trimEnd();
 }
 
 /** The part of the system prompt about this tester: their pages and the index. */
