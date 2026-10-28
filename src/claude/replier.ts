@@ -12,9 +12,24 @@ export interface Turn {
 
 export interface ReplyInput {
   tester: Tester;
-  /** The conversation since the tester's context started, oldest first, ending with their text. */
+  /**
+   * The texts the coach reads word for word, oldest first, ending with their text: the whole
+   * conversation before the plan locks; after it, the last two days (memory covers the rest).
+   */
   turns: Turn[];
   now: Date;
+  /** The stored text being answered: what a preference saved in this reply cites. */
+  messageId?: string;
+  /** Called once per reply with the tokens it used, for the message's timings. */
+  onUsage?: (usage: TokenUsage) => void;
+}
+
+/** Tokens one reply used across its Claude calls. */
+export interface TokenUsage {
+  input: number;
+  cacheRead: number;
+  cacheWrite: number;
+  output: number;
 }
 
 /** Claude answered but wrote nothing to send (a refusal or an empty turn), as opposed to failing. */
@@ -30,6 +45,8 @@ export interface NudgeRequest {
   now: Date;
   /** Which nudge to write (kickoff, rest_day, checkin…); the coach's prompt defines each. */
   moment: NudgeMoment;
+  /** The last text ZOH sent them for this same moment, so this one reads differently. */
+  previous?: string;
 }
 
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
@@ -85,6 +102,7 @@ export interface ModelResponse {
   /** Every block as returned, thinking included: tool loops must send these back unchanged. */
   raw?: Anthropic.ContentBlockParam[];
   stopReason: string | null;
+  usage?: TokenUsage;
 }
 
 /** The seam between the coach and Anthropic's API; `test/helpers.ts` has a scripted fake. */
@@ -124,7 +142,14 @@ export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
         if (b.type === "text") content.push({ type: "text", text: b.text });
         else if (b.type === "tool_use") content.push({ type: "tool_use", id: b.id, name: b.name, input: b.input });
       }
-      return { content, raw: response.content as Anthropic.ContentBlockParam[], stopReason: response.stop_reason };
+      const u = response.usage;
+      const usage: TokenUsage = {
+        input: u.input_tokens,
+        cacheRead: u.cache_read_input_tokens ?? 0,
+        cacheWrite: u.cache_creation_input_tokens ?? 0,
+        output: u.output_tokens,
+      };
+      return { content, raw: response.content as Anthropic.ContentBlockParam[], stopReason: response.stop_reason, usage };
     },
     async check() {
       await client.models.retrieve(opts.model);

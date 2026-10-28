@@ -2,7 +2,8 @@ import type { FastifyBaseLogger } from "fastify";
 import { NoReplyTextError, type Turn, type Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
-import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
+import { insertOutbound, mergeTimings, updateMessage } from "../db/messages.js";
+import { coachHistory } from "../memory/context.js";
 import type { Message, Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
@@ -96,7 +97,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     image = result?.image;
   }
 
-  // 3. Reply text from the coach, or the fallback. The coach sees everything since the tester's context started.
+  // 3. Reply text from the coach, or the fallback. Before the plan locks it reads the whole conversation; after, two days plus memory.
   let replyText = FALLBACK_REPLY;
   if (deps.replier) {
     const claudeStart = now();
@@ -108,9 +109,20 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
       try {
         // Reloaded each attempt: a failed attempt may already have saved answers or moved the tester on.
         const current = (attempt > 1 && (await getTester(db, tester.id))) || tester;
-        const history = await recentConversation(db, inbound.contactNumber, COACH_HISTORY_CAP, current.contextStartedAt);
+        const history = await coachHistory(db, current, now(), COACH_HISTORY_CAP);
         const turns = toTurns(history, inbound.id, { transcript, image });
-        replyText = await replier.reply({ tester: current, turns, now: now() });
+        replyText = await replier.reply({
+          tester: current,
+          turns,
+          now: now(),
+          messageId: inbound.id,
+          onUsage: (u) => {
+            timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
+            timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;
+            timings.claude_cache_write_tokens = Number(timings.claude_cache_write_tokens ?? 0) + u.cacheWrite;
+            timings.claude_output_tokens = Number(timings.claude_output_tokens ?? 0) + u.output;
+          },
+        });
         break;
       } catch (err) {
         errors.push(`claude (attempt ${attempt}): ${errorMessage(err)}`);
@@ -340,7 +352,8 @@ export function toTurns(
       const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl);
       if (kind === "audio") parts.push(transcript ? `[Voice note transcript]: ${transcript}` : "[Sent a voice note]");
       else if (isCurrent && current.image) parts.push("[Sent a photo]");
-      else if (kind === "image") parts.push(isCurrent ? "[Sent a photo that couldn't be opened]" : "[Sent a photo earlier]");
+      else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
+      else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
       else parts.push(`[Sent a ${kind} attachment]`);
     }
     if (m.content?.trim()) parts.push(m.content.trim());

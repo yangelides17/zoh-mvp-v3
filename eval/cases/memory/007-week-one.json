@@ -1,0 +1,45 @@
+{
+  "id": "week-one",
+  "title": "Day 3: memory doesn't make ZOH act like an old friend",
+  "origin": "Spec #8 (coach memory), part 2: no overfamiliarity in the first week",
+  "seed": {
+    "name": "Leo",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "50 minutes on my thesis", "where": "the library", "when": "10 am", "how_long": "50 min" },
+    "history": [
+      { "from": "zoh", "text": "Leo, 50 minutes on the thesis at the library at 10." },
+      { "from": "tester", "text": "done, did the lit review section" },
+      { "from": "zoh", "text": "Day 2. Lit review moving." }
+    ],
+    "plan": {
+      "step": "50 minutes of focused thesis work",
+      "place": "the library",
+      "time": "10:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "screenshot",
+      "proof_note": "the focus timer",
+      "reason": "One protected block a day finishes a thesis.",
+      "minutes": 50,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory": {
+      "pages": [
+        { "kind": "self", "facts": [{ "text": "PhD student writing his thesis", "days_ago": 2 }, { "text": "Got distracted by his phone on day 1", "days_ago": 2 }] }
+      ],
+      "daily": [
+        { "days_ago": 2, "title": "Day 1, phone distraction", "summary": "Did the block but checked his phone a lot.", "body": "Leo did 50 minutes but said he kept checking his phone." },
+        { "days_ago": 1, "title": "Day 2, lit review", "summary": "50 minutes on the lit review.", "body": "Done at the library." }
+      ]
+    }
+  },
+  "startTime": "11:05",
+  "testerLines": ["done. phone was in my bag this time", "ugh the methods section is gonna be brutal tomorrow"],
+  "whatWentWrong": "New case, not a past mistake: memory exists but it's only day 3.",
+  "shouldHaveHappened": "ZOH can note the phone-in-bag win against day 1 in passing, but doesn't act like it knows Leo well: no nicknames, no 'I know you', no claimed patterns or inside jokes after two days, and nothing invented about his thesis beyond what he said."
+}

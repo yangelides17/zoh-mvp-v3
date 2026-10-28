@@ -1,0 +1,67 @@
+{
+  "id": "three-days-fresh",
+  "title": "Three mornings of kickoffs stay fresh, drawing on memory",
+  "origin": "Coach memory (#8), part 2: Yanni asked that nudges use memory for variety instead of repeating the same text (Decision on #8)",
+  "seed": {
+    "name": "Mike",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "Project Hail Mary", "where": "bed", "when": "9 pm", "how_long": "20 min", "tracks_with": "doesn't track it" },
+    "history": [
+      { "from": "zoh", "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight." },
+      { "from": "tester", "text": "done, 10 pages" },
+      { "from": "zoh", "text": "Five in a row. Love it." }
+    ],
+    "plan": {
+      "step": "10 pages of Project Hail Mary",
+      "place": "bed",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 12
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done_reduced" },
+      { "days_ago": 5, "status": "done" }
+    ],
+    "memory": {
+      "pages": [
+        { "kind": "self", "facts": [{ "text": "Works as a nurse, mostly day shifts", "days_ago": 12 }, { "text": "Texts short and lowercase, says lol", "section": "voice", "days_ago": 11 }] },
+        {
+          "kind": "person",
+          "title": "Ana (his sister)",
+          "summary": "His sister; reads along with him so they can talk about the books.",
+          "related_to_goal": true,
+          "facts": [{ "text": "Reads along with Mike; always a few chapters ahead", "days_ago": 10 }]
+        },
+        { "kind": "goal", "facts": [{ "text": "Wants to read so he has something to talk about with Ana besides work", "days_ago": 12 }, { "text": "Hasn't finished a book since college", "days_ago": 12 }] }
+      ],
+      "daily": [
+        { "days_ago": 4, "title": "Long shift, 5 pages", "summary": "Did a smaller 5 pages after a 12-hour shift.", "body": "Mike was wiped after a double; did 5 pages instead of 10." },
+        { "days_ago": 2, "title": "Hit the halfway point", "summary": "Reached the middle of Project Hail Mary.", "body": "Mike said he's halfway through and the book just got good." },
+        { "days_ago": 1, "title": "10 pages", "summary": "Read 10 pages.", "body": "Done by 9:30." }
+      ]
+    }
+  },
+  "startTime": "08:30",
+  "testerLines": [
+    "advance to 09:30",
+    "yep tonight",
+    "advance to 21:40",
+    "done, 10 pages",
+    "advance to 09:30",
+    "ya",
+    "advance to 21:40",
+    "done",
+    "advance to 09:30"
+  ],
+  "whatWentWrong": "New case, not a past mistake: Yanni wants nudges to draw on memory so they don't read as the same scripted text every day.",
+  "shouldHaveHappened": "Each of the three morning kickoffs names tonight's 10 pages but feels different from the others: a different opener and a different specific detail from memory or the record (e.g. his streak, being halfway through the book, Ana reading along, why he started, the long-shift day), stated accurately (his streak goes up by one each day he reads). Each kickoff stays short: one to three sentences, one question. None reads like a template of the one before, and none invents details."
+}

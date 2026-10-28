@@ -56,6 +56,32 @@ export const seedSchema = z.object({
   step_days: z
     .array(z.object({ days_ago: z.number().int().min(1).max(30), status: z.enum(["done", "done_reduced", "missed"]) }))
     .default([]),
+  /**
+   * Coach memory from before the run (memory feature): what the overnight pass would have filed
+   * over earlier weeks. Facts carry no source text; "days_ago" sets when each was learned.
+   */
+  memory: z
+    .object({
+      pages: z
+        .array(
+          z.object({
+            kind: z.enum(["self", "preferences", "goal", "person", "subject"]),
+            /** Person and subject pages only (self, preferences and the goal page have fixed titles). */
+            title: z.string().optional(),
+            summary: z.string().optional(),
+            facts: z.array(z.object({ text: z.string(), section: z.enum(["stated", "learned", "voice", "observation"]).optional(), days_ago: z.number().int().min(0).max(60) })),
+            /** Linked as related to the current goal page. */
+            related_to_goal: z.boolean().default(false),
+          }),
+        )
+        .default([]),
+      daily: z.array(z.object({ days_ago: z.number().int().min(1).max(60), title: z.string(), summary: z.string(), body: z.string() })).default([]),
+      /** Locked plan versions before the seeded plan, oldest first. */
+      earlier_plans: z.array(z.object({ step: z.string(), days_ago: z.number().int().min(1).max(60) })).default([]),
+      /** Goals they had before the seeded one, oldest first; each switched to the next (the last to the seeded goal). */
+      earlier_goals: z.array(z.object({ goal: z.string(), reason: z.string(), days_ago: z.number().int().min(1).max(60) })).default([]),
+    })
+    .optional(),
 });
 export type Seed = z.infer<typeof seedSchema>;
 

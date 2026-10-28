@@ -2,6 +2,7 @@ import type { Db } from "../db/client.js";
 import type { MemoryFact, MemoryPage, Tester } from "../db/schema.js";
 import { describePlan } from "../coach/tools.js";
 import { localDate } from "../coach/state.js";
+import { weekdayOf } from "../nudges/schedule.js";
 import {
   factRef,
   factsOf,
@@ -26,6 +27,7 @@ const SECTION_TITLES: Record<string, string> = {
   learned: "Learned (a pattern seen over several days)",
   observation: "Observations (evidence, not yet a pattern)",
   voice: "How they text",
+  forget: "Asked to forget (never bring up, never file)",
 };
 
 function shortDate(d: string | Date, tester: Tester): string {
@@ -33,6 +35,11 @@ function shortDate(d: string | Date, tester: Tester): string {
   const [, m, day] = date.split("-");
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${months[Number(m) - 1]} ${Number(day)}`;
+}
+
+function weekdayLabel(date: string): string {
+  const d = weekdayOf(date);
+  return d[0]!.toUpperCase() + d.slice(1);
 }
 
 function factLine(f: MemoryFact, tester: Tester, opts: RenderOptions): string {
@@ -45,7 +52,8 @@ function factLine(f: MemoryFact, tester: Tester, opts: RenderOptions): string {
 
 /** One page, in full. */
 export async function renderPage(db: Db, tester: Tester, page: MemoryPage, opts: RenderOptions = {}): Promise<string> {
-  const lines = [`${pageRef(page.id)} · ${page.title} [${page.kind}${page.status === "past" ? ", past" : ""}]`];
+  const day = page.kind === "daily" && page.date ? `${weekdayLabel(page.date)} ${shortDate(page.date, tester)} · ` : "";
+  const lines = [`${pageRef(page.id)} · ${day}${page.title} [${page.kind}${page.status === "past" ? ", past" : ""}]`];
   if (page.summary) lines.push(page.summary);
   if (page.kind === "daily") {
     if (page.body) lines.push(page.body);
@@ -55,7 +63,7 @@ export async function renderPage(db: Db, tester: Tester, page: MemoryPage, opts:
   const facts = await factsOf(db, [page.id]);
   const sections = new Map<string, MemoryFact[]>();
   for (const f of facts) sections.set(f.section, [...(sections.get(f.section) ?? []), f]);
-  const order = ["", "voice", "stated", "learned", "observation", ...[...sections.keys()].filter((s) => !(s in SECTION_TITLES) && s !== "")];
+  const order = ["", "voice", "stated", "learned", "observation", "forget", ...[...sections.keys()].filter((s) => !(s in SECTION_TITLES) && s !== "")];
   for (const section of new Set(order)) {
     const list = sections.get(section);
     if (!list?.length) continue;

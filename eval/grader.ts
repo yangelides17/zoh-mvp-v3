@@ -79,7 +79,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
   const memory = input.memory
     ? [
         "",
-        "=== ZOH's memory after the overnight pass (pages it filed from these texts; grade the memory rules against it) ===",
+        "=== ZOH's memory at the end (what ZOH knew about them, plus anything the overnight pass filed if the clock passed 3 am; grade the memory rules against it) ===",
         input.memory,
       ]
     : [];

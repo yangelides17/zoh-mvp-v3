@@ -191,6 +191,16 @@ export const FEATURES: Record<string, FeatureDef> = {
           "Makes pages for real parts of the tester's life, files general likes and opinions on the right person's page, and makes no pages for passing mentions or general topics",
       },
       { id: "learned-not-single", scope: "conversation", label: "Doesn't record a learned preference from a single instance" },
+      { id: "recall", scope: "text", label: "Uses a relevant detail from 1+ weeks back naturally, without reciting it" },
+      { id: "stated-pref", scope: "text", label: "Follows a stated preference days later" },
+      { id: "honest-memory", scope: "text", label: "Never states a fact that isn't in memory" },
+      { id: "what-you-know", scope: "text", label: "Answers \"what do you know about me\" honestly in a few lines" },
+      { id: "not-overfamiliar", scope: "text", label: "No overfamiliarity in the first week" },
+      {
+        id: "progress-path",
+        scope: "conversation",
+        label: "\"How much progress have I made?\" traces the whole path back to the start, accurately",
+      },
     ],
   },
 };

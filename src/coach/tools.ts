@@ -56,7 +56,6 @@ const schemas = {
     .strict(),
   set_time_zone: z.object({ city: text(80), time_zone: text(60) }).strict(),
   set_quiet_hours: z.object({ start: clock, end: clock }).strict(),
-  save_style_note: z.object({ note: text(120) }).strict(),
   opt_out: z.object({}).strict(),
   propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
@@ -124,11 +123,6 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
       properties: { start: { type: "string" }, end: { type: "string" } },
       required: ["start", "end"],
     },
-  },
-  {
-    name: "save_style_note",
-    description: 'Save a request about how you coach or text ("no emojis", "chill out").',
-    input_schema: { type: "object", properties: { note: { type: "string" } }, required: ["note"] },
   },
   {
     name: "opt_out",
@@ -278,12 +272,6 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const { start, end } = input as z.infer<typeof schemas.set_quiet_hours>;
       if (start === end) return { ok: false, error: "start and end can't be the same" };
       return saved(await updateTester(db, tester.id, { quietHoursStart: start, quietHoursEnd: end }), `Quiet hours: ${start} to ${end}`);
-    }
-
-    case "save_style_note": {
-      const { note } = input as z.infer<typeof schemas.save_style_note>;
-      const notes = tester.styleNotes ? `${tester.styleNotes}; ${note}` : note;
-      return saved(await updateTester(db, tester.id, { styleNotes: notes }), `Style note saved: ${note}`);
     }
 
     case "opt_out": {

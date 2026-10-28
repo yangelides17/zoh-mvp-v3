@@ -66,6 +66,7 @@ How to file:
 - Link pages that belong together ("related": Ana ↔ the reading goal she does with them).
 - Never store sensitive health, mental-health, legal or financial details beyond what their step needs (a bad knee that changes their workout: yes; a diagnosis, medication or money trouble: no), and never anyone's phone number, email or address.
 - ZOH's own texts are context, not facts about the tester.
+- Anything listed under "Asked to forget" on the preferences page is never filed, and any fact about it is removed.
 
 Preferences from evidence:
 - record_observation when today shows how they respond to a kind of coaching: which texts got a quick reply or a done step and which were ignored (hype or calm, a challenge or a reason why, morning or evening, a joke or straight talk). The label names what today's evidence shows, and every observation under a label must support it (observations are counted toward that pattern): a late reply never goes under "replies fast…". Reuse an existing label only when today shows the same thing.
