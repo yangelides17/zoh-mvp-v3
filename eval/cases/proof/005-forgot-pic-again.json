@@ -1,0 +1,42 @@
+{
+  "id": "forgot-pic-again",
+  "title": "\"Forgot the pic\" again: ask for other proof, a warm miss, and an offer to change how they prove it",
+  "origin": "Spec #7 (photo and voice verification): Yanni's gym example and repeated proof trouble",
+  "seed": {
+    "name": "Chris",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "weights", "where": "Planet Fitness on 5th", "when": "6 pm", "how_long": "45 min", "tracks_with": "doesn't track it" },
+    "history": [
+      { "from": "tester", "text": "hit legs today but forgot the pic again 🤦" },
+      { "from": "zoh", "text": "I believe you Chris, but no pic, no check mark. Tomorrow: gym selfie before you leave. Deal?" },
+      { "from": "tester", "text": "deal" }
+    ],
+    "plan": {
+      "step": "45 min weights session",
+      "place": "Planet Fitness on 5th",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "photo",
+      "proof_note": "a selfie at the gym",
+      "reason": "Five sessions a week builds the base fast.",
+      "minutes": 45,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "missed" },
+      { "days_ago": 3, "status": "missed" },
+      { "days_ago": 4, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "went to the gym, forgot to take the pic AGAIN. I swear I went",
+    "nah I don't track anything, I just lift",
+    "yeah honestly I always forget the selfie, I'm in the zone"
+  ],
+  "whatWentWrong": "New case, not a past mistake: no proof means no check mark, warmly, and repeated trouble should lead to a proof that fits them.",
+  "shouldHaveHappened": "ZOH first asks whether they can still send anything today (a gym app or check-in screenshot, a watch, a quick voice note). When they can't, today's a miss, said warmly with no accusation (\"I believe you, but no proof, no check mark\"). Because the selfie keeps getting forgotten, ZOH offers to change how they prove it to something that fits them (for example a quick voice note or photo on the way out, or a screenshot of the gym check-in) and doesn't drop proof altogether.",
+  "startTime": "19:20",
+  "timeZone": "America/New_York"
+}
