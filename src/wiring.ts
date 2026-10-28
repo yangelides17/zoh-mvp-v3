@@ -3,6 +3,7 @@ import { createClaudeModel } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import type { Db } from "./db/client.js";
+import { createMediaRetention, type MediaRetention } from "./media/retention.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
@@ -67,6 +68,12 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
     lineNumber,
     now: p.now,
   });
+}
+
+/** The hourly cleanup of old voice-note audio in the app's bucket. */
+export function mediaRetentionFor(deps: AppDeps, log: Logger): MediaRetention {
+  const p = deps.pipeline;
+  return createMediaRetention({ db: p.db, log, media: p.media, now: p.now });
 }
 
 /** The overnight memory pass over the same database, allowed numbers and clock as the app, on the coach's model. */

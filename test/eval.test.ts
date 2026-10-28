@@ -14,6 +14,7 @@ import { overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
 import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
+import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
 import { DONE, cleanSimulatorText, simulatedTester } from "../eval/simulator.js";
 import type { Check, ConversationPlan, Grade, GradedConversation, TranscriptLine } from "../eval/types.js";
@@ -137,6 +138,42 @@ describe("eval: nudge cases", () => {
     expect(cases.map((c) => c.id)).toEqual(["full-pushy-day", "silent-day", "off-day", "cant-today", "day-after-a-miss", "day-three", "three-days-fresh"]);
     expect(cases.every((c) => c.seed?.plan)).toBe(true);
     expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);
+  });
+});
+
+describe("eval: proof cases send photos and voice notes", () => {
+  it("parses media lines into a caption and a URL the eval serves", async () => {
+    expect(parseMediaLine("[photo dark-selfie.jpg: a dark selfie] phone's down")).toEqual({
+      caption: "phone's down",
+      mediaUrl: "https://eval.media/photo/dark-selfie.jpg",
+    });
+    const voice = parseMediaLine("[voice: ten pages done]")!;
+    expect(voice.caption).toBe("");
+    expect(await evalTranscriber.transcribe((await evalMediaFetcher(voice.mediaUrl)).bytes, "v.caf", "audio/x-caf")).toBe("ten pages done");
+    expect(parseMediaLine("just text")).toBeUndefined();
+    await expect(evalMediaFetcher("https://eval.media/photo/missing.jpg")).rejects.toThrow();
+  });
+
+  it("every proof case loads, and its photos and voice notes reach the coach through the real pipeline", async () => {
+    const cases = await loadCases("proof");
+    expect(cases.map((c) => c.id)).toEqual(["dark-selfie-counts", "bright-hallway-pushback", "blurry-never-clears", "voice-note-off-topic", "forgot-pic-again"]);
+    for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic")) {
+      const plan = planConversations([], [c], { runs: 1 })[0]!;
+      const echo = new EchoReplier();
+      const result = await runConversation(plan, scriptedTester(c.testerLines), { maxTurns: c.testerLines.length + 1, index: 3, env: {}, replier: echo });
+      expect(result.error).toBeUndefined();
+      // The grader reads the line as written, bracketed description included.
+      expect(result.transcript[0]!.text).toBe(c.testerLines[0]);
+      const first = echo.received[0]!.at(-1)!;
+      if (c.id === "dark-selfie-counts") {
+        expect(first.image?.mediaType).toBe("image/jpeg");
+        expect(first.text).toContain("[Sent a photo]");
+        expect(first.text).not.toContain("dark, flash-lit");
+      } else {
+        expect(first.image).toBeUndefined();
+        expect(first.text).toContain("[Voice note transcript]: Ugh today was so long.");
+      }
+    }
   });
 });
 

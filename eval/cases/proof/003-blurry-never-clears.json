@@ -1,0 +1,40 @@
+{
+  "id": "blurry-never-clears",
+  "title": "A blurry photo: a natural clarifying ask, then a warm miss when no real proof comes",
+  "origin": "Spec #7 (photo and voice verification): unclear proof is a conversation, ending warmly",
+  "seed": {
+    "name": "Yanni",
+    "goal": "bedtime",
+    "phase": "active",
+    "history_hours_ago": 10,
+    "answers": { "when": "9:45 pm", "what": "phone away and lights out" },
+    "history": [
+      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off." },
+      { "from": "tester", "text": "bet" }
+    ],
+    "plan": {
+      "step": "In bed with the phone down and lights off by 9:45 pm",
+      "place": "your bedroom",
+      "time": "21:45",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "selfie in bed with the lights off",
+      "reason": "Same time every night is what resets your sleep.",
+      "minutes": 5,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "[photo blurry.jpg: almost all a blurry dark-red smear, like a finger over the lens; nothing can be made out] done",
+    "ugh my camera's being weird",
+    "phone's at 1% I can't keep doing this, just trust me"
+  ],
+  "whatWentWrong": "New case, not a past mistake: an unclear photo should start a light conversation, not count and not turn into an interrogation.",
+  "shouldHaveHappened": "ZOH says honestly it can't make anything out and lightly asks for another shot (no suspicion). When the camera's acting up, it keeps it easy. When they can't send one and ask to be trusted, ZOH closes it warmly along the lines of \"It's okay, I see that. Let's just make sure we get the right proof tomorrow\": tonight doesn't count, said without guilt or a lecture, and it doesn't keep asking.",
+  "startTime": "21:42",
+  "timeZone": "America/New_York"
+}

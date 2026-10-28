@@ -55,7 +55,7 @@ export interface NudgeInput {
   /** The latest locked plan for their current goal. */
   plan?: Pick<Plan, "stepTime" | "days" | "startDate" | "minutes" | "lockedAt">;
   /** Their step-day row for the service date (`serviceDate`), if any. */
-  today?: Pick<StepDay, "status" | "movedTime" | "onItAt">;
+  today?: Pick<StepDay, "status" | "movedTime" | "onItAt"> & Partial<Pick<StepDay, "proofPendingAt">>;
   /** Nudge kinds already claimed for the service date. */
   claimedToday: string[];
   lastInboundAt?: Date;
@@ -166,10 +166,12 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     }
     // A time moved for today gets its own check-in and follow-up, even if the original ones went out.
     const suffix = today?.movedTime ? `@${today.movedTime}` : "";
-    if (level === "pushy" && !merged && !today?.onItAt) {
+    // Unclear proof being sorted out in the conversation: no "did you do it?" over the top of it.
+    const proofPending = Boolean(today?.proofPendingAt);
+    if (level === "pushy" && !merged && !today?.onItAt && !proofPending) {
       slots.push({ kind: `checkin${suffix}`, moment: "checkin", from: checkinAt, until: stepAt });
     }
-    if (level !== "gentle") {
+    if (level !== "gentle" && !proofPending) {
       const doneBy = stepAt + (plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
       slots.push({ kind: `followup${suffix}`, moment: "followup", from: doneBy, until: day.end });
     }

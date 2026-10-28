@@ -7,7 +7,6 @@ import type { Db } from "../src/db/client.js";
 import { migrationsFolder } from "../src/db/paths.js";
 import * as schema from "../src/db/schema.js";
 import type { Replier } from "../src/claude/replier.js";
-import type { MediaFetcher } from "../src/media/storage.js";
 import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { NudgeScheduler } from "../src/nudges/scheduler.js";
@@ -20,6 +19,7 @@ import { desc, eq } from "drizzle-orm";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
+import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
 import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
@@ -46,11 +46,6 @@ export class RecordingSendblue implements SendblueClient {
     return true;
   }
 }
-
-/** No media in the eval yet; anything that tries to download is a bug in a scenario. */
-export const noMediaFetcher: MediaFetcher = async () => {
-  throw new Error("The eval has no media to fetch");
-};
 
 /** Fake number in the reserved 555-01xx range, with the scenario's area code. */
 export function fakeNumber(areaCode: string, index: number): string {
@@ -122,8 +117,11 @@ export async function startEvalApp(opts: {
     {
       sendblue,
       media: undefined,
-      transcriber: undefined,
-      fetchMedia: noMediaFetcher,
+      // Case photos come from eval/fixtures; voice notes carry their transcript (eval/media.ts).
+      transcriber: evalTranscriber,
+      fetchMedia: evalMediaFetcher,
+      // Photo descriptions are for memory's search, not the reply being graded: skip the extra Claude call.
+      describer: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
       ...(opts.replier ? { replier: opts.replier } : {}),
@@ -153,7 +151,7 @@ export async function startEvalApp(opts: {
 }
 
 /** Sends one tester text through the real webhook and returns ZOH's replies to it. */
-export async function textZoh(app: EvalApp, text: string, handle: string): Promise<TranscriptLine[]> {
+export async function textZoh(app: EvalApp, text: string, handle: string, mediaUrl = ""): Promise<TranscriptLine[]> {
   const before = app.sendblue.sent.length;
   const at = app.clock.now();
   const res = await app.built.app.inject({
@@ -170,7 +168,7 @@ export async function textZoh(app: EvalApp, text: string, handle: string): Promi
       number: app.phone,
       to_number: LINE,
       sendblue_number: LINE,
-      media_url: "",
+      media_url: mediaUrl,
       message_type: "message",
       group_id: "",
       service: "iMessage",
@@ -419,9 +417,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
         transcript.push(...(await advanceTo(app, advance[1]!, plan.timeZone)));
         continue;
       }
+      // The grader reads the line as written ("[photo ...: what it shows] caption"); ZOH gets the media.
       transcript.push({ from: "tester", text, at: clock.now().toISOString() });
       clock.advance(5_000);
-      transcript.push(...(await textZoh(app, text, `eval-${plan.key}-${turn}`)));
+      const media = parseMediaLine(text);
+      transcript.push(...(await textZoh(app, media?.caption ?? text, `eval-${plan.key}-${turn}`, media?.mediaUrl)));
       clock.advance(typingDelayMs(text));
     }
   } catch (err) {

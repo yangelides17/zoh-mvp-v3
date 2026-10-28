@@ -1,9 +1,10 @@
-import { and, asc, desc, eq, isNotNull, lt, ne } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, lt, lte, ne, sql } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
   flags,
   goals,
+  messages,
   planInputs,
   plans,
   stepDays,
@@ -17,6 +18,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
+import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 
@@ -56,6 +58,8 @@ export interface CoachState {
   recentDays: StepDay[];
   /** Streak and in-a-row counts, today included once it's closed. */
   days: DaySummary;
+  /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
+  proof: ProofSeen;
   /** Set when ZOH is starting a text itself rather than replying. */
   nudgeMoment?: NudgeMoment;
   /** Answers saved for goals they switched away from, to reuse where they fit. */
@@ -104,6 +108,7 @@ export async function loadCoachState(
     .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today)))
     .limit(1);
   const recentDays = await loadRecentDays(db, tester, today);
+  const proof = await loadProof(db, tester, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
   const description = inputs?.extraNotes.goal_description;
   return {
@@ -122,6 +127,7 @@ export async function loadCoachState(
     todayRow,
     recentDays,
     days: summarizeDays(todayRow?.status ? [todayRow, ...recentDays] : recentDays, testerPlans),
+    proof,
     nudgeMoment: opts.nudgeMoment,
     earlierAnswers,
     lastTesterText: opts.lastTesterText ?? "",
@@ -140,6 +146,47 @@ export async function loadRecentDays(db: Db, tester: Tester, date: string): Prom
     .orderBy(desc(stepDays.date))
     .limit(14);
   return rows;
+}
+
+export interface ProofSeen {
+  /** Sent during their local day today. */
+  today: number;
+  /** Sent since ZOH's last text: where proof for yesterday has to be. */
+  latest: number;
+}
+
+/**
+ * Counts the photos, screenshots and voice notes they sent in the last two days that fall on their
+ * local day today, and those since ZOH's last text. Videos and files don't count: ZOH can't see them.
+ */
+export async function loadProof(db: Db, tester: Tester, today: string, now: Date): Promise<ProofSeen> {
+  // When a text happened: Sendblue's sent time, else when it was stored (as memory's `sentTime`; not
+  // imported from there, since memory's store imports the coach's tools, which import this file).
+  const sentTime = sql<Date>`coalesce(${messages.sentAt}, ${messages.createdAt})`;
+  const messageTime = (m: { sentAt: Date | null; createdAt: Date }) => m.sentAt ?? m.createdAt;
+  const window = and(
+    eq(messages.contactNumber, tester.phone),
+    gte(messages.createdAt, tester.contextStartedAt),
+    gte(sentTime, new Date(now.getTime() - 2 * 86_400_000)),
+    // A few minutes' slack: Sendblue's clock can run a little ahead of ours, and the photo they just sent must count.
+    lte(sentTime, new Date(now.getTime() + 5 * 60_000)),
+  );
+  const inbound = await db
+    .select({ sentAt: messages.sentAt, createdAt: messages.createdAt, mediaUrl: messages.mediaUrl, mediaContentType: messages.mediaContentType })
+    .from(messages)
+    .where(and(window, eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl)));
+  const [lastOut] = await db
+    .select({ at: sentTime })
+    .from(messages)
+    .where(and(window, eq(messages.direction, "outbound")))
+    .orderBy(desc(sentTime))
+    .limit(1);
+  const proof = inbound.filter((m) => ["image", "audio"].includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
+  const lastOutAt = lastOut ? new Date(lastOut.at).getTime() : undefined;
+  return {
+    today: proof.filter((m) => serviceDate(messageTime(m), tester) === today).length,
+    latest: proof.filter((m) => lastOutAt === undefined || messageTime(m).getTime() > lastOutAt).length,
+  };
 }
 
 /**

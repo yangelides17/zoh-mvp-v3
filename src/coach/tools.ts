@@ -17,11 +17,12 @@ import {
 } from "../db/schema.js";
 import { optOut } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
-import { isStepDay } from "../nudges/schedule.js";
+import { addDays, isStepDay } from "../nudges/schedule.js";
 import { describeDays, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
+export const PROOF_PATTERN_FLAG = "proof_pattern";
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'use 24-hour "HH:MM"');
@@ -63,7 +64,19 @@ const schemas = {
     .object({ ...planFields, until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
     .strict(),
   switch_goal: z.object({ slug: text(40), reason: text(300) }).strict(),
-  mark_step_done: z.object({ how: z.enum(["full", "reduced"]), note: z.string().trim().max(200).optional() }).strict(),
+  mark_step_done: z
+    .object({
+      how: z.enum(["full", "reduced"]),
+      proof: z.enum(["clear", "plausible"]),
+      seen: text(200),
+      note: z.string().trim().max(200).optional(),
+      day: z.enum(["today", "yesterday"]).optional(),
+      dated: text(60).optional(),
+    })
+    .strict(),
+  proof_unclear: z.object({ verdict: z.enum(["unclear", "doesnt_match"]), seen: text(200) }).strict(),
+  mark_missed: z.object({ note: z.string().trim().max(200).optional() }).strict(),
+  flag_proof_pattern: z.object({ reason: text(300) }).strict(),
   mark_on_it: z.object({}).strict(),
   move_today: z.object({ time: clock }).strict(),
 };
@@ -166,12 +179,41 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_step_done",
     description:
-      "Today's step is done: only once it has happened (they say so or send proof), never when they agree to do it, or a smaller version, later. how: full, or reduced for a smaller version. note: what they did, in a few words. Your texts stop for today.",
+      "The step is done and their photo, screenshot or voice note shows it: never on their word alone. how: full, or reduced for a smaller version. proof: clear, or plausible (fits, can't be 100% sure). seen: what the proof shows, in a line. note: what they did, in a few words. day: yesterday only for proof clearly dated yesterday (dated: the date you see on it). Your texts stop for today.",
     input_schema: {
       type: "object",
-      properties: { how: { type: "string", enum: ["full", "reduced"] }, note: { type: "string" } },
-      required: ["how"],
+      properties: {
+        how: { type: "string", enum: ["full", "reduced"] },
+        proof: { type: "string", enum: ["clear", "plausible"] },
+        seen: { type: "string" },
+        note: { type: "string" },
+        day: { type: "string", enum: ["today", "yesterday"] },
+        dated: { type: "string" },
+      },
+      required: ["how", "proof", "seen"],
     },
+  },
+  {
+    name: "proof_unclear",
+    description:
+      "Their proof doesn't show the step yet: unclear (can't tell, blurry, doesn't mention it) or doesnt_match (shows something else). seen: what it shows, in a line. Holds your check-ins while you sort it out.",
+    input_schema: {
+      type: "object",
+      properties: { verdict: { type: "string", enum: ["unclear", "doesnt_match"] }, seen: { type: "string" } },
+      required: ["verdict", "seen"],
+    },
+  },
+  {
+    name: "mark_missed",
+    description:
+      "Today's step won't have proof (\"did it but forgot the pic\" and nothing else they can send): today is a miss. Proof later today still turns it into done.",
+    input_schema: { type: "object", properties: { note: { type: "string" } } },
+  },
+  {
+    name: "flag_proof_pattern",
+    description:
+      "For the founders, rarely: they keep sending unclear or mismatched proof over several days and it looks like gaming the system. reason: what keeps happening. Saved only; nobody is told.",
+    input_schema: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] },
   },
   {
     name: "mark_on_it",
@@ -358,11 +400,56 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "mark_step_done": {
-      const { how, note } = input as z.infer<typeof schemas.mark_step_done>;
-      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      const { how, proof, seen, note, day, dated } = input as z.infer<typeof schemas.mark_step_done>;
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
       const status = how === "full" ? "done" : "done_reduced";
-      await saveToday(db, state, { status, note: note || null }, at);
-      return saved(tester, `Today (${state.today}) marked ${how === "full" ? "done" : "done, reduced"}. No more texts from you today unless they write.`);
+      const values: DayValues = { status, note: note || null, proofVerdict: proof, proofSeen: seen, proofPendingAt: null };
+      const marked = how === "full" ? "done" : "done, reduced";
+      if (day === "yesterday") {
+        const yesterday = addDays(state.today, -1);
+        if (!dated) return { ok: false, error: "Yesterday needs dated: the date you can see on the proof." };
+        if (state.proof.latest === 0) return { ok: false, error: "No photo, screenshot or voice note in their latest texts: nothing proves yesterday." };
+        if (!isStepDay(plan, yesterday)) return { ok: false, error: "Yesterday wasn't a step day." };
+        const [row] = await db
+          .select()
+          .from(stepDays)
+          .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, yesterday)));
+        if (row?.status && row.status !== "missed") return { ok: false, error: `Yesterday is already ${row.status}.` };
+        await saveDay(db, state, yesterday, { ...values, proofSeen: `${seen} (dated ${dated})` }, at);
+        return saved(tester, `Yesterday (${yesterday}) marked ${marked}. Today is unchanged.`);
+      }
+      if (state.proof.today === 0) {
+        return { ok: false, error: "No photo, screenshot or voice note from them today: words alone don't mark it done. Ask for the proof." };
+      }
+      await saveDay(db, state, state.today, values, at);
+      return saved(tester, `Today (${state.today}) marked ${marked}. No more texts from you today unless they write.`);
+    }
+
+    case "proof_unclear": {
+      const { verdict, seen } = input as z.infer<typeof schemas.proof_unclear>;
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      if (state.todayRow?.status && state.todayRow.status !== "missed") return { ok: false, error: `Today is already ${state.todayRow.status}.` };
+      await saveDay(db, state, state.today, { proofVerdict: verdict, proofSeen: seen, proofPendingAt: at }, at);
+      return saved(tester, "Noted. Today's check-ins are held while you sort out the proof.");
+    }
+
+    case "mark_missed": {
+      const { note } = input as z.infer<typeof schemas.mark_missed>;
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
+      if (!isStepDay(plan, state.today, state.todayRow)) return { ok: false, error: "Today isn't a step day: nothing to miss." };
+      if (state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced") {
+        return { ok: false, error: "Today is already done." };
+      }
+      await saveDay(db, state, state.today, { status: "missed", note: note || null, proofPendingAt: null }, at);
+      return saved(tester, `Today (${state.today}) marked missed. Proof later today still makes it done.`);
+    }
+
+    case "flag_proof_pattern": {
+      const { reason } = input as z.infer<typeof schemas.flag_proof_pattern>;
+      await db.insert(flags).values({ testerId: tester.id, kind: PROOF_PATTERN_FLAG, detail: reason });
+      return saved(tester, "Saved for the founders. Say nothing about it to them.");
     }
 
     case "mark_on_it": {
@@ -384,17 +471,19 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
   }
 }
 
+type DayValues = Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "proofVerdict" | "proofSeen" | "proofPendingAt">>;
+
 /** Creates or updates the tester's row for today's step. */
-async function saveToday(
-  db: Db,
-  state: CoachState,
-  values: Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt">>,
-  at: Date,
-): Promise<void> {
+function saveToday(db: Db, state: CoachState, values: DayValues, at: Date): Promise<void> {
+  return saveDay(db, state, state.today, values, at);
+}
+
+/** Creates or updates the tester's row for one local day (today, or yesterday with dated proof). */
+async function saveDay(db: Db, state: CoachState, date: string, values: DayValues, at: Date): Promise<void> {
   const set = { ...values, planId: state.plan?.id ?? null, updatedAt: at };
   await db
     .insert(stepDays)
-    .values({ testerId: state.tester.id, date: state.today, ...set })
+    .values({ testerId: state.tester.id, date, ...set })
     .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
 }
 

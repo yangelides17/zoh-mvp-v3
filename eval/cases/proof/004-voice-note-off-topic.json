@@ -1,0 +1,40 @@
+{
+  "id": "voice-note-off-topic",
+  "title": "A voice note that never mentions the step gets a clarifying ask; a real one counts",
+  "origin": "Spec #7 (photo and voice verification): Watch item, a voice note about something else",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Day 3 tonight, Maya. Ten pages of Atomic Habits at 8, then a quick voice note saying what you read." },
+      { "from": "tester", "text": "on it" }
+    ],
+    "plan": {
+      "step": "10 pages of Atomic Habits",
+      "place": "the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note saying what you read",
+      "reason": "Ten pages a night finishes the book this month.",
+      "minutes": 20,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "[voice: Ugh today was so long. Work was nonstop and then I made pasta for my roommates and we watched a movie.]",
+    "oh lol yeah I read my pages earlier",
+    "[voice: Okay, ten pages done. Chapter three, the part about identity-based habits, how you vote for who you want to be.]"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a voice note that doesn't mention the step isn't proof, and their word alone isn't either.",
+  "shouldHaveHappened": "The first voice note never mentions reading: ZOH responds warmly to their day but notes it didn't hear anything about the pages and asks naturally for the reading note. \"I read my pages earlier\" alone isn't proof: ZOH stays light and asks for the quick voice note saying what they read. The second voice note names the pages and chapter: ZOH celebrates and counts it, maybe referencing what they read (identity-based habits), without inventing anything.",
+  "startTime": "21:10",
+  "timeZone": "America/New_York"
+}

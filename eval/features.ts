@@ -203,6 +203,29 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
+  proof: {
+    name: "proof",
+    doneWhen: "the day is over: today's step is counted or it's clear it won't be.",
+    scenarios: [],
+    rubric: [
+      { id: "plausible-counts", scope: "text", label: "A plausible photo is celebrated, not questioned" },
+      {
+        id: "unclear-asks",
+        scope: "conversation",
+        label: "Unclear proof gets a light, natural clarifying ask; it ends warmly as a miss when there's no proof",
+      },
+      { id: "kind-pushback", scope: "text", label: "A contradicting photo gets kind pushback" },
+      { id: "forgot-pic", scope: "conversation", label: "\"Forgot the pic\" leads to an ask for other proof first, then a warm miss" },
+      { id: "change-method", scope: "conversation", label: "After repeated proof trouble, ZOH offers to change the proof method" },
+      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
+      {
+        id: "voice",
+        scope: "text",
+        label: "Pushy-level energy, warm and sincere; never suspicious or accusing; emoji as punctuation, never a row",
+      },
+    ],
+  },
 };
 
 export function getFeature(name: string): FeatureDef | undefined {

@@ -36,6 +36,8 @@ export const messages = pgTable(
     mediaContentType: text("media_content_type"),
     /** Voice-note transcript from Speaches. */
     transcript: text("transcript"),
+    /** When our bucket copy was deleted (voice-note audio after 30 days); the transcript stays. */
+    mediaDeletedAt: timestamp("media_deleted_at", { withTimezone: true }),
     /** One line on what a photo or video shows, written as it arrives (coach memory). */
     description: text("description"),
     /** Sendblue's message handle: dedupes webhook retries and links status updates. */
@@ -224,6 +226,9 @@ export const flags = pgTable(
 );
 
 export const STEP_DAY_STATUSES = ["done", "done_reduced", "missed"] as const;
+/** The coach's read of the day's proof: clear or plausible counts; unclear or doesnt_match doesn't (yet). */
+export const PROOF_VERDICTS = ["clear", "plausible", "unclear", "doesnt_match"] as const;
+export type ProofVerdict = (typeof PROOF_VERDICTS)[number];
 export type StepDayStatus = (typeof STEP_DAY_STATUSES)[number];
 
 /**
@@ -248,12 +253,19 @@ export const stepDays = pgTable(
     onItAt: timestamp("on_it_at", { withTimezone: true }),
     /** What they did, in a few words. */
     note: text("note"),
+    /** The coach's verdict on the latest proof for this day. */
+    proofVerdict: text("proof_verdict", { enum: PROOF_VERDICTS }),
+    /** What the coach saw or heard in that proof, in a line. */
+    proofSeen: text("proof_seen"),
+    /** Set while unclear proof is being sorted out: holds the day's check-in and follow-up. */
+    proofPendingAt: timestamp("proof_pending_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     unique("step_days_tester_date_unique").on(t.testerId, t.date),
     check("step_days_status_check", sql`${t.status} in ('done', 'done_reduced', 'missed')`),
+    check("step_days_proof_verdict_check", sql`${t.proofVerdict} in ('clear', 'plausible', 'unclear', 'doesnt_match')`),
   ],
 );
 
