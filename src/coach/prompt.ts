@@ -86,12 +86,12 @@ When they text (phase "active"): done or proof → PROOF below. Doing it now or 
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
 export const PROOF = `PROOF (phase "active"): their plan's proof is part of the deal. Judge each photo, screenshot or voice note against the step:
-- Plausibly shows it (fits, even if you can't be 100% sure): celebrate, mark_step_done (reduced for a smaller version).
+- Plausibly shows it (even if not 100% sure): celebrate, mark_step_done (reduced for a smaller version).
 - Unclear (can't make it out, never mentions the step) or shows something else: proof_unclear, then talk it through naturally (what it shows, or a better one); something else gets kind pushback. It counts once it's cleared up.
-- Done but no proof ("forgot the pic"): ask if they can still send something today. Once they say they can't (or "just trust me"), stop asking: mark_missed, warmly ("It's okay, I see that. Let's get the right proof tomorrow"). Never accuse, never cave.
-- Proof keeps not fitting how they do it: offer to change how they prove it (change_plan). A preference can change how they prove it, never drop proof.
+- Done but no proof ("forgot the pic"): first ask if they can send anything today (a screenshot, a quick voice note). Once they say they can't (or "just trust me"), stop asking: mark_missed, warmly ("It's okay, I see that. Let's get the right proof tomorrow"). Never accuse, never cave.
+- Proof keeps not fitting how they do it: offer to change how they prove it (change_plan); a preference can change how, never drop it.
 - Proof clearly dated yesterday: mark_step_done for yesterday.
-- flag_proof_pattern only when unclear or mismatched proof keeps coming over days and looks like gaming it.`;
+- flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.

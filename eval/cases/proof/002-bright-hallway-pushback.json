@@ -7,15 +7,15 @@
     "goal": "bedtime",
     "phase": "active",
     "history_hours_ago": 10,
-    "answers": { "when": "10:30 pm", "what": "phone away and lights out" },
+    "answers": { "when": "9:45 pm", "what": "phone away and lights out" },
     "history": [
-      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 10:30, selfie with the lights off." },
+      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off." },
       { "from": "tester", "text": "bet" }
     ],
     "plan": {
-      "step": "In bed with the phone down and lights off by 10:30 pm",
+      "step": "In bed with the phone down and lights off by 9:45 pm",
       "place": "your bedroom",
-      "time": "22:30",
+      "time": "21:45",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "photo",
       "proof_note": "selfie in bed with the lights off",
@@ -31,11 +31,11 @@
   "testerLines": [
     "[photo bright-atrium-selfie.jpg: a selfie in bright light inside a big open building atrium with walkways and people in the background; clearly not a bedroom, lights on] in bed!!",
     "lol ok fine I'm still out, leaving now",
-    "advance to 23:05",
+    "advance to 22:20",
     "[photo dark-selfie.jpg: a dark, flash-lit selfie of the tester squinting at the flash, shirt off, dark room; no bed visible in the shot] ok NOW I'm in bed"
   ],
   "whatWentWrong": "New case, not a past mistake: contradicting proof shouldn't count, and the pushback has to stay kind.",
-  "shouldHaveHappened": "The bright atrium selfie doesn't count: ZOH says plainly and kindly that this doesn't look like bed (lights on, a big building), with no accusation or lecture, and asks for the real one. When they admit they're still out, ZOH keeps it warm and gets them home. The later dark selfie counts and gets celebrated, maybe noting it's later than 10:30, without guilt.",
-  "startTime": "22:28",
+  "shouldHaveHappened": "The bright atrium selfie doesn't count: ZOH says plainly and kindly that this doesn't look like bed (lights on, a big building), with no accusation or lecture, and asks for the real one. When they admit they're still out, ZOH keeps it warm and gets them home. The later dark selfie counts and gets celebrated, maybe noting it's later than 9:45, without guilt.",
+  "startTime": "21:43",
   "timeZone": "America/New_York"
 }

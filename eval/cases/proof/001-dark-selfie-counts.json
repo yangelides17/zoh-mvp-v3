@@ -7,15 +7,15 @@
     "goal": "bedtime",
     "phase": "active",
     "history_hours_ago": 10,
-    "answers": { "when": "10:30 pm", "what": "phone away and lights out" },
+    "answers": { "when": "9:45 pm", "what": "phone away and lights out" },
     "history": [
-      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 10:30, selfie with the lights off." },
+      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off." },
       { "from": "tester", "text": "bet" }
     ],
     "plan": {
-      "step": "In bed with the phone down and lights off by 10:30 pm",
+      "step": "In bed with the phone down and lights off by 9:45 pm",
       "place": "your bedroom",
-      "time": "22:30",
+      "time": "21:45",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "photo",
       "proof_note": "selfie in bed with the lights off",
@@ -31,6 +31,6 @@
   "testerLines": ["[photo dark-selfie.jpg: a dark, flash-lit selfie of the tester squinting at the flash, shirt off, dark room; no bed visible in the shot] phone's going down 😴"],
   "whatWentWrong": "New case, not a past mistake: plausible proof should count without interrogation.",
   "shouldHaveHappened": "ZOH treats the dark, flash-lit selfie as plausible proof of bedtime (it fits, even though the bed isn't in the shot) and celebrates in one or two short sentences, counting night 3. It doesn't question the photo, ask for a better one, or describe anything that isn't in it.",
-  "startTime": "22:24",
+  "startTime": "21:39",
   "timeZone": "America/New_York"
 }

@@ -7,15 +7,15 @@
     "goal": "bedtime",
     "phase": "active",
     "history_hours_ago": 10,
-    "answers": { "when": "10:30 pm", "what": "phone away and lights out" },
+    "answers": { "when": "9:45 pm", "what": "phone away and lights out" },
     "history": [
-      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 10:30, selfie with the lights off." },
+      { "from": "zoh", "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off." },
       { "from": "tester", "text": "bet" }
     ],
     "plan": {
-      "step": "In bed with the phone down and lights off by 10:30 pm",
+      "step": "In bed with the phone down and lights off by 9:45 pm",
       "place": "your bedroom",
-      "time": "22:30",
+      "time": "21:45",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "photo",
       "proof_note": "selfie in bed with the lights off",
@@ -35,6 +35,6 @@
   ],
   "whatWentWrong": "New case, not a past mistake: an unclear photo should start a light conversation, not count and not turn into an interrogation.",
   "shouldHaveHappened": "ZOH says honestly it can't make anything out and lightly asks for another shot (no suspicion). When the camera's acting up, it keeps it easy. When they can't send one and ask to be trusted, ZOH closes it warmly along the lines of \"It's okay, I see that. Let's just make sure we get the right proof tomorrow\": tonight doesn't count, said without guilt or a lecture, and it doesn't keep asking.",
-  "startTime": "22:27",
+  "startTime": "21:42",
   "timeZone": "America/New_York"
 }
