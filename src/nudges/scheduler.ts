@@ -1,21 +1,36 @@
-import { and, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
 import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
+import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
 import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
+import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { messages, nudges, stepDays, testers, type Tester } from "../db/schema.js";
-import { saveFlag } from "../console/alerts.js";
+import { maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
+import { raiseAlert, saveFlag } from "../console/alerts.js";
+import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import { updateTester } from "../testers/testers.js";
 import { summarizeDays } from "./streak.js";
-import { addDays, daysToClose, dueNudge, serviceDate, zonedTime, type DueNudge, type NudgeDecision } from "./schedule.js";
+import {
+  addDays,
+  CARRYING_MOMENTS,
+  daysToClose,
+  dueNudge,
+  serviceDate,
+  zonedTime,
+  type DueNudge,
+  type NudgeCarry,
+  type NudgeDecision,
+} from "./schedule.js";
 
 export const WENT_QUIET_FLAG = "went_quiet";
 export const DEFAULT_TICK_MS = 60_000;
+/** Whole local days without a text from them before the founders get a "went quiet" alert. */
+export const QUIET_ALERT_DAYS = 2;
 
 export interface NudgeSchedulerDeps {
   db: Db;
@@ -121,6 +136,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
           set: { status: "missed", planId: plan.id, updatedAt: now },
           setWhere: isNull(stepDays.status),
         });
+      await alertSecondMiss(db, tester.id, plan.goalSlug, day, now);
     }
   }
 
@@ -134,6 +150,19 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date)));
   const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
+  // Two whole days without a word from them, after the plan is locked: one alert per silence.
+  if (plan && !tester.stoppedAt && lastInboundAt) {
+    const lastDay = serviceDate(lastInboundAt, tester);
+    if (addDays(lastDay, QUIET_ALERT_DAYS) <= date) {
+      await raiseAlert(db, {
+        testerId: tester.id,
+        topic: "quiet",
+        key: `quiet:${tester.id}:${lastDay}`,
+        body: `No text from them since ${lastDay}`,
+        at: now,
+      });
+    }
+  }
   const midnight = zonedTime(date, "00:00", tester.timeZone);
   const since = lastInboundAt && lastInboundAt > midnight ? lastInboundAt : midnight;
   // The cap counts only texts ZOH started: chatting with ZOH never costs them a nudge.
@@ -207,6 +236,31 @@ async function lastTexts(db: Db, tester: Tester): Promise<{ lastInboundAt?: Date
   return { lastInboundAt: at("inbound"), lastOutboundAt: at("outbound") };
 }
 
+/**
+ * What a step-day kickoff carries (spec #9): an approved deepen or upgrade not raised yet, else one
+ * maintenance check-in that's due. A new focus is raised in a reply instead, where the goal cap is checked.
+ */
+async function carryFor(db: Db, tester: Tester, date: string): Promise<NudgeCarry | undefined> {
+  const rows = await db
+    .select()
+    .from(suggestions)
+    .where(and(eq(suggestions.testerId, tester.id), gte(suggestions.createdAt, tester.contextStartedAt)))
+    .orderBy(asc(suggestions.createdAt));
+  const ready = rows.find((s) => readyToRaise(s) && approvedKind(s) !== "new_focus");
+  if (ready) return { suggestionId: ready.id };
+  const [yesterday] = await db
+    .select({ status: stepDays.status })
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, addDays(date, -1))));
+  const goal = dueCheckin({
+    today: date,
+    goals: await loadTesterGoals(db, tester.id),
+    checkins: await loadCheckins(db, tester.id),
+    missedYesterday: yesterday?.status === "missed",
+  });
+  return goal ? { checkinGoal: goal } : undefined;
+}
+
 /** Claims the slot, has the coach write it, sends it and records it. */
 async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, now: Date): Promise<void> {
   const { db, log } = deps;
@@ -221,10 +275,12 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
   if (!claim) return;
 
   let text: string;
+  let carry: NudgeCarry | undefined;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
-    text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment, previous });
+    carry = CARRYING_MOMENTS.includes(nudge.moment) ? await carryFor(db, tester, nudge.date) : undefined;
+    text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment, previous, ...(carry ? { carry } : {}) });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.
     await db.delete(nudges).where(eq(nudges.id, claim.id));
@@ -245,6 +301,11 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
+    if (carry && "suggestionId" in carry) {
+      await db.update(suggestions).set({ outcome: "delivered", deliveredAt: now, updatedAt: now }).where(eq(suggestions.id, carry.suggestionId));
+    } else if (carry) {
+      await db.insert(maintenanceCheckins).values({ testerId: tester.id, goalSlug: carry.checkinGoal, date: nudge.date, messageId: message.id, createdAt: now });
+    }
     log.info(ctx, "Nudge sent");
   } catch (err) {
     // No retry: a text that may have gone out must not go twice.

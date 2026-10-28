@@ -79,6 +79,8 @@ export interface CoachState {
   suggestions: Suggestion[];
   /** Maintenance check-ins since their context started, oldest first. */
   checkins: MaintenanceCheckin[];
+  /** Each maintenance goal's step, from its last locked plan: what a check-in asks about. */
+  maintenanceSteps: Record<string, string>;
   /** Answers saved for goals they switched away from, to reuse where they fit. */
   earlierAnswers: PlanInput[];
   /** Their latest text: what lock_plan checks the commitment against. */
@@ -167,6 +169,13 @@ export async function loadCoachState(
     streaks: tester.phase === "active" ? await goalStreaks(db, tester, testerGoalRows, today) : [],
     suggestions: suggestionRows,
     checkins: await loadCheckins(db, tester.id),
+    maintenanceSteps: Object.fromEntries(
+      testerGoalRows.flatMap((g) => {
+        // testerPlans is newest version first.
+        const last = g.role === "maintenance" ? testerPlans.find((p) => p.status === "locked" && p.goalSlug === g.goalSlug) : undefined;
+        return last ? [[g.goalSlug, last.step]] : [];
+      }),
+    ),
     earlierAnswers,
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,

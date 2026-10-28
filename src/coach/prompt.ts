@@ -1,7 +1,8 @@
-import type { Plan, PlanQuestion, StepDayStatus, Weekday } from "../db/schema.js";
+import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
+import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
-import { describePlan } from "./tools.js";
+import { describePlan, fitsGoalCap } from "./tools.js";
 
 /**
  * The coach's instructions, all in this file. Keep them lean (CLAUDE.md, "Changing what ZOH says"):
@@ -171,6 +172,56 @@ function streakLine(s: CoachState, plan: Plan): string {
   return days(streak);
 }
 
+/** Every goal's streak, the next steps the team approved, and maintenance check-ins (spec #9). */
+function nextStepLines(s: CoachState, plan: Plan): string[] {
+  const lines: string[] = [];
+  const title = (slug: string) => s.goals.find((g) => g.slug === slug)?.title ?? slug;
+  const days = (n: number) => `${n} step day${n === 1 ? "" : "s"}`;
+  const live = s.testerGoals.filter((g) => g.role === "focus" || g.role === "maintenance");
+  if (s.streaks.length) {
+    const each = s.streaks.map((g) => {
+      if (g.role === "focus") return `${title(g.goalSlug)} (focus): ${streakLine(s, plan)}`;
+      const record = g.answered ? `; check-ins kept up ${g.keptUp} of ${g.answered}${g.lastConfirmed ? `, last confirmed ${g.lastConfirmed}` : ""}` : "";
+      const streak = g.current ? days(g.current.length) : "0 (they said they stopped)";
+      return `${title(g.goalSlug)} (maintenance, self-reported): ${streak}${record}`;
+    });
+    lines.push(`Their goals (${live.length} of ${s.goalCap} allowed), each with its own streak: ${each.join("; ")}.`);
+  }
+
+  const ref = (id: string) => `[${suggestionRef(id)}]`;
+  const what = (x: Suggestion) => `${approvedKind(x)}: ${approvedProposal(x)}${x.newGoalSlug ? ` (${title(x.newGoalSlug)})` : ""}`;
+  // A new focus waits silently while the tester is at the cap.
+  const raisable = s.suggestions.filter((x) => readyToRaise(x) && (approvedKind(x) !== "new_focus" || fitsGoalCap(s, x.newGoalSlug ?? "")));
+  const carried = s.carry && "suggestionId" in s.carry ? raisable.find((x) => x.id === (s.carry as { suggestionId: string }).suggestionId) : undefined;
+  if (carried) {
+    lines.push(`THIS TEXT ALSO RAISES the next step the team approved ${ref(carried.id)} (${what(carried)}): as your own idea, specific to them, in place of the kickoff's question.`);
+  } else if (!s.nudgeMoment) {
+    for (const x of raisable) {
+      lines.push(`Next step the team approved, not raised yet ${ref(x.id)} (${what(x)}): raise it as your own idea when it fits (after a done, or when they talk about how it's going), then record_next_step delivered.`);
+    }
+  }
+  for (const x of s.suggestions.filter(awaitingAnswer)) {
+    const yes = approvedKind(x) === "new_focus" ? "switch_goal" : "change_plan";
+    lines.push(`Next step you raised ${ref(x.id)} (${what(x)}), waiting on their answer: yes → ${yes} with suggestion ${suggestionRef(x.id)}; no → record_next_step declined.`);
+  }
+
+  const step = (slug: string) => (s.maintenanceSteps[slug] ? ` (${s.maintenanceSteps[slug]})` : "");
+  if (s.carry && "checkinGoal" in s.carry) {
+    const slug = s.carry.checkinGoal;
+    lines.push(`THIS TEXT ALSO ASKS a maintenance check-in on ${title(slug)}${step(slug)}: one light line in place of the kickoff's question.`);
+  }
+  for (const g of live.filter((x) => x.role === "maintenance")) {
+    const rows = s.checkins.filter((c) => c.goalSlug === g.goalSlug);
+    if (!s.nudgeMoment && checkinOwed(rows)) {
+      lines.push(`Maintenance check-in owed on ${title(g.goalSlug)}${step(g.goalSlug)}: their last 2 went unanswered. Ask it on its own in this reply, one light line, then record_checkin asked.`);
+      continue;
+    }
+    const open = rows.findLast((c) => c.answer === null && c.date > addDays(s.today, -7));
+    if (open) lines.push(`You asked about ${title(g.goalSlug)} (maintenance) on ${open.date}, no answer yet: when they answer, record_checkin.`);
+  }
+  return lines;
+}
+
 function nextStepDay(plan: Plan, today: string): string | undefined {
   for (let i = 1; i <= 7; i++) {
     const date = addDays(today, i);
@@ -240,7 +291,7 @@ export function buildStateBlock(s: CoachState): string {
   if (t.phase === "active" && s.plan) {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }
