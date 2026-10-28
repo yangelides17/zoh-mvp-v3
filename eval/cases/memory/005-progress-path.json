@@ -1,0 +1,53 @@
+{
+  "id": "progress-path",
+  "title": "\"How much progress have I made?\" traces the path from the start",
+  "origin": "Spec #8 (coach memory), part 2: progress traces the whole path back to the start, accurately",
+  "seed": {
+    "name": "Dana",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "Atomic Habits", "where": "the couch", "when": "8 pm", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Dana! 15 pages of Atomic Habits on the couch at 8." },
+      { "from": "tester", "text": "done" },
+      { "from": "zoh", "text": "15 pages, locked in." }
+    ],
+    "plan": {
+      "step": "15 pages of Atomic Habits",
+      "place": "the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Fifteen pages keeps the book moving without eating the evening.",
+      "minutes": 25,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done_reduced" },
+      { "days_ago": 4, "status": "done" }
+    ],
+    "memory": {
+      "earlier_goals": [{ "goal": "bedtime", "reason": "kept scrolling in bed; wants to read at night instead of fighting her phone", "days_ago": 21 }],
+      "earlier_plans": [
+        { "step": "5 pages of Atomic Habits", "days_ago": 20 },
+        { "step": "10 pages of Atomic Habits", "days_ago": 12 }
+      ],
+      "pages": [
+        { "kind": "goal", "facts": [{ "text": "Started at 5 pages because she hadn't read a book in two years", "days_ago": 20 }, { "text": "Moved up to 10 pages after a full week without a miss", "days_ago": 12 }, { "text": "Moved up to 15 pages; said 10 felt easy now", "days_ago": 4 }] }
+      ],
+      "daily": [
+        { "days_ago": 21, "title": "Switched from bedtime to reading", "summary": "Bedtime goal kept losing to her phone; switched to reading.", "body": "Dana said she kept scrolling in bed and wanted to read at night instead. Switched goals; new plan of 5 pages a night." },
+        { "days_ago": 13, "title": "First full week", "summary": "Seven nights of 5 pages, no misses.", "body": "Dana finished her first week without a miss." },
+        { "days_ago": 4, "title": "Up to 15 pages", "summary": "Plan moved to 15 pages.", "body": "Said 10 pages felt easy; plan changed to 15." }
+      ]
+    }
+  },
+  "startTime": "20:40",
+  "testerLines": ["done, 15 pages", "honestly how much progress have I actually made since I started with you?"],
+  "whatWentWrong": "New case, not a past mistake: a progress question three weeks in.",
+  "shouldHaveHappened": "ZOH traces the whole path accurately from the start: she began on a bedtime goal about three weeks ago, switched to reading because she kept scrolling in bed, started at 5 pages a night, moved to 10 after a clean week, and now 15. It mentions her recent run of done days (one reduced) without inventing numbers or dates that aren't in memory, and keeps it to a short text or two."
+}

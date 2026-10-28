@@ -15,7 +15,8 @@ import type { Logger } from "../src/pipeline/inbound.js";
 import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
-import { getPages } from "../src/memory/store.js";
+import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
+import { eq } from "drizzle-orm";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
@@ -251,6 +252,9 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   // the eval clock only sets what the coach reads as "now" and the times the grader sees.
   const storedStart = new Date(Date.now() - gap);
   const { timeZone, status } = guessTimeZone(app.phone);
+  // Seeded memory reaches further back: start their context before the oldest of it.
+  const oldest = memoryDays(seed);
+  const contextStart = oldest ? new Date(Math.min(storedStart.getTime(), now.getTime() - (oldest + 1) * DAY_MS)) : storedStart;
   const [tester] = await app.db
     .insert(schema.testers)
     .values({
@@ -260,8 +264,11 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       phase: seed.plan ? "active" : seed.phase,
       timeZone,
       timeZoneStatus: status,
-      consentAt: storedStart,
-      contextStartedAt: storedStart,
+      consentAt: contextStart,
+      contextStartedAt: contextStart,
+      styleNotes: (seed.memory?.pages ?? [])
+        .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
+        .join("; "),
     })
     .returning();
   const a = seed.answers;
@@ -274,13 +281,31 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     howLong: a.how_long,
     tracksWith: a.tracks_with,
   });
+  const earlierPlans = seed.memory?.earlier_plans ?? [];
   if (seed.plan) {
     const p = seed.plan;
+    for (const [i, e] of earlierPlans.entries()) {
+      await app.db.insert(schema.plans).values({
+        testerId: tester!.id,
+        goalSlug: seed.goal,
+        status: "locked",
+        version: i + 1,
+        step: e.step,
+        place: p.place,
+        stepTime: p.time,
+        days: p.days,
+        proof: p.proof,
+        reason: p.reason,
+        startDate: localDate(now, timeZone, -e.days_ago),
+        commitment: "I'm in",
+        lockedAt: new Date(now.getTime() - (e.days_ago + 1) * DAY_MS),
+      });
+    }
     const [plan] = await app.db.insert(schema.plans).values({
       testerId: tester!.id,
       goalSlug: seed.goal,
       status: "locked",
-      version: 1,
+      version: earlierPlans.length + 1,
       setupStep: p.setup_step,
       step: p.step,
       place: p.place,
@@ -317,7 +342,58 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     });
     context.push({ from: line.from, text: line.text, at: at.toISOString() });
   }
+  if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
   return context;
+}
+
+const DAY_MS = 24 * 60 * 60_000;
+
+/** How many days back a seed's memory reaches (0 without one). */
+function memoryDays(seed: Seed): number {
+  const m = seed.memory;
+  if (!m) return 0;
+  return Math.max(
+    0,
+    ...m.pages.flatMap((p) => p.facts.map((f) => f.days_ago)),
+    ...m.daily.map((d) => d.days_ago),
+    ...m.earlier_plans.map((e) => e.days_ago),
+    ...m.earlier_goals.map((g) => g.days_ago),
+  );
+}
+
+/** Files a seed's memory the way the overnight pass would have, dated on the eval clock. */
+async function seedMemory(app: EvalApp, tester: schema.Tester, memory: NonNullable<Seed["memory"]>, now: Date): Promise<void> {
+  const daysAgo = (n: number) => new Date(now.getTime() - n * DAY_MS);
+  const goals = [...memory.earlier_goals.map((g) => g.goal), tester.goalSlug];
+  for (const [i, g] of memory.earlier_goals.entries()) {
+    await app.db
+      .insert(schema.flags)
+      .values({ testerId: tester.id, kind: "goal_switch", detail: `${g.goal} → ${goals[i + 1]}: ${g.reason}`, createdAt: daysAgo(g.days_ago) });
+  }
+  const { self, preferences } = await ensureCorePages(app.db, tester, daysAgo(memoryDays({ memory } as Seed) + 1));
+  const goalPages = await ensureGoalPages(app.db, tester, now);
+  const current = goalPages.find((p) => p.goalSlug === tester.goalSlug);
+  for (const p of memory.pages) {
+    const page =
+      p.kind === "self" ? self
+      : p.kind === "preferences" ? preferences
+      : p.kind === "goal" ? current
+      : await createPage(app.db, tester.id, { kind: p.kind, title: p.title ?? "(untitled)", summary: p.summary ?? "" }, daysAgo(Math.min(...p.facts.map((f) => f.days_ago))));
+    if (!page) continue;
+    if (p.kind === "person" || p.kind === "subject") {
+      await link(app.db, tester.id, self.id, page.id, "related");
+      if (p.related_to_goal && current) await link(app.db, tester.id, page.id, current.id, "related");
+    }
+    for (const f of p.facts) {
+      await addFact(app.db, page, { text: f.text, sourceMessageId: null, section: f.section ?? "", day: localDate(daysAgo(f.days_ago), tester.timeZone) }, daysAgo(f.days_ago));
+    }
+  }
+  for (const d of memory.daily) {
+    const at = daysAgo(d.days_ago - 1);
+    await createPage(app.db, tester.id, { kind: "daily", date: localDate(daysAgo(d.days_ago), tester.timeZone), title: d.title, summary: d.summary, body: d.body }, at);
+  }
+  // Memory is filed through yesterday, so the run's overnight pass (if any) only files the run's own day.
+  await app.db.update(schema.testers).set({ memoryThrough: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
 }
 
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */

@@ -1,0 +1,52 @@
+{
+  "id": "stated-pref-holds",
+  "title": "A preference stated last week still holds",
+  "origin": "Spec #8 (coach memory), part 2: follows a stated preference days later",
+  "seed": {
+    "name": "Priya",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "7 am", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Priya. 20 minute run in the park at 7." },
+      { "from": "tester", "text": "done" },
+      { "from": "zoh", "text": "Nice work. Day 9." }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava",
+      "reason": "Twenty minutes before work, every day, makes it automatic.",
+      "minutes": 20,
+      "started_days_ago": 9
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory": {
+      "pages": [
+        { "kind": "self", "facts": [{ "text": "Software engineer, works from home", "days_ago": 9 }, { "text": "Writes in full sentences, no emoji", "section": "voice", "days_ago": 8 }] },
+        {
+          "kind": "preferences",
+          "facts": [
+            { "text": "No emojis", "section": "stated", "days_ago": 6 },
+            { "text": "Less hype, keep it calm: no caps or exclamation-heavy texts", "section": "stated", "days_ago": 6 }
+          ]
+        }
+      ],
+      "daily": [
+        { "days_ago": 6, "title": "Asked for calmer texts", "summary": "Priya asked for no emojis and less hype.", "body": "She ran and asked ZOH to drop the emojis and the hype; prefers calm texts." },
+        { "days_ago": 1, "title": "Run done", "summary": "Ran 20 minutes.", "body": "Done at 7:25, Strava sent." }
+      ]
+    }
+  },
+  "startTime": "07:30",
+  "testerLines": ["Done. 20 minutes, and my fastest pace yet.", "Honestly feeling great about this week."],
+  "whatWentWrong": "New case, not a past mistake: a stated preference, six days on.",
+  "shouldHaveHappened": "ZOH celebrates the fastest pace sincerely but calmly: no emojis, no caps, no string of exclamation points, because Priya asked for that six days ago. Still warm and specific."
+}

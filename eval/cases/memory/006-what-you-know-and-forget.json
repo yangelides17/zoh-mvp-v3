@@ -1,0 +1,52 @@
+{
+  "id": "what-you-know-and-forget",
+  "title": "\"What do you know about me?\", then \"forget that\"",
+  "origin": "Spec #8 (coach memory), part 2: honest short answer; forget removes it and confirms in one line",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "push-ups and squats", "where": "home", "when": "6 pm", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Sam! 15 minutes of push-ups and squats at home at 6." },
+      { "from": "tester", "text": "done" },
+      { "from": "zoh", "text": "Day 10. Good shit." }
+    ],
+    "plan": {
+      "step": "15 minutes of push-ups and squats",
+      "place": "home",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note of what you did",
+      "reason": "Fifteen minutes right after work, before the couch wins.",
+      "minutes": 15,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory": {
+      "pages": [
+        {
+          "kind": "self",
+          "facts": [
+            { "text": "Works at a bank; says he hates his job there", "days_ago": 9 },
+            { "text": "Has a dog, Max, who joins him for walks", "days_ago": 8 },
+            { "text": "Hates mornings; does better after work", "days_ago": 10 },
+            { "text": "Texts short, swears a bit, says lol", "section": "voice", "days_ago": 9 }
+          ]
+        },
+        { "kind": "preferences", "facts": [{ "text": "Voice notes over photos: 'photos are a pain'", "section": "stated", "days_ago": 7 }] },
+        { "kind": "person", "title": "Max (his dog)", "summary": "His dog; comes on walks.", "facts": [{ "text": "Goes on walks with Sam most evenings", "days_ago": 8 }] }
+      ],
+      "daily": [{ "days_ago": 1, "title": "Done after work", "summary": "15 minutes done at 6:20.", "body": "Voice note: did push-ups and squats." }]
+    }
+  },
+  "startTime": "18:40",
+  "testerLines": ["done, voice note coming lol", "wait what do you even know about me lol", "ok forget the stuff about my job", "what do you know now?"],
+  "whatWentWrong": "New case, not a past mistake: asking what ZOH knows, then asking it to forget something.",
+  "shouldHaveHappened": "First answer: a short honest summary of what's in memory (the bank job he hates, his dog Max, hating mornings, voice notes over photos), a few lines at most, no invented details, then a light check that it's right. After 'forget the stuff about my job': a one-line confirmation, and the job fact is gone from memory. Second answer: the same kind of summary without anything about his job."
+}
