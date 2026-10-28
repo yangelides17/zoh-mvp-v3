@@ -100,21 +100,24 @@ export interface ClaudeModelOptions {
   maxTokens: number;
   /** Thinking depth (the coach uses "medium"). */
   effort?: "low" | "medium" | "high";
+  /** Per request; defaults to 30 s (a reply). The overnight memory pass writes more and gets longer. */
+  timeoutMs?: number;
   client?: Anthropic;
 }
 
 export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
-  const client = opts.client ?? new Anthropic({ apiKey: opts.apiKey, maxRetries: 1, timeout: 30_000 });
+  const client = opts.client ?? new Anthropic({ apiKey: opts.apiKey, maxRetries: 1, timeout: opts.timeoutMs ?? 30_000 });
   return {
     async create(req) {
+      const withTools = req.tools.length > 0;
       const response = await client.messages.create({
         model: opts.model,
         max_tokens: opts.maxTokens,
         system: req.system,
         messages: req.messages,
-        tools: req.tools,
+        ...(withTools ? { tools: req.tools } : {}),
         ...(opts.effort ? { output_config: { effort: opts.effort } } : {}),
-        ...(req.toolChoice === "none" ? { tool_choice: { type: "none" } } : {}),
+        ...(withTools && req.toolChoice === "none" ? { tool_choice: { type: "none" } } : {}),
       });
       const content: ModelBlock[] = [];
       for (const b of response.content) {

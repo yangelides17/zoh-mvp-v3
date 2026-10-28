@@ -5,6 +5,7 @@ import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, recentConversation, updateMessage } from "../db/messages.js";
 import type { Message, Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
+import type { MediaDescriber } from "../memory/describe.js";
 import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
@@ -37,6 +38,8 @@ export interface PipelineDeps {
   media?: MediaStore;
   transcriber?: Transcriber;
   fetchMedia: MediaFetcher;
+  /** Describes photos as they arrive, for coach memory; missing when Claude isn't configured. */
+  describer?: MediaDescriber;
   now?: () => Date;
   /** Defaults to RETRY_DELAYS_MS; tests pass zeros. */
   retryDelaysMs?: number[];
@@ -169,12 +172,42 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
     if (deps.typingIndicator) await sendblue.sendTypingIndicator(inbound.contactNumber, "stop");
   }
 
+  // 5. Media into memory right away, after the reply so it never adds to the wait.
+  if (inbound.mediaUrl) await describeMedia(deps, inbound, image, timings);
+
   await mergeTimings(db, inbound.id, timings);
   await updateMessage(db, inbound.id, {
     status: errors.length ? "REPLIED_WITH_ERRORS" : "REPLIED",
     error: errors.length ? errors.join("; ") : null,
   });
   log.info({ ...ctx, timings, errors }, "Inbound message handled");
+}
+
+/**
+ * Saves a one-line description of a photo (from Claude) or a video (its caption) so memory can
+ * search it at once. Voice notes already have their transcript. Failures are logged, never sent.
+ */
+async function describeMedia(
+  deps: PipelineDeps,
+  inbound: Message,
+  image: ClaudeImage | undefined,
+  timings: Record<string, string | number>,
+): Promise<void> {
+  const kind = mediaKind(inbound.mediaContentType ?? undefined, inbound.mediaUrl ?? "");
+  const caption = inbound.content?.trim();
+  try {
+    let description: string | undefined;
+    if (image && deps.describer) {
+      const t0 = Date.now();
+      description = await deps.describer.describe(image, caption);
+      timings.describe_ms = Date.now() - t0;
+    } else if (kind === "video") {
+      description = caption ? `A video: ${caption}` : "A video (not watchable here)";
+    }
+    if (description) await updateMessage(deps.db, inbound.id, { description });
+  } catch (err) {
+    deps.log.error({ messageId: inbound.id, contact: maskNumber(inbound.contactNumber), err: safeError(err) }, "Describing media failed");
+  }
 }
 
 /**
