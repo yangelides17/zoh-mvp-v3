@@ -6,7 +6,7 @@ import { messageTime } from "../memory/store.js";
 import { maskNumber } from "../pipeline/inbound.js";
 import type { StreakRun } from "../nudges/streak.js";
 import type { GoalView, TesterPage, TesterRow } from "./data.js";
-import { APP_AUTHOR } from "./requests.js";
+import { APP_AUTHOR, awaitingAnswer } from "./requests.js";
 import { decided } from "./suggestions.js";
 
 /** The founder console's pages: server-rendered HTML that reads on a phone. Every value is escaped. */
@@ -240,9 +240,8 @@ function threadItem(m: ConsoleMessage, page: TesterPage): string {
 
 /** The coach is still answering: the founder's latest line has no answer after it yet (and is recent). */
 export function coachThinking(thread: ConsoleMessage[], now: Date): boolean {
-  const lastFounder = thread.findLast((m) => m.kind === "founder");
-  const lastCoach = thread.findLast((m) => m.kind === "coach");
-  return Boolean(lastFounder && !(lastCoach && lastCoach.createdAt >= lastFounder.createdAt) && now.getTime() - lastFounder.createdAt.getTime() < THINKING_FOR_MS);
+  const lastFounder = awaitingAnswer(thread);
+  return Boolean(lastFounder && now.getTime() - lastFounder.createdAt.getTime() < THINKING_FOR_MS);
 }
 
 /** How long the page keeps checking for the coach's answer. */

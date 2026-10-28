@@ -176,7 +176,7 @@ describe("console chat route", () => {
     const tester = await seed();
     await chat(tester, "hello?");
     const rows = await thread(tester.id);
-    expect(rows.at(-1)).toMatchObject({ kind: "coach", author: APP_AUTHOR });
+    expect(rows.at(-1)).toMatchObject({ kind: "coach", author: COACH_AUTHOR });
     expect(rows.at(-1)!.body).toContain("isn't set up");
   });
 
@@ -184,7 +184,9 @@ describe("console chat route", () => {
     const tester = await seed();
     model.script(new Error("Claude down"));
     await chat(tester, "how's she doing?");
-    expect((await thread(tester.id)).at(-1)).toMatchObject({ kind: "coach", author: APP_AUTHOR, body: "Sorry, I couldn't answer that just now. Try again?" });
+    expect((await thread(tester.id)).at(-1)).toMatchObject({ kind: "coach", author: COACH_AUTHOR, body: "Sorry, I couldn't answer that just now. Try again?" });
+    const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
+    expect(page.body).not.toContain("ZOH is thinking");
   });
 
   it("send exactly this: queued word for word with the app's confirmation, no Claude call", async () => {
@@ -298,6 +300,16 @@ describe("console coach capabilities", () => {
     const last = JSON.stringify(msgs[2]);
     expect(last).toContain("app] Done");
     expect(last).toContain("Yanni (");
+  });
+
+  it("an app line landing before the answer (an exact text queued, a Done) doesn't swallow the question", async () => {
+    const tester = await seed();
+    await addThreadLine(t.db, { testerId: tester.id, kind: "founder", author: "Yanni", body: "why did she miss Tuesday?", at: now });
+    await addThreadLine(t.db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: "Queued word for word: it goes out within a minute.", at: new Date(now.getTime() + 1000) });
+    const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
+    expect(page.body).toContain("ZOH is thinking");
+    model.script("She didn't miss Tuesday.");
+    expect(await createConsoleCoach({ db: t.db, model, voice: "v" }).answer(tester.id, new Date(now.getTime() + 2000))).toMatchObject({ author: COACH_AUTHOR, body: "She didn't miss Tuesday." });
   });
 
   it("answers nothing when the latest founder line already has an answer", async () => {

@@ -8,7 +8,7 @@ import { mediaMessage, testerPage, testerRows, waitingAlerts } from "../console/
 import { addFounderSuggestion, decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
 import { ICON_SVG, loginPage, listPage, MANIFEST, namePage, notConfiguredPage, testerView } from "../console/views.js";
 import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
-import { addThreadLine, APP_AUTHOR, cancelRequest } from "../console/requests.js";
+import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
 import { SUGGESTION_KINDS, testers } from "../db/schema.js";
 import { safeError } from "../errors.js";
@@ -175,7 +175,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
         } catch (err) {
           request.log.error({ err: safeError(err) }, "Console coach failed");
           const why = err instanceof Error && err.message.startsWith("The console coach") ? err.message : "Sorry, I couldn't answer that just now. Try again?";
-          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: APP_AUTHOR, body: why, at: clock() });
+          // ZOH's line, so it counts as the answer and the page stops waiting.
+          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: clock() });
         }
       };
       if (opts.queue) opts.queue.run(answer);

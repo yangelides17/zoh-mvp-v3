@@ -13,7 +13,7 @@ import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../me
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
 import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
-import { addRequest, addThreadLine, APP_AUTHOR, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
+import { addRequest, addThreadLine, APP_AUTHOR, awaitingAnswer, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
 
 /**
  * The console chat's coach (spec: GitHub issue "Founder console", 4): the same model, voice page,
@@ -171,9 +171,8 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
     const [tester] = await db.select().from(testers).where(eq(testers.id, testerId));
     if (!tester) return undefined;
     const thread = (await db.select().from(consoleMessages).where(eq(consoleMessages.testerId, testerId)).orderBy(asc(consoleMessages.createdAt))).slice(-THREAD_SHOWN);
-    const lastFounder = thread.findLast((m) => m.kind === "founder");
-    const lastCoach = thread.findLast((m) => m.kind === "coach");
-    if (!lastFounder || (lastCoach && lastCoach.createdAt >= lastFounder.createdAt)) return undefined;
+    const lastFounder = awaitingAnswer(thread);
+    if (!lastFounder) return undefined;
 
     const budget: LookupBudget = { lookups: 0, searches: 0 };
     const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;

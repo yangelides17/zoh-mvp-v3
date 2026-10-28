@@ -17,6 +17,16 @@ export const COACH_AUTHOR = "zoh";
 /** The app's own lines in the thread ("Done", "Queued word for word"): updates, not the coach's answers. */
 export const APP_AUTHOR = "app";
 
+/**
+ * The founders' latest line, while ZOH hasn't answered it yet. Only ZOH's own lines answer: the app's
+ * ("Queued word for word", "Done") can land in between and must not swallow a question.
+ */
+export function awaitingAnswer(thread: ConsoleMessage[]): ConsoleMessage | undefined {
+  const lastFounder = thread.findLast((m) => m.kind === "founder");
+  const lastAnswer = thread.findLast((m) => m.kind === "coach" && m.author === COACH_AUTHOR);
+  return lastFounder && !(lastAnswer && lastAnswer.createdAt >= lastFounder.createdAt) ? lastFounder : undefined;
+}
+
 /** How the coaches name a request: the first 8 characters of its id. */
 export const requestRef = (id: string) => id.slice(0, 8);
 
