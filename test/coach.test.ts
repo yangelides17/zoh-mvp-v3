@@ -7,6 +7,7 @@ import {
   EXAMPLES,
   FIXED_INSTRUCTIONS,
   MEMORY,
+  NEXT_STEPS,
   fullVoiceInstructions,
   NUDGES,
   ONBOARDING,
@@ -433,6 +434,7 @@ describe("instructions", () => {
     expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
     expect(MEMORY.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.memory);
     expect(PROOF.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.proof);
+    expect(NEXT_STEPS.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nextSteps);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 

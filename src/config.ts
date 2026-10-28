@@ -77,6 +77,9 @@ const envSchema = z.object({
   CONSOLE_SESSION_SECRET: optionalString,
   /** Comma-separated names to pick from, once per device. */
   CONSOLE_NAMES: withDefault("Yanni,Stamati"),
+
+  /** Goals a tester can have at once: one focus plus maintenance goals (spec #9, rule 6). */
+  GOAL_CAP: intWithDefault(3),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -89,6 +92,8 @@ export interface Config {
   allowedNumbers: string[];
   devNumbers: string[];
   typingIndicator: boolean;
+  /** Focus plus maintenance goals a tester can have at once. */
+  goalCap: number;
   sendblue: {
     baseUrl: string;
     apiKeyId?: string;
@@ -142,6 +147,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     allowedNumbers: e.ALLOWED_NUMBERS,
     devNumbers: e.DEV_NUMBERS,
     typingIndicator: e.TYPING_INDICATOR,
+    goalCap: e.GOAL_CAP,
     sendblue: {
       baseUrl: e.SENDBLUE_BASE_URL.replace(/\/+$/, ""),
       apiKeyId: e.SENDBLUE_API_KEY_ID,

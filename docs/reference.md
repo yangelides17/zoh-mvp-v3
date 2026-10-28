@@ -13,7 +13,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
   `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD` (the founders' shared console password),
   `CONSOLE_SESSION_SECRET` (signs console cookies; a long random string), optional `CONSOLE_NAMES`
-  (default `Yanni,Stamati`). Model: `claude-sonnet-5-5`.
+  (default `Yanni,Stamati`), optional `GOAL_CAP` (goals a tester can have at once, focus plus
+  maintenance; default 3). Model: `claude-sonnet-5-5`.
 - **Founder console:** https://app-production-354a.up.railway.app/console (same app, no separate
   service). One shared password, a 30-day cookie, your name picked once per device; "Add to Home
   Screen" gives it the ZOH Console name and icon.
@@ -45,6 +46,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Goals (#9): `tester_goals` holds every goal with its role (focus, maintenance, dropped);
   `testers.goal_slug` stays the focus. Each goal has its own streak from its own step days: a plan
   version's `change_kind` says deepen or other (streak goes on) or upgrade (a new streak starts).
+- Next steps (#9): the coach's own ideas and a tester's request for a new goal on top are saved as
+  `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
+  upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade
+  rides on the next step-day kickoff (or a reply); a new focus is raised in a reply, within the goal
+  cap, and keeps the old focus as maintenance. Maintenance goals get a one-line check-in in the
+  kickoff twice a week; alerts cover milestones (focus only), a second miss, 2 quiet days, two
+  "stopped" answers, new-goal requests and the coach being unsure.
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.

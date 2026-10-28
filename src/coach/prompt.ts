@@ -1,7 +1,8 @@
-import type { Plan, PlanQuestion, StepDayStatus, Weekday } from "../db/schema.js";
+import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
+import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
-import { describePlan } from "./tools.js";
+import { describePlan, fitsGoalCap } from "./tools.js";
 
 /**
  * The coach's instructions, all in this file. Keep them lean (CLAUDE.md, "Changing what ZOH says"):
@@ -9,7 +10,7 @@ import { describePlan } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, nextSteps: 1300, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -70,11 +71,11 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - Day 1 (the step itself, not just the setup): today unless they push back, even if the usual time has passed (a version tonight); tomorrow only on pushback or if nothing realistic is left today. Once locked: a hype line and when day 1 is, with no question; let the conversation rest.
 - After lock, tweaks go through change_plan; confirm the new version in one line.
 - Switching goals needs a real reason (an injury, the goal turned out wrong): ask why if they don't say. "Bored" or "don't feel like it" gets a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.
-- One goal at a time; a second can come once this one sticks.`;
+- One focus goal at a time; a second waits until it sticks.`;
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. Ask for proof once a day, not in every text.
-- kickoff (step day): a detail from memory in a few words, not an extra sentence (a recent day, a person, their why, the streak), then today's step (what, when, where) and a question to commit; unlike your last kickoff. kickoff_checkin: the same, and it starts soon.
+- kickoff (step day): a detail from memory in a few words, not an extra sentence (a recent day, a person, their why, the streak), then today's step (what, when, where) and a question to commit (a carried check-in or next step replaces it); unlike your last kickoff. kickoff_checkin: the same, and it starts soon.
 - rest_day: short and light: rest day, back at it on their next step day. No push, no question. A rest day stays light all day: if they reply, keep it easy; no lock-in ask for tomorrow.
 - checkin: it starts in about 10 minutes: get set up.
 - followup: no word yet: ask how it went.
@@ -92,6 +93,14 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - Proof keeps not fitting how they do it: offer to change how they prove it (change_plan); a preference can change how, never drop it.
 - Proof clearly dated yesterday: mark_step_done for yesterday.
 - flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.`;
+
+/** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
+export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
+- Never raise a level-up, a harder step or a new goal yourself. Think they're ready for more (a solid streak, it's getting easy)? suggest_next_step for the team, and say nothing.
+- A next step the state lists as approved: raise it as your own idea, specific to them, then record_next_step delivered. Yes: change_plan or switch_goal with its id. No: record_next_step declined, warmly, and drop it.
+- When they ask: a change to their one goal (time, a tweak, a different goal) goes as in PLAN AGREEMENT. More of the same activity (deepen) or a harder or different one (upgrade): change_plan right away, that kind, their words. Something new on top of a goal that's going well: suggest_next_step (new_focus), then just a warm "Love that. Let me think on it." (no timeline, no talk of a plan); asked again, one short line: still thinking. Can't tell which: suggest_next_step with unsure.
+- Maintenance check-in: one light line in place of the kickoff's question, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
+- "What's my streak?": every goal's streak from the state, in one short reply.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.
@@ -119,7 +128,7 @@ export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your v
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, MEMORY].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, NEXT_STEPS, MEMORY].join("\n\n");
 }
 
 /** Today's step, as the nudge scheduler sees it, and the next step day. */
@@ -169,6 +178,56 @@ function streakLine(s: CoachState, plan: Plan): string {
   if (streakThrough === s.today) return `${days(streak)}, today included`;
   if (isStepDay(plan, s.today, s.todayRow) && !s.todayRow?.status) return `${days(streak)}, not counting today (done today makes it ${streak + 1})`;
   return days(streak);
+}
+
+/** Every goal's streak, the next steps the team approved, and maintenance check-ins (spec #9). */
+function nextStepLines(s: CoachState, plan: Plan): string[] {
+  const lines: string[] = [];
+  const title = (slug: string) => s.goals.find((g) => g.slug === slug)?.title ?? slug;
+  const days = (n: number) => `${n} step day${n === 1 ? "" : "s"}`;
+  const live = s.testerGoals.filter((g) => g.role === "focus" || g.role === "maintenance");
+  if (s.streaks.length) {
+    const each = s.streaks.map((g) => {
+      if (g.role === "focus") return `${title(g.goalSlug)} (focus): ${streakLine(s, plan)}`;
+      const record = g.answered ? `; check-ins kept up ${g.keptUp} of ${g.answered}${g.lastConfirmed ? `, last confirmed ${g.lastConfirmed}` : ""}` : "";
+      const streak = g.stopped ? "ended, they said they stopped" : days(g.current?.length ?? 0);
+      return `${title(g.goalSlug)} (maintenance, self-reported): ${streak}${record}`;
+    });
+    lines.push(`Their goals (${live.length} of ${s.goalCap} allowed), each with its own streak: ${each.join("; ")}.`);
+  }
+
+  const ref = (id: string) => `[${suggestionRef(id)}]`;
+  const what = (x: Suggestion) => `${approvedKind(x)}: ${approvedProposal(x)}${x.newGoalSlug ? ` (${title(x.newGoalSlug)})` : ""}`;
+  // A new focus waits silently while the tester is at the cap.
+  const raisable = s.suggestions.filter((x) => readyToRaise(x) && (approvedKind(x) !== "new_focus" || fitsGoalCap(s, x.newGoalSlug ?? "")));
+  const carried = s.carry && "suggestionId" in s.carry ? raisable.find((x) => x.id === (s.carry as { suggestionId: string }).suggestionId) : undefined;
+  if (carried) {
+    lines.push(`THIS TEXT ALSO RAISES the next step the team approved ${ref(carried.id)} (${what(carried)}): as your own idea, specific to them, in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`);
+  } else if (!s.nudgeMoment) {
+    for (const x of raisable) {
+      lines.push(`Next step the team approved, not raised yet ${ref(x.id)} (${what(x)}): raise it as your own idea when it fits (after a done, or when they talk about how it's going), then record_next_step delivered.`);
+    }
+  }
+  for (const x of s.suggestions.filter(awaitingAnswer)) {
+    const yes = approvedKind(x) === "new_focus" ? "switch_goal" : "change_plan";
+    lines.push(`Next step you raised ${ref(x.id)} (${what(x)}), waiting on their answer: yes → ${yes} with suggestion ${suggestionRef(x.id)}; no → record_next_step declined.`);
+  }
+
+  const step = (slug: string) => (s.maintenanceSteps[slug] ? ` (${s.maintenanceSteps[slug]})` : "");
+  if (s.carry && "checkinGoal" in s.carry) {
+    const slug = s.carry.checkinGoal;
+    lines.push(`THIS TEXT ALSO ASKS a maintenance check-in on ${title(slug)}${step(slug)}: one light line in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`);
+  }
+  for (const g of live.filter((x) => x.role === "maintenance")) {
+    const rows = s.checkins.filter((c) => c.goalSlug === g.goalSlug);
+    if (!s.nudgeMoment && checkinOwed(rows)) {
+      lines.push(`Maintenance check-in owed on ${title(g.goalSlug)}${step(g.goalSlug)}: their last 2 went unanswered. Ask it on its own in this reply, one light line, then record_checkin asked.`);
+      continue;
+    }
+    const open = rows.findLast((c) => c.answer === null && c.date > addDays(s.today, -7));
+    if (open) lines.push(`You asked about ${title(g.goalSlug)} (maintenance) on ${open.date}, no answer yet: when they answer, record_checkin.`);
+  }
+  return lines;
 }
 
 function nextStepDay(plan: Plan, today: string): string | undefined {
@@ -240,7 +299,7 @@ export function buildStateBlock(s: CoachState): string {
   if (t.phase === "active" && s.plan) {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }

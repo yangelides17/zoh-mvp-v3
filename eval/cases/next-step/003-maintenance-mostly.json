@@ -1,0 +1,39 @@
+{
+  "id": "maintenance-mostly",
+  "title": "A maintenance check-in folded into the kickoff, and \"mostly\" taken lightly",
+  "origin": "Spec #9 (step log and next step), example \"Good, maintenance in a kickoff\" and rule 4",
+  "seed": {
+    "name": "Priya",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "push-ups and squats", "where": "home", "when": "6 pm", "how_long": "15 min" },
+    "history": [
+      { "from": "tester", "text": "done, 15 min" },
+      { "from": "zoh", "text": "Day 5, Priya! That's the stuff 💪" }
+    ],
+    "plan": {
+      "step": "20 push-ups and 30 squats",
+      "place": "home",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "watch workout summary",
+      "reason": "Fifteen minutes at home, right after work.",
+      "minutes": 15,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }
+    ],
+    "maintenance": [
+      { "goal": "bedtime", "step": "in bed, lights out, by 10:30", "time": "22:30", "since_days_ago": 6, "streak_days": 21 }
+    ]
+  },
+  "testerLines": ["advance to 09:05", "on it! and mostly, missed one night this week lol"],
+  "whatWentWrong": "New case, not a past mistake: a maintenance check-in.",
+  "shouldHaveHappened": "The 9 am kickoff names today's 20 push-ups and 30 squats and folds in one light line asking if she's still in bed by 10:30, as its only question; no push or proof ask about bedtime. Her \"mostly, missed one night\" is taken lightly as still keeping it up (no guilt, no plan talk about bedtime, no lecture), and the reply stays short and points to today's workout.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}

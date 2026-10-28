@@ -155,9 +155,9 @@ async function stepDay(tester: Tester, date: string) {
   return row;
 }
 
-async function tool(name: string, input: unknown, now: Date) {
+async function tool(name: string, input: unknown, now: Date, lastTesterText = "", goalCap?: number) {
   const tester = (await getTester(t.db, (await t.db.select().from(testers).where(eq(testers.phone, ME)))[0]!.id))!;
-  const state = await loadCoachState(t.db, tester, { now, isFirstText: false });
+  const state = await loadCoachState(t.db, tester, { now, isFirstText: false, lastTesterText, goalCap });
   return runTool(t.db, state, name, input, now);
 }
 
@@ -582,12 +582,15 @@ describe("the coach writing a nudge", () => {
     expect(JSON.stringify(last.content)).toContain("[No new text from them. It's Mon 9:00 AM. Write the kickoff text now.]");
   });
 
-  it("an empty answer is an error, so the slot is retried", async () => {
+  it("an empty answer is tried once more; two in a row are an error, so the slot is retried", async () => {
     const tester = await setup();
     const model = new FakeClaudeModel();
-    model.script("");
+    model.script("", "Yo Sam! Ten pages tonight?");
     const coach = createCoach({ db: t.db, model });
+    expect(await coach.nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" })).toBe("Yo Sam! Ten pages tonight?");
+    model.script("", "");
     await expect(coach.nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" })).rejects.toThrow(/no nudge text/);
+    expect(model.requests).toHaveLength(4);
   });
 });
 
@@ -892,14 +895,14 @@ describe("goals foundation (spec: Step log and next step)", () => {
   it("change_plan saves its kind (other by default); deepen keeps the streak, upgrade starts a new one", async () => {
     const tester = await setup();
     await done(tester, MON, TUE);
-    expect(await tool("change_plan", { step: "15 pages of Dune", kind: "deepen" }, at(WED, "08:00"))).toMatchObject({ ok: true });
+    expect(await tool("change_plan", { step: "15 pages of Dune", kind: "deepen", asked: "15 pages" }, at(WED, "08:00"), "can we do 15 pages now?")).toMatchObject({ ok: true });
     expect(await block(tester, at(WED, "08:01"))).toContain("Streak: 2 step days, not counting today");
     expect(await tool("change_plan", { time: "20:00" }, at(WED, "08:02"))).toMatchObject({ ok: true });
-    expect(await tool("change_plan", { step: "5 pages", until: FRI, kind: "deepen" }, at(WED, "08:03"))).toMatchObject({
+    expect(await tool("change_plan", { step: "5 pages", until: FRI, kind: "deepen", asked: "5 pages" }, at(WED, "08:03"), "just 5 pages till Friday")).toMatchObject({
       ok: false,
       error: expect.stringContaining("kind other"),
     });
-    const upgrade = await tool("change_plan", { step: "20 min of lifting", kind: "upgrade" }, at(WED, "08:04"));
+    const upgrade = await tool("change_plan", { step: "20 min of lifting", kind: "upgrade", asked: "lifting" }, at(WED, "08:04"), "I want to try lifting instead");
     expect(upgrade).toMatchObject({ ok: true, message: expect.stringContaining("A new streak starts") });
     expect((await t.db.select().from(plans).orderBy(asc(plans.version))).map((p) => p.changeKind)).toEqual([null, "deepen", "other", "upgrade"]);
     expect(await block(tester, at(WED, "08:05"))).toContain("Streak: 0 step days, not counting today (done today makes it 1).");

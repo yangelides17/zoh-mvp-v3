@@ -50,6 +50,8 @@ export interface CoachOptions {
   model: ClaudeModel;
   /** The voice page as the coach reads it; defaults to docs/coach-voice.md, read once here. */
   voice?: string;
+  /** Focus plus maintenance goals a tester can have (`GOAL_CAP`); defaults to 3. */
+  goalCap?: number;
 }
 
 /**
@@ -58,7 +60,7 @@ export interface CoachOptions {
  * plan question are saved, and tells the model to carry straight on into the plan.
  */
 export function createCoach(opts: CoachOptions): Replier {
-  const { db, model } = opts;
+  const { db, model, goalCap } = opts;
   // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
   const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
   return {
@@ -86,7 +88,7 @@ export function createCoach(opts: CoachOptions): Replier {
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText });
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -134,11 +136,11 @@ export function createCoach(opts: CoachOptions): Replier {
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
             }
           }
           results.push({
@@ -161,25 +163,29 @@ export function createCoach(opts: CoachOptions): Replier {
      * A text ZOH starts itself: one call with the same prompt and tools (so the cache holds), no
      * tool use, and a note in place of a tester text naming the moment (the state block says it too).
      */
-    async nudge({ tester, turns, now, moment, previous }: NudgeRequest) {
+    async nudge({ tester, turns, now, moment, previous, carry }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${fresh}]`;
+      const carries = carry ? ` It also does what the state's "THIS TEXT ALSO" line says.` : "";
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
-      const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment });
+      const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
-      const response = await model.create({
-        system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
-        messages,
-        tools: toolsFor(tester),
-        toolChoice: "none",
-      });
-      const text = response.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n")
-        .trim();
-      if (!text) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
-      return text;
+      // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
+      for (let attempt = 1; ; attempt++) {
+        const response = await model.create({
+          system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
+          messages,
+          tools: toolsFor(tester),
+          toolChoice: "none",
+        });
+        const text = response.content
+          .filter((b) => b.type === "text")
+          .map((b) => b.text)
+          .join("\n")
+          .trim();
+        if (text) return text;
+        if (attempt === 2) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
+      }
     },
     check: () => model.check(),
   };

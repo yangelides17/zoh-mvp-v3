@@ -22,6 +22,8 @@ describe("config", () => {
     expect(c.allowedNumbers).toEqual(["+19085550100", "+19175551234"]);
     expect(c.typingIndicator).toBe(true);
     expect(c.claude.model).toBe("claude-sonnet-5-5");
+    expect(c.goalCap).toBe(3);
+    expect(loadConfig({ DATABASE_URL: "postgres://x", GOAL_CAP: "4" }).goalCap).toBe(4);
     expect(missingSettings(c)).toContain("ANTHROPIC_API_KEY");
   });
 

@@ -1,0 +1,47 @@
+{
+  "id": "approved-deepen-in-kickoff",
+  "title": "An approved deepen rides on the morning kickoff as ZOH's own idea, and their yes makes it",
+  "origin": "Spec #9 (step log and next step), example \"Good, approved deepen\"",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "The Overstory", "where": "bed", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "10 down, page 212" },
+      { "from": "zoh", "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚" }
+    ],
+    "plan": {
+      "step": "10 pages of The Overstory",
+      "place": "bed",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 14
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 6, "status": "done" },
+      { "days_ago": 7, "status": "done" }, { "days_ago": 8, "status": "done" }, { "days_ago": 9, "status": "done" },
+      { "days_ago": 10, "status": "done" }, { "days_ago": 11, "status": "done" }, { "days_ago": 12, "status": "done" },
+      { "days_ago": 13, "status": "done" }, { "days_ago": 14, "status": "done" }
+    ],
+    "suggestions": [
+      {
+        "kind": "deepen",
+        "proposal": "15 pages a night",
+        "reasoning": "14 days straight, often reads past 10 pages",
+        "decision": "approved"
+      }
+    ]
+  },
+  "testerLines": ["advance to 09:05", "ooh ok yeah let's try 15"],
+  "whatWentWrong": "New case, not a past mistake: an approved deepen delivered.",
+  "shouldHaveHappened": "The 9 am kickoff raises fifteen pages a night as ZOH's own idea, tied to her two-week streak and The Overstory, in place of the usual commitment question (one question only, no mention of a team, founders or approval). Her yes gets a short confirmation that the plan is now 15 pages of The Overstory at 9 pm in bed, and the streak keeps going. No extra questions.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}

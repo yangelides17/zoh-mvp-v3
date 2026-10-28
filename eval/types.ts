@@ -57,6 +57,39 @@ export const seedSchema = z.object({
     .array(z.object({ days_ago: z.number().int().min(1).max(30), status: z.enum(["done", "done_reduced", "missed"]) }))
     .default([]),
   /**
+   * Maintenance goals (next-step feature, needs a plan): goals kept up in the background, each with
+   * its last plan, the streak it had as focus when it became maintenance, and check-ins since.
+   */
+  maintenance: z
+    .array(
+      z.object({
+        goal: z.string(),
+        step: z.string(),
+        time: z.string().regex(/^\d{2}:\d{2}$/),
+        /** Became maintenance this many days ago, with a streak of `streak_days` every-day steps ending then. */
+        since_days_ago: z.number().int().min(0).max(60),
+        streak_days: z.number().int().min(0).max(60).default(0),
+        checkins: z.array(z.object({ days_ago: z.number().int().min(0).max(60), answer: z.enum(["kept_up", "mostly", "stopped"]).nullable() })).default([]),
+      }),
+    )
+    .default([]),
+  /** Next steps on the seeded goal as the founders left them (next-step feature). */
+  suggestions: z
+    .array(
+      z.object({
+        kind: z.enum(["deepen", "upgrade", "new_focus"]),
+        raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
+        proposal: z.string(),
+        reasoning: z.string().optional(),
+        new_goal: z.string().optional(),
+        decision: z.enum(["waiting", "approved", "changed", "rejected"]),
+        decided_kind: z.enum(["deepen", "upgrade", "new_focus"]).optional(),
+        decided_proposal: z.string().optional(),
+        outcome: z.enum(["delivered", "agreed", "declined"]).optional(),
+      }),
+    )
+    .default([]),
+  /**
    * Coach memory from before the run (memory feature): what the overnight pass would have filed
    * over earlier weeks. Facts carry no source text; "days_ago" sets when each was learned.
    */

@@ -92,10 +92,21 @@ export interface EvalApp {
   nudger: NudgeScheduler;
   /** The overnight memory pass, for features that grade memory; ticked alongside the nudger. */
   keeper?: MemoryKeeper;
+  /** Errors the nudge tick and memory pass logged (they never reach a message row), for the report. */
+  backgroundErrors: string[];
   close(): Promise<void>;
 }
 
 const quietLog = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
+
+/** Quiet, except errors are kept: a nudge that keeps failing to be written would otherwise vanish. */
+function errorKeepingLog(errors: string[]): Logger {
+  const error = (obj: unknown, msg?: string) => {
+    const err = (obj as { err?: { message?: string } } | undefined)?.err?.message;
+    errors.push([msg, err].filter(Boolean).join(": "));
+  };
+  return { ...quietLog, error } as unknown as Logger;
+}
 
 /** The production app, built through src/wiring.ts, on a fresh in-memory database. */
 export async function startEvalApp(opts: {
@@ -129,8 +140,9 @@ export async function startEvalApp(opts: {
     { webhookSecret: WEBHOOK_SECRET, logger: false },
   );
   const built = await buildApp(deps);
-  const nudger = nudgeSchedulerFor(deps, quietLog, LINE);
-  const keeper = opts.memory ? memoryKeeperFor(opts.config, deps, quietLog) : undefined;
+  const backgroundErrors: string[] = [];
+  const nudger = nudgeSchedulerFor(deps, errorKeepingLog(backgroundErrors), LINE);
+  const keeper = opts.memory ? memoryKeeperFor(opts.config, deps, errorKeepingLog(backgroundErrors)) : undefined;
   return {
     built,
     db: db as unknown as Db,
@@ -140,6 +152,7 @@ export async function startEvalApp(opts: {
     phone: opts.phone,
     nudger,
     keeper,
+    backgroundErrors,
     async close() {
       await nudger.stop();
       await keeper?.stop();
@@ -325,6 +338,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         .insert(schema.stepDays)
         .values({ testerId: tester!.id, date: localDate(now, timeZone, -d.days_ago), planId: plan!.id, status: d.status });
     }
+    await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);
   }
   const context: TranscriptLine[] = [];
   for (const [i, line] of seed.history.entries()) {
@@ -345,6 +359,74 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
 }
 
 const DAY_MS = 24 * 60 * 60_000;
+
+/**
+ * The seeded goal as their focus, maintenance goals (a plan each, the streak they carried and their
+ * check-ins) and next steps as the founders left them. Plan versions for maintenance goals start at `version`.
+ */
+async function seedNextSteps(app: EvalApp, tester: schema.Tester, seed: Seed, version: number, now: Date): Promise<void> {
+  const { timeZone } = tester;
+  const daysAgo = (n: number) => new Date(now.getTime() - n * DAY_MS);
+  await app.db.insert(schema.testerGoals).values({ testerId: tester.id, goalSlug: seed.goal, role: "focus", roleSince: daysAgo(seed.plan?.started_days_ago ?? 0) });
+  for (const [i, m] of seed.maintenance.entries()) {
+    const start = m.since_days_ago + m.streak_days + 1;
+    const [plan] = await app.db
+      .insert(schema.plans)
+      .values({
+        testerId: tester.id,
+        goalSlug: m.goal,
+        status: "locked",
+        version: version + i,
+        step: m.step,
+        stepTime: m.time,
+        days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+        proof: "photo",
+        reason: "Their earlier focus.",
+        startDate: localDate(now, timeZone, -start),
+        commitment: "I'm in",
+        lockedAt: daysAgo(start + 1),
+      })
+      .returning();
+    for (let d = 0; d < m.streak_days; d++) {
+      const date = localDate(now, timeZone, -(m.since_days_ago + 1 + d));
+      await app.db.insert(schema.stepDays).values({ testerId: tester.id, date, planId: plan!.id, status: "done" });
+    }
+    await app.db.insert(schema.testerGoals).values({
+      testerId: tester.id,
+      goalSlug: m.goal,
+      role: "maintenance",
+      nudges: false,
+      proof: false,
+      checkinsPerWeek: 2,
+      roleSince: daysAgo(m.since_days_ago),
+    });
+    for (const c of m.checkins) {
+      await app.db.insert(schema.maintenanceCheckins).values({
+        testerId: tester.id,
+        goalSlug: m.goal,
+        date: localDate(now, timeZone, -c.days_ago),
+        answer: c.answer,
+        answeredAt: c.answer ? daysAgo(c.days_ago) : null,
+      });
+    }
+  }
+  for (const s of seed.suggestions) {
+    await app.db.insert(schema.suggestions).values({
+      testerId: tester.id,
+      goalSlug: seed.goal,
+      kind: s.kind,
+      raisedBy: s.raised_by,
+      proposal: s.proposal,
+      reasoning: s.reasoning,
+      newGoalSlug: s.new_goal,
+      decision: s.decision,
+      decidedBy: s.decision === "waiting" ? null : "Yanni",
+      decidedKind: s.decided_kind,
+      decidedProposal: s.decided_proposal,
+      outcome: s.outcome,
+    });
+  }
+}
 
 /** How many days back a seed's memory reaches (0 without one). */
 function memoryDays(seed: Seed): number {
@@ -444,7 +526,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,
       messageCount: row?.n ?? 0,
-      appErrors: row?.errors ?? [],
+      appErrors: [...new Set([...(row?.errors ?? []), ...app.backgroundErrors])],
       usage: tester.usage(),
     };
   } finally {
