@@ -156,7 +156,7 @@ describe("eval: proof cases send photos and voice notes", () => {
 
   it("every proof case loads, and its photos and voice notes reach the coach through the real pipeline", async () => {
     const cases = await loadCases("proof");
-    expect(cases.map((c) => c.id)).toEqual(["dark-selfie-counts", "bright-hallway-pushback", "blurry-never-clears", "voice-note-off-topic", "forgot-pic-again"]);
+    expect(cases.map((c) => c.id)).toEqual(["dark-selfie-counts", "bright-hallway-pushback", "blurry-never-clears", "voice-note-off-topic", "forgot-pic-again", "streak-counts-today-once"]);
     for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();
