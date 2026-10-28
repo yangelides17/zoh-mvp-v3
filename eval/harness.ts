@@ -92,10 +92,21 @@ export interface EvalApp {
   nudger: NudgeScheduler;
   /** The overnight memory pass, for features that grade memory; ticked alongside the nudger. */
   keeper?: MemoryKeeper;
+  /** Errors the nudge tick and memory pass logged (they never reach a message row), for the report. */
+  backgroundErrors: string[];
   close(): Promise<void>;
 }
 
 const quietLog = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
+
+/** Quiet, except errors are kept: a nudge that keeps failing to be written would otherwise vanish. */
+function errorKeepingLog(errors: string[]): Logger {
+  const error = (obj: unknown, msg?: string) => {
+    const err = (obj as { err?: { message?: string } } | undefined)?.err?.message;
+    errors.push([msg, err].filter(Boolean).join(": "));
+  };
+  return { ...quietLog, error } as unknown as Logger;
+}
 
 /** The production app, built through src/wiring.ts, on a fresh in-memory database. */
 export async function startEvalApp(opts: {
@@ -129,8 +140,9 @@ export async function startEvalApp(opts: {
     { webhookSecret: WEBHOOK_SECRET, logger: false },
   );
   const built = await buildApp(deps);
-  const nudger = nudgeSchedulerFor(deps, quietLog, LINE);
-  const keeper = opts.memory ? memoryKeeperFor(opts.config, deps, quietLog) : undefined;
+  const backgroundErrors: string[] = [];
+  const nudger = nudgeSchedulerFor(deps, errorKeepingLog(backgroundErrors), LINE);
+  const keeper = opts.memory ? memoryKeeperFor(opts.config, deps, errorKeepingLog(backgroundErrors)) : undefined;
   return {
     built,
     db: db as unknown as Db,
@@ -140,6 +152,7 @@ export async function startEvalApp(opts: {
     phone: opts.phone,
     nudger,
     keeper,
+    backgroundErrors,
     async close() {
       await nudger.stop();
       await keeper?.stop();
@@ -513,7 +526,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,
       messageCount: row?.n ?? 0,
-      appErrors: row?.errors ?? [],
+      appErrors: [...new Set([...(row?.errors ?? []), ...app.backgroundErrors])],
       usage: tester.usage(),
     };
   } finally {

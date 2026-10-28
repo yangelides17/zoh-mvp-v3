@@ -9,7 +9,7 @@
     "history_hours_ago": 12,
     "answers": { "what": "The Overstory", "where": "bed", "when": "9 pm", "how_long": "20 min" },
     "history": [
-      { "from": "tester", "text": "[photo of The Overstory open on the bed, page 212] 10 down" },
+      { "from": "tester", "text": "10 down, page 212" },
       { "from": "zoh", "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚" }
     ],
     "plan": {

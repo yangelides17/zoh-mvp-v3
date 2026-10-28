@@ -21,7 +21,8 @@ import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/schedul
 import type { Logger } from "../src/pipeline/inbound.js";
 import { loadTesterGoals, setFocusGoal } from "../src/testers/goals.js";
 import { getTester } from "../src/testers/testers.js";
-import { LINE, ME, makeApp, type TestApp } from "./helpers.js";
+import { createCoach } from "../src/coach/coach.js";
+import { FakeClaudeModel, LINE, ME, makeApp, type TestApp } from "./helpers.js";
 
 /**
  * Next steps and maintenance (spec: GitHub issue "Step log and next step", PR 2). The founders'
@@ -414,6 +415,18 @@ describe("kickoffs carry an approved next step", () => {
     expect(await t.db.select().from(maintenanceCheckins)).toEqual([]);
     const carried = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { suggestionId: s.id } });
     expect(buildStateBlock(carried)).not.toContain("THIS TEXT ALSO RAISES"); // already delivered now
+  });
+
+  it("with the real coach, the kickoff is written with the step in its state, and goes out", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel("Yo Sam! Fifteen pages tonight?");
+    const real = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: createCoach({ db: t.db, model }), allowedNumbers: [ME], lineNumber: LINE });
+    const s = await suggestion(tester, { kind: "deepen", proposal: "15 pages a night", decision: "approved", createdAt: at(SUN, "13:00") });
+    await real.tick(at(MON, "09:00"));
+    await real.stop();
+    expect(t.sendblue.sends.map((x) => x.content)).toEqual(["Yo Sam! Fifteen pages tonight?"]);
+    expect(model.stateOf()).toContain(`THIS TEXT ALSO RAISES the next step the team approved [${suggestionRef(s.id)}]`);
+    expect((await allSuggestions())[0]).toMatchObject({ outcome: "delivered" });
   });
 
   it("the state for that kickoff tells the coach to raise it as its own idea", async () => {

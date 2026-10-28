@@ -98,8 +98,8 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
 - Never raise a level-up, a harder step or a new goal yourself. Think they're ready for more (a solid streak, it's getting easy)? suggest_next_step for the team, and say nothing.
 - A next step the state lists as approved: raise it as your own idea, specific to them, then record_next_step delivered. Yes: change_plan or switch_goal with its id. No: record_next_step declined, warmly, and drop it.
-- When they ask: a change to their one goal (time, a tweak, a different goal) goes as in PLAN AGREEMENT. More of the same activity (deepen) or a harder or different one (upgrade): change_plan right away, that kind, their words. Something new on top of a goal that's going well: suggest_next_step (new_focus), then a warm "Love that. Let me think on it.", no promise; asked again, still thinking. Can't tell which: suggest_next_step with unsure.
-- Maintenance check-in: one light line, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
+- When they ask: a change to their one goal (time, a tweak, a different goal) goes as in PLAN AGREEMENT. More of the same activity (deepen) or a harder or different one (upgrade): change_plan right away, that kind, their words. Something new on top of a goal that's going well: suggest_next_step (new_focus), then just a warm "Love that. Let me think on it." (no timeline, no talk of a plan); asked again, one short line: still thinking. Can't tell which: suggest_next_step with unsure.
+- Maintenance check-in: one light line in place of the kickoff's question, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
 - "What's my streak?": every goal's streak from the state, in one short reply.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */

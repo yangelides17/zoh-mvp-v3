@@ -9,7 +9,7 @@
     "history_hours_ago": 18,
     "answers": { "what": "thesis writing", "where": "the library", "when": "10 am", "how_long": "50 min" },
     "history": [
-      { "from": "tester", "text": "[screenshot of a 50 minute focus timer] boom" },
+      { "from": "tester", "text": "50 minutes, boom" },
       { "from": "zoh", "text": "That's 6 in a row, Nico. The thesis is moving 🔥" }
     ],
     "plan": {
