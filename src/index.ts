@@ -2,9 +2,10 @@ import { buildApp } from "./app.js";
 import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
 import { safeError } from "./errors.js";
+import type { MediaRetention } from "./media/retention.js";
 import type { MemoryKeeper } from "./memory/keeper.js";
 import type { NudgeScheduler } from "./nudges/scheduler.js";
-import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "./wiring.js";
+import { appDeps, mediaRetentionFor, memoryKeeperFor, nudgeSchedulerFor } from "./wiring.js";
 
 let config;
 try {
@@ -26,6 +27,7 @@ const deps = appDeps(config, db, {}, { version: process.env.RAILWAY_GIT_COMMIT_S
 const { app, queue } = await buildApp(deps);
 let nudger: NudgeScheduler | undefined;
 let keeper: MemoryKeeper | undefined;
+let retention: MediaRetention | undefined;
 
 const missing = missingSettings(config);
 if (missing.length) app.log.warn({ missing }, "Some settings are missing; those features stay off until they are set");
@@ -37,6 +39,7 @@ async function shutdown(signal: string) {
   app.log.info({ signal, inFlight: queue.size }, "Shutting down");
   await nudger?.stop();
   await keeper?.stop();
+  await retention?.stop();
   await app.close();
   await Promise.race([queue.idle(), new Promise((r) => setTimeout(r, 20_000))]);
   await closeDb();
@@ -64,3 +67,7 @@ nudger.start();
 // Coach memory: each tester's day is filed overnight (3 am their time); checked once a minute.
 keeper = memoryKeeperFor(config, deps, app.log);
 keeper.start();
+
+// Voice-note audio is deleted 30 days after it arrived (transcripts stay); checked hourly.
+retention = mediaRetentionFor(deps, app.log);
+retention.start();

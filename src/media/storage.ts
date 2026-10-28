@@ -1,8 +1,10 @@
-import { HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /** Private object storage for photos and audio (Railway Storage Bucket, S3-compatible). */
 export interface MediaStore {
   put(key: string, body: Uint8Array, contentType: string): Promise<void>;
+  /** Removes an object; a key that's already gone is fine. */
+  delete(key: string): Promise<void>;
   check(): Promise<void>;
 }
 
@@ -26,6 +28,9 @@ export function createS3MediaStore(opts: S3MediaStoreOptions): MediaStore {
     async put(key, body, contentType) {
       await s3.send(new PutObjectCommand({ Bucket: opts.bucket, Key: key, Body: body, ContentType: contentType }));
     },
+    async delete(key) {
+      await s3.send(new DeleteObjectCommand({ Bucket: opts.bucket, Key: key }));
+    },
     async check() {
       await s3.send(new HeadBucketCommand({ Bucket: opts.bucket }));
     },
@@ -34,7 +39,7 @@ export function createS3MediaStore(opts: S3MediaStoreOptions): MediaStore {
 
 export type MediaKind = "image" | "audio" | "video" | "other";
 
-const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm"]);
+export const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm"]);
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif", "heic", "heif", "webp"]);
 const VIDEO_EXT = new Set(["mov", "mp4", "m4v"]);
 

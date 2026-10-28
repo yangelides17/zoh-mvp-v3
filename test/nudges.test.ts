@@ -5,6 +5,7 @@ import { buildStateBlock, NUDGES } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { flags, messages, nudges, plans, stepDays, testers, type Plan, type Tester } from "../src/db/schema.js";
+import { createMediaRetention } from "../src/media/retention.js";
 import { dueNudge, serviceDate, zonedTime, type NudgeInput } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import { summarizeDays } from "../src/nudges/streak.js";
@@ -145,6 +146,30 @@ async function tool(name: string, input: unknown, now: Date) {
   return runTool(t.db, state, name, input, now);
 }
 
+/** A photo from them a minute before `now`, then the step marked done on it. */
+async function doneWithPhoto(how: "full" | "reduced", now: Date, note?: string) {
+  await photo(new Date(now.getTime() - 60_000));
+  return tool("mark_step_done", { how, proof: "clear", seen: "the book open on the couch", ...(note ? { note } : {}) }, now);
+}
+
+/** A photo (or, with `kind`, a voice note or video) from them, as the webhook stores it. */
+async function photo(when: Date, kind: "photo" | "voice" | "video" = "photo") {
+  const media = {
+    photo: ["https://cdn.example/p.jpg", "image/jpeg"],
+    voice: ["https://cdn.example/v.caf", "audio/x-caf"],
+    video: ["https://cdn.example/m.mov", "video/quicktime"],
+  }[kind];
+  await t.db.insert(messages).values({
+    direction: "inbound",
+    contactNumber: ME,
+    content: "",
+    mediaUrl: media[0],
+    mediaContentType: media[1],
+    createdAt: when,
+    sentAt: when,
+  });
+}
+
 describe("a step day", () => {
   it("Pushy: kickoff when quiet hours end, check-in 10 minutes before, follow-up after step time + minutes + 30", async () => {
     await setup();
@@ -232,7 +257,7 @@ describe("rule 3: once today is done, nothing more", () => {
   it("full or reduced", async () => {
     await setup();
     expect(await tick(MON, "09:00")).toEqual(["kickoff"]);
-    expect(await tool("mark_step_done", { how: "reduced", note: "5 pages" }, at(MON, "12:00"))).toMatchObject({ ok: true });
+    expect(await doneWithPhoto("reduced", at(MON, "12:00"), "5 pages")).toMatchObject({ ok: true });
     expect(await day(MON, "12:05", "23:59")).toEqual([]);
     const tester = (await t.db.select().from(testers))[0]!;
     expect(await stepDay(tester, MON)).toMatchObject({ status: "done_reduced", note: "5 pages" });
@@ -303,7 +328,7 @@ describe("rule 5: a miss is nothing done on a step day by the start of quiet hou
 
   it("a done day is not a miss", async () => {
     const tester = await setup();
-    await tool("mark_step_done", { how: "full" }, at(MON, "19:30"));
+    await doneWithPhoto("full", at(MON, "19:30"));
     await scheduler.tick(at(MON, "22:30"));
     expect(await stepDay(tester, MON)).toMatchObject({ status: "done" });
   });
@@ -470,7 +495,7 @@ describe("reset", () => {
   it("clears step days, nudges and the pause", async () => {
     const tester = await setup();
     await tick(MON, "09:00");
-    await tool("mark_step_done", { how: "full" }, at(MON, "12:00"));
+    await doneWithPhoto("full", at(MON, "12:00"));
     await updateTester(t.db, tester.id, { autoTextsPausedAt: at(MON, "12:00") });
     const fresh = await resetTester(t.db, (await getTester(t.db, tester.id))!, at(MON, "13:00"));
     expect(fresh.autoTextsPausedAt).toBeNull();
@@ -560,7 +585,7 @@ describe("the state block for an active tester", () => {
     const block = buildStateBlock(state);
     expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not marked done yet. They said they're on it (Mon 8:10 PM).");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
-    await tool("mark_step_done", { how: "full", note: "10 pages" }, at(MON, "20:40"));
+    await doneWithPhoto("full", at(MON, "20:40"), "10 pages");
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(MON, "20:41"), isFirstText: false }))).toContain("Today's step: done.");
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(TUE, "10:00"), isFirstText: false }))).toContain(
       "Today: Tue 2026-11-03, a rest day (no step).",
@@ -624,7 +649,7 @@ describe("the slip ladder", () => {
     await day(MON, "09:00", "22:05");
     await day(TUE, "09:00", "22:05");
     expect(await day(WED, "09:00", "18:55")).toEqual(["one_a_day@18:50"]);
-    await tool("mark_step_done", { how: "reduced", note: "5 pages" }, at(WED, "19:30"));
+    await doneWithPhoto("reduced", at(WED, "19:30"), "5 pages");
     expect(await day(THU, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
   });
 
@@ -681,5 +706,123 @@ describe("a temporary lighter plan (rule 7)", () => {
     expect(block).toContain("Recent step days, newest first: Tue done (reduced version), Mon done (reduced version).");
     expect(block).toContain("Streak: 0 step days. Missed in a row: 0. Reduced in a row: 2.");
     expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
+  });
+});
+
+describe("proof (spec: Photo and voice verification)", () => {
+  const seen = { proof: "plausible", seen: "dark selfie, lights off" } as const;
+
+  it("done needs a photo or voice note from today, and saves the verdict and what was seen", async () => {
+    const tester = await setup();
+    const words = await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"));
+    expect(words).toMatchObject({ ok: false, error: expect.stringContaining("words alone don't mark it done") });
+    // Yesterday's photo and a video don't count for today.
+    await photo(at(SUN, "21:00"));
+    await photo(at(MON, "19:40"), "video");
+    expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"))).toMatchObject({ ok: false });
+    await photo(at(MON, "20:01"), "voice");
+    expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:02"))).toMatchObject({ ok: true });
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "done", proofVerdict: "plausible", proofSeen: "dark selfie, lights off" });
+  });
+
+  it("the state block tells the coach what proof came in and its read of it", async () => {
+    const tester = await setup();
+    const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);
+    expect(await block()).toContain("No photo, screenshot or voice note from them today.");
+    await photo(at(MON, "19:50"));
+    await tool("proof_unclear", { verdict: "doesnt_match", seen: "bright hallway, lights on" }, at(MON, "19:51"));
+    expect(await block()).toContain("Proof sent today: 1. Your read: doesnt match (bright hallway, lights on). Still sorting it out with them.");
+  });
+
+  it("unclear proof holds the check-in and follow-up; clearing it up marks the day done", async () => {
+    const tester = await setup();
+    expect(await tick(MON, "09:00")).toEqual(["kickoff"]);
+    await photo(at(MON, "18:00"));
+    expect(await tool("proof_unclear", { verdict: "unclear", seen: "blurry, can't make it out" }, at(MON, "18:01"))).toMatchObject({ ok: true });
+    expect(await day(MON, "18:05", "21:55")).toEqual([]);
+    await doneWithPhoto("full", at(MON, "21:00"));
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "done", proofVerdict: "clear", proofPendingAt: null });
+  });
+
+  it("no proof: a miss stops today's nudges, and a photo later the same day still makes it done", async () => {
+    const tester = await setup();
+    expect(await tick(MON, "09:00")).toEqual(["kickoff"]);
+    expect(await tool("mark_missed", { note: "gym, forgot the pic" }, at(MON, "12:00"))).toMatchObject({ ok: true });
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "missed" });
+    expect(await day(MON, "12:05", "20:55")).toEqual([]);
+    await doneWithPhoto("full", at(MON, "21:00"));
+    expect(await stepDay(tester, MON)).toMatchObject({ status: "done" });
+    expect(await tool("mark_missed", {}, at(MON, "21:05"))).toMatchObject({ ok: false, error: "Today is already done." });
+  });
+
+  it("proof dated yesterday turns yesterday's miss into done, and the slip ladder and streak follow", async () => {
+    const tester = await setup();
+    await tick(MON, "22:05");
+    await tick(TUE, "22:05");
+    expect((await stepDay(tester, TUE))?.status).toBe("missed");
+    const before = await loadCoachState(t.db, tester, { now: at(WED, "09:20"), isFirstText: false });
+    expect(before.days).toMatchObject({ streak: 0, missesInARow: 2 });
+
+    const yesterday = { how: "full", ...seen, day: "yesterday" } as const;
+    // The proof has to be in what they just sent, and the coach has to have seen a date on it.
+    await photo(at(TUE, "20:00"));
+    await say(tester, "outbound", at(TUE, "20:01"), "Love it");
+    expect(await tool("mark_step_done", { ...yesterday, dated: "Nov 3" }, at(WED, "09:30"))).toMatchObject({ ok: false });
+    await photo(at(WED, "09:29"));
+    expect(await tool("mark_step_done", yesterday, at(WED, "09:30"))).toMatchObject({ ok: false, error: expect.stringContaining("dated") });
+    expect(await tool("mark_step_done", { ...yesterday, dated: "Nov 3, 8:12 pm" }, at(WED, "09:30"))).toMatchObject({ ok: true });
+    expect(await stepDay(tester, TUE)).toMatchObject({ status: "done", proofSeen: "dark selfie, lights off (dated Nov 3, 8:12 pm)" });
+    expect(await stepDay(tester, WED)).toBeUndefined();
+
+    const after = await loadCoachState(t.db, tester, { now: at(WED, "09:35"), isFirstText: false });
+    expect(after.days).toMatchObject({ streak: 1, missesInARow: 0 });
+    // Off the ladder: a normal day again instead of one text at step time.
+    expect(await day(WED, "09:35", "21:55")).toEqual(["kickoff@09:35", "checkin@18:50", "followup@19:50"]);
+  });
+
+  it("flag_proof_pattern saves a flag for the founders and sends nothing", async () => {
+    const tester = await setup();
+    const sends = t.sendblue.sends.length;
+    expect(await tool("flag_proof_pattern", { reason: "Third day of blurry photos, never the book" }, at(MON, "20:00"))).toMatchObject({ ok: true });
+    expect(await t.db.select().from(flags).where(eq(flags.testerId, tester.id))).toMatchObject([
+      { kind: "proof_pattern", detail: "Third day of blurry photos, never the book" },
+    ]);
+    expect(t.sendblue.sends.length).toBe(sends);
+  });
+});
+
+describe("voice-note audio retention", () => {
+  it("deletes audio 30 days after it arrived, keeps newer audio and every photo, and records it", async () => {
+    const now = at(MON, "12:00");
+    const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000);
+    const rows = [
+      { key: "media/1/old.caf", type: "audio/x-caf", when: daysAgo(31) },
+      { key: "media/1/old-unlabeled.m4a", type: "application/octet-stream", when: daysAgo(40) },
+      { key: "media/1/new.caf", type: "audio/x-caf", when: daysAgo(29) },
+      { key: "media/1/old.jpg", type: "image/jpeg", when: daysAgo(60) },
+    ];
+    for (const r of rows) {
+      await t.media.put(r.key, new Uint8Array([1]), r.type);
+      await t.db.insert(messages).values({
+        direction: "inbound",
+        contactNumber: ME,
+        mediaUrl: `https://cdn.example/${r.key}`,
+        mediaKey: r.key,
+        mediaContentType: r.type,
+        transcript: r.type === "image/jpeg" ? null : "did my ten pages",
+        createdAt: r.when,
+      });
+    }
+    const retention = createMediaRetention({ db: t.db, log: silent, media: t.media });
+    expect(await retention.tick(now)).toBe(2);
+    expect([...t.media.objects.keys()].sort()).toEqual(["media/1/new.caf", "media/1/old.jpg"]);
+    const saved = await t.db.select().from(messages).orderBy(asc(messages.createdAt));
+    expect(saved.map((m) => [m.mediaKey, m.mediaDeletedAt !== null, m.transcript])).toEqual([
+      ["media/1/old.jpg", false, null],
+      ["media/1/old-unlabeled.m4a", true, "did my ten pages"],
+      ["media/1/old.caf", true, "did my ten pages"],
+      ["media/1/new.caf", false, "did my ten pages"],
+    ]);
+    expect(await retention.tick(now)).toBe(0);
   });
 });

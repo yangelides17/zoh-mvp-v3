@@ -12,6 +12,7 @@ import {
   ONBOARDING,
   PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
+  PROOF,
   TOOL_RULES,
 } from "../src/coach/prompt.js";
 import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
@@ -431,6 +432,7 @@ describe("instructions", () => {
     expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
     expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
     expect(MEMORY.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.memory);
+    expect(PROOF.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.proof);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 

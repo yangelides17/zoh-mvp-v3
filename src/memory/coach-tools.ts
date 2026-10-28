@@ -43,7 +43,7 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_preference",
     description:
-      'Save something they say about how they want to be coached (style, nudging, proof, timing: "no emojis", "chill out", "I\'ll just tell you, no photos") the moment they say it. replaces: refs of learned preferences it overrides.',
+      'Save something they say about how they want to be coached (style, nudging, proof, timing: "no emojis", "chill out", "voice notes instead of photos"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides.',
     input_schema: {
       type: "object",
       properties: { preference: { type: "string" }, replaces: { type: "array", items: { type: "string" }, description: "f: refs" } },

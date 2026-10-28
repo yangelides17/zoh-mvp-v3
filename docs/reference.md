@@ -43,6 +43,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Once a plan is locked, replies and nudges read a cached memory block plus only today's and
   yesterday's texts (at least 30), instead of the last 200; up to 5 lookups a reply (2 searches).
   Each reply's tokens are logged in the message's `timings`.
+- Photo and voice verification (#7): the coach judges proof in its reply (no second Claude call)
+  and saves a verdict and a line on what it saw on the day. No proof, no done. Photos stay in the
+  bucket; voice-note audio is deleted 30 days after it arrived (hourly job), transcripts stay.
+  Proof-gaming flags are saved only.
 - The launch plan doc is the source for timeline and strategy. The coach voice page in Yanni's
   Business Ideas doc is an older copy; `docs/coach-voice.md` is the real one.
 

@@ -9,7 +9,7 @@ import { describePlan } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -38,7 +38,7 @@ Never:
 - Act like you know them better than what they've shared.`;
 
 /** Saving and style requests: the rules in every phase that the voice page doesn't cover. */
-export const TOOL_RULES = `Style requests and other coaching preferences ("no emojis", "chill out", "push me harder", "I'll just tell you, no photos") change your style immediately: confirm in one short line, save them with save_preference, and follow them from then on. Saved style notes override everything about style.
+export const TOOL_RULES = `Style requests and other coaching preferences ("no emojis", "chill out", "push me harder", "voice notes instead of photos") change your style immediately: confirm in one short line, save them with save_preference, and follow them from then on. Saved style notes override everything about style.
 
 Saving: whenever they tell you something the state block tracks (name, goal, plan answers, city, quiet hours, style), save it with a tool in the same reply, even if said in passing. Change it the same way if they change their mind. Saving is silent: never reply just "Saved"; answer what they said or asked first. If they clearly want to stop hearing from you ("leave me alone", "I'm done with this"), call opt_out; the app sends the confirmation.`;
 
@@ -82,7 +82,16 @@ export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names w
 - after_miss: yesterday slipped; once, not twice. Push harder for the full step today, or at least the smaller version.
 - one_a_day (2+ misses in a row): today's one text, from a new angle each day: a different reason, a smaller start, or what's getting in the way.
 - day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
-When they text (phase "active"): done, or proof → celebrate and mark_step_done (reduced if they did a smaller version). Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
+When they text (phase "active"): done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
+
+/** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
+export const PROOF = `PROOF (phase "active"): the proof in their plan is part of the deal. Judge each photo, screenshot or voice note against the step:
+- Plausibly shows it (fits, even if you can't be 100% sure): celebrate, mark_step_done (reduced for a smaller version).
+- Unclear (can't make it out, never mentions the step) or shows something else: proof_unclear, then talk it through naturally (what it shows, or a better one); something else gets kind pushback. It counts once it's cleared up.
+- Done but no proof ("forgot the pic"): ask if they can still send something today. If not, or it never clears up: mark_missed, warmly ("no proof, no check mark; get me that proof tomorrow"). Never accuse, never cave.
+- Proof keeps not fitting how they do it: offer to change how they prove it (change_plan). A preference can change how they prove it, never drop proof.
+- Proof clearly dated yesterday: mark_step_done for yesterday.
+- flag_proof_pattern only when unclear or mismatched proof keeps coming over days and looks like gaming it.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.
@@ -110,7 +119,7 @@ export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your v
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, MEMORY].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, MEMORY].join("\n\n");
 }
 
 /** Today's step, as the nudge scheduler sees it, and the next step day. */
@@ -121,10 +130,19 @@ function todayLines(s: CoachState, plan: Plan): string[] {
   const status = row?.status ? STATUS_LABELS[row.status] : "not marked done yet";
   const onIt = row?.onItAt ? ` They said they're on it (${localTime(row.onItAt, s.tester.timeZone)}).` : "";
   const today = isStepDay(plan, s.today, row)
-    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt}`
+    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt} ${proofLine(s)}`
     : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
   const next = nextStepDay(plan, s.today);
   return [today, next ? `Next step day: ${day(next)}.` : ""].filter(Boolean);
+}
+
+/** What proof they've sent today and what you made of it. */
+function proofLine(s: CoachState): string {
+  const row = s.todayRow;
+  const sent = s.proof.today === 0 ? "No photo, screenshot or voice note from them today." : `Proof sent today: ${s.proof.today}.`;
+  const verdict = row?.proofVerdict ? ` Your read: ${row.proofVerdict.replace("_", " ")} (${row.proofSeen ?? ""}).` : "";
+  const pending = row?.proofPendingAt && !row.status ? " Still sorting it out with them." : "";
+  return `${sent}${verdict}${pending}`;
 }
 
 /** How their recent step days went: the streak, misses and reduced days in a row. */
