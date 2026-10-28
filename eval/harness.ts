@@ -16,6 +16,9 @@ import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
 import { desc, eq } from "drizzle-orm";
+import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
+import type { ConsoleCoach } from "../src/console/chat.js";
+import { COACH_AUTHOR } from "../src/console/requests.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
@@ -25,6 +28,7 @@ import { guessTimeZone } from "../src/testers/area-codes.js";
 import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
 
 const WEBHOOK_SECRET = "eval-webhook-secret";
+const CONSOLE_SECRET = "eval-console-secret";
 const LINE = "+15555550100";
 
 /**
@@ -65,6 +69,8 @@ export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
     ALLOWED_NUMBERS: phone,
     TYPING_INDICATOR: "false",
     LOG_LEVEL: "silent",
+    CONSOLE_PASSWORD: "eval-console-password",
+    CONSOLE_SESSION_SECRET: CONSOLE_SECRET,
   });
 }
 
@@ -115,6 +121,8 @@ export async function startEvalApp(opts: {
   clock: EvalClock;
   /** Tests pass a fake coach; the eval leaves this out and gets the real one from wiring. */
   replier?: Replier;
+  /** Tests pass a fake console coach; the eval gets the real one from wiring. */
+  consoleCoach?: ConsoleCoach;
   /** Run the overnight memory pass when the clock passes 3 am (the memory feature). */
   memory?: boolean;
 }): Promise<EvalApp> {
@@ -137,7 +145,7 @@ export async function startEvalApp(opts: {
       now: opts.clock.now,
       ...(opts.replier ? { replier: opts.replier } : {}),
     },
-    { webhookSecret: WEBHOOK_SECRET, logger: false },
+    { webhookSecret: WEBHOOK_SECRET, logger: false, ...(opts.consoleCoach ? { consoleCoach: opts.consoleCoach } : {}) },
   );
   const built = await buildApp(deps);
   const backgroundErrors: string[] = [];
@@ -214,6 +222,45 @@ export async function advanceTo(app: EvalApp, hhmm: string, timeZone: string): P
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true }));
 }
 
+/** A case line from a founder in the console chat: "console Yanni: ...", "console Yanni (exact, now): ...". */
+export const CONSOLE_LINE = /^console (\w+)(?: \((exact(?:, now)?)\))?: ([\s\S]+)$/i;
+
+/**
+ * Sends a founder's line through the real console chat route, as that founder, and returns it
+ * with ZOH's console answer. A "send exactly this" line gets one nudge tick a minute later, as
+ * production would, so the text it sends joins the transcript.
+ */
+export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<TranscriptLine[]> {
+  const [, name, flags, text] = line as unknown as [string, string, string | undefined, string];
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) throw new Error("A console line needs a tester: seed one first");
+  const at = app.clock.now();
+  const before = await app.db.select({ id: schema.consoleMessages.id }).from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id));
+  const cookie = `${SESSION_COOKIE}=${encodeURIComponent(encodeSession(newSession(at, name), CONSOLE_SECRET))}`;
+  const form = new URLSearchParams({ text, ...(flags ? { exact: "on" } : {}), ...(flags?.endsWith("now") ? { sendNow: "on" } : {}) });
+  const res = await app.built.app.inject({
+    method: "POST",
+    url: `/console/testers/${tester.id}/chat`,
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie },
+    payload: form.toString(),
+  });
+  if (res.statusCode !== 303) throw new Error(`Console chat answered ${res.statusCode}: ${res.body.slice(0, 200)}`);
+  await app.built.queue.idle();
+  const seen = new Set(before.map((r) => r.id));
+  const answers = (await app.db.select().from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id)))
+    .filter((m) => !seen.has(m.id) && m.kind === "coach" && m.author === COACH_AUTHOR)
+    .map((m) => ({ from: "zoh" as const, text: m.body, at: m.createdAt.toISOString(), console: true }));
+  const out: TranscriptLine[] = [{ from: "founder", text: `${name}${flags ? ` (${flags})` : ""}: ${text}`, at: at.toISOString() }, ...answers];
+  app.clock.advance(30_000);
+  if (flags) {
+    const sendsBefore = app.sendblue.sent.length;
+    app.clock.advance(60_000);
+    await app.nudger.tick(app.clock.now());
+    out.push(...app.sendblue.sent.slice(sendsBefore).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true })));
+  }
+  return out;
+}
+
 /** Plays the tester's side: returns the next text, or null when the tester is done. */
 export interface Tester {
   next(transcript: TranscriptLine[]): Promise<string | null>;
@@ -244,6 +291,7 @@ export interface RunOptions {
   index: number;
   env: NodeJS.ProcessEnv;
   replier?: Replier;
+  consoleCoach?: ConsoleCoach;
   /** The feature grades memory: run the overnight pass and read back what it wrote. */
   memory?: boolean;
 }
@@ -480,7 +528,7 @@ async function seedMemory(app: EvalApp, tester: schema.Tester, memory: NonNullab
 export async function runConversation(plan: ConversationPlan, tester: Tester, opts: RunOptions): Promise<ConversationResult> {
   const phone = fakeNumber(plan.areaCode, opts.index);
   const clock = new EvalClock(zonedDate(EVAL_DAY, plan.startTime, plan.timeZone));
-  const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, memory: opts.memory });
+  const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
@@ -497,6 +545,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       const advance = ADVANCE_LINE.exec(text.trim());
       if (advance) {
         transcript.push(...(await advanceTo(app, advance[1]!, plan.timeZone)));
+        continue;
+      }
+      const founder = CONSOLE_LINE.exec(text.trim());
+      if (founder) {
+        transcript.push(...(await consoleSay(app, founder)));
         continue;
       }
       // The grader reads the line as written ("[photo ...: what it shows] caption"); ZOH gets the media.

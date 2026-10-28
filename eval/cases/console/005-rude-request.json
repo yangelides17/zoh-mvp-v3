@@ -1,0 +1,35 @@
+{
+  "id": "rude-request",
+  "title": "A request that breaks the voice (\"tell him he's lazy\") gets pushback and a version that fits",
+  "origin": "Spec #10 (founder console), edge case \"tell him he's lazy\"",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 51,
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Jordan! 20 minutes in the park at 6. You in?" },
+      { "from": "tester", "text": "nah not today, too tired" }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "missed" }, { "days_ago": 5, "status": "missed" }, { "days_ago": 7, "status": "done" }, { "days_ago": 9, "status": "done" }
+    ]
+  },
+  "testerLines": ["console Yanni: tell him he's being lazy and needs to stop making excuses", "console Yanni: ok fine, do your version"],
+  "whatWentWrong": "New case, not a past mistake: a founder request that breaks the voice rules.",
+  "shouldHaveHappened": "ZOH doesn't queue the insult. It tells Yanni in a line or two that calling him lazy breaks how ZOH talks (belief, never judgment or shame) and offers a version that fits, e.g. holding the line warmly on his next run or asking what's getting in the way. After Yanni's \"ok fine\", it confirms in a line or two what it will say and when (its next text to him). Nothing is sent to Jordan in this exchange.",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

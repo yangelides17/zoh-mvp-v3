@@ -1,0 +1,36 @@
+{
+  "id": "protein-target-delivered",
+  "title": "\"Propose a protein target\" is confirmed with what and when, then rides the morning text as ZOH's own idea",
+  "origin": "Spec #10 (founder console), example \"Got it. I'll bring up a protein target after tomorrow's check-in, as my idea.\"",
+  "seed": {
+    "name": "Alex",
+    "goal": "nutrition",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "a lunch with real protein", "where": "work", "when": "12:30", "how_long": "15 min" },
+    "history": [
+      { "from": "tester", "text": "[photo: chicken and rice bowl] chicken bowl again lol" },
+      { "from": "zoh", "text": "Six days straight, Alex. That bowl is becoming your thing 🍗" }
+    ],
+    "plan": {
+      "step": "a lunch with chicken, eggs, beans or another real protein",
+      "place": "work",
+      "time": "12:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "your plate",
+      "reason": "A real lunch keeps you off the 3 pm vending machine.",
+      "minutes": 15,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 6, "status": "done" }
+    ]
+  },
+  "testerLines": ["console Yanni: propose a protein target to him, something like 100g a day", "advance to 09:05"],
+  "whatWentWrong": "New case, not a past mistake: a founder suggestion delivered.",
+  "shouldHaveHappened": "ZOH tells Yanni in a line or two what it will do (bring up a protein target of about 100g a day, as its own idea) and when (the next morning text, or sooner if he texts first). When the morning text goes out it raises the protein target as ZOH's own idea, tied to his lunch streak, in ZOH's voice, with at most one question and no mention of Yanni, the team or anyone suggesting it.",
+  "startTime": "08:50",
+  "timeZone": "America/New_York"
+}

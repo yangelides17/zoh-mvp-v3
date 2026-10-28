@@ -56,7 +56,8 @@ export function simulatorSystemPrompt(scenario: Scenario, doneWhen: string): str
 /** The conversation so far, from the tester's side, for the simulator's next call. */
 export function simulatorPrompt(transcript: TranscriptLine[]): string {
   if (transcript.length === 0) return "You're about to send your very first text to the ZOH number. Write it.";
-  const lines = transcript.map((l) => `${l.from === "tester" ? "YOU" : "ZOH"}: ${l.text}`);
+  // The console chat is between ZOH and the founders: the tester never sees it.
+  const lines = transcript.filter((l) => l.from !== "founder" && !l.console).map((l) => `${l.from === "tester" ? "YOU" : "ZOH"}: ${l.text}`);
   return `The conversation so far:\n\n${lines.join("\n\n")}\n\nWrite your next text (or ${DONE} if ZOH has wrapped up).`;
 }
 

@@ -53,14 +53,24 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
     const when = localTime(l.at, plan.timeZone);
     if (l.from === "zoh") {
       n += 1;
+      if (l.console) return `[ZOH ${n}, to the founders in the console; the tester never sees it] (${when}) ${l.text}`;
       return `[ZOH ${n}${l.started ? ", started by ZOH, not a reply" : ""}] (${when}) ${l.text}`;
     }
+    if (l.from === "founder") return `[FOUNDER, in the console] (${when}) ${l.text}`;
     return `[TESTER] (${when}) ${l.text}`;
   });
   const context = [
     `Tester's phone number: area code ${plan.areaCode}, time zone ${plan.timeZone}${plan.timeZone === "America/New_York" ? " (Eastern)" : " (outside Eastern Time)"}.`,
     `Times are the tester's local time; the conversation starts on ${new Intl.DateTimeFormat("en-US", { timeZone: plan.timeZone, weekday: "long", month: "long", day: "numeric" }).format(new Date(transcript[0]?.at ?? Date.now()))}.`,
   ];
+  if (transcript.some((l) => l.from === "founder")) {
+    context.push(
+      "",
+      "Lines marked console are ZOH and the founders (Yanni and Stamati) talking about this tester in a private chat the tester never sees.",
+      "ZOH's console answers are judged as a colleague's replies to the founders (this feature's rules); the voice page's texting rules",
+      "(energy, one question, coaching tone) apply only to ZOH's texts to the tester. Times are still the tester's local time.",
+    );
+  }
   if (plan.regression) {
     context.push(
       "",

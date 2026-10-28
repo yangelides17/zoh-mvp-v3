@@ -1,0 +1,38 @@
+{
+  "id": "why-she-missed",
+  "title": "Asked why she missed, ZOH answers from her texts; asked something not on record, it says it doesn't know",
+  "origin": "Spec #10 (founder console), \"ask: why did she miss Tuesday?\"",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "The Overstory", "where": "bed", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Maya, how'd tonight's 10 pages go?" },
+      { "from": "tester", "text": "ugh work ran till 10, I'm wiped. didn't get to it" },
+      { "from": "zoh", "text": "Long day, I hear you. Rest up, and tomorrow night we're back on page 212 📚" }
+    ],
+    "plan": {
+      "step": "10 pages of The Overstory",
+      "place": "bed",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 8
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "missed" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 6, "status": "done" },
+      { "days_ago": 7, "status": "done" }, { "days_ago": 8, "status": "done" }
+    ]
+  },
+  "testerLines": ["console Yanni: why did she miss yesterday?", "console Yanni: has her sister's visit been getting in the way?"],
+  "whatWentWrong": "New case, not a past mistake: the console answering about a tester.",
+  "shouldHaveHappened": "ZOH's first console answer says she missed last night because work ran until 10 and she was wiped, from her own text, and can add that the week before was all done. The second says nothing in her texts or record mentions a sister or a visit, so it doesn't know; it doesn't invent one. Both answers are a line or two, plain, addressed to Yanni, not coaching-style hype.",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

@@ -154,6 +154,9 @@ export const caseSchema = z.object({
   /**
    * The tester's texts, in order. A line "advance to HH:MM" is not a text: the clock moves to that local
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
+   * A line "console Yanni: ..." is a founder's message in the console chat (add "(exact)" or
+   * "(exact, now)" after the name for "send exactly this" and "send now"); ZOH's console answer joins
+   * the transcript, marked as console.
    */
   testerLines: z.array(z.string().min(1)).min(1),
   whatWentWrong: z.string(),
@@ -167,8 +170,11 @@ export const caseSchema = z.object({
 export type RegressionCase = z.infer<typeof caseSchema>;
 
 export interface TranscriptLine {
-  from: "tester" | "zoh";
+  /** "founder": a founder's line in the console chat (console feature); never seen by the tester. */
+  from: "tester" | "zoh" | "founder";
   text: string;
+  /** ZOH answering the founders in the console chat, not a text to the tester. */
+  console?: boolean;
   /** ISO time on the injected clock. */
   at: string;
   /** A text ZOH started itself (a nudge), not a reply. */

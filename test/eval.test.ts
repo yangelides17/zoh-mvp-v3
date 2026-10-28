@@ -579,3 +579,44 @@ describe("eval: command line and cost", () => {
     expect(cleanSimulatorText("Honestly: idk", "Alex")).toBe("Honestly: idk");
   });
 });
+
+describe("eval: console lines (console feature)", () => {
+  it("sends founder lines through the real console chat and an exact one out on the next tick", async () => {
+    const [c] = (await loadCases("console")).filter((x) => x.id === "rude-request");
+    const plan = planConversations([], [c!], { runs: 1 })[0]!;
+    const asked: string[] = [];
+    const consoleCoach = {
+      answer: async (testerId: string) => {
+        asked.push(testerId);
+        return undefined;
+      },
+    };
+    const lines = ["console Yanni: how's he doing?", "console Stamati (exact, now): Hey Jordan, word for word", "hi"];
+    const result = await runConversation(plan, scriptedTester(lines), { maxTurns: 4, index: 5, env: {}, replier: new EchoReplier(), consoleCoach });
+    expect(result.error).toBeUndefined();
+    expect(result.transcript.map((l) => `${l.from}${l.console ? " (console)" : ""}${l.started ? " (started)" : ""}: ${l.text}`)).toEqual([
+      "founder: Yanni: how's he doing?",
+      "founder: Stamati (exact, now): Hey Jordan, word for word",
+      "zoh (started): Hey Jordan, word for word",
+      "tester: hi",
+      "zoh: got: hi",
+    ]);
+    // Only the plain line asks the console coach; an exact one goes out as written.
+    expect(asked).toHaveLength(1);
+  });
+
+  it("shows the grader which lines are the founders' console chat", () => {
+    const at = "2026-11-02T17:00:00Z";
+    const prompt = graderUserPrompt({
+      plan: { key: "k", kind: "case", id: "k", title: "t", persona: "scripted", areaCode: "212", startTime: "12:00", timeZone: "America/New_York" },
+      transcript: [
+        { from: "founder", text: "Yanni: why did she miss?", at },
+        { from: "zoh", text: "Work ran late.", at, console: true },
+        { from: "zoh", text: "Hey Maya!", at, started: true },
+      ],
+    });
+    expect(prompt).toContain("[FOUNDER, in the console] (12:00 pm) Yanni: why did she miss?");
+    expect(prompt).toContain("[ZOH 1, to the founders in the console; the tester never sees it] (12:00 pm) Work ran late.");
+    expect(prompt).toContain("[ZOH 2, started by ZOH, not a reply]");
+  });
+});
