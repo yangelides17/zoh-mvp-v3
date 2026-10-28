@@ -154,6 +154,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return reply
       .header("cache-control", "private, max-age=3600")
       .header("x-content-type-options", "nosniff")
+      // A tester's file (an SVG, an HTML attachment) opened on its own never runs script as a logged-in founder.
+      .header("content-security-policy", "sandbox")
       .type(message!.mediaContentType ?? object.contentType)
       .send(Buffer.from(object.bytes));
   }));

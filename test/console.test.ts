@@ -268,6 +268,7 @@ describe("tester list and page", () => {
     const res = await get(`/console/media/${s.photoId}`, cookieFor("Yanni"));
     expect(res.statusCode).toBe(200);
     expect(res.headers["content-type"]).toBe("image/jpeg");
+    expect(res.headers["content-security-policy"]).toBe("sandbox");
     expect([...res.rawPayload]).toEqual([9, 9, 9]);
     const [stranger] = await t.db
       .insert(messages)
