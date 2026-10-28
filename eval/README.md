@@ -65,6 +65,10 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
 - **A rule:** the grader applies the page text, but pass rates are tracked by the ids in
   `eval/features.ts`. Add an id there when a page gains a rule that none of the ids covers.
 - **A regression case:** see `eval/cases/README.md`.
+- **Memory** (`memory` feature only): when an `advance to` line passes 3 am, the real overnight memory
+  pass runs (about $0.08 a day, in the estimate), and the grader sees the tester's memory at the start and at
+  the end, with their step days. A seed's `memory` files weeks of earlier memory (pages and facts with
+  `days_ago`, daily docs, earlier plan versions and goals), so a case can start two weeks in.
 - **Nudges** (texts ZOH starts itself): a case line `advance to HH:MM` isn't a text: the clock moves
   to the next such local time, running the production nudge tick each minute, and any nudges join the
   transcript marked as started by ZOH. A seed's `history_hours_ago` puts the seeded conversation

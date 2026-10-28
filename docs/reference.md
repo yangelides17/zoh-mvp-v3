@@ -40,6 +40,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   (first run reads back up to 14 days). Photos get a one-line description as they arrive. Search
   is Postgres full-text. Learned preferences need 3 observations on 3 different days, checked in
   code. `npm run memory -- <last 4 digits>` prints a tester's pages (needs `DATABASE_URL`).
+  Once a plan is locked, replies and nudges read a cached memory block plus only today's and
+  yesterday's texts (at least 30), instead of the last 200; up to 5 lookups a reply (2 searches).
+  Each reply's tokens are logged in the message's `timings`.
 - The launch plan doc is the source for timeline and strategy. The coach voice page in Yanni's
   Business Ideas doc is an older copy; `docs/coach-voice.md` is the real one.
 
