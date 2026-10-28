@@ -7,7 +7,7 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 20,
-    "answers": { "what": "push-ups and squats", "where": "home", "when": "6 pm", "how_long": "15 min" },
+    "answers": { "what": "push-ups and squats", "where": "home", "when": "6 pm", "how_long": "15 min", "tracks_with": "doesn't track it" },
     "history": [
       { "from": "zoh", "text": "Sam! 15 minutes of push-ups and squats at home at 6." },
       { "from": "tester", "text": "done" },
