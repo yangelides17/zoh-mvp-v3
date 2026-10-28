@@ -740,6 +740,13 @@ describe("proof (spec: Photo and voice verification)", () => {
     expect((await stepDay(tester, MON))?.status).toBe("done");
   });
 
+  it("counts a photo whose Sendblue time is a little ahead of our clock", async () => {
+    const tester = await setup();
+    await photo(at(MON, "20:02"));
+    expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"))).toMatchObject({ ok: true });
+    expect((await stepDay(tester, MON))?.status).toBe("done");
+  });
+
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);

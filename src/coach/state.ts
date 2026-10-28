@@ -168,7 +168,8 @@ export async function loadProof(db: Db, tester: Tester, today: string, now: Date
     eq(messages.contactNumber, tester.phone),
     gte(messages.createdAt, tester.contextStartedAt),
     gte(sentTime, new Date(now.getTime() - 2 * 86_400_000)),
-    lte(sentTime, now),
+    // A few minutes' slack: Sendblue's clock can run a little ahead of ours, and the photo they just sent must count.
+    lte(sentTime, new Date(now.getTime() + 5 * 60_000)),
   );
   const inbound = await db
     .select({ sentAt: messages.sentAt, createdAt: messages.createdAt, mediaUrl: messages.mediaUrl, mediaContentType: messages.mediaContentType })
