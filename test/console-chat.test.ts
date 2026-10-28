@@ -269,6 +269,8 @@ describe("console coach capabilities", () => {
     // The tool result tells the coach when it goes.
     const toolResult = JSON.stringify(model.requests[1]!.messages.at(-1));
     expect(toolResult).toContain(`Queued [${requestRef(request!.id)}]`);
+    // The next round's record names it as just queued, not as an earlier request (eval: rude-request).
+    expect(model.requests[1]!.system.at(-1)!.text).toContain(`[${requestRef(request!.id)}] you just queued it in this answer, not before`);
 
     model.script({ tools: [{ name: "cancel_request", input: { request: requestRef(request!.id) } }] }, "Cancelled.");
     await chat(tester, "actually cancel that");
@@ -360,8 +362,14 @@ describe("the texting coach and the team", () => {
     expect(rows.find((r) => r.id === request.id)).toMatchObject({ requestStatus: "done", doneAt: now });
     expect(rows.at(-1)).toMatchObject({ kind: "coach", author: APP_AUTHOR });
     expect(rows.at(-1)!.body).toMatch(/^Done \(in a reply, Tue 12:00 PM\): Share the sleep article$/);
-    const again = await runTool(t.db, await loadCoachState(t.db, tester, { now, isFirstText: false }), "mark_request_done", { request: requestRef(request.id) }, now);
+    // Later rounds of the same reply still see it, so the text doesn't drop it (eval: article-link).
+    const sameReply = await loadCoachState(t.db, tester, { now, isFirstText: false });
+    expect(buildStateBlock(sameReply)).toContain(`request [${requestRef(request.id)}], marked done in this reply: Share the sleep article. This text carries it`);
+    const again = await runTool(t.db, sameReply, "mark_request_done", { request: requestRef(request.id) }, now);
     expect(again.ok).toBe(false);
+    // The next reply doesn't.
+    const next = await loadCoachState(t.db, tester, { now: new Date(now.getTime() + 60_000), isFirstText: false });
+    expect(buildStateBlock(next)).not.toContain("Share the sleep article");
   });
 
   it("a kickoff carries a due request in ZOH's words and marks it done with the text that carried it", async () => {

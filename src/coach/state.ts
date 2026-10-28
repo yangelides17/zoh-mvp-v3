@@ -23,7 +23,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
-import { notesForCoach, pendingRequests } from "../console/requests.js";
+import { notesForCoach, pendingRequests, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
@@ -89,6 +89,8 @@ export interface CoachState {
   teamNotes: ConsoleMessage[];
   /** The founders' requests to carry in ZOH's words, due now, oldest first. */
   teamRequests: ConsoleMessage[];
+  /** Requests marked done in this reply: this text must still carry them. */
+  teamRequestsDone: ConsoleMessage[];
   /** Their latest text: what lock_plan checks the commitment against. */
   lastTesterText: string;
   /** No first reply has been sent since the tester's context started. */
@@ -185,6 +187,7 @@ export async function loadCoachState(
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
     teamRequests: await pendingRequests(db, tester.id, opts.now),
+    teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,

@@ -24,7 +24,7 @@
       "started_days_ago": 10
     },
     "step_days": [
-      { "days_ago": 2, "status": "missed" }, { "days_ago": 5, "status": "missed" }, { "days_ago": 7, "status": "done" }, { "days_ago": 9, "status": "done" }
+      { "days_ago": 2, "status": "missed" }, { "days_ago": 3, "status": "done" }, { "days_ago": 5, "status": "missed" }, { "days_ago": 7, "status": "done" }, { "days_ago": 9, "status": "done" }
     ]
   },
   "testerLines": ["console Yanni: tell him he's being lazy and needs to stop making excuses", "console Yanni: ok fine, do your version"],

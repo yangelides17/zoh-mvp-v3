@@ -254,6 +254,9 @@ function teamLines(s: CoachState): string[] {
     for (const r of s.teamRequests) {
       lines.push(`FROM THE TEAM, request [${requestRef(r.id)}]: ${r.body}. Work it in as your own idea when it fits (this reply if it can), then mark_request_done.`);
     }
+    for (const r of s.teamRequestsDone) {
+      lines.push(`FROM THE TEAM, request [${requestRef(r.id)}], marked done in this reply: ${r.body}. This text carries it, as your own idea.`);
+    }
   }
   return lines;
 }

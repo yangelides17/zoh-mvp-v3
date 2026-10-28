@@ -121,6 +121,18 @@ export async function pendingRequests(db: Db, testerId: string, now: Date): Prom
     .orderBy(asc(consoleMessages.createdAt));
 }
 
+/**
+ * Requests the coach marked done in the reply it's writing now (a reply's rounds share one `now`):
+ * still shown, so the text that carries one doesn't drop it once it's off the pending list.
+ */
+export async function requestsDoneAt(db: Db, testerId: string, now: Date): Promise<ConsoleMessage[]> {
+  return db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "done"), eq(consoleMessages.doneAt, now)))
+    .orderBy(asc(consoleMessages.createdAt));
+}
+
 /** Pending "send exactly this" texts due by `now`, oldest first: the nudge tick sends them. */
 export async function pendingExact(db: Db, testerId: string, now: Date): Promise<ConsoleMessage[]> {
   return db

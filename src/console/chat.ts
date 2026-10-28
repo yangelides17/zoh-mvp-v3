@@ -33,10 +33,11 @@ Answering the founders:
 - Plain and short: a line or two (a few for a real question). No markdown.
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess.
 - Context for how to coach them ("traveling next week, go easy"): save_note in plain words, then confirm in a line.
-- Something to bring to the tester (a suggestion, a link, a question): plan_request, then confirm what you'll do and when, from NEXT CHANCE below ("Got it. I'll bring up a protein target in tomorrow's morning text, as my idea. I'll tell you how she takes it."). Links go in as is.
+- Something to bring to the tester (a suggestion, a link, a question): plan_request, then confirm in one or two sentences: what you'll do and when, from NEXT CHANCE below ("Got it. I'll bring up a protein target in tomorrow's morning text, as my idea. I'll tell you how she takes it."). Links go in as is.
+- Only what the record shows about their days, too: count misses and streaks from the state, never estimate them.
 - A request that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't queue it. Say why in a line and offer a version that fits; queue that once they agree.
 - "Cancel that": cancel_request.
-- Their words sent word for word: they tick "Send exactly this" under the chat box.
+- Only if they ask for their own words sent as written: they tick "Send exactly this" under the chat box.
 - They've stopped: answer questions, but nothing can be sent.`;
 
 /** What one capability gets: the tester, who's asking, and the clock. */
@@ -275,8 +276,10 @@ async function recordBlock(db: Db, tester: Tester, now: Date, goalCap?: number):
   const state = await loadCoachState(db, tester, { now, isFirstText: false, goalCap });
   const texts = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
   const open = await openRequests(db, tester.id);
+  // The record is rebuilt every round: a request this answer just queued is named as such, not as an earlier one.
   const requests = open.map(
-    (r) => `- [${requestRef(r.id)}] from ${r.author ?? "the team"}${r.exact ? ", word for word" : ""}${r.dueAt ? `, not before ${localTime(r.dueAt, tester.timeZone)}` : ""}: ${r.body}`,
+    (r) =>
+      `- [${requestRef(r.id)}] ${r.createdAt.getTime() === now.getTime() ? "you just queued it in this answer" : `from ${r.author ?? "the team"}`}${r.exact ? ", word for word" : ""}${r.dueAt ? `, not before ${localTime(r.dueAt, tester.timeZone)}` : ""}: ${r.body}`,
   );
   return [
     `THE TESTER (as the texting coach sees them; its instructions there are for texting, not for you)\n${buildStateBlock(state)}`,
