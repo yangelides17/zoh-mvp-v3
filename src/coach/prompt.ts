@@ -202,7 +202,7 @@ function nextStepLines(s: CoachState, plan: Plan): string[] {
   const raisable = s.suggestions.filter((x) => readyToRaise(x) && (approvedKind(x) !== "new_focus" || fitsGoalCap(s, x.newGoalSlug ?? "")));
   const carried = s.carry && "suggestionId" in s.carry ? raisable.find((x) => x.id === (s.carry as { suggestionId: string }).suggestionId) : undefined;
   if (carried) {
-    lines.push(`THIS TEXT ALSO RAISES the next step the team approved ${ref(carried.id)} (${what(carried)}): as your own idea, specific to them, in place of the kickoff's question; the whole text stays 1 to 3 sentences, no proof ask.`);
+    lines.push(`THIS TEXT ALSO RAISES the next step the team approved ${ref(carried.id)} (${what(carried)}): as your own idea, specific to them, in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`);
   } else if (!s.nudgeMoment) {
     for (const x of raisable) {
       lines.push(`Next step the team approved, not raised yet ${ref(x.id)} (${what(x)}): raise it as your own idea when it fits (after a done, or when they talk about how it's going), then record_next_step delivered.`);
@@ -216,7 +216,7 @@ function nextStepLines(s: CoachState, plan: Plan): string[] {
   const step = (slug: string) => (s.maintenanceSteps[slug] ? ` (${s.maintenanceSteps[slug]})` : "");
   if (s.carry && "checkinGoal" in s.carry) {
     const slug = s.carry.checkinGoal;
-    lines.push(`THIS TEXT ALSO ASKS a maintenance check-in on ${title(slug)}${step(slug)}: one light line in place of the kickoff's question; the whole text stays 1 to 3 sentences, no proof ask.`);
+    lines.push(`THIS TEXT ALSO ASKS a maintenance check-in on ${title(slug)}${step(slug)}: one light line in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`);
   }
   for (const g of live.filter((x) => x.role === "maintenance")) {
     const rows = s.checkins.filter((c) => c.goalSlug === g.goalSlug);
