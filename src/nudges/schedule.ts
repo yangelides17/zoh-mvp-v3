@@ -49,8 +49,11 @@ export type NudgeMoment = (typeof NUDGE_MOMENTS)[number];
 /** Step-day kickoffs: the moments that can carry an approved next step or a maintenance check-in. */
 export const CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin"];
 
-/** What a kickoff carries besides the step, in place of its question (spec #9, rules 2 and 7). */
-export type NudgeCarry = { suggestionId: string } | { checkinGoal: string };
+/** What a kickoff carries besides the step, in place of its question (spec #9, rules 2 and 7; spec #10, 4). */
+export type NudgeCarry = { suggestionId: string } | { checkinGoal: string } | { requestId: string };
+
+/** Morning texts that can carry a founder's request: the kickoffs, and the rest-day text. */
+export const REQUEST_CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin", "rest_day"];
 
 export interface NudgeInput {
   now: Date;

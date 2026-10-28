@@ -2,6 +2,7 @@ import type { AppDeps } from "./app.js";
 import { createClaudeModel } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
+import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
 import { createMediaRetention, type MediaRetention } from "./media/retention.js";
@@ -46,6 +47,7 @@ export function appDeps(
     },
     webhookSecret: config.sendblue.webhookSecret,
     console: config.console,
+    consoleCoach: makeConsoleCoach(config, db),
     missingSettings: () => missingSettings(config),
     logger: {
       level: config.logLevel,
@@ -135,6 +137,17 @@ function makeCoach(config: Config, db: Db) {
           maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
           effort: "medium",
         }),
+      })
+    : undefined;
+}
+
+/** The console chat's coach: the texting coach's model and effort. */
+function makeConsoleCoach(config: Config, db: Db) {
+  return config.claude.apiKey
+    ? createConsoleCoach({
+        db,
+        goalCap: config.goalCap,
+        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium" }),
       })
     : undefined;
 }

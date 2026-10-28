@@ -6,6 +6,7 @@ import { messageTime } from "../memory/store.js";
 import { maskNumber } from "../pipeline/inbound.js";
 import type { StreakRun } from "../nudges/streak.js";
 import type { GoalView, TesterPage, TesterRow } from "./data.js";
+import { APP_AUTHOR } from "./requests.js";
 import { decided } from "./suggestions.js";
 
 /** The founder console's pages: server-rendered HTML that reads on a phone. Every value is escaped. */
@@ -206,13 +207,59 @@ function newSuggestionForm(page: TesterPage): string {
 <button class="primary">Save suggestion</button></form></details>`;
 }
 
+const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sent: "sent", done: "done", cancelled: "cancelled" };
+
 function threadItem(m: ConsoleMessage, page: TesterPage): string {
-  if (m.kind === "alert") return alertCard(m, page.tester.id);
-  const label = m.kind === "summary" ? "Weekly summary" : m.author ? `${m.author} (${m.kind})` : m.kind;
-  return `<div class="card"><div class="row"><span class="chip">${esc(label)}</span><span class="muted">${esc(when(m.createdAt))}</span></div><pre>${esc(m.body)}</pre></div>`;
+  const time = `<span class="muted">${esc(when(m.createdAt))}</span>`;
+  switch (m.kind) {
+    case "alert":
+      return alertCard(m, page.tester.id);
+    case "founder":
+      return `<div class="text out"><div class="bubble">${esc(m.body)}</div><div class="muted">${esc(m.author)} · ${esc(when(m.createdAt))}</div></div>`;
+    case "coach":
+      if (m.author === APP_AUTHOR) return `<div class="muted" style="margin:6px 0">${esc(m.body)} · ${esc(when(m.createdAt))}</div>`;
+      return `<div class="text in"><div class="bubble">${esc(m.body)}</div><div class="muted">ZOH · ${esc(when(m.createdAt))}</div></div>`;
+    case "note":
+      return `<div class="card"><div class="row"><span class="chip">note for the coach</span><span class="muted">from ${esc(m.author)}</span>${time}</div><div>${esc(m.body)}</div></div>`;
+    case "request": {
+      const status = m.requestStatus ?? "pending";
+      const cancel =
+        status === "pending"
+          ? `<form class="inline" method="post" action="/console/testers/${esc(page.tester.id)}/requests/${esc(m.id)}/cancel"><button>Cancel</button></form>`
+          : "";
+      const chips = [m.exact ? "send exactly this" : "for the coach to bring up", m.sendNow && "send now", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      return `<div class="card"><div class="row">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)}</span>${time}${m.dueAt ? `<span class="muted">not before ${esc(when(m.dueAt))}</span>` : ""}</div>
+<div>${esc(m.body)}</div>${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
+    }
+    case "summary":
+      return `<div class="card"><div class="row"><span class="chip">Weekly summary</span>${time}</div><pre>${esc(m.body)}</pre></div>`;
+  }
 }
 
-export function testerView(page: TesterPage, name: string, notice?: string): string {
+/** The coach is still answering: the founder's latest line has no answer after it yet (and is recent). */
+export function coachThinking(thread: ConsoleMessage[], now: Date): boolean {
+  const lastFounder = thread.findLast((m) => m.kind === "founder");
+  const lastCoach = thread.findLast((m) => m.kind === "coach");
+  return Boolean(lastFounder && !(lastCoach && lastCoach.createdAt >= lastFounder.createdAt) && now.getTime() - lastFounder.createdAt.getTime() < THINKING_FOR_MS);
+}
+
+/** How long the page keeps checking for the coach's answer. */
+const THINKING_FOR_MS = 2 * 60_000;
+
+function chatBox(page: TesterPage, thinking: boolean): string {
+  const stopped = page.tester.stoppedAt ? `<p class="muted warn">They texted stop: you can still ask about them, but nothing is sent.</p>` : "";
+  // While the coach answers, reload every few seconds, but never over something being typed.
+  const poll = thinking
+    ? `<p class="muted" id="thinking">ZOH is thinking…</p><script>setInterval(function(){var t=document.getElementById("chat-text");if(!t||!t.value)location.reload()},3000)</script>`
+    : "";
+  return `${poll}<form method="post" action="/console/testers/${esc(page.tester.id)}/chat" class="card" id="chat">${stopped}
+<textarea id="chat-text" name="text" maxlength="2000" required placeholder="Ask about them, give context, or ask ZOH to bring something up"></textarea>
+<div class="row" style="margin-top:6px"><label><input type="checkbox" name="exact"> Send exactly this</label><label><input type="checkbox" name="sendNow"> Send now (skip quiet hours)</label></div>
+<p class="muted">Exact texts go out word for word, as ZOH: never after a stop or past 3 unanswered; "send now" skips only quiet hours.</p>
+<button class="primary">Send</button></form>`;
+}
+
+export function testerView(page: TesterPage, name: string, now = new Date(), notice?: string): string {
   const t = page.tester;
   const goalsHtml = page.goals.map((v) => goalCard(v, page)).join("") || `<p class="muted">No goals yet.</p>`;
   const switches = page.switches.length
@@ -240,7 +287,7 @@ export function testerView(page: TesterPage, name: string, notice?: string): str
 <h1>${esc(t.name ?? "Unnamed")}</h1>
 <div class="row"><span class="muted">${esc(maskNumber(t.phone))}</span><span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip warn">${esc(s)}</span>`).join("")}<span class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)} · ${esc(t.pushiness)}</span></div>
 <nav class="jump" style="margin:10px 0"><a href="#console">Console${waiting ? ` (${waiting})` : ""}</a><a href="#goals">Goals</a><a href="#suggestions">Suggestions</a><a href="#plans">Plans</a><a href="#steps">Step log</a><a href="#memory">Memory</a><a href="#texts">Texts</a></nav>
-<h2 id="console">Console</h2>${page.thread.map((m) => threadItem(m, page)).join("") || `<p class="muted">No alerts or summaries yet.</p>`}
+<h2 id="console">Console</h2>${page.thread.map((m) => threadItem(m, page)).join("") || `<p class="muted">Nothing yet: ask ZOH about them below.</p>`}${chatBox(page, coachThinking(page.thread, now))}
 <h2 id="goals">Goals</h2>${goalsHtml}${switches}
 <h2 id="suggestions">Suggestions</h2>${page.suggestions.map((s) => suggestionCard(s, page)).join("") || `<p class="muted">None yet.</p>`}${newSuggestionForm(page)}
 <h2 id="plans">Plan versions</h2>${page.plans.map((p) => planCard(p, page)).join("") || `<p class="muted">No plan yet.</p>`}

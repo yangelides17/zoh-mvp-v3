@@ -1,5 +1,6 @@
 import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
+import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
@@ -10,7 +11,7 @@ import { describePlan, fitsGoalCap } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, nextSteps: 1300, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, nextSteps: 1300, team: 650, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -102,6 +103,12 @@ export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudg
 - Maintenance check-in: one light line in place of the kickoff's question, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
 - "What's my streak?": every goal's streak from the state, in one short reply.`;
 
+/** The founders behind the console (spec: GitHub issue "Founder console"). Every phase. */
+export const TEAM = `THE TEAM: the founders read along and sometimes weigh in (the state's FROM THE TEAM lines).
+- A note is context: let it shape how you coach; never quote it or say where it came from.
+- A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done. A link goes in as is, with a line on why it's for them.
+- Asked "did someone tell you to say that?": be honest: the team reads along and sometimes weighs in. Never deny it.`;
+
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.
 - Remember like a friend: when they mention someone or something in memory, show you know it (their name, the detail that matters); otherwise bring a detail up only when it fits, in passing, never as a list. Never state anything about them or the people in their life that isn't in memory or the texts: no guesses said as facts.
@@ -121,14 +128,14 @@ Tester: what's the best book to start with?
 ZOH: Depends what you're into. We'll pick one together in your plan. Quick one first: when are you usually free to read?`;
 
 /** The fixed part of the system prompt during onboarding; cached. */
-export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, NUDGES, EXAMPLES].join("\n\n");
+export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, NUDGES, TEAM, EXAMPLES].join("\n\n");
 
 /** Opens the voice page in the after-onboarding prompt. */
 export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your voice is the page below, word for word. Sections marked "Not active yet" describe features that aren't built yet: don't act on them. One text per reply.`;
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, NEXT_STEPS, MEMORY].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, NEXT_STEPS, TEAM, MEMORY].join("\n\n");
 }
 
 /** Today's step, as the nudge scheduler sees it, and the next step day. */
@@ -230,6 +237,27 @@ function nextStepLines(s: CoachState, plan: Plan): string[] {
   return lines;
 }
 
+/** The founders' notes and requests (spec #10): never quoted; a request is carried as ZOH's own idea. */
+function teamLines(s: CoachState): string[] {
+  const lines: string[] = [];
+  const day = (at: Date) => new Intl.DateTimeFormat("en-US", { timeZone: s.tester.timeZone, month: "short", day: "numeric" }).format(at);
+  if (s.teamNotes.length) {
+    lines.push(`FROM THE TEAM, notes (context only; never quote them or mention the team):\n${s.teamNotes.map((n) => `- ${day(n.createdAt)}: ${n.body}`).join("\n")}`);
+  }
+  const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
+  const carried = s.teamRequests.find((r) => r.id === carriedId);
+  if (carried) {
+    lines.push(
+      `THIS TEXT ALSO CARRIES the team's request [${requestRef(carried.id)}]: ${carried.body}. As your own idea, in place of the text's usual question (at most one question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`,
+    );
+  } else if (!s.nudgeMoment) {
+    for (const r of s.teamRequests) {
+      lines.push(`FROM THE TEAM, request [${requestRef(r.id)}]: ${r.body}. Work it in as your own idea when it fits (this reply if it can), then mark_request_done.`);
+    }
+  }
+  return lines;
+}
+
 function nextStepDay(plan: Plan, today: string): string | undefined {
   for (let i = 1; i <= 7; i++) {
     const date = addDays(today, i);
@@ -325,6 +353,8 @@ export function buildStateBlock(s: CoachState): string {
 
   lines.push(`Goal list (use exactly these lines when you show it):\n${s.goals.map((g) => `• ${g.title}`).join("\n")}`);
   lines.push(`Goal slugs for choose_goal: ${s.goals.map((g) => `${g.slug} = ${g.title} (${g.description})`).join("; ")}`);
+
+  lines.push(...teamLines(s));
 
   if (s.nudgeMoment) {
     lines.push(`NUDGE MOMENT: ${s.nudgeMoment}. They haven't texted: you're starting this text yourself (see NUDGES).`);

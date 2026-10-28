@@ -10,6 +10,7 @@ import {
   stepDays,
   suggestions,
   WEEKDAYS,
+  type ConsoleMessage,
   type Goal,
   type MaintenanceCheckin,
   type Plan,
@@ -22,6 +23,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
+import { notesForCoach, pendingRequests } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
@@ -83,6 +85,10 @@ export interface CoachState {
   maintenanceSteps: Record<string, string>;
   /** Answers saved for goals they switched away from, to reuse where they fit. */
   earlierAnswers: PlanInput[];
+  /** The founders' notes from the console: context, never quoted (spec "Founder console", rule 3). */
+  teamNotes: ConsoleMessage[];
+  /** The founders' requests to carry in ZOH's words, due now, oldest first. */
+  teamRequests: ConsoleMessage[];
   /** Their latest text: what lock_plan checks the commitment against. */
   lastTesterText: string;
   /** No first reply has been sent since the tester's context started. */
@@ -177,6 +183,8 @@ export async function loadCoachState(
       }),
     ),
     earlierAnswers,
+    teamNotes: await notesForCoach(db, tester, opts.now),
+    teamRequests: await pendingRequests(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
