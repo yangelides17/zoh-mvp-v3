@@ -43,6 +43,13 @@
       "when": 1793206951666,
       "tag": "0005_proof",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793215700591,
+      "tag": "0006_goals_foundation",
+      "breakpoints": true
     }
   ]
 }

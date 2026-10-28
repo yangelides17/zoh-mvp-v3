@@ -5,7 +5,8 @@ import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { flags, messages, nudges, stepDays, testers, type Tester } from "../db/schema.js";
+import { messages, nudges, stepDays, testers, type Tester } from "../db/schema.js";
+import { saveFlag } from "../console/alerts.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
@@ -176,11 +177,12 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
 
   if (decision.action === "pause") {
     await updateTester(db, tester.id, { autoTextsPausedAt: now });
-    await db.insert(flags).values({
-      testerId: tester.id,
-      kind: WENT_QUIET_FLAG,
-      detail: `No reply since ${lastInboundAt ? serviceDate(lastInboundAt, tester) : "their first text"} (phase ${tester.phase}); ZOH's own texts paused on ${decision.date}`,
-    });
+    await saveFlag(
+      db,
+      tester.id,
+      WENT_QUIET_FLAG,
+      `No reply since ${lastInboundAt ? serviceDate(lastInboundAt, tester) : "their first text"} (phase ${tester.phase}); ZOH's own texts paused on ${decision.date}`,
+    );
     deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
   } else if (decision.action === "send") {
     await send(deps, tester, decision.nudge, now);

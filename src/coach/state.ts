@@ -21,6 +21,7 @@ import {
 import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
+import { loadGoalDays } from "../testers/goals.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -56,7 +57,7 @@ export interface CoachState {
   todayRow?: StepDay;
   /** Closed step days before today, newest first (the last two weeks). */
   recentDays: StepDay[];
-  /** Streak and in-a-row counts, today included once it's closed. */
+  /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
   proof: ProofSeen;
@@ -126,7 +127,7 @@ export async function loadCoachState(
     today,
     todayRow,
     recentDays,
-    days: summarizeDays(todayRow?.status ? [todayRow, ...recentDays] : recentDays, testerPlans),
+    days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,
     earlierAnswers,
@@ -146,6 +147,12 @@ export async function loadRecentDays(db: Db, tester: Tester, date: string): Prom
     .orderBy(desc(stepDays.date))
     .limit(14);
   return rows;
+}
+
+/** The streak and in-a-row counts for one goal, from all its closed step days through `date`. */
+export async function loadDaySummary(db: Db, testerId: string, goalSlug: string, date: string): Promise<DaySummary> {
+  const { days, plans: goalPlans } = await loadGoalDays(db, testerId, goalSlug, date);
+  return summarizeDays(days.reverse(), goalPlans);
 }
 
 export interface ProofSeen {

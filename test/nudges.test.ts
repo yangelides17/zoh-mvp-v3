@@ -1,15 +1,30 @@
-import { and, asc, eq } from "drizzle-orm";
+import { readFileSync } from "node:fs";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { raiseAlert } from "../src/console/alerts.js";
 import { createCoach } from "../src/coach/coach.js";
 import { buildStateBlock, NUDGES } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
-import { flags, messages, nudges, plans, stepDays, testers, type Plan, type Tester } from "../src/db/schema.js";
+import {
+  consoleMessages,
+  flags,
+  maintenanceCheckins,
+  messages,
+  nudges,
+  planInputs,
+  plans,
+  stepDays,
+  testers,
+  type Plan,
+  type Tester,
+} from "../src/db/schema.js";
 import { createMediaRetention } from "../src/media/retention.js";
 import { dueNudge, serviceDate, zonedTime, type NudgeInput } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import { summarizeDays } from "../src/nudges/streak.js";
 import type { Logger } from "../src/pipeline/inbound.js";
+import { goalMetrics, loadTesterGoals, setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, LINE, ME, STRANGER, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
 
@@ -669,6 +684,7 @@ describe("streaks (rule 6)", () => {
   it("counts done and reduced days, and stops at a miss", () => {
     expect(summarizeDays([row(WED, "done"), row(TUE, "done_reduced"), row(MON, "done"), row(SUN, "missed")], [])).toEqual({
       streak: 3,
+      streakThrough: WED,
       missesInARow: 0,
       reducedInARow: 0,
     });
@@ -704,7 +720,7 @@ describe("a temporary lighter plan (rule 7)", () => {
     ]);
     const block = buildStateBlock(await loadCoachState(t.db, tester, { now: at(WED, "10:00"), isFirstText: false }));
     expect(block).toContain("Recent step days, newest first: Tue done (reduced version), Mon done (reduced version).");
-    expect(block).toContain("Streak: 0 step days. Missed in a row: 0. Reduced in a row: 2.");
+    expect(block).toContain("Streak: 0 step days, not counting today (done today makes it 1). Missed in a row: 0. Reduced in a row: 2.");
     expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
   });
 });
@@ -846,5 +862,104 @@ describe("voice-note audio retention", () => {
       ["media/1/new.caf", false, "did my ten pages"],
     ]);
     expect(await retention.tick(now)).toBe(0);
+  });
+});
+
+describe("goals foundation (spec: Step log and next step)", () => {
+  const done = async (tester: Tester, ...dates: string[]) => {
+    const plan = (await t.db.select().from(plans).orderBy(asc(plans.version)))[0]!;
+    await t.db.insert(stepDays).values(dates.map((date) => ({ testerId: tester.id, date, planId: plan.id, status: "done" as const })));
+  };
+  const block = async (tester: Tester, now: Date) =>
+    buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now, isFirstText: false }));
+  const alerts = () => t.db.select().from(consoleMessages).where(eq(consoleMessages.kind, "alert")).orderBy(asc(consoleMessages.createdAt));
+
+  it("#46: the streak says whether today is counted, and marking today done says the new number once", async () => {
+    const tester = await setup();
+    await done(tester, MON, TUE, WED);
+    expect(await block(tester, at(THU, "19:30"))).toContain("Streak: 3 step days, not counting today (done today makes it 4).");
+    const result = await doneWithPhoto("full", at(THU, "19:30"));
+    expect(result).toMatchObject({ ok: true, message: expect.stringContaining("Streak now: 4 step days, today included.") });
+    expect(await block(tester, at(THU, "19:31"))).toContain("Streak: 4 step days, today included.");
+  });
+
+  it("day 1 done shows a streak of 1 even with nothing before it", async () => {
+    const tester = await setup();
+    await doneWithPhoto("full", at(MON, "19:30"));
+    expect(await block(tester, at(MON, "19:31"))).toContain("Streak: 1 step day, today included.");
+  });
+
+  it("change_plan saves its kind (other by default); deepen keeps the streak, upgrade starts a new one", async () => {
+    const tester = await setup();
+    await done(tester, MON, TUE);
+    expect(await tool("change_plan", { step: "15 pages of Dune", kind: "deepen" }, at(WED, "08:00"))).toMatchObject({ ok: true });
+    expect(await block(tester, at(WED, "08:01"))).toContain("Streak: 2 step days, not counting today");
+    expect(await tool("change_plan", { time: "20:00" }, at(WED, "08:02"))).toMatchObject({ ok: true });
+    expect(await tool("change_plan", { step: "5 pages", until: FRI, kind: "deepen" }, at(WED, "08:03"))).toMatchObject({
+      ok: false,
+      error: expect.stringContaining("kind other"),
+    });
+    const upgrade = await tool("change_plan", { step: "20 min of lifting", kind: "upgrade" }, at(WED, "08:04"));
+    expect(upgrade).toMatchObject({ ok: true, message: expect.stringContaining("A new streak starts") });
+    expect((await t.db.select().from(plans).orderBy(asc(plans.version))).map((p) => p.changeKind)).toEqual([null, "deepen", "other", "upgrade"]);
+    expect(await block(tester, at(WED, "08:05"))).toContain("Streak: 0 step days, not counting today (done today makes it 1).");
+    expect((await goalMetrics(t.db, tester.id, "reading", WED)).past).toEqual([{ length: 2, from: MON, to: TUE, endedBy: "upgrade" }]);
+  });
+
+  it("every saved flag and every locked version raises one alert, once per event", async () => {
+    const tester = await setup();
+    await tool("flag_proof_pattern", { reason: "Third day of blurry photos" }, at(MON, "20:00"));
+    await tool("change_plan", { time: "20:00" }, at(MON, "20:05"));
+    const [flag] = await t.db.select().from(flags);
+    const version2 = (await t.db.select().from(plans).where(eq(plans.version, 2)))[0]!;
+    expect(await alerts()).toMatchObject([
+      { topic: "proof_pattern", eventKey: `flag:${flag!.id}`, body: "Third day of blurry photos", testerId: tester.id },
+      { topic: "plan_review", eventKey: `plan_review:${version2.id}`, planId: version2.id },
+    ]);
+    const again = { testerId: tester.id, topic: "plan_review", key: `plan_review:${version2.id}`, body: "again" };
+    expect(await raiseAlert(t.db, again)).toBe(false);
+    expect(await alerts()).toHaveLength(2);
+  });
+
+  it("a switched goal is dropped with its streak frozen; the new focus starts its own", async () => {
+    const tester = await setup();
+    await setFocusGoal(t.db, tester.id, "reading", at(SUN, "12:00"), "remove");
+    await done(tester, MON, TUE, WED);
+    expect(await tool("switch_goal", { slug: "exercise", reason: "my doctor wants me moving" }, at(THU, "08:00"))).toMatchObject({ ok: true });
+    expect((await loadTesterGoals(t.db, tester.id)).map((g) => [g.goalSlug, g.role, g.nudges, g.proof])).toEqual([
+      ["reading", "dropped", false, false],
+      ["exercise", "focus", true, true],
+    ]);
+    const state = await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(THU, "08:01"), isFirstText: false });
+    expect(state.days.streak).toBe(0);
+    expect((await goalMetrics(t.db, tester.id, "reading", THU)).current).toMatchObject({ length: 3, to: WED });
+    expect((await alerts()).map((a) => a.topic)).toEqual(["goal_switch"]);
+  });
+
+  it("reset clears goals and check-ins but keeps the console thread", async () => {
+    const tester = await setup();
+    await setFocusGoal(t.db, tester.id, "reading", at(SUN, "12:00"), "remove");
+    await t.db.insert(maintenanceCheckins).values({ testerId: tester.id, goalSlug: "reading", date: MON });
+    await tool("flag_proof_pattern", { reason: "blurry again" }, at(MON, "20:00"));
+    await resetTester(t.db, (await getTester(t.db, tester.id))!, at(TUE, "10:00"));
+    expect(await loadTesterGoals(t.db, tester.id)).toEqual([]);
+    expect(await t.db.select().from(maintenanceCheckins)).toEqual([]);
+    expect(await alerts()).toHaveLength(1);
+  });
+
+  it("the migration's backfill makes today's goal the focus, earlier goals dropped, and later versions 'other'", async () => {
+    const tester = await setup();
+    await t.db.insert(planInputs).values([{ testerId: tester.id, goalSlug: "reading" }, { testerId: tester.id, goalSlug: "bedtime" }]);
+    const base = (await t.db.select().from(plans))[0]!;
+    const { id: _id, ...rest } = base;
+    await t.db.insert(plans).values({ ...rest, version: 2 });
+    const migration = readFileSync(new URL("../drizzle/0006_goals_foundation.sql", import.meta.url), "utf8");
+    const backfill = migration.slice(migration.indexOf("-- Today's goals")).split("--> statement-breakpoint");
+    for (const statement of backfill) await t.db.execute(sql.raw(statement));
+    expect((await loadTesterGoals(t.db, tester.id)).map((g) => [g.goalSlug, g.role]).sort()).toEqual([
+      ["bedtime", "dropped"],
+      ["reading", "focus"],
+    ]);
+    expect((await t.db.select().from(plans).orderBy(asc(plans.version))).map((p) => p.changeKind)).toEqual([null, "other"]);
   });
 });

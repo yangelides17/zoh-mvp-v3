@@ -28,8 +28,12 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always
   replies. After 3 days of silence ZOH stops automatic texts and the founders decide.
-- No founder notifications of any kind yet; flags (declined goals, goal switches, plans to review)
-  are only saved. How we get notified is decided with the founder console and commands.
+- Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
+  went quiet) and each locked plan version to review are saved as console alerts, one per event
+  (`raiseAlert`), which the founder console (#10) shows.
+- Goals (#9): `tester_goals` holds every goal with its role (focus, maintenance, dropped);
+  `testers.goal_slug` stays the focus. Each goal has its own streak from its own step days: a plan
+  version's `change_kind` says deepen or other (streak goes on) or upgrade (a new streak starts).
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.
