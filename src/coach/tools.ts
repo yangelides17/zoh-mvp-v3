@@ -734,7 +734,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const found = findRequest(state.teamRequests, ref);
       if (!found) return { ok: false, error: `No open team request ${ref}.` };
       await closeRequest(db, { request: found, status: "done", at, line: doneLine(found.body, "in a reply", at) });
-      return saved(tester, "Marked done; the team sees it. This text must carry it.");
+      return saved(tester, "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.");
     }
   }
 }

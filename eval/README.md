@@ -74,4 +74,8 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
   transcript marked as started by ZOH. A seed's `history_hours_ago` puts the seeded conversation
   earlier (e.g. the evening before); its plan's `started_days_ago` and `minutes` set day 1 and how
   long the step takes. See `eval/cases/nudges/`.
+- **Console** (founders' chat): a case line `console Yanni: ...` goes through the real console chat as
+  that founder (`console Yanni (exact): ...` or `(exact, now)` for "send exactly this"); ZOH's console answer
+  joins the transcript marked as console, and an exact text goes out on the next minute's tick. The
+  estimate counts the coach's console calls loosely. See `eval/cases/console/`.
 - **A feature:** add an entry to `FEATURES` in `eval/features.ts` and a scenarios file.

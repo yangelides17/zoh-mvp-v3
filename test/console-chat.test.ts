@@ -364,7 +364,7 @@ describe("the texting coach and the team", () => {
     expect(rows.at(-1)!.body).toMatch(/^Done \(in a reply, Tue 12:00 PM\): Share the sleep article$/);
     // Later rounds of the same reply still see it, so the text doesn't drop it (eval: article-link).
     const sameReply = await loadCoachState(t.db, tester, { now, isFirstText: false });
-    expect(buildStateBlock(sameReply)).toContain(`request [${requestRef(request.id)}], marked done in this reply: Share the sleep article. This text carries it`);
+    expect(buildStateBlock(sameReply)).toContain(`request [${requestRef(request.id)}], marked done in this reply: Share the sleep article. This text (not sent yet) carries it`);
     const again = await runTool(t.db, sameReply, "mark_request_done", { request: requestRef(request.id) }, now);
     expect(again.ok).toBe(false);
     // The next reply doesn't.
