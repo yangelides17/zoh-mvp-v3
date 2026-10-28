@@ -374,7 +374,7 @@ describe("maintenance check-ins (rule 7)", () => {
     await t.db.insert(plans).values({ testerId: tester.id, goalSlug: "bedtime", status: "locked", version: 0, ...DUNE, days: [...DUNE.days], step: "in bed by 10:30", startDate: "2026-10-01" });
     await t.db.insert(testerGoals).values({ testerId: tester.id, goalSlug: "bedtime", role: "maintenance", nudges: false, proof: false, checkinsPerWeek: 2 });
     const s = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { checkinGoal: "bedtime" } });
-    expect(buildStateBlock(s)).toContain("THIS TEXT ALSO ASKS a maintenance check-in on Same bedtime every night (in bed by 10:30): one light line in place of the kickoff's question.");
+    expect(buildStateBlock(s)).toContain("THIS TEXT ALSO ASKS a maintenance check-in on Same bedtime every night (in bed by 10:30): one light line in place of the kickoff's question; the whole text stays 1 to 3 sentences, no proof ask.");
   });
 
   it("two unanswered: the next reply asks it on its own once", async () => {

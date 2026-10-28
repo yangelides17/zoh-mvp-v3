@@ -582,12 +582,15 @@ describe("the coach writing a nudge", () => {
     expect(JSON.stringify(last.content)).toContain("[No new text from them. It's Mon 9:00 AM. Write the kickoff text now.]");
   });
 
-  it("an empty answer is an error, so the slot is retried", async () => {
+  it("an empty answer is tried once more; two in a row are an error, so the slot is retried", async () => {
     const tester = await setup();
     const model = new FakeClaudeModel();
-    model.script("");
+    model.script("", "Yo Sam! Ten pages tonight?");
     const coach = createCoach({ db: t.db, model });
+    expect(await coach.nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" })).toBe("Yo Sam! Ten pages tonight?");
+    model.script("", "");
     await expect(coach.nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" })).rejects.toThrow(/no nudge text/);
+    expect(model.requests).toHaveLength(4);
   });
 });
 

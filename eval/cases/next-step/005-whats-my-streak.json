@@ -10,7 +10,7 @@
     "answers": { "what": "thesis writing", "where": "the library", "when": "10 am", "how_long": "50 min" },
     "history": [
       { "from": "tester", "text": "50 minutes, boom" },
-      { "from": "zoh", "text": "That's 6 in a row, Nico. The thesis is moving 🔥" }
+      { "from": "zoh", "text": "That's 9 in a row, Nico. The thesis is moving 🔥" }
     ],
     "plan": {
       "step": "one 50-minute phone-free thesis block",

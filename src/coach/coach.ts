@@ -165,23 +165,27 @@ export function createCoach(opts: CoachOptions): Replier {
      */
     async nudge({ tester, turns, now, moment, previous, carry }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${fresh}]`;
+      const carries = carry ? ` It also does what the state's "THIS TEXT ALSO" line says.` : "";
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
       const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
-      const response = await model.create({
-        system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
-        messages,
-        tools: toolsFor(tester),
-        toolChoice: "none",
-      });
-      const text = response.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n")
-        .trim();
-      if (!text) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
-      return text;
+      // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
+      for (let attempt = 1; ; attempt++) {
+        const response = await model.create({
+          system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
+          messages,
+          tools: toolsFor(tester),
+          toolChoice: "none",
+        });
+        const text = response.content
+          .filter((b) => b.type === "text")
+          .map((b) => b.text)
+          .join("\n")
+          .trim();
+        if (text) return text;
+        if (attempt === 2) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
+      }
     },
     check: () => model.check(),
   };
