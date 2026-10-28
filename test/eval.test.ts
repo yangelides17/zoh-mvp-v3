@@ -603,6 +603,9 @@ describe("eval: console lines (console feature)", () => {
     ]);
     // Only the plain line asks the console coach; an exact one goes out as written.
     expect(asked).toHaveLength(1);
+    // The grader gets the step log ZOH saw, so true facts about his days aren't marked made up.
+    expect(result.record).toContain("Sat, Oct 31: missed");
+    expect(result.record).toContain("Mon, Nov 2 (today): step day, not done yet at 18:00");
   });
 
   it("shows the grader which lines are the founders' console chat", () => {
@@ -614,7 +617,10 @@ describe("eval: console lines (console feature)", () => {
         { from: "zoh", text: "Work ran late.", at, console: true },
         { from: "zoh", text: "Hey Maya!", at, started: true },
       ],
+      record: "Sun, Nov 1 (yesterday): missed",
     });
+    expect(prompt).toContain("=== The tester's step log at the start");
+    expect(prompt.indexOf("Sun, Nov 1 (yesterday): missed")).toBeLessThan(prompt.indexOf("=== Transcript ==="));
     expect(prompt).toContain("[FOUNDER, in the console] (12:00 pm) Yanni: why did she miss?");
     expect(prompt).toContain("[ZOH 1, to the founders in the console; the tester never sees it] (12:00 pm) Work ran late.");
     expect(prompt).toContain("[ZOH 2, started by ZOH, not a reply]");

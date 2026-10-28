@@ -10,6 +10,8 @@ export interface GraderInput {
   transcript: TranscriptLine[];
   /** ZOH's memory pages after the overnight pass (memory feature), graded with the conversation. */
   memory?: string;
+  /** The tester's step log as ZOH saw it (console feature). */
+  record?: string;
   rubric: RubricRule[];
   /** The feature's approved checks and the voice page, read at run time. */
   pages: { rules: string; voice: string };
@@ -46,7 +48,7 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   ].join("\n");
 }
 
-export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory">): string {
+export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory" | "record">): string {
   const { plan, transcript, context: earlier = [] } = input;
   let n = 0;
   const lines = transcript.map((l) => {
@@ -93,7 +95,10 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
         input.memory,
       ]
     : [];
-  return [...context, ...before, "", "=== Transcript ===", ...lines, ...memory].join("\n");
+  const record = input.record
+    ? ["", "=== The tester's step log at the start (ZOH could see this; check its facts about their days against it) ===", input.record]
+    : [];
+  return [...context, ...before, ...record, "", "=== Transcript ===", ...lines, ...memory].join("\n");
 }
 
 /** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */

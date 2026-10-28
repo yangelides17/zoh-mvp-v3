@@ -17,7 +17,9 @@ import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
 import { desc, eq } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
-import type { ConsoleCoach } from "../src/console/chat.js";
+import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
+import { loadCurrentPlan } from "../src/coach/state.js";
+import { serviceDate } from "../src/nudges/schedule.js";
 import { COACH_AUTHOR } from "../src/console/requests.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
@@ -259,6 +261,15 @@ export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<T
     out.push(...app.sendblue.sent.slice(sendsBefore).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true })));
   }
   return out;
+}
+
+/** The tester's dated step log as the console coach sees it, for the grader (console feature). */
+async function readStepLog(app: EvalApp): Promise<string | undefined> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return undefined;
+  const today = serviceDate(app.clock.now(), tester);
+  const plan = await loadCurrentPlan(app.db, tester, today);
+  return plan ? stepLog(app.db, tester, plan, today) : undefined;
 }
 
 /** Plays the tester's side: returns the next text, or null when the tester is done. */
@@ -532,6 +543,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
+  const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(l.trim())) ? await readStepLog(app) : undefined;
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
   let error: string | undefined;
@@ -576,6 +588,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
+      ...(record ? { record } : {}),
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,
       messageCount: row?.n ?? 0,

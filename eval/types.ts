@@ -207,6 +207,8 @@ export interface ConversationResult {
   error?: string;
   /** The tester's memory pages after the run (memory feature only), as the coach reads them. */
   memory?: string;
+  /** The tester's dated step log at the start (console feature): what ZOH could see, so the grader can check its facts. */
+  record?: string;
   /** Rows in the database that belong to this tester, other than messages. */
   savedState: Record<string, unknown[]>;
   messageCount: number;
