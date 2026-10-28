@@ -725,6 +725,21 @@ describe("proof (spec: Photo and voice verification)", () => {
     expect(await stepDay(tester, MON)).toMatchObject({ status: "done", proofVerdict: "plausible", proofSeen: "dark selfie, lights off" });
   });
 
+  it("goes by when Sendblue says the photo was sent, not when we stored it", async () => {
+    const tester = await setup();
+    // Found by the eval, whose clock runs apart from the database's: a photo sent at 8 pm, stored hours later.
+    await t.db.insert(messages).values({
+      direction: "inbound",
+      contactNumber: ME,
+      mediaUrl: "https://cdn.example/p.jpg",
+      mediaContentType: "image/jpeg",
+      sentAt: at(MON, "20:00"),
+      createdAt: at(TUE, "03:00"),
+    });
+    expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:01"))).toMatchObject({ ok: true });
+    expect((await stepDay(tester, MON))?.status).toBe("done");
+  });
+
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);

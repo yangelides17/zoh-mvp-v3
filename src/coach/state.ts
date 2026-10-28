@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, isNotNull, lt, lte, ne } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, lt, lte, ne, sql } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
@@ -160,22 +160,31 @@ export interface ProofSeen {
  * local day today, and those since ZOH's last text. Videos and files don't count: ZOH can't see them.
  */
 export async function loadProof(db: Db, tester: Tester, today: string, now: Date): Promise<ProofSeen> {
-  const since = new Date(Math.max(tester.contextStartedAt.getTime(), now.getTime() - 2 * 86_400_000));
-  const window = and(eq(messages.contactNumber, tester.phone), gte(messages.createdAt, since), lte(messages.createdAt, now));
+  // When a text happened: Sendblue's sent time, else when it was stored (as memory's `sentTime`; not
+  // imported from there, since memory's store imports the coach's tools, which import this file).
+  const sentTime = sql<Date>`coalesce(${messages.sentAt}, ${messages.createdAt})`;
+  const messageTime = (m: { sentAt: Date | null; createdAt: Date }) => m.sentAt ?? m.createdAt;
+  const window = and(
+    eq(messages.contactNumber, tester.phone),
+    gte(messages.createdAt, tester.contextStartedAt),
+    gte(sentTime, new Date(now.getTime() - 2 * 86_400_000)),
+    lte(sentTime, now),
+  );
   const inbound = await db
-    .select({ createdAt: messages.createdAt, mediaUrl: messages.mediaUrl, mediaContentType: messages.mediaContentType })
+    .select({ sentAt: messages.sentAt, createdAt: messages.createdAt, mediaUrl: messages.mediaUrl, mediaContentType: messages.mediaContentType })
     .from(messages)
     .where(and(window, eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl)));
   const [lastOut] = await db
-    .select({ createdAt: messages.createdAt })
+    .select({ at: sentTime })
     .from(messages)
     .where(and(window, eq(messages.direction, "outbound")))
-    .orderBy(desc(messages.createdAt))
+    .orderBy(desc(sentTime))
     .limit(1);
   const proof = inbound.filter((m) => ["image", "audio"].includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
+  const lastOutAt = lastOut ? new Date(lastOut.at).getTime() : undefined;
   return {
-    today: proof.filter((m) => serviceDate(m.createdAt, tester) === today).length,
-    latest: proof.filter((m) => !lastOut || m.createdAt > lastOut.createdAt).length,
+    today: proof.filter((m) => serviceDate(messageTime(m), tester) === today).length,
+    latest: proof.filter((m) => lastOutAt === undefined || messageTime(m).getTime() > lastOutAt).length,
   };
 }
 
