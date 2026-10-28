@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { consoleMessages, type ConsoleMessage, type Tester } from "../db/schema.js";
+import { consoleMessages, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
 
 /**
  * What the founders send through the console chat (spec: GitHub issue "Founder console", 4 and
@@ -39,7 +39,18 @@ export async function addThreadLine(
 
 export async function addRequest(
   db: Db,
-  opts: { testerId: string; author: string; body: string; exact: boolean; sendNow: boolean; dueAt?: Date; at: Date; status?: "pending" | "cancelled" },
+  opts: {
+    testerId: string;
+    author: string;
+    body: string;
+    exact: boolean;
+    sendNow: boolean;
+    dueAt?: Date;
+    delivery?: RequestDelivery;
+    expiresAt?: Date;
+    at: Date;
+    status?: "pending" | "cancelled";
+  },
 ): Promise<ConsoleMessage> {
   const [row] = await db
     .insert(consoleMessages)
@@ -52,6 +63,8 @@ export async function addRequest(
       exact: opts.exact,
       sendNow: opts.sendNow,
       dueAt: opts.dueAt,
+      delivery: opts.delivery ?? "natural",
+      expiresAt: opts.expiresAt,
       doneAt: opts.status === "cancelled" ? opts.at : undefined,
       createdAt: opts.at,
     })
@@ -104,8 +117,13 @@ export function doneLine(body: string, how: string, at: Date): string {
   return `Done (${how}, ${founderTime(at)}): ${short}`;
 }
 
-/** Pending requests for the coach to carry in its own words, due by `now`, oldest first. */
-export async function pendingRequests(db: Db, testerId: string, now: Date): Promise<ConsoleMessage[]> {
+/** What a reply may carry: a natural request, or a manual nudge that's due (they're mid-conversation, so it goes in the reply). */
+export const REPLY_CARRIES: readonly RequestDelivery[] = ["natural", "own_text"];
+/** What the morning text may carry. */
+export const MORNING_CARRIES: readonly RequestDelivery[] = ["natural", "morning"];
+
+/** Pending requests for the coach to carry in its own words, due by `now` and not expired, oldest first. */
+export async function pendingRequests(db: Db, testerId: string, now: Date, deliveries: readonly RequestDelivery[]): Promise<ConsoleMessage[]> {
   return db
     .select()
     .from(consoleMessages)
@@ -115,10 +133,36 @@ export async function pendingRequests(db: Db, testerId: string, now: Date): Prom
         eq(consoleMessages.kind, "request"),
         eq(consoleMessages.requestStatus, "pending"),
         eq(consoleMessages.exact, false),
+        inArray(consoleMessages.delivery, [...deliveries]),
         or(isNull(consoleMessages.dueAt), lte(consoleMessages.dueAt, now)),
+        or(isNull(consoleMessages.expiresAt), gt(consoleMessages.expiresAt, now)),
       ),
     )
     .orderBy(asc(consoleMessages.createdAt));
+}
+
+/**
+ * Drops pending requests whose too-late-after time has passed (never sent late) and says so in
+ * the thread, with what stood in the way. Returns how many it dropped.
+ */
+export async function expireRequests(db: Db, tester: Tester, now: Date, blockedBy: string): Promise<number> {
+  const rows = await db
+    .update(consoleMessages)
+    .set({ requestStatus: "cancelled", doneAt: now })
+    .where(
+      and(
+        eq(consoleMessages.testerId, tester.id),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.requestStatus, "pending"),
+        lte(consoleMessages.expiresAt, now),
+      ),
+    )
+    .returning();
+  for (const r of rows) {
+    const short = r.body.length > 100 ? `${r.body.slice(0, 97)}...` : r.body;
+    await addThreadLine(db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: `Didn't go out in time (${blockedBy}), so I dropped it: ${short}`, at: now });
+  }
+  return rows.length;
 }
 
 /**

@@ -50,6 +50,13 @@
       "when": 1793215700591,
       "tag": "0006_goals_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793223326721,
+      "tag": "0007_console_request_timing",
+      "breakpoints": true
     }
   ]
 }

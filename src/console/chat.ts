@@ -7,7 +7,7 @@ import { buildStateBlock } from "../coach/prompt.js";
 import { insideQuietHours, loadCoachState, localTime } from "../coach/state.js";
 import { loadVoiceDoc } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, nudges, stepDays, testers, type ConsoleMessage, type Message, type Plan, type StepDayStatus, type Tester } from "../db/schema.js";
+import { consoleMessages, nudges, stepDays, testers, type ConsoleMessage, type Message, type Plan, type RequestDelivery, type StepDayStatus, type Tester } from "../db/schema.js";
 import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
@@ -34,6 +34,7 @@ Answering the founders:
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess.
 - Context for how to coach them ("traveling next week, go easy"): save_note in plain words, then confirm in a line.
 - Something to bring to the tester (a suggestion, a link, a question): plan_request, then confirm in one or two sentences: what you'll do and when, from NEXT CHANCE below ("Got it. I'll bring up a protein target in tomorrow's morning text, as my idea. I'll tell you how she takes it."). Links go in as is.
+- When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text), under the usual rules: never in quiet hours, counts toward 3 unanswered, dropped with a note if it can't go out that day. Something tied to a time ("tonight's run") that NEXT CHANCE can't reach in time: say so and offer its own text. Confirm the actual day and time.
 - Only what the record shows about their days, too: count misses and streaks from the state, never estimate them.
 - A request that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't queue it. Say why in a line and offer a version that fits; queue that once they agree.
 - "Cancel that": cancel_request.
@@ -85,19 +86,46 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "plan_request",
       description:
-        'Something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). not_before: their local "YYYY-MM-DD HH:MM" when it shouldn\'t come up before then (e.g. after a trip).',
-      input_schema: { type: "object", properties: { what: { type: "string" }, not_before: { type: "string" } }, required: ["what"] },
+        'Something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). when, as agreed with the founders: naturally (default: the morning text or your next reply), morning (only the morning text), own_text (its own text, a manual nudge; at: when, or now). at: their local "YYYY-MM-DD HH:MM" (own_text: when it goes; otherwise not before then). too_late_after: their local time after which it\'s dropped instead of sent late.',
+      input_schema: {
+        type: "object",
+        properties: {
+          what: { type: "string" },
+          when: { type: "string", enum: ["naturally", "morning", "own_text"] },
+          at: { type: "string" },
+          too_late_after: { type: "string" },
+        },
+        required: ["what"],
+      },
     },
     async run(ctx, input) {
-      const { what, not_before } = parse(
-        z.object({ what: text(1000), not_before: z.string().regex(/^\d{4}-\d{2}-\d{2} ([01]\d|2[0-3]):[0-5]\d$/, 'use "YYYY-MM-DD HH:MM"').optional() }).strict(),
+      const local = z.string().regex(/^\d{4}-\d{2}-\d{2} ([01]\d|2[0-3]):[0-5]\d$/, 'use "YYYY-MM-DD HH:MM"');
+      const { what, when = "naturally", at, too_late_after } = parse(
+        z.object({ what: text(1000), when: z.enum(["naturally", "morning", "own_text"]).optional(), at: local.optional(), too_late_after: local.optional() }).strict(),
         input,
       );
-      if (ctx.tester.stoppedAt) throw new CapabilityError("They texted stop: nothing can be sent to them. Tell the founders.");
-      const dueAt = not_before ? zoned(not_before, ctx.tester.timeZone) : undefined;
-      const row = await addRequest(ctx.db, { testerId: ctx.tester.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, at: ctx.now });
-      const from = dueAt ? ` Not before ${localTime(dueAt, ctx.tester.timeZone)} their time.` : "";
-      return `Queued [${requestRef(row.id)}].${from} It goes in your next text to them that fits (see NEXT CHANCE); the thread shows "Done" when it has.`;
+      const t = ctx.tester;
+      if (t.stoppedAt) throw new CapabilityError("They texted stop: nothing can be sent to them. Tell the founders.");
+      const delivery = when === "naturally" ? "natural" : when;
+      if (delivery === "morning" && t.phase !== "active") throw new CapabilityError(`They're in ${t.phase}: no morning texts yet. Use naturally (your next reply) or own_text.`);
+      const asked = at ? zoned(at, t.timeZone) : undefined;
+      const dueAt = delivery === "own_text" ? new Date(Math.max(asked?.getTime() ?? 0, ctx.now.getTime())) : asked;
+      if (delivery === "own_text" && insideQuietHours(localClock(dueAt!, t.timeZone), t)) {
+        throw new CapabilityError(
+          `That's inside their quiet hours (${t.quietHoursStart} to ${t.quietHoursEnd} their time): your own texts never go then. Offer ${t.quietHoursEnd} their time, or the founders' "Send exactly this" with "send now".`,
+        );
+      }
+      // Its own text is about that day: by default, too late once their day ends (quiet hours start).
+      const expiresAt = too_late_after ? zoned(too_late_after, t.timeZone) : delivery === "own_text" ? new Date(dayBounds(serviceDate(dueAt!, t), t).end) : undefined;
+      if (expiresAt && expiresAt <= (dueAt ?? ctx.now)) throw new CapabilityError("too_late_after has to be after it can go out.");
+      const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now });
+      const theirs = (d: Date) => `${localTime(d, t.timeZone)} their time`;
+      const until = expiresAt ? ` If it can't go out by ${theirs(expiresAt)} (quiet hours, 3 unanswered texts, a stop), it's dropped and the thread says so.` : "";
+      const where =
+        delivery === "own_text"
+          ? `its own text, ${dueAt!.getTime() <= ctx.now.getTime() ? "within a minute (or in your reply if they're texting right now)" : `at ${theirs(dueAt!)}`}.`
+          : `${delivery === "morning" ? "with the morning text" : "in your next text to them that fits"}${dueAt ? `, not before ${theirs(dueAt)}` : ""} (see NEXT CHANCE).`;
+      return `Queued [${requestRef(row.id)}]: ${where}${until} The thread shows "Done" when it has. Tell the founders the actual time.`;
     },
   },
   cancel_request: {
@@ -279,7 +307,7 @@ async function recordBlock(db: Db, tester: Tester, now: Date, goalCap?: number):
   // The record is rebuilt every round: a request this answer just queued is named as such, not as an earlier one.
   const requests = open.map(
     (r) =>
-      `- [${requestRef(r.id)}] ${r.createdAt.getTime() === now.getTime() ? "you just queued it in this answer" : `from ${r.author ?? "the team"}`}${r.exact ? ", word for word" : ""}${r.dueAt ? `, not before ${localTime(r.dueAt, tester.timeZone)}` : ""}: ${r.body}`,
+      `- [${requestRef(r.id)}] ${r.createdAt.getTime() === now.getTime() ? "you just queued it in this answer" : `from ${r.author ?? "the team"}`}${r.exact ? ", word for word" : `, ${DELIVERY_LABELS[r.delivery]}`}${r.dueAt ? `${r.delivery === "own_text" ? ", at" : ", not before"} ${localTime(r.dueAt, tester.timeZone)}` : ""}${r.expiresAt ? `, dropped after ${localTime(r.expiresAt, tester.timeZone)}` : ""}: ${r.body}`,
   );
   return [
     `THE TESTER (as the texting coach sees them; its instructions there are for texting, not for you)\n${buildStateBlock(state)}`,
@@ -290,6 +318,8 @@ async function recordBlock(db: Db, tester: Tester, now: Date, goalCap?: number):
     `Now: ${founderTime(now)} Eastern (founders), ${localTime(now, tester.timeZone)} their time.`,
   ].join("\n\n");
 }
+
+export const DELIVERY_LABELS: Record<RequestDelivery, string> = { natural: "naturally", morning: "with the morning text", own_text: "its own text" };
 
 /** Days shown before and after today in the console's step log. */
 export const STEP_LOG_PAST_DAYS = 14;

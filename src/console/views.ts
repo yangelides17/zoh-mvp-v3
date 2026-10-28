@@ -227,8 +227,10 @@ function threadItem(m: ConsoleMessage, page: TesterPage): string {
         status === "pending"
           ? `<form class="inline" method="post" action="/console/testers/${esc(page.tester.id)}/requests/${esc(m.id)}/cancel"><button>Cancel</button></form>`
           : "";
-      const chips = [m.exact ? "send exactly this" : "for the coach to bring up", m.sendNow && "send now", REQUEST_STATUS_LABELS[status]].filter(Boolean);
-      return `<div class="card"><div class="row">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)}</span>${time}${m.dueAt ? `<span class="muted">not before ${esc(when(m.dueAt))}</span>` : ""}</div>
+      const how = m.exact ? "send exactly this" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
+      const chips = [how, m.sendNow && "send now", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      const timing = [m.dueAt && `${m.delivery === "own_text" ? "at" : "not before"} ${when(m.dueAt)}`, m.expiresAt && `dropped if not out by ${when(m.expiresAt)}`].filter(Boolean);
+      return `<div class="card"><div class="row">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)}</span>${time}${timing.map((x) => `<span class="muted">${esc(x)}</span>`).join("")}</div>
 <div>${esc(m.body)}</div>${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
     }
     case "summary":

@@ -10,7 +10,7 @@ import { runTool } from "../src/coach/tools.js";
 import { loadVoiceDoc } from "../src/coach/voice.js";
 import { consoleMessages, messages, nudges, plans, stepDays, testers, type ConsoleMessage, type Tester } from "../src/db/schema.js";
 import { zonedTime } from "../src/nudges/schedule.js";
-import { createNudgeScheduler, MAX_UNANSWERED, TEAM_MOMENT, type NudgeScheduler } from "../src/nudges/scheduler.js";
+import { createNudgeScheduler, MAX_UNANSWERED, EXACT_MOMENT, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { DEV, FakeClaudeModel, LINE, ME, makeApp, type TestApp } from "./helpers.js";
 
@@ -261,7 +261,7 @@ describe("console coach capabilities", () => {
 
   it("plan_request queues a request (with a not-before time in their zone); cancel_request cancels it", async () => {
     const tester = await seed();
-    model.script({ tools: [{ name: "plan_request", input: { what: "Suggest a protein target", not_before: "2026-11-05 09:00" } }] }, "Got it. Thursday morning.");
+    model.script({ tools: [{ name: "plan_request", input: { what: "Suggest a protein target", at: "2026-11-05 09:00" } }] }, "Got it. Thursday morning.");
     await chat(tester, "propose a protein target after Wednesday");
     const [request] = (await thread(tester.id)).filter((r) => r.kind === "request");
     expect(request).toMatchObject({ author: "Yanni", body: "Suggest a protein target", exact: false, requestStatus: "pending" });
@@ -270,7 +270,7 @@ describe("console coach capabilities", () => {
     const toolResult = JSON.stringify(model.requests[1]!.messages.at(-1));
     expect(toolResult).toContain(`Queued [${requestRef(request!.id)}]`);
     // The next round's record names it as just queued, not as an earlier request (eval: rude-request).
-    expect(model.requests[1]!.system.at(-1)!.text).toContain(`[${requestRef(request!.id)}] you just queued it in this answer, not before`);
+    expect(model.requests[1]!.system.at(-1)!.text).toContain(`[${requestRef(request!.id)}] you just queued it in this answer, naturally, not before`);
 
     model.script({ tools: [{ name: "cancel_request", input: { request: requestRef(request!.id) } }] }, "Cancelled.");
     await chat(tester, "actually cancel that");
@@ -447,8 +447,8 @@ describe("send exactly this, through the nudge tick", () => {
     expect(row).toMatchObject({ requestStatus: "sent", messageId: message!.id });
     expect((await thread(tester.id)).at(-1)!.body).toContain("Done (sent word for word");
     // It counts toward the unanswered cap like ZOH's own texts.
-    const [slot] = await t.db.select().from(nudges).where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, TEAM_MOMENT)));
-    expect(slot).toMatchObject({ status: "sent", kind: `team:${request.id}` });
+    const [slot] = await t.db.select().from(nudges).where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, EXACT_MOMENT)));
+    expect(slot).toMatchObject({ status: "sent", kind: `exact:${request.id}` });
   });
 
   it("waits through quiet hours and goes when they end", async () => {
@@ -524,5 +524,127 @@ describe("send exactly this, through the nudge tick", () => {
     const decisions = await scheduler.tick(at(TUE, "12:01"));
     expect(sentTexts()).toEqual(["Welcome aboard"]);
     expect(decisions.get(tester.id)).toEqual({ action: "none", reason: "sent the team's text" });
+  });
+});
+
+describe("when a request goes: agreed in the console chat", () => {
+  /** Has the console coach queue a request with these inputs, and returns it. */
+  async function queue(tester: Tester, input: Record<string, unknown>): Promise<ConsoleMessage | undefined> {
+    model.script({ tools: [{ name: "plan_request", input: { what: "Ask how the new shoes feel", ...input } }] }, "Got it.");
+    await chat(tester, "text him about the shoes");
+    return (await thread(tester.id)).find((r) => r.kind === "request");
+  }
+  const toolResult = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
+  const nudgeMoments = () => t.replier.nudges.map((n) => n.moment);
+
+  it("\"now\" is its own text, due now, dropped once their day ends", async () => {
+    const tester = await seed();
+    const request = await queue(tester, { when: "own_text" });
+    expect(request).toMatchObject({ delivery: "own_text", requestStatus: "pending" });
+    expect(request!.dueAt).toEqual(now);
+    expect(request!.expiresAt).toEqual(at(TUE, "22:00"));
+    expect(toolResult()).toContain("its own text, within a minute");
+  });
+
+  it("its own text at a time in their quiet hours is refused, with what to offer instead", async () => {
+    const tester = await seed();
+    expect(await queue(tester, { when: "own_text", at: "2026-11-03 23:30" })).toBeUndefined();
+    expect(toolResult()).toContain("inside their quiet hours (22:00 to 09:00 their time)");
+  });
+
+  it("with the morning text needs a locked plan; a too-late-after time must come after it can go", async () => {
+    const planning = await seed({ phase: "planning" });
+    expect(await queue(planning, { when: "morning" })).toBeUndefined();
+    expect(toolResult()).toContain("no morning texts yet");
+    await t.db.update(testers).set({ phase: "active" }).where(eq(testers.id, planning.id));
+    expect(await queue({ ...planning, phase: "active" }, { when: "own_text", at: "2026-11-03 17:00", too_late_after: "2026-11-03 16:00" })).toBeUndefined();
+    expect(toolResult()).toContain("too_late_after has to be after");
+  });
+
+  it("the tick sends its own text at the agreed time, written by ZOH, and marks it done", async () => {
+    const tester = await seed();
+    const request = await queue(tester, { when: "own_text", at: "2026-11-03 17:00" });
+    await scheduler.tick(at(TUE, "16:59"));
+    expect(nudgeMoments()).toEqual([]);
+    await scheduler.tick(at(TUE, "17:00"));
+    expect(t.replier.nudges.at(-1)).toMatchObject({ moment: "team", carry: { requestId: request!.id } });
+    const [sent] = await t.db.select().from(messages).where(eq(messages.content, "Yo, team text"));
+    const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request!.id));
+    expect(row).toMatchObject({ requestStatus: "done", messageId: sent!.id });
+    expect((await thread(tester.id)).at(-1)!.body).toContain("Done (in its own text");
+    // A nudge like ZOH's own: it takes a slot and counts toward the unanswered cap.
+    const [slot] = await t.db.select().from(nudges).where(eq(nudges.kind, `team:${request!.id}`));
+    expect(slot).toMatchObject({ moment: "team", status: "sent" });
+    await scheduler.tick(at(TUE, "17:01"));
+    expect(nudgeMoments()).toEqual(["team"]);
+  });
+
+  it("the texting coach writes it as the text's whole job", async () => {
+    const tester = await seed();
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Ask how the new shoes feel", exact: false, sendNow: false, delivery: "own_text", dueAt: now, at: now });
+    const coachModel = new FakeClaudeModel("Sam! How are the new shoes feeling?");
+    const coach = createCoach({ db: t.db, model: coachModel, voice: "v" });
+    await coach.nudge!({ tester, turns: [{ role: "user", text: "hi" }], now, moment: "team", carry: { requestId: request.id } });
+    expect(coachModel.requests[0]!.system.at(-1)!.text).toContain(`[${requestRef(request.id)}]: Ask how the new shoes feel. It's this text's whole job`);
+    expect(TEAM).toContain("NUDGE MOMENT team");
+  });
+
+  it("follows the nudge rules: never after a stop or past 3 unanswered; dropped with a note when it's too late", async () => {
+    const stopped = await seed({ stopped: true });
+    await addRequest(t.db, { testerId: stopped.id, author: "Yanni", body: "Hi", exact: false, sendNow: false, delivery: "own_text", dueAt: now, expiresAt: at(TUE, "22:00"), at: now });
+    await scheduler.tick(at(TUE, "12:01"));
+    expect(nudgeMoments()).toEqual([]);
+    await scheduler.tick(at(TUE, "22:00"));
+    expect((await thread(stopped.id)).at(-1)!.body).toBe("Didn't go out in time (they texted stop), so I dropped it: Hi");
+  });
+
+  it("past 3 unanswered texts it waits, and is dropped (not sent tomorrow) when their day ends", async () => {
+    const tester = await seed();
+    for (const [i, kind] of ["kickoff", "checkin", "followup"].entries()) {
+      const when = at(TUE, `09:0${i}`);
+      await t.db.insert(nudges).values({ testerId: tester.id, date: TUE, kind, moment: kind, status: "sent", createdAt: when });
+    }
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Ask about the shoes", exact: false, sendNow: false, delivery: "own_text", dueAt: now, expiresAt: at(TUE, "22:00"), at: now });
+    await scheduler.tick(at(TUE, "12:01"));
+    expect(nudgeMoments()).toEqual([]);
+    await scheduler.tick(at(TUE, "22:00"));
+    const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request.id));
+    expect(row!.requestStatus).toBe("cancelled");
+    expect((await thread(tester.id)).at(-1)!.body).toContain("Didn't go out in time (3 texts from ZOH unanswered)");
+    await scheduler.tick(at(WED, "09:00"));
+    expect(nudgeMoments()).not.toContain("team");
+  });
+
+  it("mid-conversation it rides in ZOH's reply instead of a text on top; after 10 quiet minutes it goes on its own", async () => {
+    const tester = await seed();
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Ask about the shoes", exact: false, sendNow: false, delivery: "own_text", dueAt: now, at: now });
+    await say(tester, "inbound", at(TUE, "11:55"), "hey");
+    await scheduler.tick(at(TUE, "12:00"));
+    expect(nudgeMoments()).toEqual([]);
+    const reply = buildStateBlock(await loadCoachState(t.db, tester, { now: at(TUE, "12:00"), isFirstText: false }));
+    expect(reply).toContain(`FROM THE TEAM, request [${requestRef(request.id)}]: Ask about the shoes.`);
+    await scheduler.tick(at(TUE, "12:05"));
+    expect(nudgeMoments()).toEqual(["team"]);
+  });
+
+  it("with the morning text: never in a reply, carried by the next morning text", async () => {
+    const tester = await seed();
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share the sleep article", exact: false, sendNow: false, delivery: "morning", at: now });
+    expect(buildStateBlock(await loadCoachState(t.db, tester, { now, isFirstText: false }))).not.toContain("Share the sleep article");
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    await t.db.insert(stepDays).values({ testerId: tester.id, date: TUE, planId: plan!.id, status: "done" });
+    await scheduler.tick(at(WED, "09:00"));
+    expect(t.replier.nudges.at(-1)).toMatchObject({ moment: "kickoff", carry: { requestId: request.id } });
+  });
+
+  it("the page shows each request's timing", async () => {
+    const tester = await seed();
+    await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Shoes", exact: false, sendNow: false, delivery: "own_text", dueAt: at(TUE, "17:00"), expiresAt: at(TUE, "22:00"), at: now });
+    await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Article", exact: false, sendNow: false, delivery: "morning", at: now });
+    const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
+    expect(page.body).toContain("its own text");
+    expect(page.body).toContain("at Nov 3, 5:00 PM");
+    expect(page.body).toContain("dropped if not out by Nov 3, 10:00 PM");
+    expect(page.body).toContain("with the morning text");
   });
 });

@@ -43,6 +43,8 @@ export const NUDGE_MOMENTS = [
   "after_miss",
   "one_a_day",
   "day_three",
+  /** A manual nudge: a text the founders asked ZOH to send on its own (spec #10). */
+  "team",
 ] as const;
 export type NudgeMoment = (typeof NUDGE_MOMENTS)[number];
 

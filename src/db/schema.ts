@@ -337,6 +337,12 @@ export const suggestions = pgTable(
 export const CONSOLE_KINDS = ["founder", "coach", "alert", "summary", "note", "request"] as const;
 export type ConsoleKind = (typeof CONSOLE_KINDS)[number];
 export const REQUEST_STATUSES = ["pending", "sent", "done", "cancelled"] as const;
+/**
+ * When a request in ZOH's words reaches the tester: naturally (the morning text or ZOH's next reply),
+ * only with the morning text, or as its own text at a set time (a manual nudge).
+ */
+export const REQUEST_DELIVERIES = ["natural", "morning", "own_text"] as const;
+export type RequestDelivery = (typeof REQUEST_DELIVERIES)[number];
 
 /**
  * One console thread per tester (spec: GitHub issue "Founder console"): the founders' messages, the
@@ -367,8 +373,12 @@ export const consoleMessages = pgTable(
     exact: boolean("exact").notNull().default(false),
     /** Requests: skip quiet hours (and only that). */
     sendNow: boolean("send_now").notNull().default(false),
-    /** Requests: not before this. */
+    /** Requests: not before this (for its own text: when it goes). */
     dueAt: timestamp("due_at", { withTimezone: true }),
+    /** Requests in ZOH's words: where they ride (see REQUEST_DELIVERIES). */
+    delivery: text("delivery", { enum: REQUEST_DELIVERIES }).notNull().default("natural"),
+    /** Requests: still pending after this, it's dropped with a note in the thread instead of sent late. */
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
     doneAt: timestamp("done_at", { withTimezone: true }),
     /** Requests: the text to the tester that carried it. */
     messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
@@ -380,6 +390,7 @@ export const consoleMessages = pgTable(
     index("console_messages_tester_created_idx").on(t.testerId, t.createdAt),
     check("console_messages_kind_check", sql`${t.kind} in ('founder', 'coach', 'alert', 'summary', 'note', 'request')`),
     check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sent', 'done', 'cancelled')`),
+    check("console_messages_delivery_check", sql`${t.delivery} in ('natural', 'morning', 'own_text')`),
   ],
 );
 

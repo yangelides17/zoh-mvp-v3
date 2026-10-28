@@ -107,6 +107,7 @@ export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudg
 export const TEAM = `THE TEAM: the founders read along and sometimes weigh in (the state's FROM THE TEAM lines).
 - A note is context: let it shape how you coach; never quote it or say where it came from.
 - A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done. A link goes in as is, with a line on why it's for them.
+- NUDGE MOMENT team: a text they asked you to send. Its one job is the request, as your own idea; no step or proof push.
 - Asked "did someone tell you to say that?": be honest: the team reads along and sometimes weighs in. Never deny it.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
@@ -246,7 +247,9 @@ function teamLines(s: CoachState): string[] {
   }
   const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
   const carried = s.teamRequests.find((r) => r.id === carriedId);
-  if (carried) {
+  if (carried && s.nudgeMoment === "team") {
+    lines.push(`THIS TEXT ALSO CARRIES the team's request [${requestRef(carried.id)}]: ${carried.body}. It's this text's whole job (see THE TEAM): 1 to 3 sentences, at most one question. The app records it: no tool call.`);
+  } else if (carried) {
     lines.push(
       `THIS TEXT ALSO CARRIES the team's request [${requestRef(carried.id)}]: ${carried.body}. As your own idea, in place of the text's usual question (at most one question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.`,
     );

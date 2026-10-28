@@ -2,6 +2,7 @@ import { and, asc, desc, eq, gte, isNotNull, lt, lte, ne, sql } from "drizzle-or
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
+  REQUEST_DELIVERIES,
   flags,
   goals,
   messages,
@@ -23,7 +24,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
-import { notesForCoach, pendingRequests, requestsDoneAt } from "../console/requests.js";
+import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
@@ -186,7 +187,8 @@ export async function loadCoachState(
     ),
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
-    teamRequests: await pendingRequests(db, tester.id, opts.now),
+    // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
+    teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
