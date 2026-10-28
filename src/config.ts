@@ -71,6 +71,13 @@ const envSchema = z.object({
   SPEACHES_API_KEY: optionalString,
   SPEACHES_MODEL: withDefault("Systran/faster-distil-whisper-small.en"),
 
+  /** The founder console's one shared password; without it (and the secret) the console stays shut. */
+  CONSOLE_PASSWORD: optionalString,
+  /** Signs console session cookies. */
+  CONSOLE_SESSION_SECRET: optionalString,
+  /** Comma-separated names to pick from, once per device. */
+  CONSOLE_NAMES: withDefault("Yanni,Stamati"),
+
   /** Goals a tester can have at once: one focus plus maintenance goals (spec #9, rule 6). */
   GOAL_CAP: intWithDefault(3),
 });
@@ -112,6 +119,13 @@ export interface Config {
     apiKey?: string;
     model: string;
   };
+  console: ConsoleConfig;
+}
+
+export interface ConsoleConfig {
+  password?: string;
+  sessionSecret?: string;
+  names: string[];
 }
 
 export class ConfigError extends Error {}
@@ -159,6 +173,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       apiKey: e.SPEACHES_API_KEY,
       model: e.SPEACHES_MODEL,
     },
+    console: {
+      password: e.CONSOLE_PASSWORD,
+      sessionSecret: e.CONSOLE_SESSION_SECRET,
+      names: e.CONSOLE_NAMES.split(",")
+        .map((n) => n.trim())
+        .filter(Boolean),
+    },
   };
 }
 
@@ -183,5 +204,6 @@ export function missingSettings(config: Config): string[] {
     missing.push("BUCKET_*");
   }
   if (!config.speaches.url) missing.push("SPEACHES_URL");
+  if (!config.console.password || !config.console.sessionSecret) missing.push("CONSOLE_*");
   return missing;
 }

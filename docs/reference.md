@@ -11,8 +11,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS` and
   `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
-  `SPEACHES_API_KEY`, `LOG_LEVEL`, optional `GOAL_CAP` (goals a tester can have at once, focus plus
+  `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD` (the founders' shared console password),
+  `CONSOLE_SESSION_SECRET` (signs console cookies; a long random string), optional `CONSOLE_NAMES`
+  (default `Yanni,Stamati`), optional `GOAL_CAP` (goals a tester can have at once, focus plus
   maintenance; default 3). Model: `claude-sonnet-5-5`.
+- **Founder console:** https://app-production-354a.up.railway.app/console (same app, no separate
+  service). One shared password, a 30-day cookie, your name picked once per device; "Add to Home
+  Screen" gives it the ZOH Console name and icon.
 - **Sendblue:** AI Agent plan, line +1 917 741 2162. Webhooks for received and outbound status point
   at the app's `/webhooks/sendblue`.
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
@@ -32,6 +37,12 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
   went quiet) and each locked plan version to review are saved as console alerts, one per event
   (`raiseAlert`), which the founder console (#10) shows.
+- Everything for the founders lives in the console, inside the same app: server-rendered pages,
+  masked numbers, proofs streamed from the bucket behind the login. Each alert gets a one-line why
+  from a low-effort Claude call (alerts under 2 days old); seeing a plan-to-review alert clears that
+  version's needs review. Weekly summaries are written Sunday from 8 am Eastern, once per tester
+  with a locked plan. The texting coach only ever sees approved or changed suggestions
+  (`suggestionsForCoach`); a founder's own suggestion is saved as approved by them.
 - Goals (#9): `tester_goals` holds every goal with its role (focus, maintenance, dropped);
   `testers.goal_slug` stays the focus. Each goal has its own streak from its own step days: a plan
   version's `change_kind` says deepen or other (streak goes on) or upgrade (a new streak starts).

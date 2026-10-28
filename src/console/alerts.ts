@@ -1,10 +1,13 @@
+import { and, eq, isNull } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { consoleMessages, flags, type Flag } from "../db/schema.js";
+import { consoleMessages, flags, plans, type ConsoleMessage, type Flag } from "../db/schema.js";
 
 /**
  * Alerts for the founder console (spec: GitHub issue "Founder console"). Each event has a key, so it
- * fires once however often its trigger runs. Stored only for now: nothing shows them yet.
+ * fires once however often its trigger runs. The console shows them; a founder marks each one seen.
  */
+
+export const PLAN_REVIEW_TOPIC = "plan_review";
 export interface AlertInput {
   testerId: string;
   /** What kind of event: a flag kind, plan_review, milestone… */
@@ -34,6 +37,28 @@ export async function raiseAlert(db: Db, alert: AlertInput): Promise<boolean> {
     .onConflictDoNothing({ target: consoleMessages.eventKey })
     .returning({ id: consoleMessages.id });
   return rows.length > 0;
+}
+
+/**
+ * Marks an alert seen (the first founder to see it is kept). Seeing a plan-to-review alert is the
+ * review: it clears that plan version's needs-review flag.
+ */
+export async function markAlertSeen(db: Db, opts: { testerId: string; alertId: string; by: string; at: Date }): Promise<ConsoleMessage | undefined> {
+  const [alert] = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.id, opts.alertId), eq(consoleMessages.testerId, opts.testerId), eq(consoleMessages.kind, "alert")));
+  if (!alert) return undefined;
+  if (!alert.seenAt) {
+    await db
+      .update(consoleMessages)
+      .set({ seenAt: opts.at, seenBy: opts.by })
+      .where(and(eq(consoleMessages.id, alert.id), isNull(consoleMessages.seenAt)));
+  }
+  if (alert.topic === PLAN_REVIEW_TOPIC && alert.planId) {
+    await db.update(plans).set({ needsReview: false, updatedAt: opts.at }).where(eq(plans.id, alert.planId));
+  }
+  return alert;
 }
 
 /** Saves a flag for the founders and raises its alert. */

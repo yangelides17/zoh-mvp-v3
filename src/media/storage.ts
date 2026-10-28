@@ -1,8 +1,10 @@
-import { DeleteObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /** Private object storage for photos and audio (Railway Storage Bucket, S3-compatible). */
 export interface MediaStore {
   put(key: string, body: Uint8Array, contentType: string): Promise<void>;
+  /** Reads an object back (the founder console's proofs); undefined when it's gone. */
+  get(key: string): Promise<{ bytes: Uint8Array; contentType: string } | undefined>;
   /** Removes an object; a key that's already gone is fine. */
   delete(key: string): Promise<void>;
   check(): Promise<void>;
@@ -27,6 +29,16 @@ export function createS3MediaStore(opts: S3MediaStoreOptions): MediaStore {
   return {
     async put(key, body, contentType) {
       await s3.send(new PutObjectCommand({ Bucket: opts.bucket, Key: key, Body: body, ContentType: contentType }));
+    },
+    async get(key) {
+      try {
+        const res = await s3.send(new GetObjectCommand({ Bucket: opts.bucket, Key: key }));
+        if (!res.Body) return undefined;
+        return { bytes: await res.Body.transformToByteArray(), contentType: res.ContentType ?? "application/octet-stream" };
+      } catch (err) {
+        if (err instanceof NoSuchKey) return undefined;
+        throw err;
+      }
     },
     async delete(key) {
       await s3.send(new DeleteObjectCommand({ Bucket: opts.bucket, Key: key }));

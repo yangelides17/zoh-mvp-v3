@@ -2,6 +2,7 @@ import type { AppDeps } from "./app.js";
 import { createClaudeModel } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
+import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
 import { createMediaRetention, type MediaRetention } from "./media/retention.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
@@ -44,6 +45,7 @@ export function appDeps(
       describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,
+    console: config.console,
     missingSettings: () => missingSettings(config),
     logger: {
       level: config.logLevel,
@@ -92,6 +94,19 @@ export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): Mem
         })
       : undefined,
     allowedNumbers: p.allowedNumbers,
+    now: p.now,
+  });
+}
+
+/** The console's alert whys and weekly summaries, on the coach's model at low effort. */
+export function consoleJobsFor(config: Config, deps: AppDeps, log: Logger): ConsoleJobs {
+  const p = deps.pipeline;
+  return createConsoleJobs({
+    db: p.db,
+    log,
+    model: config.claude.apiKey
+      ? createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_JOB_MAX_TOKENS, effort: "low" })
+      : undefined,
     now: p.now,
   });
 }
