@@ -1,4 +1,4 @@
-import { and, count, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
 import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
@@ -85,6 +85,18 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
       await chain;
     },
   };
+}
+
+/** The last text ZOH sent this tester for the same moment, so the next one can read differently. */
+async function lastSent(db: Db, testerId: string, moment: string): Promise<string | undefined> {
+  const [row] = await db
+    .select({ content: messages.content })
+    .from(nudges)
+    .innerJoin(messages, eq(messages.id, nudges.messageId))
+    .where(and(eq(nudges.testerId, testerId), eq(nudges.moment, moment), eq(nudges.status, "sent")))
+    .orderBy(desc(nudges.createdAt))
+    .limit(1);
+  return row?.content ?? undefined;
 }
 
 async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): Promise<NudgeDecision> {
@@ -209,7 +221,8 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
   let text: string;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
-    text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment });
+    const previous = await lastSent(db, tester.id, nudge.moment);
+    text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment, previous });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.
     await db.delete(nudges).where(eq(nudges.id, claim.id));

@@ -45,6 +45,8 @@ export interface NudgeRequest {
   now: Date;
   /** Which nudge to write (kickoff, rest_day, checkin…); the coach's prompt defines each. */
   moment: NudgeMoment;
+  /** The last text ZOH sent them for this same moment, so this one reads differently. */
+  previous?: string;
 }
 
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */

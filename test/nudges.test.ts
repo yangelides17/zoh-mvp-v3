@@ -161,6 +161,17 @@ describe("a step day", () => {
     expect(t.sendblue.sends.map((s) => s.number)).toEqual([ME, ME, ME]);
   });
 
+  it("hands the coach its last text for the same moment, so the next one reads differently", async () => {
+    const sam = await setup();
+    await tick(MON, "09:00");
+    expect(t.replier.nudges[0]!.previous).toBeUndefined();
+    await t.db.insert(stepDays).values({ testerId: sam.id, date: MON, status: "done" });
+    await tick(TUE, "09:00");
+    const tuesday = t.replier.nudges.at(-1)!;
+    expect(tuesday.moment).toBe("kickoff");
+    expect(tuesday.previous).toBe("Yo, kickoff text");
+  });
+
   it("uses 60 minutes when the plan doesn't say how long the step takes", async () => {
     await setup({ minutes: null });
     expect(await day(MON, "19:00", "21:00")).toEqual(["followup@20:30"]);

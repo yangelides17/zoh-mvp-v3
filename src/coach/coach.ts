@@ -161,8 +161,9 @@ export function createCoach(opts: CoachOptions): Replier {
      * A text ZOH starts itself: one call with the same prompt and tools (so the cache holds), no
      * tool use, and a note in place of a tester text naming the moment (the state block says it too).
      */
-    async nudge({ tester, turns, now, moment }: NudgeRequest) {
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.]`;
+    async nudge({ tester, turns, now, moment, previous }: NudgeRequest) {
+      const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${fresh}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
       const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
