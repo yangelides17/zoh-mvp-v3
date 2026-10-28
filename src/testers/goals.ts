@@ -116,6 +116,8 @@ export interface GoalStreak {
   keptUp?: number;
   answered?: number;
   lastConfirmed?: string;
+  /** Maintenance: their latest answer was "stopped". */
+  stopped?: boolean;
 }
 
 /**
@@ -148,6 +150,7 @@ export async function goalStreaks(db: Db, tester: Tester, goals: TesterGoal[], t
         keptUp: kept.length,
         answered: answered.length,
         lastConfirmed: kept.at(-1)?.date,
+        stopped: answered.at(-1)?.answer === "stopped",
       });
     }
   }

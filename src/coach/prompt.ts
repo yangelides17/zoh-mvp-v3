@@ -182,7 +182,7 @@ function nextStepLines(s: CoachState, plan: Plan): string[] {
     const each = s.streaks.map((g) => {
       if (g.role === "focus") return `${title(g.goalSlug)} (focus): ${streakLine(s, plan)}`;
       const record = g.answered ? `; check-ins kept up ${g.keptUp} of ${g.answered}${g.lastConfirmed ? `, last confirmed ${g.lastConfirmed}` : ""}` : "";
-      const streak = g.current ? days(g.current.length) : "0 (they said they stopped)";
+      const streak = g.stopped ? "ended, they said they stopped" : days(g.current?.length ?? 0);
       return `${title(g.goalSlug)} (maintenance, self-reported): ${streak}${record}`;
     });
     lines.push(`Their goals (${live.length} of ${s.goalCap} allowed), each with its own streak: ${each.join("; ")}.`);
