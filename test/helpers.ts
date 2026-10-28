@@ -189,13 +189,15 @@ export interface TestApp extends Awaited<ReturnType<typeof buildApp>> {
   close(): Promise<void>;
 }
 
-export async function makeApp(overrides: Partial<AppDeps["pipeline"]> & { webhookSecret?: string | null } = {}): Promise<TestApp> {
+export async function makeApp(
+  overrides: Partial<AppDeps["pipeline"]> & { webhookSecret?: string | null; console?: AppDeps["console"] } = {},
+): Promise<TestApp> {
   const { db } = await makeDb();
   const sendblue = new FakeSendblue();
   const replier = new FakeReplier();
   const media = new FakeMedia();
   const transcriber = new FakeTranscriber();
-  const { webhookSecret, ...pipelineOverrides } = overrides;
+  const { webhookSecret, console: consoleConfig, ...pipelineOverrides } = overrides;
   const built = await buildApp({
     pipeline: {
       db,
@@ -211,6 +213,7 @@ export async function makeApp(overrides: Partial<AppDeps["pipeline"]> & { webhoo
       ...pipelineOverrides,
     },
     webhookSecret: webhookSecret === null ? undefined : (webhookSecret ?? SECRET),
+    console: consoleConfig,
     missingSettings: () => [],
   });
   return {
