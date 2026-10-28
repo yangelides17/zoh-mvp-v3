@@ -68,11 +68,11 @@ How to file:
 - ZOH's own texts are context, not facts about the tester.
 
 Preferences from evidence:
-- record_observation when today shows how they respond to a kind of coaching: which texts got a quick reply or a done step and which were ignored (hype or calm, a challenge or a reason why, morning or evening, a joke or straight talk). Reuse an existing pattern label when it fits.
+- record_observation when today shows how they respond to a kind of coaching: which texts got a quick reply or a done step and which were ignored (hype or calm, a challenge or a reason why, morning or evening, a joke or straight talk). The label names what today's evidence shows, and every observation under a label must support it (observations are counted toward that pattern): a late reply never goes under "replies fast…". Reuse an existing label only when today shows the same thing.
 - learn_preference only once a pattern has at least ${LEARN_AFTER} observations on ${LEARN_AFTER} different days (the app checks). One moment is never a pattern: a bad day is just a bad day.
 - A stated preference always wins: if they state the opposite of a learned one, remove the learned one.
 
-Finally, write_daily_doc exactly once: a title like "Tue Oct 27: 10 pages, Ana joined", a one-line summary, and a short body (a few sentences): what happened with their step, how they sounded, anything new learned. Then stop (reply with no tool calls).`;
+Finally, write_daily_doc exactly once: a title like "Tue Oct 27: 10 pages, Ana joined", a one-line summary, and a short body (a few sentences): what happened with their step, how they sounded, anything new learned. It records the day, not advice or conclusions (those come only from patterns). Then stop (reply with no tool calls).`;
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const ref = text(40);
