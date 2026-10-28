@@ -405,7 +405,8 @@ export async function searchMemory(db: Db, tester: Tester, query: string, limit 
     .select({ fact: memoryFacts, title: memoryPages.title, pageId: memoryPages.id, score: rank(factDoc) })
     .from(memoryFacts)
     .innerJoin(memoryPages, eq(memoryPages.id, memoryFacts.pageId))
-    .where(and(eq(memoryFacts.testerId, tester.id), match(factDoc)))
+    // "Asked to forget" notes show on the preferences page; search never turns them up.
+    .where(and(eq(memoryFacts.testerId, tester.id), ne(memoryFacts.section, "forget"), match(factDoc)))
     .orderBy(desc(rank(factDoc)))
     .limit(limit);
 

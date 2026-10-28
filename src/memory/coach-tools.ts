@@ -6,7 +6,7 @@ import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, type MemoryFact
 import { localDate } from "../coach/state.js";
 import { updateTester } from "../testers/testers.js";
 import { renderPage } from "./render.js";
-import { addFact, ensureCorePages, findFact, findPage, removeFact, searchMemory } from "./store.js";
+import { addFact, ensureCorePages, factsOf, findFact, findPage, removeFact, searchMemory } from "./store.js";
 
 /**
  * The coach's memory tools (spec: GitHub issue "Coach memory"): saving a stated preference the
@@ -25,7 +25,12 @@ const schemas = {
   open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS) }).strict(),
   search_memory: z.object({ query: text(120) }).strict(),
   forget: z
-    .object({ facts: z.array(text(40)).max(10).optional(), note: text(120).optional(), everything: z.boolean().optional() })
+    .object({
+      facts: z.array(text(40)).max(10).optional(),
+      pages: z.array(text(40)).max(5).optional(),
+      note: text(120).optional(),
+      everything: z.boolean().optional(),
+    })
     .strict(),
 };
 
@@ -58,10 +63,13 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "forget",
     description:
-      "They asked you to forget something. facts: the f: refs to remove. note: a few neutral words naming it, when it isn't in memory yet (\"his ex\"), so it's never filed. everything: true only for \"forget everything\".",
+      "They asked you to forget something. facts: the f: refs to remove. pages: p: refs of a person or subject page to remove whole (\"forget my dog\"). note: a few neutral words naming it (\"his job\", \"his ex\"), always: later replies and the overnight pass see it was forgotten on purpose and never file it again. everything: true only for \"forget everything\".",
     input_schema: {
       type: "object",
-      properties: { facts: { type: "array", items: { type: "string" } }, note: { type: "string" }, everything: { type: "boolean" } },
+      properties: {
+        facts: { type: "array", items: { type: "string" } },
+        pages: { type: "array", items: { type: "string" } },
+        note: { type: "string" }, everything: { type: "boolean" } },
     },
   },
 ];
@@ -138,7 +146,7 @@ export async function runMemoryTool(
     }
 
     case "forget": {
-      const { facts, note, everything } = parsed.data as z.infer<typeof schemas.forget>;
+      const { facts, pages, note, everything } = parsed.data as z.infer<typeof schemas.forget>;
       if (everything) {
         await db.delete(memoryLinks).where(eq(memoryLinks.testerId, tester.id));
         await db.delete(memoryFacts).where(eq(memoryFacts.testerId, tester.id));
@@ -148,8 +156,23 @@ export async function runMemoryTool(
         const updated = await updateTester(db, tester.id, { memorySince: at, styleNotes: "" });
         return { ok: true, message: "Forgot everything: memory is empty and older texts won't be read again.", tester: updated, memoryChanged: true };
       }
-      if (!facts?.length && !note) return { ok: false, error: "Give the facts' refs, a note, or everything: true." };
+      if (!facts?.length && !pages?.length && !note) return { ok: false, error: "Give the facts' or pages' refs, a note, or everything: true." };
       const removed: string[] = [];
+      const pageTitles: string[] = [];
+      for (const ref of pages ?? []) {
+        const page = await findPage(db, tester.id, ref);
+        if (!page) return { ok: false, error: `No page ${ref} for this tester.` };
+        // Their own page, preferences, goals and days stay: forget the facts on them instead.
+        if (page.kind !== "person" && page.kind !== "subject") return { ok: false, error: `${ref} is their ${page.kind} page: forget its facts instead.` };
+        const sources = (await factsOf(db, [page.id])).flatMap((f) => (f.sourceMessageId ? [f.sourceMessageId] : []));
+        if (sources.length) {
+          await db.insert(memoryForgotten).values(sources.map((messageId) => ({ testerId: tester.id, messageId }))).onConflictDoNothing();
+        }
+        // Its facts and links go with it.
+        await db.delete(memoryPages).where(eq(memoryPages.id, page.id));
+        removed.push(page.title);
+        pageTitles.push(page.title);
+      }
       for (const ref of facts ?? []) {
         const f = await findFact(db, tester.id, ref);
         if (!f) return { ok: false, error: `No fact ${ref} for this tester.` };
@@ -159,11 +182,14 @@ export async function runMemoryTool(
         }
         removed.push(f.text);
       }
-      if (note) {
+      // Always leave a note: without it a later reply sees its own earlier words missing from memory
+      // and thinks it made them up, and the overnight pass could file it again from today's texts.
+      const forgetNote = note ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
+      if (forgetNote) {
         const { preferences } = await ensureCorePages(db, tester, at);
-        await addFact(db, preferences, { text: note, sourceMessageId: ctx.sourceMessageId ?? null, section: "forget", day: localDate(at, tester.timeZone) }, at);
+        await addFact(db, preferences, { text: forgetNote, sourceMessageId: ctx.sourceMessageId ?? null, section: "forget", day: localDate(at, tester.timeZone) }, at);
       }
-      return { ok: true, message: `Forgotten${removed.length ? `: ${removed.join("; ")}` : ""}${note ? ` (won't keep: ${note})` : ""}.`, tester, memoryChanged: true };
+      return { ok: true, message: `Forgotten${removed.length ? `: ${removed.join("; ")}` : ""}${forgetNote ? ` (won't keep: ${forgetNote})` : ""}.`, tester, memoryChanged: true };
     }
   }
 }

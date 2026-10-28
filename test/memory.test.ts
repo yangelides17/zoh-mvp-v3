@@ -561,6 +561,35 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     expect(JSON.stringify(model.requests[0]!.messages)).not.toContain("bank");
     expect(JSON.stringify(model.requests[0]!.messages)).toContain("Ana reads with me");
 
+    // A person or thing with its own page: the whole page goes, and its texts with it.
+    const dogText = await say(mike, "inbound", at(MON, "19:50"), "my dog Max helps me sleep");
+    const max = await createPage(t.db, mike.id, { kind: "person", title: "Max (his dog)", summary: "His dog; helps him sleep." }, at(MON, "23:00"));
+    await addFact(t.db, max, { text: "Helps him sleep", sourceMessageId: dogText.id }, at(MON, "23:00"));
+    await link(t.db, mike.id, self.id, max.id, "related");
+    const sam = await tester("+15550002222");
+    const samPage = await createPage(t.db, sam.id, { kind: "person", title: "Rex (her dog)" }, at(MON, "23:00"));
+    expect((await runMemoryTool(t.db, mike, "forget", { pages: [pageRef(samPage.id)] }, ctx)).ok).toBe(false);
+    expect((await runMemoryTool(t.db, mike, "forget", { pages: [pageRef(self.id)] }, ctx)).ok).toBe(false);
+    expect((await runMemoryTool(t.db, mike, "forget", { pages: [pageRef(max.id)] }, ctx)).ok).toBe(true);
+    expect((await pagesOf(mike)).map((p) => p.title)).not.toContain("Max (his dog)");
+    expect(await findFactText(mike, "Helps him sleep")).toBe(false);
+    expect(await searchMemory(t.db, mike, "Max")).toEqual([]);
+    expect((await timeline(t.db, mike)).map((i) => i.title)).not.toContain("Max (his dog)");
+    // A note stays, so later replies and the overnight pass know it was forgotten on purpose.
+    expect(await renderPage(t.db, mike, (await ensureCorePages(t.db, mike, ctx.at)).preferences)).toContain("- Max (his dog)");
+    expect(await pagesOf(sam)).toHaveLength(1);
+    // A subject page (a place, group, event or thing) goes the same way.
+    const clubText = await say(mike, "inbound", at(MON, "20:00"), "joined the Riverside running club");
+    const club = await createPage(t.db, mike.id, { kind: "subject", title: "Riverside running club", summary: "A club he joined." }, at(MON, "23:00"));
+    await addFact(t.db, club, { text: "Joined in October", sourceMessageId: clubText.id }, at(MON, "23:00"));
+    await link(t.db, mike.id, self.id, club.id, "related");
+    const gone = await runMemoryTool(t.db, mike, "forget", { pages: [pageRef(club.id)] }, ctx);
+    expect(gone.ok && gone.message).toContain("Riverside running club");
+    expect((await pagesOf(mike)).map((p) => p.title)).not.toContain("Riverside running club");
+    expect(await findFactText(mike, "Joined in October")).toBe(false);
+    expect(await searchMemory(t.db, mike, "Riverside")).toEqual([]);
+    expect((await t.db.select().from(memoryLinks).where(eq(memoryLinks.testerId, mike.id))).map((l) => l.toPageId)).not.toContain(club.id);
+
     const all = await runMemoryTool(t.db, mike, "forget", { everything: true }, ctx);
     expect(all.ok).toBe(true);
     expect(await pagesOf(mike)).toHaveLength(0);

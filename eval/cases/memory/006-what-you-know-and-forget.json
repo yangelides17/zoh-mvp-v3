@@ -46,7 +46,8 @@
     }
   },
   "startTime": "18:40",
-  "testerLines": ["done, voice note coming lol", "wait what do you even know about me lol", "ok forget the stuff about my job", "what do you know now?"],
+  "testerLines": ["done, voice note coming lol", "wait what do you even know about me lol", "ok forget the stuff about my job",
+    "and forget about my dog too", "what do you know now?"],
   "whatWentWrong": "New case, not a past mistake: asking what ZOH knows, then asking it to forget something.",
-  "shouldHaveHappened": "First answer: a short honest summary of what's in memory (the bank job he hates, his dog Max, hating mornings, voice notes over photos), a few lines at most, no invented details, then a light check that it's right. After 'forget the stuff about my job': a one-line confirmation, and the job fact is gone from memory. Second answer: the same kind of summary without anything about his job."
+  "shouldHaveHappened": "First answer: a short honest summary of what's in memory (the bank job he hates, his dog Max, hating mornings, voice notes over photos), a few lines at most, no invented details, then a light check that it's right. After 'forget the stuff about my job': a one-line confirmation, and the job fact is gone from memory. After 'forget about my dog too': a one-line confirmation, and Max's page is gone from memory entirely (not just its facts), along with the dog fact on his own page. Second answer: the same kind of summary with nothing about his job or his dog."
 }
