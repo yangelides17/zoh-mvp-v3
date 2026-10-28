@@ -272,8 +272,10 @@ export async function ensureCorePages(db: Db, tester: Tester, at: Date): Promise
       { kind: "preferences", title: "How they like to be coached", summary: "Stated and learned preferences: nudging, tone, proof, timing." },
       at,
     );
-    for (const note of tester.styleNotes.split(";").map((n) => n.trim()).filter(Boolean)) {
-      await addFact(db, preferences, { text: note, sourceMessageId: null, section: "stated" }, at);
+    const notes = tester.styleNotes.split(";").map((n) => n.trim()).filter(Boolean);
+    // A millisecond apart, so they keep the order they were said in.
+    for (const [i, note] of notes.entries()) {
+      await addFact(db, preferences, { text: note, sourceMessageId: null, section: "stated" }, new Date(at.getTime() + i));
     }
   }
   return { self, preferences };
