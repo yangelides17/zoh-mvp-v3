@@ -26,6 +26,7 @@ const SECTION_TITLES: Record<string, string> = {
   learned: "Learned (a pattern seen over several days)",
   observation: "Observations (evidence, not yet a pattern)",
   voice: "How they text",
+  forget: "Asked to forget (never bring up, never file)",
 };
 
 function shortDate(d: string | Date, tester: Tester): string {
@@ -55,7 +56,7 @@ export async function renderPage(db: Db, tester: Tester, page: MemoryPage, opts:
   const facts = await factsOf(db, [page.id]);
   const sections = new Map<string, MemoryFact[]>();
   for (const f of facts) sections.set(f.section, [...(sections.get(f.section) ?? []), f]);
-  const order = ["", "voice", "stated", "learned", "observation", ...[...sections.keys()].filter((s) => !(s in SECTION_TITLES) && s !== "")];
+  const order = ["", "voice", "stated", "learned", "observation", "forget", ...[...sections.keys()].filter((s) => !(s in SECTION_TITLES) && s !== "")];
   for (const section of new Set(order)) {
     const list = sections.get(section);
     if (!list?.length) continue;

@@ -3,7 +3,8 @@ import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
 import type { Db } from "../db/client.js";
-import { insertOutbound, recentConversation } from "../db/messages.js";
+import { insertOutbound } from "../db/messages.js";
+import { coachHistory } from "../memory/context.js";
 import { flags, messages, nudges, stepDays, testers, type Tester } from "../db/schema.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
@@ -207,7 +208,7 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
 
   let text: string;
   try {
-    const history = await recentConversation(db, tester.phone, COACH_HISTORY_CAP, tester.contextStartedAt);
+    const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.

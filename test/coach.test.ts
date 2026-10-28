@@ -6,6 +6,7 @@ import {
   CORE_VOICE,
   EXAMPLES,
   FIXED_INSTRUCTIONS,
+  MEMORY,
   fullVoiceInstructions,
   NUDGES,
   ONBOARDING,
@@ -83,7 +84,7 @@ describe("first text", () => {
     expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);
     expect(state).toContain(GOAL_LINES.join("\n"));
     expect(state).toContain("Time zone: Eastern (assumed");
-    expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start" }] }]);
+    expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start", cache_control: { type: "ephemeral" } }] }]);
     expect(sent()).toEqual(["Yo! I'm ZOH…"]);
   });
 
@@ -223,9 +224,11 @@ describe("tools", () => {
     expect(await tester()).toMatchObject({ quietHoursStart: "23:00", quietHoursEnd: "07:30" });
   });
 
-  it("save_style_note adds to the style notes", async () => {
-    await run("save_style_note", { note: "no emojis" });
-    await run("save_style_note", { note: "chill out" });
+  it("save_preference adds to the style notes, in any phase", async () => {
+    model.script({ tools: [{ name: "save_preference", input: { preference: "no emojis" } }] }, "Got it, no emojis.");
+    await text(ME, "no emojis pls");
+    model.script({ tools: [{ name: "save_preference", input: { preference: "chill out" } }] }, "Dialing it back.");
+    await text(ME, "chill out a bit");
     expect((await tester()).styleNotes).toBe("no emojis; chill out");
   });
 
@@ -341,7 +344,7 @@ describe("memory", () => {
     await text(DEV, "more old stuff");
     await text(DEV, "reset");
     expect(model.stateOf()).toContain("First text from this tester: yes");
-    expect(model.requests.at(-1)!.messages).toEqual([{ role: "user", content: [{ type: "text", text: "reset" }] }]);
+    expect(model.requests.at(-1)!.messages).toEqual([{ role: "user", content: [{ type: "text", text: "reset", cache_control: { type: "ephemeral" } }] }]);
     await text(DEV, "hey");
     const contents = JSON.stringify(model.requests.at(-1)!.messages);
     expect(contents).not.toContain("old stuff");
@@ -351,7 +354,7 @@ describe("memory", () => {
     await text(ME, "look", { media_url: "https://cdn.example/photo.jpg" });
     const content = model.requests.at(-1)!.messages[0]!.content as { type: string }[];
     expect(content.map((b) => b.type)).toEqual(["image", "text"]);
-    expect(content[1]).toEqual({ type: "text", text: "[Sent a photo]\nlook" });
+    expect(content[1]).toEqual({ type: "text", text: "[Sent a photo]\nlook", cache_control: { type: "ephemeral" } });
   });
 });
 
@@ -410,12 +413,12 @@ describe("opting out and failures", () => {
   });
 
   it("records which tools ran when Claude never writes text, without tester content", async () => {
-    const silent = { tools: [{ name: "save_style_note", input: { note: "secret words" } }] };
-    model.script(silent, silent, silent, "", silent, silent, silent, "");
+    const silent = { tools: [{ name: "save_preference", input: { preference: "secret words" } }] };
+    model.script(silent, silent, silent, silent, "", silent, silent, silent, silent, "");
     await text(ME, "more hype pls");
     expect(sent()).toEqual([FALLBACK_REPLY]);
     const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
-    expect(inbound!.error).toContain("rounds: save_style_note:ok | save_style_note:ok | save_style_note:ok");
+    expect(inbound!.error).toContain("rounds: save_preference:ok | save_preference:ok | save_preference:ok | save_preference:ok");
     expect(inbound!.error).not.toContain("secret words");
   });
 });
@@ -427,6 +430,7 @@ describe("instructions", () => {
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
     expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
     expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
+    expect(MEMORY.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.memory);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
@@ -449,7 +453,7 @@ describe("instructions", () => {
 });
 
 describe("the voice page", () => {
-  it("is read as the coach sees it: people-only parts left out, not-active notes kept", () => {
+  it("is read as the coach sees it: people-only parts left out, \"Learns what works\" active", () => {
     const raw = readFileSync(VOICE_DOC_PATH, "utf8");
     const voice = loadVoiceDoc();
     expect(raw).toContain("## Yanni's coaching voice");
@@ -458,7 +462,8 @@ describe("the voice page", () => {
     expect(voice).not.toContain("**Decision:**");
     expect(voice).not.toContain("This is a first draft, to be refined");
     expect(voice).toContain("ZOH is the friend you wish you'd had");
-    expect(voice).toContain("Not active yet: turns on with coach memory (#8).");
+    expect(voice).toContain("## Learns what works for each person");
+    expect(voice).not.toContain("Not active yet: turns on with coach memory");
     expect(voice).not.toContain("Not active yet: turns on with the nudge scheduler");
     expect(voice).toContain('never reuse these lines or the name "Sam"');
   });

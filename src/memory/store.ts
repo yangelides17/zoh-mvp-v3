@@ -456,10 +456,11 @@ export async function searchMemory(db: Db, tester: Tester, query: string, limit 
     .map(({ score: _score, ...hit }) => hit);
 }
 
-/** Their texts (both ways) on one local day, oldest first. */
+/** Their texts (both ways) on one local day, oldest first; never a text behind something they asked to forget. */
 export async function textsOn(db: Db, tester: Tester, date: string): Promise<Message[]> {
   const start = zonedTime(date, "00:00", tester.timeZone);
   const end = zonedTime(addDays(date, 1), "00:00", tester.timeZone);
+  const forgotten = db.select({ id: memoryForgotten.messageId }).from(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
   return db
     .select()
     .from(messages)
@@ -470,6 +471,7 @@ export async function textsOn(db: Db, tester: Tester, date: string): Promise<Mes
         gte(messages.createdAt, memoryStart(tester)),
         gte(sentTime, start),
         lt(sentTime, end),
+        notInArray(messages.id, forgotten),
       ),
     )
     .orderBy(asc(sentTime), asc(messages.id));

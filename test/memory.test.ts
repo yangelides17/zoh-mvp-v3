@@ -24,6 +24,7 @@ import { zonedTime } from "../src/nudges/schedule.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { getTester, resetTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, inboundEvent, makeApp, ME, postWebhook, WESTERN, type TestApp } from "./helpers.js";
+import { runMemoryTool } from "../src/memory/coach-tools.js";
 
 const TZ = "America/New_York";
 const MON = "2026-11-02";
@@ -417,23 +418,179 @@ describe("stop and reset", () => {
   });
 });
 
-describe("replies and nudges are unchanged by memory (part 1)", () => {
-  it("gives the coach exactly the same input with or without memory rows", async () => {
+describe("the coach reads memory once the plan is locked (part 2)", () => {
+  async function lockedPlan(who: Tester) {
+    await t.db.insert(plans).values({
+      testerId: who.id, goalSlug: "reading", status: "locked", version: 1, step: "10 pages", stepTime: "21:00",
+      days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], proof: "photo", reason: "Habit.", startDate: MON, lockedAt: at(MON, "08:00"),
+    });
+  }
+  const turnsFor = (text: string) => [{ role: "user" as const, text }];
+
+  it("gives an active tester their page, preferences, goal page, the last 7 daily docs and the index, cached; nobody else gets it", async () => {
     const mike = await tester();
+    await lockedPlan(mike);
     const m = await say(mike, "inbound", at(MON, "19:30"), "my sister Ana reads with me");
+    const { self } = await ensureCorePages(t.db, mike, at(MON, "20:00"));
+    await ensureGoalPages(t.db, mike, at(MON, "20:00"));
+    await addFact(t.db, self, { text: "has a sister Ana", sourceMessageId: m.id }, at(MON, "20:00"));
+    const ana = await createPage(t.db, mike.id, { kind: "person", title: "Ana (his sister)", summary: "Reads with him" }, at(MON, "20:00"));
+    for (let i = 1; i <= 9; i++) {
+      const date = `2026-10-${String(20 + i).padStart(2, "0")}`;
+      await createPage(t.db, mike.id, { kind: "daily", date, title: `Day doc ${date}`, summary: "", body: "" }, at(MON, "20:00"));
+    }
     const model = new FakeClaudeModel("Love that.");
     const coach = createCoach({ db: t.db, model, voice: "VOICE" });
-    const input = { tester: mike, turns: [{ role: "user" as const, text: "my sister Ana reads with me" }], now: at(MON, "19:31") };
+    await coach.reply({ tester: mike, turns: turnsFor("hi"), now: at(TUE, "09:00") });
 
-    await coach.reply(input);
-    const { self } = await ensureCorePages(t.db, mike, at(MON, "20:00"));
-    const ana = await createPage(t.db, mike.id, { kind: "person", title: "Ana (his sister)", summary: "Reads with him" }, at(MON, "20:00"));
-    await addFact(t.db, self, { text: "has a sister Ana", sourceMessageId: m.id }, at(MON, "20:00"));
-    await link(t.db, mike.id, self.id, ana.id, "related");
-    await coach.reply(input);
+    const req = model.requests[0]!;
+    expect(req.system).toHaveLength(3);
+    expect(req.system[1]!.cache_control).toEqual({ type: "ephemeral" });
+    const memory = model.memoryOf()!;
+    expect(memory).toContain("Mike (the tester)");
+    expect(memory).toContain("- f:");
+    expect(memory).toContain("has a sister Ana");
+    expect(memory).toContain("How they like to be coached");
+    expect(memory).toContain("Goal: Daily reading");
+    expect(memory).toContain("Day doc 2026-10-29");
+    expect(memory).toContain("Day doc 2026-10-23");
+    const recentDays = memory.slice(memory.indexOf("RECENT DAYS"), memory.indexOf("INDEX ("));
+    expect(recentDays).not.toContain("Day doc 2026-10-22");
+    expect(recentDays.match(/Day doc /g)).toHaveLength(7);
+    expect(memory).toContain(`${pageRef(ana.id)} [person] Ana (his sister) — Reads with him`);
+    expect(model.stateOf()).toContain("STATE");
+    expect(req.tools.map((x) => x.name)).toEqual(expect.arrayContaining(["open_pages", "search_memory", "forget", "save_preference"]));
 
-    expect(model.requests).toHaveLength(2);
-    expect(model.requests[1]).toEqual(model.requests[0]);
-    expect(JSON.stringify(model.requests[1])).not.toContain("Ana (his sister)");
+    // A nudge gets the same block.
+    await coach.nudge!({ tester: mike, turns: [], now: at(TUE, "09:05"), moment: "kickoff" });
+    expect(model.memoryOf()).toBe(memory);
+
+    // Before the plan locks: no memory block and no lookups, just save_preference.
+    const planning = { ...mike, phase: "planning" as const };
+    await coach.reply({ tester: planning, turns: turnsFor("hi"), now: at(TUE, "09:10") });
+    expect(model.requests.at(-1)!.system).toHaveLength(2);
+    const names = model.requests.at(-1)!.tools.map((x) => x.name);
+    expect(names).toContain("save_preference");
+    expect(names).not.toContain("open_pages");
+  });
+
+  it("reads today's and yesterday's texts word for word, never fewer than 30; the whole conversation before the plan locks", async () => {
+    const now = Date.now();
+    const mike = await tester(ME, { contextStartedAt: new Date(now - 10 * 86_400_000) });
+    for (let i = 0; i < 40; i++) await say(mike, i % 2 ? "outbound" : "inbound", new Date(now - 5 * 86_400_000 + i * 60_000), `old ${i}`);
+    await postWebhook(t, inboundEvent({ content: "today" }));
+    await t.queue.idle();
+    expect(t.replier.received[0]).toHaveLength(30);
+    expect(t.replier.received[0]!.at(-1)!.text).toBe("today");
+
+    // A busy two days: all of them, even past 30.
+    for (let i = 0; i < 34; i++) await say(mike, i % 2 ? "outbound" : "inbound", new Date(now - 60 * 60_000 + i * 1_000), `recent ${i}`);
+    await postWebhook(t, inboundEvent({ content: "again" }));
+    await t.queue.idle();
+    expect(t.replier.received[1]!.map((x) => x.text).filter((x) => x.startsWith("old"))).toEqual([]);
+    expect(t.replier.received[1]!.length).toBeGreaterThanOrEqual(36);
+
+    // Before the plan locks: everything since their context started.
+    await t.db.update(testers).set({ phase: "planning" }).where(eq(testers.id, mike.id));
+    await postWebhook(t, inboundEvent({ content: "planning" }));
+    await t.queue.idle();
+    expect(t.replier.received[2]!.filter((x) => x.text.startsWith("old"))).toHaveLength(40);
+  });
+
+  it("caps lookups at 5 a reply, 2 of them searches, and never reaches another tester's memory", async () => {
+    const mike = await tester();
+    const other = await tester(DEV);
+    const theirs = await createPage(t.db, other.id, { kind: "person", title: "Leo", summary: "" }, at(MON, "20:00"));
+    const mine = await createPage(t.db, mike.id, { kind: "person", title: "Ana", summary: "his sister" }, at(MON, "20:00"));
+    const ctx = () => ({ at: at(TUE, "09:00"), budget });
+    let budget = { lookups: 0, searches: 0 };
+    expect((await runMemoryTool(t.db, mike, "open_pages", { pages: [pageRef(theirs.id)] }, ctx())).ok && budget.lookups).toBe(1);
+    expect(JSON.stringify(await runMemoryTool(t.db, mike, "open_pages", { pages: [pageRef(theirs.id)] }, ctx()))).toContain("no such page");
+    expect((await runMemoryTool(t.db, mike, "search_memory", { query: "Leo" }, ctx())).ok).toBe(true);
+    expect((await runMemoryTool(t.db, mike, "search_memory", { query: "sister" }, ctx())).ok).toBe(true);
+    expect((await runMemoryTool(t.db, mike, "search_memory", { query: "Ana" }, ctx())).ok).toBe(false);
+    expect((await runMemoryTool(t.db, mike, "open_pages", { pages: [pageRef(mine.id)] }, ctx())).ok).toBe(true);
+    expect((await runMemoryTool(t.db, mike, "open_pages", { pages: [pageRef(mine.id)] }, ctx())).ok).toBe(false);
+
+    budget = { lookups: 0, searches: 0 };
+    expect((await runMemoryTool(t.db, mike, "open_pages", { pages: Array(6).fill(pageRef(mine.id)) }, ctx())).ok).toBe(false);
+    const found = await runMemoryTool(t.db, mike, "search_memory", { query: "Leo" }, ctx());
+    expect(found.ok && found.message).toContain("Nothing found");
+  });
+
+  it("saves a stated preference during the reply, citing their text; the next reply's memory shows it and drops the learned one it overrides", async () => {
+    const mike = await tester();
+    await lockedPlan(mike);
+    const m = await say(mike, "inbound", at(TUE, "09:00"), "less hype pls, it's too much");
+    const { preferences } = await ensureCorePages(t.db, mike, at(MON, "23:00"));
+    const learned = await addFact(t.db, preferences, { text: "Hype works: lead with energy", sourceMessageId: m.id, section: "learned", label: "replies to hype" }, at(MON, "23:00"));
+    const model = new FakeClaudeModel().script(
+      { tools: [{ name: "save_preference", input: { preference: "less hype", replaces: [factRef(learned.id)] } }] },
+      "Got it, dialing it back.",
+    );
+    const coach = createCoach({ db: t.db, model, voice: "VOICE" });
+    await coach.reply({ tester: mike, turns: turnsFor("less hype pls, it's too much"), now: at(TUE, "09:01"), messageId: m.id });
+    const stated = await t.db.select().from(memoryFacts).where(and(eq(memoryFacts.testerId, mike.id), eq(memoryFacts.section, "stated")));
+    expect(stated.map((f) => [f.text, f.sourceMessageId])).toEqual([["less hype", m.id]]);
+
+    await coach.reply({ tester: (await getTester(t.db, mike.id))!, turns: turnsFor("ok"), now: at(TUE, "09:05") });
+    const memory = model.memoryOf()!;
+    expect(memory).toMatch(/Stated \(they said so; always wins\):\n- f:\w+ less hype/);
+    expect(memory).not.toContain("Hype works");
+    expect(model.stateOf()).toContain("Style notes: less hype");
+  });
+
+  it("forgets: facts go and their texts stop being searched or filed; everything wipes memory; stop keeps it", async () => {
+    const mike = await tester();
+    await lockedPlan(mike);
+    const m = await say(mike, "inbound", at(MON, "19:30"), "I hate my job at the bank");
+    const keep = await say(mike, "inbound", at(MON, "19:40"), "Ana reads with me");
+    const { self } = await ensureCorePages(t.db, mike, at(MON, "23:00"));
+    const fact = await addFact(t.db, self, { text: "Hates his job at the bank", sourceMessageId: m.id }, at(MON, "23:00"));
+    await addFact(t.db, self, { text: "Reads with his sister Ana", sourceMessageId: keep.id }, at(MON, "23:00"));
+    const ctx = { at: at(TUE, "09:00"), budget: { lookups: 0, searches: 0 } };
+
+    expect((await runMemoryTool(t.db, mike, "forget", { facts: [factRef(fact.id)] }, ctx)).ok).toBe(true);
+    expect(await findFactText(mike, "Hates his job")).toBe(false);
+    expect((await searchMemory(t.db, mike, "bank")).length).toBe(0);
+    expect((await runMemoryTool(t.db, mike, "forget", { note: "his job" }, ctx)).ok).toBe(true);
+    expect(await renderPage(t.db, mike, (await ensureCorePages(t.db, mike, ctx.at)).preferences)).toContain("Asked to forget (never bring up, never file):\n- his job");
+    // The overnight pass never sees the forgotten text again.
+    const model = new FakeClaudeModel();
+    await writeDay(t.db, model, mike, MON, at(TUE, "03:00"));
+    expect(JSON.stringify(model.requests[0]!.messages)).not.toContain("bank");
+    expect(JSON.stringify(model.requests[0]!.messages)).toContain("Ana reads with me");
+
+    const all = await runMemoryTool(t.db, mike, "forget", { everything: true }, ctx);
+    expect(all.ok).toBe(true);
+    expect(await pagesOf(mike)).toHaveLength(0);
+    const after = (await getTester(t.db, mike.id))!;
+    expect(after.memorySince).toEqual(ctx.at);
+    expect(after.styleNotes).toBe("");
+    expect(await searchMemory(t.db, after, "Ana")).toEqual([]);
+  });
+
+  async function findFactText(who: Tester, text: string): Promise<boolean> {
+    const rows = await t.db.select().from(memoryFacts).where(eq(memoryFacts.testerId, who.id));
+    return rows.some((r) => r.text.startsWith(text));
+  }
+
+  it("logs each reply's tokens on the text it answered", async () => {
+    await t.close();
+    const { db } = await (await import("./helpers.js")).makeDb();
+    const model = new FakeClaudeModel().script({ tools: [{ name: "save_preference", input: { preference: "no emojis" } }] }, "Got it.");
+    t = await makeApp({ replier: createCoach({ db, model, voice: "VOICE" }) });
+    await postWebhook(t, inboundEvent({ content: "no emojis pls" }));
+    await t.queue.idle();
+    const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
+    expect(inbound!.timings).toMatchObject({ claude_input_tokens: 2000, claude_cache_read_tokens: 8000, claude_cache_write_tokens: 0, claude_output_tokens: 100 });
+  });
+
+  it("shows older photos to the coach by their description", async () => {
+    const { toTurns } = await import("../src/pipeline/inbound.js");
+    const mike = await tester();
+    const photo = await say(mike, "inbound", at(MON, "19:30"), "done", { mediaUrl: "https://cdn/x.jpg", mediaContentType: "image/jpeg", description: "Dune open at page 112" });
+    const now = await say(mike, "inbound", at(MON, "19:40"), "next");
+    expect(toTurns([photo, now], now.id, {})[0]!.text).toBe("[Sent a photo earlier: Dune open at page 112]\ndone");
   });
 });

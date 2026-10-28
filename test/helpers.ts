@@ -95,6 +95,9 @@ export class FakeReplier implements Replier {
   async check() {}
 }
 
+/** Tokens every fake Claude call reports. */
+export const FAKE_USAGE = { input: 1000, cacheRead: 4000, cacheWrite: 0, output: 50 } as const;
+
 /** One scripted Claude response: plain text, or tool calls (with optional text alongside). */
 export type FakeStep = string | { tools: { name: string; input: unknown }[]; text?: string } | Error;
 
@@ -116,17 +119,23 @@ export class FakeClaudeModel implements ClaudeModel {
     this.requests.push(structuredClone(req));
     const step = this.steps.shift() ?? this.defaultText;
     if (step instanceof Error) throw step;
-    if (typeof step === "string") return { content: [{ type: "text", text: step }], stopReason: "end_turn" };
-    if (req.toolChoice === "none") return { content: [{ type: "text", text: step.text ?? this.defaultText }], stopReason: "end_turn" };
+    const usage = { ...FAKE_USAGE };
+    if (typeof step === "string") return { content: [{ type: "text", text: step }], stopReason: "end_turn", usage };
+    if (req.toolChoice === "none") return { content: [{ type: "text", text: step.text ?? this.defaultText }], stopReason: "end_turn", usage };
     const content: ModelBlock[] = [];
     if (step.text) content.push({ type: "text", text: step.text });
     for (const t of step.tools) content.push({ type: "tool_use", id: `toolu_${++this.ids}`, name: t.name, input: t.input });
-    return { content, stopReason: "tool_use" };
+    return { content, stopReason: "tool_use", usage };
   }
   async check() {}
-  /** The state block (second system block) of a request. */
+  /** The state block (last system block, after the memory block when there is one) of a request. */
   stateOf(i = -1): string {
-    return this.requests.at(i)?.system[1]?.text ?? "";
+    return this.requests.at(i)?.system.at(-1)?.text ?? "";
+  }
+  /** The memory block of a request, when the tester's plan is locked. */
+  memoryOf(i = -1): string | undefined {
+    const system = this.requests.at(i)?.system ?? [];
+    return system.length === 3 ? system[1]!.text : undefined;
   }
 }
 
