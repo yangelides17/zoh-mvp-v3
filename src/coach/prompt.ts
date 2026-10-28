@@ -74,7 +74,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. Ask for proof once a day, not in every text.
-- kickoff (step day): one detail from memory (a recent day, a person, their why, the streak), then today's step (what, when, where) and a question to commit; opener, detail and shape unlike your last kickoff. kickoff_checkin: the same, and it starts soon.
+- kickoff (step day): a detail from memory in a few words, not an extra sentence (a recent day, a person, their why, the streak), then today's step (what, when, where) and a question to commit; unlike your last kickoff. kickoff_checkin: the same, and it starts soon.
 - rest_day: short and light: rest day, back at it on their next step day. No push, no question. A rest day stays light all day: if they reply, keep it easy; no lock-in ask for tomorrow.
 - checkin: it starts in about 10 minutes: get set up.
 - followup: no word yet: ask how it went.
