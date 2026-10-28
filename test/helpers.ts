@@ -144,6 +144,9 @@ export class FakeMedia implements MediaStore {
   async put(key: string, bytes: Uint8Array, contentType: string) {
     this.objects.set(key, { bytes, contentType });
   }
+  async get(key: string) {
+    return this.objects.get(key);
+  }
   async delete(key: string) {
     this.objects.delete(key);
   }
