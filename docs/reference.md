@@ -11,7 +11,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS` and
   `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
-  `SPEACHES_API_KEY`, `LOG_LEVEL`. Model: `claude-sonnet-5-5`.
+  `SPEACHES_API_KEY`, `LOG_LEVEL`, optional `GOAL_CAP` (goals a tester can have at once, focus plus
+  maintenance; default 3). Model: `claude-sonnet-5-5`.
 - **Sendblue:** AI Agent plan, line +1 917 741 2162. Webhooks for received and outbound status point
   at the app's `/webhooks/sendblue`.
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
@@ -34,6 +35,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Goals (#9): `tester_goals` holds every goal with its role (focus, maintenance, dropped);
   `testers.goal_slug` stays the focus. Each goal has its own streak from its own step days: a plan
   version's `change_kind` says deepen or other (streak goes on) or upgrade (a new streak starts).
+- Next steps (#9): the coach's own ideas and a tester's request for a new goal on top are saved as
+  `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
+  upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade
+  rides on the next step-day kickoff (or a reply); a new focus is raised in a reply, within the goal
+  cap, and keeps the old focus as maintenance. Maintenance goals get a one-line check-in in the
+  kickoff twice a week; alerts cover milestones (focus only), a second miss, 2 quiet days, two
+  "stopped" answers, new-goal requests and the coach being unsure.
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.

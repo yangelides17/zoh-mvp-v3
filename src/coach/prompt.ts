@@ -10,7 +10,7 @@ import { describePlan, fitsGoalCap } from "./tools.js";
  * examples in eval/cases, not here. `test/coach-prompt.test.ts` enforces these budgets;
  * when a fix would exceed one, merge or trim first.
  */
-export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
+export const PROMPT_BUDGET_CHARS = { core: 2800, onboarding: 2800, plan: 3200, nudges: 1800, proof: 1050, nextSteps: 1300, memory: 1300, examples: 700, fullVoice: 16_000 } as const;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -71,7 +71,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - Day 1 (the step itself, not just the setup): today unless they push back, even if the usual time has passed (a version tonight); tomorrow only on pushback or if nothing realistic is left today. Once locked: a hype line and when day 1 is, with no question; let the conversation rest.
 - After lock, tweaks go through change_plan; confirm the new version in one line.
 - Switching goals needs a real reason (an injury, the goal turned out wrong): ask why if they don't say. "Bored" or "don't feel like it" gets a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.
-- One goal at a time; a second can come once this one sticks.`;
+- One focus goal at a time; a second waits until it sticks.`;
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (the step itself, in their words; never just quote "I'm in"). 1 to 3 short sentences: each text has one job. Ask for proof once a day, not in every text.
@@ -93,6 +93,14 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - Proof keeps not fitting how they do it: offer to change how they prove it (change_plan); a preference can change how, never drop it.
 - Proof clearly dated yesterday: mark_step_done for yesterday.
 - flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.`;
+
+/** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
+export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
+- Never raise a level-up, a harder step or a new goal yourself. Think they're ready for more (a solid streak, it's getting easy)? suggest_next_step for the team, and say nothing.
+- A next step the state lists as approved: raise it as your own idea, specific to them, then record_next_step delivered. Yes: change_plan or switch_goal with its id. No: record_next_step declined, warmly, and drop it.
+- When they ask: a change to their one goal (time, a tweak, a different goal) goes as in PLAN AGREEMENT. More of the same activity (deepen) or a harder or different one (upgrade): change_plan right away, that kind, their words. Something new on top of a goal that's going well: suggest_next_step (new_focus), then a warm "Love that. Let me think on it.", no promise; asked again, still thinking. Can't tell which: suggest_next_step with unsure.
+- Maintenance check-in: one light line, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
+- "What's my streak?": every goal's streak from the state, in one short reply.`;
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.
@@ -120,7 +128,7 @@ export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your v
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, MEMORY].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, PROOF, NEXT_STEPS, MEMORY].join("\n\n");
 }
 
 /** Today's step, as the nudge scheduler sees it, and the next step day. */
