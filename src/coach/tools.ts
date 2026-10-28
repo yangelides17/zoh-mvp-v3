@@ -21,6 +21,7 @@ import {
   type Tester,
 } from "../db/schema.js";
 import { raiseAlert, saveFlag } from "../console/alerts.js";
+import { closeRequest, doneLine, findRequest } from "../console/requests.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
 import {
@@ -116,6 +117,7 @@ const schemas = {
   flag_proof_pattern: z.object({ reason: text(300) }).strict(),
   mark_on_it: z.object({}).strict(),
   move_today: z.object({ time: clock }).strict(),
+  mark_request_done: z.object({ request: text(40) }).strict(),
 };
 
 export type ToolName = keyof typeof schemas;
@@ -311,6 +313,11 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     description:
       'They\'ll do today\'s step at another time, today only (also a one-off day-1 time right after lock_plan). Local 24-hour "HH:MM".',
     input_schema: { type: "object", properties: { time: { type: "string" } }, required: ["time"] },
+  },
+  {
+    name: "mark_request_done",
+    description: "A FROM THE TEAM request (by its id) that this text carries. Call it in the reply that does it, never before.",
+    input_schema: { type: "object", properties: { request: { type: "string" } }, required: ["request"] },
   },
 ];
 
@@ -720,6 +727,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       await saveToday(db, state, { movedTime: time }, at);
       return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
+    }
+
+    case "mark_request_done": {
+      const { request: ref } = input as z.infer<typeof schemas.mark_request_done>;
+      const found = findRequest(state.teamRequests, ref);
+      if (!found) return { ok: false, error: `No open team request ${ref}.` };
+      await closeRequest(db, { request: found, status: "done", at, line: doneLine(found.body, "in a reply", at) });
+      return saved(tester, "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.");
     }
   }
 }

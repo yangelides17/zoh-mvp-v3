@@ -121,7 +121,7 @@ async function main(): Promise<number> {
     if (!result.error || result.transcript.length > 0) {
       try {
         const g = await gradeConversation(
-          { plan, context: result.context, transcript: result.transcript, memory: result.memory, rubric, pages },
+          { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, rubric, pages },
           complete,
         );
         graded.grade = g.grade;

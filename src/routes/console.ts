@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import sharp from "sharp";
 import type { ConsoleConfig } from "../config.js";
@@ -6,9 +7,13 @@ import { clearedSessionCookie, decodeSession, encodeSession, newSession, parseCo
 import { mediaMessage, testerPage, testerRows, waitingAlerts } from "../console/data.js";
 import { addFounderSuggestion, decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
 import { ICON_SVG, loginPage, listPage, MANIFEST, namePage, notConfiguredPage, testerView } from "../console/views.js";
+import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
-import { SUGGESTION_KINDS } from "../db/schema.js";
+import { SUGGESTION_KINDS, testers } from "../db/schema.js";
+import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
+import type { TaskQueue } from "../pipeline/task-queue.js";
 
 /**
  * The founder console (spec: GitHub issue "Founder console"): read every tester and decide on next
@@ -19,11 +24,18 @@ import type { MediaStore } from "../media/storage.js";
 export interface ConsoleRouteOptions extends ConsoleConfig {
   db: Db;
   media?: MediaStore;
+  /** The console chat's coach; without it, the chat says it isn't set up. */
+  chat?: ConsoleCoach;
+  /** Where the coach's answer runs, after the page has redirected; without one, before. */
+  queue?: TaskQueue;
   now?: () => Date;
 }
 
+/** Longest message the chat box takes. */
+export const MAX_CHAT_CHARS = 2000;
+
 type Form = Record<string, string | undefined>;
-type Params = { id: string; sid: string; aid: string; mid: string };
+type Params = { id: string; sid: string; aid: string; mid: string; rid: string };
 
 export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOptions): Promise<void> {
   const clock = opts.now ?? (() => new Date());
@@ -71,7 +83,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!isUuid(request.params.id)) return html(reply, "Not found", 404);
     const data = await testerPage(opts.db, request.params.id, clock());
     if (!data) return html(reply, "Not found", 404);
-    return html(reply, testerView(data, name));
+    return html(reply, testerView(data, name, clock()));
   }));
 
   app.post<{ Body: Form }>("/console/login", async (request, reply) => {
@@ -142,6 +154,43 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       throw err;
     }
     return back(reply, id, "suggestions");
+  }));
+
+  // The console chat (spec 4): the founder's line is stored now; the coach answers in the background.
+  app.post("/console/testers/:id/chat", action(async (request, reply, name) => {
+    const { id } = request.params;
+    if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+    const body = request.body?.text?.trim();
+    if (!body || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters is needed` });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    const now = clock();
+    const exact = request.body?.exact === "on";
+    const { needsAnswer } = await postFounderMessage(opts.db, { tester, founder: name, body, exact, sendNow: exact && request.body?.sendNow === "on", now });
+    if (needsAnswer) {
+      const answer = async () => {
+        try {
+          if (!opts.chat) throw new Error("The console coach isn't set up (no Claude key).");
+          await opts.chat.answer(id, clock());
+        } catch (err) {
+          request.log.error({ err: safeError(err) }, "Console coach failed");
+          const why = err instanceof Error && err.message.startsWith("The console coach") ? err.message : "Sorry, I couldn't answer that just now. Try again?";
+          // ZOH's line, so it counts as the answer and the page stops waiting.
+          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: clock() });
+        }
+      };
+      if (opts.queue) opts.queue.run(answer);
+      else await answer();
+    }
+    return back(reply, id, "chat");
+  }));
+
+  app.post("/console/testers/:id/requests/:rid/cancel", action(async (request, reply) => {
+    const { id, rid } = request.params;
+    if (!isUuid(id) || !isUuid(rid)) return reply.code(404).send({ error: "not found" });
+    const row = await cancelRequest(opts.db, { testerId: id, requestId: rid, at: clock() });
+    if (!row) return reply.code(409).send({ error: "not pending any more" });
+    return back(reply, id, "chat");
   }));
 
   // Proof photos and voice notes, streamed from our private bucket.

@@ -10,6 +10,8 @@ export interface GraderInput {
   transcript: TranscriptLine[];
   /** ZOH's memory pages after the overnight pass (memory feature), graded with the conversation. */
   memory?: string;
+  /** The tester's step log as ZOH saw it (console feature). */
+  record?: string;
   rubric: RubricRule[];
   /** The feature's approved checks and the voice page, read at run time. */
   pages: { rules: string; voice: string };
@@ -46,21 +48,31 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   ].join("\n");
 }
 
-export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory">): string {
+export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory" | "record">): string {
   const { plan, transcript, context: earlier = [] } = input;
   let n = 0;
   const lines = transcript.map((l) => {
     const when = localTime(l.at, plan.timeZone);
     if (l.from === "zoh") {
       n += 1;
+      if (l.console) return `[ZOH ${n}, to the founders in the console; the tester never sees it] (${when}) ${l.text}`;
       return `[ZOH ${n}${l.started ? ", started by ZOH, not a reply" : ""}] (${when}) ${l.text}`;
     }
+    if (l.from === "founder") return `[FOUNDER, in the console] (${when}) ${l.text}`;
     return `[TESTER] (${when}) ${l.text}`;
   });
   const context = [
     `Tester's phone number: area code ${plan.areaCode}, time zone ${plan.timeZone}${plan.timeZone === "America/New_York" ? " (Eastern)" : " (outside Eastern Time)"}.`,
     `Times are the tester's local time; the conversation starts on ${new Intl.DateTimeFormat("en-US", { timeZone: plan.timeZone, weekday: "long", month: "long", day: "numeric" }).format(new Date(transcript[0]?.at ?? Date.now()))}.`,
   ];
+  if (transcript.some((l) => l.from === "founder")) {
+    context.push(
+      "",
+      "Lines marked console are ZOH and the founders (Yanni and Stamati) talking about this tester in a private chat the tester never sees.",
+      "ZOH's console answers are judged as a colleague's replies to the founders (this feature's rules); the voice page's texting rules",
+      "(energy, one question, coaching tone) apply only to ZOH's texts to the tester. Times are still the tester's local time.",
+    );
+  }
   if (plan.regression) {
     context.push(
       "",
@@ -83,7 +95,10 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
         input.memory,
       ]
     : [];
-  return [...context, ...before, "", "=== Transcript ===", ...lines, ...memory].join("\n");
+  const record = input.record
+    ? ["", "=== The tester's step log at the start (ZOH could see this; check its facts about their days against it) ===", input.record]
+    : [];
+  return [...context, ...before, ...record, "", "=== Transcript ===", ...lines, ...memory].join("\n");
 }
 
 /** JSON schema for structured output; rule ids are limited to the rubric rules of each scope. */

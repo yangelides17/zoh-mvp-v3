@@ -221,6 +221,21 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
     ],
   },
+  /**
+   * Founder console chat (#10): cases only. Founders' lines go through the console chat ("console
+   * Yanni: ..."), and the grader sees ZOH's console answers marked as such. Target 80%.
+   */
+  console: {
+    name: "console",
+    doneWhen: "the founders' requests have been answered and anything they asked for has reached you.",
+    scenarios: [],
+    rubric: [
+      { id: "grounded", scope: "text", label: "Answers about a tester are grounded in their history; it says when it doesn't know" },
+      { id: "own-idea", scope: "text", label: "Our suggestions reach the tester in ZOH's voice, at a natural moment, as its own idea" },
+      { id: "confirms", scope: "text", label: "Confirmations back to us say what and when, in a line or two" },
+      { id: "pushback", scope: "text", label: "It pushes back on requests that break the voice rules" },
+    ],
+  },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
   proof: {
     name: "proof",

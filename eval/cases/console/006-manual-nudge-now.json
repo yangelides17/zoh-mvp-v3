@@ -1,0 +1,35 @@
+{
+  "id": "manual-nudge-now",
+  "title": "\"Text him now\" is a manual nudge: confirmed with the time, then sent as ZOH's own text within a minute",
+  "origin": "Yanni, Oct 28 (PR 4 review): founders agree in the console chat when a request goes, including \"right now\"",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥" },
+      { "from": "zoh", "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪" }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 7, "status": "done" }
+    ]
+  },
+  "testerLines": ["console Yanni: can you text him right now and ask how the new shoes are feeling?", "advance to 14:02"],
+  "whatWentWrong": "New case, not a past mistake: a manual nudge sent right away.",
+  "shouldHaveHappened": "ZOH tells Yanni in a line or two that it will text Jordan now, in its own text (within a minute). Within a minute its own text goes out: a short, warm question about how the new shoes are feeling, tied to his runs, as ZOH's own curiosity, with one question, no push about today's 6 pm run or proof, and no mention of Yanni or the team.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}

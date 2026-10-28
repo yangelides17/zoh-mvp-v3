@@ -129,7 +129,7 @@ function zohTextsWithContext(conv: GradedConversation): { text: string; after?: 
   const out: { text: string; after?: string }[] = [];
   let lastTester: string | undefined;
   for (const line of conv.transcript) {
-    if (line.from === "tester") lastTester = line.text;
+    if (line.from !== "zoh") lastTester = line.text;
     else out.push({ text: line.text, after: lastTester });
   }
   return out;
@@ -294,9 +294,10 @@ export function renderMarkdown(r: ReportData): string {
     let n = 0;
     for (const l of conv.transcript) {
       if (l.from === "tester") lines.push(`**Tester:** ${l.text}`, "");
+      else if (l.from === "founder") lines.push(`**Founder (console):** ${l.text}`, "");
       else {
         n += 1;
-        lines.push(`**ZOH ${n}:** ${l.text.replace(/\n/g, "  \n")}`, "");
+        lines.push(`**ZOH ${n}${l.console ? " (console)" : ""}:** ${l.text.replace(/\n/g, "  \n")}`, "");
         const checks = conv.grade?.texts.find((x) => x.zohText === n)?.checks ?? [];
         const bad = checks.filter((c) => !c.pass || c.borderline);
         for (const c of bad) lines.push(`- ${c.pass ? "~" : "✗"} \`${c.rule}\`: ${c.reason}`);

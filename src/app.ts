@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastif
 import type { PipelineDeps } from "./pipeline/inbound.js";
 import { TaskQueue } from "./pipeline/task-queue.js";
 import type { ConsoleConfig } from "./config.js";
+import type { ConsoleCoach } from "./console/chat.js";
 import { safeError } from "./errors.js";
 import { consoleRoutes } from "./routes/console.js";
 import { healthRoutes, type HealthRouteOptions } from "./routes/health.js";
@@ -12,6 +13,8 @@ export interface AppDeps {
   webhookSecret?: string;
   /** The founder console; without a password and secret it stays shut. */
   console?: ConsoleConfig;
+  /** Answers the founders in the console chat; without it, the chat says it isn't set up. */
+  consoleCoach?: ConsoleCoach;
   missingSettings: () => string[];
   version?: string;
   logger?: FastifyServerOptions["logger"];
@@ -53,7 +56,7 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
   app.get("/", async () => ({ name: "zoh-mvp-v3", ok: true }));
   await app.register(healthRoutes, health);
   await app.register(webhookRoutes, { webhookSecret: deps.webhookSecret, pipeline, queue });
-  await app.register(consoleRoutes, { names: [], ...deps.console, db: pipeline.db, media: pipeline.media, now: pipeline.now });
+  await app.register(consoleRoutes, { names: [], ...deps.console, db: pipeline.db, media: pipeline.media, chat: deps.consoleCoach, queue, now: pipeline.now });
 
   return { app, queue };
 }

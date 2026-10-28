@@ -1,0 +1,38 @@
+{
+  "id": "article-link",
+  "title": "A link from the founders is worked into the reply to his next text, as ZOH's idea",
+  "origin": "Spec #10 (founder console), example \"Saw this on sleep and thought of your 10:30 bedtime: <link>\"",
+  "seed": {
+    "name": "Sam",
+    "goal": "bedtime",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "in bed, lights out", "where": "home", "when": "10:30 pm" },
+    "history": [
+      { "from": "tester", "text": "lights out 10:32 lol close enough" },
+      { "from": "zoh", "text": "Close enough counts, Sam. Kalinixta 🌙" }
+    ],
+    "plan": {
+      "step": "in bed, lights out, by 10:30",
+      "place": "home",
+      "time": "22:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "your phone's sleep or screen time",
+      "reason": "Same bedtime every night, so mornings stop being a fight.",
+      "minutes": 5,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" }, { "days_ago": 4, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "console Stamati: send him this, it fits his 10:30 bedtime: https://www.sleepfoundation.org/sleep-hygiene",
+    "ugh I keep waking up at 3am and scrolling"
+  ],
+  "whatWentWrong": "First eval run (PR 4): after mark_request_done the request left the state block, and the reply disowned it: \"I need to correct something. There was no team request behind that tool call, so I shouldn't have marked one done. I'm also not sure that link is the right page for you, so skip it.\"",
+  "shouldHaveHappened": "ZOH confirms to Stamati in a line or two that it will send the sleep link and when (its next text to him: his reply or the morning text). Sam's text about waking at 3 am gets a warm, short reply that answers it and works in the link https://www.sleepfoundation.org/sleep-hygiene exactly as given, as ZOH's own find, tied to his 10:30 bedtime, with at most one question and no mention of Stamati or the team.",
+  "startTime": "09:30",
+  "timeZone": "America/New_York"
+}

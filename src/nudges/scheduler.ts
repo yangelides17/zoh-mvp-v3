@@ -7,8 +7,10 @@ import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
+import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
 import { raiseAlert, saveFlag } from "../console/alerts.js";
+import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
+import { insideQuietHours } from "../coach/state.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
@@ -20,6 +22,9 @@ import {
   CARRYING_MOMENTS,
   daysToClose,
   dueNudge,
+  localClock,
+  REPLY_IN_PROGRESS_MS,
+  REQUEST_CARRYING_MOMENTS,
   serviceDate,
   zonedTime,
   type DueNudge,
@@ -31,6 +36,12 @@ export const WENT_QUIET_FLAG = "went_quiet";
 export const DEFAULT_TICK_MS = 60_000;
 /** Whole local days without a text from them before the founders get a "went quiet" alert. */
 export const QUIET_ALERT_DAYS = 2;
+/** The founders' exact texts never go past this many unanswered texts from ZOH (spec #10, rule 1). */
+export const MAX_UNANSWERED = 3;
+/** The `nudges` moment for a founder's exact text. */
+export const EXACT_MOMENT = "team_exact";
+/** They texted this recently: a due manual nudge waits, so ZOH's reply carries it instead of a text on top. */
+export const MID_CONVERSATION_MS = 10 * 60_000;
 
 export interface NudgeSchedulerDeps {
   db: Db;
@@ -190,6 +201,33 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, "day_three"), eq(nudges.status, "sent")));
 
+  const unanswered = started?.n ?? 0;
+  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  // A request still pending past its too-late-after time is dropped with a note, never sent late.
+  const blockedBy = tester.stoppedAt
+    ? "they texted stop"
+    : unanswered >= MAX_UNANSWERED
+      ? `${MAX_UNANSWERED} texts from ZOH unanswered`
+      : quiet
+        ? "their quiet hours"
+        : "no fitting text came up";
+  await expireRequests(db, tester, now, blockedBy);
+
+  // The founders' "send exactly this": one per tick, and that tick sends nothing else.
+  if (await sendExact(deps, tester, { now, date, lastInboundAt, lastOutboundAt, unanswered })) {
+    return { action: "none", reason: "sent the team's text" };
+  }
+  // A manual nudge (its own text in ZOH's words, at the time agreed in the console): the same rules as
+  // ZOH's own texts. Mid-conversation it waits: the reply carries it instead (the state lists it).
+  if (deps.sendblue && deps.replier?.nudge && !tester.stoppedAt && !quiet && unanswered < MAX_UNANSWERED) {
+    const midConversation = lastInboundAt !== undefined && now.getTime() - lastInboundAt.getTime() < MID_CONVERSATION_MS;
+    const [request] = midConversation ? [] : await pendingRequests(db, tester.id, now, ["own_text"]);
+    if (request) {
+      await send(deps, tester, { kind: `team:${request.id}`, moment: "team", date }, now, { requestId: request.id });
+      return { action: "none", reason: "sent the team's nudge" };
+    }
+  }
+
   const decision = dueNudge({
     now,
     tester,
@@ -237,10 +275,75 @@ async function lastTexts(db: Db, tester: Tester): Promise<{ lastInboundAt?: Date
 }
 
 /**
- * What a step-day kickoff carries (spec #9): an approved deepen or upgrade not raised yet, else one
- * maintenance check-in that's due. A new focus is raised in a reply instead, where the goal cap is checked.
+ * A founder's "send exactly this" that's due (spec #10, rule 1): word for word, under the rules for
+ * ZOH's own texts: never after a stop, never past 3 unanswered, never in quiet hours unless "send
+ * now" was ticked, and not while a reply to them is being written. True when one went out (or failed).
  */
-async function carryFor(db: Db, tester: Tester, date: string): Promise<NudgeCarry | undefined> {
+async function sendExact(
+  deps: NudgeSchedulerDeps,
+  tester: Tester,
+  ctx: { now: Date; date: string; lastInboundAt?: Date; lastOutboundAt?: Date; unanswered: number },
+): Promise<boolean> {
+  const { db, log } = deps;
+  if (!deps.sendblue || tester.stoppedAt || ctx.unanswered >= MAX_UNANSWERED) return false;
+  const { now, lastInboundAt: lastIn, lastOutboundAt: lastOut } = ctx;
+  const theirsIsLatest = lastIn !== undefined && (lastOut === undefined || lastIn > lastOut);
+  if (theirsIsLatest && now.getTime() - lastIn.getTime() < REPLY_IN_PROGRESS_MS) return false;
+  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const request = (await pendingExact(db, tester.id, now)).find((r) => r.sendNow || !quiet);
+  if (!request) return false;
+
+  // The slot counts toward the unanswered cap like any text ZOH starts, and claiming it means one send.
+  const [claim] = await db
+    .insert(nudges)
+    .values({ testerId: tester.id, date: ctx.date, kind: `exact:${request.id}`, moment: EXACT_MOMENT, status: "claimed", createdAt: now })
+    .onConflictDoNothing()
+    .returning();
+  if (!claim) return false;
+  const logCtx = { contact: maskNumber(tester.phone), kind: EXACT_MOMENT };
+  try {
+    const sent = await deps.sendblue.sendMessage({ number: tester.phone, content: request.body });
+    const message = await insertOutbound(db, {
+      contactNumber: tester.phone,
+      lineNumber: deps.lineNumber ?? null,
+      content: request.body,
+      sendblueHandle: sent.messageHandle ?? null,
+      status: sent.status ?? null,
+      inReplyTo: null,
+      sentAt: now,
+      raw: sent.raw as object,
+    });
+    await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
+    await closeRequest(db, { request, status: "sent", at: now, messageId: message.id, line: doneLine(request.body, "sent word for word", now) });
+    log.info(logCtx, "Team text sent");
+  } catch (err) {
+    // No retry: a text that may have gone out must not go twice. The founders can send it again.
+    await db.update(nudges).set({ status: "failed" }).where(eq(nudges.id, claim.id));
+    await cancelRequest(db, { testerId: tester.id, requestId: request.id, at: now });
+    await addThreadLine(db, {
+      testerId: tester.id,
+      kind: "coach",
+      author: APP_AUTHOR,
+      body: `Couldn't send your text (${err instanceof Error ? err.message.slice(0, 80) : "send failed"}). Send it again if you still want it to go.`,
+      at: now,
+    });
+    log.error({ ...logCtx, err: safeError(err) }, "Sending a team text failed");
+  }
+  return true;
+}
+
+/**
+ * What a morning text carries (spec #9, #10): a founder's request due now (kickoffs and the rest-day
+ * text), else, on a step-day kickoff, an approved deepen or upgrade not raised yet, else one maintenance
+ * check-in that's due. A new focus is raised in a reply instead, where the goal cap is checked.
+ */
+async function carryFor(db: Db, tester: Tester, nudge: DueNudge, now: Date): Promise<NudgeCarry | undefined> {
+  if (REQUEST_CARRYING_MOMENTS.includes(nudge.moment)) {
+    const [request] = await pendingRequests(db, tester.id, now, MORNING_CARRIES);
+    if (request) return { requestId: request.id };
+  }
+  if (!CARRYING_MOMENTS.includes(nudge.moment)) return undefined;
+  const date = nudge.date;
   const rows = await db
     .select()
     .from(suggestions)
@@ -261,8 +364,8 @@ async function carryFor(db: Db, tester: Tester, date: string): Promise<NudgeCarr
   return goal ? { checkinGoal: goal } : undefined;
 }
 
-/** Claims the slot, has the coach write it, sends it and records it. */
-async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, now: Date): Promise<void> {
+/** Claims the slot, has the coach write it, sends it and records it. `given`: what it carries (a manual nudge), instead of working it out. */
+async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, now: Date, given?: NudgeCarry): Promise<void> {
   const { db, log } = deps;
   const ctx = { contact: maskNumber(tester.phone), kind: nudge.kind };
   if (!deps.sendblue || !deps.replier?.nudge) return;
@@ -279,7 +382,7 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
-    carry = CARRYING_MOMENTS.includes(nudge.moment) ? await carryFor(db, tester, nudge.date) : undefined;
+    carry = given ?? (await carryFor(db, tester, nudge, now));
     text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment, previous, ...(carry ? { carry } : {}) });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.
@@ -301,7 +404,10 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
-    if (carry && "suggestionId" in carry) {
+    if (carry && "requestId" in carry) {
+      const [request] = await db.select().from(consoleMessages).where(eq(consoleMessages.id, carry.requestId));
+      if (request) await closeRequest(db, { request, status: "done", at: now, messageId: message.id, line: doneLine(request.body, nudge.moment === "team" ? "in its own text" : "in the morning text", now) });
+    } else if (carry && "suggestionId" in carry) {
       await db.update(suggestions).set({ outcome: "delivered", deliveredAt: now, updatedAt: now }).where(eq(suggestions.id, carry.suggestionId));
     } else if (carry) {
       await db.insert(maintenanceCheckins).values({ testerId: tester.id, goalSlug: carry.checkinGoal, date: nudge.date, messageId: message.id, createdAt: now });
