@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
-import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance } from "../src/console/chat.js";
+import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance, stepLog } from "../src/console/chat.js";
 import { addRequest, addThreadLine, APP_AUTHOR, COACH_AUTHOR, requestRef } from "../src/console/requests.js";
 import { createCoach } from "../src/coach/coach.js";
 import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, TEAM } from "../src/coach/prompt.js";
@@ -306,6 +306,36 @@ describe("console coach capabilities", () => {
     const coach = createConsoleCoach({ db: t.db, model, voice: "v" });
     expect(await coach.answer(tester.id, now)).toBeUndefined();
     expect(model.requests).toHaveLength(1);
+  });
+
+  it("shows a dated step log: past days with how they went, rest days, today and the week ahead", async () => {
+    const tester = await seed();
+    const [plan] = await t.db
+      .update(plans)
+      .set({ days: ["mon", "wed", "fri"], startDate: "2026-10-26" })
+      .where(eq(plans.testerId, tester.id))
+      .returning();
+    await t.db.insert(stepDays).values([
+      { testerId: tester.id, date: "2026-10-28", planId: plan!.id, status: "missed" },
+      { testerId: tester.id, date: "2026-10-30", planId: plan!.id, status: "done_reduced", note: "half" },
+      { testerId: tester.id, date: "2026-11-02", planId: plan!.id, status: "done" },
+    ]);
+    const log = await stepLog(t.db, tester, plan!, TUE);
+    const lines = log.split("\n");
+    expect(lines[0]).toBe("Tue, Oct 20: before this plan");
+    expect(lines).toContain("Mon, Oct 26: step day, nothing recorded");
+    expect(lines).toContain("Tue, Oct 27: rest day");
+    expect(lines).toContain("Wed, Oct 28: missed");
+    expect(lines).toContain("Fri, Oct 30: done (smaller version) (half)");
+    expect(lines).toContain("Mon, Nov 2 (yesterday): done");
+    expect(lines).toContain("Tue, Nov 3 (today): rest day");
+    expect(lines).toContain("Wed, Nov 4 (tomorrow): step day at 19:00");
+    expect(lines.at(-1)).toBe("Tue, Nov 10: rest day");
+
+    // The console coach gets it in its record.
+    await chat(tester, "how's her week?");
+    expect(model.requests[0]!.system.at(-1)!.text).toContain("STEP LOG (their focus goal");
+    expect(model.requests[0]!.system.at(-1)!.text).toContain("Wed, Oct 28: missed");
   });
 
   it("says when ZOH can next reach them", async () => {

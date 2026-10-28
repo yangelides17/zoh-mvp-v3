@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
@@ -7,12 +7,12 @@ import { buildStateBlock } from "../coach/prompt.js";
 import { insideQuietHours, loadCoachState, localTime } from "../coach/state.js";
 import { loadVoiceDoc } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, nudges, testers, type ConsoleMessage, type Message, type Tester } from "../db/schema.js";
+import { consoleMessages, nudges, stepDays, testers, type ConsoleMessage, type Message, type Plan, type StepDayStatus, type Tester } from "../db/schema.js";
 import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
-import { addDays, dayBounds, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
+import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
 import { addRequest, addThreadLine, APP_AUTHOR, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
 
 /**
@@ -284,11 +284,52 @@ async function recordBlock(db: Db, tester: Tester, now: Date, goalCap?: number):
   return [
     `THE TESTER (as the texting coach sees them; its instructions there are for texting, not for you)\n${buildStateBlock(state)}`,
     `RECENT TEXTS (oldest first, their local time)\n${texts.map((m) => textLine(m, tester)).join("\n") || "(none yet)"}`,
+    ...(state.plan ? [`STEP LOG (their focus goal, one line per local day; count from this, never work dates out yourself)\n${await stepLog(db, tester, state.plan, state.today)}`] : []),
     `OPEN REQUESTS\n${requests.join("\n") || "(none)"}`,
     `NEXT CHANCE to reach them: ${await nextChance(db, tester, now)}`,
     `Now: ${founderTime(now)} Eastern (founders), ${localTime(now, tester.timeZone)} their time.`,
   ].join("\n\n");
 }
+
+/** Days shown before and after today in the console's step log. */
+export const STEP_LOG_PAST_DAYS = 14;
+export const STEP_LOG_NEXT_DAYS = 7;
+
+/**
+ * The focus goal's days, oldest first: the last two weeks with how each went, today, and the
+ * next week's step days. Dated with weekdays so the console coach reads counts and "tomorrow"
+ * off the page (eval: it miscounted streaks and step days when it worked them out itself).
+ */
+export async function stepLog(db: Db, tester: Tester, plan: Plan, today: string): Promise<string> {
+  const from = addDays(today, -STEP_LOG_PAST_DAYS);
+  const rows = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), gte(stepDays.date, from), lte(stepDays.date, today)));
+  const byDate = new Map(rows.map((r) => [r.date, r]));
+  const label = (date: string) =>
+    new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${date}T12:00:00Z`));
+  const lines: string[] = [];
+  for (let i = -STEP_LOG_PAST_DAYS; i <= STEP_LOG_NEXT_DAYS; i++) {
+    const date = addDays(today, i);
+    const row = byDate.get(date);
+    const step = isStepDay(plan, date, row);
+    let status: string;
+    if (plan.startDate && date < plan.startDate) {
+      if (i > 0) continue;
+      status = row?.status ? STEP_STATUS[row.status] : "before this plan";
+    } else if (row?.status) status = STEP_STATUS[row.status];
+    else if (!step) status = "rest day";
+    else if (i < 0) status = "step day, nothing recorded";
+    else if (i === 0) status = "step day, not done yet";
+    else status = "step day";
+    const time = step && i >= 0 ? ` at ${row?.movedTime ?? plan.stepTime}` : "";
+    lines.push(`${label(date)}${i === 0 ? " (today)" : i === 1 ? " (tomorrow)" : i === -1 ? " (yesterday)" : ""}: ${status}${time}${row?.note ? ` (${row.note})` : ""}`);
+  }
+  return lines.join("\n");
+}
+
+const STEP_STATUS: Record<StepDayStatus, string> = { done: "done", done_reduced: "done (smaller version)", missed: "missed" };
 
 function textLine(m: Message, tester: Tester): string {
   const who = m.direction === "inbound" ? "Them" : "ZOH";
