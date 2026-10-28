@@ -1,0 +1,38 @@
+{
+  "id": "new-goal-asked-twice",
+  "title": "A new goal on top: \"let me think on it\", then still thinking, with no promise",
+  "origin": "Spec #9 (step log and next step), rule 6 and edge case \"they ask for the new goal again while it waits\"",
+  "seed": {
+    "name": "Jordan",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "Project Hail Mary", "where": "the train home", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "LFG Jordan, another one in the books on the train home 🚆" },
+      { "from": "tester", "text": "🙌" }
+    ],
+    "plan": {
+      "step": "15 pages of Project Hail Mary",
+      "place": "the train home",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "reason": "Your commute is already 20 quiet minutes.",
+      "minutes": 20,
+      "started_days_ago": 14
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 6, "status": "done" }, { "days_ago": 7, "status": "done" }, { "days_ago": 8, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "reading's going great honestly. I want to start running too, like 3 mornings a week. can we add that?",
+    "so are we adding the running or what?"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a new goal on top of one that's going well.",
+  "shouldHaveHappened": "The first reply is warm about running and says ZOH will think on it (\"Love that. Let me think on it.\" or similar), without setting up a running plan, asking running questions, or promising it will happen or when. The second reply says, warmly, that it's still thinking on it, again with no promise or timeline, and may point back to tomorrow's reading. Neither reply mentions a team, founders or approval.",
+  "startTime": "19:30",
+  "timeZone": "America/New_York"
+}

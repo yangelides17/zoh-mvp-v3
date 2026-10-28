@@ -1,0 +1,47 @@
+{
+  "id": "whats-my-streak",
+  "title": "\"What's my streak?\" gives every goal's streak in one short reply",
+  "origin": "Spec #9 (step log and next step), rule 8 of the tester experience",
+  "seed": {
+    "name": "Nico",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 18,
+    "answers": { "what": "thesis writing", "where": "the library", "when": "10 am", "how_long": "50 min" },
+    "history": [
+      { "from": "tester", "text": "[screenshot of a 50 minute focus timer] boom" },
+      { "from": "zoh", "text": "That's 6 in a row, Nico. The thesis is moving 🔥" }
+    ],
+    "plan": {
+      "step": "one 50-minute phone-free thesis block",
+      "place": "the library",
+      "time": "10:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "focus timer",
+      "reason": "One protected block a day moves the thesis every week.",
+      "minutes": 50,
+      "started_days_ago": 9
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 6, "status": "done" },
+      { "days_ago": 7, "status": "done" }, { "days_ago": 8, "status": "done" }, { "days_ago": 9, "status": "done" }
+    ],
+    "maintenance": [
+      {
+        "goal": "reading",
+        "step": "10 pages before bed",
+        "time": "22:00",
+        "since_days_ago": 10,
+        "streak_days": 18,
+        "checkins": [{ "days_ago": 7, "answer": "kept_up" }, { "days_ago": 3, "answer": "mostly" }]
+      }
+    ]
+  },
+  "testerLines": ["what's my streak at right now?"],
+  "whatWentWrong": "New case, not a past mistake: the streak question with two goals.",
+  "shouldHaveHappened": "One short reply that gives both streaks with the numbers from the state: the thesis block (his focus) and his reading before bed (kept up on his own), without inventing other numbers or counting today's block before it's done. It may add a brief, specific push for today's block. No lists of dates.",
+  "startTime": "08:40",
+  "timeZone": "America/New_York"
+}

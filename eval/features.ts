@@ -203,6 +203,24 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** Step log and next step (#9): cases only, each seeded with goals and next steps. Target 80%. */
+  "next-step": {
+    name: "next-step",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      { id: "own-idea", scope: "text", label: "An approved step sounds like ZOH's own idea, specific to them" },
+      { id: "think-on-it", scope: "text", label: "\"Let me think on it\" is warm and promises nothing" },
+      {
+        id: "maintenance-light",
+        scope: "text",
+        label: "Maintenance question is one light line, not a second push; \"mostly\" is taken lightly, not as a failure",
+      },
+      { id: "change-vs-add", scope: "conversation", label: "Change vs. add requests, and deepen vs. upgrade, are told apart correctly" },
+      { id: "all-streaks", scope: "text", label: "\"What's my streak?\" gives every goal's streak in one short reply" },
+      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
+    ],
+  },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
   proof: {
     name: "proof",
