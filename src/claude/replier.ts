@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Tester } from "../db/schema.js";
-import type { NudgeMoment } from "../nudges/schedule.js";
+import type { NudgeCarry, NudgeMoment } from "../nudges/schedule.js";
 
 /** One turn of the text conversation, already flattened to what Claude should see. */
 export interface Turn {
@@ -47,6 +47,8 @@ export interface NudgeRequest {
   moment: NudgeMoment;
   /** The last text ZOH sent them for this same moment, so this one reads differently. */
   previous?: string;
+  /** A kickoff that also raises an approved next step or asks a maintenance check-in. */
+  carry?: NudgeCarry;
 }
 
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */

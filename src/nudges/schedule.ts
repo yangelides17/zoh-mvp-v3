@@ -46,6 +46,12 @@ export const NUDGE_MOMENTS = [
 ] as const;
 export type NudgeMoment = (typeof NUDGE_MOMENTS)[number];
 
+/** Step-day kickoffs: the moments that can carry an approved next step or a maintenance check-in. */
+export const CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin"];
+
+/** What a kickoff carries besides the step, in place of its question (spec #9, rules 2 and 7). */
+export type NudgeCarry = { suggestionId: string } | { checkinGoal: string };
+
 export interface NudgeInput {
   now: Date;
   tester: Pick<

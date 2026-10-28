@@ -113,6 +113,7 @@ function makeCoach(config: Config, db: Db) {
   return config.claude.apiKey
     ? createCoach({
         db,
+        goalCap: config.goalCap,
         model: createClaudeModel({
           apiKey: config.claude.apiKey,
           model: config.claude.model,

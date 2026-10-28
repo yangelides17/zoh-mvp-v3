@@ -8,9 +8,13 @@ import {
   planInputs,
   plans,
   stepDays,
+  suggestions,
   WEEKDAYS,
   type Goal,
+  type MaintenanceCheckin,
   type Plan,
+  type Suggestion,
+  type TesterGoal,
   type PlanInput,
   type PlanQuestion,
   type PlanQuestionKey,
@@ -19,9 +23,9 @@ import {
   type Weekday,
 } from "../db/schema.js";
 import { mediaKind } from "../media/storage.js";
-import { serviceDate, type NudgeMoment } from "../nudges/schedule.js";
+import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
-import { loadGoalDays } from "../testers/goals.js";
+import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -63,6 +67,18 @@ export interface CoachState {
   proof: ProofSeen;
   /** Set when ZOH is starting a text itself rather than replying. */
   nudgeMoment?: NudgeMoment;
+  /** What that text also carries: an approved next step or a maintenance check-in. */
+  carry?: NudgeCarry;
+  /** Focus plus maintenance goals a tester can have at once (`GOAL_CAP`). */
+  goalCap: number;
+  /** Every goal they have, with its role (focus, maintenance, dropped). */
+  testerGoals: TesterGoal[];
+  /** Each live goal's streak (active phase only). */
+  streaks: GoalStreak[];
+  /** Next steps since their context started, oldest first: the coach only ever sees approved ones. */
+  suggestions: Suggestion[];
+  /** Maintenance check-ins since their context started, oldest first. */
+  checkins: MaintenanceCheckin[];
   /** Answers saved for goals they switched away from, to reuse where they fit. */
   earlierAnswers: PlanInput[];
   /** Their latest text: what lock_plan checks the commitment against. */
@@ -77,9 +93,24 @@ export interface CoachState {
 export async function loadCoachState(
   db: Db,
   tester: Tester,
-  opts: { now: Date; isFirstText: boolean; justFinished?: boolean; lastTesterText?: string; nudgeMoment?: NudgeMoment },
+  opts: {
+    now: Date;
+    isFirstText: boolean;
+    justFinished?: boolean;
+    lastTesterText?: string;
+    nudgeMoment?: NudgeMoment;
+    carry?: NudgeCarry;
+    goalCap?: number;
+  },
 ): Promise<CoachState> {
   const today = serviceDate(opts.now, tester);
+  const testerGoalRows = await loadTesterGoals(db, tester.id);
+  const since = gte(suggestions.createdAt, tester.contextStartedAt);
+  const suggestionRows = await db
+    .select()
+    .from(suggestions)
+    .where(and(eq(suggestions.testerId, tester.id), since))
+    .orderBy(asc(suggestions.createdAt));
   const allGoals = await db.select().from(goals).orderBy(asc(goals.sortOrder));
   const goal = allGoals.find((g) => g.slug === tester.goalSlug);
   const inputs = goal
@@ -130,6 +161,12 @@ export async function loadCoachState(
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,
+    carry: opts.carry,
+    goalCap: opts.goalCap ?? DEFAULT_GOAL_CAP,
+    testerGoals: testerGoalRows,
+    streaks: tester.phase === "active" ? await goalStreaks(db, tester, testerGoalRows, today) : [],
+    suggestions: suggestionRows,
+    checkins: await loadCheckins(db, tester.id),
     earlierAnswers,
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,
