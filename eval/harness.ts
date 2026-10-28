@@ -16,7 +16,7 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
@@ -298,7 +298,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         reason: p.reason,
         startDate: localDate(now, timeZone, -e.days_ago),
         commitment: "I'm in",
-        lockedAt: new Date(now.getTime() - (e.days_ago + 1) * DAY_MS),
+        lockedAt: new Date(now.getTime() - e.days_ago * DAY_MS),
       });
     }
     const [plan] = await app.db.insert(schema.plans).values({
@@ -402,6 +402,8 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const clock = new EvalClock(zonedDate(EVAL_DAY, plan.startTime, plan.timeZone));
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, memory: opts.memory });
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
+  // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
+  const memoryBefore = opts.memory ? await readMemory(app) : undefined;
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
   let error: string | undefined;
@@ -439,7 +441,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
-      ...(opts.memory ? { memory: await readMemory(app) } : {}),
+      ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,
       messageCount: row?.n ?? 0,
       appErrors: row?.errors ?? [],
@@ -489,8 +491,15 @@ export async function readMemory(app: EvalApp): Promise<string> {
   if (!tester) return "(no tester)";
   const order = ["self", "preferences", "goal", "person", "subject", "daily"];
   const pages = (await getPages(app.db, tester.id)).sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
-  if (pages.length === 0) return "(nothing in memory: the overnight pass didn't run or found no texts)";
-  return (await Promise.all(pages.map((p) => renderPage(app.db, tester, p)))).join("\n\n");
+  // ZOH also sees its step-day record (streak, misses) in every reply; show it so counts can be checked.
+  const days = await app.db
+    .select()
+    .from(schema.stepDays)
+    .where(eq(schema.stepDays.testerId, tester.id))
+    .orderBy(desc(schema.stepDays.date));
+  const record = `Step days on record, newest first: ${days.map((d) => `${d.date} ${d.status ?? "open"}`).join(", ") || "none"}`;
+  if (pages.length === 0) return `(no memory pages)\n${record}`;
+  return [...(await Promise.all(pages.map((p) => renderPage(app.db, tester, p)))), record].join("\n\n");
 }
 
 /** JSON-friendly, with the (fake) number masked like everywhere else. */

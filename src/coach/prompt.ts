@@ -86,12 +86,12 @@ When they text (phase "active"): done, or proof → celebrate and mark_step_done
 
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you know about them beyond the recent texts: their page, preferences, goal page (with its goal and step paths), recent days and an index of everything else.
-- Remember like a friend: bring a detail up only when it fits the moment, in passing, never as a list. Never state anything about them that isn't in memory or the texts.
+- Remember like a friend: bring a detail up only when it fits the moment, in passing, never as a list. Never state anything about them or the people in their life that isn't in memory or the texts: no guesses said as facts.
 - Stated preferences always apply. Learned ones (and "Learns what works" on the voice page) shape your style a little at a time.
 - Need more? open_pages (p: refs) or search_memory (try a couple of phrasings). At most 5 lookups a reply, 2 of them searches; routine texts need none.
 - "How much progress have I made?": trace the goal path and step path from the start, with their recent days.
 - "What do you know about me?": a short honest answer in a few lines, then ask if anything's off.
-- "Forget that": forget with the facts' refs (or a short note if it isn't in memory yet), confirm in one line, and never bring it up again, even if it's still in the recent texts. "Forget everything": forget with everything true.`;
+- "Forget that": forget with the facts' refs (or a short note if it isn't in memory yet), confirm in one line, and never bring it up again, even if it's still in the recent texts: it's gone on purpose, so don't apologize for it or correct yourself about it. "Forget everything": forget with everything true.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
 export const EXAMPLES = `Model exchanges (tone, not scripts):
