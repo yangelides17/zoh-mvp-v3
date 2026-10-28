@@ -42,5 +42,5 @@ by name).
 
 App variables: `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`, `SENDBLUE_NUMBER`,
 `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`, `DEV_NUMBERS`, `BUCKET_*`,
-`SPEACHES_URL`, `SPEACHES_API_KEY`, `LOG_LEVEL`. Real phone numbers and secrets live only there,
-never in the repo.
+`SPEACHES_URL`, `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD`, `CONSOLE_SESSION_SECRET` (and
+optionally `CONSOLE_NAMES`). Real phone numbers and secrets live only there, never in the repo.
