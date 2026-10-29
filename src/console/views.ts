@@ -283,7 +283,8 @@ export function testerView(page: TesterPage, name: string, now = new Date(), not
     .map(({ page: p, text }) => `<details class="card"><summary>${esc(p.title)} <span class="muted">${esc(p.kind)}</span></summary><pre>${esc(text)}</pre></details>`)
     .join("");
   const waiting = page.thread.filter((m) => m.kind === "alert" && !m.seenAt).length;
-  const status = [t.stoppedAt && "stopped", t.autoTextsPausedAt && "automatic texts paused"].filter(Boolean);
+  const paused = page.pause && `paused${page.pause.until ? ` until ${page.pause.until}` : ""}`;
+  const status = [t.stoppedAt && "stopped", paused, t.autoTextsPausedAt && "automatic texts paused"].filter(Boolean);
   const body = `${notice ? `<div class="card warn">${esc(notice)}</div>` : ""}
 <h1>${esc(t.name ?? "Unnamed")}</h1>
 <div class="row"><span class="muted">${esc(maskNumber(t.phone))}</span><span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip warn">${esc(s)}</span>`).join("")}<span class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)} · ${esc(t.pushiness)}</span></div>

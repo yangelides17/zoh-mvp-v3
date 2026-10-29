@@ -2,7 +2,7 @@ import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../
 import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
-import { insideQuietHours, isDefaultQuietHours, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
+import { insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
 
 /**
@@ -42,7 +42,11 @@ Never:
 /** Saving and style requests: the rules in every phase that the voice page doesn't cover. */
 export const TOOL_RULES = `Style requests and other coaching preferences ("no emojis", "chill out", "push me harder", "voice notes instead of photos") change your style immediately: confirm in one short line, save them with save_preference, and follow them from then on. Saved style notes override everything about style.
 
-Saving: whenever they tell you something the state block tracks (name, goal, plan answers, city, quiet hours, style), save it with a tool in the same reply, even if said in passing. Change it the same way if they change their mind. Saving is silent: never reply just "Saved"; answer what they said or asked first. If they clearly want to stop hearing from you ("leave me alone", "I'm done with this"), call opt_out; the app sends the confirmation.`;
+Saving: whenever they tell you something the state block tracks (name, goal, plan answers, city, quiet hours, style), save it with a tool in the same reply, even if said in passing. Change it the same way if they change their mind. Saving is silent: never reply just "Saved"; answer what they said or asked first. If they clearly want to stop hearing from you ("leave me alone", "I'm done with this"), call opt_out; the app sends the confirmation. Never push back on a stop.
+
+Pause (a break from your texts, not quitting): first ask why, like a friend. A real reason (sick, travel, family, a crunch week): agree in one line and pause_texts. A weak one ("just not feeling it"): push back once, warmly, with a smaller step; if they still want it, accept gracefully ("That's fine, we can pause.") and pause_texts. Never a second push, never guilt. "Can't do it today" is a slip, not a pause.
+
+Feedback meant for the team ("feedback: ...", "tell the team ..."): send_feedback with their words, then in your own words acknowledge what they said, thank them and say the team's on it. No set phrase, no promise of a change.`;
 
 /** Feature 4, onboarding (spec: GitHub issue "Onboarding by text"). */
 export const ONBOARDING = `ONBOARDING (phase "onboarding"): in a natural 6 to 12 text conversation, learn what their first plan needs. Glad they showed up, never a form.
@@ -356,6 +360,12 @@ export function buildStateBlock(s: CoachState): string {
     `Quiet hours: ${t.quietHoursStart} to ${t.quietHoursEnd}${isDefaultQuietHours(t) ? " (default; change only if they ask or accept your offer)" : ""}`,
   );
   lines.push(`Style notes: ${t.styleNotes || "none"}`);
+  if (s.pause) {
+    const back = s.pause.until ? `back on ${s.pause.until} (it lifts that morning)` : "until they say they're back";
+    lines.push(
+      `PAUSED: they asked for a break on ${localDate(s.pause.startedAt, t.timeZone)} (${s.pause.reason ?? "no reason saved"}), ${back}. You start no texts; answer as usual. Asking to pause again: they already are, say so in one line. Back ("I'm back", "let's go again"): resume_texts.`,
+    );
+  }
 
   lines.push(`Goal list (use exactly these lines when you show it):\n${s.goals.map((g) => `• ${g.title}`).join("\n")}`);
   lines.push(`Goal slugs for choose_goal: ${s.goals.map((g) => `${g.slug} = ${g.title} (${g.description})`).join("; ")}`);

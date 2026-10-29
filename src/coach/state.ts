@@ -14,6 +14,7 @@ import {
   type ConsoleMessage,
   type Goal,
   type MaintenanceCheckin,
+  type Pause,
   type Plan,
   type Suggestion,
   type TesterGoal,
@@ -28,6 +29,7 @@ import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from ".
 import { mediaKind } from "../media/storage.js";
 import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
+import { activePause } from "../testers/pauses.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
 
 /** Plan input columns by question key. */
@@ -88,6 +90,8 @@ export interface CoachState {
   earlierAnswers: PlanInput[];
   /** The founders' notes from the console: context, never quoted (spec "Founder console", rule 3). */
   teamNotes: ConsoleMessage[];
+  /** The break they asked for, while it's on (spec "Commands and safety"). */
+  pause?: Pause;
   /** The founders' requests to carry in ZOH's words, due now, oldest first. */
   teamRequests: ConsoleMessage[];
   /** Requests marked done in this reply: this text must still carry them. */
@@ -187,6 +191,7 @@ export async function loadCoachState(
     ),
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
+    pause: await activePause(db, tester.id),
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
     teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),

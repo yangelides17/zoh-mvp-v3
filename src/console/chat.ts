@@ -13,6 +13,7 @@ import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../me
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
 import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
+import { activePause } from "../testers/pauses.js";
 import { addRequest, addThreadLine, APP_AUTHOR, awaitingAnswer, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
 
 /**
@@ -377,6 +378,11 @@ function textLine(m: Message, tester: Tester): string {
  */
 export async function nextChance(db: Db, tester: Tester, now: Date): Promise<string> {
   if (tester.stoppedAt) return "never: they texted stop, so nothing is sent.";
+  const pause = await activePause(db, tester.id);
+  if (pause) {
+    const until = pause.until ? `until the morning of ${pause.until}` : "until they say they're back";
+    return `in your reply to their next text: they asked for a break, so ZOH starts no texts ${until}.`;
+  }
   const reply = "or sooner, in your reply, if they text first";
   if (tester.phase !== "active") return `in your reply to their next text (they're in ${tester.phase}: no morning texts yet).`;
   const today = serviceDate(now, tester);

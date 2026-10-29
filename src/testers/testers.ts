@@ -8,6 +8,7 @@ import {
   memoryForgotten,
   memoryPages,
   nudges,
+  pauses,
   planInputs,
   plans,
   stepDays,
@@ -103,6 +104,7 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
   await db.delete(maintenanceCheckins).where(eq(maintenanceCheckins.testerId, tester.id));
   await db.delete(stepDays).where(eq(stepDays.testerId, tester.id));
   await db.delete(nudges).where(eq(nudges.testerId, tester.id));
+  await db.delete(pauses).where(eq(pauses.testerId, tester.id));
   await db.delete(plans).where(eq(plans.testerId, tester.id));
   return updateTester(db, tester.id, {
     name: null,

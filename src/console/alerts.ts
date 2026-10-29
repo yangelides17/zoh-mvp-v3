@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { consoleMessages, flags, plans, type ConsoleMessage, type Flag } from "../db/schema.js";
@@ -66,4 +67,34 @@ export async function saveFlag(db: Db, testerId: string, kind: string, detail: s
   const [flag] = await db.insert(flags).values({ testerId, kind, detail }).returning();
   await raiseAlert(db, { testerId, topic: kind, key: `flag:${flag!.id}`, body: detail, at: flag!.createdAt });
   return flag!;
+}
+
+/**
+ * Commands and safety (spec: GitHub issue "Commands and safety", rules 7 and 8): a stop, a stopped
+ * tester texting again, feedback and failures each reach the console as an alert.
+ */
+export async function alertStop(db: Db, testerId: string, stoppedAt: Date, how: string): Promise<void> {
+  await raiseAlert(db, { testerId, topic: "stop", key: `stop:${testerId}:${stoppedAt.getTime()}`, body: `Opted out (${how})`, at: stoppedAt });
+}
+
+export async function alertUnstop(db: Db, testerId: string, messageId: string, at: Date): Promise<void> {
+  await raiseAlert(db, { testerId, topic: "unstop", key: `unstop:${messageId}`, body: "Texted again after stopping: un-stopped", at });
+}
+
+/** Word for word; the same feedback twice (a retried reply) is one alert. */
+export async function alertFeedback(db: Db, testerId: string, feedback: string, at: Date): Promise<void> {
+  const digest = createHash("sha1").update(feedback.trim().toLowerCase()).digest("hex").slice(0, 16);
+  await raiseAlert(db, { testerId, topic: "feedback", key: `feedback:${testerId}:${digest}`, body: feedback.trim(), at });
+}
+
+/**
+ * Something failed for this tester (the system-down reply, a text that never sent): at most one alert
+ * per tester per clock hour (UTC). Never throws: the database may be what's failing.
+ */
+export async function alertFailure(db: Db, testerId: string, what: string, at: Date): Promise<boolean> {
+  try {
+    return await raiseAlert(db, { testerId, topic: "failure", key: `failure:${testerId}:${at.toISOString().slice(0, 13)}`, body: what, at });
+  } catch {
+    return false;
+  }
 }

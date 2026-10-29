@@ -14,6 +14,7 @@ import {
   type MaintenanceCheckin,
   type MemoryPage,
   type Message,
+  type Pause,
   type Plan,
   type StepDay,
   type Suggestion,
@@ -25,6 +26,7 @@ import { getPages, messageTime, switchReasons } from "../memory/store.js";
 import { addDays } from "../nudges/schedule.js";
 import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/streak.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
+import { activePause } from "../testers/pauses.js";
 import { listSuggestions } from "./suggestions.js";
 
 /** What the founder console reads (spec: GitHub issue "Founder console", "What we experience" 2 and 3). */
@@ -144,6 +146,8 @@ export interface TesterPage {
   memory: { page: MemoryPage; text: string }[];
   suggestions: Suggestion[];
   thread: ConsoleMessage[];
+  /** The break they asked for, while it's on. */
+  pause?: Pause;
 }
 
 /** Everything on one tester's page. */
@@ -180,6 +184,7 @@ export async function testerPage(db: Db, testerId: string, now: Date): Promise<T
     memory,
     suggestions: await listSuggestions(db, tester.id),
     thread: await db.select().from(consoleMessages).where(eq(consoleMessages.testerId, tester.id)).orderBy(asc(consoleMessages.createdAt)),
+    pause: await activePause(db, tester.id),
   };
 }
 

@@ -11,6 +11,7 @@ import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../m
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
+import { alertFailure, alertUnstop } from "../console/alerts.js";
 import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
 
@@ -141,6 +142,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
         if (delay === undefined) {
           replyText = SYSTEM_DOWN_REPLY;
           log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
+          await alertFailure(db, tester.id, `The coach failed after retries; they got the system-down reply (${errorMessage(err).slice(0, 120)})`, now());
           break;
         }
         log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; retrying");
@@ -173,6 +175,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   } catch (err) {
     errors.push(`send: ${errorMessage(err)}`);
     log.error({ ...ctx, err: safeError(err) }, "Sending the reply failed");
+    await alertFailure(db, tester.id, `A reply didn't send (${errorMessage(err).slice(0, 120)})`, now());
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
@@ -248,6 +251,7 @@ async function runCommands(
   if (isOptOutText(inbound.content)) {
     await optOut(db, tester, at);
     log.info(ctx, "Tester opted out");
+    // Sendblue blocks this too until they text again (issue "Sendblue's own STOP opt-out"): no failure alert.
     await sendCommandReply(deps, inbound, OPT_OUT_CONFIRMATION);
     return { handled: true };
   }
@@ -258,6 +262,16 @@ async function runCommands(
   } else if (tester.stoppedAt) {
     tester = await updateTester(db, tester.id, { stoppedAt: null });
     log.info(ctx, "Opted-out tester texted again; un-stopped");
+    await alertUnstop(db, tester.id, inbound.id, at);
+    // They texted us themselves: take them off Sendblue's opt-out list so the reply gets through.
+    if (deps.sendblue) {
+      try {
+        await deps.sendblue.optIn(inbound.contactNumber);
+      } catch (err) {
+        log.error({ ...ctx, err: safeError(err) }, "Sendblue opt-in failed; replying anyway");
+        await alertFailure(db, tester.id, `Couldn't take them off Sendblue's opt-out list (${errorMessage(err).slice(0, 120)})`, at);
+      }
+    }
   }
   return { handled: false, tester };
 }

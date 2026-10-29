@@ -409,6 +409,35 @@ export const flags = pgTable(
   (t) => [index("flags_tester_idx").on(t.testerId)],
 );
 
+export const PAUSE_END_REASONS = ["tester", "end_date", "stop", "reset"] as const;
+export type PauseEndReason = (typeof PAUSE_END_REASONS)[number];
+
+/**
+ * A break the tester asked for (spec: GitHub issue "Commands and safety"): ZOH starts no texts while
+ * one is open, and a step day that ends inside it is never closed as missed. At most one open per tester.
+ */
+export const pauses = pgTable(
+  "pauses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+    /** Their local date they said they'd be back: the pause lifts when that day's quiet hours end. */
+    until: date("until", { mode: "string" }),
+    /** Why they wanted the break, in a few words. */
+    reason: text("reason"),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    endedBy: text("ended_by", { enum: PAUSE_END_REASONS }),
+  },
+  (t) => [
+    index("pauses_tester_idx").on(t.testerId),
+    uniqueIndex("pauses_one_open_idx").on(t.testerId).where(sql`${t.endedAt} is null`),
+    check("pauses_ended_by_check", sql`${t.endedBy} in ('tester', 'end_date', 'stop', 'reset')`),
+  ],
+);
+
 export const STEP_DAY_STATUSES = ["done", "done_reduced", "missed"] as const;
 /** The coach's read of the day's proof: clear or plausible counts; unclear or doesnt_match doesn't (yet). */
 export const PROOF_VERDICTS = ["clear", "plausible", "unclear", "doesnt_match"] as const;
@@ -597,6 +626,7 @@ export type NewTester = typeof testers.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
 export type PlanInput = typeof planInputs.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
+export type Pause = typeof pauses.$inferSelect;
 export type Plan = typeof plans.$inferSelect;
 export type StepDay = typeof stepDays.$inferSelect;
 export type NewStepDay = typeof stepDays.$inferInsert;
