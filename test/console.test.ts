@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { raiseAlert } from "../src/console/alerts.js";
@@ -8,6 +8,7 @@ import {
   consoleMessages,
   maintenanceCheckins,
   memoryFacts,
+  memoryLinks,
   memoryPages,
   messages,
   plans,
@@ -301,7 +302,7 @@ describe("tester list and page", () => {
     expect(texts).toContain(`/console/media/${s.photoId}`);
     const memory = await tab("memory");
     expect(memory).toContain("Sam (the tester)");
-    expect(memory).toContain("Has a dog named Max");
+    expect(memory).toContain("Commutes by train");
     const progress = await tab("progress");
     // Metrics: focus streak and hit rate; maintenance proven, then self-reported
     expect(progress).toContain("Streak 2 (since 2026-10-26)");
@@ -317,6 +318,63 @@ describe("tester list and page", () => {
     expect(progress).toContain(`/console/media/${s.photoId}`);
     // An unknown tab is the console.
     expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
+  });
+
+  it("shows memory as cards with kind filters and search text, each opening its own page whose links resolve (#63)", async () => {
+    const s = await seed();
+    const id = s.tester.id;
+    const [self] = await t.db.select().from(memoryPages).where(and(eq(memoryPages.testerId, id), eq(memoryPages.kind, "self")));
+    const [maya] = await t.db.insert(memoryPages).values({ testerId: id, kind: "person", title: "Maya (her sister)", summary: "Lends her books" }).returning();
+    const [day1] = await t.db.insert(memoryPages).values({ testerId: id, kind: "daily", title: "Nov 9", summary: "Read on the train", body: "Did 10 pages on the train.", date: "2026-11-09" }).returning();
+    const [day2] = await t.db.insert(memoryPages).values({ testerId: id, kind: "daily", title: "Nov 10", summary: "Short day", date: "2026-11-10" }).returning();
+    await t.db.insert(memoryFacts).values({ pageId: maya!.id, testerId: id, text: "Recommended Dune", section: "stated" });
+    await t.db.insert(memoryLinks).values([
+      { testerId: id, fromPageId: self!.id, toPageId: maya!.id, kind: "related" },
+      { testerId: id, fromPageId: day1!.id, toPageId: day2!.id, kind: "leads_to" },
+    ]);
+    const tab = (await get(`/console/testers/${id}?tab=memory`, cookieFor("Yanni"))).body;
+    // A card per page, each in its chip's group, linking to its own page.
+    for (const [page, group] of [[self!, "about"], [maya!, "person"], [day1!, "daily"], [day2!, "daily"]] as const) {
+      expect(tab).toContain(`href="/console/testers/${id}/memory/${page.id}" data-group="${group}"`);
+    }
+    for (const chip of ["all", "about", "goal", "person", "subject", "daily", "timeline"]) expect(tab).toContain(`data-chip="${chip}"`);
+    // Facts are searchable even when the card shows the summary.
+    expect(tab).toContain('data-search="sam (the tester) commutes by train  has a dog named max"');
+    // The timeline groups daily pages by their local day (now is Nov 10).
+    const timeline = tab.slice(tab.indexOf('class="mem-timeline"'));
+    expect(timeline.indexOf("<h3>Today</h3>")).toBeLessThan(timeline.indexOf("<h3>Yesterday</h3>"));
+
+    // Their own page: facts under headings, the related page as a link.
+    const own = await get(`/console/testers/${id}/memory/${self!.id}`, cookieFor("Yanni"));
+    expect(own.statusCode).toBe(200);
+    expect(own.body).toContain("Has a dog named Max");
+    expect(own.body).toContain("<h3>Related</h3>");
+    expect(own.body).toContain(`href="/console/testers/${id}/memory/${maya!.id}">Maya (her sister)</a>`);
+    // Related reads both ways; a daily page shows its body and the path through it.
+    expect((await get(`/console/testers/${id}/memory/${maya!.id}`, cookieFor("Yanni"))).body).toContain(`/memory/${self!.id}">Sam (the tester)</a>`);
+    const daily = (await get(`/console/testers/${id}/memory/${day1!.id}`, cookieFor("Yanni"))).body;
+    expect(daily).toContain("Did 10 pages on the train.");
+    expect(daily).toContain(`<strong>Nov 9</strong> → <a href="/console/testers/${id}/memory/${day2!.id}">Nov 10</a>`);
+    // Another tester's page isn't reachable under this one; nothing without the password.
+    const other = await seed(WESTERN, "Alex");
+    const [theirs] = await t.db.select().from(memoryPages).where(eq(memoryPages.testerId, other.tester.id));
+    const cross = await get(`/console/testers/${id}/memory/${theirs!.id}`, cookieFor("Yanni"));
+    expect(cross.statusCode).toBe(404);
+    expect(cross.body).not.toContain("Alex");
+    const locked = await get(`/console/testers/${id}/memory/${self!.id}`);
+    expect(locked.statusCode).toBe(401);
+    expect(locked.body).not.toContain("Has a dog named Max");
+  });
+
+  it("shows the step log as day dots that jump to each day, with a letter as well as a color (#63)", async () => {
+    const s = await seed();
+    const progress = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
+    expect(progress).toContain(`<a class="dot done proof" href="#day-${MON}" title="Mon, Nov 2: done, with proof"`);
+    expect(progress).toContain(`id="day-${MON}"`);
+    expect(progress).toContain(">✓</a>");
+    // Oldest first, left to right.
+    expect(progress.indexOf('href="#day-2026-10-21"')).toBeLessThan(progress.indexOf(`href="#day-${MON}"`));
+    expect(progress).toContain("<b>🔥 2</b><span>current streak</span>");
   });
 
   it("escapes what testers write, on the page and in live updates", async () => {

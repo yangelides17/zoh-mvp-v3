@@ -13,7 +13,6 @@ import {
   type ConsoleMessage,
   type Goal,
   type MaintenanceCheckin,
-  type MemoryPage,
   type Message,
   type Pause,
   type Plan,
@@ -22,8 +21,7 @@ import {
   type Tester,
   type TesterGoal,
 } from "../db/schema.js";
-import { renderPage } from "../memory/render.js";
-import { getPages, messageTime, switchReasons } from "../memory/store.js";
+import { messageTime, switchReasons } from "../memory/store.js";
 import { addDays } from "../nudges/schedule.js";
 import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/streak.js";
 import { testerNow } from "../testers/clock.js";
@@ -307,16 +305,6 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
     stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [] })),
     suggestions: await listSuggestions(db, tester.id),
   };
-}
-
-export interface MemoryTab {
-  pages: { page: MemoryPage; text: string }[];
-}
-
-export async function memoryTab(db: Db, tester: Tester): Promise<MemoryTab> {
-  const pages = [];
-  for (const page of await getPages(db, tester.id)) pages.push({ page, text: await renderPage(db, tester, page) });
-  return { pages };
 }
 
 /** A media text the console may show: inbound, ours in the bucket, and from a tester we know. */
