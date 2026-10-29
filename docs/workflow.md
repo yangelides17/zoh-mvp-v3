@@ -113,4 +113,6 @@ review session and your "merge" are the check.
    spent, one decision noted."
 4. New session, `/review`: "Merge; worth trying 'yeah sure but later' on your phone." You say merge.
 5. On your phone: text "reset", go through onboarding to a plan. The plan is a bit long: Claude
-   files a bug. Otherwise good: `done`.
+   files a bug. Otherwise good: `done`. To see days of nudges in a minute, a dev number texts
+   `jump next`, `jump 3h`, `jump 2d` or `jump 7:30am` (the clock moves forward, a ⏩ line says what
+   happened); "reset" returns to real time.

@@ -25,6 +25,7 @@ import { renderPage } from "../memory/render.js";
 import { getPages, messageTime, switchReasons } from "../memory/store.js";
 import { addDays } from "../nudges/schedule.js";
 import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/streak.js";
+import { testerNow } from "../testers/clock.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
 import { activePause } from "../testers/pauses.js";
 import { listSuggestions } from "./suggestions.js";
@@ -109,7 +110,7 @@ export async function testerRows(db: Db, now: Date): Promise<TesterRow[]> {
   const waitingBy = new Map(waiting.map((w) => [w.testerId, w.n]));
   const out: TesterRow[] = [];
   for (const tester of all) {
-    const views = await goalViews(db, tester, now, titles);
+    const views = await goalViews(db, tester, testerNow(tester, now), titles);
     const [lastText] = await db
       .select()
       .from(messages)

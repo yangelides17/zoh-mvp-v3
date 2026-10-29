@@ -17,6 +17,15 @@ export function onTesterClock(tester: Pick<Tester, "clockOffsetMs">, at: Date): 
   return tester.clockOffsetMs ? at : undefined;
 }
 
+/** How far ahead a jumped clock is: "20 min", "1h20", "2d 3h". */
+export function aheadBy(ms: number): string {
+  const minutes = Math.round(ms / 60_000);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return minutes % 60 ? `${hours}h${String(minutes % 60).padStart(2, "0")}` : `${hours}h`;
+  return hours % 24 ? `${Math.floor(hours / 24)}d ${hours % 24}h` : `${Math.floor(hours / 24)}d`;
+}
+
 /** Testers whose jump is running, and when it will finish. The minute ticks skip them; their texts wait. */
 const running = new Map<string, Promise<void>>();
 

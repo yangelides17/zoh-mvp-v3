@@ -263,6 +263,14 @@ describe("tester list and page", () => {
     expect(page).toContain("&lt;script&gt;");
   });
 
+  it("a jumped dev account's page runs on their clock and says how far ahead it is (#14)", async () => {
+    const s = await seed();
+    const page = async () => (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    expect(await page()).not.toContain("test clock");
+    await t.db.update(testers).set({ clockOffsetMs: (3 * 24 + 4) * 60 * 60_000 }).where(eq(testers.id, s.tester.id));
+    expect(await page()).toContain("⏩ test clock +3d 4h");
+  });
+
   it("streams a proof from the bucket, and only a known tester's", async () => {
     const s = await seed();
     const res = await get(`/console/media/${s.photoId}`, cookieFor("Yanni"));

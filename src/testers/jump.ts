@@ -10,7 +10,7 @@ import { addDays, localClock, serviceDate, weekdayOf, zonedTime } from "../nudge
 import { forecastNudge, type NudgeScheduler } from "../nudges/scheduler.js";
 import { maskNumber, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
-import { testerNow, whileJumping } from "./clock.js";
+import { aheadBy, testerNow, whileJumping } from "./clock.js";
 import { JUMP_USAGE, MAX_JUMP_MS, parseJump, type JumpTarget } from "./commands.js";
 import { getTester, getTesterByPhone, updateTester } from "./testers.js";
 
@@ -134,7 +134,7 @@ async function logLine(db: Db, tester: Tester, from: Date, to: Date): Promise<st
   else if (parts.length === 1) parts.push("nothing due");
 
   const next = await forecastNudge(db, tester, to, new Date(to.getTime() + MAX_JUMP_MS), JUMP_STEP_MS);
-  parts.push(next ? `next: ${label(next.moment)} ${when(next.at)} (in ${duration(next.at.getTime() - to.getTime())})` : "next: nothing coming");
+  parts.push(next ? `next: ${label(next.moment)} ${when(next.at)} (in ${aheadBy(next.at.getTime() - to.getTime())})` : "next: nothing coming");
   return parts.join(" · ");
 }
 
@@ -192,13 +192,4 @@ function clockTime(at: Date, tester: Pick<Tester, "timeZone">): string {
 function weekday(date: string): string {
   const day = weekdayOf(date);
   return day.charAt(0).toUpperCase() + day.slice(1);
-}
-
-/** "20 min", "1h20", "2d 3h". */
-function duration(ms: number): string {
-  const minutes = Math.round(ms / 60_000);
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return minutes % 60 ? `${hours}h${String(minutes % 60).padStart(2, "0")}` : `${hours}h`;
-  return hours % 24 ? `${Math.floor(hours / 24)}d ${hours % 24}h` : `${Math.floor(hours / 24)}d`;
 }
