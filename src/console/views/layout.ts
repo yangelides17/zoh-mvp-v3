@@ -158,10 +158,22 @@ const SCRIPT = `(function () {
     box.querySelectorAll(".divider").forEach(function (d) { if (d.dataset.day === day) d.remove(); else day = d.dataset.day; });
   }
   function json(url) { return fetch(url, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }); }
+  // A thread fills what's left of the window, so the chat box (or footnote) under it shows on load.
+  function fit(box) {
+    var under = box.parentElement.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom;
+    var top = box.getBoundingClientRect().top + window.scrollY;
+    box.style.height = Math.max(240, window.innerHeight - top - under - 16) + "px";
+  }
   boxes.forEach(function (box) {
     var items = box.querySelector(".items");
+    fit(box);
     box.scrollTop = box.scrollHeight;
-    window.addEventListener("load", function () { box.scrollTop = box.scrollHeight; });
+    window.addEventListener("load", function () { fit(box); box.scrollTop = box.scrollHeight; });
+    window.addEventListener("resize", function () {
+      var near = box.scrollHeight - box.scrollTop - box.clientHeight < 160;
+      fit(box);
+      if (near) box.scrollTop = box.scrollHeight;
+    });
     box.addEventListener("scroll", function () {
       if (box.scrollTop > 120 || box.dataset.loading || !box.dataset.before) return;
       box.dataset.loading = "1";
