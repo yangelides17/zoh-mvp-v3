@@ -8,7 +8,7 @@ import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION } from "../src/testers/
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
 import { DEV, ME, STRANGER, WESTERN, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
 
-const OPT_OUTS = ["stop", "stop all", "unsubscribe", "cancel", "end", "quit", "opt out", "optout"];
+const OPT_OUTS = ["stop", "stop all", "unsubscribe", "cancel", "end", "quit", "revoke", "opt out", "optout"];
 
 async function text(t: TestApp, from: string, content: string) {
   const res = await postWebhook(t, inboundEvent({ content, from_number: from, number: from }));
