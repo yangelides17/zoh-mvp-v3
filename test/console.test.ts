@@ -160,7 +160,17 @@ describe("console login", () => {
       expect((await get(`/console/media/${s.photoId}`, cookie)).statusCode).toBe(401);
       expect((await post(`/console/testers/${id}/alerts/${s.alertId}/seen`, {}, cookie)).statusCode).toBe(401);
       expect((await post(`/console/testers/${id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookie)).statusCode).toBe(401);
-      expect((await post(`/console/testers/${id}/suggestions`, { goal: "reading", kind: "deepen", proposal: "x" }, cookie)).statusCode).toBe(401);
+      // The page's own fetches (#63): older items, live updates.
+      for (const url of [`/console/testers/${id}/thread?before=${now.getTime()}`, `/console/testers/${id}/texts?before=${now.getTime()}`, `/console/testers/${id}/updates?thread=0&texts=0`]) {
+        const res = await get(url, cookie);
+        expect(res.statusCode).toBe(401);
+        expect(res.body).not.toContain("Page 40");
+      }
+    }
+    for (const tab of ["console", "texts", "memory", "progress"]) {
+      const res = await get(`/console/testers/${id}?tab=${tab}`);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).not.toContain("Sam");
     }
     // Nothing changed.
     const [row] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
@@ -218,49 +228,177 @@ describe("tester list and page", () => {
   it("lists each tester with goals, streak, hit rate, last text and alerts waiting", async () => {
     await seed();
     const res = await get("/console", cookieFor("Yanni"));
-    expect(res.body).toContain("Focus: Daily reading · streak 2 (since 2026-10-26)");
+    expect(res.body).toContain("Daily reading · 🔥 2");
+    expect(res.body).toContain("streak 2 (since 2026-10-26)");
     expect(res.body).toContain("hit rate 100% (2/2)");
     expect(res.body).toContain("Daily exercise");
     expect(res.body).toContain("Page 40, nice.");
     expect(res.body).toContain("2 alerts");
   });
 
-  it("shows texts, memory, metrics, plan versions, proofs, suggestions and alerts", async () => {
+  it("puts testers needing a look first, and counts a waiting suggestion and its alert once (#63)", async () => {
+    const sam = await seed();
+    const alex = await seed(WESTERN, "Alex");
+    const third = await seed("+15555550123", "Kim");
+    // Alex: everything seen and decided; texted most recently.
+    await t.db.update(consoleMessages).set({ seenAt: now, seenBy: "Yanni" }).where(eq(consoleMessages.testerId, alex.tester.id));
+    await t.db.update(suggestions).set({ decision: "approved", decidedBy: "Yanni", decidedAt: now }).where(eq(suggestions.testerId, alex.tester.id));
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: WESTERN, content: "newest text", createdAt: at("2026-11-10", "11:00") });
+    // Kim: both alerts seen, the suggestion still waiting: it counts on its own.
+    await t.db.update(consoleMessages).set({ seenAt: now, seenBy: "Yanni" }).where(eq(consoleMessages.testerId, third.tester.id));
+    const res = await get("/console", cookieFor("Yanni"));
+    const order = ["Sam", "Kim", "Alex"].map((n) => res.body.indexOf(`<strong style="font-size:16px">${n}</strong>`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    // Sam and Kim need a look (Sam texted later), Alex doesn't despite the newest text.
+    expect(order[0]).toBeLessThan(order[1]!);
+    expect(order[1]).toBeLessThan(order[2]!);
+    const badge = (name: string) => res.body.slice(res.body.indexOf(`>${name}</strong>`)).match(/<span class="badge"[^>]*>(\d+)</)?.[1];
+    expect(badge("Sam")).toBe("2"); // two unseen alerts; the waiting suggestion's alert is one of them
+    expect(badge("Kim")).toBe("1"); // the waiting suggestion, its alert already seen
+    expect(res.body.slice(res.body.indexOf(">Alex</strong>")).split("</a>")[0]).not.toContain('class="badge"');
+    void sam;
+  });
+
+  it("shows a header and four tabs; Console has the chat, Alerts and Pending, and no alerts in the chat (#63)", async () => {
     const s = await seed();
+    await t.db.insert(consoleMessages).values({ testerId: s.tester.id, kind: "founder", author: "Yanni", body: "how is she doing?", createdAt: at("2026-11-10", "10:00") });
     const res = await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"));
     expect(res.statusCode).toBe(200);
     const page = res.body;
-    // Texts
-    expect(page).toContain("Page 40, nice.");
-    // Memory
-    expect(page).toContain("Sam (the tester)");
-    expect(page).toContain("Has a dog named Max");
-    // Metrics: focus streak and hit rate; maintenance proven, then self-reported
-    expect(page).toContain("Streak 2 (since 2026-10-26)");
-    expect(page).toContain("Proven through 2026-10-23, self-reported since · last confirmed 2026-11-09");
-    // Plan versions, the deepen waiting for review
-    expect(page).toContain("v3");
-    expect(page).toContain("15 pages of Dune");
-    expect(page).toContain("deepen");
-    expect(page).toContain("needs review");
-    // Step log with the proof photo behind the media proxy
-    expect(page).toContain("read on the train");
-    expect(page).toContain("Dune open at page 40");
-    expect(page).toContain(`/console/media/${s.photoId}`);
-    // Suggestions and alerts
-    expect(page).toContain("20 pages a night");
-    expect(page).toContain("Two weeks without a miss");
-    expect(page).toContain("Plan version 3 to review");
-    // Masked number only
+    for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
+    // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
+    expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
+    expect(page).toContain("Focus: <strong>Daily reading</strong>");
+    expect(page).toContain("🔥 2</b>");
+    const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
+    const below = page.slice(page.indexOf('<div id="side"'));
+    expect(chat).toContain("how is she doing?");
+    // The coach's suggestion is a card in the chat, with its buttons…
+    expect(chat).toContain("20 pages a night");
+    expect(chat).toContain('value="approved"');
+    // …and under Pending; the alerts only below the chat.
+    expect(below).toContain("Pending suggestions");
+    expect(below).toContain("20 pages a night");
+    expect(below).toContain("Plan version 3 to review");
+    expect(chat).not.toContain("Plan version 3 to review");
+    expect(chat).not.toContain("A next step is waiting");
+    // No suggestion form any more: founders ask ZOH in the chat.
+    expect(page).not.toContain("Suggest a next step yourself");
     expect(page).not.toContain(ME);
   });
 
-  it("escapes what testers write", async () => {
+  it("shows texts, memory, metrics, plan versions, proofs and past suggestions on their tabs", async () => {
+    const s = await seed();
+    const tab = async (name: string) => {
+      const res = await get(`/console/testers/${s.tester.id}?tab=${name}`, cookieFor("Yanni"));
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain(`aria-current="page">${name[0]!.toUpperCase()}${name.slice(1)}`);
+      expect(res.body).not.toContain(ME);
+      return res.body;
+    };
+    const texts = await tab("texts");
+    expect(texts).toContain("Page 40, nice.");
+    expect(texts).toContain(`/console/media/${s.photoId}`);
+    const memory = await tab("memory");
+    expect(memory).toContain("Sam (the tester)");
+    expect(memory).toContain("Has a dog named Max");
+    const progress = await tab("progress");
+    // Metrics: focus streak and hit rate; maintenance proven, then self-reported
+    expect(progress).toContain("Streak 2 (since 2026-10-26)");
+    expect(progress).toContain("Proven through 2026-10-23, self-reported since · last confirmed 2026-11-09");
+    // Plan versions, the deepen waiting for review
+    expect(progress).toContain("v3");
+    expect(progress).toContain("15 pages of Dune");
+    expect(progress).toContain("deepen");
+    expect(progress).toContain("needs review");
+    // Step log with the proof photo behind the media proxy
+    expect(progress).toContain("read on the train");
+    expect(progress).toContain("Dune open at page 40");
+    expect(progress).toContain(`/console/media/${s.photoId}`);
+    // An unknown tab is the console.
+    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
+  });
+
+  it("escapes what testers write, on the page and in live updates", async () => {
     const s = await seed();
     await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "<script>alert(1)</script>", createdAt: at("2026-11-10", "09:00") });
-    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
-    expect(page).not.toContain("<script>alert(1)</script>");
-    expect(page).toContain("&lt;script&gt;");
+    await t.db.insert(memoryFacts).values({ pageId: (await t.db.select().from(memoryPages).where(eq(memoryPages.testerId, s.tester.id)))[0]!.id, testerId: s.tester.id, text: "<img src=x onerror=alert(2)>" });
+    await t.db.insert(consoleMessages).values({ testerId: s.tester.id, kind: "coach", author: "zoh", body: "<b>bold</b>", createdAt: at("2026-11-10", "09:30") });
+    const bodies = [
+      (await get(`/console/testers/${s.tester.id}?tab=texts`, cookieFor("Yanni"))).body,
+      (await get(`/console/testers/${s.tester.id}?tab=memory`, cookieFor("Yanni"))).body,
+      (await get(`/console/testers/${s.tester.id}?tab=console`, cookieFor("Yanni"))).body,
+      (await get(`/console/testers/${s.tester.id}/updates?thread=0&texts=0`, cookieFor("Yanni"))).body,
+    ];
+    for (const body of bodies) {
+      expect(body).not.toContain("<script>alert(1)</script>");
+      expect(body).not.toContain("<img src=x");
+      expect(body).not.toContain("<b>bold</b>");
+    }
+    expect(bodies[0]).toContain("&lt;script&gt;");
+    expect(bodies[1]).toContain("&lt;img src=x");
+    expect(bodies[2]).toContain("&lt;b&gt;bold");
+  });
+
+  it("loads texts and the chat in chunks, newest first, and older ones on request (#63)", async () => {
+    const s = await seed();
+    const start = at("2026-11-03", "08:00").getTime();
+    await t.db.insert(messages).values(
+      Array.from({ length: 120 }, (_, i) => ({ direction: "inbound" as const, contactNumber: ME, content: `text number ${i}`, createdAt: new Date(start + i * 60_000) })),
+    );
+    // 2 seeded texts on Nov 2, then 120 more: the newest 50 show first.
+    const page = (await get(`/console/testers/${s.tester.id}?tab=texts`, cookieFor("Yanni"))).body;
+    expect(page).toContain("text number 119<");
+    expect(page).toContain("text number 70<");
+    expect(page).not.toContain("text number 69<");
+    const before = page.match(/data-kind="texts" data-before="(\d+)"/)![1]!;
+    expect(Number(before)).toBe(start + 70 * 60_000);
+    const older = (await get(`/console/testers/${s.tester.id}/texts?before=${before}`, cookieFor("Yanni"))).json() as { html: string; before: string | null };
+    // At or before the edge: the edge text repeats (the page drops it), then the next 49 older.
+    expect(older.html).toContain("text number 70<");
+    expect(older.html).toContain("text number 21<");
+    expect(older.html).not.toContain("text number 20<");
+    expect(older.html.indexOf("text number 21<")).toBeLessThan(older.html.indexOf("text number 70<"));
+    const oldest = (await get(`/console/testers/${s.tester.id}/texts?before=${older.before}`, cookieFor("Yanni"))).json() as { html: string; before: string | null };
+    expect(oldest.html).toContain("text number 0<");
+    expect(oldest.html).toContain("Page 40, nice.");
+    expect(oldest.before).toBeNull();
+
+    // The chat works the same way.
+    await t.db.insert(consoleMessages).values(
+      Array.from({ length: 60 }, (_, i) => ({ testerId: s.tester.id, kind: "founder" as const, author: "Yanni", body: `line ${i}`, createdAt: new Date(start + i * 60_000) })),
+    );
+    const chat = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    expect(chat).toContain("line 59<");
+    expect(chat).not.toContain("line 9<");
+    const threadBefore = chat.match(/data-kind="thread" data-before="(\d+)"/)![1]!;
+    const olderChat = (await get(`/console/testers/${s.tester.id}/thread?before=${threadBefore}`, cookieFor("Yanni"))).json() as { html: string };
+    expect(olderChat.html).toContain("line 0<");
+  });
+
+  it("live updates carry only what's new, and the thinking line while ZOH answers (#63)", async () => {
+    const s = await seed();
+    const after = at("2026-11-10", "11:00").getTime();
+    type Chunk = { html: string; after: string };
+    type Updates = { thread: Chunk; texts: Chunk; thinking: string; side: { sig: string; html: string } };
+    const updates = async () => (await get(`/console/testers/${s.tester.id}/updates?thread=${after}&texts=${after}`, cookieFor("Yanni"))).json() as Updates;
+    const quiet = await updates();
+    expect(quiet.thread.html).toBe("");
+    expect(quiet.texts.html).toBe("");
+    expect(quiet.thinking).toBe("");
+    expect(quiet.side.html).toContain("Plan version 3 to review");
+    await t.db.insert(consoleMessages).values({ testerId: s.tester.id, kind: "founder", author: "Stamati", body: "anything new?", createdAt: at("2026-11-10", "11:59") });
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "on my way", createdAt: at("2026-11-10", "11:58") });
+    const fresh = await updates();
+    expect(fresh.thread.html).toContain("anything new?");
+    expect(fresh.thread.html).not.toContain("20 pages a night");
+    expect(fresh.texts.html).toContain("on my way");
+    expect(fresh.texts.html).not.toContain("Page 40");
+    expect(Number(fresh.thread.after)).toBe(at("2026-11-10", "11:59").getTime());
+    expect(fresh.thinking).toBe("ZOH is thinking…");
+    // Seeing an alert changes the section (and its signature).
+    await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/seen`, {}, cookieFor("Yanni"));
+    expect((await updates()).side.sig).not.toBe(fresh.side.sig);
   });
 
   it("a jumped dev account's page runs on their clock and says how far ahead it is (#14)", async () => {
@@ -330,10 +468,26 @@ describe("deciding next steps", () => {
     const [row] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
     expect(row).toMatchObject({ decision: "rejected", decidedBy: "Yanni", decisionReason: "Too soon" });
     expect(await suggestionsForCoach(t.db, s.tester.id)).toEqual([]);
+    // The second founder (deciding from a page that still showed it waiting) sees why, on the page.
     const again = await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Stamati"));
     expect(again.statusCode).toBe(409);
+    expect(again.body).toContain("Not saved: Already rejected by Yanni.");
     const [still] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
     expect(still).toMatchObject({ decision: "rejected", decidedBy: "Yanni" });
+    // Decided shows in the chat card; it's gone from Pending.
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
+    expect(chat).toContain("rejected by Yanni");
+    expect(chat).not.toContain('value="approved"');
+    expect(page.slice(page.indexOf('<div id="side"'))).not.toContain("20 pages a night");
+  });
+
+  it("decides from the Pending list the same way, back on the Console tab (#63)", async () => {
+    const s = await seed();
+    const res = await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved", reason: "ok" }, cookieFor("Stamati"));
+    expect(res.headers.location).toBe(`/console/testers/${s.tester.id}?tab=console#pending`);
+    const [row] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
+    expect(row).toMatchObject({ decision: "approved", decidedBy: "Stamati", decisionReason: "ok" });
   });
 
   it("never gives the coach a waiting one, or another tester's", async () => {
@@ -345,18 +499,11 @@ describe("deciding next steps", () => {
     expect((await post(`/console/testers/${s.tester.id}/suggestions/${other.suggestionId}/decide`, { decision: "rejected" }, cookieFor("Yanni"))).statusCode).toBe(409);
   });
 
-  it("saves a founder's own suggestion as approved by them", async () => {
+  it("has no suggestion form any more: founders' own next steps go through the chat (#63)", async () => {
     const s = await seed();
-    const res = await post(
-      `/console/testers/${s.tester.id}/suggestions`,
-      { goal: "reading", kind: "new_focus", newGoal: "bedtime", proposal: "Same bedtime every night", reasoning: "Reads late, sleeps badly" },
-      cookieFor("Stamati"),
-    );
-    expect(res.statusCode).toBe(303);
-    const mine = (await suggestionsForCoach(t.db, s.tester.id))[0];
-    expect(mine).toMatchObject({ raisedBy: "founder", raisedByName: "Stamati", decision: "approved", decidedBy: "Stamati", kind: "new_focus", newGoalSlug: "bedtime" });
-    expect((await post(`/console/testers/${s.tester.id}/suggestions`, { goal: "reading", kind: "new_focus", proposal: "x" }, cookieFor("Stamati"))).statusCode).toBe(400);
-    expect((await post(`/console/testers/${s.tester.id}/suggestions`, { goal: "knitting", kind: "deepen", proposal: "x" }, cookieFor("Stamati"))).statusCode).toBe(400);
+    const res = await post(`/console/testers/${s.tester.id}/suggestions`, { goal: "reading", kind: "deepen", proposal: "x" }, cookieFor("Stamati"));
+    expect(res.statusCode).toBe(404);
+    expect(await suggestionsForCoach(t.db, s.tester.id)).toEqual([]);
   });
 });
 

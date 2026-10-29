@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
-import { testerPage } from "../src/console/data.js";
+import { testerHeader } from "../src/console/data.js";
 import { engagement, metricsPage, retention, rollup, testerMetrics, weekStart } from "../src/console/metrics.js";
 import { TOOL_RULES } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
@@ -148,7 +148,7 @@ describe("Metrics page", () => {
   it("shows the same streak and hit rate as the tester page", async () => {
     const sam = await seedSam();
     const m = await testerMetrics(t.db, sam, now);
-    const page = await testerPage(t.db, sam.id, now);
+    const page = await testerHeader(t.db, sam.id, now);
     const focus = page!.goals.find((g) => g.goal.role === "focus")!;
     expect(m.hitRate).toEqual(focus.hitRate);
     expect(m.streak).toEqual(focus.current);

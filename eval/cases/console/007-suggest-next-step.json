@@ -1,0 +1,40 @@
+{
+  "id": "suggest-next-step",
+  "title": "A founder asks for a clear next step in the chat; ZOH files it and confirms what and which goal in a line",
+  "origin": "Spec #63 (founder console upgrade): founders suggest next steps by telling ZOH in the chat, no form",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "10 pages of a novel", "where": "bed", "when": "9:30 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "10 pages done, this book is getting good" },
+      { "from": "zoh", "text": "Two weeks straight, Maya. Love that it's pulling you in 📖" }
+    ],
+    "plan": {
+      "step": "10 pages before bed",
+      "place": "bed",
+      "time": "21:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page she's on",
+      "reason": "Ten pages a night, in bed, phone away.",
+      "minutes": 20,
+      "started_days_ago": 14
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 2, "status": "done" }, { "days_ago": 3, "status": "done" },
+      { "days_ago": 4, "status": "done" }, { "days_ago": 5, "status": "done" }, { "days_ago": 6, "status": "done" },
+      { "days_ago": 7, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "console Yanni: she's crushing the reading. let's deepen it to 15 pages a night, same time",
+    "advance to 09:05"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the console's new suggest-a-next-step ability.",
+  "shouldHaveHappened": "ZOH files the next step (a deepen on her reading goal: 15 pages a night, same time) and confirms to Yanni in a line or two: what it filed and for which goal, and that it'll bring it up as its own idea when it fits. No questions back: the goal and kind were clear. Nothing to Maya says the team asked for it.",
+  "startTime": "08:50",
+  "timeZone": "America/New_York"
+}
