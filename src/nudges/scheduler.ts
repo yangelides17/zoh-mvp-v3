@@ -28,6 +28,7 @@ import {
   REPLY_IN_PROGRESS_MS,
   REQUEST_CARRYING_MOMENTS,
   serviceDate,
+  SKIPPABLE_MOMENTS,
   zonedTime,
   type DueNudge,
   type NudgeCarry,
@@ -235,7 +236,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     );
     deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
   } else if (decision.action === "send") {
-    await send(deps, tester, decision.nudge, now);
+    await send(deps, tester, decision.nudge, now, undefined, lastInboundAt);
   }
   return decision;
 }
@@ -304,6 +305,17 @@ async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, da
   // The slip ladder counts misses on this version of the plan: reworking it starts fresh.
   const sinceLock = plan?.lockedAt ? serviceDate(plan.lockedAt, tester) : undefined;
   const recent = plan ? (await loadRecentDays(db, tester, date)).filter((d) => !sinceLock || d.date >= sinceLock) : [];
+  const [dailies] = await db
+    .select({ n: count() })
+    .from(nudges)
+    .where(
+      and(
+        eq(nudges.testerId, tester.id),
+        eq(nudges.kind, "daily"),
+        eq(nudges.status, "sent"),
+        lastInboundAt ? gt(nudges.createdAt, lastInboundAt) : undefined,
+      ),
+    );
   const [dayThree] = await db
     .select({ at: max(nudges.createdAt) })
     .from(nudges)
@@ -322,6 +334,7 @@ async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, da
     stallsSinceReply: stalls?.n ?? 0,
     missesInARow: summarizeDays(recent, []).missesInARow,
     lastDayThreeAt: dayThree?.at ? new Date(dayThree.at) : undefined,
+    dailiesSinceReply: dailies?.n ?? 0,
   };
 }
 
@@ -433,8 +446,18 @@ async function carryFor(db: Db, tester: Tester, nudge: DueNudge, now: Date): Pro
   return goal ? { checkinGoal: goal } : undefined;
 }
 
-/** Claims the slot, has the coach write it, sends it and records it. `given`: what it carries (a manual nudge), instead of working it out. */
-async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, now: Date, given?: NudgeCarry): Promise<void> {
+/**
+ * Claims the slot, has the coach write it, sends it and records it. `given`: what it carries (a manual nudge), instead of
+ * working it out. `lastInboundAt`: their latest text; one from today lets the coach skip a kickoff it already covered (#42).
+ */
+async function send(
+  deps: NudgeSchedulerDeps,
+  tester: Tester,
+  nudge: DueNudge,
+  now: Date,
+  given?: NudgeCarry,
+  lastInboundAt?: Date,
+): Promise<void> {
   const { db, log } = deps;
   const ctx = { contact: maskNumber(tester.phone), kind: nudge.kind };
   if (!deps.sendblue || !deps.replier?.nudge) return;
@@ -446,17 +469,34 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
   // Another tick (or the app before a restart) has this slot.
   if (!claim) return;
 
-  let text: string;
+  let text: string | null;
   let carry: NudgeCarry | undefined;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
     carry = given ?? (await carryFor(db, tester, nudge, now));
-    text = await deps.replier.nudge({ tester, turns: toTurns(history, "", {}), now, moment: nudge.moment, previous, ...(carry ? { carry } : {}) });
+    // A kickoff that carries something has its own job, so it always goes.
+    const textedToday = lastInboundAt !== undefined && lastInboundAt >= zonedTime(nudge.date, "00:00", tester.timeZone);
+    const mayskip = textedToday && !carry && SKIPPABLE_MOMENTS.includes(nudge.moment);
+    text = await deps.replier.nudge({
+      tester,
+      turns: toTurns(history, "", {}),
+      now,
+      moment: nudge.moment,
+      previous,
+      ...(carry ? { carry } : {}),
+      ...(mayskip ? { mayskip } : {}),
+    });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.
     await db.delete(nudges).where(eq(nudges.id, claim.id));
     log.error({ ...ctx, err: safeError(err) }, "Writing a nudge failed; will retry next tick");
+    return;
+  }
+  // Today's conversation already said it: the slot is used up, nothing goes out.
+  if (text === null) {
+    await db.update(nudges).set({ status: "skipped" }).where(eq(nudges.id, claim.id));
+    log.info(ctx, "Nudge skipped: today's conversation already covered it");
     return;
   }
 

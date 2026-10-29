@@ -71,6 +71,13 @@
       "when": 1793247310186,
       "tag": "0009_test_mode_jumps",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793292891229,
+      "tag": "0010_nosy_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

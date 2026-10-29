@@ -94,10 +94,13 @@ export class FakeReplier implements Replier {
   nudges: NudgeRequest[] = [];
   /** Thrown one per nudge call, in order, before any nudge succeeds. */
   nudgeFailures: Error[] = [];
+  /** Skip every nudge it's allowed to skip (#42), as the coach does when the morning already covered it. */
+  skipWhenAllowed = false;
   async nudge(input: NudgeRequest) {
     this.nudges.push(input);
     const next = this.nudgeFailures.shift();
     if (next) throw next;
+    if (input.mayskip && this.skipWhenAllowed) return null;
     return `Yo, ${input.moment} text`;
   }
   async check() {}

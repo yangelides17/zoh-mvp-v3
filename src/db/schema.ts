@@ -467,6 +467,8 @@ export const stepDays = pgTable(
     movedTime: text("moved_time"),
     /** When they said they were doing it or about to: skips that day's check-in. */
     onItAt: timestamp("on_it_at", { withTimezone: true }),
+    /** When they said yes to this day's step (or moved it): it's settled, so the coach doesn't re-say it (#42). */
+    agreedAt: timestamp("agreed_at", { withTimezone: true }),
     /** What they did, in a few words. */
     note: text("note"),
     /** The coach's verdict on the latest proof for this day. */
@@ -485,7 +487,8 @@ export const stepDays = pgTable(
   ],
 );
 
-export const NUDGE_STATUSES = ["claimed", "sent", "failed"] as const;
+/** "skipped": the coach found the morning's conversation already covered the kickoff (#42); nothing was sent. */
+export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped"] as const;
 
 /**
  * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
@@ -510,7 +513,7 @@ export const nudges = pgTable(
   },
   (t) => [
     unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
-    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed')`),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped')`),
   ],
 );
 

@@ -18,8 +18,8 @@
       "place": "the couch",
       "time": "19:00",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-      "proof": "photo",
-      "proof_note": "the page you stop on",
+      "proof": "voice",
+      "proof_note": "a quick voice note saying where you stopped",
       "reason": "Ten pages a night builds the habit without eating your evening.",
       "minutes": 20,
       "started_days_ago": 4
@@ -30,8 +30,8 @@
       { "days_ago": 3, "status": "done" }
     ]
   },
-  "testerLines": ["advance to 09:00", "ugh yeah yesterday got away from me", "advance to 18:50", "done, all 10 pages", "advance to 21:59"],
-  "whatWentWrong": "New case, not a past mistake: the day after a miss.",
+  "testerLines": ["advance to 09:00", "ugh yeah yesterday got away from me", "advance to 18:50", "[voice: Ten pages of Dune done on the couch, I stopped right where Paul meets the Fremen] done, all 10 pages", "advance to 21:59"],
+  "whatWentWrong": "New case, not a past mistake: the day after a miss. Since proof (#7), \"done\" without a photo isn't a check mark, so the done text now carries the proof (a voice note, which the coach can judge from its words).",
   "shouldHaveHappened": "A morning kickoff that names yesterday's slip without guilt (one miss is a slip, not two) and pushes a little harder than usual for the full ten pages of Dune at 7, with at most a smaller version as the fallback. The reply to \"yesterday got away from me\" accepts it once, warmly, and turns straight to tonight. A short check-in around 6:50. \"done, all 10 pages\" gets a real, specific celebration. Nothing after that.",
   "startTime": "08:30",
   "timeZone": "America/New_York"

@@ -36,6 +36,9 @@ const TUE = "2026-11-03";
 const WED = "2026-11-04";
 const THU = "2026-11-05";
 const FRI = "2026-11-06";
+const SAT = "2026-11-07";
+const SUN2 = "2026-11-08";
+const MON2 = "2026-11-09";
 const at = (date: string, hhmm: string) => zonedTime(date, hhmm, TZ);
 
 const silent: Logger = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
@@ -649,16 +652,40 @@ describe("the slip ladder", () => {
     expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
   });
 
-  it("a reply after the day-3 check-in keeps the one text a day going instead of a pause", async () => {
+  it("a reply after the day-3 check-in, then silence: the ladder repeats, then pause and flag (#41)", async () => {
     const tester = await setup();
     await day(MON, "09:00", "22:05");
     await day(TUE, "09:00", "22:05");
     await day(WED, "09:00", "22:05");
     expect(await day(THU, "09:00", "19:00")).toEqual(["day_three@18:50"]);
-    await say(tester, "inbound", at(THU, "19:10"), "yeah I still want this");
+    await say(tester, "inbound", at(THU, "19:10"), "yeah yeah");
     await say(tester, "outbound", at(THU, "19:10"), "Then let's go. Tomorrow, full ten.");
     expect(await day(THU, "19:15", "22:05")).toEqual([]);
+    // Two daily texts with no reply, then the honest check-in again, handed the first one to read differently.
     expect(await day(FRI, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SAT, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SUN2, "09:00", "22:05")).toEqual(["day_three@18:50"]);
+    expect(t.replier.nudges.at(-1)!.previous).toBe("Yo, day_three text");
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+    // No reply to that one either: no text on the next step day; paused and flagged.
+    expect(await day(MON2, "09:00", "22:05")).toEqual([]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).not.toBeNull();
+    expect(await t.db.select().from(flags).where(eq(flags.kind, "went_quiet"))).toHaveLength(1);
+  });
+
+  it("a reply between the daily texts starts the count over (#41)", async () => {
+    const tester = await setup();
+    await day(MON, "09:00", "22:05");
+    await day(TUE, "09:00", "22:05");
+    await day(WED, "09:00", "22:05");
+    await day(THU, "09:00", "19:00");
+    await say(tester, "inbound", at(THU, "19:10"), "yeah yeah");
+    expect(await day(FRI, "09:00", "19:00")).toEqual(["one_a_day@18:50"]);
+    await say(tester, "inbound", at(FRI, "19:10"), "tomorrow for real");
+    expect(await day(FRI, "19:15", "22:05")).toEqual([]);
+    expect(await day(SAT, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SUN2, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(MON2, "09:00", "22:05")).toEqual(["day_three@18:50"]);
     expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
   });
 
@@ -678,6 +705,77 @@ describe("the slip ladder", () => {
     expect(await tool("change_plan", { step: "5 pages of Dune", time: "21:00" }, at(WED, "08:00"))).toMatchObject({ ok: true });
     // Wednesday (untouched) is the new plan's first miss: Thursday is "after a miss", not day 3.
     expect(await day(THU, "09:00", "21:55")).toEqual(["after_miss@09:00", "checkin@20:50", "followup@21:50"]);
+  });
+});
+
+describe("a kickoff the morning already covered (#42)", () => {
+  const sentKinds = async () =>
+    (await t.db.select().from(nudges).orderBy(asc(nudges.createdAt))).map((r) => `${r.kind}:${r.status}`);
+
+  it("no text from them today: the kickoff goes as usual, with no skip offered", async () => {
+    await setup();
+    t.replier.skipWhenAllowed = true;
+    expect(await day(MON, "09:00", "09:30")).toEqual(["kickoff@09:00"]);
+    expect(t.replier.nudges[0]!.mayskip).toBeUndefined();
+    expect(t.sendblue.sends).toHaveLength(1);
+  });
+
+  it("they texted this morning and the coach skips: nothing sent, no kickoff later, check-in and follow-up still go", async () => {
+    const tester = await setup();
+    t.replier.skipWhenAllowed = true;
+    await say(tester, "inbound", at(MON, "08:10"), "Yep! 7 tonight");
+    await say(tester, "outbound", at(MON, "08:10"), "Love it.");
+    await day(MON, "09:00", "21:59");
+    expect(t.replier.nudges[0]).toMatchObject({ moment: "kickoff", mayskip: true });
+    expect(await sentKinds()).toEqual(["kickoff:skipped", "checkin:sent", "followup:sent"]);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Yo, checkin text", "Yo, followup text"]);
+    // The check-in and follow-up are never offered the skip.
+    expect(t.replier.nudges.slice(1).map((n) => n.mayskip)).toEqual([undefined, undefined]);
+  });
+
+  it("they texted but the coach writes it: the kickoff goes", async () => {
+    const tester = await setup();
+    await say(tester, "inbound", at(MON, "08:10"), "rough night lol");
+    expect(await day(MON, "09:00", "09:30")).toEqual(["kickoff@09:00"]);
+    expect(t.replier.nudges[0]!.mayskip).toBe(true);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Yo, kickoff text"]);
+  });
+
+  it("the kickoff after a miss can be skipped once they've texted that day", async () => {
+    const tester = await setup();
+    await day(MON, "09:00", "22:05");
+    t.replier.skipWhenAllowed = true;
+    await say(tester, "inbound", at(TUE, "08:30"), "I know I missed yesterday. Ready to go today");
+    await day(TUE, "09:00", "09:30");
+    expect(t.replier.nudges.at(-1)).toMatchObject({ moment: "after_miss", mayskip: true });
+    expect((await sentKinds()).at(-1)).toBe("kickoff:skipped");
+  });
+
+  it("a yes to today's step is saved and the state says it's settled, until it's done", async () => {
+    const tester = await setup({ days: ["mon", "wed", "fri"] });
+    await updateTester(t.db, tester.id, { phase: "active" });
+    expect(await tool("mark_agreed", {}, at(MON, "10:00"))).toMatchObject({ ok: true });
+    expect(await stepDay(tester, MON)).toMatchObject({ agreedAt: at(MON, "10:00") });
+    const block = async () =>
+      buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "20:00"), isFirstText: false }));
+    expect(await block()).toContain("They said yes to today's step (Mon 10:00 AM): it's settled.");
+    await doneWithPhoto("full", at(MON, "19:30"));
+    expect(await block()).not.toContain("They said yes to today's step");
+    // A rest day has nothing to agree to.
+    expect(await tool("mark_agreed", {}, at(TUE, "10:00"))).toMatchObject({ ok: false });
+  });
+
+  it("moving today's time counts as agreeing to it", async () => {
+    const tester = await setup();
+    await tool("move_today", { time: "20:30" }, at(MON, "12:00"));
+    expect(await stepDay(tester, MON)).toMatchObject({ movedTime: "20:30", agreedAt: at(MON, "12:00") });
+  });
+
+  it("a text from yesterday doesn't count: no skip offered", async () => {
+    const tester = await setup();
+    await say(tester, "inbound", at(SUN, "21:00"), "see you tomorrow");
+    await day(MON, "09:00", "09:30");
+    expect(t.replier.nudges[0]!.mayskip).toBeUndefined();
   });
 });
 

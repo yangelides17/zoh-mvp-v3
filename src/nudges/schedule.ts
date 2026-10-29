@@ -54,6 +54,9 @@ export const CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_che
 /** What a kickoff carries besides the step, in place of its question (spec #9, rules 2 and 7; spec #10, 4). */
 export type NudgeCarry = { suggestionId: string } | { checkinGoal: string } | { requestId: string };
 
+/** Morning kickoffs the coach may skip when today's conversation already covered them (#42). */
+export const SKIPPABLE_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin", "after_miss"];
+
 /** Morning texts that can carry a founder's request: the kickoffs, and the rest-day text. */
 export const REQUEST_CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin", "rest_day"];
 
@@ -81,6 +84,8 @@ export interface NudgeInput {
   missesInARow?: number;
   /** When the latest day-3 check-in went out. */
   lastDayThreeAt?: Date;
+  /** Slip-ladder daily texts ZOH sent since their last text (#41). */
+  dailiesSinceReply?: number;
 }
 
 export interface DueNudge {
@@ -160,8 +165,11 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     if (input.claimedToday.includes("daily") || at < from || at >= day.end) return none("no slot open");
     // No reply since the day-3 check-in, through the next step day's slot: stop and flag.
     const { lastDayThreeAt: dayThree, lastInboundAt } = input;
-    if (misses > DAY_THREE_MISSES && dayThree && !(lastInboundAt && lastInboundAt > dayThree)) return { action: "pause", date };
-    return { action: "send", nudge: { kind: "daily", moment: misses === DAY_THREE_MISSES ? "day_three" : "one_a_day", date } };
+    const answered = dayThree !== undefined && lastInboundAt !== undefined && lastInboundAt > dayThree;
+    if (misses > DAY_THREE_MISSES && dayThree && !answered) return { action: "pause", date };
+    // Answered, then quiet again: the ladder repeats from their reply (#41), two daily texts and then the check-in.
+    const again = answered && (input.dailiesSinceReply ?? 0) >= DAY_THREE_MISSES - 1;
+    return { action: "send", nudge: { kind: "daily", moment: misses === DAY_THREE_MISSES || again ? "day_three" : "one_a_day", date } };
   }
 
   if (!isStepDay(plan, date, today)) {

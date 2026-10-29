@@ -1,0 +1,33 @@
+{
+  "id": "owned-the-miss",
+  "title": "Texts first to own yesterday's miss and say today's on: no after-miss kickoff",
+  "origin": "Issue #42, Yanni at planning: \"Hey, I know I missed yesterday. I'm ready to go today\" makes the kickoff pointless",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "push-ups", "where": "the living room", "when": "7 am", "how_long": "15 min" },
+    "history": [{ "from": "zoh", "text": "Hey Sam, no word on the push-ups today. How'd it go?" }],
+    "plan": {
+      "step": "30 push-ups",
+      "place": "the living room",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a pic after the last set",
+      "reason": "Thirty a day builds real strength in a month.",
+      "minutes": 15,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "missed" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "testerLines": ["Hey, I know I missed yesterday. I'm ready to go today, 30 push-ups at 6", "advance to 11:00"],
+  "whatWentWrong": "New case for #42: the after-miss kickoff was the one morning text that couldn't be skipped.",
+  "shouldHaveHappened": "ZOH answers warmly, without guilt about yesterday, and holds them to today's 30 push-ups at 6 (one miss is a slip, not two). No after-miss kickoff goes out at 9 am or later that morning: Sam already owned the miss and settled today's plan.",
+  "startTime": "08:20",
+  "timeZone": "America/New_York"
+}
