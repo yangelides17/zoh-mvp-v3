@@ -40,6 +40,11 @@ touched eval cases once both are on `main`.
    `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/main`,
    `cd` into it and run `npm install`. Do everything below from there.
    `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
+   **Check for overlap again** (the plan's check may be days old): for each other open PR, compare
+   `gh pr diff <pr> --name-only` with the files the plan touches. If both change the database, `src/coach/prompt.ts`,
+   `docs/coach-voice.md` or `src/pipeline/inbound.ts`, tell Yanni and post a `Decision:` comment on which lands first
+   (two migrations collide: the later one regenerates its migration after the first merges). Note smaller overlaps
+   under the PR's risks.
 3. Open a **draft PR** early (`gh pr create --draft`, body from `.github/pull_request_template.md`, first line
    `Closes #$ARGUMENTS`) and push as you go, so Yanni can watch progress.
 4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
