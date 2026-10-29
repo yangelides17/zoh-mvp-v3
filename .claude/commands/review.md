@@ -29,8 +29,7 @@ number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has th
    `git worktree prune`), bring the main folder up to date (`git -C <main folder> pull --ff-only`; if it isn't on a
    clean `main`, skip this and say so), then
    `gh issue edit $ARGUMENTS --add-label done --remove-label in-review`. Railway deploys `main` in a couple of minutes.
-6. **Record the Watch list:** add it as unticked boxes under a `### <title> (#$ARGUMENTS, PR #<pr>)` heading in the body
-   of the open `live-check` issue, "Live checks to do" (`gh issue list --label live-check`; create it with that label
-   if it's missing), via `gh issue edit <n> --body-file`. Done doesn't wait for these.
-7. When Yanni reports a live check: tick it if it's good. Anything wrong becomes a new issue (`--label bug`) and,
-   for the coach, a regression case in `eval/cases/`; tick the box and link the bug.
+6. **Leave the Watch list on the issue:** `gh issue comment $ARGUMENTS` with "**Live checks** (not done yet; try these
+   on a phone when there's time):" and the list, so anyone can come back to it. Done doesn't wait for these.
+7. If Yanni later reports a live check that went wrong, it becomes a new issue (`--label bug`) and, for the coach,
+   a regression case in `eval/cases/`.
