@@ -28,7 +28,8 @@ issue, and write **one** plan with these extra parts:
 
 1. `gh issue view $ARGUMENTS --comments`. It must have the `spec-approved` label; if not, stop and say `/spec` comes first.
 2. Read `CLAUDE.md`, `docs/coach-voice.md` (if ZOH's words are involved) and the code the feature touches. Check
-   what else is in flight: `gh issue list --label building` and `gh pr list`, and note any files you'd both touch.
+   what else is in flight: `gh issue list --label plan-approved`, the same with `--label building`, and `gh pr list`.
+   Note any files you'd both touch, naming each overlap by issue number and title.
 3. Write the plan in plain words, short enough to read in two minutes (a group may take a little longer):
    - **Approach:** how it works, in a few sentences.
    - **Changes:** the modules and files, and any database change (one migration at most, for a group too).

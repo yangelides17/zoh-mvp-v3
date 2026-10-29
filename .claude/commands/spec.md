@@ -22,7 +22,9 @@ own spec in its own body (small bugs can be a few lines: what's wrong, what shou
 
 1. **Get context, quietly.** Read `CLAUDE.md` and `docs/coach-voice.md`. Run `gh issue list --state all --limit 50`
    to see what exists. If `$ARGUMENTS` is an issue number, read it with `gh issue view`. Skim the code only as far
-   as you need to know what already exists.
+   as you need to know what already exists. If an issue already in progress (`spec-approved` through `in-review`)
+   changes the same moment for testers (the same nudge, the same step of onboarding), say so and ask Yanni how the
+   two should fit together.
 2. **Talk it through.** Ask Yanni the questions that change what gets built, one or two at a time, and offer your
    recommendation with each. He cares about what the tester experiences and how ZOH sounds, not code details.
 3. **Draft the spec** in this shape. It must fit on one screen; leave out sections that don't apply.

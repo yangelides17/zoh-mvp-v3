@@ -78,6 +78,10 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 - **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session. Each
   build works in its own copy of the repo (a git worktree in `../zoh-worktrees/`), so parallel builds never
   trip over each other; Claude creates and removes these, you don't need to do anything.
+- **Overlapping work is checked at every step.** `/spec` flags a feature in progress that changes the same moment
+  for testers, `/plan` and `/build` name open work that touches the same files (a database or coach-prompt overlap
+  gets a decision on which lands first), and `/review` only merges a branch that's up to date with `main`, then tells
+  other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
 - **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself. Each change runs only the cases it touches
