@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNull, or } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, max, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { pauses, type Pause, type PauseEndReason, type Tester } from "../db/schema.js";
 import { raiseAlert } from "../console/alerts.js";
@@ -64,6 +64,12 @@ export async function endPause(db: Db, testerId: string, opts: { at: Date; by: P
     });
   }
   return ended;
+}
+
+/** When their latest pause ended: their silence counts from then, not from their last text before the break. */
+export async function lastPauseEnd(db: Db, testerId: string): Promise<Date | undefined> {
+  const [row] = await db.select({ at: max(pauses.endedAt) }).from(pauses).where(eq(pauses.testerId, testerId));
+  return row?.at ? new Date(row.at) : undefined;
 }
 
 /** Their end date has come: the pause lifts once that day's quiet hours are over. */

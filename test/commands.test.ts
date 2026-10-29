@@ -152,6 +152,19 @@ describe("pause", () => {
     const [row] = await t.db.select().from(pauses).where(eq(pauses.testerId, tester.id));
     expect(row).toMatchObject({ endedBy: "end_date", until: TUE });
     expect(await alerts("resume")).toHaveLength(1);
+    // Their silence counts from the pause's end, not their last text before the break.
+    expect(await alerts("quiet")).toHaveLength(0);
+  });
+
+  it("lifting on its end date during onboarding picks up where it left off, without a went-quiet pause", async () => {
+    const tester = await setup();
+    await t.db.update(testers).set({ phase: "onboarding" }).where(eq(testers.id, tester.id));
+    await t.db.delete(plans).where(eq(plans.testerId, tester.id));
+    await tool("pause_texts", { reason: "moving house", back_on: THU }, at(SUN, "20:00"));
+    await ticks(MON, "08:00", "21:55");
+    expect(await ticks(THU, "08:55", "12:00")).toEqual(["stall"]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+    expect(await alerts("went_quiet")).toHaveLength(0);
   });
 
   it("refuses an end date that isn't after today", async () => {

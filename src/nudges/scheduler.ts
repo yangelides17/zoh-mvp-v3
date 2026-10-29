@@ -9,7 +9,7 @@ import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
 import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
-import { activePause, endPause, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
+import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
 import { insideQuietHours } from "../coach/state.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
@@ -174,9 +174,12 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date)));
   const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
+  // A break they asked for isn't silence: it counts from when the pause ended.
+  const pauseEndedAt = await lastPauseEnd(db, tester.id);
+  const heardAt = pauseEndedAt && (!lastInboundAt || pauseEndedAt > lastInboundAt) ? pauseEndedAt : lastInboundAt;
   // Two whole days without a word from them, after the plan is locked: one alert per silence.
-  if (plan && !tester.stoppedAt && !pause && lastInboundAt) {
-    const lastDay = serviceDate(lastInboundAt, tester);
+  if (plan && !tester.stoppedAt && !pause && heardAt) {
+    const lastDay = serviceDate(heardAt, tester);
     if (addDays(lastDay, QUIET_ALERT_DAYS) <= date) {
       await raiseAlert(db, {
         testerId: tester.id,
@@ -253,6 +256,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     claimedToday: claimed.map((c) => c.kind),
     lastInboundAt,
     lastOutboundAt,
+    pauseEndedAt,
     nudgesSinceReply: started?.n ?? 0,
     stallsSinceReply: stalls?.n ?? 0,
     missesInARow: summarizeDays(recent, []).missesInARow,
