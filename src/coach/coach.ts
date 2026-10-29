@@ -189,7 +189,8 @@ export function createCoach(opts: CoachOptions): Replier {
           .map((b) => b.text)
           .join("\n")
           .trim();
-        const skipped = text.replace(/[^A-Z]/g, "") === SKIP;
+        // Starts with SKIP: a reason tacked on after it ("SKIP. Alex already agreed") must never reach them.
+        const skipped = new RegExp(`^\\W*${SKIP}\\b`).test(text);
         if (skipped && mayskip) return null;
         // SKIP when it wasn't offered counts as no text: retried, never sent and never dropped.
         if (text && !skipped) return text;

@@ -437,6 +437,8 @@ describe("skipping a kickoff (#42)", () => {
 
     model.script("SKIP");
     expect(await coach.nudge!({ ...ask, mayskip: true })).toBeNull();
+    model.script("SKIP. Alex already said yes at 8:10.");
+    expect(await coach.nudge!({ ...ask, mayskip: true })).toBeNull();
     expect(lastNote()).toContain("answer only SKIP");
 
     model.script("SKIP", "Hey! Ten pages at 7 tonight.");
