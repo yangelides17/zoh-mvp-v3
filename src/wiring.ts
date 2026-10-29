@@ -13,6 +13,7 @@ import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js
 import type { Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
+import { createJumper } from "./testers/jump.js";
 
 /**
  * Everything the app needs, built from config the way production runs it.
@@ -31,7 +32,7 @@ export function appDeps(
   const pick = <K extends keyof AppDeps["pipeline"]>(key: K, make: () => AppDeps["pipeline"][K]): AppDeps["pipeline"][K] =>
     key in overrides ? (overrides[key] as AppDeps["pipeline"][K]) : make();
 
-  return {
+  const deps: AppDeps = {
     pipeline: {
       ...overrides,
       db,
@@ -58,6 +59,18 @@ export function appDeps(
     },
     ...extra,
   };
+  // Test mode (#14): a jump runs one tester's nudge tick, memory pass and summary, as the app's own would.
+  deps.jumper ??= (log) =>
+    createJumper({
+      db,
+      log,
+      sendblue: deps.pipeline.sendblue,
+      nudger: nudgeSchedulerFor(deps, log, config.sendblue.number),
+      keeper: memoryKeeperFor(config, deps, log),
+      consoleJobs: consoleJobsFor(config, deps, log),
+      now: deps.pipeline.now,
+    });
+  return deps;
 }
 
 /** The nudge tick over the same database, Sendblue client, coach, allowed numbers and clock as the app. */

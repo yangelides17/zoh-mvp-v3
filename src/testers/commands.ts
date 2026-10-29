@@ -41,3 +41,50 @@ export async function optOut(db: Db, tester: Tester, at: Date, how = "texted sto
   await alertStop(db, tester.id, at, how);
   return stopped;
 }
+
+/** Test mode (#14): what a dev account's "jump" asks for. */
+export type JumpTarget =
+  | { kind: "by"; ms: number }
+  /** The next time it's this local "HH:MM". */
+  | { kind: "at"; hhmm: string }
+  /** Wherever ZOH next texts. */
+  | { kind: "next" }
+  | { kind: "invalid" };
+
+/** The longest jump (spec #14, rule 5). */
+export const MAX_JUMP_MS = 14 * 24 * 60 * 60_000;
+
+export const JUMP_USAGE = "⏩ Try: jump 3h, jump 2d, jump 7:30am or jump next (up to 14 days).";
+
+/**
+ * Dev accounts only: "jump", or "jump" then one target ("next" or something starting with a digit).
+ * "Jump rope done" stays an ordinary text.
+ */
+export function isJumpText(text: string | null | undefined): boolean {
+  return /^jump(\s+(next|\d.*))?$/.test(text?.trim().toLowerCase() ?? "");
+}
+
+/** "jump 3h", "jump 2d", "jump 7:30am", "jump 19:30", "jump next". Anything else, or past 14 days, is invalid. */
+export function parseJump(text: string): JumpTarget {
+  const arg = text.trim().toLowerCase().replace(/^jump\s*/, "");
+  if (arg === "next") return { kind: "next" };
+  const by = /^(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|d|day|days)$/.exec(arg);
+  if (by) {
+    const ms = Number(by[1]) * (by[2]!.startsWith("d") ? 24 : 1) * 60 * 60_000;
+    return ms > 0 && ms <= MAX_JUMP_MS ? { kind: "by", ms } : { kind: "invalid" };
+  }
+  const twelve = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/.exec(arg);
+  if (twelve) {
+    const h = Number(twelve[1]);
+    const m = Number(twelve[2] ?? 0);
+    if (h < 1 || h > 12 || m > 59) return { kind: "invalid" };
+    return { kind: "at", hhmm: `${pad((h % 12) + (twelve[3] === "pm" ? 12 : 0))}:${pad(m)}` };
+  }
+  const day = /^(\d{1,2}):(\d{2})$/.exec(arg);
+  if (day && Number(day[1]) < 24 && Number(day[2]) < 60) return { kind: "at", hhmm: `${pad(Number(day[1]))}:${day[2]}` };
+  return { kind: "invalid" };
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}

@@ -1,10 +1,11 @@
+import { eq } from "drizzle-orm";
 import type { FastifyBaseLogger } from "fastify";
 import { NoReplyTextError, type Turn, type Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, updateMessage } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import type { Message, Tester } from "../db/schema.js";
+import { messages, type Message, type Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
 import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
@@ -13,6 +14,7 @@ import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
 import { alertFailure, alertUnstop } from "../console/alerts.js";
 import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
+import { jumpSettled, onTesterClock, testerNow } from "../testers/clock.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
 
 export type Logger = Pick<FastifyBaseLogger, "info" | "warn" | "error" | "debug">;
@@ -51,8 +53,9 @@ export interface PipelineDeps {
  * Handles one stored inbound message: tester lookup and commands ("stop", "reset"),
  * typing indicator, media copy and transcription, a reply from the coach (or the fallback), then the send.
  */
-export async function processInbound(deps: PipelineDeps, inbound: Message): Promise<void> {
+export async function processInbound(deps: PipelineDeps, stored: Message): Promise<void> {
   const now = deps.now ?? (() => new Date());
+  let inbound = stored;
   const { db, log } = deps;
   const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
   const started = now();
@@ -69,6 +72,9 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   const commands = await runCommands(deps, inbound);
   if (commands.handled) return;
   const tester = commands.tester;
+  inbound = commands.inbound;
+  // The tester's own clock: real time, unless a dev account has jumped ahead (#14).
+  const clock = () => testerNow(tester, now());
 
   if (!deps.sendblue) {
     log.warn(ctx, "Sendblue keys are not configured; cannot reply");
@@ -110,12 +116,12 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
       try {
         // Reloaded each attempt: a failed attempt may already have saved answers or moved the tester on.
         const current = (attempt > 1 && (await getTester(db, tester.id))) || tester;
-        const history = await coachHistory(db, current, now(), COACH_HISTORY_CAP);
+        const history = await coachHistory(db, current, clock(), COACH_HISTORY_CAP);
         const turns = toTurns(history, inbound.id, { transcript, image });
         replyText = await replier.reply({
           tester: current,
           turns,
-          now: now(),
+          now: clock(),
           messageId: inbound.id,
           onUsage: (u) => {
             timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
@@ -158,10 +164,11 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
   await typing;
   try {
     const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content: replyText });
-    const sentAt = now();
-    timings.reply_sent_at = sentAt.toISOString();
+    const realSentAt = now();
+    const sentAt = testerNow(tester, realSentAt);
+    timings.reply_sent_at = realSentAt.toISOString();
     if (inbound.sentAt) timings.received_to_reply_sent_ms = sentAt.getTime() - inbound.sentAt.getTime();
-    timings.processing_ms = sentAt.getTime() - started.getTime();
+    timings.processing_ms = realSentAt.getTime() - started.getTime();
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
@@ -170,6 +177,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
       status: sent.status ?? null,
       inReplyTo: inbound.id,
       sentAt,
+      createdAt: onTesterClock(tester, sentAt),
       raw: sent.raw as object,
     });
   } catch (err) {
@@ -183,6 +191,7 @@ export async function processInbound(deps: PipelineDeps, inbound: Message): Prom
       status: "SEND_FAILED",
       error: errorMessage(err),
       inReplyTo: inbound.id,
+      createdAt: onTesterClock(tester, clock()),
     });
     if (deps.typingIndicator) await sendblue.sendTypingIndicator(inbound.contactNumber, "stop");
   }
@@ -232,15 +241,22 @@ async function describeMedia(
  */
 async function runCommands(
   deps: PipelineDeps,
-  inbound: Message,
-): Promise<{ handled: true } | { handled: false; tester: Tester }> {
+  stored: Message,
+): Promise<{ handled: true } | { handled: false; tester: Tester; inbound: Message }> {
   const { db, log } = deps;
-  const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
-  const at = inbound.createdAt;
-  let tester = await getOrCreateTester(db, inbound.contactNumber, {
-    firstTextAt: at,
-    isTestUser: deps.devNumbers.includes(inbound.contactNumber),
+  const ctx = { messageId: stored.id, contact: maskNumber(stored.contactNumber) };
+  let tester = await getOrCreateTester(db, stored.contactNumber, {
+    firstTextAt: stored.createdAt,
+    isTestUser: deps.devNumbers.includes(stored.contactNumber),
   });
+  // A text that arrives mid-jump waits for it, then lands on the moved clock (#14).
+  let inbound = stored;
+  if (tester.isTestUser) {
+    await jumpSettled(tester.id);
+    tester = (await getTester(db, tester.id)) ?? tester;
+    inbound = await stampOnTesterClock(db, tester, stored, (deps.now ?? (() => new Date()))());
+  }
+  const at = inbound.createdAt;
 
   // Texting again lifts the pause ZOH put on its own texts after a silence.
   if (tester.autoTextsPausedAt) {
@@ -252,12 +268,15 @@ async function runCommands(
     await optOut(db, tester, at);
     log.info(ctx, "Tester opted out");
     // Sendblue blocks this too until they text again (issue "Sendblue's own STOP opt-out"): no failure alert.
-    await sendCommandReply(deps, inbound, OPT_OUT_CONFIRMATION);
+    await sendCommandReply(deps, inbound, OPT_OUT_CONFIRMATION, tester);
     return { handled: true };
   }
 
   if (tester.isTestUser && isResetText(inbound.content)) {
+    const moved = tester.clockOffsetMs;
     tester = await resetTester(db, tester, at);
+    // Back on real time: this text moved back with the rest of their history.
+    if (moved) inbound = (await db.select().from(messages).where(eq(messages.id, inbound.id)))[0] ?? inbound;
     log.info(ctx, "Dev account reset; starting fresh");
   } else if (tester.stoppedAt) {
     tester = await updateTester(db, tester.id, { stoppedAt: null });
@@ -273,11 +292,22 @@ async function runCommands(
       }
     }
   }
-  return { handled: false, tester };
+  return { handled: false, tester, inbound };
+}
+
+/**
+ * Test mode (#14): a text from a dev account whose clock has jumped is stamped on that clock, so it
+ * sits after everything the jump sent. Everyone else's texts keep the times they were stored with.
+ */
+async function stampOnTesterClock(db: Db, tester: Tester, inbound: Message, real: Date): Promise<Message> {
+  if (!tester.clockOffsetMs) return inbound;
+  const at = testerNow(tester, real);
+  const [row] = await db.update(messages).set({ createdAt: at, sentAt: at }).where(eq(messages.id, inbound.id)).returning();
+  return row ?? inbound;
 }
 
 /** Sends a fixed reply (no typing bubble, no Claude) and records it. */
-async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: string): Promise<void> {
+async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: string, tester: Tester): Promise<void> {
   const { db, log } = deps;
   const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
   if (!deps.sendblue) {
@@ -293,7 +323,8 @@ async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: s
       sendblueHandle: sent.messageHandle ?? null,
       status: sent.status ?? null,
       inReplyTo: inbound.id,
-      sentAt: (deps.now ?? (() => new Date()))(),
+      sentAt: testerNow(tester, (deps.now ?? (() => new Date()))()),
+      createdAt: onTesterClock(tester, testerNow(tester, (deps.now ?? (() => new Date()))())),
       raw: sent.raw as object,
     });
     await updateMessage(db, inbound.id, { status: "REPLIED", error: null });
@@ -306,6 +337,7 @@ async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: s
       status: "SEND_FAILED",
       error: errorMessage(err),
       inReplyTo: inbound.id,
+      createdAt: onTesterClock(tester, testerNow(tester, (deps.now ?? (() => new Date()))())),
     });
     await updateMessage(db, inbound.id, { status: "REPLIED_WITH_ERRORS", error: `send: ${errorMessage(err)}` });
   }

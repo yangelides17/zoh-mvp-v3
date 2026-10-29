@@ -4,6 +4,8 @@ import { normalizePhone } from "../config.js";
 import { insertInboundOnce, updateStatusByHandle } from "../db/messages.js";
 import { processInbound, maskNumber, type PipelineDeps } from "../pipeline/inbound.js";
 import type { TaskQueue } from "../pipeline/task-queue.js";
+import { isJumpText } from "../testers/commands.js";
+import type { Jumper } from "../testers/jump.js";
 import { sendblueMessageEvent } from "../sendblue/webhook-payload.js";
 
 /** Sendblue sends the configured secret verbatim in this header. */
@@ -13,6 +15,7 @@ export interface WebhookRouteOptions {
   webhookSecret?: string;
   pipeline: PipelineDeps;
   queue: TaskQueue;
+  jumper?: Jumper;
 }
 
 export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOptions): Promise<void> {
@@ -56,6 +59,16 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
     const contact = normalizePhone(event.number ?? event.from_number ?? "");
     if (!contact) return reply.code(202).send({ ignored: "no sender number" });
     const line = event.sendblue_number ?? event.to_number;
+
+    // Test mode (#14): a dev account's "jump" is a ghost: never stored as a message, run in the background.
+    const { devNumbers, allowedNumbers } = opts.pipeline;
+    if (opts.jumper && !event.media_url && isJumpText(event.content) && devNumbers.includes(contact) && allowedNumbers.includes(contact)) {
+      const jump = await opts.jumper.start({ contact, text: event.content!.trim(), handle: event.message_handle });
+      if (!jump) return reply.code(200).send({ ok: true, duplicate: true });
+      opts.queue.run(() => jump.done);
+      request.log.info({ contact: maskNumber(contact) }, "Jump started");
+      return reply.code(200).send({ ok: true, jump: true });
+    }
 
     const inbound = await insertInboundOnce(db, {
       contactNumber: contact,

@@ -19,6 +19,9 @@ import * as schema from "../src/db/schema.js";
 import type { MediaFetcher, MediaStore } from "../src/media/storage.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
+import { createNudgeScheduler } from "../src/nudges/scheduler.js";
+import type { Logger } from "../src/pipeline/inbound.js";
+import { createJumper } from "../src/testers/jump.js";
 
 export const SECRET = "test-webhook-secret";
 export const ME = "+19085550100";
@@ -195,14 +198,20 @@ export interface TestApp extends Awaited<ReturnType<typeof buildApp>> {
 }
 
 export async function makeApp(
-  overrides: Partial<AppDeps["pipeline"]> & { webhookSecret?: string | null; console?: AppDeps["console"]; consoleCoach?: AppDeps["consoleCoach"] } = {},
+  overrides: Partial<AppDeps["pipeline"]> & {
+    webhookSecret?: string | null;
+    console?: AppDeps["console"];
+    consoleCoach?: AppDeps["consoleCoach"];
+    /** Test mode (#14): wire "jump" to a nudge scheduler on the same fakes and clock. */
+    jumps?: boolean;
+  } = {},
 ): Promise<TestApp> {
   const { db } = await makeDb();
   const sendblue = new FakeSendblue();
   const replier = new FakeReplier();
   const media = new FakeMedia();
   const transcriber = new FakeTranscriber();
-  const { webhookSecret, console: consoleConfig, consoleCoach, ...pipelineOverrides } = overrides;
+  const { webhookSecret, console: consoleConfig, consoleCoach, jumps, ...pipelineOverrides } = overrides;
   const built = await buildApp({
     pipeline: {
       db,
@@ -221,6 +230,18 @@ export async function makeApp(
     console: consoleConfig,
     consoleCoach,
     missingSettings: () => [],
+    ...(jumps
+      ? {
+          jumper: (log: Logger) =>
+            createJumper({
+              db,
+              log,
+              sendblue,
+              nudger: createNudgeScheduler({ db, log, sendblue, replier, allowedNumbers: [], lineNumber: LINE, now: pipelineOverrides.now }),
+              now: pipelineOverrides.now,
+            }),
+        }
+      : {}),
   });
   return {
     ...built,

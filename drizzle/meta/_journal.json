@@ -64,6 +64,13 @@
       "when": 1793244865893,
       "tag": "0008_pauses",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793247310186,
+      "tag": "0009_test_mode_jumps",
+      "breakpoints": true
     }
   ]
 }

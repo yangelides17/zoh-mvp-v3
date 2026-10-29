@@ -12,6 +12,7 @@ import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
 import { SUGGESTION_KINDS, testers } from "../db/schema.js";
+import { testerNow } from "../testers/clock.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
 import type { TaskQueue } from "../pipeline/task-queue.js";
@@ -73,6 +74,12 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       return handler(request, reply, session.name);
     };
 
+  /** A tester's own clock (#14: a dev account's may have jumped ahead); real time for an unknown id. */
+  const nowFor = async (testerId: string): Promise<Date> => {
+    const [row] = await opts.db.select({ clockOffsetMs: testers.clockOffsetMs }).from(testers).where(eq(testers.id, testerId));
+    return row ? testerNow(row, clock()) : clock();
+  };
+
   const back = (reply: FastifyReply, testerId: string, hash: string) => reply.redirect(`/console/testers/${encodeURIComponent(testerId)}#${hash}`, 303);
 
   app.get("/console", page(async (_request, reply, name) => {
@@ -87,9 +94,10 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
 
   app.get("/console/testers/:id", page(async (request, reply, name) => {
     if (!isUuid(request.params.id)) return html(reply, "Not found", 404);
-    const data = await testerPage(opts.db, request.params.id, clock());
+    const now = await nowFor(request.params.id);
+    const data = await testerPage(opts.db, request.params.id, now);
     if (!data) return html(reply, "Not found", 404);
-    return html(reply, testerView(data, name, clock()));
+    return html(reply, testerView(data, name, now));
   }));
 
   app.post<{ Body: Form }>("/console/login", async (request, reply) => {
@@ -116,7 +124,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.post("/console/testers/:id/alerts/:aid/seen", action(async (request, reply, name) => {
     const { id, aid } = request.params;
     if (!isUuid(id) || !isUuid(aid)) return reply.code(404).send({ error: "not found" });
-    const alert = await markAlertSeen(opts.db, { testerId: id, alertId: aid, by: name, at: clock() });
+    const alert = await markAlertSeen(opts.db, { testerId: id, alertId: aid, by: name, at: await nowFor(id) });
     if (!alert) return reply.code(404).send({ error: "not found" });
     return back(reply, id, "console");
   }));
@@ -127,7 +135,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     const decision = parseDecision(request.body ?? {});
     if (!decision) return reply.code(400).send({ error: "a decision (and, for a change, a kind and proposal) is needed" });
     try {
-      await decideSuggestion(opts.db, { testerId: id, suggestionId: sid, by: name, at: clock(), ...decision });
+      await decideSuggestion(opts.db, { testerId: id, suggestionId: sid, by: name, at: await nowFor(id), ...decision });
     } catch (err) {
       if (err instanceof SuggestionError) return reply.code(409).send({ error: err.message });
       throw err;
@@ -151,7 +159,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
         reasoning: body.reasoning,
         newGoalSlug: body.newGoal || undefined,
         by: name,
-        at: clock(),
+        at: await nowFor(id),
       });
     } catch (err) {
       if (err instanceof SuggestionError) return reply.code(400).send({ error: err.message });
@@ -170,19 +178,19 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!body || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters is needed` });
     const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
     if (!tester) return reply.code(404).send({ error: "not found" });
-    const now = clock();
+    const now = testerNow(tester, clock());
     const exact = request.body?.exact === "on";
     const { needsAnswer } = await postFounderMessage(opts.db, { tester, founder: name, body, exact, sendNow: exact && request.body?.sendNow === "on", now });
     if (needsAnswer) {
       const answer = async () => {
         try {
           if (!opts.chat) throw new Error("The console coach isn't set up (no Claude key).");
-          await opts.chat.answer(id, clock());
+          await opts.chat.answer(id, await nowFor(id));
         } catch (err) {
           request.log.error({ err: safeError(err) }, "Console coach failed");
           const why = err instanceof Error && err.message.startsWith("The console coach") ? err.message : "Sorry, I couldn't answer that just now. Try again?";
           // ZOH's line, so it counts as the answer and the page stops waiting.
-          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: clock() });
+          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: await nowFor(id) });
         }
       };
       if (opts.queue) opts.queue.run(answer);
@@ -194,7 +202,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.post("/console/testers/:id/requests/:rid/cancel", action(async (request, reply) => {
     const { id, rid } = request.params;
     if (!isUuid(id) || !isUuid(rid)) return reply.code(404).send({ error: "not found" });
-    const row = await cancelRequest(opts.db, { testerId: id, requestId: rid, at: clock() });
+    const row = await cancelRequest(opts.db, { testerId: id, requestId: rid, at: await nowFor(id) });
     if (!row) return reply.code(409).send({ error: "not pending any more" });
     return back(reply, id, "chat");
   }));

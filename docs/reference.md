@@ -81,6 +81,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   and saves a verdict and a line on what it saw on the day. No proof, no done. Photos stay in the
   bucket; voice-note audio is deleted 30 days after it arrived (hourly job), transcripts stay.
   Proof-gaming flags are saved only.
+- Test mode (#14): a dev number texts `jump 3h`, `jump 2d`, `jump 7:30am` or `jump next`, and that
+  tester's own clock (`testers.clock_offset_ms`) walks forward in 5-minute steps, running their
+  nudges, day closes, memory pass and Sunday summary on the way; then one ⏩ log line. The jump
+  text and log line are never stored as messages (each jump is a row in `jumps`). Only a jumped
+  tester's rows are stamped with their clock; everyone else's keep the database's time. `reset`
+  goes back to real time and moves their kept history back with it. The walk itself never calls
+  Claude; only the texts it sends (and memory for days they texted) do.
 - The launch plan doc is the source for timeline and strategy. The coach voice page in Yanni's
   Business Ideas doc is an older copy; `docs/coach-voice.md` is the real one.
 

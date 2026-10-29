@@ -57,7 +57,7 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
   `src/app.ts`: Fastify app built from injected dependencies.
 - `src/routes/`: HTTP routes (`/health`, `/webhooks/sendblue`).
 - `src/pipeline/inbound.ts`: what happens to each inbound text (tester, commands, media, coach, send).
-- `src/testers/`: testers, goals, "stop" and dev-account "reset". `src/coach/`: the coach's prompt,
+- `src/testers/`: testers, goals, "stop", dev-account "reset" and test-mode "jump" (#14). `src/coach/`: the coach's prompt,
   state and tools.
 - `src/memory/`: coach memory (#8): the store (pages, facts, links, search), the 3 am pass that
   files each day, photo descriptions, and `npm run memory -- <last 4>` to read a tester's pages.
