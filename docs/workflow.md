@@ -27,15 +27,15 @@ Start Claude Code in the repo folder. Everything below happens there.
 
 ## The flow
 
-Each feature goes through five steps. You're needed at the two approvals, the merge and the live check.
+Each feature goes through four steps, plus a live check whenever you get to it. You're needed at the two approvals and the merge.
 
 | Step | Command | Who | Result |
 | --- | --- | --- | --- |
 | 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
 | 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
-| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it deploys in about 2 minutes (`live-check`), and Claude cleans up the branch and worktrees and updates your main folder. |
-| 5. Live check | | You | Try the spec's Watch list on your phone. Good: `done`. Not good: Claude files a `bug`. |
+| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it deploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and adds the Watch list to "Live checks to do". |
+| Live check | | You, any time | Try the boxes on "Live checks to do" (the one `live-check` issue) on your phone. Good: tick it. Not good: Claude files a `bug`. Nothing waits on these. |
 
 Each command checks that the step before it is done, and ends by naming the next one, so the order
 takes care of itself.
@@ -53,15 +53,16 @@ You never need an issue number. Every command takes a number, a description, or 
 | `/idea <a sentence or two>` | Files a new idea (or `bug`, if something's broken) as an issue to spec later, without speccing it now. |
 | `/plan` · `/plan the nudges one` · `/plan 12` | With nothing, lists approved specs waiting for a plan. |
 | `/build` · `/build plan agreement` · `/build 12` | With nothing, lists approved plans waiting to be built. |
-| `/review` · `/review nudges` · `/review 12` | With nothing, lists PRs waiting for review and merged work waiting for your live check. |
+| `/review` · `/review nudges` · `/review 12` | With nothing, lists PRs waiting for review. |
 
 Outside the commands, just talk normally: "file a bug: the recap was too long", "what did the build
 decide about time zones?", "mark #12 done".
 
 ## Labels
 
-`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `live-check` → `done`,
-plus `decide` (a question waiting for Yes / Later / No) and `bug`.
+`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge),
+plus `decide` (a question waiting for Yes / Later / No) and `bug`. `live-check` is only on "Live checks to do",
+the running list of phone checks.
 
 ## Good habits
 

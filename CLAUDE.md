@@ -9,15 +9,16 @@ they approve specs and plans, say "merge", and test on their phones.
 
 ## How we build
 GitHub Issues hold every feature, bug and idea. A label says where it stands:
-`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `live-check` → `done`
-(plus `decide` for Yes / Later / No questions and `bug`).
+`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge)
+(plus `decide` for Yes / Later / No questions and `bug`). Phone checks don't hold anything up: each merged PR's
+Watch list goes on the one open `live-check` issue, "Live checks to do", to try when there's time.
 
 One feature, one flow, using the commands in `.claude/commands/`:
 1. `/spec <idea>`: shape it with Yanni; the approved spec becomes the issue. **Gate 1.**
 2. `/plan <n>`: read the code, propose the build; the approved plan is posted on the issue. **Gate 2.**
 3. `/build <n>`: build on `feature/<n>-<slug>`, tests first, draft PR early, eval if ZOH's words change.
 4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges when Yanni says so.
-5. Live check on Yanni's phone; problems become `bug` issues. `/status` shows the board anytime;
+5. Live checks on Yanni's phone whenever he gets to them (ticked on "Live checks to do"); problems become `bug` issues. `/status` shows the board anytime;
    `/idea` files a new idea or bug to spec later; `/quick` makes a small change on `main` with a record.
 
 Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch

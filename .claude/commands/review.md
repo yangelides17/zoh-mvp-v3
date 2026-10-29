@@ -8,8 +8,7 @@ Review the PR for issue **#$ARGUMENTS** with fresh eyes. Best run in a new sessi
 **Which issue?** `$ARGUMENTS` may be an issue number, a description ("the nudges one") or empty. If it isn't a
 number, run `gh issue list --state open --label in-review` and match the description to an issue; if it's empty or
 matches more than one, show those issues as a short numbered list and ask Yanni which one. Call the chosen
-number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `in-review` label, check `gh issue list --state closed --label live-check` too (for step 6; merged issues are closed), otherwise say nothing is
-waiting for review and stop.
+number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `in-review` label, say nothing is waiting for review and stop.
 
 1. `gh issue view $ARGUMENTS --comments` (spec, approved plan, decisions) and find the PR: `gh pr list --search "$ARGUMENTS"`.
    Read `gh pr view <pr>` and `gh pr diff <pr>`. To run the tests, check the branch out in its own worktree
@@ -29,6 +28,9 @@ waiting for review and stop.
    (`git worktree list`, then `git worktree remove --force <path>` for the review and build ones, and
    `git worktree prune`), bring the main folder up to date (`git -C <main folder> pull --ff-only`; if it isn't on a
    clean `main`, skip this and say so), then
-   `gh issue edit $ARGUMENTS --add-label live-check --remove-label in-review`. Railway deploys `main` in a couple of minutes.
-6. After Yanni's live check: if it's good, `gh issue edit $ARGUMENTS --add-label done --remove-label live-check`.
-   Anything wrong becomes a new issue (`--label bug`) and, for the coach, a regression case in `eval/cases/`.
+   `gh issue edit $ARGUMENTS --add-label done --remove-label in-review`. Railway deploys `main` in a couple of minutes.
+6. **Record the Watch list:** add it as unticked boxes under a `### <title> (#$ARGUMENTS, PR #<pr>)` heading in the body
+   of the open `live-check` issue, "Live checks to do" (`gh issue list --label live-check`; create it with that label
+   if it's missing), via `gh issue edit <n> --body-file`. Done doesn't wait for these.
+7. When Yanni reports a live check: tick it if it's good. Anything wrong becomes a new issue (`--label bug`) and,
+   for the coach, a regression case in `eval/cases/`; tick the box and link the bug.
