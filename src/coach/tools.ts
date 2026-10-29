@@ -764,7 +764,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "flag_back_off": {
       const { reason } = input as z.infer<typeof schemas.flag_back_off>;
-      await saveFlag(db, tester.id, BACK_OFF_FLAG, reason);
+      await saveFlag(db, tester.id, BACK_OFF_FLAG, reason, onTesterClock(tester, at));
       return saved(tester, "Saved for the founders. Still answer what they asked.");
     }
 
