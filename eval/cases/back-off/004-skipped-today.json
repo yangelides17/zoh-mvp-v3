@@ -1,0 +1,54 @@
+{
+  "id": "skipped-today",
+  "title": "A skipped day isn't a back-off request",
+  "origin": "Spec #13 (metrics), Should: back-off requests are flagged and answered with what the app can do",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": {
+      "what": "running",
+      "where": "the park by my place",
+      "when": "6 pm",
+      "how_long": "30 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?"
+      },
+      {
+        "from": "tester",
+        "text": "6 works"
+      }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Running every day builds the habit fast.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": [
+    "skipped today, too tired"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the back-off path.",
+  "shouldHaveHappened": "ZOH handles it as a slip (no guilt, a smaller version or tomorrow's step). No back_off flag, no pause, no stop.",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

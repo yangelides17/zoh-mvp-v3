@@ -33,6 +33,8 @@ export interface FeatureDef {
    * grader sees the pages it wrote. Only for features that grade memory: it costs a pass per day.
    */
   memory?: boolean;
+  /** The grader sees what ZOH saved during the conversation (flags, pauses, plan versions, style). */
+  saved?: boolean;
 }
 
 /** Applies to every feature: only judged on a regression case. */
@@ -253,6 +255,31 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "feedback",
         scope: "text",
         label: "Feedback is acknowledged naturally with thanks and \"the team's on it\" (in its own words), with no promise of a specific change",
+      },
+    ],
+  },
+  /** Metrics (#13): back-off requests are flagged and answered with what the app can do. Cases only. */
+  "back-off": {
+    name: "back-off",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    saved: true,
+    rubric: [
+      {
+        id: "flags-back-off",
+        scope: "conversation",
+        label: "The coach flags clear requests for fewer texts or less pushing (a pause or mute goes to the pause instead)",
+      },
+      {
+        id: "no-false-flag",
+        scope: "conversation",
+        label: "It doesn't flag misses, complaints about a step, or quiet-hours time changes",
+      },
+      {
+        id: "honest-offer",
+        scope: "text",
+        label:
+          "Fewer texts: it offers fewer step days or a lighter stretch, else thanks them and says the team's on it; it promises nothing the app can't do. \"Be less pushy\" still tones it down",
       },
     ],
   },
