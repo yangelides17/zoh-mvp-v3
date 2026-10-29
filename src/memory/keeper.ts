@@ -8,7 +8,8 @@ import { safeError } from "../errors.js";
 import { localDate } from "../coach/state.js";
 import { addDays, localClock, weekdayOf } from "../nudges/schedule.js";
 import { maskNumber, type Logger } from "../pipeline/inbound.js";
-import { updateTester } from "../testers/testers.js";
+import { isJumping, testerNow } from "../testers/clock.js";
+import { getTester, updateTester } from "../testers/testers.js";
 import { renderPage, renderTimeline } from "./render.js";
 import {
   addFact,
@@ -373,8 +374,10 @@ export interface MemoryKeeperDeps {
 }
 
 export interface MemoryKeeper {
-  /** One pass over every allowed tester; ticks never overlap. Returns the days written per tester. */
+  /** One pass over every allowed tester, each on their own clock; ticks never overlap. Returns the days written per tester. */
   tick(now?: Date): Promise<Map<string, string[]>>;
+  /** One tester at `now` on their clock, outside the ticks (a jump, #14). Returns the days written. */
+  tickTester(tester: Tester, now: Date): Promise<string[]>;
   start(intervalMs?: number): void;
   stop(): Promise<void>;
 }
@@ -391,20 +394,30 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
     const written = new Map<string, string[]>();
     if (!deps.model || deps.allowedNumbers.length === 0) return written;
     const rows = await deps.db.select().from(testers).where(inArray(testers.phone, deps.allowedNumbers));
-    for (const tester of rows) {
-      if ((retryAfter.get(tester.id) ?? 0) > now.getTime()) continue;
-      const ctx = { contact: maskNumber(tester.phone) };
-      for (const date of daysDue(tester, now)) {
-        try {
-          // Reloaded per day: the day before may have changed the tester's pages, never the row itself.
-          if (await writeDay(deps.db, deps.model, tester, date, now, deps.log)) written.set(tester.id, [...(written.get(tester.id) ?? []), date]);
-          await updateTester(deps.db, tester.id, { memoryThrough: date });
-          tester.memoryThrough = date;
-        } catch (err) {
-          deps.log.error({ ...ctx, date, err: safeError(err) }, "Memory pass failed; will retry in an hour");
-          retryAfter.set(tester.id, now.getTime() + RETRY_AFTER_MS);
-          break;
-        }
+    for (const row of rows) {
+      // Mid-jump, the jump runs this tester's pass itself (#14).
+      if (isJumping(row.id)) continue;
+      const tester = (row.isTestUser && (await getTester(deps.db, row.id))) || row;
+      const days = await forTester(tester, testerNow(tester, now));
+      if (days.length) written.set(tester.id, days);
+    }
+    return written;
+  }
+
+  async function forTester(tester: Tester, now: Date): Promise<string[]> {
+    const written: string[] = [];
+    if (!deps.model || (retryAfter.get(tester.id) ?? 0) > now.getTime()) return written;
+    const ctx = { contact: maskNumber(tester.phone) };
+    for (const date of daysDue(tester, now)) {
+      try {
+        // Reloaded per day: the day before may have changed the tester's pages, never the row itself.
+        if (await writeDay(deps.db, deps.model, tester, date, now, deps.log)) written.push(date);
+        await updateTester(deps.db, tester.id, { memoryThrough: date });
+        tester.memoryThrough = date;
+      } catch (err) {
+        deps.log.error({ ...ctx, date, err: safeError(err) }, "Memory pass failed; will retry in an hour");
+        retryAfter.set(tester.id, now.getTime() + RETRY_AFTER_MS);
+        break;
       }
     }
     return written;
@@ -415,6 +428,9 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
       const next = chain.then(() => run(now));
       chain = next.catch(() => undefined);
       return next;
+    },
+    tickTester(tester, now) {
+      return forTester(tester, now);
     },
     start(intervalMs = 60_000) {
       if (timer) return;

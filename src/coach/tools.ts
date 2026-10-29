@@ -37,6 +37,7 @@ import {
   stoppedTwice,
   suggestionRef,
 } from "./next-steps.js";
+import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, isStepDay } from "../nudges/schedule.js";
 import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
@@ -392,7 +393,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           return { ok: false, error: "something_else needs a description and accepted (true or false)" };
         }
         if (!accepted) {
-          await saveFlag(db, tester.id, OFF_LIST_GOAL_FLAG, description);
+          await saveFlag(db, tester.id, OFF_LIST_GOAL_FLAG, description, onTesterClock(tester, at));
           return saved(tester, `Declined and saved for the founders: ${description}. No goal set.`);
         }
       } else if (description !== undefined || accepted !== undefined) {
@@ -474,7 +475,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         await db.update(plans).set({ ...merged, updatedAt: at }).where(eq(plans.id, draft.id));
       } else {
         await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
-        await db.insert(plans).values({ testerId: tester.id, goalSlug: state.goal.slug, status: "draft", ...merged });
+        await db.insert(plans).values({ testerId: tester.id, goalSlug: state.goal.slug, status: "draft", ...merged, createdAt: onTesterClock(tester, at), updatedAt: onTesterClock(tester, at) });
       }
       return saved(tester, `Draft saved: ${describePlan(merged)}`);
     }
@@ -600,7 +601,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         const old = state.goal?.title ?? tester.goalSlug;
         return saved(updated, `${goal.title} is their focus now; ${old} carries on as maintenance (no nudges or proof, a light check-in now and then). Now agree its plan.`);
       }
-      await saveFlag(db, tester.id, GOAL_SWITCH_FLAG, `${tester.goalSlug} → ${slug}: ${reason}`);
+      await saveFlag(db, tester.id, GOAL_SWITCH_FLAG, `${tester.goalSlug} → ${slug}: ${reason}`, onTesterClock(tester, at));
       await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
       await db.insert(planInputs).values({ testerId: tester.id, goalSlug: slug }).onConflictDoNothing();
       await setFocusGoal(db, tester.id, slug, at, "dropped");
@@ -755,7 +756,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "flag_proof_pattern": {
       const { reason } = input as z.infer<typeof schemas.flag_proof_pattern>;
-      await saveFlag(db, tester.id, PROOF_PATTERN_FLAG, reason);
+      await saveFlag(db, tester.id, PROOF_PATTERN_FLAG, reason, onTesterClock(tester, at));
       return saved(tester, "Saved for the founders. Say nothing about it to them.");
     }
 

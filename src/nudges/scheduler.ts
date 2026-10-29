@@ -7,7 +7,7 @@ import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
+import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
@@ -16,7 +16,8 @@ import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
-import { updateTester } from "../testers/testers.js";
+import { isJumping, onTesterClock, testerNow } from "../testers/clock.js";
+import { getTester, updateTester } from "../testers/testers.js";
 import { summarizeDays } from "./streak.js";
 import {
   addDays,
@@ -31,6 +32,7 @@ import {
   type DueNudge,
   type NudgeCarry,
   type NudgeDecision,
+  type NudgeInput,
 } from "./schedule.js";
 
 export const WENT_QUIET_FLAG = "went_quiet";
@@ -60,8 +62,10 @@ export interface NudgeSchedulerDeps {
 }
 
 export interface NudgeScheduler {
-  /** One pass over every allowed tester; ticks never overlap. Returns each tester's decision. */
+  /** One pass over every allowed tester, each on their own clock; ticks never overlap. Returns each tester's decision. */
   tick(now?: Date): Promise<Map<string, NudgeDecision>>;
+  /** One tester at `now` on their clock, outside the ticks (a jump, #14: the ticks skip them meanwhile). */
+  tickTester(tester: Tester, now: Date): Promise<NudgeDecision>;
   start(intervalMs?: number): void;
   /** Stops the timer and waits for a running tick. */
   stop(): Promise<void>;
@@ -82,11 +86,15 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
     const decisions = new Map<string, NudgeDecision>();
     if (deps.allowedNumbers.length === 0) return decisions;
     const rows = await deps.db.select().from(testers).where(inArray(testers.phone, deps.allowedNumbers));
-    for (const tester of rows) {
+    for (const row of rows) {
+      // Mid-jump, the jump runs this tester's ticks itself (#14).
+      if (isJumping(row.id)) continue;
       try {
-        decisions.set(tester.id, await forTester(deps, tester, now));
+        // A dev account's clock may have moved since the rows were read.
+        const tester = (row.isTestUser && (await getTester(deps.db, row.id))) || row;
+        decisions.set(tester.id, await forTester(deps, tester, testerNow(tester, now)));
       } catch (err) {
-        deps.log.error({ contact: maskNumber(tester.phone), err: safeError(err) }, "Nudge tick failed for a tester");
+        deps.log.error({ contact: maskNumber(row.phone), err: safeError(err) }, "Nudge tick failed for a tester");
       }
     }
     return decisions;
@@ -97,6 +105,9 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
       const next = chain.then(() => run(now));
       chain = next.catch(() => undefined);
       return next;
+    },
+    tickTester(tester, now) {
+      return forTester(deps, tester, now);
     },
     start(intervalMs = DEFAULT_TICK_MS) {
       if (timer) return;
@@ -164,18 +175,8 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     }
   }
 
-  const [todayRow] = await db
-    .select()
-    .from(stepDays)
-    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, date)))
-    .limit(1);
-  const claimed = await db
-    .select({ kind: nudges.kind })
-    .from(nudges)
-    .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date)));
-  const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
-  // A break they asked for isn't silence: it counts from when the pause ended.
-  const pauseEndedAt = await lastPauseEnd(db, tester.id);
+  const input = await loadNudgeInput(db, tester, plan, date, now);
+  const { lastInboundAt, lastOutboundAt, pauseEndedAt } = input;
   const heardAt = pauseEndedAt && (!lastInboundAt || pauseEndedAt > lastInboundAt) ? pauseEndedAt : lastInboundAt;
   // Two whole days without a word from them, after the plan is locked: one alert per silence.
   if (plan && !tester.stoppedAt && !pause && heardAt) {
@@ -190,34 +191,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
       });
     }
   }
-  const midnight = zonedTime(date, "00:00", tester.timeZone);
-  const since = lastInboundAt && lastInboundAt > midnight ? lastInboundAt : midnight;
-  // The cap counts only texts ZOH started: chatting with ZOH never costs them a nudge.
-  const [started] = await db
-    .select({ n: count() })
-    .from(nudges)
-    .where(and(eq(nudges.testerId, tester.id), eq(nudges.status, "sent"), gte(nudges.createdAt, since)));
-  const [stalls] = await db
-    .select({ n: count() })
-    .from(nudges)
-    .where(
-      and(
-        eq(nudges.testerId, tester.id),
-        eq(nudges.kind, "stall"),
-        ne(nudges.status, "failed"),
-        lastInboundAt ? gt(nudges.createdAt, lastInboundAt) : undefined,
-      ),
-    );
-
-  // The slip ladder counts misses on this version of the plan: reworking it starts fresh.
-  const sinceLock = plan?.lockedAt ? serviceDate(plan.lockedAt, tester) : undefined;
-  const recent = plan ? (await loadRecentDays(db, tester, date)).filter((d) => !sinceLock || d.date >= sinceLock) : [];
-  const [dayThree] = await db
-    .select({ at: max(nudges.createdAt) })
-    .from(nudges)
-    .where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, "day_three"), eq(nudges.status, "sent")));
-
-  const unanswered = started?.n ?? 0;
+  const unanswered = input.nudgesSinceReply;
   const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
   // A request still pending past its too-late-after time is dropped with a note, never sent late.
   const blockedBy = tester.stoppedAt
@@ -248,7 +222,94 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     }
   }
 
-  const decision = dueNudge({
+  const decision = dueNudge(input);
+
+  if (decision.action === "pause") {
+    await updateTester(db, tester.id, { autoTextsPausedAt: now });
+    await saveFlag(
+      db,
+      tester.id,
+      WENT_QUIET_FLAG,
+      `No reply since ${lastInboundAt ? serviceDate(lastInboundAt, tester) : "their first text"} (phase ${tester.phase}); ZOH's own texts paused on ${decision.date}`,
+      onTesterClock(tester, now),
+    );
+    deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
+  } else if (decision.action === "send") {
+    await send(deps, tester, decision.nudge, now);
+  }
+  return decision;
+}
+
+/**
+ * Test mode (#14): when ZOH would next start a text after `from`, checked every `stepMs` on the
+ * nudge rules alone, assuming nothing changes meanwhile (a forecast: a reply or a missed day can
+ * move it). Founders' requests aren't counted, and a break they asked for means nothing is coming.
+ * Undefined when nothing comes before `until`.
+ */
+export async function forecastNudge(
+  db: Db,
+  tester: Tester,
+  from: Date,
+  until: Date,
+  stepMs: number,
+): Promise<{ at: Date; moment: string } | undefined> {
+  if (await activePause(db, tester.id)) return undefined;
+  const date = serviceDate(from, tester);
+  const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
+  const base = await loadNudgeInput(db, tester, plan, date, from);
+  for (let t = Math.floor(from.getTime() / stepMs) * stepMs + stepMs; t <= until.getTime(); t += stepMs) {
+    const now = new Date(t);
+    // A later day starts with nothing claimed and nothing sent since its midnight.
+    const later = serviceDate(now, tester) !== date ? { today: undefined, claimedToday: [], nudgesSinceReply: 0 } : {};
+    const decision = dueNudge({ ...base, ...later, now });
+    if (decision.action === "send") return { at: now, moment: decision.nudge.moment };
+    if (decision.action === "pause") return undefined;
+  }
+  return undefined;
+}
+
+/** What the nudge rules read for this tester at `now` (their local `date`), from saved state. */
+async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, date: string, now: Date): Promise<NudgeInput> {
+  const [todayRow] = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, date)))
+    .limit(1);
+  const claimed = await db
+    .select({ kind: nudges.kind })
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date)));
+  const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
+  // A break they asked for isn't silence: it counts from when the pause ended.
+  const pauseEndedAt = await lastPauseEnd(db, tester.id);
+  const midnight = zonedTime(date, "00:00", tester.timeZone);
+  const since = lastInboundAt && lastInboundAt > midnight ? lastInboundAt : midnight;
+  // The cap counts only texts ZOH started: chatting with ZOH never costs them a nudge.
+  const [started] = await db
+    .select({ n: count() })
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.status, "sent"), gte(nudges.createdAt, since)));
+  const [stalls] = await db
+    .select({ n: count() })
+    .from(nudges)
+    .where(
+      and(
+        eq(nudges.testerId, tester.id),
+        eq(nudges.kind, "stall"),
+        ne(nudges.status, "failed"),
+        lastInboundAt ? gt(nudges.createdAt, lastInboundAt) : undefined,
+      ),
+    );
+
+  // The slip ladder counts misses on this version of the plan: reworking it starts fresh.
+  const sinceLock = plan?.lockedAt ? serviceDate(plan.lockedAt, tester) : undefined;
+  const recent = plan ? (await loadRecentDays(db, tester, date)).filter((d) => !sinceLock || d.date >= sinceLock) : [];
+  const [dayThree] = await db
+    .select({ at: max(nudges.createdAt) })
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.moment, "day_three"), eq(nudges.status, "sent")));
+
+  return {
     now,
     tester,
     plan,
@@ -261,21 +322,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     stallsSinceReply: stalls?.n ?? 0,
     missesInARow: summarizeDays(recent, []).missesInARow,
     lastDayThreeAt: dayThree?.at ? new Date(dayThree.at) : undefined,
-  });
-
-  if (decision.action === "pause") {
-    await updateTester(db, tester.id, { autoTextsPausedAt: now });
-    await saveFlag(
-      db,
-      tester.id,
-      WENT_QUIET_FLAG,
-      `No reply since ${lastInboundAt ? serviceDate(lastInboundAt, tester) : "their first text"} (phase ${tester.phase}); ZOH's own texts paused on ${decision.date}`,
-    );
-    deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
-  } else if (decision.action === "send") {
-    await send(deps, tester, decision.nudge, now);
-  }
-  return decision;
+  };
 }
 
 /** When a message happened: Sendblue's time when we have it (and the eval's clock), else when we stored it. */
@@ -332,6 +379,7 @@ async function sendExact(
       status: sent.status ?? null,
       inReplyTo: null,
       sentAt: now,
+      createdAt: onTesterClock(tester, now),
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
@@ -422,6 +470,7 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
       status: sent.status ?? null,
       inReplyTo: null,
       sentAt: now,
+      createdAt: onTesterClock(tester, now),
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
@@ -443,6 +492,7 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
       status: "SEND_FAILED",
       error: err instanceof Error ? err.message : String(err),
       inReplyTo: null,
+      createdAt: onTesterClock(tester, now),
     });
     await db.update(nudges).set({ status: "failed", messageId: message.id }).where(eq(nudges.id, claim.id));
     log.error({ ...ctx, err: safeError(err) }, "Sending a nudge failed");

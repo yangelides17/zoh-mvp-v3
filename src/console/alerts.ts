@@ -63,8 +63,8 @@ export async function markAlertSeen(db: Db, opts: { testerId: string; alertId: s
 }
 
 /** Saves a flag for the founders and raises its alert. */
-export async function saveFlag(db: Db, testerId: string, kind: string, detail: string): Promise<Flag> {
-  const [flag] = await db.insert(flags).values({ testerId, kind, detail }).returning();
+export async function saveFlag(db: Db, testerId: string, kind: string, detail: string, at?: Date): Promise<Flag> {
+  const [flag] = await db.insert(flags).values({ testerId, kind, detail, createdAt: at }).returning();
   await raiseAlert(db, { testerId, topic: kind, key: `flag:${flag!.id}`, body: detail, at: flag!.createdAt });
   return flag!;
 }

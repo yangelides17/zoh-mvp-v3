@@ -1,17 +1,22 @@
-import { eq } from "drizzle-orm";
+import { eq, sql, type AnyColumn } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_PUSHINESS,
   DEFAULT_QUIET_HOURS,
+  consoleMessages,
+  flags,
+  jumps,
   maintenanceCheckins,
   memoryFacts,
   memoryForgotten,
   memoryPages,
+  messages,
   nudges,
   pauses,
   planInputs,
   plans,
   stepDays,
+  suggestions,
   testerGoals,
   testers,
   type NewTester,
@@ -28,6 +33,7 @@ export type TesterPatch = Partial<
     | "goalSlug"
     | "timeZone"
     | "timeZoneStatus"
+    | "clockOffsetMs"
     | "quietHoursStart"
     | "quietHoursEnd"
     | "pushiness"
@@ -92,9 +98,12 @@ export async function updateTester(db: Db, id: string, patch: TesterPatch): Prom
 /**
  * Dev-account "reset": back to a brand-new tester whose context starts at `at`.
  * Messages, flags, suggestions and the console thread stay in the database; plan inputs, plans, goals,
- * check-ins, step days, nudges and memory are deleted.
+ * check-ins, step days, nudges and memory are deleted. A jumped clock (#14) goes back to real time,
+ * and what stays moves back with it, so nothing is left in the future.
  */
 export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tester> {
+  const moved = tester.clockOffsetMs;
+  if (moved) await moveHistoryBack(db, tester, moved);
   const { timeZone, status } = guessTimeZone(tester.phone);
   await db.delete(memoryFacts).where(eq(memoryFacts.testerId, tester.id));
   await db.delete(memoryPages).where(eq(memoryPages.testerId, tester.id));
@@ -118,8 +127,40 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
     styleNotes: "",
     stoppedAt: null,
     autoTextsPausedAt: null,
-    contextStartedAt: at,
+    contextStartedAt: new Date(at.getTime() - moved),
     memoryThrough: null,
     memorySince: null,
+    clockOffsetMs: 0,
   });
+}
+
+/** Moves every kept timestamp of a jumped tester back by `ms`, their jumps' clock times included. */
+async function moveHistoryBack(db: Db, tester: Tester, ms: number): Promise<void> {
+  const back = (column: AnyColumn) => sql`${column} - interval '${sql.raw(String(Math.trunc(ms)))} milliseconds'`;
+  await db
+    .update(messages)
+    .set({ sentAt: back(messages.sentAt), createdAt: back(messages.createdAt), updatedAt: back(messages.updatedAt), mediaDeletedAt: back(messages.mediaDeletedAt) })
+    .where(eq(messages.contactNumber, tester.phone));
+  await db.update(flags).set({ createdAt: back(flags.createdAt) }).where(eq(flags.testerId, tester.id));
+  await db
+    .update(suggestions)
+    .set({
+      decidedAt: back(suggestions.decidedAt),
+      deliveredAt: back(suggestions.deliveredAt),
+      outcomeAt: back(suggestions.outcomeAt),
+      createdAt: back(suggestions.createdAt),
+      updatedAt: back(suggestions.updatedAt),
+    })
+    .where(eq(suggestions.testerId, tester.id));
+  await db
+    .update(consoleMessages)
+    .set({
+      dueAt: back(consoleMessages.dueAt),
+      expiresAt: back(consoleMessages.expiresAt),
+      doneAt: back(consoleMessages.doneAt),
+      seenAt: back(consoleMessages.seenAt),
+      createdAt: back(consoleMessages.createdAt),
+    })
+    .where(eq(consoleMessages.testerId, tester.id));
+  await db.update(jumps).set({ fromAt: back(jumps.fromAt), toAt: back(jumps.toAt) }).where(eq(jumps.testerId, tester.id));
 }

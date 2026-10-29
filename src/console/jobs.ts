@@ -7,6 +7,7 @@ import { consoleMessages, memoryPages, messages, plans, stepDays, testers, type 
 import { safeError } from "../errors.js";
 import { addDays, isStepDay, localClock } from "../nudges/schedule.js";
 import { maskNumber, type Logger } from "../pipeline/inbound.js";
+import { testerNow, isJumping } from "../testers/clock.js";
 import { goalMetrics } from "../testers/goals.js";
 import { suggestionsForCoach } from "./suggestions.js";
 
@@ -46,6 +47,8 @@ export interface ConsoleJobsDeps {
 
 export interface ConsoleJobs {
   tick(now?: Date): Promise<{ whys: number; summaries: number }>;
+  /** One tester's weekly summary at `now` on their clock, if due (a jump, #14). True when one was written. */
+  tickTester(tester: Tester, now: Date): Promise<boolean>;
   start(intervalMs?: number): void;
   stop(): Promise<void>;
 }
@@ -80,7 +83,7 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
       if (written >= WHY_BATCH) break;
       if (waiting(alert.id, now)) continue;
       try {
-        const context = await testerContext(deps.db, tester, now);
+        const context = await testerContext(deps.db, tester, testerNow(tester, now));
         const why = await ask(deps.model!, WHY_INSTRUCTIONS, `Alert: ${alert.topic ?? "alert"}: ${alert.body}\n\n${context}`);
         await deps.db.update(consoleMessages).set({ why: why.slice(0, 300) }).where(eq(consoleMessages.id, alert.id));
         written += 1;
@@ -93,30 +96,38 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
   }
 
   async function writeSummaries(now: Date): Promise<number> {
-    const sunday = summaryDate(now);
-    if (!sunday) return 0;
     const active = await deps.db.select().from(testers).where(eq(testers.phase, "active"));
     let written = 0;
     for (const tester of active) {
-      const key = summaryKey(tester.id, sunday);
-      if (waiting(key, now)) continue;
-      const [exists] = await deps.db.select({ id: consoleMessages.id }).from(consoleMessages).where(eq(consoleMessages.eventKey, key));
-      if (exists) continue;
-      try {
-        const body = await weeklySummary(deps.db, tester, sunday, now, deps.model);
-        const rows = await deps.db
-          .insert(consoleMessages)
-          .values({ testerId: tester.id, kind: "summary", topic: "weekly_summary", eventKey: key, body, createdAt: now })
-          .onConflictDoNothing({ target: consoleMessages.eventKey })
-          .returning({ id: consoleMessages.id });
-        written += rows.length;
-      } catch (err) {
-        failedAt.set(key, now.getTime());
-        deps.log.warn({ contact: maskNumber(tester.phone), err: safeError(err) }, "Weekly summary failed");
-      }
+      // Mid-jump, the jump writes this tester's summary itself (#14).
+      if (isJumping(tester.id)) continue;
+      if (await summaryFor(tester, testerNow(tester, now))) written += 1;
     }
-    if (written) deps.log.info({ written, week: sunday }, "Weekly summaries written");
+    if (written) deps.log.info({ written }, "Weekly summaries written");
     return written;
+  }
+
+  /** The tester's summary for the Sunday due at `now` on their clock, unless it's written. */
+  async function summaryFor(tester: Tester, now: Date): Promise<boolean> {
+    const sunday = summaryDate(now);
+    if (!sunday) return false;
+    const key = summaryKey(tester.id, sunday);
+    if (waiting(key, now)) return false;
+    const [exists] = await deps.db.select({ id: consoleMessages.id }).from(consoleMessages).where(eq(consoleMessages.eventKey, key));
+    if (exists) return false;
+    try {
+      const body = await weeklySummary(deps.db, tester, sunday, now, deps.model);
+      const rows = await deps.db
+        .insert(consoleMessages)
+        .values({ testerId: tester.id, kind: "summary", topic: "weekly_summary", eventKey: key, body, createdAt: now })
+        .onConflictDoNothing({ target: consoleMessages.eventKey })
+        .returning({ id: consoleMessages.id });
+      return rows.length > 0;
+    } catch (err) {
+      failedAt.set(key, now.getTime());
+      deps.log.warn({ contact: maskNumber(tester.phone), err: safeError(err) }, "Weekly summary failed");
+      return false;
+    }
   }
 
   return {
@@ -124,6 +135,9 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
       const next = chain.then(() => run(now));
       chain = next.catch(() => undefined);
       return next;
+    },
+    tickTester(tester, now) {
+      return summaryFor(tester, now);
     },
     start(intervalMs = DEFAULT_TICK_MS) {
       if (timer) return;

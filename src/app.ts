@@ -1,5 +1,5 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
-import type { PipelineDeps } from "./pipeline/inbound.js";
+import type { Logger, PipelineDeps } from "./pipeline/inbound.js";
 import { TaskQueue } from "./pipeline/task-queue.js";
 import type { ConsoleConfig } from "./config.js";
 import type { ConsoleCoach } from "./console/chat.js";
@@ -7,6 +7,7 @@ import { safeError } from "./errors.js";
 import { consoleRoutes } from "./routes/console.js";
 import { healthRoutes, type HealthRouteOptions } from "./routes/health.js";
 import { webhookRoutes } from "./routes/webhook.js";
+import type { Jumper } from "./testers/jump.js";
 
 export interface AppDeps {
   pipeline: Omit<PipelineDeps, "log">;
@@ -16,6 +17,8 @@ export interface AppDeps {
   /** Answers the founders in the console chat; without it, the chat says it isn't set up. */
   consoleCoach?: ConsoleCoach;
   missingSettings: () => string[];
+  /** Test mode (#14): runs a dev account's "jump"; without it, "jump" is an ordinary text. */
+  jumper?: (log: Logger) => Jumper;
   version?: string;
   logger?: FastifyServerOptions["logger"];
 }
@@ -55,7 +58,7 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
 
   app.get("/", async () => ({ name: "zoh-mvp-v3", ok: true }));
   await app.register(healthRoutes, health);
-  await app.register(webhookRoutes, { webhookSecret: deps.webhookSecret, pipeline, queue });
+  await app.register(webhookRoutes, { webhookSecret: deps.webhookSecret, pipeline, queue, jumper: deps.jumper?.(app.log) });
   await app.register(consoleRoutes, { names: [], ...deps.console, db: pipeline.db, media: pipeline.media, chat: deps.consoleCoach, queue, now: pipeline.now });
 
   return { app, queue };

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   check,
   date,
@@ -102,6 +103,8 @@ export const testers = pgTable(
     memoryThrough: date("memory_through", { mode: "string" }),
     /** Set by "forget everything": memory never reads or searches texts from before this. */
     memorySince: timestamp("memory_since", { withTimezone: true }),
+    /** Test mode (#14): how far a dev account's clock is ahead of real time, moved by "jump"; 0 for everyone else. */
+    clockOffsetMs: bigint("clock_offset_ms", { mode: "number" }).notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -621,6 +624,27 @@ export const memoryForgotten = pgTable(
   (t) => [unique("memory_forgotten_unique").on(t.testerId, t.messageId)],
 );
 
+/**
+ * Test mode (#14): each "jump" a dev account texted. The jump text is never a message (a ghost);
+ * this is its record, and its Sendblue handle keeps a retried webhook from jumping twice.
+ */
+export const jumps = pgTable("jumps", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  testerId: uuid("tester_id")
+    .notNull()
+    .references(() => testers.id, { onDelete: "cascade" }),
+  /** What they texted, e.g. "jump 3h". */
+  text: text("text").notNull(),
+  sendblueHandle: text("sendblue_handle").notNull().unique(),
+  /** The tester's clock before and after the jump; null until it has run. */
+  fromAt: timestamp("from_at", { withTimezone: true }),
+  toAt: timestamp("to_at", { withTimezone: true }),
+  /** The log line sent back. */
+  log: text("log"),
+  /** Real time. */
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Tester = typeof testers.$inferSelect;
 export type NewTester = typeof testers.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
@@ -638,3 +662,4 @@ export type TesterGoal = typeof testerGoals.$inferSelect;
 export type MaintenanceCheckin = typeof maintenanceCheckins.$inferSelect;
 export type Suggestion = typeof suggestions.$inferSelect;
 export type ConsoleMessage = typeof consoleMessages.$inferSelect;
+export type Jump = typeof jumps.$inferSelect;
