@@ -177,6 +177,22 @@ export const FEATURES: Record<string, FeatureDef> = {
         label:
           "Once the step is done ZOH celebrates and starts no more texts that day; \"can't today\" gets the line held once, then a smaller version",
       },
+      {
+        id: "repeat-day-three",
+        scope: "conversation",
+        label: "A repeat day-3 check-in is sincere, guilt-free, reads differently from the first and gives the same real choice",
+      },
+      {
+        id: "kickoff-not-repeated",
+        scope: "conversation",
+        label:
+          "When the morning's conversation already covered today's step, the kickoff is skipped (after a miss too); morning chat unrelated to the step still gets the kickoff",
+      },
+      {
+        id: "no-restating",
+        scope: "conversation",
+        label: "In a several-text conversation, ZOH doesn't restate the step and time in each reply, but does when the time changes or they ask",
+      },
     ],
   },
   /** Coach memory (#8). Part 1 grades what the overnight pass files; Part 2 adds how the coach uses it. */

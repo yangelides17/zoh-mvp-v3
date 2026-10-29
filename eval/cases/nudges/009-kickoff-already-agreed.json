@@ -1,0 +1,35 @@
+{
+  "id": "kickoff-already-agreed",
+  "title": "Agreed to tonight's step before 9 am: no kickoff re-asking it",
+  "origin": "Issue #42, from the live thread on Oct 28: \"Yep!\" at 8:10, then a 9:00 kickoff asking \"Can you lock in 11:50 tonight?\"",
+  "seed": {
+    "name": "Alex",
+    "goal": "bedtime",
+    "phase": "active",
+    "answers": { "what": "in bed with screens away", "where": "home", "when": "9:30 pm" },
+    "history": [
+      { "from": "tester", "text": "Morning! 7 hours last night, Whoop says 68% recovery. Not bad!" },
+      { "from": "zoh", "text": "Not bad at all, Alex. Same again tonight: in bed at 9:30, screens away. You in?" }
+    ],
+    "plan": {
+      "step": "In bed by 9:30 pm, screens away",
+      "place": "home",
+      "time": "21:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a quick pic once you're in bed",
+      "reason": "A steady bedtime is what moves your recovery score.",
+      "minutes": 15,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "testerLines": ["Yep!", "advance to 11:00", "advance to 21:25"],
+  "whatWentWrong": "On Oct 28 ZOH restated tonight's step in nearly every text, and the 9:00 kickoff asked again for a time already agreed at 8:10.",
+  "shouldHaveHappened": "ZOH answers \"Yep!\" briefly and warmly, without restating the time a second time or asking anything more. No kickoff goes out at 9 am or later that morning: the conversation already covered today's step. The only text ZOH starts later is the check-in about 10 minutes before 9:30 pm, which may name the step.",
+  "startTime": "08:10",
+  "timeZone": "America/New_York"
+}

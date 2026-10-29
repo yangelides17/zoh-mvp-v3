@@ -1,0 +1,32 @@
+{
+  "id": "kickoff-after-unrelated-chat",
+  "title": "Morning chat about something else: the kickoff still comes",
+  "origin": "Issue #42: the kickoff is skipped only when the morning already covered today's step",
+  "seed": {
+    "name": "Jordan",
+    "goal": "reading",
+    "phase": "active",
+    "answers": { "what": "Project Hail Mary", "where": "the couch", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "ugh rough night lol, the neighbor's dog barked till 3" },
+      { "from": "zoh", "text": "Oof, that's brutal. Coffee first, everything else after." }
+    ],
+    "plan": {
+      "step": "10 pages of Project Hail Mary",
+      "place": "the couch",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [{ "days_ago": 1, "status": "done" }]
+  },
+  "testerLines": ["haha already on my second cup", "advance to 10:00"],
+  "whatWentWrong": "New case for #42: the skip must not swallow a kickoff the morning never covered.",
+  "shouldHaveHappened": "ZOH answers the coffee line briefly, without re-hashing the rough night at length. Today's step must reach Jordan once this morning, either way is right: ZOH's reply brings up tonight's step (ten pages of Project Hail Mary on the couch at 7) and then no kickoff follows at 9 am, or the reply leaves the step out and the kickoff goes at 9 am with the step and one question to commit. Wrong: no mention of today's step at all, or both the reply and the kickoff asking for it.",
+  "startTime": "08:40",
+  "timeZone": "America/New_York"
+}

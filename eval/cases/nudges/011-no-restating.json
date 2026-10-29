@@ -1,0 +1,40 @@
+{
+  "id": "no-restating",
+  "title": "A day of back-and-forth: the step and time come up when they matter, not in every reply",
+  "origin": "Issue #42: \"There is no need to repeat the goal constantly\" (Yanni)",
+  "seed": {
+    "name": "Priya",
+    "goal": "reading",
+    "phase": "active",
+    "answers": { "what": "Dune", "where": "the couch", "when": "7 pm", "how_long": "20 min" },
+    "history": [{ "from": "zoh", "text": "Kalimera Priya! Ten pages of Dune on the couch at 7 tonight. You in?" }],
+    "history_hours_ago": 1,
+    "plan": {
+      "step": "10 pages of Dune",
+      "place": "the couch",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "yes! I'm in",
+    "btw is it weird that I skip the appendices",
+    "work is insane today",
+    "omg my boss just asked me to stay late, can we do 8:30 instead?",
+    "cool cool",
+    "what time was it again?"
+  ],
+  "whatWentWrong": "On Oct 28 ZOH restated the step and time in nearly every text.",
+  "shouldHaveHappened": "Each reply answers what Priya said. ZOH doesn't tack \"ten pages at 7\" onto every reply: after her yes it's settled. When she asks to move to 8:30, ZOH moves today's time and confirms the new time once. \"cool cool\" gets a short reply with no restated step. When she asks what time it was, ZOH says 8:30 plainly.",
+  "startTime": "10:00",
+  "timeZone": "America/New_York"
+}
