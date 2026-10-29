@@ -26,7 +26,7 @@ export async function decideSuggestion(
     .from(suggestions)
     .where(and(eq(suggestions.id, opts.suggestionId), eq(suggestions.testerId, opts.testerId)));
   if (!current) throw new SuggestionError("No such suggestion for this tester");
-  if (current.decision !== "waiting") throw new SuggestionError(`Already ${current.decision}`);
+  if (current.decision !== "waiting") throw new SuggestionError(`Already ${current.decision}${current.decidedBy ? ` by ${current.decidedBy}` : ""}`);
   const changed = opts.decision === "changed" ? { decidedKind: opts.kind, decidedProposal: opts.proposal.trim() } : {};
   const [row] = await db
     .update(suggestions)

@@ -8,7 +8,8 @@ import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, TEAM } from
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { loadVoiceDoc } from "../src/coach/voice.js";
-import { consoleMessages, messages, nudges, plans, stepDays, testers, type ConsoleMessage, type Tester } from "../src/db/schema.js";
+import { consoleMessages, messages, nudges, plans, stepDays, suggestions, testers, type ConsoleMessage, type Tester } from "../src/db/schema.js";
+import { suggestionsForCoach } from "../src/console/suggestions.js";
 import { zonedTime } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, MAX_UNANSWERED, EXACT_MOMENT, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
@@ -128,7 +129,7 @@ describe("console chat route", () => {
     model.script("She missed Monday? No: Monday was done, page 40.");
     const res = await chat(tester, "why did she miss Monday?");
     expect(res.statusCode).toBe(303);
-    expect(res.headers.location).toBe(`/console/testers/${tester.id}#chat`);
+    expect(res.headers.location).toBe(`/console/testers/${tester.id}?tab=console#chat`);
     const rows = await thread(tester.id);
     expect(rows.map((r) => [r.kind, r.author, r.body])).toEqual([
       ["founder", "Yanni", "why did she miss Monday?"],
@@ -245,8 +246,41 @@ describe("console chat route", () => {
 });
 
 describe("console coach capabilities", () => {
-  it("is a list of capabilities: note, request, cancel", () => {
-    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "cancel_request"]);
+  it("is a list of capabilities: note, request, next step, cancel", () => {
+    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "suggest_next_step", "cancel_request"]);
+  });
+
+  it("suggest_next_step files the founder's next step as approved by them, shown in the chat as a card (#63)", async () => {
+    const tester = await seed();
+    model.script(
+      { tools: [{ name: "suggest_next_step", input: { goal: "Daily reading", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" } }] },
+      "Filed: a deepen on Daily reading, 15 pages a night.",
+    );
+    await chat(tester, "let's bump her reading to 15 pages", { as: "Stamati" });
+    const [row] = await t.db.select().from(suggestions).where(eq(suggestions.testerId, tester.id));
+    expect(row).toMatchObject({ raisedBy: "founder", raisedByName: "Stamati", decision: "approved", decidedBy: "Stamati", goalSlug: "reading", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" });
+    expect(await suggestionsForCoach(t.db, tester.id)).toHaveLength(1);
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Filed as approved by Stamati: deepen on Daily reading");
+    const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
+    const chatHtml = page.body.slice(page.body.indexOf('<section id="chat">'), page.body.indexOf('<div id="side"'));
+    expect(chatHtml).toContain("15 pages a night");
+    expect(chatHtml).toContain("approved by Stamati");
+  });
+
+  it("suggest_next_step refuses an unknown goal, a new focus without one, and a stopped tester", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "suggest_next_step", input: { goal: "knitting", kind: "deepen", proposal: "x" } }] }, "Which goal?");
+    await chat(tester, "suggest more knitting");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain('No goal \\"knitting\\". Goals:');
+    model.script({ tools: [{ name: "suggest_next_step", input: { goal: "reading", kind: "new_focus", proposal: "Switch focus" } }] }, "To which goal?");
+    await chat(tester, "move her focus");
+    expect(JSON.stringify(model.requests[3]!.messages.at(-1))).toContain("A new focus needs new_goal");
+    expect(await t.db.select().from(suggestions).where(eq(suggestions.testerId, tester.id))).toHaveLength(0);
+    await t.db.update(testers).set({ stoppedAt: now }).where(eq(testers.id, tester.id));
+    model.script({ tools: [{ name: "suggest_next_step", input: { goal: "reading", kind: "deepen", proposal: "more" } }] }, "They've stopped.");
+    await chat(tester, "bump her up");
+    expect(JSON.stringify(model.requests[5]!.messages.at(-1))).toContain("They texted stop");
+    expect(await t.db.select().from(suggestions).where(eq(suggestions.testerId, tester.id))).toHaveLength(0);
   });
 
   it("save_note stores the founder's context under their name", async () => {

@@ -7,14 +7,16 @@ import { buildStateBlock } from "../coach/prompt.js";
 import { insideQuietHours, loadCoachState, localTime } from "../coach/state.js";
 import { loadVoiceDoc } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, nudges, stepDays, testers, type ConsoleMessage, type Message, type Plan, type RequestDelivery, type StepDayStatus, type Tester } from "../db/schema.js";
+import { consoleMessages, nudges, stepDays, SUGGESTION_KINDS, testers, type ConsoleMessage, type Message, type Plan, type RequestDelivery, type StepDayStatus, type Tester } from "../db/schema.js";
 import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
 import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
 import { activePause } from "../testers/pauses.js";
+import { goalTitles } from "./data.js";
 import { addRequest, addThreadLine, APP_AUTHOR, awaitingAnswer, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
+import { addFounderSuggestion } from "./suggestions.js";
 
 /**
  * The console chat's coach (spec: GitHub issue "Founder console", 4): the same model, voice page,
@@ -38,6 +40,7 @@ Answering the founders:
 - When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text), under the usual rules: never in quiet hours, counts toward 3 unanswered, dropped with a note if it can't go out that day. Something tied to a time ("tonight's run") that NEXT CHANCE can't reach in time: say so and offer its own text. Confirm the actual day and time.
 - Only what the record shows about their days, too: count misses and streaks from the state, never estimate them.
 - A request that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't queue it. Say why in a line and offer a version that fits; queue that once they agree.
+- A next step they want for the tester (deepen, upgrade, a new focus): suggest_next_step once the goal and kind are clear (ask in a line if not), then confirm what and which goal.
 - "Cancel that": cancel_request.
 - Only if they ask for their own words sent as written: they tick "Send exactly this" under the chat box.
 - They've stopped: answer questions, but nothing can be sent.`;
@@ -127,6 +130,52 @@ export const CAPABILITIES: Record<string, Capability> = {
           ? `its own text, ${dueAt!.getTime() <= ctx.now.getTime() ? "within a minute (or in your reply if they're texting right now)" : `at ${theirs(dueAt!)}`}.`
           : `${delivery === "morning" ? "with the morning text" : "in your next text to them that fits"}${dueAt ? `, not before ${theirs(dueAt)}` : ""} (see NEXT CHANCE).`;
       return `Queued [${requestRef(row.id)}]: ${where}${until} The thread shows "Done" when it has. Tell the founders the actual time.`;
+    },
+  },
+  suggest_next_step: {
+    tool: {
+      name: "suggest_next_step",
+      description:
+        "File a next step the founders decided on for this tester (#63). It's saved as approved by the founder asking; the texting coach brings it up as its own idea when it fits. goal: the goal it builds on (its name or slug). kind: deepen (more of the same habit; the streak carries on), upgrade (a harder or different version; a new streak), new_focus (move the focus to another goal, named in new_goal). proposal: what to propose, in plain words. reasoning: their why, if they gave one. Only once the goal and kind are clear: ask the founders first if not.",
+      input_schema: {
+        type: "object",
+        properties: {
+          goal: { type: "string" },
+          kind: { type: "string", enum: [...SUGGESTION_KINDS] },
+          proposal: { type: "string" },
+          reasoning: { type: "string" },
+          new_goal: { type: "string" },
+        },
+        required: ["goal", "kind", "proposal"],
+      },
+    },
+    async run(ctx, input) {
+      const { goal, kind, proposal, reasoning, new_goal } = parse(
+        z.object({ goal: text(80), kind: z.enum(SUGGESTION_KINDS), proposal: text(1000), reasoning: text(500).optional(), new_goal: text(80).optional() }).strict(),
+        input,
+      );
+      if (ctx.tester.stoppedAt) throw new CapabilityError("They texted stop: a next step can't reach them. Tell the founders.");
+      const titles = await goalTitles(ctx.db);
+      const find = (name: string) => {
+        const wanted = name.trim().toLowerCase();
+        return [...titles.values()].find((g) => g.slug.toLowerCase() === wanted || g.title.toLowerCase() === wanted);
+      };
+      const known = () => [...titles.values()].map((g) => `${g.slug} (${g.title})`).join(", ");
+      const base = find(goal);
+      if (!base) throw new CapabilityError(`No goal "${goal}". Goals: ${known()}.`);
+      const next = new_goal ? find(new_goal) : undefined;
+      if (kind === "new_focus" && !next) throw new CapabilityError(`A new focus needs new_goal, the goal to move to. Goals: ${known()}.`);
+      await addFounderSuggestion(ctx.db, {
+        testerId: ctx.tester.id,
+        goalSlug: base.slug,
+        kind,
+        proposal,
+        reasoning,
+        newGoalSlug: next?.slug,
+        by: ctx.founder,
+        at: ctx.now,
+      });
+      return `Filed as approved by ${ctx.founder}: ${kind} on ${base.title}${next ? ` → ${next.title}` : ""}, "${proposal}". It shows in the chat as a card. The texting coach brings it up as its own idea when it fits. Confirm in a line: what, and which goal.`;
     },
   },
   cancel_request: {

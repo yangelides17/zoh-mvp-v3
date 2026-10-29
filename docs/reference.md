@@ -49,7 +49,11 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   pauses plus `back_off` flags (the coach's `flag_back_off`, for fewer texts or less pushing: it offers
   fewer step days or a lighter stretch, else the feedback reply); stops are counted from `stop` alerts.
 - Everything for the founders lives in the console, inside the same app: server-rendered pages,
-  masked numbers, proofs streamed from the bucket behind the login. Each alert gets a one-line why
+  masked numbers, proofs streamed from the bucket behind the login. Since #63 a tester page is a
+  header plus tabs (`?tab=console|texts|memory|progress`); threads load 50 at a time and the page
+  checks `/console/testers/:id/updates` every 4 s while visible (polling, no websockets: two founders,
+  one cheap read each). Founders' own next steps go through the console chat (`suggest_next_step`),
+  not a form. Each alert gets a one-line why
   from a low-effort Claude call (alerts under 2 days old); seeing a plan-to-review alert clears that
   version's needs review. Weekly summaries are written Sunday from 8 am Eastern, once per tester
   with a locked plan. The texting coach only ever sees approved or changed suggestions

@@ -236,6 +236,11 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "own-idea", scope: "text", label: "Our suggestions reach the tester in ZOH's voice, at a natural moment, as its own idea" },
       { id: "confirms", scope: "text", label: "Confirmations back to us say what and when, in a line or two" },
       { id: "pushback", scope: "text", label: "It pushes back on requests that break the voice rules" },
+      {
+        id: "files-step",
+        scope: "conversation",
+        label: "Asked to suggest a next step, ZOH files it and confirms in a line (what, which goal); asks first if the goal or kind is unclear",
+      },
     ],
   },
   /** Commands and safety (#12): pause and feedback, cases only, each seeded with a locked plan. Target 80%. */

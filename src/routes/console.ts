@@ -1,13 +1,34 @@
+import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import sharp from "sharp";
 import type { ConsoleConfig } from "../config.js";
 import { markAlertSeen } from "../console/alerts.js";
 import { clearedSessionCookie, decodeSession, encodeSession, newSession, parseCookies, passwordMatches, SESSION_COOKIE, sessionCookie, type Session } from "../console/auth.js";
-import { mediaMessage, testerPage, testerRows, waitingAlerts } from "../console/data.js";
-import { addFounderSuggestion, decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
+import {
+  CHUNK,
+  consoleTab,
+  mediaMessage,
+  memoryTab,
+  progressTab,
+  recentLines,
+  sideSection,
+  testerHeader,
+  testerRows,
+  textsChunk,
+  threadChunk,
+  waitingAlerts,
+  type ConsoleTab,
+} from "../console/data.js";
+import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
 import { metricsPage } from "../console/metrics.js";
-import { ICON_SVG, loginPage, listPage, MANIFEST, metricsView, namePage, notConfiguredPage, testerView } from "../console/views.js";
+import { listPage } from "../console/views/home.js";
+import { ICON_SVG, loginPage, MANIFEST, namePage, notConfiguredPage } from "../console/views/layout.js";
+import { memoryTabHtml } from "../console/views/memory.js";
+import { metricsView } from "../console/views/metrics.js";
+import { progressTabHtml } from "../console/views/progress.js";
+import { asTab, testerView, type Tab } from "../console/views/tester.js";
+import { coachThinking, consoleTabHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
 import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
@@ -35,6 +56,8 @@ export interface ConsoleRouteOptions extends ConsoleConfig {
 
 /** Longest message the chat box takes. */
 export const MAX_CHAT_CHARS = 2000;
+/** Most new items one live update carries; the rest come on the next. */
+const LIVE_MAX = 200;
 
 type Form = Record<string, string | undefined>;
 type Params = { id: string; sid: string; aid: string; mid: string; rid: string };
@@ -80,11 +103,20 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return row ? testerNow(row, clock()) : clock();
   };
 
-  const back = (reply: FastifyReply, testerId: string, hash: string) => reply.redirect(`/console/testers/${encodeURIComponent(testerId)}#${hash}`, 303);
+  const back = (reply: FastifyReply, testerId: string, hash: string) => reply.redirect(`/console/testers/${encodeURIComponent(testerId)}?tab=console#${hash}`, 303);
+
+  /** Alerts and pending next steps, signed so the page swaps them only when they change. */
+  const side = (data: Pick<ConsoleTab, "alerts" | "pending">, ctx: ThreadContext) => {
+    const unsigned = sideHtml(data, ctx, "");
+    const sig = createHash("sha256").update(unsigned).digest("hex").slice(0, 16);
+    return { sig, html: unsigned.replace('data-sig=""', `data-sig="${sig}"`) };
+  };
+
+  const query = (request: FastifyRequest) => request.query as Record<string, unknown>;
 
   app.get("/console", page(async (_request, reply, name) => {
     const now = clock();
-    return html(reply, listPage(await testerRows(opts.db, now), await waitingAlerts(opts.db), name));
+    return html(reply, listPage(await testerRows(opts.db, now), await waitingAlerts(opts.db), name, now));
   }));
 
   app.get("/console/metrics", page(async (request, reply, name) => {
@@ -92,12 +124,76 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return html(reply, metricsView(await metricsPage(opts.db, clock(), { includeTest }), name, includeTest));
   }));
 
+  /** A tester's page (#63): the header, then one tab. Undefined for an unknown tester. */
+  const testerHtml = async (reply: FastifyReply, id: string, tab: Tab, name: string, notice?: string, code = 200) => {
+    const now = await nowFor(id);
+    const header = await testerHeader(opts.db, id, now);
+    if (!header) return undefined;
+    const ctx: ThreadContext = { testerId: id, titles: header.titles, now };
+    let content: string;
+    if (tab === "console") {
+      const data = await consoleTab(opts.db, id);
+      content = consoleTabHtml(data, header.tester, ctx, side(data, ctx).html, CHUNK);
+    } else if (tab === "texts") content = textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK);
+    else if (tab === "memory") content = memoryTabHtml(await memoryTab(opts.db, header.tester));
+    else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
+    return html(reply, testerView(header, tab, content, name, notice), code);
+  };
+
   app.get("/console/testers/:id", page(async (request, reply, name) => {
-    if (!isUuid(request.params.id)) return html(reply, "Not found", 404);
-    const now = await nowFor(request.params.id);
-    const data = await testerPage(opts.db, request.params.id, now);
-    if (!data) return html(reply, "Not found", 404);
-    return html(reply, testerView(data, name, now));
+    const { id } = request.params;
+    if (!isUuid(id)) return html(reply, "Not found", 404);
+    return (await testerHtml(reply, id, asTab(query(request).tab), name)) ?? html(reply, "Not found", 404);
+  }));
+
+  // Older items for a thread, as the founder scrolls up (#63).
+  app.get("/console/testers/:id/thread", action(async (request, reply) => {
+    const { id } = request.params;
+    const before = cursor(query(request).before);
+    if (!isUuid(id) || !before) return reply.code(404).send({ error: "not found" });
+    const now = await nowFor(id);
+    const header = await testerHeader(opts.db, id, now);
+    if (!header) return reply.code(404).send({ error: "not found" });
+    const items = await threadChunk(opts.db, id, { before });
+    const html = threadItemsHtml(items, { testerId: id, titles: header.titles, now });
+    return reply.header("cache-control", "no-store").send({ html, before: items.length >= CHUNK ? String(items[0]!.at.getTime()) : null });
+  }));
+
+  app.get("/console/testers/:id/texts", action(async (request, reply) => {
+    const { id } = request.params;
+    const before = cursor(query(request).before);
+    if (!isUuid(id) || !before) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    const texts = await textsChunk(opts.db, tester, { before });
+    return reply
+      .header("cache-control", "no-store")
+      .send({ html: textItemsHtml(texts, testerNow(tester, clock())), before: texts.length >= CHUNK ? String(texts[0]!.createdAt.getTime()) : null });
+  }));
+
+  // Live updates (#63): what's new after the page's cursors, checked every few seconds while it's visible.
+  app.get("/console/testers/:id/updates", action(async (request, reply) => {
+    const { id } = request.params;
+    if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    const now = testerNow(tester, clock());
+    const out: Record<string, unknown> = {};
+    const threadAfter = cursor(query(request).thread);
+    if (threadAfter) {
+      const header = await testerHeader(opts.db, id, now);
+      const ctx: ThreadContext = { testerId: id, titles: header!.titles, now };
+      const items = await threadChunk(opts.db, id, { after: threadAfter }, LIVE_MAX);
+      out.thread = { html: threadItemsHtml(items, ctx), after: String(newest(items.map((i) => i.at), threadAfter).getTime()) };
+      out.thinking = thinkingLabel(coachThinking(await recentLines(opts.db, id), now));
+      out.side = side(await sideSection(opts.db, id), ctx);
+    }
+    const textsAfter = cursor(query(request).texts);
+    if (textsAfter) {
+      const texts = await textsChunk(opts.db, tester, { after: textsAfter }, LIVE_MAX);
+      out.texts = { html: textItemsHtml(texts, now), after: String(newest(texts.map((m) => m.createdAt), textsAfter).getTime()) };
+    }
+    return reply.header("cache-control", "no-store").send(out);
   }));
 
   app.post<{ Body: Form }>("/console/login", async (request, reply) => {
@@ -137,37 +233,11 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     try {
       await decideSuggestion(opts.db, { testerId: id, suggestionId: sid, by: name, at: await nowFor(id), ...decision });
     } catch (err) {
-      if (err instanceof SuggestionError) return reply.code(409).send({ error: err.message });
+      // The page again, saying why ("Someone else just decided it"), with the decision that stands.
+      if (err instanceof SuggestionError) return (await testerHtml(reply, id, "console", name, `Not saved: ${err.message}.`, 409)) ?? reply.code(409).send({ error: err.message });
       throw err;
     }
-    return back(reply, id, "suggestions");
-  }));
-
-  app.post("/console/testers/:id/suggestions", action(async (request, reply, name) => {
-    const { id } = request.params;
-    if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
-    const body = request.body ?? {};
-    const kind = asKind(body.kind);
-    const proposal = body.proposal?.trim();
-    if (!kind || !proposal || !body.goal) return reply.code(400).send({ error: "goal, kind and proposal are needed" });
-    try {
-      await addFounderSuggestion(opts.db, {
-        testerId: id,
-        goalSlug: body.goal,
-        kind,
-        proposal,
-        reasoning: body.reasoning,
-        newGoalSlug: body.newGoal || undefined,
-        by: name,
-        at: await nowFor(id),
-      });
-    } catch (err) {
-      if (err instanceof SuggestionError) return reply.code(400).send({ error: err.message });
-      // A tester or goal that doesn't exist (a foreign key) is the founder's mistake, not ours.
-      if ((err as { cause?: { code?: string } }).cause?.code === "23503" || (err as { code?: string }).code === "23503") return reply.code(400).send({ error: "unknown tester or goal" });
-      throw err;
-    }
-    return back(reply, id, "suggestions");
+    return back(reply, id, "pending");
   }));
 
   // The console chat (spec 4): the founder's line is stored now; the coach answers in the background.
@@ -247,6 +317,11 @@ function parseDecision(body: Form): Decision | undefined {
     return kind && proposal ? { decision: "changed", kind, proposal, reason } : undefined;
   }
   return undefined;
+}
+
+/** A cursor from the page: milliseconds since the epoch. */
+function cursor(value: unknown): Date | undefined {
+  return typeof value === "string" && /^\d{1,15}$/.test(value) ? new Date(Number(value)) : undefined;
 }
 
 function isUuid(value: string): boolean {

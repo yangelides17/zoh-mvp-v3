@@ -1,0 +1,42 @@
+{
+  "id": "suggest-unclear-goal",
+  "title": "A founder asks for a vague next step for a tester with two goals; ZOH asks which goal and how before filing",
+  "origin": "Spec #63 (founder console upgrade), rule 2: if the goal or kind isn't clear, ZOH asks before filing",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "7 am", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "run done, legs are toast" },
+      { "from": "zoh", "text": "Ten days in a row, Jordan. Toast legs are earned legs 🏃" }
+    ],
+    "plan": {
+      "step": "20 minute run",
+      "place": "the park",
+      "time": "07:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "run app summary",
+      "reason": "Short runs before work, four days a week.",
+      "minutes": 20,
+      "started_days_ago": 21
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }, { "days_ago": 3, "status": "done" }, { "days_ago": 5, "status": "done" },
+      { "days_ago": 6, "status": "done" }, { "days_ago": 8, "status": "done" }
+    ],
+    "maintenance": [
+      { "goal": "bedtime", "step": "lights out by 11", "time": "23:00", "since_days_ago": 10, "streak_days": 14, "checkins": [{ "days_ago": 3, "answer": "kept_up" }] }
+    ]
+  },
+  "testerLines": [
+    "console Stamati: he's doing great, bump him up a level",
+    "console Stamati: the running. make it a harder version, intervals instead of a steady run"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the console's new suggest-a-next-step ability with an ambiguous ask.",
+  "shouldHaveHappened": "To \"bump him up a level\", ZOH doesn't file anything yet: he has two goals (running is the focus, bedtime is maintenance) and \"a level\" could mean more of the same or a harder version, so it asks Stamati in a line which goal and how. Once Stamati says running, intervals, ZOH files it (an upgrade on the exercise goal) and confirms in a line what it filed and for which goal.",
+  "startTime": "13:00",
+  "timeZone": "America/New_York"
+}
