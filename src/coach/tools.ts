@@ -458,7 +458,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     case "send_feedback": {
       const { feedback } = input as z.infer<typeof schemas.send_feedback>;
       await alertFeedback(db, tester.id, feedback, at);
-      return saved(tester, "Passed to the team word for word. Acknowledge it in your own words, thank them, and say the team's on it; promise no change.");
+      return saved(tester, "Passed to the team word for word. Acknowledge it in your own words, thank them, and say the team's on it; don't promise or offer a change.");
     }
 
     case "propose_plan": {
