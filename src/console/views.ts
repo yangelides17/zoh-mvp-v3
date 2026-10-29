@@ -355,7 +355,7 @@ export function metricsView(data: { rows: TesterMetrics[]; rollup: Rollup }, nam
     ? `<a href="/console/metrics">Hide test accounts</a>`
     : `<a href="/console/metrics?test=1">Show test accounts</a>`;
   const totals = u.testers
-    ? `<div class="card"><div class="row"><strong>${u.testers} tester${u.testers === 1 ? "" : "s"}</strong><span class="muted">averages per tester</span></div>
+    ? `<div class="card"><div class="row"><strong>${u.testers} tester${u.testers === 1 ? "" : "s"}</strong><span class="muted">averages per tester; progressed, back-off and stops are totals</span></div>
 <table><tbody>
 <tr><td>Days retained</td><td>${esc(one(u.retainedDays))}</td></tr>
 <tr><td>Active days</td><td>${esc(pct(u.activeShare))}</td></tr>
