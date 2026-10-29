@@ -22,7 +22,7 @@ const STYLE = `
   --done: #4cc27e; --half: #2f6f4f; --miss: #e0716d; --open: #4a4842;
   --shadow: none;
 } }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; } [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 main { max-width: 920px; margin: 0 auto; padding: 16px 16px 48px; }
@@ -76,6 +76,29 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 img.proof { max-width: 220px; max-height: 220px; border-radius: 14px; display: block; }
 .empty { text-align: center; color: var(--muted); padding: 28px 12px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.memory .mem-search { width: 100%; border-radius: 999px; padding: 10px 16px; margin: 6px 0 10px; }
+.chips { margin-bottom: 14px; }
+.chip-btn { border-radius: 999px; padding: 5px 14px; font-size: 14px; }
+.chip-btn.on { background: var(--fg); color: var(--bg); border-color: var(--fg); } .chip-btn.on .muted { color: inherit; opacity: .7; }
+a.mem { display: flex; flex-direction: column; color: inherit; min-height: 200px; max-height: 260px; overflow: hidden; border-radius: 20px; padding: 16px 18px; border: 1px solid var(--line); box-shadow: var(--shadow); background: linear-gradient(180deg, var(--card) 0%, var(--tint) 100%); }
+a.mem:hover { text-decoration: none; border-color: var(--muted); }
+a.mem h3 { font-size: 20px; margin: 10px 0 6px; line-height: 1.2; }
+a.mem .fade { margin: 0; color: var(--muted); font-size: 14px; flex: 1; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent); mask-image: linear-gradient(180deg, #000 55%, transparent); }
+.k-self, .k-preferences { --tint: #eee8fb; } .k-goal { --tint: #e2f3e8; } .k-person { --tint: #e3eefb; } .k-subject { --tint: #def3ef; } .k-daily { --tint: #fbf3dc; }
+@media (prefers-color-scheme: dark) { .k-self, .k-preferences { --tint: #2a2540; } .k-goal { --tint: #1d3326; } .k-person { --tint: #1d2a3d; } .k-subject { --tint: #1a3330; } .k-daily { --tint: #3a321b; } }
+.mem-page { background: linear-gradient(180deg, var(--card) 0%, var(--card) 60%, var(--tint) 100%); padding: 20px 22px; }
+.mem-page .lede { font-size: 17px; margin: 8px 0 4px; }
+.mem-page h3 { margin-top: 20px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+ul.facts { margin: 8px 0; padding-left: 20px; } ul.facts li { margin: 4px 0; }
+.daily-body { white-space: pre-wrap; margin: 12px 0; }
+.big-goal { display: flex; gap: 22px; flex-wrap: wrap; margin: 10px 0 6px; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--open); }
+.dot:hover { text-decoration: none; outline: 2px solid var(--fg); }
+.dot.done { background: var(--done); } .dot.done_reduced { background: var(--half); } .dot.missed { background: var(--miss); } .dot.proof { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--done); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend .dot { width: 14px; height: 14px; font-size: 0; display: inline-block; vertical-align: -2px; margin-right: 4px; }
+.day-row { scroll-margin-top: 110px; } .day-row:target { outline: 2px solid var(--accent); }
 `;
 
 /**
@@ -89,12 +112,44 @@ const SCRIPT = `(function () {
   var base = "/console/testers/" + root.dataset.tester, tab = root.dataset.tab;
   try {
     var saved = localStorage.getItem("zoh-tab");
-    if (!new URLSearchParams(location.search).get("tab") && saved && saved !== tab && root.dataset.tabs.split(",").indexOf(saved) >= 0) {
+    if (location.pathname === base && !new URLSearchParams(location.search).get("tab") && saved && saved !== tab && root.dataset.tabs.split(",").indexOf(saved) >= 0) {
       location.replace(base + "?tab=" + saved + location.hash);
       return;
     }
     localStorage.setItem("zoh-tab", tab);
   } catch (e) {}
+  // A day dot opens the folded day list before jumping to its day.
+  document.querySelectorAll("a.dot[href^='#']").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var day = document.getElementById(a.getAttribute("href").slice(1));
+      var fold = day && day.closest("details");
+      if (fold) fold.open = true;
+    });
+  });
+  var memory = document.querySelector(".memory");
+  if (memory) {
+    var chip = "all", search = memory.querySelector(".mem-search");
+    var grid = memory.querySelector(".mem-grid"), line = memory.querySelector(".mem-timeline"), none = memory.querySelector(".mem-none");
+    function filter() {
+      var q = search.value.trim().toLowerCase(), shown = 0;
+      grid.hidden = chip === "timeline";
+      line.hidden = chip !== "timeline";
+      memory.querySelectorAll("a.mem").forEach(function (c) {
+        var ok = (chip === "all" || chip === "timeline" || c.dataset.group === chip) && (!q || c.dataset.search.indexOf(q) >= 0);
+        c.hidden = !ok;
+        if (ok && grid.contains(c)) shown++;
+      });
+      none.hidden = chip === "timeline" || shown > 0;
+    }
+    memory.querySelectorAll("[data-chip]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        chip = b.dataset.chip;
+        memory.querySelectorAll("[data-chip]").forEach(function (x) { x.classList.toggle("on", x === b); });
+        filter();
+      });
+    });
+    search.addEventListener("input", filter);
+  }
   var boxes = Array.prototype.slice.call(document.querySelectorAll(".scroller"));
   function tidy(box) {
     var ids = {};

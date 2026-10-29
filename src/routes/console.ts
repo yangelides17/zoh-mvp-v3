@@ -9,7 +9,6 @@ import {
   CHUNK,
   consoleTab,
   mediaMessage,
-  memoryTab,
   progressTab,
   recentLines,
   sideSection,
@@ -24,7 +23,8 @@ import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind }
 import { metricsPage } from "../console/metrics.js";
 import { listPage } from "../console/views/home.js";
 import { ICON_SVG, loginPage, MANIFEST, namePage, notConfiguredPage } from "../console/views/layout.js";
-import { memoryTabHtml } from "../console/views/memory.js";
+import { memoryCards, memoryPageView } from "../console/memory-view.js";
+import { memoryPageHtml, memoryTabHtml } from "../console/views/memory.js";
 import { metricsView } from "../console/views/metrics.js";
 import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
@@ -60,7 +60,7 @@ export const MAX_CHAT_CHARS = 2000;
 const LIVE_MAX = 200;
 
 type Form = Record<string, string | undefined>;
-type Params = { id: string; sid: string; aid: string; mid: string; rid: string };
+type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string };
 
 export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOptions): Promise<void> {
   const clock = opts.now ?? (() => new Date());
@@ -135,7 +135,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       const data = await consoleTab(opts.db, id);
       content = consoleTabHtml(data, header.tester, ctx, side(data, ctx).html, CHUNK);
     } else if (tab === "texts") content = textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK);
-    else if (tab === "memory") content = memoryTabHtml(await memoryTab(opts.db, header.tester));
+    else if (tab === "memory") content = memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
     else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
     return html(reply, testerView(header, tab, content, name, notice), code);
   };
@@ -144,6 +144,16 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     const { id } = request.params;
     if (!isUuid(id)) return html(reply, "Not found", 404);
     return (await testerHtml(reply, id, asTab(query(request).tab), name)) ?? html(reply, "Not found", 404);
+  }));
+
+  // One memory page (#63), only under its own tester.
+  app.get("/console/testers/:id/memory/:pid", page(async (request, reply, name) => {
+    const { id, pid } = request.params;
+    if (!isUuid(id) || !isUuid(pid)) return html(reply, "Not found", 404);
+    const header = await testerHeader(opts.db, id, await nowFor(id));
+    const view = header && (await memoryPageView(opts.db, id, pid));
+    if (!header || !view) return html(reply, "Not found", 404);
+    return html(reply, testerView(header, "memory", memoryPageHtml(view, id), name));
   }));
 
   // Older items for a thread, as the founder scrolls up (#63).
