@@ -91,7 +91,7 @@ export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names w
 - after_miss: yesterday slipped; once, not twice. Push harder for the full step today, or at least the smaller version.
 - one_a_day (2+ misses in a row): today's one text, a new angle each day: a different reason, a smaller start, or what's getting in the way.
 - day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
-When they text (phase "active"): once they've said yes to today's step it's settled: answer them without re-saying it or the proof, or asking if they're still on. Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
+When they text (phase "active"): a yes to today's step → mark_agreed; then it's settled (see the state). Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
 export const PROOF = `PROOF (phase "active"): their plan's proof is part of the deal. Judge each photo, screenshot or voice note against the step:
@@ -153,8 +153,13 @@ function todayLines(s: CoachState, plan: Plan): string[] {
   if (plan.startDate && plan.startDate > s.today) return [`Today: ${day(s.today)}. Day 1 is ${day(plan.startDate)}: nothing to do yet.`];
   const status = row?.status ? STATUS_LABELS[row.status] : "not marked done yet";
   const onIt = row?.onItAt ? ` They said they're on it (${localTime(row.onItAt, s.tester.timeZone)}).` : "";
+  // #42: settled once they've said yes, so replies stop re-saying it.
+  const agreed =
+    row?.agreedAt && !row.status
+      ? ` They said yes to today's step (${localTime(row.agreedAt, s.tester.timeZone)}): it's settled. Don't re-say it or its proof, or ask if they're still on; a change is said once, and after that only if they ask.`
+      : "";
   const today = isStepDay(plan, s.today, row)
-    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt} ${proofLine(s)}`
+    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt}${agreed} ${proofLine(s)}`
     : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
   const next = nextStepDay(plan, s.today);
   return [today, next ? `Next step day: ${day(next)}.` : ""].filter(Boolean);

@@ -1,5 +1,5 @@
 {
-  "id": "49c6d24c-c466-41c2-b308-35d8fc0749e3",
+  "id": "015b7dd7-99eb-4068-beb7-583ea0fd2405",
   "prevId": "d53becba-5e1f-42b0-87c8-75f0039cd3db",
   "version": "7",
   "dialect": "postgresql",
@@ -1910,6 +1910,12 @@
         },
         "on_it_at": {
           "name": "on_it_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agreed_at": {
+          "name": "agreed_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false

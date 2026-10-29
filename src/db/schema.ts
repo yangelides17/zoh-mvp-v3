@@ -467,6 +467,8 @@ export const stepDays = pgTable(
     movedTime: text("moved_time"),
     /** When they said they were doing it or about to: skips that day's check-in. */
     onItAt: timestamp("on_it_at", { withTimezone: true }),
+    /** When they said yes to this day's step (or moved it): it's settled, so the coach doesn't re-say it (#42). */
+    agreedAt: timestamp("agreed_at", { withTimezone: true }),
     /** What they did, in a few words. */
     note: text("note"),
     /** The coach's verdict on the latest proof for this day. */

@@ -18,8 +18,8 @@
       "place": "the couch",
       "time": "19:00",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-      "proof": "photo",
-      "proof_note": "the page you stopped on",
+      "proof": "voice",
+      "proof_note": "a quick voice note saying where you stopped",
       "reason": "Twenty pages a night finishes the book in two weeks.",
       "minutes": 25
     }
@@ -29,10 +29,10 @@
     "yep, 7 tonight",
     "advance to 18:50",
     "heading to the couch now",
-    "done!! 20 pages, this book is so good",
+    "[voice: Okay, twenty pages of Project Hail Mary done on the couch, I stopped at the start of chapter twelve] done!! 20 pages, this book is so good",
     "advance to 21:45"
   ],
-  "whatWentWrong": "New case, not a past mistake: the daily rhythm on a Pushy step day.",
+  "whatWentWrong": "New case, not a past mistake: the daily rhythm on a Pushy step day. Since proof (#7), \"done\" without a photo isn't a check mark, so the done text now carries the proof (a voice note, which the coach can judge from its words).",
   "shouldHaveHappened": "At 9 am ZOH starts a warm kickoff that uses Maya's name and names her commitment (20 pages of Project Hail Mary, on the couch, at 7) and asks one question. Her reply gets a short answer. Around 6:50 pm a short check-in names the step and says to get set up. \"heading to the couch now\" gets a short push, no extra question needed. \"done!!\" gets a real, specific celebration. Nothing after that: no follow-up text later in the evening. No guilt or fake urgency anywhere.",
   "startTime": "08:30",
   "timeZone": "America/New_York"

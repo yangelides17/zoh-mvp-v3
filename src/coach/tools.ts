@@ -126,6 +126,7 @@ const schemas = {
   mark_missed: z.object({ note: z.string().trim().max(200).optional() }).strict(),
   flag_proof_pattern: z.object({ reason: text(300) }).strict(),
   mark_on_it: z.object({}).strict(),
+  mark_agreed: z.object({}).strict(),
   move_today: z.object({ time: clock }).strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
 };
@@ -341,6 +342,12 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     name: "mark_on_it",
     description:
       'They are doing today\'s step now or about to ("heading to the gym now"). Not for chatting or answering a question. Skips today\'s check-in.',
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "mark_agreed",
+    description:
+      'They said yes to today\'s step, including a plain yes to the kickoff ("yes! I\'m in", "yep, 7 tonight", "ready to go today"). Not for a yes to something else. From then on today\'s step is settled: the state says so.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -780,6 +787,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       return saved(tester, "Noted they're on it: today's check-in is skipped.");
     }
 
+    case "mark_agreed": {
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
+      if (!isStepDay(plan, state.today, state.todayRow)) return { ok: false, error: "Today isn't a step day: nothing to agree to." };
+      await saveToday(db, state, { agreedAt: at }, at);
+      return saved(tester, "Noted: today's step is settled. Don't re-say it or ask if they're still on.");
+    }
+
     case "move_today": {
       const { time } = input as z.infer<typeof schemas.move_today>;
       const plan = state.plan;
@@ -787,7 +802,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (!isStepDay(plan, state.today) && plan.startDate !== state.today) {
         return { ok: false, error: "Today isn't a step day: nothing to move." };
       }
-      await saveToday(db, state, { movedTime: time }, at);
+      // They picked the new time themselves: that's agreeing to it.
+      await saveToday(db, state, { movedTime: time, agreedAt: at }, at);
       return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
     }
 
@@ -841,7 +857,7 @@ async function alertPlanReview(db: Db, tester: Tester, planId: string, version: 
   await raiseAlert(db, { testerId: tester.id, topic: "plan_review", key: `plan_review:${planId}`, body: `Plan version ${version} to review`, planId, at });
 }
 
-type DayValues = Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "proofVerdict" | "proofSeen" | "proofPendingAt">>;
+type DayValues = Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt">>;
 
 /** Creates or updates the tester's row for today's step. */
 function saveToday(db: Db, state: CoachState, values: DayValues, at: Date): Promise<void> {

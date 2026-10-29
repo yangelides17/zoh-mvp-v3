@@ -751,6 +751,26 @@ describe("a kickoff the morning already covered (#42)", () => {
     expect((await sentKinds()).at(-1)).toBe("kickoff:skipped");
   });
 
+  it("a yes to today's step is saved and the state says it's settled, until it's done", async () => {
+    const tester = await setup({ days: ["mon", "wed", "fri"] });
+    await updateTester(t.db, tester.id, { phase: "active" });
+    expect(await tool("mark_agreed", {}, at(MON, "10:00"))).toMatchObject({ ok: true });
+    expect(await stepDay(tester, MON)).toMatchObject({ agreedAt: at(MON, "10:00") });
+    const block = async () =>
+      buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "20:00"), isFirstText: false }));
+    expect(await block()).toContain("They said yes to today's step (Mon 10:00 AM): it's settled.");
+    await doneWithPhoto("full", at(MON, "19:30"));
+    expect(await block()).not.toContain("They said yes to today's step");
+    // A rest day has nothing to agree to.
+    expect(await tool("mark_agreed", {}, at(TUE, "10:00"))).toMatchObject({ ok: false });
+  });
+
+  it("moving today's time counts as agreeing to it", async () => {
+    const tester = await setup();
+    await tool("move_today", { time: "20:30" }, at(MON, "12:00"));
+    expect(await stepDay(tester, MON)).toMatchObject({ movedTime: "20:30", agreedAt: at(MON, "12:00") });
+  });
+
   it("a text from yesterday doesn't count: no skip offered", async () => {
     const tester = await setup();
     await say(tester, "inbound", at(SUN, "21:00"), "see you tomorrow");
