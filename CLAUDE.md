@@ -25,6 +25,12 @@ Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-wo
 branches in the main folder; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
+**Groups and parallel builds are optional.** The commands can take several issues at once (related, dependent, or
+just small) through one spec conversation, one plan and usually one PR, and `/build` can run up to 3 branches as
+parallel agents. Neither is ever required: use them when Claude judges it safe and quicker, and when Claude has
+concerns (too big, a database change, shared prompt files, an open question), it says so and splits the issue out
+or builds one at a time. The details are in each command.
+
 **When a request skips the flow.** If someone asks for a change directly (not through a command), first judge
 its size. Small (docs, wording, config, a few-line fix): do it the `/quick` way, tests and a record included.
 Bigger (a new feature, a behavior change testers would notice, anything in the database or the coach's voice):
@@ -49,7 +55,7 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - `npm run db:generate`: after editing `src/db/schema.ts`, generate a migration in `drizzle/`. Commit both.
 - `npm run dev`: run locally with `tsx` (needs a `.env`, see `.env.example`).
 - `npm run eval -- <feature> --case <id>`: replays only the regression cases a change touches against the
-  real coach, graded by a separate Claude (about $0.10–0.20 a case). Costs money: **$1 per branch**, enforced
+  real coach, graded by a separate Claude (about $0.10–0.20 a case). Costs money: **$1 per issue on the branch, up to $3**, enforced
   (see `eval/README.md`). A full run (no `--case`, $1.30–1.90) only for changes that affect every
   conversation, and only with Yanni's OK. `npm run check` is free: tests never call Claude.
 

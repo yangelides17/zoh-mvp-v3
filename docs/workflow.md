@@ -55,6 +55,13 @@ You never need an issue number. Every command takes a number, a description, or 
 | `/build` · `/build plan agreement` · `/build 12` | With nothing, lists approved plans waiting to be built. |
 | `/review` · `/review nudges` · `/review 12` | With nothing, lists PRs waiting for review. |
 
+**Several issues at once (optional).** `/spec 41 42 48`, `/plan the small nudge bugs` or `/build 41 42 48` take
+a group: related or dependent issues, or a handful of small fixes not worth doing one by one. Each issue keeps its own
+spec; the group gets one plan (on the first issue) and usually one PR that closes them all, so it's one review, one
+deploy and one round of phone checks. When the plan splits a group into separate branches, `/build` can build up to
+3 of them at the same time. Claude decides when either is safe and worth it, and tells you when it would rather split
+an issue out (big, a database change, shared prompt files, an open question) or build one at a time.
+
 Outside the commands, just talk normally: "file a bug: the recap was too long", "what did the build
 decide about time zones?", "mark #12 done".
 
@@ -74,7 +81,7 @@ the running list of phone checks.
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
-- **Eval budget: $1 per branch**, enforced by the eval itself. Each change runs only the cases it touches
+- **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself. Each change runs only the cases it touches
   (about $0.10–0.20 each); a full run ($1.30–1.90) only for changes to every conversation, with your OK. The
   tests in `npm run check` are free. Live testing and the beta catch the rest.
 

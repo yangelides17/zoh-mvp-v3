@@ -3,17 +3,26 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 /**
- * Eval spend per branch (one branch = one feature), kept in eval/reports/spend.json (gitignored).
- * The default budget is $1 per branch (Yanni, Oct 27, down from $2): run only the cases a change
- * touches (--case); bugs beyond that get found live and in the beta.
+ * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $1 per issue
+ * the branch builds, up to $3 for a group (Yanni, Oct 29; $1 per branch since Oct 27): run only
+ * the cases a change touches (--case); bugs beyond that get found live and in the beta.
  */
-export const DEFAULT_BUDGET_USD = 1;
+export const BUDGET_PER_ISSUE_USD = 1;
+export const MAX_BUDGET_USD = 3;
 
 export type Ledger = Record<string, { spentUsd: number; runs: number }>;
 
-export function budgetFrom(env: NodeJS.ProcessEnv): number {
+/** Issues a branch builds, from its name: feature/41-42-48-nudge-fixes is 3. Any other branch is 1. */
+export function issueCount(branch: string): number {
+  const numbers = /^feature\/(\d+(?:-\d+)*)(?=-|$)/.exec(branch)?.[1];
+  return numbers ? numbers.split("-").length : 1;
+}
+
+/** EVAL_BUDGET_USD overrides; otherwise $1 per issue on the branch, at most $3. */
+export function budgetFor(env: NodeJS.ProcessEnv, branch: string): number {
   const n = Number(env.EVAL_BUDGET_USD);
-  return Number.isFinite(n) && n > 0 ? n : DEFAULT_BUDGET_USD;
+  if (Number.isFinite(n) && n > 0) return n;
+  return Math.min(MAX_BUDGET_USD, BUDGET_PER_ISSUE_USD * issueCount(branch));
 }
 
 export function currentBranch(cwd: string): string {

@@ -10,7 +10,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "../src/config.js";
 import { addUsage, createCompleter } from "./claude.js";
 import { USAGE, UsageError, evalApiKey, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
-import { budgetFrom, currentBranch, overBudgetMessage, readLedger, recordSpend } from "./budget.js";
+import { budgetFor, currentBranch, overBudgetMessage, readLedger, recordSpend } from "./budget.js";
 import { COACH, dollarsFor, estimateCost, KEEPER } from "./cost.js";
 import { REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor } from "./features.js";
 import { gradeConversation } from "./grader.js";
@@ -86,7 +86,7 @@ async function main(): Promise<number> {
   );
   const ledgerPath = `${REPORTS_DIR}spend.json`;
   const branch = currentBranch(REPO_ROOT);
-  const budgetUsd = budgetFrom(env);
+  const budgetUsd = budgetFor(env, branch);
   const spentUsd = (await readLedger(ledgerPath))[branch]?.spentUsd ?? 0;
   console.log(`Budget: $${spentUsd.toFixed(2)} of $${budgetUsd.toFixed(2)} spent on ${branch}.`);
   const tooMuch = overBudgetMessage({ spentUsd, estimateUsd: est.dollars, budgetUsd, branch });

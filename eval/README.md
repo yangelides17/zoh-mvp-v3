@@ -24,7 +24,8 @@ Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, d
 `EVAL_MODEL` sets the grader model (default: the coach's `CLAUDE_MODEL`); `EVAL_SIM_MODEL` the
 simulated tester (default `claude-haiku-5-5`).
 
-**Budget:** $1 of eval spend per branch (`EVAL_BUDGET_USD`), tracked in `eval/reports/spend.json`.
+**Budget:** $1 of eval spend per issue the branch builds, counted from its name
+(`feature/41-42-48-...` is $3), up to $3 (`EVAL_BUDGET_USD` overrides), tracked in `eval/reports/spend.json`.
 A run that would likely go past it refuses to start. Run only the cases a change touches (`--case <id>`,
 repeatable, about $0.10–0.20 each); a full onboarding run is about $1.30–$1.90, so it's only for changes
 that affect every conversation, with Yanni's OK. Not part of `npm run check`: tests never

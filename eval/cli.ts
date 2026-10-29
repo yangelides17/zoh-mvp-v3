@@ -17,7 +17,7 @@ export const USAGE = [
   "",
   "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
   "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the grader model (default: CLAUDE_MODEL); EVAL_SIM_MODEL the",
-  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: 1).",
+  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: $1 per issue in the branch name, up to $3).",
 ].join("\n");
 
 export interface EvalArgs {

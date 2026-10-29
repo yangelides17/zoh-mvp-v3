@@ -67,7 +67,7 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.
-- Eval: $1 per branch, targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
+- Eval: $1 per issue on the branch, up to $3 for a group (Oct 29; was $1 per branch), targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
   against the checks Yanni approves in each spec, judged reasonably.
 - Coach memory (#8) is a small wiki per tester in Postgres (no outside search service): pages of
   facts that each cite the text they came from, written by one pass per tester at 3 am their time

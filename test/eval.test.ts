@@ -10,7 +10,7 @@ import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
 import { zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
-import { overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
+import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
 import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
@@ -571,6 +571,19 @@ describe("eval: command line and cost", () => {
     await recordSpend(path, "feature/x", 0.75);
     const ledger = await recordSpend(path, "feature/x", 0.5);
     expect(ledger["feature/x"]).toEqual({ spentUsd: 1.25, runs: 2 });
+  });
+
+  it("budgets $1 per issue a branch builds, up to $3", () => {
+    expect(issueCount("feature/12-commands")).toBe(1);
+    expect(issueCount("feature/41-42-48-nudge-fixes")).toBe(3);
+    expect(issueCount("feature/41-3am-pass")).toBe(1);
+    expect(issueCount("feature/7")).toBe(1);
+    expect(issueCount("main")).toBe(1);
+    expect(budgetFor({}, "feature/12-commands")).toBe(1);
+    expect(budgetFor({}, "feature/41-42-nudge-fixes")).toBe(2);
+    expect(budgetFor({}, "feature/1-2-3-4-5-small-fixes")).toBe(3);
+    expect(budgetFor({ EVAL_BUDGET_USD: "5" }, "feature/12-commands")).toBe(5);
+    expect(budgetFor({ EVAL_BUDGET_USD: "nope" }, "main")).toBe(1);
   });
 
   it("cleans up what the simulator writes", () => {
