@@ -6,6 +6,7 @@ import { consoleMessages, flags, messages, pauses, plans, stepDays, testerGoals,
 import { messageTime } from "../memory/store.js";
 import { addDays, daysBetween, weekdayOf } from "../nudges/schedule.js";
 import type { HitRate, StreakRun } from "../nudges/streak.js";
+import { testerNow } from "../testers/clock.js";
 import { pausedOn } from "../testers/pauses.js";
 import { goalTitles, goalViews } from "./data.js";
 
@@ -136,13 +137,6 @@ export interface Rollup {
   progressed: number;
   backOff: number;
   stops: number;
-}
-
-/**
- * Today for a tester. One place so the test clock (#14) can move it per tester.
- */
-function testerNow(_tester: Tester, now: Date): Date {
-  return now;
 }
 
 /** One tester's numbers, since their context started (a dev "reset" starts fresh). */

@@ -191,6 +191,17 @@ describe("Metrics page", () => {
     expect(again.retention).toMatchObject({ comebacks: 0, total: 8 });
   });
 
+  it("a jumped dev account's numbers run on their clock (#14)", async () => {
+    let sam = await seedSam();
+    // Saved on Sam's clock once jumped: a day after real now, so it only counts from there.
+    await text(ME, at("2026-11-11", "09:00"));
+    const real = await testerMetrics(t.db, sam, now);
+    sam = await updateTester(t.db, sam.id, { clockOffsetMs: 2 * 24 * 60 * 60_000 });
+    const jumped = await testerMetrics(t.db, sam, now);
+    expect(jumped.engagement!.messages).toBe(real.engagement!.messages + 1);
+    expect(jumped.engagement!.ofDays).toBe(real.engagement!.ofDays + 2);
+  });
+
   it("leaves test accounts out unless the toggle is on", async () => {
     await seedSam();
     await tester(DEV, "Dev", { isTestUser: true });
@@ -253,6 +264,19 @@ describe("flag_back_off", () => {
     expect(await runTool(t.db, state, "flag_back_off", { reason: "too many texts" }, now)).toMatchObject({ ok: true });
     const saved = await t.db.select().from(flags).where(eq(flags.testerId, row!.id));
     expect(saved).toMatchObject([{ kind: BACK_OFF_FLAG, detail: "too many texts" }]);
+  });
+
+  it("saves on a jumped dev account's clock, like every other flag (#14)", async () => {
+    const [row] = await t.db
+      .insert(testers)
+      .values({ phone: DEV, name: "Dev", phase: "onboarding", timeZone: TZ, timeZoneStatus: "assumed_eastern", consentAt: new Date(), contextStartedAt: new Date(), isTestUser: true, clockOffsetMs: 3 * 60 * 60_000 })
+      .returning();
+    const tester = (await getTester(t.db, row!.id))!;
+    const ahead = new Date(Date.now() + 3 * 60 * 60_000);
+    const state = await loadCoachState(t.db, tester, { now: ahead, isFirstText: false, lastTesterText: "" });
+    await runTool(t.db, state, "flag_back_off", { reason: "too many texts" }, ahead);
+    const [saved] = await t.db.select().from(flags).where(eq(flags.testerId, row!.id));
+    expect(saved!.createdAt).toEqual(ahead);
   });
 
   it("is in the every-phase rules, and stopping is for good", () => {
