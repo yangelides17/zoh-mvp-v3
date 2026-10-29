@@ -49,13 +49,15 @@ export interface NudgeRequest {
   previous?: string;
   /** A kickoff that also raises an approved next step or asks a maintenance check-in. */
   carry?: NudgeCarry;
+  /** They've already texted today: the coach may skip a kickoff the conversation already covered (#42). */
+  mayskip?: boolean;
 }
 
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
   reply(input: ReplyInput): Promise<string>;
-  /** Writes a nudge; repliers without it never start texts. */
-  nudge?(input: NudgeRequest): Promise<string>;
+  /** Writes a nudge; repliers without it never start texts. Null: skipped (only when `mayskip`). */
+  nudge?(input: NudgeRequest): Promise<string | null>;
   /** Cheap connectivity check for /health?deep=1. */
   check(): Promise<void>;
 }

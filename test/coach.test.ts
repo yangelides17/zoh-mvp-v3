@@ -426,6 +426,27 @@ describe("opting out and failures", () => {
   });
 });
 
+describe("skipping a kickoff (#42)", () => {
+  const lastNote = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
+
+  it("SKIP skips only when it was offered; otherwise it's retried and never sent", async () => {
+    await text(ME, "Start");
+    const me = await tester();
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    const ask = { tester: me, turns: [], now: new Date("2026-11-02T14:00:00Z"), moment: "kickoff" as const };
+
+    model.script("SKIP");
+    expect(await coach.nudge!({ ...ask, mayskip: true })).toBeNull();
+    expect(lastNote()).toContain("answer only SKIP");
+
+    model.script("SKIP", "Hey! Ten pages at 7 tonight.");
+    expect(await coach.nudge!(ask)).toBe("Hey! Ten pages at 7 tonight.");
+    expect(lastNote()).not.toContain("SKIP");
+    model.script("SKIP", "SKIP.");
+    await expect(coach.nudge!(ask)).rejects.toThrow(/no nudge text/);
+  });
+});
+
 describe("instructions", () => {
   it("stay within their length budget", () => {
     expect(CORE_VOICE.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.core);

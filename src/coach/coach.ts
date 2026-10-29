@@ -38,6 +38,8 @@ export const MAX_ROUNDS = 5;
  * (src/memory/context.ts) and only the last two days come word for word.
  */
 export const COACH_HISTORY_CAP = 200;
+/** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
+export const SKIP = "SKIP";
 
 /**
  * Output budget per Claude call. Thinking counts against it, so it sits well above a text's
@@ -163,10 +165,14 @@ export function createCoach(opts: CoachOptions): Replier {
      * A text ZOH starts itself: one call with the same prompt and tools (so the cache holds), no
      * tool use, and a note in place of a tester text naming the moment (the state block says it too).
      */
-    async nudge({ tester, turns, now, moment, previous, carry }: NudgeRequest) {
+    async nudge({ tester, turns, now, moment, previous, carry, mayskip }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
       const carries = carry ? ` It also does what the state's "THIS TEXT ALSO" line says.` : "";
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}]`;
+      // #42: a kickoff right after a morning chat that settled today's step only repeats it.
+      const skip = mayskip
+        ? ` They've already texted today. If today's conversation already covered what this text would say (today's step and time agreed, they're on it or moved it, or they owned a miss and talked through today's plan), answer only ${SKIP} and nothing goes out. Otherwise write it without repeating what was already said.`
+        : "";
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
       const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
@@ -183,7 +189,10 @@ export function createCoach(opts: CoachOptions): Replier {
           .map((b) => b.text)
           .join("\n")
           .trim();
-        if (text) return text;
+        const skipped = text.replace(/[^A-Z]/g, "") === SKIP;
+        if (skipped && mayskip) return null;
+        // SKIP when it wasn't offered counts as no text: retried, never sent and never dropped.
+        if (text && !skipped) return text;
         if (attempt === 2) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
       }
     },

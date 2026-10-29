@@ -1,0 +1,2 @@
+ALTER TABLE "nudges" DROP CONSTRAINT "nudges_status_check";--> statement-breakpoint
+ALTER TABLE "nudges" ADD CONSTRAINT "nudges_status_check" CHECK ("nudges"."status" in ('claimed', 'sent', 'failed', 'skipped'));

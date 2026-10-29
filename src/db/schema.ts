@@ -485,7 +485,8 @@ export const stepDays = pgTable(
   ],
 );
 
-export const NUDGE_STATUSES = ["claimed", "sent", "failed"] as const;
+/** "skipped": the coach found the morning's conversation already covered the kickoff (#42); nothing was sent. */
+export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped"] as const;
 
 /**
  * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
@@ -510,7 +511,7 @@ export const nudges = pgTable(
   },
   (t) => [
     unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
-    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed')`),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped')`),
   ],
 );
 

@@ -708,6 +708,57 @@ describe("the slip ladder", () => {
   });
 });
 
+describe("a kickoff the morning already covered (#42)", () => {
+  const sentKinds = async () =>
+    (await t.db.select().from(nudges).orderBy(asc(nudges.createdAt))).map((r) => `${r.kind}:${r.status}`);
+
+  it("no text from them today: the kickoff goes as usual, with no skip offered", async () => {
+    await setup();
+    t.replier.skipWhenAllowed = true;
+    expect(await day(MON, "09:00", "09:30")).toEqual(["kickoff@09:00"]);
+    expect(t.replier.nudges[0]!.mayskip).toBeUndefined();
+    expect(t.sendblue.sends).toHaveLength(1);
+  });
+
+  it("they texted this morning and the coach skips: nothing sent, no kickoff later, check-in and follow-up still go", async () => {
+    const tester = await setup();
+    t.replier.skipWhenAllowed = true;
+    await say(tester, "inbound", at(MON, "08:10"), "Yep! 7 tonight");
+    await say(tester, "outbound", at(MON, "08:10"), "Love it.");
+    await day(MON, "09:00", "21:59");
+    expect(t.replier.nudges[0]).toMatchObject({ moment: "kickoff", mayskip: true });
+    expect(await sentKinds()).toEqual(["kickoff:skipped", "checkin:sent", "followup:sent"]);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Yo, checkin text", "Yo, followup text"]);
+    // The check-in and follow-up are never offered the skip.
+    expect(t.replier.nudges.slice(1).map((n) => n.mayskip)).toEqual([undefined, undefined]);
+  });
+
+  it("they texted but the coach writes it: the kickoff goes", async () => {
+    const tester = await setup();
+    await say(tester, "inbound", at(MON, "08:10"), "rough night lol");
+    expect(await day(MON, "09:00", "09:30")).toEqual(["kickoff@09:00"]);
+    expect(t.replier.nudges[0]!.mayskip).toBe(true);
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Yo, kickoff text"]);
+  });
+
+  it("the kickoff after a miss can be skipped once they've texted that day", async () => {
+    const tester = await setup();
+    await day(MON, "09:00", "22:05");
+    t.replier.skipWhenAllowed = true;
+    await say(tester, "inbound", at(TUE, "08:30"), "I know I missed yesterday. Ready to go today");
+    await day(TUE, "09:00", "09:30");
+    expect(t.replier.nudges.at(-1)).toMatchObject({ moment: "after_miss", mayskip: true });
+    expect((await sentKinds()).at(-1)).toBe("kickoff:skipped");
+  });
+
+  it("a text from yesterday doesn't count: no skip offered", async () => {
+    const tester = await setup();
+    await say(tester, "inbound", at(SUN, "21:00"), "see you tomorrow");
+    await day(MON, "09:00", "09:30");
+    expect(t.replier.nudges[0]!.mayskip).toBeUndefined();
+  });
+});
+
 describe("streaks (rule 6)", () => {
   const row = (date: string, status: "done" | "done_reduced" | "missed", planId = "p1") => ({ date, status, planId });
 

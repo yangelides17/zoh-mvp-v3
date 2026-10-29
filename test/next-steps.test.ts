@@ -369,6 +369,14 @@ describe("maintenance check-ins (rule 7)", () => {
     expect(t.replier.nudges.at(-1)?.carry).toBeUndefined();
   });
 
+  it("a kickoff that carries a check-in is never offered the skip, even after a morning text (#42)", async () => {
+    const tester = await setup();
+    await t.db.insert(testerGoals).values({ testerId: tester.id, goalSlug: "bedtime", role: "maintenance", nudges: false, proof: false, checkinsPerWeek: 2 });
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: tester.phone, content: "yep, 7 tonight", createdAt: at(MON, "08:10"), sentAt: at(MON, "08:10") });
+    await scheduler.tick(at(MON, "09:00"));
+    expect(t.replier.nudges.map((n) => [n.moment, n.carry, n.mayskip])).toEqual([["kickoff", { checkinGoal: "bedtime" }, undefined]]);
+  });
+
   it("the kickoff state names the goal and its step, in place of the kickoff's question", async () => {
     const tester = await setup();
     await t.db.insert(plans).values({ testerId: tester.id, goalSlug: "bedtime", status: "locked", version: 0, ...DUNE, days: [...DUNE.days], step: "in bed by 10:30", startDate: "2026-10-01" });
