@@ -12,7 +12,7 @@ number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has th
 
 **A group.** If the PR closes several issues (one `Closes #n` line each), review it once for all of them: read every
 issue's spec and the group plan (on the lead issue), check each issue's Must tests and Watch items on their own, and
-when it merges, move every issue's label and record the Watch list under one heading per issue. If one issue's part
+when it merges, move every issue's label and leave each issue its own "Live checks" comment (step 6). If one issue's part
 isn't ready but the rest is, you may suggest taking it out (as `/build` describes) rather than holding up the group;
 it's Yanni's call. Branches from one plan built in parallel are reviewed and merged one at a time: rebase the next on
 `main` and run `npm run check` before merging it.
@@ -36,8 +36,7 @@ it's Yanni's call. Branches from one plan built in parallel are reviewed and mer
    `git worktree prune`), bring the main folder up to date (`git -C <main folder> pull --ff-only`; if it isn't on a
    clean `main`, skip this and say so), then
    `gh issue edit $ARGUMENTS --add-label done --remove-label in-review`. Railway deploys `main` in a couple of minutes.
-6. **Record the Watch list:** add it as unticked boxes under a `### <title> (#$ARGUMENTS, PR #<pr>)` heading in the body
-   of the open `live-check` issue, "Live checks to do" (`gh issue list --label live-check`; create it with that label
-   if it's missing), via `gh issue edit <n> --body-file`. Done doesn't wait for these.
-7. When Yanni reports a live check: tick it if it's good. Anything wrong becomes a new issue (`--label bug`) and,
-   for the coach, a regression case in `eval/cases/`; tick the box and link the bug.
+6. **Leave the Watch list on the issue:** `gh issue comment $ARGUMENTS` with "**Live checks** (not done yet; try these
+   on a phone when there's time):" and the list, so anyone can come back to it. Done doesn't wait for these.
+7. If Yanni later reports a live check that went wrong, it becomes a new issue (`--label bug`) and, for the coach,
+   a regression case in `eval/cases/`.
