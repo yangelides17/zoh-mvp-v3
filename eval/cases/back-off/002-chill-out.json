@@ -1,0 +1,54 @@
+{
+  "id": "chill-out",
+  "title": "\"Chill out a bit\": tone down right away and flag it",
+  "origin": "Spec #13 (metrics), Should: back-off requests are flagged and answered with what the app can do",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": {
+      "what": "running",
+      "where": "the park by my place",
+      "when": "6 pm",
+      "how_long": "30 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?"
+      },
+      {
+        "from": "tester",
+        "text": "6 works"
+      }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Running every day builds the habit fast.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": [
+    "chill out a bit, you're a lot sometimes"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the back-off path.",
+  "shouldHaveHappened": "ZOH confirms in one short line that it'll ease up, in a visibly calmer tone, and saves it as a style preference. A back_off flag is saved. No pause, no stop, no guilt.",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

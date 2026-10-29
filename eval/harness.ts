@@ -15,7 +15,7 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
@@ -308,6 +308,8 @@ export interface RunOptions {
   consoleCoach?: ConsoleCoach;
   /** The feature grades memory: run the overnight pass and read back what it wrote. */
   memory?: boolean;
+  /** Show the grader what ZOH saved during the run. */
+  saved?: boolean;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -547,6 +549,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
   const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(l.trim())) ? await readStepLog(app) : undefined;
+  const savedBefore = opts.saved ? await savedIds(app) : undefined;
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
   let error: string | undefined;
@@ -592,6 +595,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       endedBy,
       error,
       ...(record ? { record } : {}),
+      ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,
       messageCount: row?.n ?? 0,
@@ -634,6 +638,35 @@ export async function readSavedState(client: PGlite, phone: string): Promise<Rec
   const out: Record<string, unknown[]> = {};
   for (const [table, rows] of picked) out[table] = [...rows].map((row) => plainRow(row, phone));
   return out;
+}
+
+/** Ids of the tester's flags, pauses and plans, so the run's new ones can be told apart (rows carry the real clock). */
+async function savedIds(app: EvalApp): Promise<Set<string>> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return new Set();
+  const rows = [
+    ...(await app.db.select({ id: schema.flags.id }).from(schema.flags).where(eq(schema.flags.testerId, tester.id))),
+    ...(await app.db.select({ id: schema.pauses.id }).from(schema.pauses).where(eq(schema.pauses.testerId, tester.id))),
+    ...(await app.db.select({ id: schema.plans.id }).from(schema.plans).where(eq(schema.plans.testerId, tester.id))),
+  ];
+  return new Set(rows.map((r) => r.id));
+}
+
+/** Flags, pauses and plan versions ZOH saved during the run, and the style it ended on, one line each. */
+export async function readSaved(app: EvalApp, before: Set<string>): Promise<string> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return "(no tester)";
+  const fresh = <T extends { id: string }>(rows: T[]) => rows.filter((r) => !before.has(r.id));
+  const flagged = fresh(await app.db.select().from(schema.flags).where(eq(schema.flags.testerId, tester.id)));
+  const paused = fresh(await app.db.select().from(schema.pauses).where(eq(schema.pauses.testerId, tester.id)));
+  const versions = fresh(await app.db.select().from(schema.plans).where(and(eq(schema.plans.testerId, tester.id), eq(schema.plans.status, "locked"))));
+  const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
+  const lines = [
+    ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
+    ...paused.map((x) => `Pause: ${x.reason ?? "no reason"}${x.until ? `, back on ${x.until}` : ""}`),
+    ...versions.map((x) => `New plan version ${x.version}${x.changeKind ? ` (${x.changeKind})` : ""}: ${x.step}, ${x.days.join(" ")} at ${x.stepTime}${x.endsOn ? `, until ${x.endsOn}` : ""}`),
+  ];
+  return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");
 }
 
 /** The tester's memory as the coach would read it: every page, core pages first, daily docs last. */

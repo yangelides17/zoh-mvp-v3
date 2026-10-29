@@ -1,0 +1,55 @@
+{
+  "id": "a-lot-of-texts",
+  "title": "\"A lot of texts\": flag it, offer fewer step days, then the feedback reply when they'd rather keep the days",
+  "origin": "Spec #13 (metrics), Should: back-off requests are flagged and answered with what the app can do",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": {
+      "what": "running",
+      "where": "the park by my place",
+      "when": "6 pm",
+      "how_long": "30 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?"
+      },
+      {
+        "from": "tester",
+        "text": "6 works"
+      }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Running every day builds the habit fast.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": [
+    "this is a lot of texts lol",
+    "nah I want to keep running every day, it's just a lot of messages"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the back-off path.",
+  "shouldHaveHappened": "A back_off flag is saved. ZOH first offers fewer step days (at least 3 a week) or a lighter stretch, in a line, without guilt. When they say they want to keep every day, it takes that as feedback: thanks them and says the team's on it (in its own words), and doesn't promise or offer fewer texts or any other change. It isn't a stop or a pause.",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

@@ -209,6 +209,8 @@ export interface ConversationResult {
   memory?: string;
   /** The tester's dated step log at the start (console feature): what ZOH could see, so the grader can check its facts. */
   record?: string;
+  /** What ZOH saved during the run (features with `saved`): flags, pauses, plan versions, style. */
+  saved?: string;
   /** Rows in the database that belong to this tester, other than messages. */
   savedState: Record<string, unknown[]>;
   messageCount: number;
