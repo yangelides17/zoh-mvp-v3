@@ -36,7 +36,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   replies. After 3 days of silence ZOH stops automatic texts and the founders decide.
 - Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
   went quiet) and each locked plan version to review are saved as console alerts, one per event
-  (`raiseAlert`), which the founder console (#10) shows.
+  (`raiseAlert`), which the founder console (#10) shows. Since #12 alerts also cover a stop, a
+  stopped tester texting again, pause and back from pause, feedback (word for word) and failures (the
+  system-down reply or a text that didn't send; at most one per tester per hour).
+- Pause (#12): a break the tester asks for, kept in `pauses` (separate from the automatic pause after
+  3 silent days). The coach asks why and pushes back once on a weak reason. While one is open ZOH starts
+  no texts (founder requests included) but always replies; a step day that ends inside it is never a
+  miss. It lifts when they say they're back or when their end date's quiet hours end; a stop closes it.
 - Everything for the founders lives in the console, inside the same app: server-rendered pages,
   masked numbers, proofs streamed from the bucket behind the login. Each alert gets a one-line why
   from a low-effort Claude call (alerts under 2 days old); seeing a plan-to-review alert clears that
@@ -77,4 +83,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **Sendblue:** replies within 24 hours of a tester's last text are unlimited; after that the coach
   can still text first, up to 200 contacts per line per day; 150 outbound texts in a row with no
   reply is the only other cap. Photo links expire after 30 days (we keep our own copy).
+- **Sendblue opt-out:** Sendblue keeps its own opt-out list (STOP, QUIT, END, REVOKE, OPT OUT,
+  CANCEL, UNSUBSCRIBE; START opts back in) and refuses every send to a number on it, the stop
+  confirmation included. When a stopped tester texts us again, the app calls
+  `POST /api/v2/contacts/opt-out` with `opted_out: false` before replying (#12). Turning the filter off,
+  narrowing its match, and whether Sendblue sends its own STOP reply need Sendblue support (#30).
 - **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s).

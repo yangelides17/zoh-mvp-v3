@@ -1,11 +1,14 @@
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
+import { alertStop } from "../console/alerts.js";
+import { endPause } from "./pauses.js";
 import { updateTester } from "./testers.js";
 
 /** Feature 4, edge cases: the exact reply to "stop" and any other opt-out. */
 export const OPT_OUT_CONFIRMATION = "Thank you very much. Noted. We will stop sending you messages.";
 
-const OPT_OUT_WORDS = new Set(["stop", "stop all", "unsubscribe", "cancel", "end", "quit", "opt out", "optout"]);
+/** Sendblue's own opt-out words are among these ("revoke" too), so its block list and ours agree. */
+const OPT_OUT_WORDS = new Set(["stop", "stop all", "unsubscribe", "cancel", "end", "quit", "revoke", "opt out", "optout"]);
 
 /** Lowercase, punctuation and emoji dropped, whitespace collapsed: "Opt-Out!" → "opt out". */
 export function normalizeCommand(text: string): string {
@@ -27,11 +30,14 @@ export function isResetText(text: string | null | undefined): boolean {
 }
 
 /**
- * Marks the tester as opted out. The caller sends OPT_OUT_CONFIRMATION and nothing else.
- * Also for the coach (T2) when it hears a looser phrasing ("leave me alone").
- * Keeps the first stop time if they were already stopped.
+ * Marks the tester as opted out, closes any pause (stop wins) and raises one alert for the founders.
+ * The caller sends OPT_OUT_CONFIRMATION and nothing else. Also for the coach (T2) when it hears a
+ * looser phrasing ("leave me alone"). Keeps the first stop time if they were already stopped.
  */
-export async function optOut(db: Db, tester: Tester, at: Date): Promise<Tester> {
+export async function optOut(db: Db, tester: Tester, at: Date, how = "texted stop"): Promise<Tester> {
   if (tester.stoppedAt) return tester;
-  return updateTester(db, tester.id, { stoppedAt: at });
+  const stopped = await updateTester(db, tester.id, { stoppedAt: at });
+  await endPause(db, tester.id, { at, by: "stop" });
+  await alertStop(db, tester.id, at, how);
+  return stopped;
 }

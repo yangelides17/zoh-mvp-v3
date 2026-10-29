@@ -236,6 +236,26 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "pushback", scope: "text", label: "It pushes back on requests that break the voice rules" },
     ],
   },
+  /** Commands and safety (#12): pause and feedback, cases only, each seeded with a locked plan. Target 80%. */
+  commands: {
+    name: "commands",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      {
+        id: "pause-why",
+        scope: "conversation",
+        label:
+          "ZOH asks why before pausing; a real reason is accepted right away; a weak one gets exactly one warm pushback, then acceptance if they insist, with no guilt",
+      },
+      { id: "slip-not-pause", scope: "conversation", label: "A \"can't do it today\" text gets the slip treatment, not a pause" },
+      {
+        id: "feedback",
+        scope: "text",
+        label: "Feedback is acknowledged naturally with thanks and \"the team's on it\" (in its own words), with no promise of a specific change",
+      },
+    ],
+  },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
   proof: {
     name: "proof",

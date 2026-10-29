@@ -1,0 +1,36 @@
+{
+  "id": "cant-today-is-a-slip",
+  "title": "\"Can't do it today\" is a slip, not a pause",
+  "origin": "Spec #12 (commands and safety), Should: a \"can't do it today\" text gets the slip treatment, not a pause",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "running", "where": "the park by my place", "when": "6 pm", "how_long": "30 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "zoh", "text": "Plan's yours, Jordan. I'll hold you to it. You in?" },
+      { "from": "tester", "text": "let's do it" },
+      { "from": "zoh", "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃" }
+    ],
+    "plan": {
+      "step": "30 min run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Running every day builds the habit fast.",
+      "minutes": 30,
+      "started_days_ago": 2
+    }
+  },
+  "testerLines": [
+    "advance to 09:00",
+    "can't do it today, need a break, slammed at work"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a skipped day mustn't be read as a request to pause.",
+  "shouldHaveHappened": "After the morning kickoff, \"can't do it today\" is treated as a slip: ZOH holds the line once, warmly and without guilt (the full run, maybe later today) or offers a smaller version. It doesn't offer, suggest or confirm pausing its texts, and doesn't ask why they want a break as if they'd asked to pause.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

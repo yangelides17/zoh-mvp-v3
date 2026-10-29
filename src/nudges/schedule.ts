@@ -71,6 +71,8 @@ export interface NudgeInput {
   claimedToday: string[];
   lastInboundAt?: Date;
   lastOutboundAt?: Date;
+  /** When their latest pause ended: going quiet counts from then, not from before the break. */
+  pauseEndedAt?: Date;
   /** Nudges ZOH sent since the later of their last text and the service date's local midnight (replies don't count). */
   nudgesSinceReply: number;
   /** Stall nudges since their last text. */
@@ -121,7 +123,8 @@ function stalled(input: NudgeInput, date: string, theirsIsLatest: boolean): Nudg
   if (!lastOutboundAt || theirsIsLatest) return none("nothing unanswered");
   if (input.stallsSinceReply === 0 && now.getTime() < lastOutboundAt.getTime() + STALL_FIRST_AFTER_MS) return none("waiting");
   if (input.claimedToday.includes("stall")) return none("already nudged today");
-  const silentSince = localDate(lastInboundAt ?? lastOutboundAt, tester.timeZone);
+  const lastHeard = lastInboundAt ?? lastOutboundAt;
+  const silentSince = localDate(input.pauseEndedAt && input.pauseEndedAt > lastHeard ? input.pauseEndedAt : lastHeard, tester.timeZone);
   if (daysBetween(silentSince, date) >= STALL_SILENT_DAYS) return { action: "pause", date };
   return { action: "send", nudge: { kind: "stall", moment: "stall", date } };
 }

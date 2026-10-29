@@ -8,7 +8,8 @@ import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
 import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Tester } from "../db/schema.js";
-import { raiseAlert, saveFlag } from "../console/alerts.js";
+import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
+import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
 import { insideQuietHours } from "../coach/state.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
@@ -42,6 +43,8 @@ export const MAX_UNANSWERED = 3;
 export const EXACT_MOMENT = "team_exact";
 /** They texted this recently: a due manual nudge waits, so ZOH's reply carries it instead of a text on top. */
 export const MID_CONVERSATION_MS = 10 * 60_000;
+/** Pauses that ended this long ago can still cover yesterday, the oldest day a tick closes. */
+const PAUSE_LOOKBACK_MS = 3 * 24 * 60 * 60_000;
 
 export interface NudgeSchedulerDeps {
   db: Db;
@@ -131,13 +134,23 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
   const date = serviceDate(now, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
 
-  // A step day that ended with nothing done is a miss, whatever else happens.
+  // A break they asked for: it lifts on its own once their end date's quiet hours are over.
+  let pause = await activePause(db, tester.id);
+  if (pause && pauseEnds(pause, now, tester)) {
+    await endPause(db, tester.id, { at: now, by: "end_date" });
+    pause = undefined;
+  }
+
+  // A step day that ended with nothing done is a miss, whatever else happens, unless it ended inside a pause.
   if (plan && !tester.stoppedAt) {
     const rows = await db
       .select()
       .from(stepDays)
       .where(and(eq(stepDays.testerId, tester.id), inArray(stepDays.date, [addDays(date, -1), date])));
-    const missed = daysToClose({ now, tester, plan, rows: Object.fromEntries(rows.map((r) => [r.date, r])) });
+    const recentPauses = await pausesSince(db, tester.id, new Date(now.getTime() - PAUSE_LOOKBACK_MS));
+    const missed = daysToClose({ now, tester, plan, rows: Object.fromEntries(rows.map((r) => [r.date, r])) }).filter(
+      (day) => !pausedOn(recentPauses, day, tester),
+    );
     for (const day of missed) {
       await db
         .insert(stepDays)
@@ -161,9 +174,12 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date)));
   const { lastInboundAt, lastOutboundAt } = await lastTexts(db, tester);
+  // A break they asked for isn't silence: it counts from when the pause ended.
+  const pauseEndedAt = await lastPauseEnd(db, tester.id);
+  const heardAt = pauseEndedAt && (!lastInboundAt || pauseEndedAt > lastInboundAt) ? pauseEndedAt : lastInboundAt;
   // Two whole days without a word from them, after the plan is locked: one alert per silence.
-  if (plan && !tester.stoppedAt && lastInboundAt) {
-    const lastDay = serviceDate(lastInboundAt, tester);
+  if (plan && !tester.stoppedAt && !pause && heardAt) {
+    const lastDay = serviceDate(heardAt, tester);
     if (addDays(lastDay, QUIET_ALERT_DAYS) <= date) {
       await raiseAlert(db, {
         testerId: tester.id,
@@ -206,12 +222,16 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
   // A request still pending past its too-late-after time is dropped with a note, never sent late.
   const blockedBy = tester.stoppedAt
     ? "they texted stop"
-    : unanswered >= MAX_UNANSWERED
+    : pause
+      ? "they asked for a break"
+      : unanswered >= MAX_UNANSWERED
       ? `${MAX_UNANSWERED} texts from ZOH unanswered`
       : quiet
         ? "their quiet hours"
         : "no fitting text came up";
   await expireRequests(db, tester, now, blockedBy);
+  // While paused ZOH starts nothing: not its own texts, not the founders' (spec "Commands and safety", rule 1).
+  if (pause) return { action: "none", reason: "paused" };
 
   // The founders' "send exactly this": one per tick, and that tick sends nothing else.
   if (await sendExact(deps, tester, { now, date, lastInboundAt, lastOutboundAt, unanswered })) {
@@ -236,6 +256,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     claimedToday: claimed.map((c) => c.kind),
     lastInboundAt,
     lastOutboundAt,
+    pauseEndedAt,
     nudgesSinceReply: started?.n ?? 0,
     stallsSinceReply: stalls?.n ?? 0,
     missesInARow: summarizeDays(recent, []).missesInARow,
@@ -425,5 +446,6 @@ async function send(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, n
     });
     await db.update(nudges).set({ status: "failed", messageId: message.id }).where(eq(nudges.id, claim.id));
     log.error({ ...ctx, err: safeError(err) }, "Sending a nudge failed");
+    await alertFailure(db, tester.id, `A ${nudge.moment} text didn't send (${(err instanceof Error ? err.message : String(err)).slice(0, 120)})`, now);
   }
 }

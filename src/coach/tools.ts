@@ -20,7 +20,8 @@ import {
   type Suggestion,
   type Tester,
 } from "../db/schema.js";
-import { raiseAlert, saveFlag } from "../console/alerts.js";
+import { alertFeedback, raiseAlert, saveFlag } from "../console/alerts.js";
+import { endPause, startPause } from "../testers/pauses.js";
 import { closeRequest, doneLine, findRequest } from "../console/requests.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
@@ -78,6 +79,11 @@ const schemas = {
   set_time_zone: z.object({ city: text(80), time_zone: text(60) }).strict(),
   set_quiet_hours: z.object({ start: clock, end: clock }).strict(),
   opt_out: z.object({}).strict(),
+  pause_texts: z
+    .object({ reason: text(200), back_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
+    .strict(),
+  resume_texts: z.object({}).strict(),
+  send_feedback: z.object({ feedback: text(1000) }).strict(),
   propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
   change_plan: z
@@ -180,6 +186,26 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     name: "opt_out",
     description: 'They want ZOH to stop texting them ("leave me alone", "I\'m done with this"). Stops them; the app sends the confirmation.',
     input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "pause_texts",
+    description:
+      "Pause every text you'd start (kickoffs, nudges), once they've given a real reason or insisted after your one push back. reason: why, in a few words. back_on: their local date they'll be back, only if they said.",
+    input_schema: {
+      type: "object",
+      properties: { reason: { type: "string" }, back_on: { type: "string", description: '"YYYY-MM-DD"' } },
+      required: ["reason"],
+    },
+  },
+  {
+    name: "resume_texts",
+    description: 'They\'re back from a pause ("I\'m back", "let\'s go again"): your texts start again.',
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "send_feedback",
+    description: "Passes feedback meant for the team to the founders, in their words.",
+    input_schema: { type: "object", properties: { feedback: { type: "string" } }, required: ["feedback"] },
   },
   {
     name: "propose_plan",
@@ -410,8 +436,29 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "opt_out": {
-      const updated = await optOut(db, tester, at);
+      const updated = await optOut(db, tester, at, "asked the coach to stop");
       return { ok: true, message: "Stopped.", tester: updated, optedOut: true };
+    }
+
+    case "pause_texts": {
+      const { reason, back_on } = input as z.infer<typeof schemas.pause_texts>;
+      if (back_on && back_on <= state.today) return { ok: false, error: `back_on must be after today (${state.today}).` };
+      const { pause, created } = await startPause(db, tester, { at, until: back_on, reason });
+      if (!created) return saved(tester, `They're already paused (since ${localDate(pause.startedAt, tester.timeZone)}): say so in one line. Nothing changed.`);
+      const until = back_on ? `until the morning of ${back_on}` : "until they say they're back";
+      return saved(tester, `Paused ${until}: you start no texts, and still answer anything they send. Confirm in one line.`);
+    }
+
+    case "resume_texts": {
+      const ended = await endPause(db, tester.id, { at, by: "tester" });
+      if (!ended) return { ok: false, error: "They aren't paused." };
+      return saved(tester, "Pause lifted: your texts start again. Pick up where you left off.");
+    }
+
+    case "send_feedback": {
+      const { feedback } = input as z.infer<typeof schemas.send_feedback>;
+      await alertFeedback(db, tester.id, feedback, at);
+      return saved(tester, "Passed to the team word for word. Acknowledge it in your own words, thank them, and say the team's on it; don't promise or offer a change.");
     }
 
     case "propose_plan": {

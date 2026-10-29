@@ -46,8 +46,13 @@ export async function makeDb(): Promise<{ db: Db; client: PGlite }> {
 }
 
 export class FakeSendblue implements SendblueClient {
-  calls: { kind: "typing" | "send"; number: string; content?: string; state?: string; at: number }[] = [];
+  calls: { kind: "typing" | "send" | "opt_in"; number: string; content?: string; state?: string; at: number }[] = [];
   failSend = false;
+  failOptIn = false;
+  async optIn(number: string) {
+    this.calls.push({ kind: "opt_in", number, at: performance.now() });
+    if (this.failOptIn) throw new Error("Sendblue opt-in failed (HTTP 500)");
+  }
   private n = 0;
   async sendMessage(input: { number: string; content?: string }) {
     this.calls.push({ kind: "send", number: input.number, content: input.content, at: performance.now() });

@@ -51,6 +51,9 @@ export class RecordingSendblue implements SendblueClient {
   async sendTypingIndicator() {
     return true;
   }
+  async optIn(number: string) {
+    if (number !== this.allowed) throw new Error("Eval Sendblue only touches its own fake tester");
+  }
 }
 
 /** Fake number in the reserved 555-01xx range, with the scenario's area code. */
