@@ -304,6 +304,17 @@ async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, da
   // The slip ladder counts misses on this version of the plan: reworking it starts fresh.
   const sinceLock = plan?.lockedAt ? serviceDate(plan.lockedAt, tester) : undefined;
   const recent = plan ? (await loadRecentDays(db, tester, date)).filter((d) => !sinceLock || d.date >= sinceLock) : [];
+  const [dailies] = await db
+    .select({ n: count() })
+    .from(nudges)
+    .where(
+      and(
+        eq(nudges.testerId, tester.id),
+        eq(nudges.kind, "daily"),
+        eq(nudges.status, "sent"),
+        lastInboundAt ? gt(nudges.createdAt, lastInboundAt) : undefined,
+      ),
+    );
   const [dayThree] = await db
     .select({ at: max(nudges.createdAt) })
     .from(nudges)
@@ -322,6 +333,7 @@ async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, da
     stallsSinceReply: stalls?.n ?? 0,
     missesInARow: summarizeDays(recent, []).missesInARow,
     lastDayThreeAt: dayThree?.at ? new Date(dayThree.at) : undefined,
+    dailiesSinceReply: dailies?.n ?? 0,
   };
 }
 

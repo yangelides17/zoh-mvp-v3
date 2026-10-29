@@ -81,6 +81,8 @@ export interface NudgeInput {
   missesInARow?: number;
   /** When the latest day-3 check-in went out. */
   lastDayThreeAt?: Date;
+  /** Slip-ladder daily texts ZOH sent since their last text (#41). */
+  dailiesSinceReply?: number;
 }
 
 export interface DueNudge {
@@ -160,8 +162,11 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     if (input.claimedToday.includes("daily") || at < from || at >= day.end) return none("no slot open");
     // No reply since the day-3 check-in, through the next step day's slot: stop and flag.
     const { lastDayThreeAt: dayThree, lastInboundAt } = input;
-    if (misses > DAY_THREE_MISSES && dayThree && !(lastInboundAt && lastInboundAt > dayThree)) return { action: "pause", date };
-    return { action: "send", nudge: { kind: "daily", moment: misses === DAY_THREE_MISSES ? "day_three" : "one_a_day", date } };
+    const answered = dayThree !== undefined && lastInboundAt !== undefined && lastInboundAt > dayThree;
+    if (misses > DAY_THREE_MISSES && dayThree && !answered) return { action: "pause", date };
+    // Answered, then quiet again: the ladder repeats from their reply (#41), two daily texts and then the check-in.
+    const again = answered && (input.dailiesSinceReply ?? 0) >= DAY_THREE_MISSES - 1;
+    return { action: "send", nudge: { kind: "daily", moment: misses === DAY_THREE_MISSES || again ? "day_three" : "one_a_day", date } };
   }
 
   if (!isStepDay(plan, date, today)) {

@@ -36,6 +36,9 @@ const TUE = "2026-11-03";
 const WED = "2026-11-04";
 const THU = "2026-11-05";
 const FRI = "2026-11-06";
+const SAT = "2026-11-07";
+const SUN2 = "2026-11-08";
+const MON2 = "2026-11-09";
 const at = (date: string, hhmm: string) => zonedTime(date, hhmm, TZ);
 
 const silent: Logger = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
@@ -649,16 +652,40 @@ describe("the slip ladder", () => {
     expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
   });
 
-  it("a reply after the day-3 check-in keeps the one text a day going instead of a pause", async () => {
+  it("a reply after the day-3 check-in, then silence: the ladder repeats, then pause and flag (#41)", async () => {
     const tester = await setup();
     await day(MON, "09:00", "22:05");
     await day(TUE, "09:00", "22:05");
     await day(WED, "09:00", "22:05");
     expect(await day(THU, "09:00", "19:00")).toEqual(["day_three@18:50"]);
-    await say(tester, "inbound", at(THU, "19:10"), "yeah I still want this");
+    await say(tester, "inbound", at(THU, "19:10"), "yeah yeah");
     await say(tester, "outbound", at(THU, "19:10"), "Then let's go. Tomorrow, full ten.");
     expect(await day(THU, "19:15", "22:05")).toEqual([]);
+    // Two daily texts with no reply, then the honest check-in again, handed the first one to read differently.
     expect(await day(FRI, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SAT, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SUN2, "09:00", "22:05")).toEqual(["day_three@18:50"]);
+    expect(t.replier.nudges.at(-1)!.previous).toBe("Yo, day_three text");
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
+    // No reply to that one either: no text on the next step day; paused and flagged.
+    expect(await day(MON2, "09:00", "22:05")).toEqual([]);
+    expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).not.toBeNull();
+    expect(await t.db.select().from(flags).where(eq(flags.kind, "went_quiet"))).toHaveLength(1);
+  });
+
+  it("a reply between the daily texts starts the count over (#41)", async () => {
+    const tester = await setup();
+    await day(MON, "09:00", "22:05");
+    await day(TUE, "09:00", "22:05");
+    await day(WED, "09:00", "22:05");
+    await day(THU, "09:00", "19:00");
+    await say(tester, "inbound", at(THU, "19:10"), "yeah yeah");
+    expect(await day(FRI, "09:00", "19:00")).toEqual(["one_a_day@18:50"]);
+    await say(tester, "inbound", at(FRI, "19:10"), "tomorrow for real");
+    expect(await day(FRI, "19:15", "22:05")).toEqual([]);
+    expect(await day(SAT, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(SUN2, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
+    expect(await day(MON2, "09:00", "22:05")).toEqual(["day_three@18:50"]);
     expect((await getTester(t.db, tester.id))!.autoTextsPausedAt).toBeNull();
   });
 
