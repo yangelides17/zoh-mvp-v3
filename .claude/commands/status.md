@@ -9,7 +9,8 @@ Give Yanni a short status of the work, from GitHub. If `$ARGUMENTS` names a feat
 1. `gh issue list --state open --limit 100 --json number,title,labels,assignees` and
    `gh pr list --json number,title,isDraft,headRefName`.
 2. Group by stage, in this order: `in-review`, `building`, `plan-approved`, `spec-approved`, `decide`,
-   `bug`, `idea`. One line per issue: number, title, linked PR if any.
+   `bug`, `idea`. One line per issue: number, title, linked PR if any. Issues built as a group (one plan, one PR)
+   share one line: "#41 + #42 + #48: <short name> → PR #60".
 3. **Changes outside the flow:** `git fetch origin && git log origin/main --since="7 days ago" --no-merges --format="%h %an %ar %s"`.
    List commits on `main` from the last week that aren't from a merged PR and aren't mentioned on any issue (a
    rogue or hand-made change). For each: who, when, what it touched, and whether it touched risky areas

@@ -10,6 +10,13 @@ number, run `gh issue list --state open --label in-review` and match the descrip
 matches more than one, show those issues as a short numbered list and ask Yanni which one. Call the chosen
 number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `in-review` label, say nothing is waiting for review and stop.
 
+**A group.** If the PR closes several issues (one `Closes #n` line each), review it once for all of them: read every
+issue's spec and the group plan (on the lead issue), check each issue's Must tests and Watch items on their own, and
+when it merges, move every issue's label and leave each issue its own "Live checks" comment (step 6). If one issue's part
+isn't ready but the rest is, you may suggest taking it out (as `/build` describes) rather than holding up the group;
+it's Yanni's call. Branches from one plan built in parallel are reviewed and merged one at a time: rebase the next on
+`main` and run `npm run check` before merging it.
+
 1. `gh issue view $ARGUMENTS --comments` (spec, approved plan, decisions) and find the PR: `gh pr list --search "$ARGUMENTS"`.
    Read `gh pr view <pr>` and `gh pr diff <pr>`. To run the tests, check the branch out in its own worktree
    (`git fetch origin && git worktree add ../zoh-worktrees/review-$ARGUMENTS origin/<branch>`, then `npm install`),
