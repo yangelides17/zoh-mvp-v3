@@ -44,6 +44,8 @@ import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type C
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
 export const PROOF_PATTERN_FLAG = "proof_pattern";
+/** They asked for fewer texts or less pushing (Metrics, #13): counted with pauses as back-off requests. */
+export const BACK_OFF_FLAG = "back_off";
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'use 24-hour "HH:MM"');
@@ -84,6 +86,7 @@ const schemas = {
     .strict(),
   resume_texts: z.object({}).strict(),
   send_feedback: z.object({ feedback: text(1000) }).strict(),
+  flag_back_off: z.object({ reason: text(300) }).strict(),
   propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
   change_plan: z
@@ -184,7 +187,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "opt_out",
-    description: 'They want ZOH to stop texting them ("leave me alone", "I\'m done with this"). Stops them; the app sends the confirmation.',
+    description: 'They want ZOH to stop texting them for good ("leave me alone", "I\'m done with this"); a break with an end ("till Monday") is a pause. Stops them; the app sends the confirmation.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -206,6 +209,11 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     name: "send_feedback",
     description: "Passes feedback meant for the team to the founders, in their words.",
     input_schema: { type: "object", properties: { feedback: { type: "string" } }, required: ["feedback"] },
+  },
+  {
+    name: "flag_back_off",
+    description: "For the founders: they asked for fewer texts or less pushing (not a pause, a miss or a new quiet-hours time). reason: what they asked, in a few words. Saved only; nobody is told.",
+    input_schema: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] },
   },
   {
     name: "propose_plan",
@@ -751,6 +759,12 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       await saveDay(db, state, state.today, { status: "missed", note: note || null, proofPendingAt: null }, at);
       await alertSecondMiss(db, tester.id, plan.goalSlug, state.today, at);
       return saved(tester, `Today (${state.today}) marked missed. Proof later today still makes it done.`);
+    }
+
+    case "flag_back_off": {
+      const { reason } = input as z.infer<typeof schemas.flag_back_off>;
+      await saveFlag(db, tester.id, BACK_OFF_FLAG, reason);
+      return saved(tester, "Saved for the founders. Still answer what they asked.");
     }
 
     case "flag_proof_pattern": {

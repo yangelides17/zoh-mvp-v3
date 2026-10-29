@@ -6,7 +6,8 @@ import { markAlertSeen } from "../console/alerts.js";
 import { clearedSessionCookie, decodeSession, encodeSession, newSession, parseCookies, passwordMatches, SESSION_COOKIE, sessionCookie, type Session } from "../console/auth.js";
 import { mediaMessage, testerPage, testerRows, waitingAlerts } from "../console/data.js";
 import { addFounderSuggestion, decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
-import { ICON_SVG, loginPage, listPage, MANIFEST, namePage, notConfiguredPage, testerView } from "../console/views.js";
+import { metricsPage } from "../console/metrics.js";
+import { ICON_SVG, loginPage, listPage, MANIFEST, metricsView, namePage, notConfiguredPage, testerView } from "../console/views.js";
 import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
@@ -77,6 +78,11 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.get("/console", page(async (_request, reply, name) => {
     const now = clock();
     return html(reply, listPage(await testerRows(opts.db, now), await waitingAlerts(opts.db), name));
+  }));
+
+  app.get("/console/metrics", page(async (request, reply, name) => {
+    const includeTest = (request.query as Record<string, string | undefined>).test === "1";
+    return html(reply, metricsView(await metricsPage(opts.db, clock(), { includeTest }), name, includeTest));
   }));
 
   app.get("/console/testers/:id", page(async (request, reply, name) => {

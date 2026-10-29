@@ -43,6 +43,11 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   3 silent days). The coach asks why and pushes back once on a weak reason. While one is open ZOH starts
   no texts (founder requests included) but always replies; a step day that ends inside it is never a
   miss. It lifts when they say they're back or when their end date's quiet hours end; a stop closes it.
+- Metrics (#13): `/console/metrics`, worked out on each load (no stored numbers), real testers only
+  unless "show test accounts". A retention run ends after 3 silent local days; a touch point is a text
+  30+ minutes after their last; paused days are left out of runs and active days. Back-off requests are
+  pauses plus `back_off` flags (the coach's `flag_back_off`, for fewer texts or less pushing: it offers
+  fewer step days or a lighter stretch, else the feedback reply); stops are counted from `stop` alerts.
 - Everything for the founders lives in the console, inside the same app: server-rendered pages,
   masked numbers, proofs streamed from the bucket behind the login. Each alert gets a one-line why
   from a low-effort Claude call (alerts under 2 days old); seeing a plan-to-review alert clears that
