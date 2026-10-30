@@ -1,0 +1,38 @@
+{
+  "id": "kickoff-after-miss",
+  "title": "After a miss, today's step is the same or easier, never a jump",
+  "origin": "Issue #76 (destination, path and today's step): after a miss or a reduced day, the next step is the same or easier",
+  "seed": {
+    "name": "Morgan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 60,
+    "answers": { "what": "running from zero", "where": "around my block", "when": "6:30 pm", "how_long": "15 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "zoh", "text": "Morgan! You've got this tonight. 2 min jog, 1 min walk around the block at 6:30." },
+      { "from": "tester", "text": "work blew up, not happening today sorry" }
+    ],
+    "plan": {
+      "step": "outside around your block: 1 min easy jog, 2 min walk, 3 rounds",
+      "destination": "run a mile without stopping by Nov 14",
+      "place": "around the block",
+      "time": "18:30",
+      "days": ["mon", "wed", "fri"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to the mile without wrecking your legs.",
+      "minutes": 15,
+      "started_days_ago": 7
+    },
+    "step_days": [
+      { "days_ago": 7, "status": "done", "step": "outside around your block: 1 min easy jog, 2 min walk, 3 rounds", "note": "fine", "proof_seen": "Strava, 10 min" },
+      { "days_ago": 5, "status": "done", "step": "around your block: 1.5 min jog, 1.5 min walk, 3 rounds", "note": "tough but did it", "proof_seen": "Strava, 10 min" },
+      { "days_ago": 3, "status": "missed", "step": "around your block: 2 min jog, 1 min walk, 3 rounds", "note": "work blew up" }
+    ]
+  },
+  "testerLines": ["advance to 09:00", "ok yeah I'm in"],
+  "whatWentWrong": "New case, not a past mistake: with the coach picking each day's step, a miss must not be followed by a harder step.",
+  "shouldHaveHappened": "The 9 am kickoff names the missed Friday lightly, without guilt, and pushes for today. Today's step is the same as Friday's missed one (2 min jog, 1 min walk, 3 rounds) or easier (Wednesday's 1.5 and 1.5), never longer jogs or more rounds. It's fully defined (around the block, 6:30 pm, about how long) and asks one thing: are they in, never what time. The reply to \"ok yeah I'm in\" is short and doesn't restate the step.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

@@ -383,6 +383,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       version: earlierPlans.length + 1,
       setupStep: p.setup_step,
       step: p.step,
+      destination: p.destination,
       place: p.place,
       stepTime: p.time,
       days: p.days,
@@ -400,7 +401,15 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     for (const d of seed.step_days) {
       await app.db
         .insert(schema.stepDays)
-        .values({ testerId: tester!.id, date: localDate(now, timeZone, -d.days_ago), planId: plan!.id, status: d.status });
+        .values({
+          testerId: tester!.id,
+          date: localDate(now, timeZone, -d.days_ago),
+          planId: plan!.id,
+          status: d.status,
+          step: d.step ?? null,
+          note: d.note ?? null,
+          proofSeen: d.proof_seen ?? null,
+        });
     }
     await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);
   }

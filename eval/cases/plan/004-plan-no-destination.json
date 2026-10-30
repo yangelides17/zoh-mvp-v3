@@ -1,0 +1,26 @@
+{
+  "id": "plan-no-destination",
+  "title": "No destination yet: no pushing for one, and the plan still locks",
+  "origin": "Issue #76 (destination, path and today's step): \"Not sure yet\" is fine",
+  "seed": {
+    "name": "Jordan",
+    "goal": "reading",
+    "phase": "planning",
+    "answers": {
+      "what": "Atomic Habits, I have it on my nightstand",
+      "where": "in bed",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      { "from": "tester", "text": "20 min is about all I've got before I fall asleep lol" },
+      { "from": "zoh", "text": "Twenty it is. Do you track your reading anywhere, like Goodreads or a notes app?" }
+    ]
+  },
+  "testerLines": ["nope, no app. and no idea what I'm aiming for yet tbh, I just want to read more", "looks good", "I'm in"],
+  "whatWentWrong": "New case, not a past mistake: the destination is optional and must never get in the way of locking.",
+  "shouldHaveHappened": "The tester already said they don't know what they're aiming for, so ZOH doesn't ask about a destination again (at most one light mention that they can add one later is fine) and goes on to the plan: day 1's step fully defined (tonight at 9 pm in bed, Atomic Habits, a clear amount such as 20 minutes or a number of pages), the usual schedule, a proof that works without an app (a photo of the page or a short voice note), a line on how it goes from here, no list of future steps, one question. After \"looks good\" it asks for the commitment naturally; after \"I'm in\" it locks with no destination and no friction.",
+  "areaCode": "212",
+  "startTime": "13:00",
+  "timeZone": "America/New_York"
+}
