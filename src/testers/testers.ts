@@ -16,6 +16,7 @@ import {
   planInputs,
   plans,
   stepDays,
+  takeaways,
   suggestions,
   testerGoals,
   testers,
@@ -98,7 +99,7 @@ export async function updateTester(db: Db, id: string, patch: TesterPatch): Prom
 /**
  * Dev-account "reset": back to a brand-new tester whose context starts at `at`.
  * Messages, flags, suggestions and the console thread stay in the database; plan inputs, plans, goals,
- * check-ins, step days, nudges and memory are deleted. A jumped clock (#14) goes back to real time,
+ * check-ins, step days, takeaways, nudges and memory are deleted. A jumped clock (#14) goes back to real time,
  * and what stays moves back with it, so nothing is left in the future.
  */
 export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tester> {
@@ -112,6 +113,7 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
   await db.delete(testerGoals).where(eq(testerGoals.testerId, tester.id));
   await db.delete(maintenanceCheckins).where(eq(maintenanceCheckins.testerId, tester.id));
   await db.delete(stepDays).where(eq(stepDays.testerId, tester.id));
+  await db.delete(takeaways).where(eq(takeaways.testerId, tester.id));
   await db.delete(nudges).where(eq(nudges.testerId, tester.id));
   await db.delete(pauses).where(eq(pauses.testerId, tester.id));
   await db.delete(plans).where(eq(plans.testerId, tester.id));

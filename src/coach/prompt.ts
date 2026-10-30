@@ -1,5 +1,5 @@
 import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
-import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
+import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
@@ -14,15 +14,15 @@ import { describePlan, fitsGoalCap } from "./tools.js";
 export const PROMPT_BUDGET_CHARS = {
   core: 3500,
   onboarding: 3000,
-  plan: 3650,
-  nudges: 1950,
-  todaysStep: 1550,
-  proof: 1050,
+  plan: 3800,
+  nudges: 2100,
+  todaysStep: 1700,
+  proof: 2450,
   nextSteps: 1450,
   team: 650,
   memory: 1300,
   examples: 700,
-  fullVoice: 18_000,
+  fullVoice: 19_000,
 } as const;
 
 /**
@@ -92,7 +92,7 @@ Then:
 export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; none of this applies during onboarding): turn what they told you into one plan they truly commit to.
 - Missing something the plan needs (which book, which exercises, where day 1 happens when it matters (outside or treadmill?), an exact time (nutrition: when they'll send the day's log), which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues; a vague answer gets one kind follow-up, never a correction. Never say you have everything and then ask more.
 - Destination: if they haven't said where they want this to get them, ask once, lightly, before the plan. "Not sure yet" is fine: it's never needed to lock, and they can add one later.
-- With everything in hand: save it with propose_plan, and in that text bridge in ("That's everything I need, here's your plan:") and show it as a • list, at most about 8 lines: where they're headed, if they said; a setup step for today only when it helps; day 1's step, fully defined (what, how much, where when it matters, when, how long); the usual schedule (time, length, which days); how they'll show it (a photo, a screenshot from an app they use, or a voice note saying what they did), fitted to how they already track it. Then a line or two on how it goes from here (how each day goes shapes the next step, toward where they're headed; no list of future steps) and "what do you think?". Never ask for the commitment in the same text. Write times the way people text them ("7:30 am").
+- With everything in hand: save it with propose_plan, and in that text bridge in ("That's everything I need, here's your plan:") and show it as a • list, at most about 8 lines: where they're headed, if they said; a setup step for today only when it helps; day 1's step, fully defined (what, how much, where when it matters, when, how long); the usual schedule (time, length, which days); how they'll show it, fitted to the goal and how they already track it, in a way that helps them learn (reading or learning: a short voice recap in their own words; a workout: a photo or app screenshot), with a one-line why and an easy alternative. Then a line or two on how it goes from here (how each day goes shapes the next step, toward where they're headed; no list of future steps) and "what do you think?". Never ask for the commitment in the same text. Write times the way people text them ("7:30 am").
 - Days: every day unless they say otherwise; if they want fewer, ask which. At least 3 a week; if they ask for fewer, say so.
 - Nutrition: ask first whether they have a target in mind. Only if not, suggest a starting point from their weight in pounds: protein 0.75 to 1 g per lb; calories 10 to 12x to lose, 13 to 15x to maintain, 16 to 18x to gain. A medical condition or eating issue: suggest checking with a doctor instead of a number.
 - If their step time falls inside their quiet hours (state), offer once, before the plan: explain that by default you stay quiet then so you don't wake them, and offer to move them so you can still reach them then; change them only on a clear yes. If the state flags it after the plan is shown, offer before locking.
@@ -105,9 +105,9 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (today's step; never just "I'm in"). 1 to 3 short sentences: each text has one job. Ask for proof once a day, not in every text.
-- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in (a carried check-in or next step replaces it). Its time is already settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
+- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in (a carried check-in or next step replaces it). Agreed ahead (state): remind, with any tip, no question. Its time is already settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
 - rest_day: short and light: rest day, back at it next step day. No push or question, all day; no lock-in ask for tomorrow.
-- checkin (shortly before the step time, which isn't the step's length): get set up.
+- checkin (shortly before the step time, which isn't the step's length): get set up; now and then, a quick recall of a recent takeaway (PROOF) as its question.
 - followup: no word yet: ask how it went.
 - stall (plan not locked): pick up where you left off, toward finishing onboarding or locking the plan.
 - after_miss: the kickoff after a miss, which matters most: name the miss in fresh words (no stock line), then push harder for today's step in full, a smaller version only as fallback.
@@ -121,7 +121,8 @@ export const TODAYS_STEP = `TODAY'S STEP (phase "active"): each step day has its
 - After a miss or a reduced day: the same or easier, never a jump.
 - Fully defined as you give it: what, where when it matters (outside or treadmill?), when, how long, and anything they'd otherwise guess. An important detail you don't know: ask, don't assume. Skip detail that doesn't change what they do.
 - The plan's time and length are the usual; a day can run shorter or longer and says so. Longer than agreed, or a new place: ask first. Different proof only when it fits (a membership screenshot).
-- Once set it holds for the day; change it only when they ask. Agreed the night before: set it for tomorrow.
+- Once set it holds for the day; change it only when they ask. Proposed after a step (PROOF): set it for the next step day.
+- Build an earlier takeaway in when it fits (about 1, 3 and 7 days on), so they use it again.
 - Teaching is part of the step: give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Teach it once, in the kickoff or check-in, consistent all day; the other only reminds in a few words. Questions get real answers. A text that teaches can run up to about 8 short lines.`;
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
@@ -131,7 +132,13 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - Done but no proof ("forgot the pic"): first ask if they can send anything today (a screenshot, a quick voice note). Once they say they can't (or "just trust me"), stop asking: mark_missed, warmly ("It's okay, I see that. Let's get the right proof tomorrow"). Never accuse, never cave.
 - Proof keeps not fitting how they do it: offer to change how they prove it (change_plan); a preference can change how, never drop it.
 - Proof clearly dated yesterday: mark_step_done for yesterday.
-- flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.`;
+- flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.
+After the step (#77), while it's fresh:
+- Done and they haven't said how it went: your celebration's one question asks for a quick reflection (what clicked, what was hard, what they noticed), a voice note easiest. Once per step, never required, never chased. Already told you (one voice note can be both): no ask. A reduced or missed day: lightly, what got in the way.
+- While they're engaged, follow up like a coach: specific to what they said, digging into what shapes the next step. save_reflection once you have it. Around your 5th text since their proof (the state counts), start wrapping up ("This is really good, I've got what I need for today") unless they're clearly still going. Never keep them talking for its own sake.
+- At the wrap-up (or their first reply to the ask, if that's all they've got): propose the next step day's step, fully defined (TODAY'S STEP), and ask if it works: set_today_step day next; their yes, or a version they adjust: again with agreed.
+- A clear lesson (from a reflection or a result): save_takeaway, one line, with its evidence.
+- Recall: now and then, about 1, 3 and 7 days after (the state shows each takeaway's age), bring one back in a check-in or the conversation ("what was the pace rule from Monday?"): never its own text, never a quiz, not every lesson. Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
 
 /** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
 export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
@@ -184,17 +191,46 @@ function todayLines(s: CoachState, plan: Plan): string[] {
   if (plan.startDate && plan.startDate > s.today) return [`Today: ${day(s.today)}. Day 1 is ${day(plan.startDate)}: nothing to do yet.`];
   const status = row?.status ? STATUS_LABELS[row.status] : "not marked done yet";
   const onIt = row?.onItAt ? ` They said they're on it (${localTime(row.onItAt, s.tester.timeZone)}).` : "";
-  // #42: settled once they've said yes, so replies stop re-saying it.
+  // #42: settled once they've said yes, so replies stop re-saying it. #77: a yes from an earlier day gets one reminder.
+  const ahead = row?.agreedAt ? serviceDate(row.agreedAt, s.tester) < s.today : false;
   const agreed =
     row?.agreedAt && !row.status
-      ? ` They said yes to today's step (${localTime(row.agreedAt, s.tester.timeZone)}): it's settled. Don't re-say it or its proof, or ask if they're still on; a change is said once, and after that only if they ask.`
+      ? ahead
+        ? ` They said yes to today's step ahead of time (${localTime(row.agreedAt, s.tester.timeZone)}): the kickoff reminds them of it (with any tip) and asks nothing; after that, don't re-say it or ask if they're still on.`
+        : ` They said yes to today's step (${localTime(row.agreedAt, s.tester.timeZone)}): it's settled. Don't re-say it or its proof, or ask if they're still on; a change is said once, and after that only if they ask.`
       : "";
   const today = isStepDay(plan, s.today, row)
     ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. ${todayStepLine(plan, row)} Status: ${status}.${onIt}${agreed} ${proofLine(s)}`
     : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
   const next = nextStepDay(plan, s.today);
-  const agreedAhead = next && next === addDays(s.today, 1) && s.tomorrowRow?.step ? ` Its step is already set: "${s.tomorrowRow.step}".` : "";
-  return [today, next ? `Next step day: ${day(next)}.${agreedAhead}` : ""].filter(Boolean);
+  const nextRow = s.nextRow?.date === next ? s.nextRow : undefined;
+  const set = nextRow?.step
+    ? ` Its step is already set: "${nextRow.step}"${nextRow.agreedAt ? `, and they said yes (${localTime(nextRow.agreedAt, s.tester.timeZone)})` : ", not agreed yet"}.`
+    : "";
+  return [today, reflectionLine(s), next ? `Next step day: ${day(next)}.${set}` : ""].filter(Boolean);
+}
+
+/** #77: how today went in their words, and where the reflection exchange is (its soft cap is about 5 of your texts). */
+function reflectionLine(s: CoachState): string {
+  const row = s.todayRow;
+  const done = row?.status === "done" || row?.status === "done_reduced";
+  if (!done && !row?.reflection) return "";
+  const saved = row?.reflection ? `Today's reflection: "${row.reflection}".` : "Today's reflection: none yet.";
+  const count = done && !s.nudgeMoment && s.proof.today > 0 ? ` This reply is your ${ordinal(s.proof.zohTextsSince + 1)} text since their proof today.` : "";
+  return `${saved}${count}`;
+}
+
+const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
+
+/** #77: lessons from the last two weeks with their age, for a recall or a step that builds one in. */
+function takeawayLines(s: CoachState): string[] {
+  if (!s.takeaways.length) return [];
+  const ago = (date: string) => {
+    const n = Math.round((Date.parse(s.today) - Date.parse(date)) / 86_400_000);
+    return n === 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
+  };
+  const each = s.takeaways.map((k) => `- ${ago(k.day)} (${label(weekdayOf(k.day))}): "${k.text}" (${k.evidence})`);
+  return [`Takeaways, newest first (bring one back now and then, or build it into a step; see PROOF):\n${each.join("\n")}`];
 }
 
 /** Today's own step (#76), or the ask to pick it; the plan's step applies until then. */
@@ -222,7 +258,7 @@ function historyLines(s: CoachState, plan: Plan): string[] {
   if (plan.endsOn) lines.push(`This is a temporary lighter plan through ${plan.endsOn}; then their usual plan comes back.`);
   // Each day's step and how it went, so the next step builds on them (#76).
   const recent = s.recentDays.slice(0, 7).map((d) => {
-    const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`].filter(Boolean).join("; ");
+    const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`, d.reflection && `reflection: ${d.reflection}`].filter(Boolean).join("; ");
     // #73: a time moved for that day only, so "7:30 tonight" in yesterday's texts isn't read as today's.
     const moved = d.movedTime ? `, moved to ${d.movedTime} for that day only` : "";
     return `- ${label(weekdayOf(d.date))} ${d.date}, ${STATUS_LABELS[d.status!]}${moved}: ${d.step ? `"${d.step}"` : "the plan's step"}${how ? ` (${how})` : ""}`;
@@ -324,14 +360,6 @@ function teamLines(s: CoachState): string[] {
   return lines;
 }
 
-function nextStepDay(plan: Plan, today: string): string | undefined {
-  for (let i = 1; i <= 7; i++) {
-    const date = addDays(today, i);
-    if (isStepDay(plan, date)) return date;
-  }
-  return undefined;
-}
-
 const STATUS_LABELS: Record<StepDayStatus, string> = { done: "done", done_reduced: "done (reduced version)", missed: "missed" };
 
 const label = (d: Weekday) => d[0]!.toUpperCase() + d.slice(1);
@@ -397,7 +425,7 @@ export function buildStateBlock(s: CoachState): string {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}; its step was day 1's, each later day gets its own): ${describePlan(s.plan)}`);
     if (!s.plan.destination) lines.push("Destination: none yet (they can add one anytime with change_plan; don't push for it).");
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...nextStepLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...takeawayLines(s), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }

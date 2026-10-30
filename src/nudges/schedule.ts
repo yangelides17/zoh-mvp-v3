@@ -250,6 +250,15 @@ export function isStepDay(
   return plan.days.includes(weekdayOf(date)) || (date === plan.startDate && Boolean(row?.movedTime));
 }
 
+/** The first step day after `date`, within a week (#77: a step agreed ahead skips any rest day between). */
+export function nextStepDay(plan: Pick<Plan, "days" | "startDate">, date: string): string | undefined {
+  for (let i = 1; i <= 7; i++) {
+    const next = addDays(date, i);
+    if (isStepDay(plan, next)) return next;
+  }
+  return undefined;
+}
+
 /** "mon"…"sun" for a "YYYY-MM-DD". */
 export function weekdayOf(date: string): Weekday {
   const day = new Date(`${date}T12:00:00Z`).getUTCDay();

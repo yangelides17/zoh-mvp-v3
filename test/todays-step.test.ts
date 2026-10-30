@@ -146,14 +146,13 @@ describe("set_today_step", () => {
     expect(await tool("set_today_step", { step: "treadmill, 2 on 1 off, 3 rounds" }, at(WED, "11:00"))).toMatchObject({ ok: true });
   });
 
-  it("tomorrow's step agreed the night before is saved on tomorrow and shows today and tomorrow", async () => {
+  it("the next step day's step set the night before is saved on that day and shows today and that day", async () => {
     await setup();
     // Tuesday is a rest day; Wednesday is the next step day.
     expect(await tool("set_today_step", { step: TODAY_STEP }, at(TUE, "20:00"))).toMatchObject({ ok: false, error: "Today isn't a step day." });
-    expect(await tool("set_today_step", { step: TODAY_STEP, day: "tomorrow" }, at(TUE, "20:00"))).toMatchObject({ ok: true });
-    expect(await block(at(TUE, "20:01"))).toContain(`Next step day: Wed ${WED}. Its step is already set: "${TODAY_STEP}".`);
+    expect(await tool("set_today_step", { step: TODAY_STEP, day: "next" }, at(TUE, "20:00"))).toMatchObject({ ok: true });
+    expect(await block(at(TUE, "20:01"))).toContain(`Next step day: Wed ${WED}. Its step is already set: "${TODAY_STEP}", not agreed yet.`);
     expect(await block(at(WED, "09:00"))).toContain(`Today's step (set, holds for today): "${TODAY_STEP}"`);
-    expect(await tool("set_today_step", { step: TODAY_STEP, day: "tomorrow" }, at(WED, "20:00"))).toMatchObject({ ok: false, error: "Tomorrow isn't a step day." });
   });
 
   it("is refused before lock and once the day is done", async () => {

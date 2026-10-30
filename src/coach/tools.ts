@@ -13,6 +13,8 @@ import {
   stepDays,
   SUGGESTION_KINDS,
   suggestions,
+  TAKEAWAY_EVIDENCE,
+  takeaways,
   WEEKDAYS,
   type NewStepDay,
   type Plan,
@@ -40,7 +42,7 @@ import {
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
-import { addDays, isStepDay } from "../nudges/schedule.js";
+import { addDays, isStepDay, nextStepDay } from "../nudges/schedule.js";
 import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
@@ -135,10 +137,13 @@ const schemas = {
       step: text(400),
       minutes: z.number().int().min(1).max(600).optional(),
       proof: z.string().trim().max(160).optional(),
-      day: z.enum(["today", "tomorrow"]).optional(),
+      day: z.enum(["today", "next"]).optional(),
+      agreed: z.boolean().optional(),
       asked: text(300).optional(),
     })
     .strict(),
+  save_reflection: z.object({ summary: text(300), day: z.enum(["today", "yesterday"]).optional() }).strict(),
+  save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
 };
 
@@ -370,17 +375,38 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "set_today_step",
     description:
-      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day tomorrow: only for one agreed the night before. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly.",
+      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed after today's step (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly.",
     input_schema: {
       type: "object",
       properties: {
         step: { type: "string", description: "What, where when it matters, when, how long" },
         minutes: { type: "integer", description: "That day's length, if not the plan's" },
         proof: { type: "string", description: 'That day\'s proof, if not the plan\'s ("a screenshot of the membership")' },
-        day: { type: "string", enum: ["today", "tomorrow"] },
+        day: { type: "string", enum: ["today", "next"] },
+        agreed: { type: "boolean" },
         asked: { type: "string" },
       },
       required: ["step"],
+    },
+  },
+  {
+    name: "save_reflection",
+    description:
+      "How the step went, from what they told you (a voice note, a few texts), in one line for choosing their next steps. Again later replaces it with a fuller one. day yesterday: for yesterday's step.",
+    input_schema: {
+      type: "object",
+      properties: { summary: { type: "string" }, day: { type: "string", enum: ["today", "yesterday"] } },
+      required: ["summary"],
+    },
+  },
+  {
+    name: "save_takeaway",
+    description:
+      'A lesson from a step, in one line ("slow enough to talk is the right pace"), once it\'s clear. evidence: explained (they put it in their own words), applied (they used it in a step) or recalled (they brought back an earlier one, asked or not).',
+    input_schema: {
+      type: "object",
+      properties: { text: { type: "string" }, evidence: { type: "string", enum: [...TAKEAWAY_EVIDENCE] } },
+      required: ["text", "evidence"],
     },
   },
   {
@@ -845,12 +871,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "set_today_step": {
-      const { step, minutes, proof, day, asked } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, minutes, proof, day, agreed, asked } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
-      const date = day === "tomorrow" ? addDays(state.today, 1) : state.today;
-      const row = day === "tomorrow" ? await loadDay(db, tester.id, date) : state.todayRow;
-      if (!isStepDay(plan, date, row)) return { ok: false, error: `${day === "tomorrow" ? "Tomorrow" : "Today"} isn't a step day.` };
+      const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
+      if (!date) return { ok: false, error: "No step day in the next week." };
+      const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
+      if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
@@ -859,9 +886,29 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         };
       }
       // A day's step is the coach's call (#76): no plan version, no founder review.
-      await saveDay(db, state, date, { step, stepMinutes: minutes ?? null, stepProof: proof || null }, at);
+      // #77: a yes to the next step day's step, agreed ahead, makes that morning's kickoff a reminder.
+      await saveDay(db, state, date, { step, stepMinutes: minutes ?? null, stepProof: proof || null, ...(agreed ? { agreedAt: at } : {}) }, at);
       const extra = [minutes !== undefined && `${minutes} min`, proof && `proof: ${proof}`].filter(Boolean).join("; ");
-      return saved(tester, `Step for ${date} saved: ${step}${extra ? ` (${extra})` : ""}.`);
+      return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.`);
+    }
+
+    case "save_reflection": {
+      const { summary, day } = input as z.infer<typeof schemas.save_reflection>;
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
+      // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
+      await db
+        .insert(stepDays)
+        .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, updatedAt: at })
+        .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set: { reflection: summary, updatedAt: at } });
+      return saved(tester, `Reflection saved for ${date}.`);
+    }
+
+    case "save_takeaway": {
+      const { text: lesson, evidence } = input as z.infer<typeof schemas.save_takeaway>;
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
+      return saved(tester, `Takeaway saved (${evidence}): ${lesson}`);
     }
 
     case "mark_request_done": {
