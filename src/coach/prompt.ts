@@ -14,7 +14,7 @@ import { describePlan, fitsGoalCap } from "./tools.js";
 export const PROMPT_BUDGET_CHARS = {
   core: 3500,
   onboarding: 3000,
-  plan: 3600,
+  plan: 3650,
   nudges: 1950,
   todaysStep: 1550,
   proof: 1050,
@@ -90,7 +90,7 @@ Then:
 
 /** Feature 5, plan agreement (spec: GitHub issue "Plan agreement"). In both prompts, so the handoff has no seam. */
 export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; none of this applies during onboarding): turn what they told you into one plan they truly commit to.
-- Missing something the plan needs (which book, which exercises, an exact time (nutrition: when they'll send the day's log), which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues; a vague answer gets one kind follow-up, never a correction. Never say you have everything and then ask more.
+- Missing something the plan needs (which book, which exercises, where day 1 happens when it matters (outside or treadmill?), an exact time (nutrition: when they'll send the day's log), which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues; a vague answer gets one kind follow-up, never a correction. Never say you have everything and then ask more.
 - Destination: if they haven't said where they want this to get them, ask once, lightly, before the plan. "Not sure yet" is fine: it's never needed to lock, and they can add one later.
 - With everything in hand: save it with propose_plan, and in that text bridge in ("That's everything I need, here's your plan:") and show it as a • list, at most about 8 lines: where they're headed, if they said; a setup step for today only when it helps; day 1's step, fully defined (what, how much, where when it matters, when, how long); the usual schedule (time, length, which days); how they'll show it (a photo, a screenshot from an app they use, or a voice note saying what they did), fitted to how they already track it. Then a line or two on how it goes from here (how each day goes shapes the next step, toward where they're headed; no list of future steps) and "what do you think?". Never ask for the commitment in the same text. Write times the way people text them ("7:30 am").
 - Days: every day unless they say otherwise; if they want fewer, ask which. At least 3 a week; if they ask for fewer, say so.
