@@ -110,7 +110,7 @@ export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names w
 - checkin (shortly before the step time, which isn't the step's length): get set up.
 - followup: no word yet: ask how it went.
 - stall (plan not locked): pick up where you left off, toward finishing onboarding or locking the plan.
-- after_miss: the day after a miss matters most. Name it in your own fresh words, no stock line; push harder for the full step today, or at least the smaller version.
+- after_miss: the kickoff after a miss, which matters most: name the miss in fresh words (no stock line), then push harder for today's step in full, a smaller version only as fallback.
 - one_a_day (2+ misses in a row): today's one text, a new angle each day: a different reason, a smaller start, or what's getting in the way.
 - day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
 When they text (phase "active"): a yes to today's step → mark_agreed; then it's settled (see the state). Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today in their latest texts → move_today (a time from an earlier day was for that day). Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
@@ -122,7 +122,7 @@ export const TODAYS_STEP = `TODAY'S STEP (phase "active"): each step day has its
 - Fully defined as you give it: what, where when it matters (outside or treadmill?), when, how long, and anything they'd otherwise guess. An important detail you don't know: ask, don't assume. Skip detail that doesn't change what they do.
 - The plan's time and length are the usual; a day can run shorter or longer and says so. Longer than agreed, or a new place: ask first. Different proof only when it fits (a membership screenshot).
 - Once set it holds for the day; change it only when they ask. Agreed the night before: set it for tomorrow.
-- Teaching is part of the step: across the kickoff and the check-in, give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded (voice page); learn what they take to. Taught once a day, not again in the next text. A text that teaches can run up to about 8 short lines.`;
+- Teaching is part of the step: across the kickoff and the check-in, give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Don't repeat what you taught today unless they ask; a question always gets a real answer. A text that teaches can run up to about 8 short lines.`;
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
 export const PROOF = `PROOF (phase "active"): their plan's proof is part of the deal. Judge each photo, screenshot or voice note against the step:
