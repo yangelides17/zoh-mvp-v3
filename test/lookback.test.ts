@@ -128,6 +128,10 @@ describe("the 6 pm Sunday recap", () => {
     expect(await tool("record_week_recap", {}, at(SUN2, "16:10"))).toMatchObject({ ok: true });
     expect(await t.db.select().from(nudges)).toHaveLength(1);
     expect(await tool("record_week_recap", {}, at(SAT, "16:00"))).toMatchObject({ ok: false, error: "The week's recap is on Sundays." });
+    // Inside a text ZOH starts, only the recap's own text may call it (a no-op there: its slot is the record).
+    const kickoff = await loadCoachState(t.db, await me(), { now: at(SUN2, "09:00"), isFirstText: false, nudgeMoment: "rest_day" });
+    expect(await runTool(t.db, kickoff, "record_week_recap", {}, at(SUN2, "09:00"))).toMatchObject({ ok: false });
+    expect(await runTool(t.db, await state(at(SUN2, "18:00"), "lookback"), "record_week_recap", {}, at(SUN2, "18:00"))).toMatchObject({ ok: true });
   });
 
   it("not when paused, on a break, stopped or at the unanswered cap", async () => {

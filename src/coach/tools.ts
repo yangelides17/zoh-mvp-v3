@@ -921,6 +921,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     case "record_week_recap": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
+      // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
+      if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
       // Spec #78: the week comes after the day's reflection, never in the text that celebrates their proof.
       const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
       if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {
