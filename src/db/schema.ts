@@ -526,7 +526,10 @@ export const takeaways = pgTable(
   ],
 );
 
-/** "skipped": the coach found the morning's conversation already covered the kickoff (#42); nothing was sent. */
+/**
+ * "skipped": the coach found the morning's conversation already covered the kickoff (#42), or gave the
+ * Sunday recap in conversation (#78, kind "lookback"); nothing was sent.
+ */
 export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped"] as const;
 
 /**

@@ -36,7 +36,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always
-  replies. After 3 days of silence ZOH stops automatic texts and the founders decide.
+  replies. After 3 days of silence ZOH stops automatic texts and the founders decide. One exception
+  (#78): the Sunday look-back goes 30 minutes after a late Sunday step's follow-up, even inside quiet
+  hours. Otherwise it goes at 6 pm Sunday, once a week (the `lookback` nudge row, also written when
+  the recap happens in conversation), after 3 closed step days, and never while on the slip ladder.
 - Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
   went quiet) and each locked plan version to review are saved as console alerts, one per event
   (`raiseAlert`), which the founder console (#10) shows. Since #12 alerts also cover a stop, a

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import {
@@ -9,6 +9,7 @@ import {
   plans,
   stepDays,
   suggestions,
+  takeaways,
   testers,
   type ConsoleMessage,
   type Goal,
@@ -27,6 +28,7 @@ import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/strea
 import { testerNow } from "../testers/clock.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
 import { activePause } from "../testers/pauses.js";
+import { learnings, type Learnings } from "../coach/week.js";
 import { listSuggestions } from "./suggestions.js";
 
 /** What the founder console reads (spec: GitHub issue "Founder console", "What we experience" 2 and 3; per tab since #63). */
@@ -283,6 +285,10 @@ export interface ProgressTab {
   /** Newest first. */
   stepDays: StepDayView[];
   suggestions: Suggestion[];
+  /** Where their focus goal's current plan is headed, if anywhere (#78). */
+  destination?: string;
+  /** Every lesson since their context started: understood (applied or recalled) and only explained (#78). */
+  learnings: Learnings;
 }
 
 export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> {
@@ -298,12 +304,20 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
     proofsByDay.set(day, [...(proofsByDay.get(day) ?? []), m]);
   }
   const days = await db.select().from(stepDays).where(eq(stepDays.testerId, tester.id)).orderBy(desc(stepDays.date));
+  const testerPlans = await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version));
+  const lessons = await db
+    .select()
+    .from(takeaways)
+    .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.createdAt, tester.contextStartedAt)));
+  const current = testerPlans.find((p) => p.status === "locked" && p.goalSlug === tester.goalSlug);
   return {
     switches: [...(await switchReasons(db, tester)).entries()].map(([pair, s]) => ({ pair, ...s })),
     checkins,
-    plans: await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version)),
+    plans: testerPlans,
     stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [] })),
     suggestions: await listSuggestions(db, tester.id),
+    ...(current?.destination ? { destination: current.destination } : {}),
+    learnings: learnings(lessons),
   };
 }
 

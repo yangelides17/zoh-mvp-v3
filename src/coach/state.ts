@@ -33,6 +33,7 @@ import { addDays, nextStepDay, serviceDate, type NudgeCarry, type NudgeMoment } 
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
+import { loadWeek, type WeekLookback } from "./week.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -72,6 +73,8 @@ export interface CoachState {
   recentDays: StepDay[];
   /** Lessons from the last two weeks, newest first (#77). */
   takeaways: Takeaway[];
+  /** Sundays with 3+ closed step days (#78): the week the look-back reads. */
+  week?: WeekLookback;
   /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
@@ -195,6 +198,7 @@ export async function loadCoachState(
     nextRow,
     recentDays,
     takeaways: recentTakeaways,
+    week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,

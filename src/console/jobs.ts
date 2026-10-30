@@ -1,9 +1,10 @@
-import { and, asc, desc, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import type { ClaudeModel } from "../claude/replier.js";
 import { localDate } from "../coach/state.js";
 import { describePlan } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, memoryPages, messages, plans, stepDays, testers, type Plan, type Tester } from "../db/schema.js";
+import { consoleMessages, memoryPages, messages, plans, stepDays, takeaways, testers, type Plan, type Tester } from "../db/schema.js";
+import { evidenceText, learnings } from "../coach/week.js";
 import { safeError } from "../errors.js";
 import { addDays, isStepDay, localClock } from "../nudges/schedule.js";
 import { maskNumber, type Logger } from "../pipeline/inbound.js";
@@ -177,13 +178,17 @@ export interface WeekNumbers {
   done: number;
   reduced: number;
   streak: number;
+  /** Where the current plan is headed, if anywhere (#78). */
+  destination?: string;
+  /** "Understood: …" and "Explained only: …" lines for the week, with evidence (#78). */
+  learnings: string[];
 }
 
 /** The seven local days before `sunday`: step days committed and done on the focus goal, and the streak now. */
 export async function weekNumbers(db: Db, tester: Tester, sunday: string): Promise<WeekNumbers> {
   const from = addDays(sunday, -7);
   const to = addDays(sunday, -1);
-  const out: WeekNumbers = { from, to, committed: 0, done: 0, reduced: 0, streak: 0 };
+  const out: WeekNumbers = { from, to, committed: 0, done: 0, reduced: 0, streak: 0, learnings: [] };
   if (!tester.goalSlug) return out;
   const goalPlans = await db
     .select()
@@ -202,6 +207,17 @@ export async function weekNumbers(db: Db, tester: Tester, sunday: string): Promi
   out.done = rows.filter((r) => r.status === "done" || r.status === "done_reduced").length;
   out.reduced = rows.filter((r) => r.status === "done_reduced").length;
   out.streak = (await goalMetrics(db, tester.id, tester.goalSlug, to)).current?.length ?? 0;
+  const current = goalPlans.filter((p) => p.startDate && p.startDate <= to).sort((a, b) => (b.version ?? 0) - (a.version ?? 0))[0];
+  if (current?.destination) out.destination = current.destination;
+  // The same "understood" as the coach's Sunday look-back: applied or recalled this week.
+  const lessons = await db
+    .select()
+    .from(takeaways)
+    .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.createdAt, tester.contextStartedAt), lte(takeaways.day, to)));
+  const { understood, explained } = learnings(lessons, from);
+  const each = (l: { text: string }, evidence: string) => `"${l.text}" (${evidence})`;
+  if (understood.length) out.learnings.push(`Understood this week: ${understood.map((l) => each(l, evidenceText(l))).join("; ")}`);
+  if (explained.length) out.learnings.push(`Explained only so far: ${explained.map((l) => each(l, evidenceText(l))).join("; ")}`);
   return out;
 }
 
@@ -212,10 +228,13 @@ export async function weeklySummary(db: Db, tester: Tester, sunday: string, now:
     `Week of ${n.from} to ${n.to}: ${n.done} of ${n.committed} step days done${n.reduced ? ` (${n.reduced} reduced)` : ""}`,
     `streak ${n.streak}`,
   ].join(", ");
-  if (!model) return `${numbers}.`;
+  // Progress as understanding (#78): the destination and the week's learnings with their evidence.
+  const progress = [`Headed for: ${n.destination ?? "no destination yet"}.`, ...(n.learnings.length ? n.learnings : ["No lessons applied or recalled this week."])].join("\n");
+  const facts = `${numbers}.\n${progress}`;
+  if (!model) return facts;
   const record = await weekRecord(db, tester, n);
-  const read = await ask(model, SUMMARY_INSTRUCTIONS, `${numbers}.\n\n${record}\n\n${await testerContext(db, tester, now)}`);
-  return `${numbers}.\n${read}`;
+  const read = await ask(model, SUMMARY_INSTRUCTIONS, `${facts}\n\n${record}\n\n${await testerContext(db, tester, now)}`);
+  return `${facts}\n${read}`;
 }
 
 /** The week as the summary reads it: each day's step, and the memory pass's daily docs. */

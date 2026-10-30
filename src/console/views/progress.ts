@@ -1,5 +1,6 @@
 import { describeDays } from "../../coach/state.js";
 import type { Goal, MaintenanceCheckin, Plan, StepDay } from "../../db/schema.js";
+import { evidenceText, type Learning } from "../../coach/week.js";
 import type { GoalView, ProgressTab, StepDayView } from "../data.js";
 import { esc, hitRatePct, hitRateText, proofHtml, streakText, suggestionCard, when } from "./shared.js";
 
@@ -70,6 +71,15 @@ function dotStrip(days: StepDayView[]): string {
   return `<div class="card"><div class="row spread"><strong>Last ${shown.length} step day${shown.length === 1 ? "" : "s"}</strong><span class="muted">tap a day for detail</span></div><div class="dots">${dots}</div>${legend}</div>`;
 }
 
+/** Lessons (#78): understood (applied or recalled) with how they showed it, then the ones only explained so far. */
+function learningsHtml(tab: ProgressTab): string {
+  const { understood, explained } = tab.learnings;
+  if (!understood.length && !explained.length) return `<p class="empty">No lessons yet.</p>`;
+  const item = (l: Learning) => `<div class="card">${esc(l.text)}<div class="muted">${esc(evidenceText(l))}</div></div>`;
+  return `<h3>Understood (applied or recalled)</h3>${understood.map(item).join("") || `<p class="empty">None yet.</p>`}
+<h3>Explained only, starting to click</h3>${explained.map(item).join("") || `<p class="empty">None.</p>`}`;
+}
+
 export function progressTabHtml(goals: GoalView[], tab: ProgressTab, testerId: string, titles: Map<string, Goal>): string {
   const goalsHtml = goals.map((v) => goalCard(v, tab.checkins)).join("") || `<p class="empty">No goals yet.</p>`;
   const switches = tab.switches.length
@@ -87,7 +97,9 @@ ${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length
     })
     .join("");
   const decided = tab.suggestions.filter((s) => s.decision !== "waiting");
-  return `<h2 id="goals">Goals</h2>${goalsHtml}${switches}
+  const destination = `<div class="card"><strong>Headed for:</strong> ${tab.destination ? esc(tab.destination) : `<span class="muted">no destination yet</span>`}</div>`;
+  return `${destination}<h2 id="goals">Goals</h2>${goalsHtml}${switches}
+<h2 id="learnings">Learnings</h2>${learningsHtml(tab)}
 <h2 id="steps">Step log</h2>${tab.stepDays.length ? `${dotStrip(tab.stepDays)}<details><summary class="muted">Every day (${tab.stepDays.length})</summary>${dayRows}</details>` : `<p class="empty">No step days yet.</p>`}
 <h2 id="plans">Plan versions</h2>${tab.plans.map((p) => planCard(p, titles)).join("") || `<p class="empty">No plan yet.</p>`}
 <h2 id="suggestions">Past next steps</h2>${decided.map((s) => suggestionCard(s, testerId, titles)).join("") || `<p class="empty">None decided yet.</p>`}`;

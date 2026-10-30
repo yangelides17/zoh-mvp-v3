@@ -13,6 +13,7 @@ import {
   ONBOARDING,
   PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
+  WEEK_LOOKBACK,
   TEAM,
   PROOF,
   TODAYS_STEP,
@@ -501,6 +502,7 @@ describe("instructions", () => {
     expect(NEXT_STEPS.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nextSteps);
     expect(TEAM.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.team);
     expect(TODAYS_STEP.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.todaysStep);
+    expect(WEEK_LOOKBACK.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.weekLookback);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
@@ -543,6 +545,7 @@ describe("instructions", () => {
     expect(PLAN_AGREEMENT).toContain("no list of future steps");
     expect(PLAN_AGREEMENT).toContain("ask once, lightly");
     expect(fullVoiceInstructions("v")).toContain(TODAYS_STEP);
+    expect(fullVoiceInstructions("v")).toContain(WEEK_LOOKBACK);
     // Onboarding has no day's step to pick.
     expect(FIXED_INSTRUCTIONS).not.toContain(TODAYS_STEP);
   });
