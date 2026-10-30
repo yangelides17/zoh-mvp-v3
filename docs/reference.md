@@ -71,6 +71,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   coach and saved on that day's `step_days` row (`set_today_step`, also callable while a nudge is
   written); no plan version or founder review. Plans gain an optional `destination`; the plan's step
   is day 1's. The coach can no longer send a harder step to the founders: only a new focus.
+  Each saved step has a `step_kind` (#88): first (day 1), same, easier or harder than the step
+  before; Metrics' "Progressed" counts harder days (untagged older days aren't counted).
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
   upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade

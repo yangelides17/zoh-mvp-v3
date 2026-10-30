@@ -448,6 +448,9 @@ export const STEP_DAY_STATUSES = ["done", "done_reduced", "missed"] as const;
 export const PROOF_VERDICTS = ["clear", "plausible", "unclear", "doesnt_match"] as const;
 export type ProofVerdict = (typeof PROOF_VERDICTS)[number];
 export type StepDayStatus = (typeof STEP_DAY_STATUSES)[number];
+/** How hard a day's step is vs. the step before (#88): only to measure progression. */
+export const STEP_KINDS = ["first", "same", "easier", "harder"] as const;
+export type StepKind = (typeof STEP_KINDS)[number];
 
 /**
  * One row per tester and local day that has something to record: the step done (full or reduced)
@@ -485,6 +488,8 @@ export const stepDays = pgTable(
     stepMinutes: integer("step_minutes"),
     /** This day's proof when it differs from the plan's ("a screenshot of the membership"). */
     stepProof: text("step_proof"),
+    /** How hard this step is vs. the one before (#88); null on days saved before it was recorded. */
+    stepKind: text("step_kind", { enum: STEP_KINDS }),
     /** How it went, in their words, summed up in a line by the coach (#77): what the next step builds on. */
     reflection: text("reflection"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -494,6 +499,7 @@ export const stepDays = pgTable(
     unique("step_days_tester_date_unique").on(t.testerId, t.date),
     check("step_days_status_check", sql`${t.status} in ('done', 'done_reduced', 'missed')`),
     check("step_days_proof_verdict_check", sql`${t.proofVerdict} in ('clear', 'plausible', 'unclear', 'doesnt_match')`),
+    check("step_days_step_kind_check", sql`${t.stepKind} in ('first', 'same', 'easier', 'harder')`),
   ],
 );
 

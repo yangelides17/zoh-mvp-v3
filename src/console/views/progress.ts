@@ -92,7 +92,7 @@ export function progressTabHtml(goals: GoalView[], tab: ProgressTab, testerId: s
       const extras = [day.stepMinutes != null && `${day.stepMinutes} min`, day.stepProof && `proof: ${day.stepProof}`].filter(Boolean).join(" · ");
       const step = day.step ? `<div class="day-step">Step: ${esc(day.step)}${extras ? ` <span class="muted">· ${esc(extras)}</span>` : ""}</div>` : "";
       const verdict = day.proofVerdict ? `<div class="muted">proof ${esc(day.proofVerdict)}${day.proofSeen ? `: ${esc(day.proofSeen)}` : ""}</div>` : "";
-      return `<div class="card day-row" id="${dayAnchor(day.date)}"><div class="row"><span class="dot ${esc(s)}" aria-hidden="true">${STATUS_MARKS[s] ?? "·"}</span><strong>${esc(shortDay(day.date))}</strong><span class="muted">${esc(day.date)} · ${esc(STATUS_LABELS[s] ?? s)}</span></div>
+      return `<div class="card day-row" id="${dayAnchor(day.date)}"><div class="row"><span class="dot ${esc(s)}" aria-hidden="true">${STATUS_MARKS[s] ?? "·"}</span><strong>${esc(shortDay(day.date))}</strong><span class="muted">${esc(day.date)} · ${esc(STATUS_LABELS[s] ?? s)} · kind: ${esc(day.stepKind ?? "–")}</span></div>
 ${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length ? `<div class="row" style="margin-top:6px">${proofs.map(proofHtml).join("")}</div>` : ""}</div>`;
     })
     .join("");

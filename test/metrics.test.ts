@@ -2,11 +2,11 @@ import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { testerHeader } from "../src/console/data.js";
-import { engagement, metricsPage, retention, rollup, testerMetrics, weekStart } from "../src/console/metrics.js";
+import { engagement, metricsPage, retention, rollup, testerMetrics, weekStart, type TesterMetrics } from "../src/console/metrics.js";
 import { TOOL_RULES } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { BACK_OFF_FLAG, runTool } from "../src/coach/tools.js";
-import { flags, messages, pauses, plans, stepDays, testerGoals, testers, type Plan, type Tester } from "../src/db/schema.js";
+import { flags, messages, pauses, plans, stepDays, takeaways, testerGoals, testers, type Plan, type Tester } from "../src/db/schema.js";
 import { addDays, zonedTime } from "../src/nudges/schedule.js";
 import { optOut } from "../src/testers/commands.js";
 import { getTester, updateTester } from "../src/testers/testers.js";
@@ -167,6 +167,79 @@ describe("Metrics page", () => {
     // A switch drops the old goal: one live goal, nothing added.
     await t.db.update(testerGoals).set({ role: "dropped" }).where(eq(testerGoals.goalSlug, "reading"));
     expect((await testerMetrics(t.db, sam, now)).progression.addedGoal).toBeUndefined();
+  });
+
+  it("counts only understood learnings (applied or recalled), this week and in all (#88)", async () => {
+    const sam = await seedSam();
+    const lesson = (text: string, day: string, evidence: "explained" | "applied" | "recalled") => ({ testerId: sam.id, goalSlug: "reading", text, day, evidence });
+    await t.db.insert(takeaways).values([
+      // Explained last week, applied this week (from Mon Nov 9): this week and in all.
+      lesson("Read before bed, not after", "2026-11-03", "explained"),
+      lesson("read before bed, not after.", "2026-11-09", "applied"),
+      // Applied last week: in all only.
+      lesson("Phone in the other room", "2026-11-04", "applied"),
+      // Recalled last week: in all only.
+      lesson("Short chapters keep it going", "2026-11-06", "recalled"),
+      // Only explained: not understood.
+      lesson("Audiobooks count too", "2026-11-09", "explained"),
+      // After today: not yet.
+      lesson("Notes in the margin", "2026-11-11", "applied"),
+    ]);
+    const m = await testerMetrics(t.db, sam, now);
+    expect(m.understood).toEqual({ thisWeek: 1, total: 3 });
+    expect((await get("/console/metrics")).body).toContain("<td>1 · 3</td>");
+    // Before a plan or a lesson there's nothing to count.
+    const fresh = await tester(WESTERN, "New");
+    expect((await testerMetrics(t.db, fresh, now)).understood).toBeUndefined();
+  });
+
+  it("reflection rate is done days with a reflection out of done days, this week and overall (#88)", async () => {
+    const sam = await seedSam();
+    // Done days: Nov 3, 4 (smaller), 6, 9, 10; Nov 5 was missed, so its reflection isn't counted.
+    for (const date of ["2026-11-03", "2026-11-05", "2026-11-09"]) {
+      await t.db.update(stepDays).set({ reflection: "went well" }).where(eq(stepDays.date, date));
+    }
+    const m = await testerMetrics(t.db, sam, now);
+    expect(m.reflections).toEqual({ thisWeek: { of: 2, with: 1 }, overall: { of: 5, with: 2 } });
+    const page = (await get("/console/metrics")).body;
+    expect(page).toContain("<td>50% · 40% (2 / 5)</td>");
+    // No done days: a dash, and the average skips them.
+    const fresh = await tester(WESTERN, "New");
+    expect((await testerMetrics(t.db, fresh, now)).reflections).toEqual({ thisWeek: undefined, overall: undefined });
+    expect((await metricsPage(t.db, now, { includeTest: false })).rollup.reflectionRate).toBeCloseTo(0.4);
+  });
+
+  it("progressed lists harder steps with a count and first date; untagged days don't count (#88)", async () => {
+    const sam = await seedSam();
+    const kinds = { "2026-11-03": "first", "2026-11-04": "easier", "2026-11-05": "harder", "2026-11-06": "harder", "2026-11-09": "harder", "2026-11-10": "same" } as const;
+    for (const [date, kind] of Object.entries(kinds)) await t.db.update(stepDays).set({ stepKind: kind }).where(eq(stepDays.date, date));
+    // Nov 5 was a harder step they missed, and one set for a day still ahead hasn't happened yet: neither counts.
+    await t.db.insert(stepDays).values({ testerId: sam.id, date: "2026-11-12", stepKind: "harder", step: "25 pages" });
+    const m = await testerMetrics(t.db, sam, now);
+    expect(m.progression.harder).toEqual({ count: 2, first: "2026-11-06" });
+    expect((await get("/console/metrics")).body).toContain("harder step ×2, first Nov 6, deepened Nov 8, added a goal Nov 9");
+
+    // Alex: only a harder step, and progressed. Kim: done days from before kinds were recorded, and not.
+    const alex = await tester(WESTERN, "Alex");
+    await t.db.insert(stepDays).values({ testerId: alex.id, date: "2026-11-05", status: "done", stepKind: "harder" });
+    const kim = await tester("+15555550123", "Kim");
+    await t.db.insert(stepDays).values([
+      { testerId: kim.id, date: "2026-11-05", status: "done", step: "10 pages" },
+      { testerId: kim.id, date: "2026-11-06", status: "done", step: "20 pages" },
+    ]);
+    const { rows, rollup: u } = await metricsPage(t.db, now, { includeTest: false });
+    expect(rows.find((r) => r.tester.name === "Alex")!.progression).toEqual({ harder: { count: 1, first: "2026-11-05" }, deepened: undefined, upgraded: undefined, addedGoal: undefined });
+    expect(rows.find((r) => r.tester.name === "Kim")!.progression.harder).toBeUndefined();
+    expect(u.progressed).toBe(2);
+  });
+
+  it("averages understood learnings and reflection rate across testers with something to count (#88)", () => {
+    const row = (understood: number | undefined, reflections: { of: number; with: number } | undefined) =>
+      ({ understood: understood === undefined ? undefined : { thisWeek: 0, total: understood }, reflections: { overall: reflections }, progression: {}, backOff: { pauses: 0, flags: 0 }, stops: 0 }) as unknown as TesterMetrics;
+    const u = rollup([row(2, { of: 4, with: 1 }), row(4, { of: 2, with: 2 }), row(undefined, undefined)]);
+    expect(u.understood).toBe(3);
+    expect(u.reflectionRate).toBeCloseTo(0.625);
+    expect(u.progressed).toBe(0);
   });
 
   it("counts pauses and back_off flags as back-off, and every stop even after they come back", async () => {

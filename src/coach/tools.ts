@@ -136,6 +136,7 @@ const schemas = {
   set_today_step: z
     .object({
       step: text(400),
+      kind: z.enum(["same", "easier", "harder"]),
       minutes: z.number().int().min(1).max(600).optional(),
       proof: z.string().trim().max(160).optional(),
       day: z.enum(["today", "next"]).optional(),
@@ -377,18 +378,19 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "set_today_step",
     description:
-      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed after today's step (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly.",
+      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed after today's step (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly. kind, vs. the step before (a multi-day piece too): same (same difficulty, incl. a new angle or a setup milestone), easier (smaller or lighter), harder (more, longer, or a new challenge).",
     input_schema: {
       type: "object",
       properties: {
         step: { type: "string", description: "What, where when it matters, when, how long" },
+        kind: { type: "string", enum: ["same", "easier", "harder"], description: "How hard vs. the step before" },
         minutes: { type: "integer", description: "That day's length, if not the plan's" },
         proof: { type: "string", description: 'That day\'s proof, if not the plan\'s ("a screenshot of the membership")' },
         day: { type: "string", enum: ["today", "next"] },
         agreed: { type: "boolean" },
         asked: { type: "string" },
       },
-      required: ["step"],
+      required: ["step", "kind"],
     },
   },
   {
@@ -573,7 +575,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .where(eq(plans.id, draft.id));
       await alertPlanReview(db, tester, draft.id, version, at);
       // Day 1's step is the plan's (#76); later days get their own with set_today_step.
-      const day1 = { step: draft.step, planId: draft.id, updatedAt: at };
+      const day1 = { step: draft.step, stepKind: "first" as const, planId: draft.id, updatedAt: at };
       await db
         .insert(stepDays)
         .values({ testerId: tester.id, date: startDate, ...day1 })
@@ -878,7 +880,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "set_today_step": {
-      const { step, minutes, proof, day, agreed, asked } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, kind, minutes, proof, day, agreed, asked } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
       const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
@@ -894,7 +896,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       // A day's step is the coach's call (#76): no plan version, no founder review.
       // #77: a yes to the next step day's step, agreed ahead, makes that morning's kickoff a reminder.
-      await saveDay(db, state, date, { step, stepMinutes: minutes ?? null, stepProof: proof || null, ...(agreed ? { agreedAt: at } : {}) }, at);
+      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes: minutes ?? null, stepProof: proof || null, ...(agreed ? { agreedAt: at } : {}) }, at);
       const extra = [minutes !== undefined && `${minutes} min`, proof && `proof: ${proof}`].filter(Boolean).join("; ");
       return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.`);
     }
@@ -987,7 +989,7 @@ async function alertPlanReview(db: Db, tester: Tester, planId: string, version: 
 }
 
 type DayValues = Partial<
-  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepMinutes" | "stepProof">
+  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepKind" | "stepMinutes" | "stepProof">
 >;
 
 async function loadDay(db: Db, testerId: string, date: string): Promise<StepDay | undefined> {

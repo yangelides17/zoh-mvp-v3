@@ -1,8 +1,9 @@
 import { and, asc, eq, gte, inArray } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import { BACK_OFF_FLAG } from "../coach/tools.js";
+import { learnings } from "../coach/week.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, flags, messages, pauses, plans, stepDays, testerGoals, testers, type Message, type Pause, type Tester } from "../db/schema.js";
+import { consoleMessages, flags, messages, pauses, plans, stepDays, takeaways, testerGoals, testers, type Message, type Pause, type StepDay, type Tester } from "../db/schema.js";
 import { messageTime } from "../memory/store.js";
 import { addDays, daysBetween, weekdayOf } from "../nudges/schedule.js";
 import type { HitRate, StreakRun } from "../nudges/streak.js";
@@ -103,6 +104,8 @@ export function weekStart(date: string): string {
 }
 
 export interface Progression {
+  /** Done days whose step was harder than the one before (#88); days saved before kinds were recorded don't count. */
+  harder?: { count: number; first: string };
   deepened?: Date;
   upgraded?: Date;
   /** A goal on top of the first that's still live (a switch replaces one, so it isn't this). */
@@ -120,9 +123,18 @@ export interface TesterMetrics {
   hitRate?: HitRate;
   /** Verified steps (rule 4): this week, and the average a week since their plan started. */
   verified?: { thisWeek: number; total: number; perWeek: number };
+  /** Lessons applied or recalled (#77's takeaways, #78's "understood"): this week, and in all; undefined before a plan or a lesson. */
+  understood?: { thisWeek: number; total: number };
+  /** Done days with a reflection (#77), this week and overall; undefined with no done days. */
+  reflections: { thisWeek?: Share; overall?: Share };
   progression: Progression;
   backOff: { pauses: number; flags: number };
   stops: number;
+}
+
+export interface Share {
+  of: number;
+  with: number;
 }
 
 export interface Rollup {
@@ -132,6 +144,9 @@ export interface Rollup {
   touchPointsPerDay?: number;
   messagesPerDay?: number;
   verifiedPerWeek?: number;
+  /** Understood lessons per tester, in all. */
+  understood?: number;
+  reflectionRate?: number;
   hitRate?: number;
   streak?: number;
   progressed: number;
@@ -156,13 +171,16 @@ export async function testerMetrics(db: Db, tester: Tester, now: Date, titles?: 
 
   const views = await goalViews(db, tester, at, titles ?? (await goalTitles(db)));
   const focus = views.find((v) => v.goal.role === "focus");
+  const days = (await db.select().from(stepDays).where(eq(stepDays.testerId, tester.id))).filter((d) => d.date <= today);
+  const monday = weekStart(today);
 
   const out: TesterMetrics = {
     tester,
     focusTitle: focus?.title,
     streak: focus?.current,
     hitRate: focus?.hitRate,
-    progression: await progression(db, tester),
+    reflections: { thisWeek: reflectionShare(days.filter((d) => d.date >= monday)), overall: reflectionShare(days) },
+    progression: { ...(await progression(db, tester)), ...harderSteps(days) },
     backOff: {
       pauses: pauseRows.length,
       flags: (await db.select().from(flags).where(and(eq(flags.testerId, tester.id), eq(flags.kind, BACK_OFF_FLAG), gte(flags.createdAt, since)))).length,
@@ -181,7 +199,28 @@ export async function testerMetrics(db: Db, tester: Tester, now: Date, titles?: 
     out.engagement = engagement(texts, tester.timeZone, start, today, paused);
   }
   out.verified = await verified(db, tester, today);
+  // A reset deletes lessons with the plan, so every one left is since their context started.
+  const lessons = (await db.select().from(takeaways).where(eq(takeaways.testerId, tester.id))).filter((l) => l.day <= today);
+  if (out.verified || lessons.length) {
+    out.understood = { thisWeek: learnings(lessons, monday).understood.length, total: learnings(lessons).understood.length };
+  }
   return out;
+}
+
+const isDone = (d: StepDay) => d.status === "done" || d.status === "done_reduced";
+
+function reflectionShare(days: StepDay[]): Share | undefined {
+  const done = days.filter(isDone);
+  return done.length ? { of: done.length, with: done.filter((d) => d.reflection).length } : undefined;
+}
+
+function harderSteps(days: StepDay[]): Pick<Progression, "harder"> {
+  // Done in full: a harder step they missed, did a smaller version of, or haven't done yet isn't progress.
+  const dates = days
+    .filter((d) => d.stepKind === "harder" && d.status === "done")
+    .map((d) => d.date)
+    .sort();
+  return dates.length ? { harder: { count: dates.length, first: dates[0]! } } : {};
 }
 
 async function verified(db: Db, tester: Tester, today: string): Promise<TesterMetrics["verified"]> {
@@ -226,9 +265,11 @@ export function rollup(rows: TesterMetrics[]): Rollup {
     touchPointsPerDay: average(engaged.map((r) => r.engagement!.touchPoints / r.engagement!.activeDays)),
     messagesPerDay: average(engaged.map((r) => r.engagement!.messages / r.engagement!.activeDays)),
     verifiedPerWeek: average(rows.flatMap((r) => (r.verified ? [r.verified.perWeek] : []))),
+    understood: average(rows.flatMap((r) => (r.understood ? [r.understood.total] : []))),
+    reflectionRate: average(rows.flatMap((r) => (r.reflections.overall ? [r.reflections.overall.with / r.reflections.overall.of] : []))),
     hitRate: average(rows.flatMap((r) => (r.hitRate?.closed ? [r.hitRate.done / r.hitRate.closed] : []))),
     streak: average(rows.flatMap((r) => (r.focusTitle ? [r.streak?.length ?? 0] : []))),
-    progressed: rows.filter((r) => r.progression.deepened || r.progression.upgraded || r.progression.addedGoal).length,
+    progressed: rows.filter((r) => r.progression.harder || r.progression.deepened || r.progression.upgraded || r.progression.addedGoal).length,
     backOff: rows.reduce((n, r) => n + r.backOff.pauses + r.backOff.flags, 0),
     stops: rows.reduce((n, r) => n + r.stops, 0),
   };

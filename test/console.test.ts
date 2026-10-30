@@ -113,7 +113,7 @@ async function seed(phone = ME, name = "Sam"): Promise<Seeded> {
     { testerId: id, date: "2026-10-22", planId: v1!.id, status: "done" },
     { testerId: id, date: "2026-10-23", planId: v1!.id, status: "done" },
     { testerId: id, date: "2026-10-26", planId: v2!.id, status: "done" },
-    { testerId: id, date: MON, planId: v2!.id, status: "done", note: "read on the train", proofVerdict: "clear", proofSeen: "Dune open at page 40", step: "chapter 3 of Dune on the train, about 20 min", stepMinutes: 25 },
+    { testerId: id, date: MON, planId: v2!.id, status: "done", note: "read on the train", proofVerdict: "clear", proofSeen: "Dune open at page 40", step: "chapter 3 of Dune on the train, about 20 min", stepMinutes: 25, stepKind: "harder" },
   ]);
   const [photo] = await t.db
     .insert(messages)
@@ -321,6 +321,9 @@ describe("tester list and page", () => {
     expect(progress).toContain("Step: chapter 3 of Dune on the train, about 20 min");
     expect(progress).toContain("25 min");
     expect(progress).toContain("Headed for: finish Dune by Dec 1");
+    // Each day's kind of step (#88); days from before kinds were recorded show a dash.
+    expect(progress).toContain(`${MON} · done · kind: harder`);
+    expect(progress).toContain("2026-10-26 · done · kind: –");
     // An unknown tab is the console.
     expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
   });
