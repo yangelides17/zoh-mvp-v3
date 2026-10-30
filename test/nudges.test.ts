@@ -556,7 +556,7 @@ describe("dueNudge", () => {
 });
 
 describe("the coach writing a nudge", () => {
-  it("one call, no tools, the moment in the state block and a note in place of a tester text", async () => {
+  it("one call when it writes straight away, the moment in the state block and a note in place of a tester text", async () => {
     const tester = await setup();
     const model = new FakeClaudeModel();
     model.script("Kalimera Sam! Ten pages of Dune on the couch at 7 tonight. Still on?");
@@ -573,11 +573,12 @@ describe("the coach writing a nudge", () => {
     expect(text).toBe("Kalimera Sam! Ten pages of Dune on the couch at 7 tonight. Still on?");
     expect(model.requests).toHaveLength(1);
     const req = model.requests[0]!;
-    expect(req.toolChoice).toBe("none");
+    // Tools on, so it can save today's step first (#76); only set_today_step runs (test/todays-step.test.ts).
+    expect(req.toolChoice).toBe("auto");
     expect(req.tools.map((x) => x.name)).toContain("mark_step_done");
     expect(req.system[0]!.text).toContain(NUDGES);
     expect(model.stateOf()).toContain("NUDGE MOMENT: kickoff");
-    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not marked done yet.");
+    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet.");
     expect(model.stateOf()).toContain("Next step day: Tue 2026-11-03.");
     expect(model.stateOf()).toContain('Their words when they committed: "I\'m in"');
     const last = req.messages.at(-1)!;
@@ -604,10 +605,10 @@ describe("the state block for an active tester", () => {
     await tool("mark_on_it", {}, at(MON, "20:10"));
     const state = await loadCoachState(t.db, tester, { now: at(MON, "20:12"), isFirstText: false });
     const block = buildStateBlock(state);
-    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not marked done yet. They said they're on it (Mon 8:10 PM).");
+    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet. Pick it the first time you talk about today (see NUDGES) and save it with set_today_step; until then the plan's step applies. Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
     await doneWithPhoto("full", at(MON, "20:40"), "10 pages");
-    expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(MON, "20:41"), isFirstText: false }))).toContain("Today's step: done.");
+    expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(MON, "20:41"), isFirstText: false }))).toContain("Status: done.");
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(TUE, "10:00"), isFirstText: false }))).toContain(
       "Today: Tue 2026-11-03, a rest day (no step).",
     );
@@ -820,7 +821,7 @@ describe("a temporary lighter plan (rule 7)", () => {
       { testerId: tester.id, date: TUE, planId: plan.id, status: "done_reduced" },
     ]);
     const block = buildStateBlock(await loadCoachState(t.db, tester, { now: at(WED, "10:00"), isFirstText: false }));
-    expect(block).toContain("Recent step days, newest first: Tue done (reduced version), Mon done (reduced version).");
+    expect(block).toContain("Recent step days, newest first:\n- Tue 2026-11-03, done (reduced version): the plan's step\n- Mon 2026-11-02, done (reduced version): the plan's step");
     expect(block).toContain("Streak: 0 step days, not counting today (done today makes it 1). Missed in a row: 0. Reduced in a row: 2.");
     expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
   });

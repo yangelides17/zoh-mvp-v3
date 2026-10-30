@@ -98,7 +98,7 @@ async function goalLines(db: Db, tester: Tester, page: MemoryPage): Promise<stri
       const latest = versions.at(-1)!;
       const steps = versions.map(
         (v) =>
-          `v${v.version}${v.lockedAt ? ` (${shortDate(v.lockedAt, tester)})` : ""}: ${v.step}${v.endsOn ? ` (lighter, through ${v.endsOn})` : ""}${v.id === latest.id ? " (current)" : ""}`,
+          `v${v.version}${v.lockedAt ? ` (${shortDate(v.lockedAt, tester)})` : ""}: ${v.step}${v.destination ? ` (headed for: ${v.destination})` : ""}${v.endsOn ? ` (lighter, through ${v.endsOn})` : ""}${v.id === latest.id ? " (current)" : ""}`,
       );
       lines.push(`Step path, first to latest: ${steps.join(" → ")}`);
       lines.push(`Current plan: ${describePlan(latest)}`);

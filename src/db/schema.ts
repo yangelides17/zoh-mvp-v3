@@ -219,8 +219,10 @@ export const plans = pgTable(
     version: integer("version"),
     /** A one-time step for day 1, when one helps ("dumbbells next to your bed"). */
     setupStep: text("setup_step"),
-    /** What they do, specific enough to just do it. */
+    /** What they do, specific enough to just do it. Day 1's step; later days pick their own (#76). */
     step: text("step").notNull(),
+    /** Where they're headed, when they have somewhere ("run a mile without stopping by Nov 14"). Optional. */
+    destination: text("destination"),
     place: text("place"),
     /** Local "HH:MM". */
     stepTime: text("step_time").notNull(),
@@ -477,6 +479,12 @@ export const stepDays = pgTable(
     proofSeen: text("proof_seen"),
     /** Set while unclear proof is being sorted out: holds the day's check-in and follow-up. */
     proofPendingAt: timestamp("proof_pending_at", { withTimezone: true }),
+    /** This day's step, picked by the coach (#76); null falls back to the plan's step. */
+    step: text("step"),
+    /** This day's length when it differs from the plan's. */
+    stepMinutes: integer("step_minutes"),
+    /** This day's proof when it differs from the plan's ("a screenshot of the membership"). */
+    stepProof: text("step_proof"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

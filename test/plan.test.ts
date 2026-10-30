@@ -156,7 +156,7 @@ describe("locking", () => {
       }),
     ]);
     expect((await tester()).phase).toBe("active");
-    expect(buildStateBlock(await state())).toContain("Locked plan (version 1, day 1 2026-10-27)");
+    expect(buildStateBlock(await state())).toContain("Locked plan (version 1, day 1 2026-10-27;");
   });
 
   it("starts tomorrow when asked, by the tester's local date", async () => {

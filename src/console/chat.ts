@@ -403,7 +403,8 @@ export async function stepLog(db: Db, tester: Tester, plan: Plan, today: string)
     else if (i === 0) status = "step day, not done yet";
     else status = "step day";
     const time = step && i >= 0 ? ` at ${row?.movedTime ?? plan.stepTime}` : "";
-    lines.push(`${label(date)}${i === 0 ? " (today)" : i === 1 ? " (tomorrow)" : i === -1 ? " (yesterday)" : ""}: ${status}${time}${row?.note ? ` (${row.note})` : ""}`);
+    const own = row?.step ? `, step: ${row.step}` : "";
+    lines.push(`${label(date)}${i === 0 ? " (today)" : i === 1 ? " (tomorrow)" : i === -1 ? " (yesterday)" : ""}: ${status}${time}${own}${row?.note ? ` (${row.note})` : ""}`);
   }
   return lines.join("\n");
 }

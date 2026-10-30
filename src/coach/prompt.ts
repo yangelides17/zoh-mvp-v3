@@ -2,7 +2,7 @@ import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../
 import { addDays, isStepDay, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
-import { insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
+import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
 
 /**
@@ -168,10 +168,21 @@ function todayLines(s: CoachState, plan: Plan): string[] {
       ? ` They said yes to today's step (${localTime(row.agreedAt, s.tester.timeZone)}): it's settled. Don't re-say it or its proof, or ask if they're still on; a change is said once, and after that only if they ask.`
       : "";
   const today = isStepDay(plan, s.today, row)
-    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. Today's step: ${status}.${onIt}${agreed} ${proofLine(s)}`
+    ? `Today: ${day(s.today)}, a step day at ${row?.movedTime ? `${row.movedTime} (moved for today only; usually ${plan.stepTime})` : plan.stepTime}. ${todayStepLine(plan, row)} Status: ${status}.${onIt}${agreed} ${proofLine(s)}`
     : `Today: ${day(s.today)}, a rest day (no step)${row?.status ? `; marked ${status}` : ""}.`;
   const next = nextStepDay(plan, s.today);
-  return [today, next ? `Next step day: ${day(next)}.` : ""].filter(Boolean);
+  const agreedAhead = next && next === addDays(s.today, 1) && s.tomorrowRow?.step ? ` Its step is already set: "${s.tomorrowRow.step}".` : "";
+  return [today, next ? `Next step day: ${day(next)}.${agreedAhead}` : ""].filter(Boolean);
+}
+
+/** Today's own step (#76), or the ask to pick it; the plan's step applies until then. */
+function todayStepLine(plan: Plan, row: CoachState["todayRow"]): string {
+  if (!row?.step) {
+    return "Today's step: not set yet. Pick it the first time you talk about today (see NUDGES) and save it with set_today_step; until then the plan's step applies.";
+  }
+  const { minutes, proof } = dayStep(plan, row);
+  const length = minutes != null ? `, about ${minutes} min` : "";
+  return `Today's step (set, holds for today): "${row.step}"${length}; proof: ${proof}.`;
 }
 
 /** What proof they've sent today and what you made of it. */
@@ -187,10 +198,14 @@ function proofLine(s: CoachState): string {
 function historyLines(s: CoachState, plan: Plan): string[] {
   const lines: string[] = [];
   if (plan.endsOn) lines.push(`This is a temporary lighter plan through ${plan.endsOn}; then their usual plan comes back.`);
-  const recent = s.recentDays.slice(0, 7).map((d) => `${label(weekdayOf(d.date))} ${STATUS_LABELS[d.status!]}`);
+  // Each day's step and how it went, so the next step builds on them (#76).
+  const recent = s.recentDays.slice(0, 7).map((d) => {
+    const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`].filter(Boolean).join("; ");
+    return `- ${label(weekdayOf(d.date))} ${d.date}, ${STATUS_LABELS[d.status!]}: ${d.step ? `"${d.step}"` : "the plan's step"}${how ? ` (${how})` : ""}`;
+  });
   const { streak, missesInARow, reducedInARow } = s.days;
   if (recent.length === 0 && streak === 0) return lines;
-  if (recent.length) lines.push(`Recent step days, newest first: ${recent.join(", ")}.`);
+  if (recent.length) lines.push(`Recent step days, newest first:\n${recent.join("\n")}`);
   lines.push(`Streak: ${streakLine(s, plan)}. Missed in a row: ${missesInARow}. Reduced in a row: ${reducedInARow}.`);
   if (reducedInARow >= 2 && !plan.endsOn) {
     lines.push(
@@ -355,7 +370,8 @@ export function buildStateBlock(s: CoachState): string {
   }
   const shown = t.phase === "active" ? s.plan : s.draft;
   if (t.phase === "active" && s.plan) {
-    lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}): ${describePlan(s.plan)}`);
+    lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}; its step was day 1's, each later day gets its own): ${describePlan(s.plan)}`);
+    if (!s.plan.destination) lines.push("Destination: none yet (they can add one anytime with change_plan; don't push for it).");
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
     lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {

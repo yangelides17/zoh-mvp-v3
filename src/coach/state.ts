@@ -27,7 +27,7 @@ import {
 } from "../db/schema.js";
 import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
-import { serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { addDays, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
@@ -62,8 +62,10 @@ export interface CoachState {
   plan?: Plan;
   /** Their local day (`serviceDate`): what "today" means for their step. */
   today: string;
-  /** What's recorded for today's step: done, a moved time, "on it". */
+  /** What's recorded for today's step: its step (#76), done, a moved time, "on it". */
   todayRow?: StepDay;
+  /** Tomorrow's row, when its step was agreed the night before. */
+  tomorrowRow?: StepDay;
   /** Closed step days before today, newest first (the last two weeks). */
   recentDays: StepDay[];
   /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
@@ -154,6 +156,11 @@ export async function loadCoachState(
     .from(stepDays)
     .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today)))
     .limit(1);
+  const [tomorrowRow] = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, addDays(today, 1))))
+    .limit(1);
   const recentDays = await loadRecentDays(db, tester, today);
   const proof = await loadProof(db, tester, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
@@ -172,6 +179,7 @@ export async function loadCoachState(
     plan: goal ? currentPlan(testerPlans, goal.slug, today) : undefined,
     today,
     todayRow,
+    tomorrowRow,
     recentDays,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
@@ -211,6 +219,19 @@ export async function loadRecentDays(db: Db, tester: Tester, date: string): Prom
     .orderBy(desc(stepDays.date))
     .limit(14);
   return rows;
+}
+
+/** A day's step (#76): its own when the coach set one, otherwise the plan's step, length and proof. */
+export function dayStep(
+  plan: Pick<Plan, "step" | "minutes" | "proof" | "proofNote">,
+  row?: Pick<StepDay, "step" | "stepMinutes" | "stepProof">,
+): { step: string; minutes: number | null; proof: string; own: boolean } {
+  return {
+    step: row?.step ?? plan.step,
+    minutes: row?.stepMinutes ?? plan.minutes,
+    proof: row?.stepProof ?? `${plan.proof}${plan.proofNote ? ` (${plan.proofNote})` : ""}`,
+    own: Boolean(row?.step),
+  };
 }
 
 /** The streak and in-a-row counts for one goal, from all its closed step days through `date`. */

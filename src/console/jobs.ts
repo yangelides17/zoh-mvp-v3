@@ -233,7 +233,7 @@ async function weekRecord(db: Db, tester: Tester, n: WeekNumbers): Promise<strin
   const open = await suggestionsForCoach(db, tester.id);
   const lines = [
     "Step days:",
-    ...days.filter((d) => d.date <= n.to).map((d) => `- ${d.date}: ${d.status ?? "open"}${d.note ? `, ${d.note}` : ""}${d.proofSeen ? ` (proof: ${d.proofSeen})` : ""}`),
+    ...days.filter((d) => d.date <= n.to).map((d) => `- ${d.date}: ${d.status ?? "open"}${d.step ? `, step: ${d.step}` : ""}${d.note ? `, ${d.note}` : ""}${d.proofSeen ? ` (proof: ${d.proofSeen})` : ""}`),
     "Daily notes:",
     ...docs.filter((d) => d.date! <= n.to).map((d) => `- ${d.date}: ${d.title}. ${d.summary} ${d.body}`.trim()),
   ];

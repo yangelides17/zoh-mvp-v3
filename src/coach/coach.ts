@@ -38,6 +38,10 @@ export const MAX_ROUNDS = 5;
  * (src/memory/context.ts) and only the last two days come word for word.
  */
 export const COACH_HISTORY_CAP = 200;
+/** Claude calls for a text ZOH starts after lock: the day's step may be saved first, the last call writes (#76). */
+export const NUDGE_ROUNDS = 3;
+/** The only tools a text ZOH starts may run: everything else waits for their reply. */
+export const NUDGE_TOOLS: readonly string[] = ["set_today_step"];
 /** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
 export const SKIP = "SKIP";
 
@@ -162,8 +166,9 @@ export function createCoach(opts: CoachOptions): Replier {
       }
     },
     /**
-     * A text ZOH starts itself: one call with the same prompt and tools (so the cache holds), no
-     * tool use, and a note in place of a tester text naming the moment (the state block says it too).
+     * A text ZOH starts itself: the same prompt and tools (so the cache holds), only `NUDGE_TOOLS`
+     * run (after lock, so the day's step can be saved first), and a note in place of a tester text
+     * naming the moment (the state block says it too).
      */
     async nudge({ tester, turns, now, moment, previous, carry, mayskip }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
@@ -174,16 +179,35 @@ export function createCoach(opts: CoachOptions): Replier {
         : "";
       const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
-      const state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
+      let state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
-      // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
-      for (let attempt = 1; ; attempt++) {
+      // After lock, a text it starts can save the day's step first (#76); nothing else runs.
+      const rounds = tester.phase === "active" ? NUDGE_ROUNDS : 1;
+      let round = 1;
+      let retried = false;
+      for (;;) {
+        const last = round >= rounds;
         const response = await model.create({
           system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
           messages,
           tools: toolsFor(tester),
-          toolChoice: "none",
+          toolChoice: last ? "none" : "auto",
         });
+        const calls = last ? [] : response.content.filter((b) => b.type === "tool_use");
+        if (calls.length) {
+          const results: Anthropic.ToolResultBlockParam[] = [];
+          for (const call of calls) {
+            const result = NUDGE_TOOLS.includes(call.name)
+              ? await runTool(db, state, call.name, call.input, now)
+              : ({ ok: false, error: `Only ${NUDGE_TOOLS.join(", ")} while writing a text you start.` } as const);
+            if (result.ok) state = await loadCoachState(db, result.tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
+            results.push({ type: "tool_result", tool_use_id: call.id, ...(result.ok ? { content: result.message } : { content: result.error, is_error: true }) });
+          }
+          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "user", content: results });
+          round++;
+          continue;
+        }
         const text = response.content
           .filter((b) => b.type === "text")
           .map((b) => b.text)
@@ -194,7 +218,9 @@ export function createCoach(opts: CoachOptions): Replier {
         if (skipped && mayskip) return null;
         // SKIP when it wasn't offered counts as no text: retried, never sent and never dropped.
         if (text && !skipped) return text;
-        if (attempt === 2) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
+        // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
+        if (retried) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
+        retried = true;
       }
     },
     check: () => model.check(),
