@@ -7,36 +7,66 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 1,
-    "answers": { "what": "push-ups and squats", "where": "living room", "when": "6:30 pm", "how_long": "15 min" },
+    "answers": {
+      "what": "push-ups and squats",
+      "where": "living room",
+      "when": "6:30 pm",
+      "how_long": "15 min"
+    },
     "history": [
-      { "from": "zoh", "text": "Starts in 10, Theo! 3 sets of 8 push-ups and 12 squats in the living room at 6:30." },
-      { "from": "tester", "text": "ok" }
+      {
+        "from": "zoh",
+        "text": "Starts in 10, Theo! 3 sets of 8 push-ups and 12 squats in the living room at 6:30."
+      },
+      {
+        "from": "tester",
+        "text": "ok"
+      }
     ],
     "plan": {
       "step": "3 sets of 6 push-ups and 10 squats in the living room",
       "place": "living room",
       "time": "18:30",
-      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-      "proof": "photo",
-      "proof_note": "a quick pic after the last set",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a quick voice note saying what you did",
       "reason": "Short sets every day build the base before anything harder.",
       "minutes": 15,
       "started_days_ago": 2
     },
     "step_days": [
-      { "days_ago": 2, "status": "done", "step": "3 sets of 6 push-ups and 10 squats in the living room" },
-      { "days_ago": 1, "status": "done", "step": "3 sets of 7 push-ups and 10 squats in the living room" }
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "3 sets of 6 push-ups and 10 squats in the living room"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "3 sets of 7 push-ups and 10 squats in the living room"
+      }
     ],
-    "today_step": { "step": "3 sets of 8 push-ups and 12 squats in the living room at 6:30 pm (about 15 min)", "agreed_hours_ago": 9 }
+    "today_step": {
+      "step": "3 sets of 8 push-ups and 12 squats in the living room at 6:30 pm (about 15 min)",
+      "agreed_hours_ago": 9
+    }
   },
   "testerLines": [
-    "[photo sweaty.jpg: a sweaty selfie on a living room floor next to a yoga mat] done",
+    "[voice: Done, three sets of eight push-ups and twelve squats.]",
     "it was fine, legs were tired on the last set",
     "nah that's it",
     "let's go"
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH shouldn't keep a tester talking for its own sake.",
-  "shouldHaveHappened": "ZOH counts the photo, celebrates and asks once for a quick reflection (a voice note is easiest). After \"legs were tired on the last set\" it may ask at most one short, specific follow-up; after \"nah that's it\" it stops digging and proposes the next step day's step, fully defined (what, where, when, how long), sensibly not a big jump given tired legs, and asks if it works. After \"let's go\" it confirms in one line with no new question.",
+  "shouldHaveHappened": "ZOH counts the voice note, celebrates and asks once for a quick reflection (a voice note is easiest). After \"legs were tired on the last set\" it may ask at most one short, specific follow-up; after \"nah that's it\" it stops digging and proposes the next step day's step, fully defined (what, where, when, how long), sensibly not a big jump given tired legs, and asks if it works. After \"let's go\" it confirms in one line with no new question.",
   "startTime": "18:55",
   "timeZone": "America/New_York"
 }

@@ -7,32 +7,67 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 1,
-    "answers": { "what": "jog and walk intervals", "where": "around the block", "when": "7 pm", "how_long": "20 min" },
+    "answers": {
+      "what": "jog and walk intervals",
+      "where": "around the block",
+      "when": "7 pm",
+      "how_long": "20 min"
+    },
     "history": [
-      { "from": "zoh", "text": "Starts in 10, Jordan! Shoes on: 2 min jog, 1 min walk, 3 rounds around the block at 7." },
-      { "from": "tester", "text": "heading out" }
+      {
+        "from": "zoh",
+        "text": "Starts in 10, Jordan! Shoes on: 2 min jog, 1 min walk, 3 rounds around the block at 7, then a quick voice note."
+      },
+      {
+        "from": "tester",
+        "text": "heading out"
+      }
     ],
     "plan": {
       "step": "1 min jog, 2 min walk, 3 rounds around the block",
       "destination": "run a mile without stopping",
       "place": "around the block",
       "time": "19:00",
-      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-      "proof": "screenshot",
-      "proof_note": "Strava run",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a quick voice note saying what you did",
       "reason": "Short intervals build up to a mile without wrecking your legs.",
       "minutes": 20,
       "started_days_ago": 2
     },
     "step_days": [
-      { "days_ago": 2, "status": "done", "step": "1 min jog, 2 min walk, 3 rounds around the block", "proof_seen": "Strava 1.0 mi" },
-      { "days_ago": 1, "status": "done", "step": "1 min jog, 2 min walk, 4 rounds around the block", "proof_seen": "Strava 1.2 mi" }
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 3 rounds around the block",
+        "proof_seen": "Strava 1.0 mi"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 4 rounds around the block",
+        "proof_seen": "Strava 1.2 mi"
+      }
     ],
-    "today_step": { "step": "2 min jog, 1 min walk, 3 rounds around the block at 7 pm (about 15 min)" }
+    "today_step": {
+      "step": "2 min jog, 1 min walk, 3 rounds around the block at 7 pm (about 15 min)"
+    }
   },
-  "testerLines": ["[photo strava.png: a Strava screenshot: Run, 1.3 mi, 17:40, today 7:22 PM]", "🙌", "advance to 21:30"],
+  "testerLines": [
+    "[voice: Done. Three rounds, two minutes jogging, one minute walking, about a mile and a quarter.]",
+    "🙌",
+    "advance to 21:30"
+  ],
   "whatWentWrong": "New case, not a past mistake: after proof, ZOH should ask once for a reflection and not chase it.",
-  "shouldHaveHappened": "ZOH counts the screenshot and celebrates, and in that same text asks once, warmly, for a quick reflection (what clicked, what was hard, what they noticed), saying a voice note is easiest. It asks only that one thing, not the next step too. \"🙌\" isn't a reflection: ZOH doesn't ask for one again; it either closes warmly or proposes the next step day's step, fully defined, and asks if it works. No more texts start that evening.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates, and in that same text asks once, warmly, for a quick reflection (what clicked, what was hard, what they noticed), saying a voice note is easiest. It asks only that one thing, not the next step too. \"🙌\" isn't a reflection: ZOH doesn't ask for one again; it either closes warmly or proposes the next step day's step, fully defined, and asks if it works. No more texts start that evening.",
   "startTime": "19:25",
   "timeZone": "America/New_York"
 }

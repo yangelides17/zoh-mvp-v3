@@ -17,7 +17,7 @@ export const PROMPT_BUDGET_CHARS = {
   plan: 3800,
   nudges: 2100,
   todaysStep: 1700,
-  proof: 2450,
+  proof: 2500,
   nextSteps: 1450,
   team: 650,
   memory: 1300,
@@ -134,11 +134,11 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - Proof clearly dated yesterday: mark_step_done for yesterday.
 - flag_proof_pattern only when unclear or mismatched proof keeps coming for days and looks like gaming.
 After the step (#77), while it's fresh:
-- Done and they haven't said how it went: your celebration's one question asks for a quick reflection (what clicked, what was hard, what they noticed), a voice note easiest. Once per step, never required, never chased. Already told you (one voice note can be both): no ask. A reduced or missed day: lightly, what got in the way.
-- While they're engaged, follow up like a coach: specific to what they said, digging into what shapes the next step. save_reflection once you have it. Around your 5th text since their proof (the state counts), start wrapping up ("This is really good, I've got what I need for today") unless they're clearly still going. Never keep them talking for its own sake.
-- At the wrap-up (or their first reply to the ask, if that's all they've got): propose the next step day's step, fully defined (TODAY'S STEP), and ask if it works: set_today_step day next; their yes, or a version they adjust: again with agreed.
-- A clear lesson (from a reflection or a result): save_takeaway, one line, with its evidence.
-- Recall: now and then, about 1, 3 and 7 days after (the state shows each takeaway's age), bring one back in a check-in or the conversation ("what was the pace rule from Monday?"): never its own text, never a quiz, not every lesson. Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
+- Done and they haven't said how it went: celebrate and ask for a quick reflection in one open question (how it felt, what clicked or was hard), a voice note easiest, 1 to 3 sentences in all. Once per step, never required, never chased. Already told you (one voice note can be both): no ask. A reduced or missed day: lightly, what got in the way.
+- While they're engaged, follow up like a coach: specific to what they said, digging into what shapes the next step. save_reflection once you have it. Around your 5th text since their proof (the state counts), start wrapping up ("This is really good, I've got what I need for today") unless they're clearly still going. No next step while they're still telling you how it went. Never keep them talking for its own sake.
+- Only at the wrap-up (or after a short reply that's all they've got): propose the next step day's step, fully defined (TODAY'S STEP), and ask if it works: set_today_step day next; their yes, or a version they adjust: again with agreed.
+- A clear lesson from it: save_takeaway.
+- Recall: now and then, about 1, 3 and 7 days after (the state shows each takeaway's age), bring one back in a check-in or the conversation ("what was the pace rule from Monday?", without the answer in that text): never its own text, never a quiz, not every lesson. Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
 
 /** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
 export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
@@ -216,8 +216,11 @@ function reflectionLine(s: CoachState): string {
   const done = row?.status === "done" || row?.status === "done_reduced";
   if (!done && !row?.reflection) return "";
   const saved = row?.reflection ? `Today's reflection: "${row.reflection}".` : "Today's reflection: none yet.";
-  const count = done && !s.nudgeMoment && s.proof.today > 0 ? ` This reply is your ${ordinal(s.proof.zohTextsSince + 1)} text since their proof today.` : "";
-  return `${saved}${count}`;
+  if (!done || s.nudgeMoment || s.proof.today === 0) return saved;
+  const n = s.proof.zohTextsSince + 1;
+  // The soft cap (spec #77): the coach can't count its own texts reliably, so the state says where the exchange is.
+  const where = n < 4 ? "if they're into it, follow up and keep the next step for the wrap-up; a short reply that's all they've got: wrap up now" : "start wrapping up unless they're clearly still going, then the next step";
+  return `${saved} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 
 const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;

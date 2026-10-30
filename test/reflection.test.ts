@@ -160,12 +160,12 @@ describe("reflection", () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today.");
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: if they're into it, follow up and keep the next step for the wrap-up; a short reply that's all they've got: wrap up now.");
     for (const [i, hhmm] of ["19:31", "19:34", "19:38", "19:42"].entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
     }
-    expect(await block(at(MON, "19:50"))).toContain("This reply is your 5th text since their proof today.");
+    expect(await block(at(MON, "19:50"))).toContain("This reply is your 5th text since their proof today: start wrapping up unless they're clearly still going, then the next step.");
     // A text ZOH starts isn't part of the exchange.
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(MON, "19:50"), isFirstText: false, nudgeMoment: "followup" }));
     expect(nudge).not.toContain("since their proof");
