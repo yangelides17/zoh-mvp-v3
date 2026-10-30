@@ -1,0 +1,38 @@
+{
+  "id": "kickoff-day-four",
+  "title": "Day 4: the kickoff builds on how the last runs went, and the check-in uses today's step",
+  "origin": "Issue #76 (destination, path and today's step), from the spec's day-4 kickoff example",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 60,
+    "answers": { "what": "running from zero", "where": "around my block", "when": "6:30 pm", "how_long": "15 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "tester", "text": "done! 2 min jogs felt easy honestly" },
+      { "from": "zoh", "text": "THAT'S what I'm talking about, Sam. Two-minute jogs, done and easy. See you Monday." }
+    ],
+    "plan": {
+      "step": "outside around your block: 1 min easy jog, 2 min walk, 3 rounds",
+      "destination": "run a mile without stopping by Nov 14",
+      "place": "around the block",
+      "time": "18:30",
+      "days": ["mon", "wed", "fri"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to the mile without wrecking your legs.",
+      "minutes": 15,
+      "started_days_ago": 7
+    },
+    "step_days": [
+      { "days_ago": 7, "status": "done", "step": "outside around your block: 1 min easy jog, 2 min walk, 3 rounds", "note": "harder than expected", "proof_seen": "Strava, 10 min, 0.6 mi" },
+      { "days_ago": 5, "status": "done", "step": "around your block: 1.5 min jog, 1.5 min walk, 3 rounds", "note": "ok", "proof_seen": "Strava, 10 min, 0.7 mi" },
+      { "days_ago": 3, "status": "done", "step": "around your block: 2 min jog, 1 min walk, 3 rounds", "note": "felt easy", "proof_seen": "Strava, 10 min, 0.8 mi" }
+    ]
+  },
+  "testerLines": ["advance to 09:00", "yes let's go", "advance to 18:25"],
+  "whatWentWrong": "Before #76 every day was the plan's one step again (\"1 min easy jog, 2 min walk\" on day 4 too), and kickoffs asked \"What time are we locking in?\" for a time already set (#73).",
+  "shouldHaveHappened": "The 9 am kickoff gives a step that builds on the last runs (2-minute jogs felt easy, so a little more: longer jogs or shorter walks, toward the mile by Nov 14), not the plan's original 1-minute jogs and not a big jump. It's fully defined (what, around the block, 6:30 pm, about how long), may carry a short tip that fits (keep it slow enough to talk), and asks one thing: are they in. It never asks what time. The reply to \"yes let's go\" is short and doesn't restate the step. The check-in before 6:30 refers to today's new step, not the plan's original one.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

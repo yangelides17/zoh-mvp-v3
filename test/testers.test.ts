@@ -98,6 +98,8 @@ describe("testers", () => {
 
     it("un-stops a stopped tester who texts again and gives them a normal reply", async () => {
       await text(t, ME, "stop");
+      // History breaks same-millisecond ties by id: a tester can't answer within the millisecond, so neither do we.
+      await new Promise((resolve) => setTimeout(resolve, 5));
       await text(t, ME, "hey");
       expect((await tester(t, ME)).stoppedAt).toBeNull();
       expect(t.replier.received).toHaveLength(1);

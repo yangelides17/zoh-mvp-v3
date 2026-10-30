@@ -69,7 +69,7 @@ export interface NudgeInput {
   /** The latest locked plan for their current goal. */
   plan?: Pick<Plan, "stepTime" | "days" | "startDate" | "minutes" | "lockedAt">;
   /** Their step-day row for the service date (`serviceDate`), if any. */
-  today?: Pick<StepDay, "status" | "movedTime" | "onItAt"> & Partial<Pick<StepDay, "proofPendingAt">>;
+  today?: Pick<StepDay, "status" | "movedTime" | "onItAt"> & Partial<Pick<StepDay, "proofPendingAt" | "stepMinutes">>;
   /** Nudge kinds already claimed for the service date. */
   claimedToday: string[];
   lastInboundAt?: Date;
@@ -194,7 +194,8 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
       slots.push({ kind: `checkin${suffix}`, moment: "checkin", from: checkinAt, until: stepAt });
     }
     if (level !== "gentle" && !proofPending) {
-      const doneBy = stepAt + (plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
+      // Today's own length when its step runs shorter or longer than the plan's (#76).
+      const doneBy = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
       slots.push({ kind: `followup${suffix}`, moment: "followup", from: doneBy, until: day.end });
     }
   }

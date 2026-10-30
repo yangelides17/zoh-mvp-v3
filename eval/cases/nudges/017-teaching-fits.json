@@ -1,0 +1,37 @@
+{
+  "id": "teaching-fits",
+  "title": "Teaching fits what they're stuck on: a grounded tip, not a lecture",
+  "origin": "Issue #76 (destination, path and today's step): teaching is part of the step",
+  "seed": {
+    "name": "Casey",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "juggling 3 balls", "where": "living room", "when": "6 pm", "how_long": "10 min" },
+    "history": [
+      { "from": "tester", "text": "did my 10 min but the 2 ball thing is a mess, they keep crashing into each other" },
+      { "from": "zoh", "text": "That's the hardest part, Casey, and you showed up for it. We'll work on it tomorrow." }
+    ],
+    "plan": {
+      "step": "living room: toss one ball hand to hand at eye level, 10 min",
+      "destination": "juggle 3 balls for 10 catches in a row",
+      "place": "living room",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note on how it went",
+      "reason": "Ten minutes a day is how juggling clicks.",
+      "minutes": 10,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "living room: toss one ball hand to hand at eye level, 10 min", "note": "easy", "proof_seen": "voice note: 'got the one ball down'" },
+      { "days_ago": 1, "status": "done", "step": "living room: two-ball exchange, 10 min", "note": "balls keep colliding", "proof_seen": "voice note: 'two balls keep crashing'" }
+    ]
+  },
+  "testerLines": ["advance to 09:00", "ok I'm in but seriously how do I stop them crashing", "advance to 17:55"],
+  "whatWentWrong": "New case, not a past mistake: teaching should fit what this person needs today, grounded, never forced.",
+  "shouldHaveHappened": "Yesterday's exchange was a mess, so today's step stays on the two-ball exchange (the same or a smaller piece of it, not three balls yet), fully defined (living room, 6 pm, about 10 minutes). ZOH gives a correct, well-known fix for collisions; any accurate description counts (for example: throw the second ball when the first peaks, under or inside it, so the paths cross; aim each throw at the other hand or opposite shoulder at about eye level; higher, slower arcs). A YouTube search phrase, if given, is for the two-ball exchange. The question \"how do I stop them crashing\" gets a real answer, consistent with the morning's tip (no contradicting aim points or heights across the day). Plain and grounded: no invented sources or video titles, no lecture, at most about 8 short lines in a text that teaches. The kickoff asks one thing, never what time. The check-in before 6 is short and doesn't teach the fix again (a few-word reminder is fine).",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

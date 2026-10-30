@@ -40,6 +40,8 @@ export const seedSchema = z.object({
     .object({
       setup_step: z.string().optional(),
       step: z.string(),
+      /** Where they're headed (#76), when they named somewhere. */
+      destination: z.string().optional(),
       place: z.string().optional(),
       time: z.string().regex(/^\d{2}:\d{2}$/),
       days: z.array(z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"])).min(3),
@@ -52,9 +54,22 @@ export const seedSchema = z.object({
       started_days_ago: z.number().int().min(0).max(30).default(0),
     })
     .optional(),
-  /** How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }. */
+  /**
+   * How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }; optionally
+   * that day's own step (#76), what they said about it and what the proof showed.
+   */
   step_days: z
-    .array(z.object({ days_ago: z.number().int().min(1).max(30), status: z.enum(["done", "done_reduced", "missed"]) }))
+    .array(
+      z.object({
+        days_ago: z.number().int().min(1).max(30),
+        status: z.enum(["done", "done_reduced", "missed"]),
+        step: z.string().optional(),
+        note: z.string().optional(),
+        proof_seen: z.string().optional(),
+        /** A time moved for that day only, local "HH:MM". */
+        moved_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      }),
+    )
     .default([]),
   /**
    * Maintenance goals (next-step feature, needs a plan): goals kept up in the background, each with

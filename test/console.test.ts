@@ -99,7 +99,7 @@ async function seed(phone = ME, name = "Sam"): Promise<Seeded> {
     .returning();
   const [v3] = await t.db
     .insert(plans)
-    .values({ ...base, goalSlug: "reading", version: 3, step: "15 pages of Dune", changeKind: "deepen", needsReview: true, startDate: "2026-11-09", lockedAt: at("2026-11-08", "12:00") })
+    .values({ ...base, goalSlug: "reading", version: 3, step: "15 pages of Dune", destination: "finish Dune by Dec 1", changeKind: "deepen", needsReview: true, startDate: "2026-11-09", lockedAt: at("2026-11-08", "12:00") })
     .returning();
   await t.db.insert(testerGoals).values([
     { testerId: id, goalSlug: "reading", role: "focus", roleSince: at("2026-10-25", "12:00") },
@@ -112,7 +112,7 @@ async function seed(phone = ME, name = "Sam"): Promise<Seeded> {
     { testerId: id, date: "2026-10-22", planId: v1!.id, status: "done" },
     { testerId: id, date: "2026-10-23", planId: v1!.id, status: "done" },
     { testerId: id, date: "2026-10-26", planId: v2!.id, status: "done" },
-    { testerId: id, date: MON, planId: v2!.id, status: "done", note: "read on the train", proofVerdict: "clear", proofSeen: "Dune open at page 40" },
+    { testerId: id, date: MON, planId: v2!.id, status: "done", note: "read on the train", proofVerdict: "clear", proofSeen: "Dune open at page 40", step: "chapter 3 of Dune on the train, about 20 min", stepMinutes: 25 },
   ]);
   const [photo] = await t.db
     .insert(messages)
@@ -316,6 +316,10 @@ describe("tester list and page", () => {
     expect(progress).toContain("read on the train");
     expect(progress).toContain("Dune open at page 40");
     expect(progress).toContain(`/console/media/${s.photoId}`);
+    // Each day's own step and the plan's destination (#76)
+    expect(progress).toContain("Step: chapter 3 of Dune on the train, about 20 min");
+    expect(progress).toContain("25 min");
+    expect(progress).toContain("Headed for: finish Dune by Dec 1");
     // An unknown tab is the console.
     expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
   });

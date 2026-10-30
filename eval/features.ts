@@ -126,7 +126,24 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "plan-shape",
         scope: "conversation",
         label:
-          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a reason and a proof method (photo, screenshot or voice note) that fits what they use",
+          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a proof method (photo, screenshot or voice note) that fits what they use",
+      },
+      {
+        id: "first-plan",
+        scope: "conversation",
+        label:
+          "The first plan shows the destination (if they named one), day 1's step, the usual schedule and the proof, plus a short general line on how progression works from here; no list or path of future steps",
+      },
+      {
+        id: "destination",
+        scope: "conversation",
+        label: "No destination given: at most one light ask, and the plan still locks smoothly without one",
+      },
+      {
+        id: "step-defined",
+        scope: "text",
+        label:
+          "Every step given says what, where when it matters, when and how long; no important detail left ambiguous (an unknown that matters, like outside or treadmill, is asked, not assumed)",
       },
       {
         id: "commitment",
@@ -154,12 +171,34 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "names-commitment",
         scope: "text",
-        label: "Every step-day nudge (a text ZOH starts itself on a step day) names their actual commitment: what, and when or where",
+        label: "Every step-day nudge (a text ZOH starts itself on a step day) names today's step: what, and when or where",
       },
       { id: "warm-open", scope: "text", label: "A text ZOH starts itself opens warm with their name" },
       { id: "off-day-light", scope: "text", label: "Off-day (rest day) text is light, with no push" },
       { id: "no-guilt", scope: "text", label: "No guilt or fake urgency" },
-      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
+      {
+        id: "short",
+        scope: "text",
+        label: "Short: one to three sentences, at most one question, at the end; a text that teaches something for the step can run to about 8 short lines",
+      },
+      { id: "kickoff-one-ask", scope: "text", label: "A kickoff asks one thing (are they in) and never re-asks a time or step already agreed" },
+      {
+        id: "step-defined",
+        scope: "text",
+        label:
+          "A step given in a kickoff says what, where when it matters, when and how long; no important detail left ambiguous (an unknown that matters is asked, not assumed)",
+      },
+      {
+        id: "step-progression",
+        scope: "conversation",
+        label:
+          "Today's step follows sensibly from how the recent days went (the same again, a new angle, the next part, harder once they've got it), never the same text every day; after a miss or a reduced day it's the same or easier, never a jump",
+      },
+      {
+        id: "teaching-fits",
+        scope: "text",
+        label: "Teaching matches what this person needs that day (a lot, a little, a reminder or nothing), feels natural and grounded, never forced or invented",
+      },
       { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
       {
         id: "voice",

@@ -15,6 +15,7 @@ import {
   PROMPT_BUDGET_CHARS,
   TEAM,
   PROOF,
+  TODAYS_STEP,
   TOOL_RULES,
 } from "../src/coach/prompt.js";
 import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
@@ -499,6 +500,7 @@ describe("instructions", () => {
     expect(PROOF.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.proof);
     expect(NEXT_STEPS.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nextSteps);
     expect(TEAM.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.team);
+    expect(TODAYS_STEP.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.todaysStep);
     expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
   });
 
@@ -520,6 +522,29 @@ describe("instructions", () => {
     for (const phrase of ["starts in about 10 minutes", "yesterday slipped", "once, not twice"]) expect(NUDGES.toLowerCase()).not.toContain(phrase);
     for (const phrase of ["One miss is a slip. Two starts a habit.", "yesterday slipped"]) expect(loadVoiceDoc()).not.toContain(phrase);
     expect(NUDGES).toContain("which isn't the step's length");
+  });
+
+  it("have the kickoff ask only whether they're in, never for a time (#73)", () => {
+    // "Today at 6:30 pm, 10 minutes of business articles… What time are we locking in?"
+    const kickoff = NUDGES.split("\n").find((l) => l.startsWith("- kickoff"))!;
+    expect(kickoff).toContain("one question: are they in");
+    expect(kickoff).toContain("never ask what time");
+    expect(kickoff).not.toContain("a question to commit");
+    // The voice page's kickoff examples were the source: none asks for a time any more.
+    for (const phrase of ["What time are we locking in?", "What time works?"]) expect(loadVoiceDoc()).not.toContain(phrase);
+  });
+
+  it("let the coach pick each day's step, and send only a new goal to the team (#76)", () => {
+    expect(TODAYS_STEP).toContain("the same or easier, never a jump");
+    expect(TODAYS_STEP).toContain("ask, don't assume");
+    expect(NEXT_STEPS).not.toContain("Never raise a level-up, a harder step");
+    expect(NEXT_STEPS).toContain("Who decides: day to day, you");
+    expect(loadVoiceDoc()).not.toContain("Raises a level-up, a harder step");
+    expect(PLAN_AGREEMENT).toContain("no list of future steps");
+    expect(PLAN_AGREEMENT).toContain("ask once, lightly");
+    expect(fullVoiceInstructions("v")).toContain(TODAYS_STEP);
+    // Onboarding has no day's step to pick.
+    expect(FIXED_INSTRUCTIONS).not.toContain(TODAYS_STEP);
   });
 
   it("allow at most 3 Greek words a day, in the onboarding prompt and the voice page", () => {

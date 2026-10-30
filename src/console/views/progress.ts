@@ -50,7 +50,7 @@ function planCard(p: Plan, titles: Map<string, Goal>): string {
   const review = p.needsReview ? `<span class="chip warn">needs review</span>` : p.status === "locked" ? `<span class="chip">reviewed</span>` : "";
   const label = p.status === "draft" ? "Draft" : `v${p.version}`;
   return `<div class="card"><div class="row"><strong>${esc(label)}</strong><span class="chip">${esc(titles.get(p.goalSlug)?.title ?? p.goalSlug)}</span>${p.changeKind ? `<span class="chip">${esc(p.changeKind)}</span>` : ""}${review}<span class="muted">${esc(when(p.lockedAt ?? p.createdAt))}</span></div>
-<div>${esc(p.step)}${p.place ? ` · ${esc(p.place)}` : ""} · ${esc(p.stepTime)}, ${esc(describeDays(p.days))}${p.minutes ? ` · ${p.minutes} min` : ""}</div>
+${p.destination ? `<div>Headed for: ${esc(p.destination)}</div>` : ""}<div>${esc(p.step)}${p.place ? ` · ${esc(p.place)}` : ""} · ${esc(p.stepTime)}, ${esc(describeDays(p.days))}${p.minutes ? ` · ${p.minutes} min` : ""}</div>
 <div class="muted">Proof: ${esc(p.proof)}${p.proofNote ? ` (${esc(p.proofNote)})` : ""}${p.setupStep ? ` · setup: ${esc(p.setupStep)}` : ""}${p.startDate ? ` · from ${esc(p.startDate)}` : ""}${p.endsOn ? ` · lighter, through ${esc(p.endsOn)}` : ""}</div>
 <div class="muted">Why: ${esc(p.reason)}${p.commitment ? ` · They said: "${esc(p.commitment)}"` : ""}</div></div>`;
 }
@@ -78,9 +78,12 @@ export function progressTabHtml(goals: GoalView[], tab: ProgressTab, testerId: s
   const dayRows = tab.stepDays
     .map(({ day, proofs }) => {
       const s = status(day);
+      // The day's own step (#76): length and proof only when they differ from the plan's.
+      const extras = [day.stepMinutes != null && `${day.stepMinutes} min`, day.stepProof && `proof: ${day.stepProof}`].filter(Boolean).join(" · ");
+      const step = day.step ? `<div class="day-step">Step: ${esc(day.step)}${extras ? ` <span class="muted">· ${esc(extras)}</span>` : ""}</div>` : "";
       const verdict = day.proofVerdict ? `<div class="muted">proof ${esc(day.proofVerdict)}${day.proofSeen ? `: ${esc(day.proofSeen)}` : ""}</div>` : "";
       return `<div class="card day-row" id="${dayAnchor(day.date)}"><div class="row"><span class="dot ${esc(s)}" aria-hidden="true">${STATUS_MARKS[s] ?? "·"}</span><strong>${esc(shortDay(day.date))}</strong><span class="muted">${esc(day.date)} · ${esc(STATUS_LABELS[s] ?? s)}</span></div>
-${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length ? `<div class="row" style="margin-top:6px">${proofs.map(proofHtml).join("")}</div>` : ""}</div>`;
+${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length ? `<div class="row" style="margin-top:6px">${proofs.map(proofHtml).join("")}</div>` : ""}</div>`;
     })
     .join("");
   const decided = tab.suggestions.filter((s) => s.decision !== "waiting");

@@ -1,0 +1,27 @@
+{
+  "id": "plan-with-destination",
+  "title": "First plan with a destination: day 1 fully defined, a line on how it progresses, no path",
+  "origin": "Issue #76 (destination, path and today's step), from the spec's first-plan example",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "planning",
+    "answers": {
+      "what": "running, starting from basically zero",
+      "where": "around my block",
+      "when": "6:30 pm after work",
+      "how_long": "15 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      { "from": "tester", "text": "I log my walks on Strava already" },
+      { "from": "zoh", "text": "Perfect, Strava it is. Is there something you're working toward with running?" }
+    ]
+  },
+  "testerLines": ["Yeah I want to run a mile without stopping by Nov 14. Mon, Wed and Fri work best", "love it", "I'm in!"],
+  "whatWentWrong": "New case, not a past mistake: before #76 the plan was one step repeated every day, with no destination and no word on how it would progress.",
+  "shouldHaveHappened": "ZOH shows the plan as a short list: where they're headed (a mile without stopping by Nov 14); day 1's step fully defined (today at 6:30 pm, around their block, easy jog and walk intervals with the minutes and rounds spelled out, about 15 minutes); the usual schedule (Mon, Wed, Fri at 6:30 pm, about 15 minutes); proof as a Strava screenshot. Then a line or two on how it goes from here (how day 1 feels shapes the next runs, building toward the mile), with no list of future steps, and one question. After \"love it\" it asks for the commitment in natural words; after \"I'm in!\" it locks with a hype line and when day 1 is.",
+  "areaCode": "212",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

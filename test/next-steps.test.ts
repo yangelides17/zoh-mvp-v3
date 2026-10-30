@@ -131,10 +131,10 @@ describe("rule 1: no next step reaches a tester before the team approves it", ()
     expect(await block(tester, now)).not.toContain(ref);
     expect(await tool(tester, "record_next_step", { suggestion: ref, outcome: "delivered" }, now)).toMatchObject({ ok: false });
     expect(await tool(tester, "change_plan", { step: "15 pages of Dune", suggestion: ref }, now)).toMatchObject({ ok: false });
-    // A deepen the coach thinks of can't go through change_plan without them asking for it.
+    // A deepen the coach thinks of can't go through change_plan without them asking for it: it's a day's step (#76).
     expect(await tool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen" }, now, "sounds good")).toMatchObject({
       ok: false,
-      error: expect.stringContaining("suggest_next_step"),
+      error: expect.stringContaining("set_today_step"),
     });
     expect(await allPlans()).toHaveLength(1);
 
@@ -143,19 +143,29 @@ describe("rule 1: no next step reaches a tester before the team approves it", ()
     expect(await block(tester, now)).not.toContain("15 pages a night");
   });
 
-  it("the coach's own idea is saved for the team with its reasoning, raises an alert and says nothing", async () => {
+  it("the coach's own new focus is saved for the team with its reasoning, raises an alert and says nothing", async () => {
     const tester = await setup();
     const result = await tool(
       tester,
       "suggest_next_step",
-      { kind: "deepen", asked_by: "coach", proposal: "15 pages a night", reasoning: "21 days straight, says it's easy now" },
+      { kind: "new_focus", asked_by: "coach", proposal: "Morning runs too", reasoning: "21 days straight, says it's easy now", new_goal: "exercise" },
       at(MON, "20:00"),
     );
     expect(result).toMatchObject({ ok: true, message: expect.stringContaining("Say nothing about it") });
     expect(await allSuggestions()).toMatchObject([
-      { kind: "deepen", raisedBy: "coach", decision: "waiting", proposal: "15 pages a night", reasoning: "21 days straight, says it's easy now", outcome: null },
+      { kind: "new_focus", raisedBy: "coach", decision: "waiting", proposal: "Morning runs too", reasoning: "21 days straight, says it's easy now", outcome: null },
     ]);
     expect((await alerts()).map((a) => a.topic)).toEqual(["next_step"]);
+  });
+
+  it("a harder step the coach thinks of no longer goes to the team: it's a day's step (#76)", async () => {
+    const tester = await setup();
+    for (const kind of ["deepen", "upgrade"]) {
+      const result = await tool(tester, "suggest_next_step", { kind, asked_by: "coach", proposal: "15 pages a night", reasoning: "easy now" }, at(MON, "20:00"));
+      expect(result).toMatchObject({ ok: false, error: expect.stringContaining("set_today_step") });
+    }
+    expect(await allSuggestions()).toHaveLength(0);
+    expect(await alerts()).toHaveLength(0);
   });
 
   it("unsure: the team gets a coach_unsure alert with what the coach can't tell", async () => {
@@ -235,11 +245,11 @@ describe("an approved next step", () => {
 
   it("declined: nothing changes, and the coach can't raise the same kind again for a week", async () => {
     const tester = await setup();
-    const s = await suggestion(tester, { kind: "deepen", proposal: "15 pages", decision: "approved" });
+    const s = await suggestion(tester, { kind: "new_focus", proposal: "Morning runs", newGoalSlug: "exercise", decision: "approved" });
     expect(await tool(tester, "record_next_step", { suggestion: suggestionRef(s.id), outcome: "declined" }, at(MON, "20:00"))).toMatchObject({ ok: true });
     expect(await allPlans()).toHaveLength(1);
     expect((await allSuggestions())[0]).toMatchObject({ outcome: "declined" });
-    const again = { kind: "deepen", asked_by: "coach", proposal: "15 pages", reasoning: "still easy" };
+    const again = { kind: "new_focus", asked_by: "coach", proposal: "Morning runs", reasoning: "still easy", new_goal: "exercise" };
     expect(await tool(tester, "suggest_next_step", again, at(addDays(MON, 6), "20:00"))).toMatchObject({ ok: false, error: expect.stringContaining(addDays(MON, 7)) });
     expect(await tool(tester, "suggest_next_step", again, at(addDays(MON, 7), "20:00"))).toMatchObject({ ok: true });
   });

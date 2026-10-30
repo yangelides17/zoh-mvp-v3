@@ -1,0 +1,30 @@
+{
+  "id": "ambiguous-step",
+  "title": "Outside or treadmill? An important unknown is asked, not assumed",
+  "origin": "Issue #76 (destination, path and today's step): every step fully defined; unknowns asked",
+  "seed": {
+    "name": "Taylor",
+    "goal": "exercise",
+    "phase": "planning",
+    "answers": {
+      "what": "running, mostly to build stamina",
+      "where": "either outside or the treadmill in my building's gym",
+      "when": "6 pm",
+      "how_long": "20 min",
+      "tracks_with": "Apple Watch"
+    },
+    "history": [
+      { "from": "zoh", "text": "Where do you usually run?" },
+      { "from": "tester", "text": "either outside or the treadmill in my building's gym, depends on the weather" },
+      { "from": "zoh", "text": "Got it. Do you track your runs with anything?" },
+      { "from": "tester", "text": "my apple watch tracks it all" },
+      { "from": "zoh", "text": "Nice, the watch makes proof easy. Anything you're working toward, like a distance or a race?" }
+    ]
+  },
+  "testerLines": ["not really, just want more stamina", "treadmill today, it's pouring", "looks good"],
+  "whatWentWrong": "New case, not a past mistake: \"run 20 minutes\" with no place, when the tester runs both outside and on a treadmill, leaves them to guess.",
+  "shouldHaveHappened": "Day 1's step never leaves where they run ambiguous: before or in the plan, ZOH either asks once whether day 1 is outside or on the treadmill, or names one with the details that change with it (pace or incline on the treadmill, a route outside). Once they say treadmill, the step is fully defined for the treadmill (what, how long, roughly how hard, at 6 pm today). It doesn't invent details they didn't give (a park, a specific route) and asks one question per text. No push for a destination after \"not really\".",
+  "areaCode": "212",
+  "startTime": "12:30",
+  "timeZone": "America/New_York"
+}

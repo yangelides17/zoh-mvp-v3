@@ -17,6 +17,7 @@ import {
   type NewStepDay,
   type Plan,
   type PlanInput,
+  type StepDay,
   type Suggestion,
   type Tester,
 } from "../db/schema.js";
@@ -53,6 +54,7 @@ const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'use 24-hour "HH:MM"
 
 /** Plan fields; every one optional, merged onto the draft (or the locked plan, for change_plan). */
 const planFields = {
+  destination: z.string().trim().max(200).optional(),
   setup_step: z.string().trim().max(200).optional(),
   step: text(300).optional(),
   place: z.string().trim().max(120).optional(),
@@ -128,6 +130,15 @@ const schemas = {
   mark_on_it: z.object({}).strict(),
   mark_agreed: z.object({}).strict(),
   move_today: z.object({ time: clock }).strict(),
+  set_today_step: z
+    .object({
+      step: text(400),
+      minutes: z.number().int().min(1).max(600).optional(),
+      proof: z.string().trim().max(160).optional(),
+      day: z.enum(["today", "tomorrow"]).optional(),
+      asked: text(300).optional(),
+    })
+    .strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
 };
 
@@ -265,7 +276,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "suggest_next_step",
     description:
-      "For the team, never said to them: a next step on their focus goal. asked_by coach: you think they're ready for more. asked_by tester: they asked for a new goal on top (new_focus, new_goal = its slug). deepen: more of the same; upgrade: a different or harder activity. unsure: what you can't tell (deepen or upgrade, change or add); the team decides.",
+      "For the team, never said to them: a big move on their focus goal. asked_by coach: a new focus goal you think they're ready for (new_focus, new_goal = its slug); a harder step is yours to set (set_today_step). asked_by tester: they asked for a new goal on top (new_focus). deepen: more of the same; upgrade: a different or harder activity. unsure: what you can't tell (deepen or upgrade, change or add); the team decides.",
     input_schema: {
       type: "object",
       properties: {
@@ -357,6 +368,22 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     input_schema: { type: "object", properties: { time: { type: "string" } }, required: ["time"] },
   },
   {
+    name: "set_today_step",
+    description:
+      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day tomorrow: only for one agreed the night before. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly.",
+    input_schema: {
+      type: "object",
+      properties: {
+        step: { type: "string", description: "What, where when it matters, when, how long" },
+        minutes: { type: "integer", description: "That day's length, if not the plan's" },
+        proof: { type: "string", description: 'That day\'s proof, if not the plan\'s ("a screenshot of the membership")' },
+        day: { type: "string", enum: ["today", "tomorrow"] },
+        asked: { type: "string" },
+      },
+      required: ["step"],
+    },
+  },
+  {
     name: "mark_request_done",
     description: "A FROM THE TEAM request (by its id) that this text carries. Call it in the reply that does it, never before.",
     input_schema: { type: "object", properties: { request: { type: "string" } }, required: ["request"] },
@@ -365,8 +392,9 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
 
 function planProperties(): Record<string, unknown> {
   return {
+    destination: { type: "string", description: 'Where they\'re headed, if they have somewhere ("run a mile without stopping by Nov 14"); empty removes it' },
     setup_step: { type: "string", description: "One-time step for day 1, only when it helps" },
-    step: { type: "string", description: "What they do and how much, specific enough to just do it" },
+    step: { type: "string", description: "Day 1's step: what, how much, where when it matters, specific enough to just do it" },
     place: { type: "string" },
     time: { type: "string", description: 'Local 24-hour "HH:MM"' },
     days: { type: "array", items: { type: "string", enum: [...WEEKDAYS] }, description: `At least ${MIN_DAYS_PER_WEEK}` },
@@ -511,6 +539,12 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .set({ status: "locked", version, startDate, commitment, needsReview: true, lockedAt: at, updatedAt: at })
         .where(eq(plans.id, draft.id));
       await alertPlanReview(db, tester, draft.id, version, at);
+      // Day 1's step is the plan's (#76); later days get their own with set_today_step.
+      const day1 = { step: draft.step, planId: draft.id, updatedAt: at };
+      await db
+        .insert(stepDays)
+        .values({ testerId: tester.id, date: startDate, ...day1 })
+        .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set: day1 });
       const updated = await updateTester(db, tester.id, { phase: "active" });
       const oneOff = start === "today" ? " For a one-off time today, also call move_today." : "";
       return saved(updated, `Locked (version ${version}). Day 1 is ${start} (${startDate}).${oneOff}`);
@@ -535,7 +569,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return {
           ok: false,
           error:
-            "A deepen or upgrade is made right away only when they ask for it: asked = their words from their latest text, exactly. One you think of goes to the team with suggest_next_step, never to them.",
+            "A deepen or upgrade of the plan is made right away only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
         };
       }
       if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
@@ -632,6 +666,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         if (!new_goal || !listed.includes(new_goal)) return { ok: false, error: `new_focus needs new_goal, one of: ${listed.join(", ")}` };
       } else if (new_goal !== undefined) {
         return { ok: false, error: "new_goal is only for new_focus" };
+      } else if (asked_by === "coach") {
+        // #76: day-to-day steps are the coach's call; only a new focus goes to the team.
+        return { ok: false, error: "A harder or different step is yours to give: set it as a day's step with set_today_step. Only a new focus goal goes to the team." };
       } else if (asked_by === "tester" && !unsure) {
         return { ok: false, error: "They asked to deepen or upgrade: make it right away with change_plan (that kind, asked = their words)." };
       }
@@ -807,6 +844,26 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
     }
 
+    case "set_today_step": {
+      const { step, minutes, proof, day, asked } = input as z.infer<typeof schemas.set_today_step>;
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
+      const date = day === "tomorrow" ? addDays(state.today, 1) : state.today;
+      const row = day === "tomorrow" ? await loadDay(db, tester.id, date) : state.todayRow;
+      if (!isStepDay(plan, date, row)) return { ok: false, error: `${day === "tomorrow" ? "Tomorrow" : "Today"} isn't a step day.` };
+      if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
+        return {
+          ok: false,
+          error: `That day's step is already set ("${row.step}"): it holds unless they ask to change it (asked = their words from their latest text, exactly).`,
+        };
+      }
+      // A day's step is the coach's call (#76): no plan version, no founder review.
+      await saveDay(db, state, date, { step, stepMinutes: minutes ?? null, stepProof: proof || null }, at);
+      const extra = [minutes !== undefined && `${minutes} min`, proof && `proof: ${proof}`].filter(Boolean).join("; ");
+      return saved(tester, `Step for ${date} saved: ${step}${extra ? ` (${extra})` : ""}.`);
+    }
+
     case "mark_request_done": {
       const { request: ref } = input as z.infer<typeof schemas.mark_request_done>;
       const found = findRequest(state.teamRequests, ref);
@@ -857,7 +914,17 @@ async function alertPlanReview(db: Db, tester: Tester, planId: string, version: 
   await raiseAlert(db, { testerId: tester.id, topic: "plan_review", key: `plan_review:${planId}`, body: `Plan version ${version} to review`, planId, at });
 }
 
-type DayValues = Partial<Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt">>;
+type DayValues = Partial<
+  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepMinutes" | "stepProof">
+>;
+
+async function loadDay(db: Db, testerId: string, date: string): Promise<StepDay | undefined> {
+  const [row] = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, testerId), eq(stepDays.date, date)));
+  return row;
+}
 
 /** Creates or updates the tester's row for today's step. */
 function saveToday(db: Db, state: CoachState, values: DayValues, at: Date): Promise<void> {
@@ -874,7 +941,7 @@ async function saveDay(db: Db, state: CoachState, date: string, values: DayValue
 }
 
 type PlanFieldsInput = z.infer<typeof schemas.propose_plan>;
-type PlanValues = Pick<Plan, "setupStep" | "step" | "place" | "stepTime" | "days" | "proof" | "proofNote" | "reason" | "minutes">;
+type PlanValues = Pick<Plan, "destination" | "setupStep" | "step" | "place" | "stepTime" | "days" | "proof" | "proofNote" | "reason" | "minutes">;
 
 /** The input merged onto a base plan, or what's still missing or wrong. */
 function mergePlan(base: Plan | undefined, input: PlanFieldsInput): PlanValues | string {
@@ -882,6 +949,7 @@ function mergePlan(base: Plan | undefined, input: PlanFieldsInput): PlanValues |
   const optional = (value: string | undefined, fallback: string | null | undefined) =>
     value === undefined ? (fallback ?? null) : value || null;
   const merged = {
+    destination: optional(input.destination, base?.destination),
     setupStep: optional(input.setup_step, base?.setupStep),
     step: input.step ?? base?.step,
     place: optional(input.place, base?.place),
@@ -903,6 +971,7 @@ function mergePlan(base: Plan | undefined, input: PlanFieldsInput): PlanValues |
 /** One line for tool results and the state block. */
 export function describePlan(p: PlanValues): string {
   return [
+    p.destination && `headed for: ${p.destination}`,
     p.setupStep && `setup: ${p.setupStep}`,
     `step: ${p.step}`,
     p.place && `where: ${p.place}`,
