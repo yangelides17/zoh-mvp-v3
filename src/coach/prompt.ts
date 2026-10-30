@@ -15,8 +15,8 @@ export const PROMPT_BUDGET_CHARS = {
   core: 3500,
   onboarding: 3000,
   plan: 3600,
-  nudges: 1850,
-  todaysStep: 1500,
+  nudges: 1950,
+  todaysStep: 1550,
   proof: 1050,
   nextSteps: 1450,
   team: 650,
@@ -105,7 +105,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (today's step; never just "I'm in"). 1 to 3 short sentences: each text has one job. Ask for proof once a day, not in every text.
-- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step and one question: are they in (a carried check-in or next step replaces it). Its time is already settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
+- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in (a carried check-in or next step replaces it). Its time is already settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
 - rest_day: short and light: rest day, back at it next step day. No push or question, all day; no lock-in ask for tomorrow.
 - checkin (shortly before the step time, which isn't the step's length): get set up.
 - followup: no word yet: ask how it went.
@@ -113,7 +113,7 @@ export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names w
 - after_miss: the day after a miss matters most. Name it in your own fresh words, no stock line; push harder for the full step today, or at least the smaller version.
 - one_a_day (2+ misses in a row): today's one text, a new angle each day: a different reason, a smaller start, or what's getting in the way.
 - day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
-When they text (phase "active"): a yes to today's step → mark_agreed; then it's settled (see the state). Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today → move_today. Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
+When they text (phase "active"): a yes to today's step → mark_agreed; then it's settled (see the state). Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today in their latest texts → move_today (a time from an earlier day was for that day). Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
 
 /** Each step day's own step (#76): the coach picks it. After onboarding only. */
 export const TODAYS_STEP = `TODAY'S STEP (phase "active"): each step day has its own step, and you pick it; set_today_step saves it, and the state shows it.
@@ -122,7 +122,7 @@ export const TODAYS_STEP = `TODAY'S STEP (phase "active"): each step day has its
 - Fully defined as you give it: what, where when it matters (outside or treadmill?), when, how long, and anything they'd otherwise guess. An important detail you don't know: ask, don't assume. Skip detail that doesn't change what they do.
 - The plan's time and length are the usual; a day can run shorter or longer and says so. Longer than agreed, or a new place: ask first. Different proof only when it fits (a membership screenshot).
 - Once set it holds for the day; change it only when they ask. Agreed the night before: set it for tomorrow.
-- Teaching is part of the step: across the kickoff and the check-in, give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded (voice page); learn what they take to. A text that teaches can run up to about 8 short lines.`;
+- Teaching is part of the step: across the kickoff and the check-in, give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded (voice page); learn what they take to. Taught once a day, not again in the next text. A text that teaches can run up to about 8 short lines.`;
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
 export const PROOF = `PROOF (phase "active"): their plan's proof is part of the deal. Judge each photo, screenshot or voice note against the step:
@@ -223,7 +223,9 @@ function historyLines(s: CoachState, plan: Plan): string[] {
   // Each day's step and how it went, so the next step builds on them (#76).
   const recent = s.recentDays.slice(0, 7).map((d) => {
     const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`].filter(Boolean).join("; ");
-    return `- ${label(weekdayOf(d.date))} ${d.date}, ${STATUS_LABELS[d.status!]}: ${d.step ? `"${d.step}"` : "the plan's step"}${how ? ` (${how})` : ""}`;
+    // #73: a time moved for that day only, so "7:30 tonight" in yesterday's texts isn't read as today's.
+    const moved = d.movedTime ? `, moved to ${d.movedTime} for that day only` : "";
+    return `- ${label(weekdayOf(d.date))} ${d.date}, ${STATUS_LABELS[d.status!]}${moved}: ${d.step ? `"${d.step}"` : "the plan's step"}${how ? ` (${how})` : ""}`;
   });
   const { streak, missesInARow, reducedInARow } = s.days;
   if (recent.length === 0 && streak === 0) return lines;

@@ -14,6 +14,9 @@
       "tracks_with": "Apple Watch"
     },
     "history": [
+      { "from": "zoh", "text": "Where do you usually run?" },
+      { "from": "tester", "text": "either outside or the treadmill in my building's gym, depends on the weather" },
+      { "from": "zoh", "text": "Got it. Do you track your runs with anything?" },
       { "from": "tester", "text": "my apple watch tracks it all" },
       { "from": "zoh", "text": "Nice, the watch makes proof easy. Anything you're working toward, like a distance or a race?" }
     ]

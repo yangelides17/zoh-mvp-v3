@@ -172,6 +172,14 @@ describe("set_today_step", () => {
     ]);
     expect(await block(at(WED, "09:00"))).toContain(`Recent step days, newest first:\n- Mon ${MON}, done: "1 on 2 off, 3 rounds" (they said: easy; proof: Strava 1.1 mi)`);
   });
+
+  it("a time moved for an earlier day says it was for that day only, so today keeps the plan's time (#73)", async () => {
+    const tester = await setup();
+    await t.db.insert(stepDays).values({ testerId: tester.id, date: MON, planId: (await allPlans())[0]!.id, status: "done", movedTime: "20:00" });
+    const wed = await block(at(WED, "09:00"));
+    expect(wed).toContain(`- Mon ${MON}, done, moved to 20:00 for that day only: the plan's step`);
+    expect(wed).toContain(`Today: Wed ${WED}, a step day at 19:00.`);
+  });
 });
 
 describe("check-in and follow-up use the day's step", () => {

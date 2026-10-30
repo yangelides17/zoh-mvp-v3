@@ -409,6 +409,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
           step: d.step ?? null,
           note: d.note ?? null,
           proofSeen: d.proof_seen ?? null,
+          movedTime: d.moved_time ?? null,
         });
     }
     await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);

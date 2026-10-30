@@ -28,12 +28,12 @@
     "step_days": [
       { "days_ago": 3, "status": "done", "step": "10 minutes of business articles at home", "note": "read about unit economics" },
       { "days_ago": 2, "status": "done", "step": "10 minutes of business articles at home", "note": "an article on hiring" },
-      { "days_ago": 1, "status": "done", "step": "10 minutes of business articles at home", "note": "read the one on pricing", "proof_seen": "screenshot of a pricing article" }
+      { "days_ago": 1, "status": "done", "moved_time": "19:30", "step": "10 minutes of business articles at home", "note": "read the one on pricing", "proof_seen": "screenshot of a pricing article" }
     ]
   },
   "testerLines": ["advance to 09:00", "yep"],
-  "whatWentWrong": "\"Today at 6:30 pm, 10 minutes of business articles at home, then screenshot and a quick recap. What time are we locking in?\" (states the usual time, then asks for one)",
-  "shouldHaveHappened": "The 9 am kickoff names today's step at the usual 6:30 pm (yesterday's 7:30 was for that day only), with something from the last days so it isn't the same text as before, and asks only whether they're in. It never asks what time or to lock in a time. The reply to \"yep\" is short and restates nothing.",
+  "whatWentWrong": "\"Today at 6:30 pm, 10 minutes of business articles at home, then screenshot and a quick recap. What time are we locking in?\" (states the usual time, then asks for one). On this branch's first eval run, the kickoff was right but the reply to \"yep\" moved today to 7:30 (\"Customer acquisition at 7:30 tonight\"), reading yesterday's \"7:30 tonight instead\" as today's.",
+  "shouldHaveHappened": "The 9 am kickoff names today's step at the usual 6:30 pm (yesterday's 7:30 was for that day only), with something from the last days so it isn't the same text as before, and asks only whether they're in. It never asks what time or to lock in a time. The reply to \"yep\" is short, restates nothing and never says 7:30: today stays at 6:30.",
   "startTime": "08:30",
   "timeZone": "America/New_York"
 }

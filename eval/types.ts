@@ -66,6 +66,8 @@ export const seedSchema = z.object({
         step: z.string().optional(),
         note: z.string().optional(),
         proof_seen: z.string().optional(),
+        /** A time moved for that day only, local "HH:MM". */
+        moved_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       }),
     )
     .default([]),
