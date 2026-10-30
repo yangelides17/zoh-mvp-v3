@@ -211,9 +211,9 @@ describe("Metrics page", () => {
 
   it("progressed lists harder steps with a count and first date; untagged days don't count (#88)", async () => {
     const sam = await seedSam();
-    const kinds = { "2026-11-03": "first", "2026-11-04": "easier", "2026-11-06": "harder", "2026-11-09": "harder", "2026-11-10": "same" } as const;
+    const kinds = { "2026-11-03": "first", "2026-11-04": "easier", "2026-11-05": "harder", "2026-11-06": "harder", "2026-11-09": "harder", "2026-11-10": "same" } as const;
     for (const [date, kind] of Object.entries(kinds)) await t.db.update(stepDays).set({ stepKind: kind }).where(eq(stepDays.date, date));
-    // A harder step set for a day still ahead hasn't happened yet.
+    // Nov 5 was a harder step they missed, and one set for a day still ahead hasn't happened yet: neither counts.
     await t.db.insert(stepDays).values({ testerId: sam.id, date: "2026-11-12", stepKind: "harder", step: "25 pages" });
     const m = await testerMetrics(t.db, sam, now);
     expect(m.progression.harder).toEqual({ count: 2, first: "2026-11-06" });

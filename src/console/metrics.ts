@@ -104,7 +104,7 @@ export function weekStart(date: string): string {
 }
 
 export interface Progression {
-  /** Days whose step was harder than the one before (#88); days saved before kinds were recorded don't count. */
+  /** Done days whose step was harder than the one before (#88); days saved before kinds were recorded don't count. */
   harder?: { count: number; first: string };
   deepened?: Date;
   upgraded?: Date;
@@ -215,8 +215,9 @@ function reflectionShare(days: StepDay[]): Share | undefined {
 }
 
 function harderSteps(days: StepDay[]): Pick<Progression, "harder"> {
+  // Done in full: a harder step they missed, did a smaller version of, or haven't done yet isn't progress.
   const dates = days
-    .filter((d) => d.stepKind === "harder")
+    .filter((d) => d.stepKind === "harder" && d.status === "done")
     .map((d) => d.date)
     .sort();
   return dates.length ? { harder: { count: dates.length, first: dates[0]! } } : {};
