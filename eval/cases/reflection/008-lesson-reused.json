@@ -1,0 +1,40 @@
+{
+  "id": "lesson-reused",
+  "title": "A lesson from three days ago is built into today's step",
+  "origin": "Issue #77 (proof plus reflection): Should, a later step builds an earlier lesson in",
+  "seed": {
+    "name": "Sofia",
+    "goal": "speak_connect",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "starting conversations with coworkers", "where": "at work", "when": "12:30 pm", "how_long": "10 min" },
+    "history": [
+      { "from": "tester", "text": "[voice note] talked to the new guy on my team at lunch, it was fine but kinda died after 2 min" },
+      { "from": "zoh", "text": "Two minutes with someone new is a real start, Sofia. We'll build on it tomorrow." }
+    ],
+    "plan": {
+      "step": "Say hi and ask one coworker how their week is going at lunch",
+      "destination": "feel at ease making small talk at work",
+      "place": "at work",
+      "time": "12:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note on how it went",
+      "reason": "One small conversation a day makes it feel normal.",
+      "minutes": 10,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 4, "status": "done", "step": "Ask one coworker how their week is going at lunch" },
+      { "days_ago": 3, "status": "done", "step": "Ask one coworker a follow-up about their weekend", "reflection": "Asking a follow-up about what they just said kept it going way longer" },
+      { "days_ago": 2, "status": "done", "step": "Say hi to someone you haven't talked to yet" },
+      { "days_ago": 1, "status": "done", "step": "Lunch chat with the new guy on your team", "reflection": "It was fine but died after 2 minutes" }
+    ],
+    "takeaways": [{ "days_ago": 3, "text": "A follow-up about what they just said keeps a conversation going", "evidence": "explained" }]
+  },
+  "testerLines": ["advance to 09:05", "yeah ok I'm in"],
+  "whatWentWrong": "New case, not a past mistake: lessons should be put to use again a few days later.",
+  "shouldHaveHappened": "The morning kickoff gives today's step fully defined (who or where, at lunch around 12:30, about how long) and builds in the follow-up lesson from three days ago, since yesterday's chat died after two minutes (for example: talk to the new guy again and ask a follow-up about whatever he says). It reads as coaching, not a quiz, and asks one thing (are they in). After \"yeah ok I'm in\" ZOH answers in a short line without restating the step.",
+  "startTime": "08:50",
+  "timeZone": "America/New_York"
+}

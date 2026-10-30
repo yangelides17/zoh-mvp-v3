@@ -1,0 +1,41 @@
+{
+  "id": "kickoff-after-agreed-step",
+  "title": "The kickoff after a step agreed the night before reminds, with the tip, and doesn't re-ask",
+  "origin": "Issue #77 (proof plus reflection): Should, the kickoff after an agreed step",
+  "seed": {
+    "name": "Riley",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "jog and walk intervals", "where": "around the block", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[voice note] That was way better than yesterday. I slowed the jogs right down and could actually talk." },
+      { "from": "zoh", "text": "That's the whole trick: slow enough to talk. So tomorrow: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Work for you?" },
+      { "from": "tester", "text": "let's go" },
+      { "from": "zoh", "text": "Locked. Park, 7 pm, 4 rounds." }
+    ],
+    "plan": {
+      "step": "1 min jog, 2 min walk, 3 rounds around the block",
+      "destination": "run a mile without stopping",
+      "place": "around the block",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to a mile without wrecking your legs.",
+      "minutes": 20,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds around the block", "note": "the jogs felt long" },
+      { "days_ago": 1, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds around the block", "reflection": "Slowing the jogs to talking pace made the second round easy" }
+    ],
+    "today_step": { "step": "2 min jog, 1 min walk, 4 rounds at the park at 7 pm (about 15 min)", "agreed_hours_ago": 13 },
+    "takeaways": [{ "days_ago": 1, "text": "Slow enough to talk is the right jogging pace", "evidence": "explained" }]
+  },
+  "testerLines": ["advance to 09:05"],
+  "whatWentWrong": "New case, not a past mistake: an agreed step shouldn't be re-asked in the morning.",
+  "shouldHaveHappened": "One kickoff goes out around 9 am. It opens warm with Riley's name and reminds them of the agreed step (2 on, 1 off, 4 rounds at the park at 7), with the tip (slow enough to talk) in a few words. It doesn't ask whether they're in, doesn't ask what time, and doesn't propose a different step. It may end without any question.",
+  "startTime": "08:50",
+  "timeZone": "America/New_York"
+}

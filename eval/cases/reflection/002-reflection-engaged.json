@@ -1,0 +1,46 @@
+{
+  "id": "reflection-engaged",
+  "title": "Proof and reflection in one voice note, then an engaged tester: real follow-ups, a wrap-up around the fifth text",
+  "origin": "Issue #77 (proof plus reflection): Should, follow-ups and wrap-up; edge case, proof and reflection in one voice note",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "Read chapter 1 of Atomic Habits on the couch", "proof_seen": "voice recap: small habits compound" },
+      { "days_ago": 2, "status": "done", "step": "Chapter 2 of Atomic Habits on the couch", "proof_seen": "voice recap: identity-based habits" },
+      { "days_ago": 1, "status": "done", "step": "Chapter 3 of Atomic Habits on the couch", "proof_seen": "voice recap: the four laws" }
+    ],
+    "today_step": { "step": "Chapter 4 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap", "agreed_hours_ago": 10 }
+  },
+  "testerLines": [
+    "[voice: Okay, finished chapter four. Honestly the habit stacking idea clicked, like linking a new habit to one you already do. The hard part was my phone kept buzzing the whole time.]",
+    "yeah like after I do the dishes I could just sit down and read",
+    "the buzzing is mostly work slack, even at night",
+    "I could leave it charging in the kitchen I guess",
+    "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch",
+    "ok that works"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a reflection is the start of a coaching exchange, not a checkmark.",
+  "shouldHaveHappened": "The first voice note is both proof and reflection: ZOH counts it and celebrates without asking for a reflection. Its follow-ups are specific to what Maya said (habit stacking, the buzzing phone, the sticky note), one question at a time, and keep going while she's engaged. Around ZOH's fifth text it starts wrapping up (\"I've got what I need for today\" in its own words) and proposes the next step day's step, fully defined (chapter 5, on the couch, 8 pm, about 20 minutes, with the phone in the kitchen or the dishes cue built in), and asks if it works. After \"ok that works\" it confirms in a line with no new question. It never invents what the book says beyond what Maya said or what's well known.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

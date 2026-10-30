@@ -485,6 +485,8 @@ export const stepDays = pgTable(
     stepMinutes: integer("step_minutes"),
     /** This day's proof when it differs from the plan's ("a screenshot of the membership"). */
     stepProof: text("step_proof"),
+    /** How it went, in their words, summed up in a line by the coach (#77): what the next step builds on. */
+    reflection: text("reflection"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -492,6 +494,35 @@ export const stepDays = pgTable(
     unique("step_days_tester_date_unique").on(t.testerId, t.date),
     check("step_days_status_check", sql`${t.status} in ('done', 'done_reduced', 'missed')`),
     check("step_days_proof_verdict_check", sql`${t.proofVerdict} in ('clear', 'plausible', 'unclear', 'doesnt_match')`),
+  ],
+);
+
+export const TAKEAWAY_EVIDENCE = ["explained", "applied", "recalled"] as const;
+export type TakeawayEvidence = (typeof TAKEAWAY_EVIDENCE)[number];
+
+/**
+ * A lesson from a step (#77), one line, with what shows they have it: explained in their own words,
+ * applied in a step, or recalled later. The coach brings recent ones back and builds them into steps.
+ */
+export const takeaways = pgTable(
+  "takeaways",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    goalSlug: text("goal_slug")
+      .notNull()
+      .references(() => goals.slug),
+    /** Their local date. */
+    day: date("day", { mode: "string" }).notNull(),
+    text: text("text").notNull(),
+    evidence: text("evidence", { enum: TAKEAWAY_EVIDENCE }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("takeaways_tester_day_idx").on(t.testerId, t.day),
+    check("takeaways_evidence_check", sql`${t.evidence} in ('explained', 'applied', 'recalled')`),
   ],
 );
 
@@ -664,6 +695,7 @@ export type Flag = typeof flags.$inferSelect;
 export type Pause = typeof pauses.$inferSelect;
 export type Plan = typeof plans.$inferSelect;
 export type StepDay = typeof stepDays.$inferSelect;
+export type Takeaway = typeof takeaways.$inferSelect;
 export type NewStepDay = typeof stepDays.$inferInsert;
 export type Nudge = typeof nudges.$inferSelect;
 export type MemoryPage = typeof memoryPages.$inferSelect;

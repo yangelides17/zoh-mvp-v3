@@ -10,6 +10,7 @@ import {
   plans,
   stepDays,
   suggestions,
+  takeaways,
   WEEKDAYS,
   type ConsoleMessage,
   type Goal,
@@ -22,12 +23,13 @@ import {
   type PlanQuestion,
   type PlanQuestionKey,
   type StepDay,
+  type Takeaway,
   type Tester,
   type Weekday,
 } from "../db/schema.js";
 import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
-import { addDays, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { addDays, nextStepDay, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
@@ -64,10 +66,12 @@ export interface CoachState {
   today: string;
   /** What's recorded for today's step: its step (#76), done, a moved time, "on it". */
   todayRow?: StepDay;
-  /** Tomorrow's row, when its step was agreed the night before. */
-  tomorrowRow?: StepDay;
+  /** The next step day's row, when its step was set ahead (#77: agreed after today's reflection). */
+  nextRow?: StepDay;
   /** Closed step days before today, newest first (the last two weeks). */
   recentDays: StepDay[];
+  /** Lessons from the last two weeks, newest first (#77). */
+  takeaways: Takeaway[];
   /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
@@ -156,11 +160,20 @@ export async function loadCoachState(
     .from(stepDays)
     .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today)))
     .limit(1);
-  const [tomorrowRow] = await db
+  const plan = goal ? currentPlan(testerPlans, goal.slug, today) : undefined;
+  const nextDay = plan ? nextStepDay(plan, today) : undefined;
+  const [nextRow] = nextDay
+    ? await db
+        .select()
+        .from(stepDays)
+        .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, nextDay)))
+        .limit(1)
+    : [];
+  const recentTakeaways = await db
     .select()
-    .from(stepDays)
-    .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, addDays(today, 1))))
-    .limit(1);
+    .from(takeaways)
+    .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.day, addDays(today, -14)), gte(takeaways.createdAt, tester.contextStartedAt)))
+    .orderBy(desc(takeaways.day), desc(takeaways.createdAt));
   const recentDays = await loadRecentDays(db, tester, today);
   const proof = await loadProof(db, tester, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
@@ -176,11 +189,12 @@ export async function loadCoachState(
     openRequired: open.filter((q) => q.required),
     openOptional: open.filter((q) => !q.required),
     draft: testerPlans.find((p) => p.status === "draft"),
-    plan: goal ? currentPlan(testerPlans, goal.slug, today) : undefined,
+    plan,
     today,
     todayRow,
-    tomorrowRow,
+    nextRow,
     recentDays,
+    takeaways: recentTakeaways,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,
@@ -245,6 +259,8 @@ export interface ProofSeen {
   today: number;
   /** Sent since ZOH's last text: where proof for yesterday has to be. */
   latest: number;
+  /** ZOH's texts since their first proof today (#77: the reflection exchange's soft cap); 0 before any. */
+  zohTextsSince: number;
 }
 
 /**
@@ -267,17 +283,20 @@ export async function loadProof(db: Db, tester: Tester, today: string, now: Date
     .select({ sentAt: messages.sentAt, createdAt: messages.createdAt, mediaUrl: messages.mediaUrl, mediaContentType: messages.mediaContentType })
     .from(messages)
     .where(and(window, eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl)));
-  const [lastOut] = await db
+  const outbound = await db
     .select({ at: sentTime })
     .from(messages)
     .where(and(window, eq(messages.direction, "outbound")))
-    .orderBy(desc(sentTime))
-    .limit(1);
+    .orderBy(desc(sentTime));
   const proof = inbound.filter((m) => ["image", "audio"].includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
-  const lastOutAt = lastOut ? new Date(lastOut.at).getTime() : undefined;
+  const outTimes = outbound.map((o) => new Date(o.at).getTime());
+  const lastOutAt = outTimes[0];
+  const todays = proof.filter((m) => serviceDate(messageTime(m), tester) === today);
+  const firstAt = todays.length ? Math.min(...todays.map((m) => messageTime(m).getTime())) : undefined;
   return {
-    today: proof.filter((m) => serviceDate(messageTime(m), tester) === today).length,
+    today: todays.length,
     latest: proof.filter((m) => lastOutAt === undefined || messageTime(m).getTime() > lastOutAt).length,
+    zohTextsSince: firstAt === undefined ? 0 : outTimes.filter((t) => t > firstAt).length,
   };
 }
 

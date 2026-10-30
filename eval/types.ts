@@ -56,7 +56,7 @@ export const seedSchema = z.object({
     .optional(),
   /**
    * How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }; optionally
-   * that day's own step (#76), what they said about it and what the proof showed.
+   * that day's own step (#76), what they said about it, what the proof showed and their reflection (#77).
    */
   step_days: z
     .array(
@@ -66,10 +66,17 @@ export const seedSchema = z.object({
         step: z.string().optional(),
         note: z.string().optional(),
         proof_seen: z.string().optional(),
+        reflection: z.string().optional(),
         /** A time moved for that day only, local "HH:MM". */
         moved_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       }),
     )
+    .default([]),
+  /** Today's step, set ahead (#77, needs a plan): agreed this many hours before the run's start, if at all. */
+  today_step: z.object({ step: z.string(), agreed_hours_ago: z.number().min(0).max(48).optional() }).optional(),
+  /** Lessons from earlier steps (#77, needs a plan), e.g. { "days_ago": 3, "text": "...", "evidence": "explained" }. */
+  takeaways: z
+    .array(z.object({ days_ago: z.number().int().min(0).max(14), text: z.string(), evidence: z.enum(["explained", "applied", "recalled"]) }))
     .default([]),
   /**
    * Maintenance goals (next-step feature, needs a plan): goals kept up in the background, each with
