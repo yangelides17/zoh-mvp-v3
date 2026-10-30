@@ -921,12 +921,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     case "record_week_recap": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
+      // Spec #78: the week comes after the day's reflection, never in the text that celebrates their proof.
+      const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
+      if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {
+        return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
+      }
       // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
       await db
         .insert(nudges)
         .values({ testerId: tester.id, date: state.today, kind: LOOKBACK_KIND, moment: LOOKBACK_KIND, status: "skipped", createdAt: at })
         .onConflictDoNothing();
-      return saved(tester, "Recap recorded: no recap text goes out later today. Carry on with the week talk.");
+      return saved(tester, "Recorded: no recap text goes out later today. Nothing has been sent yet: your text now gives the recap.");
     }
 
     case "mark_request_done": {

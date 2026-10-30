@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Weekday } from "../src/db/schema.js";
 
 export const PERSONAS = ["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
 export type Persona = (typeof PERSONAS)[number];
@@ -185,6 +186,8 @@ export const caseSchema = z.object({
   shouldHaveHappened: z.string(),
   areaCode: z.string().regex(/^\d{3}$/).default("212"),
   startTime: z.string().regex(/^\d{2}:\d{2}$/).default("18:30"),
+  /** The weekday the run starts, in the eval's week (Monday, unless a case needs another day: #78's Sunday). */
+  startDay: z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]).optional(),
   timeZone: z.string().default("America/New_York"),
   persona: z.enum(PERSONAS).optional(),
   seed: seedSchema.optional(),
@@ -213,6 +216,8 @@ export interface ConversationPlan {
   persona: Persona | "scripted";
   areaCode: string;
   startTime: string;
+  /** Weekday of the run's first line in the eval's week; Monday when not given. */
+  startDay?: Weekday;
   timeZone: string;
   scenario?: Scenario;
   regression?: RegressionCase;

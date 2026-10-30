@@ -252,15 +252,35 @@ describe("the state block on Sunday", () => {
     expect(await block(at(SAT, "18:00"))).not.toContain("WEEK LOOK-BACK");
     const sunday = await block(at(SUN2, "17:00"));
     expect(sunday).toContain(
-      "WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet: turn to the week once today's talk allows, then record_week_recap.\n" +
-        "This week: 5 step days done, 0 missed (each day in Recent step days and Today above).\n" +
+      "WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet: once today's talk settles, or when they ask how they did (WEEK LOOK-BACK), with record_week_recap.\n" +
+        "This week: 5 done in full, 0 smaller, 0 missed (each day in Recent step days and Today above).\n" +
         'Understood this week (applied or recalled; only these count as understood or "can do"):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
         'Only explained so far (starting to click):\n- "Summarize each chapter in a line" (explained Fri 2026-11-06)\n' +
         "Their destination: finish Dune by Dec 1 (say where they stand vs. it).",
     );
-    expect(await block(at(SUN2, "18:00"), "lookback")).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: This text is the recap.");
-    await tool("record_week_recap", {}, at(SUN2, "17:05"));
+    expect(await block(at(SUN2, "18:00"), "lookback")).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: This text (not sent yet) is the recap. The app records it: no tool call.");
+    // Recorded in this reply (the tool runs before the text is written): this text still gives it.
+    expect(await tool("record_week_recap", {}, at(SUN2, "17:05"))).toMatchObject({ message: expect.stringContaining("your text now gives the recap") });
+    expect(await block(at(SUN2, "17:05"))).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: This text (not sent yet) is the recap.");
+    // Any later reply: it's done.
     expect(await block(at(SUN2, "17:10"))).toContain("The recap is done for this week (in conversation or its own text): never again today");
+  });
+
+  it("after a Sunday step, the reflection's wrap-up turns to the week, and the next step waits for the week talk", async () => {
+    const sam = await setup({ days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] });
+    await done(sam, ...WEEK);
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "", mediaUrl: "https://cdn.example/p.jpg", mediaContentType: "image/jpeg", createdAt: at(SUN2, "19:25"), sentAt: at(SUN2, "19:25") });
+    expect(await tool("mark_step_done", { how: "full", proof: "clear", seen: "Dune open at page 120" }, at(SUN2, "19:26"))).toMatchObject({ ok: true });
+    const first = await block(at(SUN2, "19:27"));
+    expect(first).toContain("This reply is your 1st text since their proof today: if they're into it, follow up and keep the week (WEEK LOOK-BACK) for the wrap-up");
+    expect(first).toContain("Not given yet: not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up");
+    // The text that celebrates their proof can't record the recap; the next one can.
+    expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
+    await say(sam, "outbound", at(SUN2, "19:28"), "Page 120! How did it feel?");
+    expect(await block(at(SUN2, "19:30"))).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
+    expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
+    // Saturday: the usual wrap-up, the next step.
+    expect(await block(at(SAT, "19:27"))).not.toContain("keep the week");
   });
 
   it("nothing understood yet says so, and no block before 3 step days", async () => {

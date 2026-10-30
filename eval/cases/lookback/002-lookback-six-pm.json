@@ -1,0 +1,53 @@
+{
+  "id": "lookback-six-pm",
+  "title": "Silent on a rest-day Sunday: the 6 pm recap as its own text, then a reply leads into the week talk",
+  "origin": "Issue #78 (Sunday look-back): spec, what the tester experiences 3, and the 6 pm example",
+  "startDay": "sun",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "running from zero", "where": "around my block", "when": "6:30 pm", "how_long": "15 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "tester", "text": "done, 3 min straight without stopping!!" },
+      { "from": "zoh", "text": "THREE minutes, Sam. That's real. Sunday's a rest day, back at it Monday." }
+    ],
+    "plan": {
+      "step": "outside around your block: 1 min easy jog, 2 min walk, 3 rounds",
+      "destination": "run a mile without stopping by Nov 14",
+      "place": "around the block",
+      "time": "18:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to the mile without wrecking your legs.",
+      "minutes": 15,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "1 min easy jog, 2 min walk, 3 rounds around the block", "note": "harder than expected", "proof_seen": "Strava, 10 min, 0.6 mi" },
+      { "days_ago": 5, "status": "done", "step": "1.5 min jog, 1.5 min walk, 3 rounds, at talk-test pace", "proof_seen": "Strava, 10 min, 0.7 mi", "reflection": "Slowing to a pace where I could talk made it doable" },
+      { "days_ago": 4, "status": "done_reduced", "step": "2 min jog, 1 min walk, 3 rounds, talk-test pace", "note": "only 2 rounds, shins sore", "proof_seen": "Strava, 7 min" },
+      { "days_ago": 3, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds, talk-test pace", "proof_seen": "Strava, 10 min, 0.8 mi" },
+      { "days_ago": 2, "status": "done", "step": "2.5 min jog, 1 min walk, 3 rounds, talk-test pace", "proof_seen": "Strava, 11 min, 0.9 mi" },
+      { "days_ago": 1, "status": "done", "step": "3 min jog, 1 min walk, 3 rounds, talk-test pace", "note": "3 min straight without stopping", "proof_seen": "Strava, 12 min, 1.0 mi" }
+    ],
+    "takeaways": [
+      { "days_ago": 5, "text": "Slow enough to talk is the right pace", "evidence": "explained" },
+      { "days_ago": 3, "text": "Slow enough to talk is the right pace", "evidence": "applied" },
+      { "days_ago": 1, "text": "Slow enough to talk is the right pace", "evidence": "recalled" },
+      { "days_ago": 4, "text": "Sore shins: walk more, not less", "evidence": "explained" }
+    ]
+  },
+  "testerLines": [
+    "advance to 18:01",
+    "the 3 minutes felt huge honestly",
+    "keep building toward the mile, maybe 4 min jogs?",
+    "perfect"
+  ],
+  "whatWentWrong": "New case, not a past mistake: on a silent Sunday the recap goes as its own text at 6 pm.",
+  "shouldHaveHappened": "At 6 pm ZOH starts a text: opens with Sam's name, a warm line, 2 to 4 pieces of progress from this week each backed by what happened (3 minutes without stopping on Saturday; the talk-test pace, used and recalled since Tuesday; all 6 runs done, 5 in full and 1 smaller), never framed as 'what you couldn't do before', no report headings or 'streak' as the headline. It says where he stands vs. the mile by Nov 14 (about a mile covered with walk breaks, 3 min straight so far) and ends with one question about the week. The shin lesson was only explained: not claimed as understood. No proof ask, nothing about today's step (it's a rest day). His replies lead into the week talk, which ends with Monday's step fully defined (e.g. 4 min jog, 1 min walk, 3 rounds around the block at talk-test pace, 6:30 pm, about 15 min), asked if it works. After 'perfect' a short confirmation, no new question.",
+  "startTime": "17:00",
+  "timeZone": "America/New_York"
+}

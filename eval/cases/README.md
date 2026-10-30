@@ -38,6 +38,7 @@ ZOH's reply before sending the next one.
 | `shouldHaveHappened` | yes | What the grader checks the fresh replies against. |
 | `areaCode` | no | Area code of the fake number (default `212`, Eastern). Use a non-Eastern one for time zone cases. |
 | `startTime` | no | Local time of the first text, `HH:MM` (default `18:30`). |
+| `startDay` | no | Weekday of the first text in the eval's week (`mon` to `sun`, default `mon`): the Sunday look-back cases start on `sun`. Seeded `days_ago` count back from it. |
 | `timeZone` | no | IANA zone for `startTime` (default `America/New_York`). |
 | `persona` | no | Which persona it belongs to in the per-persona table (default: its own "scripted" row). |
 

@@ -1,0 +1,51 @@
+{
+  "id": "week-talk-next-step",
+  "title": "The week talk on a rest-day Sunday: they text first, the destination is set lightly, a new focus goes to the founders, and it ends in a defined next step",
+  "origin": "Issue #78 (Sunday look-back): spec, what the tester experiences 2 and 5",
+  "startDay": "sun",
+  "seed": {
+    "name": "Leo",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 22,
+    "answers": { "what": "solving a Rubik's cube", "where": "at my desk", "when": "9 pm", "how_long": "15 min", "tracks_with": "a cube timer app" },
+    "history": [
+      { "from": "tester", "text": "first two layers done without the guide!!" },
+      { "from": "zoh", "text": "WITHOUT the guide, Leo. That's the cube starting to make sense. Sunday's a rest day." }
+    ],
+    "plan": {
+      "step": "Learn the white cross from the beginner's method, 15 min at your desk",
+      "place": "at my desk",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "the cube timer app",
+      "reason": "One stage at a time is how the beginner's method sticks.",
+      "minutes": 15,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "White cross, beginner's method", "proof_seen": "timer: 3 attempts" },
+      { "days_ago": 5, "status": "done", "step": "White corners", "proof_seen": "timer: 4 attempts" },
+      { "days_ago": 4, "status": "done", "step": "Middle layer edges", "proof_seen": "timer: 5 attempts" },
+      { "days_ago": 3, "status": "done", "step": "First two layers in a row, guide open", "proof_seen": "timer: 4:10 best" },
+      { "days_ago": 2, "status": "done", "step": "First two layers, guide open only when stuck", "proof_seen": "timer: 3:40 best" },
+      { "days_ago": 1, "status": "done", "step": "First two layers without the guide", "proof_seen": "timer: 3:05 best", "reflection": "Didn't need the guide once; the edge insert finally makes sense" }
+    ],
+    "takeaways": [
+      { "days_ago": 4, "text": "Edge insert: up, away, and back in", "evidence": "explained" },
+      { "days_ago": 1, "text": "Edge insert: up, away, and back in", "evidence": "applied" },
+      { "days_ago": 3, "text": "Hold the solved layer on the bottom", "evidence": "explained" }
+    ]
+  },
+  "testerLines": [
+    "yo how'd I do this week",
+    "honestly I want to solve the whole thing by next weekend",
+    "also kinda want to start juggling on the side lol",
+    "yeah ok"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the week talk should end in a defined next step and never push.",
+  "shouldHaveHappened": "His question gets the week's recap in one reply: 2 to 4 pieces of progress each backed by what happened (first two layers without the guide on Saturday, the edge insert applied after learning it, best time down from 4:10 to 3:05), never 'what you couldn't do before'; 'hold the solved layer on the bottom' was only explained, so not claimed as understood; no destination yet, so none invented; one question. When he says he wants the whole cube by next weekend, ZOH takes it lightly as a destination (saves it with change_plan or simply agrees, never pushes or interrogates). Juggling is something new on top: a warm 'Love that, let me think on it' with no timeline or plan, and it's passed to the team (suggest_next_step), never started. The week talk ends with Monday's step fully defined (e.g. learn the yellow cross, 9 pm at his desk, about 15 min, timer screenshot), asked if it works; after 'yeah ok' a short confirmation.",
+  "startTime": "16:00",
+  "timeZone": "America/New_York"
+}

@@ -41,7 +41,8 @@ export const COACH_HISTORY_CAP = 200;
 /** Claude calls for a text ZOH starts after lock: the day's step may be saved first, the last call writes (#76). */
 export const NUDGE_ROUNDS = 3;
 /** The only tools a text ZOH starts may run: everything else waits for their reply. */
-export const NUDGE_TOOLS: readonly string[] = ["set_today_step"];
+/** #78: record_week_recap is a no-op in the 6 pm recap (its slot is the record), allowed so a stray call can't derail the text. */
+export const NUDGE_TOOLS: readonly string[] = ["set_today_step", "record_week_recap"];
 /** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
 export const SKIP = "SKIP";
 

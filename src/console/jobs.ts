@@ -213,7 +213,7 @@ export async function weekNumbers(db: Db, tester: Tester, sunday: string): Promi
   const lessons = await db
     .select()
     .from(takeaways)
-    .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.createdAt, tester.contextStartedAt), lte(takeaways.day, to)));
+    .where(and(eq(takeaways.testerId, tester.id), lte(takeaways.day, to)));
   const { understood, explained } = learnings(lessons, from);
   const each = (l: { text: string }, evidence: string) => `"${l.text}" (${evidence})`;
   if (understood.length) out.learnings.push(`Understood this week: ${understood.map((l) => each(l, evidenceText(l))).join("; ")}`);

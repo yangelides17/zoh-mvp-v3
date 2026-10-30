@@ -198,7 +198,7 @@ export async function loadCoachState(
     nextRow,
     recentDays,
     takeaways: recentTakeaways,
-    week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways) : undefined,
+    week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,

@@ -7,7 +7,7 @@ import { createSendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import type { Completer, CompletionRequest } from "../eval/claude.js";
 import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
-import { zonedDate } from "../eval/clock.js";
+import { evalDay, zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
@@ -109,6 +109,17 @@ class NudgingEcho extends EchoReplier {
     return `nudge: ${moment}`;
   }
 }
+
+describe("eval: look-back cases (#78)", () => {
+  it("start on the weekday they name, in the eval's week; Monday by default", async () => {
+    expect(evalDay()).toBe("2026-11-02");
+    expect(evalDay("sun")).toBe("2026-11-08");
+    const cases = await loadCases("lookback");
+    expect(cases.length).toBeGreaterThanOrEqual(4);
+    for (const c of cases) expect(c.startDay).toBe("sun");
+    expect(planConversations([], cases, { runs: 1 }).every((p) => p.startDay === "sun")).toBe(true);
+  });
+});
 
 describe("eval: nudge cases", () => {
   it("\"advance to\" lines move the clock, run the tick each minute and add ZOH's own texts to the transcript", async () => {

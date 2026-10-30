@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import {
@@ -287,7 +287,7 @@ export interface ProgressTab {
   suggestions: Suggestion[];
   /** Where their focus goal's current plan is headed, if anywhere (#78). */
   destination?: string;
-  /** Every lesson since their context started: understood (applied or recalled) and only explained (#78). */
+  /** Every lesson (a reset deletes them): understood (applied or recalled) and only explained (#78). */
   learnings: Learnings;
 }
 
@@ -305,10 +305,7 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
   }
   const days = await db.select().from(stepDays).where(eq(stepDays.testerId, tester.id)).orderBy(desc(stepDays.date));
   const testerPlans = await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version));
-  const lessons = await db
-    .select()
-    .from(takeaways)
-    .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.createdAt, tester.contextStartedAt)));
+  const lessons = await db.select().from(takeaways).where(eq(takeaways.testerId, tester.id));
   const current = testerPlans.find((p) => p.status === "locked" && p.goalSlug === tester.goalSlug);
   return {
     switches: [...(await switchReasons(db, tester)).entries()].map(([pair, s]) => ({ pair, ...s })),

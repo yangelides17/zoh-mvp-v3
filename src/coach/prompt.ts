@@ -19,7 +19,7 @@ export const PROMPT_BUDGET_CHARS = {
   nudges: 2200,
   todaysStep: 1700,
   proof: 2500,
-  weekLookback: 1600,
+  weekLookback: 1750,
   nextSteps: 1450,
   team: 650,
   memory: 1300,
@@ -145,9 +145,9 @@ After the step (#77), while it's fresh:
 
 /** The Sunday look-back (#78): the week's progress, then the week talk. After onboarding only. */
 export const WEEK_LOOKBACK = `WEEK LOOK-BACK (phase "active"; Sundays the state has a WEEK LOOK-BACK block): once a week, a look back at their progress.
-- When: talking on Sunday, once the day's reflection wraps up (PROOF), or once today's talk settles (a rest day, no step done), turn naturally from the day to the week ("And zooming out, here's the progress you made this week:"), never an abrupt switch into a report; record_week_recap in that reply. On Sunday the next step waits for the end of the week talk.
-- The recap: a warm line; 2 to 4 pieces of progress they made this week as a • list, each backed by the state (a learning applied or recalled, with when; a step that grew; days done); where they stand vs. their destination, if they have one; then one question about the week or what to push on next. Progress made, never what they couldn't do before. Only learnings the block lists as understood count as understood or "can do"; explained ones are starting to click. Nothing understood yet: name what they did, honestly, no inflation. The streak and counts can appear, never as the headline; no headings or labels.
-- The week talk: how it went and what to focus on next. Set or adjust the destination only if they want (change_plan), lightly, never pushed. Wrap up with the next step day's step, fully defined (as in PROOF). A new focus or a pivot: NEXT STEPS.
+- When: talking on Sunday after a step, never in the text that celebrates their proof: first the day's reflection (PROOF); its wrap-up turns to the week in place of the next step ("And zooming out, here's the progress you made this week:"), never an abrupt report. The next step comes at the end of the week talk, never in the recap. A rest day or no step done: once today's talk settles, or when they ask how they did. The recap goes in that text, with record_week_recap.
+- The recap: a warm line, then 2 to 4 pieces of progress they made this week as a • list, introduced as progress they made (never a heading like "Your week:"), each backed by the state (a learning applied or recalled, with when; a step that grew; days done, as the block counts them); where they stand vs. their destination, if they have one; then one question about the week or what to push on next. Progress made, never what they couldn't do before. Only learnings the block lists as understood count as understood or "can do"; explained ones are starting to click. Nothing understood yet: name what they did, honestly. The streak and counts never headline.
+- The week talk: how it went and what to focus on next. A destination they name: agree lightly (change_plan), never pushed or turned into a schedule. Wrap up with only the next step day's step, fully defined (as in PROOF), never a plan for the week. A new focus or a pivot: NEXT STEPS.
 - NUDGE MOMENT lookback: the recap as its own text, opening with their name; no proof ask. A reply leads into the week talk.`;
 
 /** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
@@ -229,7 +229,9 @@ function reflectionLine(s: CoachState): string {
   if (!done || s.nudgeMoment || s.proof.today === 0) return saved;
   const n = s.proof.zohTextsSince + 1;
   // The soft cap (spec #77): the coach can't count its own texts reliably, so the state says where the exchange is.
-  const where = n < 4 ? "if they're into it, follow up and keep the next step for the wrap-up; a short reply that's all they've got: wrap up now" : "start wrapping up unless they're clearly still going, then the next step";
+  // #78: on a look-back Sunday the wrap-up turns to the week, and the next step waits for the week talk.
+  const next = s.week && !s.week.recapped ? "the week (WEEK LOOK-BACK)" : "the next step";
+  const where = n < 4 ? `if they're into it, follow up and keep ${next} for the wrap-up; a short reply that's all they've got: wrap up now` : `start wrapping up unless they're clearly still going, then ${next}`;
   return `${saved} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 
@@ -246,19 +248,32 @@ function takeawayLines(s: CoachState): string[] {
   return [`Takeaways, newest first (bring one back now and then, or build it into a step; see PROOF):\n${each.join("\n")}`];
 }
 
+/** #78: when the week comes up today, from how today's going. */
+function weekWhen(s: CoachState): string {
+  const row = s.todayRow;
+  if (row?.status === "done" || row?.status === "done_reduced") {
+    return s.proof.today > 0 && s.proof.zohTextsSince === 0
+      ? "not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up"
+      : "turn to the week at the reflection's wrap-up, in place of the next step";
+  }
+  if (s.plan && isStepDay(s.plan, s.today, row) && !row?.status) return "after today's step and its reflection, unless they ask how the week went";
+  return "once today's talk settles, or when they ask how they did";
+}
+
 /** #78: on Sundays, the week the look-back reads; once the recap is given, only for the week talk. */
 function weekLines(s: CoachState, plan: Plan): string[] {
   const w = s.week;
   if (!w) return [];
   const n = (status: StepDayStatus) => w.days.filter((d) => d.status === status).length;
-  const done = n("done") + n("done_reduced");
-  const tally = `${done} step day${done === 1 ? "" : "s"} done${n("done_reduced") ? ` (${n("done_reduced")} smaller)` : ""}, ${n("missed")} missed`;
+  const tally = `${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed`;
   const status =
     s.nudgeMoment === "lookback"
-      ? "This text is the recap."
+      ? "This text (not sent yet) is the recap. The app records it: no tool call."
+      : w.recappedNow
+      ? "This text (not sent yet) is the recap."
       : w.recapped
         ? "The recap is done for this week (in conversation or its own text): never again today; their replies to it are the week talk."
-        : "Not given yet: turn to the week once today's talk allows, then record_week_recap.";
+        : `Not given yet: ${weekWhen(s)} (WEEK LOOK-BACK), with record_week_recap.`;
   const { understood, explained } = w.learnings;
   const lines = [
     `WEEK LOOK-BACK, ${label(weekdayOf(w.from))} ${w.from} to today: ${status}`,

@@ -228,7 +228,7 @@ describe("the kickoff saves today's step while writing", () => {
     expect(await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" })).toBe("Morning Sam!");
     expect(model.requests).toHaveLength(NUDGE_ROUNDS);
     expect(model.requests.at(-1)!.toolChoice).toBe("none");
-    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Only set_today_step while writing a text you start.");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Only set_today_step, record_week_recap while writing a text you start.");
     expect((await row(WED))?.agreedAt ?? null).toBeNull();
   });
 

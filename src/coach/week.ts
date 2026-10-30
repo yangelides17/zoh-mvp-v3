@@ -1,7 +1,6 @@
 import { and, asc, count, eq, gte, isNotNull, lte } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { nudges, stepDays, type StepDay, type Takeaway, type TakeawayEvidence, type Tester } from "../db/schema.js";
-import { localDate } from "./state.js";
 import { addDays, LOOKBACK_KIND, LOOKBACK_MIN_STEP_DAYS, weekdayOf } from "../nudges/schedule.js";
 
 /**
@@ -69,18 +68,16 @@ export interface WeekLookback {
   learnings: Learnings;
   /** The recap already happened today (in conversation, or the 6 pm text is being or was written). */
   recapped: boolean;
+  /** Recorded in the reply being written now: that text still has to give it. */
+  recappedNow: boolean;
 }
 
-/**
- * Closed step days from the local day their context started, through `date`: the look-back needs a few
- * first. By date, not when rows were written (the eval's clock runs apart from the database's).
- */
-export async function closedStepDays(db: Db, tester: Pick<Tester, "id" | "contextStartedAt" | "timeZone">, date: string): Promise<number> {
-  const started = localDate(tester.contextStartedAt, tester.timeZone);
+/** Closed step days through `date` (a reset deletes them, so these are since they started): the look-back needs a few first. */
+export async function closedStepDays(db: Db, tester: Pick<Tester, "id">, date: string): Promise<number> {
   const [row] = await db
     .select({ n: count() })
     .from(stepDays)
-    .where(and(eq(stepDays.testerId, tester.id), isNotNull(stepDays.status), gte(stepDays.date, started), lte(stepDays.date, date)));
+    .where(and(eq(stepDays.testerId, tester.id), isNotNull(stepDays.status), lte(stepDays.date, date)));
   return row?.n ?? 0;
 }
 
@@ -90,9 +87,10 @@ export async function closedStepDays(db: Db, tester: Pick<Tester, "id" | "contex
  */
 export async function loadWeek(
   db: Db,
-  tester: Pick<Tester, "id" | "contextStartedAt" | "timeZone">,
+  tester: Pick<Tester, "id">,
   today: string,
   takeaways: Pick<Takeaway, "text" | "day" | "evidence">[],
+  now: Date,
 ): Promise<WeekLookback | undefined> {
   if (weekdayOf(today) !== "sun") return undefined;
   if ((await closedStepDays(db, tester, today)) < LOOKBACK_MIN_STEP_DAYS) return undefined;
@@ -103,8 +101,10 @@ export async function loadWeek(
     .where(and(eq(stepDays.testerId, tester.id), isNotNull(stepDays.status), gte(stepDays.date, from), lte(stepDays.date, today)))
     .orderBy(asc(stepDays.date));
   const [recap] = await db
-    .select({ id: nudges.id })
+    .select({ status: nudges.status, createdAt: nudges.createdAt })
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, today), eq(nudges.kind, LOOKBACK_KIND)));
-  return { from, to: today, days, learnings: learnings(takeaways, from), recapped: Boolean(recap) };
+  // A reply's tool calls all run at its `now`: a recap recorded at exactly this instant is this reply's.
+  const recappedNow = recap?.status === "skipped" && recap.createdAt.getTime() === now.getTime();
+  return { from, to: today, days, learnings: learnings(takeaways, from), recapped: Boolean(recap), recappedNow };
 }

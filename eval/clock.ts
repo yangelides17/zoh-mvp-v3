@@ -17,6 +17,15 @@ export class EvalClock {
 /** All runs happen on the same ordinary weekday, so results don't drift with the calendar. */
 export const EVAL_DAY = "2026-11-02";
 
+const WEEK = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
+/** The run's day: `EVAL_DAY` (a Monday), or another day of that week for a case that needs one (#78: a Sunday). */
+export function evalDay(weekday: (typeof WEEK)[number] = "mon"): string {
+  const d = new Date(`${EVAL_DAY}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + WEEK.indexOf(weekday));
+  return d.toISOString().slice(0, 10);
+}
+
 /** The instant that is `hhmm` on `day` in time zone `timeZone`. */
 export function zonedDate(day: string, hhmm: string, timeZone: string): Date {
   const [y, m, d] = day.split("-").map(Number) as [number, number, number];

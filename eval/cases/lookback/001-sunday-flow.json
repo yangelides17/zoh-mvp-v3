@@ -1,0 +1,56 @@
+{
+  "id": "sunday-flow",
+  "title": "Sunday after the step: proof, a short reflection, then a natural turn to the week and the week talk",
+  "origin": "Issue #78 (Sunday look-back): spec, what the tester experiences 1 and 2, and the first good example",
+  "startDay": "sun",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Chapter 6 tonight, Maya: 8 pm on the couch, about 20 minutes, phone in the kitchen. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits by Nov 30",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "Read chapter 1 of Atomic Habits on the couch", "proof_seen": "voice recap: small habits compound", "reflection": "Liked it; phone kept buzzing" },
+      { "days_ago": 5, "status": "done", "step": "Chapter 2 on the couch, phone in the kitchen", "proof_seen": "voice recap: identity-based habits", "reflection": "No buzzing with the phone away, read longer than planned" },
+      { "days_ago": 4, "status": "done", "step": "Chapter 3 on the couch, phone in the kitchen", "proof_seen": "voice recap: the four laws" },
+      { "days_ago": 3, "status": "missed", "step": "Chapter 4 on the couch, phone in the kitchen", "note": "late dinner with friends" },
+      { "days_ago": 2, "status": "done", "step": "Chapter 4 on the couch, phone in the kitchen", "proof_seen": "voice recap: habit stacking", "reflection": "Habit stacking clicked: read right after the dishes" },
+      { "days_ago": 1, "status": "done", "step": "Chapter 5 right after the dishes, phone in the kitchen", "proof_seen": "voice recap: environment design" }
+    ],
+    "today_step": { "step": "Chapter 6 of Atomic Habits on the couch at 8 pm (about 20 min), phone in the kitchen, then a voice recap", "agreed_hours_ago": 12 },
+    "takeaways": [
+      { "days_ago": 6, "text": "Phone in the kitchen while reading", "evidence": "explained" },
+      { "days_ago": 5, "text": "Phone in the kitchen while reading", "evidence": "applied" },
+      { "days_ago": 2, "text": "Read right after the dishes (habit stacking)", "evidence": "explained" },
+      { "days_ago": 1, "text": "Read right after the dishes (habit stacking)", "evidence": "applied" },
+      { "days_ago": 1, "text": "Make the cue obvious", "evidence": "explained" }
+    ]
+  },
+  "testerLines": [
+    "[voice: Done, chapter six. The make it obvious part clicked, I left the book on my pillow this morning so I'd see it tonight.]",
+    "yeah and phone was in the kitchen again, zero buzzing",
+    "that's about it for today",
+    "honestly the dishes thing, it doesn't even feel like effort now. this week I want to get through it faster",
+    "yeah that works"
+  ],
+  "whatWentWrong": "New case, not a past mistake: on Sunday the reflection should flow into the week, not end with just the next step.",
+  "shouldHaveHappened": "The voice note counts and is celebrated without asking for a reflection (it already is one). A follow-up or two specific to what she said, then once she says that's about it, ZOH turns naturally from the day to the week (no report headings): a warm line and 2 to 4 pieces of progress from this week, each backed by what happened (the phone in the kitchen, applied since Tuesday; reading right after the dishes, applied Saturday; making the cue obvious, applied tonight with the book on her pillow, if ZOH saved that; 6 of 7 step days done counting today, the missed one fine to leave out or mention lightly), never \"what you couldn't do before\", and never claiming a lesson she only explained. It says where she stands vs. finishing the book by Nov 30 (6 chapters in) and asks one question. It does not propose the next step before the week talk. After she says she wants to go faster, it proposes Monday's step, fully defined (e.g. two chapters or a longer session, right after the dishes, on the couch, with how long), and asks if it works; it doesn't push a new destination. After \"yeah that works\" it confirms in a line, no new question.",
+  "startTime": "20:25",
+  "timeZone": "America/New_York"
+}
