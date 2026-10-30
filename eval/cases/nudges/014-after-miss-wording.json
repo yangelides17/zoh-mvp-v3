@@ -7,19 +7,19 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 36,
-    "answers": { "what": "push-ups and squats", "where": "living room", "when": "7 am", "how_long": "15 min" },
+    "answers": { "what": "push-ups and squats", "where": "living room", "when": "10 am", "how_long": "15 min" },
     "history": [
-      { "from": "zoh", "text": "Morning Theo! 15 minutes of push-ups and squats in the living room at 7. You in?" },
+      { "from": "zoh", "text": "Morning Theo! 15 minutes of push-ups and squats in the living room at 10. You in?" },
       { "from": "tester", "text": "yep" }
     ],
     "plan": {
       "step": "15 minutes of push-ups and squats",
       "place": "living room",
-      "time": "07:00",
+      "time": "10:00",
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "photo",
       "proof_note": "a quick selfie mid-set",
-      "reason": "Fifteen minutes before work is easy to protect.",
+      "reason": "Fifteen minutes mid-morning is easy to protect.",
       "minutes": 15,
       "started_days_ago": 4
     },
@@ -29,9 +29,9 @@
       { "days_ago": 3, "status": "done" }
     ]
   },
-  "testerLines": ["advance to 06:30"],
+  "testerLines": ["advance to 09:30"],
   "whatWentWrong": "\"Yesterday slipped, but one miss is a slip, two starts a habit.\" (slipped/slip in one sentence, and a stock line)",
-  "shouldHaveHappened": "The kickoff the morning after the miss names yesterday in fresh, natural words, with no stock motivational line (like \"one miss is a slip, two starts a habit\") and no awkward repeated word (like \"slipped\" and \"slip\" together). It pushes for the full 15 minutes at 7 today, with at most a smaller version as the fallback, warmly and without guilt, and asks at most one question.",
-  "startTime": "05:30",
+  "shouldHaveHappened": "The kickoff the morning after the miss names yesterday in fresh, natural words, with no stock motivational line (like \"one miss is a slip, two starts a habit\") and no awkward repeated word (like \"slipped\" and \"slip\" together). It pushes for the full 15 minutes at 10 today, with at most a smaller version as the fallback, warmly and without guilt, and asks at most one question.",
+  "startTime": "08:30",
   "timeZone": "America/New_York"
 }
