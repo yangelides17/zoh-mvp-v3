@@ -1,0 +1,14 @@
+{
+  "id": "side-no-idea",
+  "title": "Start something on the side, no idea yet: never asks \"what's your idea?\"",
+  "origin": "Spec #75 (starters and the open door), rule \"A human, fluid conversation\"",
+  "testerLines": [
+    "Start",
+    "Marcus. start something on the side",
+    "nah no idea yet, that's kind of the problem",
+    "I'm good with spreadsheets and I love cooking"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the side-project starter with no idea yet.",
+  "shouldHaveHappened": "After Marcus picks the side starter, ZOH first asks whether he already has something in mind or wants to find it together, before asking anything about the idea itself. Once he says he has no idea, it never asks what his idea is; it helps him find one from what he brings (spreadsheets, cooking), one question per text. Nothing about money, income targets or investing.",
+  "startTime": "18:30"
+}

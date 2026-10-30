@@ -25,11 +25,14 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   `eval/README.md`). Use a separate key with a low spending limit.
 
 ## Decisions to carry forward (beyond `docs/coach-voice.md`)
-- Starting goals: daily reading, exercise, nutrition (calorie or protein target), reflection and
-  planning, deep work target, same bedtime every night (no wake-time goal), and a strict
-  "something else" (only if close to a listed goal and ZOH can coach and check it).
-- Onboarding asks name and goal together in the first text; no "why" question; no wake, sleep or
-  pushiness questions; asks whether they already track the goal where it applies.
+- Starters (#75, replacing the old habit list): Put AI to work for you, Read & learn more, Start
+  something on the side, Focus & get more done, Speak & connect better, Get fitter, Eat better, Sleep
+  better, Learn a fun skill, plus "Not sure? Let's figure it out together" (a get-to-know-you chat,
+  then 2–3 fitted ideas). Off-list asks are narrowed into a starter or declined honestly
+  ("something_else" stays as the hidden route). Each starter's "what" note is what's worth learning,
+  not a script; every starter needs what, when and how long (Get fitter also where).
+- Onboarding asks name and goal together in the first text; no "why" question; no pushiness
+  question; asks at most once about apps or tools they already use.
 - How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always

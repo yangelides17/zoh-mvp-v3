@@ -143,7 +143,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "choose_goal",
     description:
-      'Save the goal they picked, by slug from the state block. For "something_else", give a short description and whether you accept it (close to a listed goal and you can coach and check it daily). A declined one is saved for the founders and no goal is set.',
+      'Save the goal they picked, by slug from the state block; an off-list ask narrowed into a starter is that starter. "something_else" only when it fits no starter: give a short description and whether you accept it (you can coach and check it daily). A declined one is saved for the founders and no goal is set.',
     input_schema: {
       type: "object",
       properties: {

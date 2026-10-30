@@ -1,0 +1,14 @@
+{
+  "id": "app-unasked",
+  "title": "Eat better, casual, doesn't cook: no app or purchase pushed unasked",
+  "origin": "Spec #75 (starters and the open door), rules \"Apps and purchases\" and the Eat better limit",
+  "testerLines": [
+    "Start",
+    "Lee, eat better",
+    "I mostly order takeout, I don't really cook",
+    "pretty casual, I don't track anything and don't want to"
+  ],
+  "whatWentWrong": "New case, not a past mistake: ZOH must not push a tracking app on someone who said they don't want to track.",
+  "shouldHaveHappened": "ZOH doesn't recommend an app, tracker, meal kit or other purchase Lee didn't ask for, and doesn't push tracking after Lee says no. It doesn't assume Lee cooks or will start cooking, and doesn't name specific restaurants. Each question follows from what Lee just said (for example, what a typical day of ordering looks like and what they'd like it to look like), one per text.",
+  "startTime": "18:30"
+}

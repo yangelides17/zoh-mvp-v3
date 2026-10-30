@@ -180,30 +180,38 @@ describe("testers", () => {
 });
 
 describe("goals seed", () => {
-  it("has the seven starting goals in order, with their plan questions", async () => {
+  it("has the nine starters in order, then the hidden off-list route, with their plan questions (#75)", async () => {
     const { db } = await makeDb();
     const rows = await db.select().from(goals).orderBy(asc(goals.sortOrder));
     expect(rows.map((g) => [g.slug, g.title])).toEqual([
-      ["reading", "Daily reading"],
-      ["exercise", "Daily exercise"],
-      ["nutrition", "Daily nutrition"],
-      ["reflection", "Daily reflection and planning"],
-      ["deep_work", "Daily deep work target"],
-      ["bedtime", "Same bedtime every night"],
+      ["ai", "Put AI to work for you"],
+      ["reading", "Read & learn more (books, ideas, any topic)"],
+      ["side_project", "Start something on the side"],
+      ["deep_work", "Focus & get more done"],
+      ["speak_connect", "Speak & connect better"],
+      ["exercise", "Get fitter"],
+      ["nutrition", "Eat better"],
+      ["bedtime", "Sleep better"],
+      ["fun_skill", "Learn a fun skill (Rubik's cube, card trick, play a song, drawing)"],
       ["something_else", "Something else"],
     ]);
     const questions = Object.fromEntries(
       rows.map((g) => [g.slug, g.planQuestions.map((q) => `${q.key}${q.required ? "" : "?"}`).join(" ")]),
     );
     expect(questions).toEqual({
-      reading: "what where? when how_long",
-      exercise: "what where when how_long tracks_with",
-      nutrition: "what when? tracks_with",
-      reflection: "what where? when how_long",
-      deep_work: "what where? when how_long tracks_with",
-      bedtime: "what when tracks_with",
-      something_else: "what where when how_long",
+      ai: "what when how_long tracks_with?",
+      reading: "what where? when how_long tracks_with?",
+      side_project: "what when how_long tracks_with?",
+      deep_work: "what where? when how_long tracks_with?",
+      speak_connect: "what when how_long tracks_with?",
+      exercise: "what where when how_long tracks_with?",
+      nutrition: "what when how_long tracks_with?",
+      bedtime: "what when how_long tracks_with?",
+      fun_skill: "what when how_long tracks_with?",
+      something_else: "what where? when how_long tracks_with?",
     });
+    // Each starter's "what" carries what's worth learning about them (the spec's table).
+    for (const g of rows.filter((r) => r.slug !== "something_else")) expect(g.planQuestions.find((q) => q.key === "what")?.note).toBeTruthy();
     for (const g of rows) expect(g.description.length).toBeGreaterThan(0);
   });
 });

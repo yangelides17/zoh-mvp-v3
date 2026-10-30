@@ -253,14 +253,14 @@ describe("console coach capabilities", () => {
   it("suggest_next_step files the founder's next step as approved by them, shown in the chat as a card (#63)", async () => {
     const tester = await seed();
     model.script(
-      { tools: [{ name: "suggest_next_step", input: { goal: "Daily reading", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" } }] },
-      "Filed: a deepen on Daily reading, 15 pages a night.",
+      { tools: [{ name: "suggest_next_step", input: { goal: "Read & learn more (books, ideas, any topic)", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" } }] },
+      "Filed: a deepen on Read & learn more (books, ideas, any topic), 15 pages a night.",
     );
     await chat(tester, "let's bump her reading to 15 pages", { as: "Stamati" });
     const [row] = await t.db.select().from(suggestions).where(eq(suggestions.testerId, tester.id));
     expect(row).toMatchObject({ raisedBy: "founder", raisedByName: "Stamati", decision: "approved", decidedBy: "Stamati", goalSlug: "reading", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" });
     expect(await suggestionsForCoach(t.db, tester.id)).toHaveLength(1);
-    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Filed as approved by Stamati: deepen on Daily reading");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Filed as approved by Stamati: deepen on Read & learn more (books, ideas, any topic)");
     const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
     const chatHtml = page.body.slice(page.body.indexOf('<section id="chat">'), page.body.indexOf('<div id="side"'));
     expect(chatHtml).toContain("15 pages a night");

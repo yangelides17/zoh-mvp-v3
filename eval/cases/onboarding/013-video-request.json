@@ -1,0 +1,14 @@
+{
+  "id": "video-request",
+  "title": "Asked for a video link: a YouTube search phrase, no link, nothing invented",
+  "origin": "Spec #75 (starters and the open door), rule \"Grounded teaching\"",
+  "testerLines": [
+    "Start",
+    "Dana, get fitter",
+    "I want to learn proper squats and deadlifts, never lifted before",
+    "is there a good video on squat form? send me a link"
+  ],
+  "whatWentWrong": "New case, not a past mistake: ZOH must never invent a link or a specific video title.",
+  "shouldHaveHappened": "ZOH sends no link and names no specific video title. It gives a YouTube search phrase for squat form (with a well-known creator only if it's one known for form tutorials), and may say a video teaches form better than text. Nothing is invented. It stays beginner-safe with no medical advice, and then carries on with one onboarding question that Dana hasn't already answered.",
+  "startTime": "18:30"
+}
