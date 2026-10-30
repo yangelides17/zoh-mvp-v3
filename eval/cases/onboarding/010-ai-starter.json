@@ -7,7 +7,7 @@
     "Priya. put AI to work for me",
     "I'm a project manager at a construction company, drowning in meeting notes and status emails",
     "honestly I've barely used ChatGPT, maybe twice",
-    "weekday mornings around 8 before standup, like 15 min"
+    "weekday mornings around 9:30 after standup, like 15 min"
   ],
   "whatWentWrong": "New case, not a past mistake: the AI starter.",
   "shouldHaveHappened": "After Priya picks the AI starter, ZOH asks about her (her work, the tasks she'd like to hand off, what she's tried with AI) one question per text before suggesting any first step, each question following from what she just said. It never asks something her answers already covered (her job, that she's barely used it, her time and minutes) and never grills her like a form. It doesn't push a paid app or product she didn't ask about, invents no features or links, and once what, when and how long are covered it moves toward a plan without re-asking them.",

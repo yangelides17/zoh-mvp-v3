@@ -80,13 +80,13 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "tracking",
         scope: "conversation",
-        label: "Asks once whether they already track it, for exercise, nutrition, bedtime and deep work only",
+        label: "Asks at most once whether they already use an app or tool for it (optional, #75), and never pushes one they didn't ask for",
       },
       { id: "reality-check", scope: "conversation", label: "Reality check when what they want doesn't fit their time or resources" },
       {
         id: "goal-list",
         scope: "conversation",
-        label: "Goal comes from the list: off-list goals declined plainly with the list offered; close ones accepted",
+        label: "Goal is a starter: off-list asks narrowed toward a starter, or declined honestly with a way forward (the list, something close, or getting to know them); \"not sure\" gets to-know-you questions, then 2 to 3 fitted ideas",
       },
       { id: "style-offer", scope: "conversation", label: "Tells them they can change how ZOH coaches anytime" },
       {
