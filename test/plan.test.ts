@@ -4,7 +4,7 @@ import { createCoach } from "../src/coach/coach.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { insideQuietHours, loadCoachState, localDate } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
-import { flags, planInputs, plans, type Tester } from "../src/db/schema.js";
+import { flags, planInputs, plans, stepDays, type Tester } from "../src/db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../src/testers/commands.js";
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
@@ -157,6 +157,8 @@ describe("locking", () => {
     ]);
     expect((await tester()).phase).toBe("active");
     expect(buildStateBlock(await state())).toContain("Locked plan (version 1, day 1 2026-10-27;");
+    // Day 1 is the plan's step, the "first" kind (#88).
+    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-27", step: GYM.step, stepKind: "first" }]);
   });
 
   it("starts tomorrow when asked, by the tester's local date", async () => {

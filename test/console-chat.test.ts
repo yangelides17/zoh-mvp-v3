@@ -364,7 +364,7 @@ describe("console coach capabilities", () => {
     await t.db.insert(stepDays).values([
       { testerId: tester.id, date: "2026-10-28", planId: plan!.id, status: "missed" },
       { testerId: tester.id, date: "2026-10-30", planId: plan!.id, status: "done_reduced", note: "half" },
-      { testerId: tester.id, date: "2026-11-02", planId: plan!.id, status: "done" },
+      { testerId: tester.id, date: "2026-11-02", planId: plan!.id, status: "done", step: "20 pages", stepKind: "harder" },
     ]);
     const log = await stepLog(t.db, tester, plan!, TUE);
     const lines = log.split("\n");
@@ -373,7 +373,8 @@ describe("console coach capabilities", () => {
     expect(lines).toContain("Tue, Oct 27: rest day");
     expect(lines).toContain("Wed, Oct 28: missed");
     expect(lines).toContain("Fri, Oct 30: done (smaller version) (half)");
-    expect(lines).toContain("Mon, Nov 2 (yesterday): done");
+    // Each day's step with its kind (#88).
+    expect(lines).toContain("Mon, Nov 2 (yesterday): done, step (harder): 20 pages");
     expect(lines).toContain("Tue, Nov 3 (today): rest day");
     expect(lines).toContain("Wed, Nov 4 (tomorrow): step day at 19:00");
     expect(lines.at(-1)).toBe("Tue, Nov 10: rest day");

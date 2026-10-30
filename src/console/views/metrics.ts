@@ -1,4 +1,4 @@
-import type { Rollup, TesterMetrics } from "../metrics.js";
+import type { Rollup, Share, TesterMetrics } from "../metrics.js";
 import { layout } from "./layout.js";
 import { esc } from "./shared.js";
 
@@ -9,13 +9,20 @@ const one = (n: number | undefined, digits = 1) => (n === undefined ? DASH : Str
 const pct = (n: number | undefined) => (n === undefined ? DASH : `${Math.round(n * 100)}%`);
 const day = (at: Date | undefined, timeZone: string) =>
   at ? new Intl.DateTimeFormat("en-US", { timeZone, month: "short", day: "numeric" }).format(at) : "";
+/** A local date ("2026-11-03") as "Nov 3". */
+const date = (d: string) => day(new Date(`${d}T12:00:00Z`), "UTC");
+const share = (s: Share | undefined) => (s ? pct(s.with / s.of) : DASH);
 
 function metricsRow(m: TesterMetrics): string {
   const t = m.tester;
   const r = m.retention;
   const e = m.engagement;
   const p = m.progression;
-  const steps = [p.deepened && `deepened ${day(p.deepened, t.timeZone)}`, p.upgraded && `upgraded ${day(p.upgraded, t.timeZone)}`, p.addedGoal && `added a goal ${day(p.addedGoal, t.timeZone)}`].filter(Boolean);
+  const steps = [
+    p.harder && `harder step ×${p.harder.count}, first ${date(p.harder.first)}`,
+    p.deepened && `deepened ${day(p.deepened, t.timeZone)}`, p.upgraded && `upgraded ${day(p.upgraded, t.timeZone)}`, p.addedGoal && `added a goal ${day(p.addedGoal, t.timeZone)}`,
+  ].filter(Boolean);
+  const reflections = m.reflections.overall ? `${share(m.reflections.thisWeek)} · ${share(m.reflections.overall)} (${m.reflections.overall.with} / ${m.reflections.overall.of})` : DASH;
   const hit = m.hitRate?.closed ? `${m.hitRate.done} / ${m.hitRate.closed} (${pct(m.hitRate.done / m.hitRate.closed)})` : DASH;
   const cells = [
     `<a href="/console/testers/${esc(t.id)}">${esc(t.name ?? "Unnamed")}</a>${t.isTestUser ? ` <span class="chip">test</span>` : ""}`,
@@ -29,6 +36,8 @@ function metricsRow(m: TesterMetrics): string {
     m.focusTitle ? `${m.streak?.length ?? 0}` : DASH,
     hit,
     m.verified ? `${m.verified.thisWeek} · ${one(m.verified.perWeek)}` : DASH,
+    m.understood ? `${m.understood.thisWeek} · ${m.understood.total}` : DASH,
+    reflections,
     steps.length ? steps.join(", ") : "no",
     `${m.backOff.pauses + m.backOff.flags}${m.backOff.pauses ? ` (${m.backOff.pauses} paused)` : ""}`,
     `${m.stops}`,
@@ -50,6 +59,8 @@ export function metricsView(data: { rows: TesterMetrics[]; rollup: Rollup }, nam
 <tr><td>Touch points a day <span class="muted">(days they texted only)</span></td><td>${esc(one(u.touchPointsPerDay))}</td></tr>
 <tr><td>Messages a day <span class="muted">(days they texted only)</span></td><td>${esc(one(u.messagesPerDay))}</td></tr>
 <tr><td>Verified steps a week</td><td>${esc(one(u.verifiedPerWeek))}</td></tr>
+<tr><td>Understood learnings <span class="muted">(in all)</span></td><td>${esc(one(u.understood))}</td></tr>
+<tr><td>Reflection rate</td><td>${esc(pct(u.reflectionRate))}</td></tr>
 <tr><td>Hit rate</td><td>${esc(pct(u.hitRate))}</td></tr>
 <tr><td>Current streak</td><td>${esc(one(u.streak))}</td></tr>
 <tr><td>Progressed</td><td>${u.progressed} of ${u.testers}</td></tr>
@@ -69,13 +80,15 @@ export function metricsView(data: { rows: TesterMetrics[]; rollup: Rollup }, nam
     "Streak",
     "Hit rate",
     'Verified steps <span class="muted">(this week · a week)</span>',
+    'Understood learnings <span class="muted">(this week · in all)</span>',
+    'Reflection rate <span class="muted">(this week · overall)</span>',
     "Progression",
     "Back-off",
     "Stops",
   ];
   const table = data.rows.length
-    ? `<div style="overflow-x:auto"><table style="min-width:1100px"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${data.rows.map(metricsRow).join("")}</tbody></table></div>`
+    ? `<div style="overflow-x:auto"><table style="min-width:1300px"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${data.rows.map(metricsRow).join("")}</tbody></table></div>`
     : "";
-  const notes = `<p class="muted">Days are each tester's local days. A run ends after 3 days without a text from them; paused days are left out of runs and active days. A touch point is a text 30+ minutes after their last one. Verified steps have clear or plausible proof. Streak and hit rate are the focus goal's, as on the tester page.${includeTest ? "" : " Test accounts are left out."}</p>`;
+  const notes = `<p class="muted">Days are each tester's local days. A run ends after 3 days without a text from them; paused days are left out of runs and active days. A touch point is a text 30+ minutes after their last one. Verified steps have clear or plausible proof. Understood learnings are lessons they applied in a step or recalled later (only explaining one doesn't count). Reflection rate is done days with a reflection out of done days. Progressed counts harder steps (each day's step is tagged first, same, easier or harder than the one before; days from before the tags aren't counted), a deepen or upgrade, or a goal added on top. Streak and hit rate are the focus goal's, as on the tester page.${includeTest ? "" : " Test accounts are left out."}</p>`;
   return layout("Metrics", `<div class="row" style="justify-content:space-between"><h1>Metrics</h1>${toggle}</div>${totals}${table}${notes}`, { name });
 }

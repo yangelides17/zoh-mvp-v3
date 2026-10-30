@@ -1,0 +1,2 @@
+ALTER TABLE "step_days" ADD COLUMN "step_kind" text;--> statement-breakpoint
+ALTER TABLE "step_days" ADD CONSTRAINT "step_days_step_kind_check" CHECK ("step_days"."step_kind" in ('first', 'same', 'easier', 'harder'));

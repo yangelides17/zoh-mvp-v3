@@ -176,9 +176,9 @@ describe("the next step, agreed at the wrap-up", () => {
   it("is saved for the next step day across a rest day, and that morning the kickoff reminds instead of re-asking", async () => {
     await setup();
     await doneMonday();
-    expect(await tool("set_today_step", { step: NEXT, day: "next" }, at(MON, "19:50"))).toMatchObject({ ok: true, message: `Step for ${WED} saved: ${NEXT}.` });
+    expect(await tool("set_today_step", { kind: "same", step: NEXT, day: "next" }, at(MON, "19:50"))).toMatchObject({ ok: true, message: `Step for ${WED} saved: ${NEXT}.` });
     expect(await block(at(MON, "19:51"))).toContain(`Next step day: Wed ${WED}. Its step is already set: "${NEXT}", not agreed yet.`);
-    expect(await tool("set_today_step", { step: NEXT, day: "next", agreed: true }, at(MON, "19:55"), "let's go")).toMatchObject({
+    expect(await tool("set_today_step", { kind: "same", step: NEXT, day: "next", agreed: true }, at(MON, "19:55"), "let's go")).toMatchObject({
       ok: true,
       message: `Step for ${WED} saved, agreed: ${NEXT}.`,
     });
@@ -200,7 +200,7 @@ describe("the next step, agreed at the wrap-up", () => {
   it("without a yes, that morning's state has no reminder: the kickoff presents and asks as usual", async () => {
     await setup();
     await doneMonday();
-    await tool("set_today_step", { step: NEXT, day: "next" }, at(MON, "19:50"));
+    await tool("set_today_step", { kind: "same", step: NEXT, day: "next" }, at(MON, "19:50"));
     const wed = await block(at(WED, "09:00"));
     expect(wed).toContain(`Today's step (set, holds for today): "${NEXT}"`);
     expect(wed).not.toContain("ahead of time");
@@ -208,7 +208,7 @@ describe("the next step, agreed at the wrap-up", () => {
 
   it("a yes the same day is settled as before (#42)", async () => {
     await setup();
-    await tool("set_today_step", { step: NEXT, agreed: true }, at(WED, "08:30"), "yes");
+    await tool("set_today_step", { kind: "same", step: NEXT, agreed: true }, at(WED, "08:30"), "yes");
     expect(await block(at(WED, "08:31"))).toContain("They said yes to today's step (Wed 8:30 AM): it's settled.");
   });
 });

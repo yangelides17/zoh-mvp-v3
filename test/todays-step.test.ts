@@ -109,22 +109,34 @@ describe("set_today_step", () => {
     expect(before).toContain("Today's step: not set yet. Pick it the first time you talk about today");
     expect(dayStep((await allPlans())[0]!, await row(WED)).step).toBe("1 min easy jog, 2 min walk, 3 rounds around the block");
 
-    expect(await tool("set_today_step", { step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: true });
+    expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: true });
     expect(await row(WED)).toMatchObject({ step: TODAY_STEP, stepMinutes: null, stepProof: null, status: null });
     const after = await block(at(WED, "09:01"));
     expect(after).toContain(`Today's step (set, holds for today): "${TODAY_STEP}", about 20 min; proof: screenshot (Strava run).`);
     expect(dayStep((await allPlans())[0]!, await row(WED))).toMatchObject({ step: TODAY_STEP, own: true });
   });
 
+  it("needs a kind, how hard it is vs. the step before, and stores it on the day (#88)", async () => {
+    await setup();
+    expect(await tool("set_today_step", { step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: false, error: expect.stringContaining("kind") });
+    expect(await tool("set_today_step", { kind: "first", step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: false });
+    expect(await row(WED)).toBeUndefined();
+    expect(await tool("set_today_step", { kind: "harder", step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: TODAY_STEP, stepKind: "harder" });
+    // The next step day's step carries its own kind.
+    await tool("set_today_step", { kind: "easier", step: "1 round around the block", day: "next" }, at(WED, "20:00"));
+    expect(await row("2026-11-06")).toMatchObject({ stepKind: "easier" });
+  });
+
   it("a day's own length and proof override the plan's", async () => {
     await setup();
-    await tool("set_today_step", { step: "sign up at the gym on Main St", minutes: 30, proof: "a screenshot of the membership" }, at(WED, "09:00"));
+    await tool("set_today_step", { kind: "same", step: "sign up at the gym on Main St", minutes: 30, proof: "a screenshot of the membership" }, at(WED, "09:00"));
     expect(await block(at(WED, "09:01"))).toContain('"sign up at the gym on Main St", about 30 min; proof: a screenshot of the membership.');
   });
 
   it("adds no plan version, review flag or alert", async () => {
     await setup();
-    await tool("set_today_step", { step: TODAY_STEP }, at(WED, "09:00"));
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
     const all = await allPlans();
     expect(all).toHaveLength(1);
     expect(all[0]!.needsReview).toBe(false);
@@ -134,23 +146,23 @@ describe("set_today_step", () => {
 
   it("holds for the day: replacing it needs their words asking to change it", async () => {
     await setup();
-    await tool("set_today_step", { step: TODAY_STEP }, at(WED, "09:00"));
-    expect(await tool("set_today_step", { step: "treadmill, 2 on 1 off, 3 rounds" }, at(WED, "10:00"))).toMatchObject({
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
+    expect(await tool("set_today_step", { kind: "same", step: "treadmill, 2 on 1 off, 3 rounds" }, at(WED, "10:00"))).toMatchObject({
       ok: false,
       error: expect.stringContaining("holds unless they ask"),
     });
     const asked = "can I do it on the treadmill instead? it's pouring";
-    expect(await tool("set_today_step", { step: "treadmill, 2 on 1 off, 3 rounds", asked: "treadmill instead" }, at(WED, "10:00"), asked)).toMatchObject({ ok: true });
+    expect(await tool("set_today_step", { kind: "same", step: "treadmill, 2 on 1 off, 3 rounds", asked: "treadmill instead" }, at(WED, "10:00"), asked)).toMatchObject({ ok: true });
     expect((await row(WED))!.step).toBe("treadmill, 2 on 1 off, 3 rounds");
     // Saying the same step again is fine.
-    expect(await tool("set_today_step", { step: "treadmill, 2 on 1 off, 3 rounds" }, at(WED, "11:00"))).toMatchObject({ ok: true });
+    expect(await tool("set_today_step", { kind: "same", step: "treadmill, 2 on 1 off, 3 rounds" }, at(WED, "11:00"))).toMatchObject({ ok: true });
   });
 
   it("the next step day's step set the night before is saved on that day and shows today and that day", async () => {
     await setup();
     // Tuesday is a rest day; Wednesday is the next step day.
-    expect(await tool("set_today_step", { step: TODAY_STEP }, at(TUE, "20:00"))).toMatchObject({ ok: false, error: "Today isn't a step day." });
-    expect(await tool("set_today_step", { step: TODAY_STEP, day: "next" }, at(TUE, "20:00"))).toMatchObject({ ok: true });
+    expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(TUE, "20:00"))).toMatchObject({ ok: false, error: "Today isn't a step day." });
+    expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP, day: "next" }, at(TUE, "20:00"))).toMatchObject({ ok: true });
     expect(await block(at(TUE, "20:01"))).toContain(`Next step day: Wed ${WED}. Its step is already set: "${TODAY_STEP}", not agreed yet.`);
     expect(await block(at(WED, "09:00"))).toContain(`Today's step (set, holds for today): "${TODAY_STEP}"`);
   });
@@ -158,9 +170,9 @@ describe("set_today_step", () => {
   it("is refused before lock and once the day is done", async () => {
     await setup();
     await t.db.insert(stepDays).values({ testerId: (await me()).id, date: WED, status: "done" });
-    expect(await tool("set_today_step", { step: TODAY_STEP }, at(WED, "20:00"))).toMatchObject({ ok: false, error: `${WED} is already done.` });
+    expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "20:00"))).toMatchObject({ ok: false, error: `${WED} is already done.` });
     await updateTester(t.db, (await me()).id, { phase: "planning" });
-    expect(await tool("set_today_step", { step: TODAY_STEP }, at(WED, "20:00"))).toMatchObject({ ok: false });
+    expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "20:00"))).toMatchObject({ ok: false });
   });
 
   it("recent days show each day's step with how it went, so the next step builds on them", async () => {
@@ -184,7 +196,7 @@ describe("set_today_step", () => {
 describe("check-in and follow-up use the day's step", () => {
   it("the coach writing a check-in or follow-up sees today's step, not the plan's", async () => {
     await setup();
-    await tool("set_today_step", { step: TODAY_STEP }, at(WED, "09:00"));
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
     const model = new FakeClaudeModel("Hey Sam!");
     const coach = createCoach({ db: t.db, model, voice: "v" });
     for (const moment of ["checkin", "followup"] as const) {
@@ -195,11 +207,11 @@ describe("check-in and follow-up use the day's step", () => {
 
   it("the follow-up waits for the day's own length; a moved time still moves check-in and follow-up", async () => {
     await setup();
-    await tool("set_today_step", { step: TODAY_STEP, minutes: 45 }, at(MON, "08:00"));
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 45 }, at(MON, "08:00"));
     // 7 pm + 45 min + 30 (the plan's 20 would make it 7:50).
     expect(await day(MON, "09:00", "21:00")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@20:15"]);
 
-    await tool("set_today_step", { step: TODAY_STEP, minutes: 10 }, at(WED, "08:00"));
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 10 }, at(WED, "08:00"));
     await tool("move_today", { time: "20:00" }, at(WED, "08:01"));
     expect(await day(WED, "09:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@20:40"]);
   });
@@ -209,7 +221,7 @@ describe("the kickoff saves today's step while writing", () => {
   it("runs set_today_step, then writes with it in the state", async () => {
     await setup();
     const model = new FakeClaudeModel();
-    model.script({ tools: [{ name: "set_today_step", input: { step: TODAY_STEP } }] }, "Morning Sam! 2 on, 1 off on your block at 7. You in?");
+    model.script({ tools: [{ name: "set_today_step", input: { kind: "same", step: TODAY_STEP } }] }, "Morning Sam! 2 on, 1 off on your block at 7. You in?");
     const coach = createCoach({ db: t.db, model, voice: "v" });
     const text = await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
     expect(text).toBe("Morning Sam! 2 on, 1 off on your block at 7. You in?");
