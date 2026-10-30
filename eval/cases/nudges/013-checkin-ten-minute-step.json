@@ -1,0 +1,33 @@
+{
+  "id": "checkin-ten-minute-step",
+  "title": "Check-in for a 10 minute step: no \"10 minutes starts in about 10 minutes\"",
+  "origin": "Yanni live, Oct 29 (snapshot 8c80a6d), issue #70",
+  "seed": {
+    "name": "Riley",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "business articles", "where": "desk at work", "when": "12:30 pm", "how_long": "10 min" },
+    "history": [
+      { "from": "zoh", "text": "Riley! 10 minutes of business articles at your desk at 12:30 tomorrow. Locked in." },
+      { "from": "tester", "text": "let's go" }
+    ],
+    "plan": {
+      "step": "10 minutes of business articles",
+      "place": "desk at work",
+      "time": "12:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a screenshot of the article",
+      "reason": "Ten minutes at lunch keeps you sharp without eating your break.",
+      "minutes": 10,
+      "started_days_ago": 2
+    },
+    "step_days": [{ "days_ago": 1, "status": "done" }]
+  },
+  "testerLines": ["advance to 12:25"],
+  "whatWentWrong": "\"Your 10 minutes of business articles starts in about 10 minutes.\" (the step's length and the lead time are both \"10 minutes\", and \"starts\" doesn't agree with \"minutes\")",
+  "shouldHaveHappened": "The morning kickoff and the check-in before 12:30 each read naturally. The check-in says the articles are coming up soon (around 12:30) without stacking the same phrase twice, such as \"10 minutes\" for both the step's length and how soon it starts, and with no grammar slips. The timing is right: it doesn't say the step is now or that it already started.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}

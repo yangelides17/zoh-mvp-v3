@@ -514,6 +514,14 @@ describe("instructions", () => {
     expect(PLAN_AGREEMENT).toContain("explain that by default you stay quiet then");
   });
 
+  it("give the coach no nudge wording to echo (#70)", () => {
+    // "Your 10 minutes of business articles starts in about 10 minutes." and
+    // "Yesterday slipped, but one miss is a slip, two starts a habit." echoed these.
+    for (const phrase of ["starts in about 10 minutes", "yesterday slipped", "once, not twice"]) expect(NUDGES.toLowerCase()).not.toContain(phrase);
+    for (const phrase of ["One miss is a slip. Two starts a habit.", "yesterday slipped"]) expect(loadVoiceDoc()).not.toContain(phrase);
+    expect(NUDGES).toContain("which isn't the step's length");
+  });
+
   it("allow at most 3 Greek words a day, in the onboarding prompt and the voice page", () => {
     expect(CORE_VOICE).toContain("At most 3 a day");
     expect(loadVoiceDoc()).toContain("At most 3 a day");
