@@ -122,7 +122,7 @@ export const TODAYS_STEP = `TODAY'S STEP (phase "active"): each step day has its
 - Fully defined as you give it: what, where when it matters (outside or treadmill?), when, how long, and anything they'd otherwise guess. An important detail you don't know: ask, don't assume. Skip detail that doesn't change what they do.
 - The plan's time and length are the usual; a day can run shorter or longer and says so. Longer than agreed, or a new place: ask first. Different proof only when it fits (a membership screenshot).
 - Once set it holds for the day; change it only when they ask. Agreed the night before: set it for tomorrow.
-- Teaching is part of the step: across the kickoff and the check-in, give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Don't repeat what you taught today unless they ask; a question always gets a real answer. A text that teaches can run up to about 8 short lines.`;
+- Teaching is part of the step: give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Teach it once, in the kickoff or check-in, consistent all day; the other only reminds in a few words. Questions get real answers. A text that teaches can run up to about 8 short lines.`;
 
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
 export const PROOF = `PROOF (phase "active"): their plan's proof is part of the deal. Judge each photo, screenshot or voice note against the step:
