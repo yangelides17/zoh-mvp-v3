@@ -23,7 +23,7 @@ import { serviceDate } from "../src/nudges/schedule.js";
 import { COACH_AUTHOR } from "../src/console/requests.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
-import { EVAL_DAY, EvalClock, zonedDate } from "./clock.js";
+import { EvalClock, evalDay, zonedDate } from "./clock.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
@@ -574,7 +574,7 @@ async function seedMemory(app: EvalApp, tester: schema.Tester, memory: NonNullab
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */
 export async function runConversation(plan: ConversationPlan, tester: Tester, opts: RunOptions): Promise<ConversationResult> {
   const phone = fakeNumber(plan.areaCode, opts.index);
-  const clock = new EvalClock(zonedDate(EVAL_DAY, plan.startTime, plan.timeZone));
+  const clock = new EvalClock(zonedDate(evalDay(plan.startDay), plan.startTime, plan.timeZone));
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.

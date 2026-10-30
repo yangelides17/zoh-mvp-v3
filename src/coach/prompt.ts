@@ -4,6 +4,7 @@ import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
+import { evidenceText } from "./week.js";
 
 /**
  * The coach's instructions, all in this file. Keep them lean (CLAUDE.md, "Changing what ZOH says"):
@@ -15,14 +16,15 @@ export const PROMPT_BUDGET_CHARS = {
   core: 3500,
   onboarding: 3000,
   plan: 3800,
-  nudges: 2100,
+  nudges: 2200,
   todaysStep: 1700,
   proof: 2500,
+  weekLookback: 1750,
   nextSteps: 1450,
   team: 650,
   memory: 1300,
   examples: 700,
-  fullVoice: 19_000,
+  fullVoice: 19_600,
 } as const;
 
 /**
@@ -113,6 +115,7 @@ export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names w
 - after_miss: the kickoff after a miss, which matters most: name the miss in fresh words (no stock line), then push harder for today's step in full, a smaller version only as fallback.
 - one_a_day (2+ misses in a row): today's one text, a new angle each day: a different reason, a smaller start, or what's getting in the way.
 - day_three: the voice page's honest day-3 check-in. Then follow their answer: keep going, change_plan, switch_goal or opt_out.
+- lookback (Sunday evening, they weren't talking): the week's recap as its own text (WEEK LOOK-BACK).
 When they text (phase "active"): a yes to today's step → mark_agreed; then it's settled (see the state). Done or proof → PROOF below. Doing it now or about to ("heading to the gym") → mark_on_it; chatting or a question isn't that. A new time for today in their latest texts → move_today (a time from an earlier day was for that day). Can't do the full step today: hold the line once, then offer a smaller version (half the time, a few fewer, or something possible where they are). Never promise a reminder or check-in the app doesn't send.`;
 
 /** Each step day's own step (#76): the coach picks it. After onboarding only. */
@@ -139,6 +142,13 @@ After the step (#77), while it's fresh:
 - Only at the wrap-up (or after a short reply that's all they've got): propose the next step day's step, fully defined (TODAY'S STEP), and ask if it works: set_today_step day next; their yes, or a version they adjust: again with agreed.
 - A clear lesson from it: save_takeaway.
 - Recall: now and then, about 1, 3 and 7 days after (the state shows each takeaway's age), bring one back in a check-in or the conversation ("what was the pace rule from Monday?", without the answer in that text): never its own text, never a quiz, not every lesson. Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
+
+/** The Sunday look-back (#78): the week's progress, then the week talk. After onboarding only. */
+export const WEEK_LOOKBACK = `WEEK LOOK-BACK (phase "active"; Sundays the state has a WEEK LOOK-BACK block): once a week, a look back at their progress.
+- When: talking on Sunday after a step, never in the text that celebrates their proof: first the day's reflection (PROOF); its wrap-up turns to the week in place of the next step ("And zooming out, here's the progress you made this week:"), never an abrupt report. The next step comes at the end of the week talk, never in the recap. A rest day or no step done: once today's talk settles, or when they ask how they did. The recap goes in that text, with record_week_recap.
+- The recap: a warm line, then 2 to 4 pieces of progress they made this week as a • list, introduced as progress they made (never a heading like "Your week:"), each backed by the state (a learning applied or recalled, with when; a step that grew; days done, as the block counts them); where they stand vs. their destination, if they have one; then one question about the week or what to push on next. Progress made, never what they couldn't do before. Only learnings the block lists as understood count as understood or "can do"; explained ones are starting to click. Nothing understood yet: name what they did, honestly. The streak and counts never headline.
+- The week talk: how it went and what to focus on next. A destination they name: agree lightly (change_plan), never pushed or turned into a schedule. Wrap up with only the next step day's step, fully defined (as in PROOF), never a plan for the week. A new focus or a pivot: NEXT STEPS.
+- NUDGE MOMENT lookback: the recap as its own text, opening with their name; no proof ask. A reply leads into the week talk.`;
 
 /** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
 export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
@@ -181,7 +191,7 @@ export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your v
 
 /** The fixed part of the system prompt after onboarding: the whole voice page, then the rules it doesn't cover; cached. */
 export function fullVoiceInstructions(voicePage: string): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, TODAYS_STEP, PROOF, NEXT_STEPS, TEAM, MEMORY].join("\n\n");
+  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voicePage}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, TODAYS_STEP, PROOF, WEEK_LOOKBACK, NEXT_STEPS, TEAM, MEMORY].join("\n\n");
 }
 
 /** Today's step, as the nudge scheduler sees it, and the next step day. */
@@ -219,7 +229,9 @@ function reflectionLine(s: CoachState): string {
   if (!done || s.nudgeMoment || s.proof.today === 0) return saved;
   const n = s.proof.zohTextsSince + 1;
   // The soft cap (spec #77): the coach can't count its own texts reliably, so the state says where the exchange is.
-  const where = n < 4 ? "if they're into it, follow up and keep the next step for the wrap-up; a short reply that's all they've got: wrap up now" : "start wrapping up unless they're clearly still going, then the next step";
+  // #78: on a look-back Sunday the wrap-up turns to the week, and the next step waits for the week talk.
+  const next = s.week && !s.week.recapped ? "the week (WEEK LOOK-BACK)" : "the next step";
+  const where = n < 4 ? `if they're into it, follow up and keep ${next} for the wrap-up; a short reply that's all they've got: wrap up now` : `start wrapping up unless they're clearly still going, then ${next}`;
   return `${saved} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 
@@ -234,6 +246,43 @@ function takeawayLines(s: CoachState): string[] {
   };
   const each = s.takeaways.map((k) => `- ${ago(k.day)} (${label(weekdayOf(k.day))}): "${k.text}" (${k.evidence})`);
   return [`Takeaways, newest first (bring one back now and then, or build it into a step; see PROOF):\n${each.join("\n")}`];
+}
+
+/** #78: when the week comes up today, from how today's going. */
+function weekWhen(s: CoachState): string {
+  const row = s.todayRow;
+  if (row?.status === "done" || row?.status === "done_reduced") {
+    return s.proof.today > 0 && s.proof.zohTextsSince === 0
+      ? "not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up"
+      : "turn to the week at the reflection's wrap-up, in place of the next step";
+  }
+  if (s.plan && isStepDay(s.plan, s.today, row) && !row?.status) return "after today's step and its reflection, unless they ask how the week went";
+  return "once today's talk settles, or when they ask how they did";
+}
+
+/** #78: on Sundays, the week the look-back reads; once the recap is given, only for the week talk. */
+function weekLines(s: CoachState, plan: Plan): string[] {
+  const w = s.week;
+  if (!w) return [];
+  const n = (status: StepDayStatus) => w.days.filter((d) => d.status === status).length;
+  const tally = `${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed`;
+  const status =
+    s.nudgeMoment === "lookback"
+      ? "This text (not sent yet) is the recap. The app records it: no tool call."
+      : w.recappedNow
+      ? "This text (not sent yet) is the recap."
+      : w.recapped
+        ? "The recap is done for this week (in conversation or its own text): never again today; their replies to it are the week talk."
+        : `Not given yet: ${weekWhen(s)} (WEEK LOOK-BACK), with record_week_recap.`;
+  const { understood, explained } = w.learnings;
+  const lines = [
+    `WEEK LOOK-BACK, ${label(weekdayOf(w.from))} ${w.from} to today: ${status}`,
+    `This week: ${tally} (each day in Recent step days and Today above).`,
+    `Understood this week (applied or recalled; only these count as understood or "can do"):\n${understood.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none yet"}`,
+    `Only explained so far (starting to click):\n${explained.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none"}`,
+  ];
+  if (plan.destination) lines.push(`Their destination: ${plan.destination} (say where they stand vs. it).`);
+  return [lines.join("\n")];
 }
 
 /** Today's own step (#76), or the ask to pick it; the plan's step applies until then. */
@@ -428,7 +477,7 @@ export function buildStateBlock(s: CoachState): string {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}; its step was day 1's, each later day gets its own): ${describePlan(s.plan)}`);
     if (!s.plan.destination) lines.push("Destination: none yet (they can add one anytime with change_plan; don't push for it).");
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...takeawayLines(s), ...nextStepLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...takeawayLines(s), ...weekLines(s, s.plan), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {
     lines.push(s.draft ? `Plan shown to them, not locked yet: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }

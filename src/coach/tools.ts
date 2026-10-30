@@ -7,6 +7,7 @@ import {
   CHECKIN_ANSWERS,
   maintenanceCheckins,
   MIN_DAYS_PER_WEEK,
+  nudges,
   planInputs,
   plans,
   PROOF_METHODS,
@@ -42,7 +43,7 @@ import {
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
-import { addDays, isStepDay, nextStepDay } from "../nudges/schedule.js";
+import { addDays, isStepDay, LOOKBACK_KIND, nextStepDay, weekdayOf } from "../nudges/schedule.js";
 import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
@@ -144,6 +145,7 @@ const schemas = {
     .strict(),
   save_reflection: z.object({ summary: text(300), day: z.enum(["today", "yesterday"]).optional() }).strict(),
   save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
+  record_week_recap: z.object({}).strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
 };
 
@@ -402,12 +404,17 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_takeaway",
     description:
-      'A lesson from a step, in one line ("slow enough to talk is the right pace"), once it\'s clear. evidence: explained (they put it in their own words), applied (they used it in a step) or recalled (they brought back an earlier one, asked or not).',
+      'A lesson from a step, in one line ("slow enough to talk is the right pace"), once it\'s clear. evidence: explained (they put it in their own words), applied (they used it in a step) or recalled (they brought back an earlier one, asked or not): then use its exact text from the state.',
     input_schema: {
       type: "object",
       properties: { text: { type: "string" }, evidence: { type: "string", enum: [...TAKEAWAY_EVIDENCE] } },
       required: ["text", "evidence"],
     },
+  },
+  {
+    name: "record_week_recap",
+    description: "Sundays: you gave the week's recap (WEEK LOOK-BACK) in this reply, so no recap text goes out later today.",
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "mark_request_done",
@@ -909,6 +916,24 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
       return saved(tester, `Takeaway saved (${evidence}): ${lesson}`);
+    }
+
+    case "record_week_recap": {
+      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
+      // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
+      if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
+      // Spec #78: the week comes after the day's reflection, never in the text that celebrates their proof.
+      const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
+      if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {
+        return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
+      }
+      // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
+      await db
+        .insert(nudges)
+        .values({ testerId: tester.id, date: state.today, kind: LOOKBACK_KIND, moment: LOOKBACK_KIND, status: "skipped", createdAt: at })
+        .onConflictDoNothing();
+      return saved(tester, "Recorded: no recap text goes out later today. Nothing has been sent yet: your text now gives the recap.");
     }
 
     case "mark_request_done": {

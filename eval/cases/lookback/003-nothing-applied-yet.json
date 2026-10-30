@@ -1,0 +1,43 @@
+{
+  "id": "nothing-applied-yet",
+  "title": "A thin first week with nothing applied or recalled yet: an honest recap, no inflated understanding",
+  "origin": "Issue #78 (Sunday look-back): spec edge case, nothing applied or recalled yet",
+  "startDay": "sun",
+  "seed": {
+    "name": "Priya",
+    "goal": "speak_connect",
+    "phase": "active",
+    "history_hours_ago": 30,
+    "answers": { "what": "speaking up in team meetings", "where": "at work", "when": "10 am", "how_long": "10 min" },
+    "history": [
+      { "from": "tester", "text": "skipped today, meeting got cancelled" },
+      { "from": "zoh", "text": "Fair, no meeting no mic. Monday's standup, then." }
+    ],
+    "plan": {
+      "step": "In standup, say one sentence about what you're working on before anyone asks",
+      "destination": "lead one team meeting by the end of the month",
+      "place": "at work",
+      "time": "10:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "voice",
+      "proof_note": "a quick voice note on what you said and how it felt",
+      "reason": "One sentence first makes speaking up a habit before it's a big deal.",
+      "minutes": 10,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "One sentence in standup before anyone asks", "proof_seen": "voice note: said what she's working on, heart racing" },
+      { "days_ago": 5, "status": "missed", "note": "froze, said nothing" },
+      { "days_ago": 4, "status": "done", "step": "One sentence in standup, prepared the night before", "proof_seen": "voice note: read her prepped line", "reflection": "Prepping the line the night before helped a lot" },
+      { "days_ago": 3, "status": "missed", "note": "meeting got cancelled" }
+    ],
+    "takeaways": [
+      { "days_ago": 4, "text": "Prep your one line the night before", "evidence": "explained" }
+    ]
+  },
+  "testerLines": ["advance to 18:01", "meh, felt like a slow week", "ok"],
+  "whatWentWrong": "New case, not a past mistake: a recap must never inflate a thin week.",
+  "shouldHaveHappened": "The 6 pm recap is honest: it names what she actually did (spoke up twice in standup, prepped a line the night before and it helped) as progress made, and treats prepping the line as starting to click, not as something she's mastered or 'can do now'. No claims like 'you've got this down' or 'you can speak up confidently now', no 'couldn't before' framing, no guilt about the misses. Where she stands vs. leading a meeting by the end of the month, lightly. One question. When she says it felt slow, ZOH is warm and specific (two real wins, and the prep trick), then the week talk lands on Monday's step fully defined (e.g. prep one line Sunday night, say it in Monday's 10 am standup, voice note after) and asks if it works.",
+  "startTime": "17:00",
+  "timeZone": "America/New_York"
+}

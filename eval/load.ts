@@ -110,6 +110,7 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
       persona: c.persona ?? "scripted",
       areaCode: c.areaCode,
       startTime: c.startTime,
+      startDay: c.startDay,
       timeZone: c.timeZone,
       regression: c,
       seed: c.seed,

@@ -28,6 +28,21 @@ export const FOLLOWUP_AFTER_MS = 30 * MINUTE;
 /** How long a step takes when the plan doesn't say. */
 export const DEFAULT_STEP_MINUTES = 60;
 
+/** The Sunday look-back (#78): the recap's own text goes at this local time on Sunday, */
+export const LOOKBACK_AT = "18:00";
+/** or this long after a later Sunday step's follow-up, even into quiet hours, */
+export const LOOKBACK_AFTER_FOLLOWUP_MS = 30 * MINUTE;
+/** within this long of that late time (a restart after it). */
+export const LOOKBACK_LATE_WINDOW_MS = 2 * HOUR;
+/** They texted this recently: they're talking, so the coach can turn to the week itself. */
+export const LOOKBACK_TALKING_MS = 10 * MINUTE;
+/** The look-back's nudge slot (and moment): one row per Sunday, the 6 pm text or one recorded in conversation. */
+export const LOOKBACK_KIND = "lookback";
+/** Closed step days since they started before the first look-back. */
+export const LOOKBACK_MIN_STEP_DAYS = 3;
+/** The look-back's own cap: the spec's "3 unanswered", whatever their level. */
+const LOOKBACK_CAP = 3;
+
 /** Nudges ZOH may send in a row without a reply, per level; never more than 3 (voice page). */
 export const CAP_BY_LEVEL: Record<string, number> = { pushy: 3, steady: 2, gentle: 1 };
 const DEFAULT_CAP = 3;
@@ -43,6 +58,8 @@ export const NUDGE_MOMENTS = [
   "after_miss",
   "one_a_day",
   "day_three",
+  /** The Sunday recap, as its own text when they weren't talking (#78). */
+  "lookback",
   /** A manual nudge: a text the founders asked ZOH to send on its own (spec #10). */
   "team",
 ] as const;
@@ -86,6 +103,8 @@ export interface NudgeInput {
   lastDayThreeAt?: Date;
   /** Slip-ladder daily texts ZOH sent since their last text (#41). */
   dailiesSinceReply?: number;
+  /** Closed step days since they started, through the service date (#78: the look-back waits for 3). */
+  closedStepDays?: number;
 }
 
 export interface DueNudge {
@@ -112,14 +131,50 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
   const { now, tester } = input;
   if (tester.stoppedAt) return none("stopped");
   if (tester.autoTextsPausedAt) return none("paused");
-  if (insideQuietHours(localClock(now, tester.timeZone), tester)) return none("quiet hours");
+  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const date = serviceDate(now, tester);
+  // Only the look-back after a late Sunday step may land in quiet hours (#78).
+  if (quiet) return lookback(input, date, true) ?? none("quiet hours");
   const { lastInboundAt: lastIn, lastOutboundAt: lastOut } = input;
   const theirsIsLatest = lastIn !== undefined && (lastOut === undefined || lastIn > lastOut);
   if (theirsIsLatest && now.getTime() - lastIn.getTime() < REPLY_IN_PROGRESS_MS) return none("reply in progress");
 
-  const date = serviceDate(now, tester);
-  if (tester.phase === "active") return activeDay(input, date);
-  return stalled(input, date, theirsIsLatest);
+  if (tester.phase !== "active") return stalled(input, date, theirsIsLatest);
+  const decision = activeDay(input, date);
+  return decision.action === "none" ? (lookback(input, date, false) ?? decision) : decision;
+}
+
+/**
+ * The Sunday look-back's own text (#78), when it's due right now: on a Sunday with 3+ closed step days,
+ * not recapped yet today, at 6 pm, or 30 minutes after the Sunday step's follow-up when that's later
+ * (the one case that may go in quiet hours). Pause, stop and the 3-unanswered cap apply; while they're
+ * talking, the coach turns to the week itself; on the slip ladder its one text a day stays the only one.
+ */
+export function lookback(input: NudgeInput, date: string, quiet: boolean): NudgeDecision | undefined {
+  const { now, tester, plan } = input;
+  if (tester.phase !== "active" || !plan?.startDate || plan.startDate > date) return undefined;
+  if (weekdayOf(date) !== "sun" || input.claimedToday.includes(LOOKBACK_KIND)) return undefined;
+  if ((input.closedStepDays ?? 0) < LOOKBACK_MIN_STEP_DAYS) return undefined;
+  if (input.nudgesSinceReply >= LOOKBACK_CAP || (input.missesInARow ?? 0) >= ONE_A_DAY_AFTER_MISSES) return undefined;
+  if (input.lastInboundAt && now.getTime() - input.lastInboundAt.getTime() < LOOKBACK_TALKING_MS) return undefined;
+  const { from, late } = lookbackTime(input, date);
+  if (quiet && !late) return undefined;
+  const end = dayBounds(date, tester).end;
+  const until = late ? Math.max(from + LOOKBACK_LATE_WINDOW_MS, end) : end;
+  const at = now.getTime();
+  if (at < from || at >= until || from < (plan.lockedAt?.getTime() ?? 0)) return undefined;
+  return { action: "send", nudge: { kind: LOOKBACK_KIND, moment: "lookback", date } };
+}
+
+/** When the look-back's own text goes: 6 pm, or after a Sunday step's follow-up when that's later (`late`). */
+export function lookbackTime(input: Pick<NudgeInput, "tester" | "plan" | "today">, date: string): { from: number; late: boolean } {
+  const { tester, plan, today } = input;
+  const six = zonedTime(date, LOOKBACK_AT, tester.timeZone).getTime();
+  if (!plan || !isStepDay(plan, date, today)) return { from: six, late: false };
+  const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
+  const followup = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
+  const after = followup + LOOKBACK_AFTER_FOLLOWUP_MS;
+  return after > six ? { from: after, late: true } : { from: six, late: false };
 }
 
 /** Before the plan is locked: one nudge 3 hours after ZOH's last unanswered text, then one a day, then pause. */

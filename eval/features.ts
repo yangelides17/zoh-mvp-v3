@@ -378,6 +378,38 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** The Sunday look-back (#78): regression cases only, each starting on a Sunday (`startDay`). */
+  lookback: {
+    name: "lookback",
+    doneWhen: "you've said what you wanted to say about your week and ZOH has answered it, or the day is over.",
+    scenarios: [],
+    saved: true,
+    rubric: [
+      {
+        id: "natural-turn",
+        scope: "conversation",
+        label: "The turn from the day's reflection to the week feels natural, not an abrupt switch into a report",
+      },
+      {
+        id: "recap",
+        scope: "text",
+        label:
+          "A recap lists 2 to 4 real pieces of progress from this week, each backed by what happened (plus where they stand vs. their destination when there is one), framed as progress made, never as what they couldn't do before, then one question",
+      },
+      { id: "no-inflation", scope: "text", label: "No inflated claims of understanding: only lessons applied or recalled are called understood; nothing applied yet is said honestly" },
+      {
+        id: "next-step",
+        scope: "conversation",
+        label: "The week talk ends in a fully defined next step (what, where when it matters, when, how long), asked if it works; the destination is never pushed",
+      },
+      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end; a recap list can run to about 8 short lines" },
+      {
+        id: "voice",
+        scope: "text",
+        label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
+      },
+    ],
+  },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
   proof: {
     name: "proof",

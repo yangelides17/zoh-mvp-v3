@@ -3,6 +3,7 @@ import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
 import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
+import { closedStepDays } from "../coach/week.js";
 import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
@@ -29,6 +30,7 @@ import {
   REQUEST_CARRYING_MOMENTS,
   serviceDate,
   SKIPPABLE_MOMENTS,
+  weekdayOf,
   zonedTime,
   type DueNudge,
   type NudgeCarry,
@@ -258,6 +260,8 @@ export async function forecastNudge(
   const date = serviceDate(from, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
   const base = await loadNudgeInput(db, tester, plan, date, from);
+  // A forecast can run into a Sunday: the look-back needs the count from any day (#78).
+  if (plan && base.closedStepDays === undefined) base.closedStepDays = await closedStepDays(db, tester, date);
   for (let t = Math.floor(from.getTime() / stepMs) * stepMs + stepMs; t <= until.getTime(); t += stepMs) {
     const now = new Date(t);
     // A later day starts with nothing claimed and nothing sent since its midnight.
@@ -335,6 +339,8 @@ async function loadNudgeInput(db: Db, tester: Tester, plan: Plan | undefined, da
     missesInARow: summarizeDays(recent, []).missesInARow,
     lastDayThreeAt: dayThree?.at ? new Date(dayThree.at) : undefined,
     dailiesSinceReply: dailies?.n ?? 0,
+    // Only Sundays have a look-back (#78).
+    ...(plan && weekdayOf(date) === "sun" ? { closedStepDays: await closedStepDays(db, tester, date) } : {}),
   };
 }
 

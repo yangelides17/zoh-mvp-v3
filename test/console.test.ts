@@ -14,6 +14,7 @@ import {
   plans,
   stepDays,
   suggestions,
+  takeaways,
   testerGoals,
   testers,
   type Plan,
@@ -381,6 +382,25 @@ describe("tester list and page", () => {
     expect(progress).toContain("<b>🔥 2</b><span>current streak</span>");
   });
 
+  it("#78: the destination at the top, then learnings: understood with evidence, then explained only", async () => {
+    const s = await seed();
+    const empty = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
+    expect(empty).toContain("No lessons yet.");
+    await t.db.insert(takeaways).values([
+      { testerId: s.tester.id, goalSlug: "reading", day: MON, text: "Phone in the other room", evidence: "explained", createdAt: at(MON, "20:00") },
+      { testerId: s.tester.id, goalSlug: "reading", day: "2026-11-04", text: "Phone in the other room", evidence: "applied", createdAt: at("2026-11-04", "20:00") },
+      { testerId: s.tester.id, goalSlug: "reading", day: "2026-11-05", text: "One line per chapter", evidence: "explained", createdAt: at("2026-11-05", "20:00") },
+    ]);
+    const progress = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
+    expect(progress).toContain("<strong>Headed for:</strong> finish Dune by Dec 1");
+    expect(progress.indexOf("Headed for:")).toBeLessThan(progress.indexOf('id="goals"'));
+    expect(progress).toContain("Phone in the other room<div class=\"muted\">explained Mon 2026-11-02, applied Wed 2026-11-04</div>");
+    expect(progress).toContain("One line per chapter<div class=\"muted\">explained Thu 2026-11-05</div>");
+    const order = ["Understood (applied or recalled)", "Phone in the other room", "Explained only, starting to click", "One line per chapter"].map((x) => progress.indexOf(x));
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(order[0]).toBeGreaterThan(-1);
+  });
+
   it("escapes what testers write, on the page and in live updates", async () => {
     const s = await seed();
     await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "<script>alert(1)</script>", createdAt: at("2026-11-10", "09:00") });
@@ -658,7 +678,40 @@ describe("weekly summary", () => {
     const jobs = createConsoleJobs({ db: t.db, log: silent });
     await jobs.tick(at("2026-11-08", "09:00"));
     const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.kind, "summary"));
-    expect(row!.body).toBe("Week of 2026-11-01 to 2026-11-07: 3 of 7 step days done (1 reduced), streak 0.");
+    expect(row!.body).toBe(
+      "Week of 2026-11-01 to 2026-11-07: 3 of 7 step days done (1 reduced), streak 0.\nHeaded for: no destination yet.\nNo lessons applied or recalled this week.",
+    );
+  });
+
+  it("#78: shows the week's learnings with their evidence, and the destination", async () => {
+    const s = await seed();
+    const lesson = (day: string, text: string, evidence: "explained" | "applied" | "recalled") => ({
+      testerId: s.tester.id,
+      goalSlug: "reading",
+      day,
+      text,
+      evidence,
+      createdAt: at(day, "20:00"),
+    });
+    await t.db.insert(takeaways).values([
+      lesson("2026-11-03", "Recall the chapter before the next", "recalled"),
+      lesson("2026-11-09", "Phone in the other room", "explained"),
+      lesson("2026-11-11", "Phone in the other room", "applied"),
+      lesson("2026-11-12", "One line per chapter", "explained"),
+    ]);
+    const n = await weekNumbers(t.db, s.tester, "2026-11-15");
+    expect(n).toMatchObject({ destination: "finish Dune by Dec 1" });
+    const jobs = createConsoleJobs({ db: t.db, log: silent });
+    await jobs.tick(at("2026-11-15", "09:00"));
+    const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.kind, "summary"));
+    const lines = row!.body.split("\n");
+    expect(lines.slice(1)).toEqual([
+      "Headed for: finish Dune by Dec 1.",
+      'Understood this week: "Phone in the other room" (explained Mon 2026-11-09, applied Wed 2026-11-11)',
+      'Explained only so far: "One line per chapter" (explained Thu 2026-11-12)',
+    ]);
+    // Last week's recall was last week's progress.
+    expect(row!.body).not.toContain("Recall the chapter");
   });
 
   it("skips testers without a plan yet", async () => {
