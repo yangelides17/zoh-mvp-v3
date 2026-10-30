@@ -15,7 +15,7 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
@@ -409,8 +409,29 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
           step: d.step ?? null,
           note: d.note ?? null,
           proofSeen: d.proof_seen ?? null,
+          reflection: d.reflection ?? null,
           movedTime: d.moved_time ?? null,
         });
+    }
+    if (seed.today_step) {
+      const agreed = seed.today_step.agreed_hours_ago;
+      await app.db.insert(schema.stepDays).values({
+        testerId: tester!.id,
+        date: localDate(now, timeZone),
+        planId: plan!.id,
+        step: seed.today_step.step,
+        agreedAt: agreed === undefined ? null : new Date(now.getTime() - agreed * 60 * 60_000),
+      });
+    }
+    for (const k of seed.takeaways) {
+      await app.db.insert(schema.takeaways).values({
+        testerId: tester!.id,
+        goalSlug: seed.goal,
+        day: localDate(now, timeZone, -k.days_ago),
+        text: k.text,
+        evidence: k.evidence,
+        createdAt: new Date(now.getTime() - k.days_ago * DAY_MS),
+      });
     }
     await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);
   }
@@ -650,7 +671,7 @@ export async function readSavedState(client: PGlite, phone: string): Promise<Rec
   return out;
 }
 
-/** Ids of the tester's flags, pauses and plans, so the run's new ones can be told apart (rows carry the real clock). */
+/** Ids of the tester's flags, pauses, plans and takeaways, so the run's new ones can be told apart (rows carry the real clock). */
 async function savedIds(app: EvalApp): Promise<Set<string>> {
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) return new Set();
@@ -658,11 +679,15 @@ async function savedIds(app: EvalApp): Promise<Set<string>> {
     ...(await app.db.select({ id: schema.flags.id }).from(schema.flags).where(eq(schema.flags.testerId, tester.id))),
     ...(await app.db.select({ id: schema.pauses.id }).from(schema.pauses).where(eq(schema.pauses.testerId, tester.id))),
     ...(await app.db.select({ id: schema.plans.id }).from(schema.plans).where(eq(schema.plans.testerId, tester.id))),
+    ...(await app.db.select({ id: schema.takeaways.id }).from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id))),
   ];
   return new Set(rows.map((r) => r.id));
 }
 
-/** Flags, pauses and plan versions ZOH saved during the run, and the style it ended on, one line each. */
+/**
+ * Flags, pauses, plan versions and takeaways ZOH saved during the run, step days with a reflection or a
+ * step set ahead (#77), and the style it ended on, one line each.
+ */
 export async function readSaved(app: EvalApp, before: Set<string>): Promise<string> {
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) return "(no tester)";
@@ -670,11 +695,16 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
   const flagged = fresh(await app.db.select().from(schema.flags).where(eq(schema.flags.testerId, tester.id)));
   const paused = fresh(await app.db.select().from(schema.pauses).where(eq(schema.pauses.testerId, tester.id)));
   const versions = fresh(await app.db.select().from(schema.plans).where(and(eq(schema.plans.testerId, tester.id), eq(schema.plans.status, "locked"))));
+  const lessons = fresh(await app.db.select().from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id)));
+  const days = await app.db.select().from(schema.stepDays).where(eq(schema.stepDays.testerId, tester.id)).orderBy(asc(schema.stepDays.date));
   const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
   const lines = [
     ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
     ...paused.map((x) => `Pause: ${x.reason ?? "no reason"}${x.until ? `, back on ${x.until}` : ""}`),
     ...versions.map((x) => `New plan version ${x.version}${x.changeKind ? ` (${x.changeKind})` : ""}: ${x.step}, ${x.days.join(" ")} at ${x.stepTime}${x.endsOn ? `, until ${x.endsOn}` : ""}`),
+    ...lessons.map((k) => `Takeaway (${k.evidence}, ${k.day}): ${k.text}`),
+    ...days.flatMap((d) => (d.reflection ? [`Reflection for ${d.date}: ${d.reflection}`] : [])),
+    ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");
 }

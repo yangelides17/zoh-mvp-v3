@@ -1,0 +1,45 @@
+{
+  "id": "next-step-at-wrap-up",
+  "title": "The next step at the wrap-up: proposed fully defined, adjusted by the tester, then set",
+  "origin": "Issue #77 (proof plus reflection): Should, the next step after the reflection",
+  "seed": {
+    "name": "Riley",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "jog and walk intervals", "where": "around the block", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Starts in 10, Riley! 2 min jog, 1 min walk, 3 rounds around the block at 7." },
+      { "from": "tester", "text": "going" }
+    ],
+    "plan": {
+      "step": "1 min jog, 2 min walk, 3 rounds around the block",
+      "destination": "run a mile without stopping",
+      "place": "around the block",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to a mile without wrecking your legs.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "1 min jog, 2 min walk, 3 rounds around the block" },
+      { "days_ago": 2, "status": "done", "step": "1 min jog, 2 min walk, 4 rounds around the block" },
+      { "days_ago": 1, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds around the block", "note": "the jogs felt long" }
+    ],
+    "today_step": { "step": "2 min jog, 1 min walk, 3 rounds around the block at 7 pm (about 15 min)", "agreed_hours_ago": 10 }
+  },
+  "testerLines": [
+    "[photo strava.png: a Strava screenshot: Run, 1.4 mi, 16:05, today 7:18 PM]",
+    "[voice: That was way better than yesterday. I slowed the jogs right down and could actually talk, the second round was easy.]",
+    "yeah I could probably do another round",
+    "can we do it at the park instead of my block? it's flatter",
+    "perfect"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the reflection should lead into an agreed next step, saved for the next step day.",
+  "shouldHaveHappened": "ZOH counts the screenshot and asks for a quick reflection. The voice note gets a specific response (slowing down is the trick) and at most a short follow-up. Then ZOH proposes the next step day's step, fully defined (2 min jog, 1 min walk, 4 rounds, where, at 7 pm, about how long), building in the pace lesson, and asks if it works; the ask and the proposal aren't in the same text as the reflection ask. When Riley asks for the park, ZOH says the adjusted step once (park instead of the block, nothing else changed) and asks or confirms; after \"perfect\" it confirms in a line with no new question. Saved: the step set for the next step day, agreed.",
+  "startTime": "19:20",
+  "timeZone": "America/New_York"
+}

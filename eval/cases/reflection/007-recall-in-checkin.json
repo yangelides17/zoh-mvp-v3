@@ -1,0 +1,40 @@
+{
+  "id": "recall-in-checkin",
+  "title": "Yesterday's lesson comes back once, lightly, in a text ZOH was sending anyway",
+  "origin": "Issue #77 (proof plus reflection): Should, recall; the spec's check-in example",
+  "seed": {
+    "name": "Dev",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "jog and walk intervals", "where": "around the block", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[voice note] second round was way easier once I slowed down, I could actually talk" },
+      { "from": "zoh", "text": "That's the trick: slow enough to talk. Tomorrow: 2 min jog, 1 min walk, 4 rounds around the block at 7. Work for you?" },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "1 min jog, 2 min walk, 3 rounds around the block",
+      "destination": "run a mile without stopping",
+      "place": "around the block",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to a mile without wrecking your legs.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds around the block", "note": "jogs felt long" },
+      { "days_ago": 1, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds around the block", "reflection": "Slowing down to talking pace made the second round easy" }
+    ],
+    "today_step": { "step": "2 min jog, 1 min walk, 4 rounds around the block at 7 pm (about 15 min)", "agreed_hours_ago": 13 },
+    "takeaways": [{ "days_ago": 1, "text": "Slow enough to talk is the right jogging pace", "evidence": "explained" }]
+  },
+  "testerLines": ["advance to 09:05", "👍", "advance to 18:55", "slow enough to talk"],
+  "whatWentWrong": "New case, not a past mistake: lessons should come back now and then, naturally.",
+  "shouldHaveHappened": "The morning kickoff reminds Dev of the agreed step without re-asking. Yesterday's pace lesson comes back once during the day, inside a text ZOH sends anyway (the check-in before 7 is the natural place, e.g. a quick \"what's the pace rule from yesterday?\"), never as its own extra text and never framed as a quiz or test. When Dev answers \"slow enough to talk\", ZOH responds in a short line, warmly, without a lecture or a new question beyond getting going.",
+  "startTime": "08:50",
+  "timeZone": "America/New_York"
+}

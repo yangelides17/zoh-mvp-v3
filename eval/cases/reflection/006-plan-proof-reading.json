@@ -1,0 +1,21 @@
+{
+  "id": "plan-proof-reading",
+  "title": "A reading plan's proof is a short voice recap in their own words, with a why and an easy alternative",
+  "origin": "Issue #77 (proof plus reflection), folds in #72 (proof that reinforces learning)",
+  "seed": {
+    "name": "Priya",
+    "goal": "reading",
+    "phase": "planning",
+    "history_hours_ago": 0,
+    "answers": { "what": "Atomic Habits", "where": "in bed", "when": "9:15 pm", "how_long": "20 min", "tracks_with": "doesn't track it" },
+    "history": [
+      { "from": "tester", "text": "finish Atomic Habits this month, then keep going with more books" },
+      { "from": "zoh", "text": "Love that. Every night, or a few nights a week?" }
+    ]
+  },
+  "testerLines": ["every night", "looks good"],
+  "whatWentWrong": "New case, not a past mistake: proof for reading should help them learn, not just show the book.",
+  "shouldHaveHappened": "The plan ZOH shows uses a short voice note recapping what they read, in their own words, as the proof, with a one-line reason (saying it back is what makes it stick) and an easy alternative (a photo of the page, for example). The plan stays at about 8 lines, with day 1's step fully defined. After \"looks good\" ZOH asks for the commitment in its own words, with nothing else in that text.",
+  "startTime": "13:00",
+  "timeZone": "America/New_York"
+}
