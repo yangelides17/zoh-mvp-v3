@@ -143,7 +143,7 @@ describe("the overnight pass", () => {
     expect(texts).toContain("[photo: A book open at page 112] page 112!");
     expect(req.system[1]!.text).toContain("Mike (the tester)");
     expect(req.system[1]!.text).toContain("How they like to be coached");
-    expect(req.system[1]!.text).toContain("Goal: Daily reading");
+    expect(req.system[1]!.text).toContain("Goal: Read & learn more (books, ideas, any topic)");
   });
 
   it("backfills up to 14 days on a tester's first run, never before their context started", async () => {
@@ -298,7 +298,7 @@ describe("goal paths", () => {
     expect(backward.map((p) => p.goalSlug)).toEqual(["reading", "bedtime", "exercise"]);
 
     const text = await renderPage(t.db, mike, exercise!);
-    expect(text).toMatch(/Goal path, first to latest: .*Goal: Daily reading .*→ .*Goal: Same bedtime every night \[switched Nov 2: reading at night kept him up\] → .*Goal: Daily exercise \(this page\) \[switched Nov 4: sleep is fine now, wants to move\]/);
+    expect(text).toMatch(/Goal path, first to latest: .*Goal: Read & learn more \(books, ideas, any topic\) .*→ .*Goal: Sleep better \[switched Nov 2: reading at night kept him up\] → .*Goal: Get fitter \(this page\) \[switched Nov 4: sleep is fine now, wants to move\]/);
     expect(text).toContain("Step path, first to latest: v1 (Nov 4): 10 push-ups → v2 (Nov 5): 20 push-ups (current)");
 
     // Running it again changes nothing.
@@ -451,7 +451,7 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     expect(memory).toContain("- f:");
     expect(memory).toContain("has a sister Ana");
     expect(memory).toContain("How they like to be coached");
-    expect(memory).toContain("Goal: Daily reading");
+    expect(memory).toContain("Goal: Read & learn more (books, ideas, any topic)");
     expect(memory).toContain("Day doc 2026-10-29");
     expect(memory).toContain("Day doc 2026-10-23");
     const recentDays = memory.slice(memory.indexOf("RECENT DAYS"), memory.indexOf("INDEX ("));

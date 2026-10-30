@@ -1,0 +1,9 @@
+{
+  "id": "off-list-dating",
+  "title": "Off-list, out of scope (dating): honest limit with a way forward",
+  "origin": "Spec #75 (starters and the open door), \"Off-list\" and the Speak & connect limit",
+  "testerLines": ["Start", "Chris. can you help me get better at dating"],
+  "whatWentWrong": "New case, not a past mistake: an off-list ask ZOH must not coach.",
+  "shouldHaveHappened": "ZOH says plainly, without lecturing, that dating isn't something it coaches yet, and offers a way forward in the same text: something close it can help with (conversations and confidence in general, like starting a chat with someone new, under Speak & connect), the list, or getting to know Chris first. It doesn't pretend to coach dating or give dating tips, and asks at most one question.",
+  "startTime": "18:30"
+}

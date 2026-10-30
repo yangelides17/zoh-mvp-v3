@@ -19,7 +19,7 @@ import {
 } from "../src/coach/prompt.js";
 import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
 import { readFileSync } from "node:fs";
-import { loadCoachState } from "../src/coach/state.js";
+import { loadCoachState, onboardingComplete } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import type { Db } from "../src/db/client.js";
 import { flags, messages, planInputs, type Tester } from "../src/db/schema.js";
@@ -28,14 +28,18 @@ import { OPT_OUT_CONFIRMATION } from "../src/testers/commands.js";
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, ME, WESTERN, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
 
+// #75: exactly the spec's 10 lines, in order; "Something else" stays hidden.
 const GOAL_LINES = [
-  "• Daily reading",
-  "• Daily exercise",
-  "• Daily nutrition",
-  "• Daily reflection and planning",
-  "• Daily deep work target",
-  "• Same bedtime every night",
-  "• Something else",
+  "• Put AI to work for you",
+  "• Read & learn more (books, ideas, any topic)",
+  "• Start something on the side",
+  "• Focus & get more done",
+  "• Speak & connect better",
+  "• Get fitter",
+  "• Eat better",
+  "• Sleep better",
+  "• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)",
+  "• Not sure? Let's figure it out together",
 ];
 
 let t: TestApp;
@@ -82,10 +86,11 @@ describe("first text", () => {
     // The coaching-style line belongs in the intro, not dropped mid-conversation.
     expect(req.system[0]!.text).toContain('"stop" anytime, and they can change how you coach anytime');
     expect(req.system[0]!.text.match(/change how you coach/g)).toHaveLength(1);
-    expect(req.system[0]!.text).toContain("start one thing and actually stick with it");
+    expect(req.system[0]!.text).toContain("help them get better at one thing, a small step a day");
     const state = model.stateOf();
     expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);
-    expect(state).toContain(GOAL_LINES.join("\n"));
+    expect(state).toContain(`Goal list (use exactly these lines when you show it):\n${GOAL_LINES.join("\n")}\n`);
+    expect(state).not.toContain("• Something else");
     expect(state).toContain("Time zone: Eastern (assumed");
     expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start", cache_control: { type: "ephemeral" } }] }]);
     expect(sent()).toEqual(["Yo! I'm ZOH…"]);
@@ -112,18 +117,18 @@ describe("first text", () => {
 
   it("saves a name and goal given in the first text and keeps the state current within the reply", async () => {
     model.script(
-      { tools: [{ name: "save_name", input: { name: "Maya" } }, { name: "choose_goal", input: { slug: "reflection" } }] },
-      { tools: [{ name: "save_plan_inputs", input: { what: "journaling", where: "home", when: "mornings before work", how_long: "10 min" } }] },
+      { tools: [{ name: "save_name", input: { name: "Maya" } }, { name: "choose_goal", input: { slug: "reading" } }] },
+      { tools: [{ name: "save_plan_inputs", input: { what: "stoic philosophy", where: "home", when: "mornings before work", how_long: "10 min" } }] },
       "Maya! I'm ZOH…",
     );
-    await text(ME, "hi! I'm Maya, I want to journal every morning at home before work, maybe 10 min");
-    expect(await tester()).toMatchObject({ name: "Maya", goalSlug: "reflection" });
+    await text(ME, "hi! I'm Maya, I want to read about stoicism every morning at home before work, maybe 10 min");
+    expect(await tester()).toMatchObject({ name: "Maya", goalSlug: "reading" });
     expect(model.stateOf(0)).toContain('ask "What\'s your name, and what are you looking to work on?"');
     expect(model.stateOf(1)).toContain("Their goal is known: skip the list");
     expect(model.stateOf(1)).toContain("Then ask the next open question.");
     expect(model.stateOf(1)).toContain("Name: Maya");
-    expect(model.stateOf(1)).toContain("Goal: Daily reflection and planning [reflection]");
-    // All of reflection's required questions were answered at once, so this is already the recap turn.
+    expect(model.stateOf(1)).toContain("Goal: Read & learn more (books, ideas, any topic) [reading]");
+    // All of reading's required questions were answered at once, so this is already the recap turn.
     expect((await tester()).phase).toBe("planning");
     expect(model.stateOf()).toContain("ONBOARDING JUST FINISHED");
   });
@@ -193,22 +198,24 @@ describe("tools", () => {
     });
     expect(await inputs()).toMatchObject({ where: "home, dumbbells", when: "mornings 7:30", howLong: "20 min", what: null });
     const s = await state();
-    expect(s.openRequired.map((q) => q.key)).toEqual(["what", "tracks_with"]);
+    expect(s.openRequired.map((q) => q.key)).toEqual(["what"]);
+    expect(s.openOptional.map((q) => q.key)).toEqual(["tracks_with"]);
     const block = buildStateBlock(s);
     expect(block).toContain("- where: home, dumbbells\n- when: mornings 7:30\n- how long: 20 min");
-    expect(block).toContain("Still open, required: what [what], tracks with [tracks_with]");
+    expect(block).toContain("Still open, required: what [what] (what they like and have done before;");
+    expect(block).toContain("Still open, optional (ask only if it fits naturally): tracks with [tracks_with] (any workout app or wearable they use)");
     // A later answer overwrites the earlier one.
     await run("save_plan_inputs", { when: "evenings" });
     expect(await inputs()).toMatchObject({ when: "evenings", where: "home, dumbbells" });
   });
 
   it("save_plan_inputs rejects a question the goal doesn't use", async () => {
-    await run("choose_goal", { slug: "reading" });
-    expect(await run("save_plan_inputs", { tracks_with: "Goodreads" })).toMatchObject({
+    await run("choose_goal", { slug: "ai" });
+    expect(await run("save_plan_inputs", { where: "the office" })).toMatchObject({
       ok: false,
-      error: expect.stringContaining("tracks_with doesn't apply"),
+      error: expect.stringContaining("where doesn't apply"),
     });
-    expect((await inputs())?.tracksWith).toBeNull();
+    expect((await inputs())?.where).toBeNull();
   });
 
   it("set_time_zone only works when the status is needs_city, and only with a real zone", async () => {
@@ -256,23 +263,24 @@ describe("finishing onboarding", () => {
       "intro",
       { tools: [{ name: "save_name", input: { name: "Alex" } }, { name: "choose_goal", input: { slug: "exercise" } }] },
       "Let's go, Alex. Have you lifted before?",
-      { tools: [{ name: "save_plan_inputs", input: { what: "dumbbells, used to lift in college", where: "home, has dumbbells" } }] },
+      { tools: [{ name: "save_plan_inputs", input: { what: "dumbbells, used to lift in college" } }] },
       "When are you free?",
       { tools: [{ name: "save_plan_inputs", input: { when: "mornings 7:30", how_long: "20 min" } }] },
-      "Do you track workouts anywhere?",
+      "Where will you work out?",
     );
     await text(ME, "Start");
     await text(ME, "Alex. Exercise, wanna get back to the gym");
-    await text(ME, "used to lift in college, home with dumbbells");
+    await text(ME, "used to lift in college");
     await text(ME, "mornings 7:30, 20 min tops");
     expect((await tester()).phase).toBe("onboarding");
-    expect(model.stateOf()).toContain("Still open, required: tracks with [tracks_with]");
+    expect(model.stateOf()).toContain("Still open, required: where [where]");
     expect(model.stateOf()).toContain("Onboarding is NOT finished");
 
-    model.script({ tools: [{ name: "save_plan_inputs", input: { tracks_with: "doesn't track it" } }] }, "Which exercises do you like doing with the dumbbells?");
-    await text(ME, "nah I don't track it");
+    // Get fitter needs where; tracks_with is optional, so it doesn't hold onboarding open.
+    model.script({ tools: [{ name: "save_plan_inputs", input: { where: "home, has dumbbells" } }] }, "Which exercises do you like doing with the dumbbells?");
+    await text(ME, "at home, I've got dumbbells");
     expect((await tester()).phase).toBe("planning");
-    expect(await inputs()).toMatchObject({ tracksWith: "doesn't track it" });
+    expect(await inputs()).toMatchObject({ where: "home, has dumbbells", tracksWith: null });
     const handoff = model.stateOf();
     expect(handoff).toContain("ONBOARDING JUST FINISHED");
     expect(handoff).toContain("carry straight on into PLAN AGREEMENT, no recap");
@@ -305,30 +313,61 @@ describe("finishing onboarding", () => {
     model.script({ tools: [{ name: "save_plan_inputs", input: { what: "120g protein" } }] }, "ok");
     await text(ME, "120g protein a day");
     expect((await tester()).phase).toBe("onboarding");
-    // nutrition's "when" is optional: tracks_with is the last required one.
-    model.script({ tools: [{ name: "save_plan_inputs", input: { tracks_with: "MyFitnessPal" } }] }, "recap");
+    // tracks_with is optional on every starter: it doesn't finish onboarding.
+    model.script({ tools: [{ name: "save_plan_inputs", input: { tracks_with: "MyFitnessPal" } }] }, "ok");
     await text(ME, "I use MyFitnessPal");
+    expect((await tester()).phase).toBe("onboarding");
+    model.script({ tools: [{ name: "save_plan_inputs", input: { when: "8 pm", how_long: "10 min" } }] }, "recap");
+    await text(ME, "8pm, 10 min to log it");
     expect((await tester()).phase).toBe("planning");
   });
 
-  it("asks tracks_with only for exercise, nutrition, bedtime and deep work", async () => {
+  it("requires what, when and how long on every starter, plus where for Get fitter; tracks_with is optional", async () => {
     await text(ME, "Start");
     const row = await tester();
     const required: Record<string, string[]> = {};
-    for (const slug of ["reading", "exercise", "nutrition", "reflection", "deep_work", "bedtime", "something_else"]) {
+    const optional: Record<string, string[]> = {};
+    for (const slug of ["ai", "reading", "side_project", "deep_work", "speak_connect", "exercise", "nutrition", "bedtime", "fun_skill", "something_else"]) {
       await updateTester(t.db, row.id, { goalSlug: slug });
       const s = await loadCoachState(t.db, await tester(), { now: new Date(), isFirstText: false });
       required[slug] = s.openRequired.map((q) => q.key);
+      optional[slug] = s.openOptional.map((q) => q.key);
     }
+    const base = ["what", "when", "how_long"];
     expect(required).toEqual({
-      reading: ["what", "when", "how_long"],
-      exercise: ["what", "where", "when", "how_long", "tracks_with"],
-      nutrition: ["what", "tracks_with"],
-      reflection: ["what", "when", "how_long"],
-      deep_work: ["what", "when", "how_long", "tracks_with"],
-      bedtime: ["what", "when", "tracks_with"],
-      something_else: ["what", "where", "when", "how_long"],
+      ai: base,
+      reading: base,
+      side_project: base,
+      deep_work: base,
+      speak_connect: base,
+      exercise: ["what", "where", "when", "how_long"],
+      nutrition: base,
+      bedtime: base,
+      fun_skill: base,
+      something_else: base,
     });
+    for (const keys of Object.values(optional)) expect(keys).toContain("tracks_with");
+  });
+
+  it("every starter can be chosen and finishes onboarding only once what, when and how long are saved; reflection is gone", async () => {
+    await text(ME, "Start");
+    const at = new Date("2026-10-27T15:00:00Z");
+    const state = async () => loadCoachState(t.db, await tester(), { now: at, isFirstText: false });
+    const run = async (name: string, input: unknown) => runTool(t.db, await state(), name, input, at);
+    const starters = (await state()).goals.map((g) => g.slug).filter((slug) => slug !== "something_else");
+    expect(starters).toHaveLength(9);
+    for (const slug of starters) {
+      expect(await run("choose_goal", { slug })).toMatchObject({ ok: true });
+      expect(await run("save_plan_inputs", { what: "something concrete", when: "7:30 am" })).toMatchObject({ ok: true });
+      expect(onboardingComplete(await state())).toBe(false);
+      expect(await run("save_plan_inputs", { how_long: "15 min" })).toMatchObject({ ok: true });
+      if (slug === "exercise") {
+        expect(onboardingComplete(await state())).toBe(false);
+        expect(await run("save_plan_inputs", { where: "the park" })).toMatchObject({ ok: true });
+      }
+      expect(onboardingComplete(await state())).toBe(true);
+    }
+    expect(await run("choose_goal", { slug: "reflection" })).toMatchObject({ ok: false, error: expect.stringContaining("Unknown goal") });
   });
 });
 

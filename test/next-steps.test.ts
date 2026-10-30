@@ -273,7 +273,7 @@ describe("an approved next step", () => {
       ok: false,
       error: expect.stringContaining("goal cap (2)"),
     });
-    expect(await block(tester, at(MON, "10:00"), 3)).toContain(`[${ref}] (new_focus: Morning runs (Daily exercise))`);
+    expect(await block(tester, at(MON, "10:00"), 3)).toContain(`[${ref}] (new_focus: Morning runs (Get fitter))`);
     expect(await tool(tester, "switch_goal", { slug: "exercise", reason: "yes", suggestion: ref }, at(MON, "10:00"), "", 3)).toMatchObject({ ok: true });
   });
 });
@@ -295,7 +295,7 @@ describe("streaks per goal and \"what's my streak?\"", () => {
     const now = at("2026-11-03", "10:00");
     // 10 carried + Oct 30 to Nov 2 assumed kept up (through yesterday).
     expect(await block(tester, now)).toContain(
-      "Their goals (2 of 3 allowed), each with its own streak: Daily reading (focus): 1 step day, not counting today (done today makes it 2); Same bedtime every night (maintenance, self-reported): 14 step days; check-ins kept up 1 of 1, last confirmed 2026-10-31.",
+      "Their goals (2 of 3 allowed), each with its own streak: Read & learn more (books, ideas, any topic) (focus): 1 step day, not counting today (done today makes it 2); Sleep better (maintenance, self-reported): 14 step days; check-ins kept up 1 of 1, last confirmed 2026-10-31.",
     );
   });
 
@@ -359,7 +359,7 @@ describe("maintenance check-ins (rule 7)", () => {
     const [ask] = await t.db.select().from(maintenanceCheckins);
     const [sent] = await t.db.select().from(messages).where(and(eq(messages.direction, "outbound"), eq(messages.content, "Yo, kickoff text")));
     expect(ask).toMatchObject({ goalSlug: "bedtime", date: MON, answer: null, messageId: sent!.id });
-    expect(await block(tester, at(MON, "09:30"))).toContain("You asked about Same bedtime every night (maintenance) on 2026-11-02, no answer yet: when they answer, record_checkin.");
+    expect(await block(tester, at(MON, "09:30"))).toContain("You asked about Sleep better (maintenance) on 2026-11-02, no answer yet: when they answer, record_checkin.");
 
     expect(await tool(tester, "record_checkin", { goal: "reading", answer: "kept_up" }, at(MON, "09:30"))).toMatchObject({ ok: false });
     expect(await tool(tester, "record_checkin", { goal: "bedtime", answer: "mostly" }, at(MON, "09:30"))).toMatchObject({ ok: true });
@@ -382,7 +382,7 @@ describe("maintenance check-ins (rule 7)", () => {
     await t.db.insert(plans).values({ testerId: tester.id, goalSlug: "bedtime", status: "locked", version: 0, ...DUNE, days: [...DUNE.days], step: "in bed by 10:30", startDate: "2026-10-01" });
     await t.db.insert(testerGoals).values({ testerId: tester.id, goalSlug: "bedtime", role: "maintenance", nudges: false, proof: false, checkinsPerWeek: 2 });
     const s = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { checkinGoal: "bedtime" } });
-    expect(buildStateBlock(s)).toContain("THIS TEXT ALSO ASKS a maintenance check-in on Same bedtime every night (in bed by 10:30): one light line in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.");
+    expect(buildStateBlock(s)).toContain("THIS TEXT ALSO ASKS a maintenance check-in on Sleep better (in bed by 10:30): one light line in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.");
   });
 
   it("two unanswered: the next reply asks it on its own once", async () => {
@@ -393,7 +393,7 @@ describe("maintenance check-ins (rule 7)", () => {
       { testerId: tester.id, goalSlug: "bedtime", date: "2026-10-27", messageId: m!.id },
       { testerId: tester.id, goalSlug: "bedtime", date: "2026-10-30", messageId: m!.id },
     ]);
-    expect(await block(tester, at(MON, "12:00"))).toContain("Maintenance check-in owed on Same bedtime every night: their last 2 went unanswered. Ask it on its own in this reply");
+    expect(await block(tester, at(MON, "12:00"))).toContain("Maintenance check-in owed on Sleep better: their last 2 went unanswered. Ask it on its own in this reply");
     expect(await tool(tester, "record_checkin", { goal: "bedtime", answer: "asked" }, at(MON, "12:00"))).toMatchObject({ ok: true });
     expect(await block(tester, at(MON, "12:01"))).not.toContain("check-in owed");
   });
@@ -453,7 +453,7 @@ describe("alerts for the founders", () => {
     const done = { how: "full", proof: "clear", seen: "the book open" };
     expect(await tool(tester, "mark_step_done", done, at(addDays(MON, 6), "19:31"))).toMatchObject({ ok: true });
     expect(await tool(tester, "mark_step_done", done, at(addDays(MON, 6), "19:32"))).toMatchObject({ ok: true });
-    expect((await alerts()).filter((a) => a.topic === "milestone").map((a) => a.body)).toEqual(["7 step days in a row on Daily reading"]);
+    expect((await alerts()).filter((a) => a.topic === "milestone").map((a) => a.body)).toEqual(["7 step days in a row on Read & learn more (books, ideas, any topic)"]);
   });
 
   it("a second miss in a row and two quiet days each raise one alert", async () => {

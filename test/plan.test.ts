@@ -110,8 +110,8 @@ describe("proposing a plan", () => {
     await updateTester(t.db, row.id, { phase: "onboarding" });
     expect(await run("propose_plan", GYM)).toMatchObject({ ok: false, error: "Finish the onboarding questions first." });
     await updateTester(t.db, row.id, { phase: "planning" });
-    await t.db.update(planInputs).set({ tracksWith: null }).where(eq(planInputs.testerId, row.id));
-    expect(await run("propose_plan", GYM)).toMatchObject({ ok: false, error: "Ask these first: tracks_with" });
+    await t.db.update(planInputs).set({ where: null }).where(eq(planInputs.testerId, row.id));
+    expect(await run("propose_plan", GYM)).toMatchObject({ ok: false, error: "Ask these first: where" });
   });
 });
 

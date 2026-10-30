@@ -1,0 +1,15 @@
+{
+  "id": "not-sure",
+  "title": "Not sure what to work on: get to know them, then 2–3 fitted ideas",
+  "origin": "Spec #75 (starters and the open door), \"Not sure\"",
+  "testerLines": [
+    "Start",
+    "Jordan. honestly not sure",
+    "I'm a nurse, I work night shifts",
+    "cards and poker with the crew on breaks, and I used to read a lot before nights",
+    "sleeping better would be huge honestly"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the \"Not sure? Let's figure it out together\" starter.",
+  "shouldHaveHappened": "After \"not sure\", ZOH says that's fine and gets to know Jordan with one question per text (work, hobbies and interests, what they'd like to be better at), about four at most, never re-asking what Jordan already said. Then it suggests 2 to 3 specific ideas that fit what Jordan said (night shifts, cards with the crew, reading, sleep), each clearly inside one of the starters, as a short • list, and asks which one grabs them. No form-like grilling, no generic ideas unrelated to Jordan.",
+  "startTime": "18:30"
+}

@@ -229,10 +229,10 @@ describe("tester list and page", () => {
   it("lists each tester with goals, streak, hit rate, last text and alerts waiting", async () => {
     await seed();
     const res = await get("/console", cookieFor("Yanni"));
-    expect(res.body).toContain("Daily reading · 🔥 2");
+    expect(res.body).toContain("Read &amp; learn more (books, ideas, any topic) · 🔥 2");
     expect(res.body).toContain("streak 2 (since 2026-10-26)");
     expect(res.body).toContain("hit rate 100% (2/2)");
-    expect(res.body).toContain("Daily exercise");
+    expect(res.body).toContain("Get fitter");
     expect(res.body).toContain("Page 40, nice.");
     expect(res.body).toContain("2 alerts");
   });
@@ -269,7 +269,7 @@ describe("tester list and page", () => {
     for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
     // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
     expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
-    expect(page).toContain("Focus: <strong>Daily reading</strong>");
+    expect(page).toContain("Focus: <strong>Read &amp; learn more (books, ideas, any topic)</strong>");
     expect(page).toContain("🔥 2</b>");
     const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
     const below = page.slice(page.indexOf('<div id="side"'));
