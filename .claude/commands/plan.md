@@ -27,7 +27,11 @@ issue, and write **one** plan with these extra parts:
   plan them one after another.
 
 1. `gh issue view $ARGUMENTS --comments`. It must have the `spec-approved` label; if not, stop and say `/spec` comes first.
-2. Read `CLAUDE.md`, `docs/coach-voice.md` (if ZOH's words are involved) and the code the feature touches. Check
+2. **Plan against the code on `dev`**, where the build will start, never `main` (it lags behind until the next release).
+   `git fetch origin`, then check this folder is on `dev` and current (`git branch --show-current` says `dev`, and
+   `git merge-base --is-ancestor origin/dev HEAD` passes). If it's behind on a clean `dev`, `git pull --ff-only`;
+   if it's on another branch, don't switch it: read files with `git show origin/dev:<path>` instead.
+   Read `CLAUDE.md`, `docs/coach-voice.md` (if ZOH's words are involved) and the code the feature touches. Check
    what else is in flight: `gh issue list --label plan-approved`, the same with `--label building`, and `gh pr list`.
    Note any files you'd both touch, naming each overlap by issue number and title.
 3. Write the plan in plain words, short enough to read in two minutes (a group may take a little longer):

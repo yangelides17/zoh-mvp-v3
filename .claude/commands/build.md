@@ -35,8 +35,11 @@ touched eval cases once both are on `dev`.
 1. `gh issue view $ARGUMENTS --comments`. It must be labeled `plan-approved` and have a `## Plan (approved by Yanni...)`
    comment; if not, stop and say `/plan` comes first. The spec and plan are the contract.
 2. **Work in your own worktree,** so other sessions in this repo aren't disturbed (never switch branches in the
-   main folder). If this session already runs in a worktree (the desktop app can create one per session), use it.
-   Feature work always starts from `dev` (staging), never `main` (production: only releases and hotfixes go there).
+   main folder). Feature work always starts from `dev` (staging), never `main` (production: only releases and
+   hotfixes go there). If this session already runs in a worktree (the desktop app can create one per session), use
+   it, but check its base first: `git fetch origin && git merge-base --is-ancestor origin/dev HEAD`. If that fails (it
+   was made from `main` or an old `dev`), start the feature branch there from `dev`:
+   `git switch -c feature/$ARGUMENTS-<short-slug> origin/dev` (if it has uncommitted changes, stop and ask Yanni).
    Otherwise: `git fetch origin`, then
    `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`,
    `cd` into it and run `npm install`. Do everything below from there.

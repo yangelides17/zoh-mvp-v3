@@ -41,7 +41,7 @@ version). Each app keeps its own texts, memory and console; the staging console 
 | Step | Command | Who | Result |
 | --- | --- | --- | --- |
 | 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
-| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
+| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code on `dev` and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
 | 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the Watch list as a "Live checks" comment (checkboxes) on the issue. |
 | Live check | | You, on staging | Text `env staging`, then try the issue's "Live checks" and tick them. Not good: Claude files a `bug`. Best done before the next release. |
