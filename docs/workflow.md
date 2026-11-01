@@ -8,7 +8,8 @@ does the building, testing, git and GitHub work. Agents follow the same rules fr
 1. Install [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) (terminal or the desktop app;
    they read the same repo instructions, so you can switch between them).
 2. Install and log in to the GitHub CLI: `brew install gh`, then `gh auth login`.
-3. Clone the repo: `git clone https://github.com/yangelides17/zoh-mvp-v3.git`, then `npm install`.
+3. Clone the repo: `git clone https://github.com/yangelides17/zoh-mvp-v3.git`, then `git checkout dev` and
+   `npm install`. Your main folder stays on `dev`, where all work starts.
 4. Only if you'll run the eval: create `.env` in the repo with `ANTHROPIC_API_KEY=...` (use a separate key
    with a low spending limit; `.env` is never committed).
 
@@ -23,19 +24,28 @@ Start Claude Code in the repo folder. Everything below happens there.
 | How ZOH talks | `docs/coach-voice.md` |
 | Infrastructure, past decisions, outside limits | `docs/reference.md` |
 | Rules for Claude and agents | `CLAUDE.md` |
+| What's on staging but not released yet | `/status` |
 | Timeline and strategy | Yanni's launch plan doc |
 
 ## The flow
 
-Each feature goes through four steps, plus a live check whenever you get to it. You're needed at the two approvals and the merge.
+Each feature goes through four steps, a live check on staging, and later a release. You're needed at the two
+approvals, the merge and "ship".
+
+**Two environments, one ZOH number.** `dev` deploys to **staging**, `main` to **production** (the testers' line).
+Features merge into `dev`; a **release** moves everything on `dev` to `main`. Both apps receive every text, and each
+keeps only the numbers it owns: testers always go to production, and a dev number goes wherever it last said. Text
+`env staging` to try staging, `env production` to go back, and `env` to ask which one you're on (it answers with its
+version). Each app keeps its own texts, memory and console; the staging console says STAGING at the top.
 
 | Step | Command | Who | Result |
 | --- | --- | --- | --- |
 | 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
 | 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
-| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it deploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the Watch list as a "Live checks" comment on the issue. |
-| Live check | | You, any time | Try the issue's "Live checks" comment on your phone. Not good: Claude files a `bug`. Nothing waits on these. |
+| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the Watch list as a "Live checks" comment (checkboxes) on the issue. |
+| Live check | | You, on staging | Text `env staging`, then try the issue's "Live checks" and tick them. Not good: Claude files a `bug`. Best done before the next release. |
+| Release | `/release` | Claude, then you | Collects everything on `dev` since the last release, writes plain-language notes, opens the `dev` → `main` PR and lists anything "Worth a look" (important unticked live checks, concerns from the PRs). Suggestions only. You say "ship"; it merges, tags the version (v0.3, v0.4…), production deploys and Claude checks it's healthy. |
 
 Each command checks that the step before it is done, and ends by naming the next one, so the order
 takes care of itself.
@@ -54,6 +64,7 @@ You never need an issue number. Every command takes a number, a description, or 
 | `/plan` · `/plan the nudges one` · `/plan 12` | With nothing, lists approved specs waiting for a plan. |
 | `/build` · `/build plan agreement` · `/build 12` | With nothing, lists approved plans waiting to be built. |
 | `/review` · `/review nudges` · `/review 12` | With nothing, lists PRs waiting for review. |
+| `/release` | Releases what's on staging to production, after your "ship". |
 
 **Several issues at once (optional).** `/spec 41 42 48`, `/plan the small nudge bugs` or `/build 41 42 48` take
 a group: related or dependent issues, or a handful of small fixes not worth doing one by one. Each issue keeps its own
@@ -67,7 +78,7 @@ decide about time zones?", "mark #12 done".
 
 ## Labels
 
-`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge),
+`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge into `dev`),
 plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 
 ## Good habits
@@ -80,7 +91,7 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Overlapping work is checked at every step.** `/spec` flags a feature in progress that changes the same moment
   for testers, `/plan` and `/build` name open work that touches the same files (a database or coach-prompt overlap
-  gets a decision on which lands first), and `/review` only merges a branch that's up to date with `main`, then tells
+  gets a decision on which lands first), and `/review` only merges a branch that's up to date with `dev`, then tells
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
@@ -91,17 +102,21 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 ## Quick fixes and changes outside the flow
 
 - **Quick fix:** `/quick <what to change>` for small things (docs, wording, config, a few-line fix). Claude checks
-  it really is small, makes it on `main`, runs the tests, pushes, and records it on an issue. Bigger than that, it
-  suggests `/idea` or `/spec` instead.
+  it really is small, then **always asks you first: dev (staging) or straight to production as a hotfix?** It makes
+  it there, runs the tests, pushes, and records it on an issue. Bigger than that, it suggests `/idea` or `/spec` instead.
+- **Hotfix** (something broken for testers right now): `/quick`, pick production. It branches off `main`, opens a PR,
+  ships it after your OK, tags a patch version and merges `main` back into `dev` so the fix isn't lost.
 - **Claude nudges toward the flow:** ask for something feature-sized directly and Claude will say so in a sentence and
   offer `/idea` or `/spec`. If you insist, it does it anyway, on a branch with a PR and a record.
 - **Just talking to Claude works too:** any session follows `CLAUDE.md`, so it runs the tests before committing and
   never commits secrets, even outside the commands.
-- **If someone goes rogue** (edits by hand, or skips the commands), three things still protect the live line:
+- **If someone goes rogue** (edits by hand, or skips the commands), four things still protect the testers' line:
   1. Railway runs the type check and tests on every push; if they fail, nothing deploys and the old version keeps
      running.
-  2. Builds in progress pick up whatever landed on `main` when they rebase, and the PR's tests run on the combined code.
-  3. `/status` lists commits from the last week that didn't come through an issue or PR, flags risky ones, and
+  2. Builds in progress pick up whatever landed on `dev` when they rebase, and the PR's tests run on the combined code.
+  3. Nothing reaches testers without a release (or a hotfix) and your "ship", and database migrations run on
+     staging first.
+  4. `/status` lists commits from the last week that didn't come through an issue or PR, flags risky ones, and
      offers to record them.
 - **Never outside a PR:** database changes (`src/db/schema.ts`, `drizzle/`). A bad migration runs at startup and can
   take the app down.
@@ -109,10 +124,17 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 
 ## Branches and PRs
 
-Claude handles all of it. Feature work goes through a PR so the tests run on the exact code before it
-reaches `main`, which deploys straight to the live line. Small things (docs, wording, config, one-line
-fixes) go straight to `main` once the tests pass. There are no required approvals: the tests, the
-review session and your "merge" are the check.
+Claude handles all of it.
+
+| Branch | Deploys to | Gets there by |
+| --- | --- | --- |
+| `feature/<n>-<slug>` | nothing (tests only) | `/build`, from `dev` |
+| `dev` (the default branch) | staging | `/review` merging a feature PR; `/quick` small changes |
+| `main` | production (testers) | `/release` after your "ship"; a hotfix |
+
+Feature work goes through a PR into `dev` so the tests run on the exact code first. Small things (docs, wording,
+config, one-line fixes) go straight to `dev` once the tests pass. Each release is tagged (`v0.3.0`) and its notes are
+the release PR. There are no required approvals: the tests, the review session and your "merge" and "ship" are the check.
 
 ## A feature, start to finish (example)
 
@@ -122,8 +144,11 @@ review session and your "merge" are the check.
    You ask one question, then approve.
 3. `/build`: you walk away. An hour later: "Ready: all tests pass, 88% on the judgment checks, $1.62
    spent, one decision noted."
-4. New session, `/review`: "Merge; worth trying 'yeah sure but later' on your phone." You say merge.
-5. On your phone: text "reset", go through onboarding to a plan. The plan is a bit long: Claude
-   files a bug. Otherwise good: `done`. To see days of nudges in a minute, a dev number texts
-   `jump next`, `jump 3h`, `jump 2d` or `jump 7:30am` (the clock moves forward, a ⏩ line says what
-   happened); "reset" returns to real time.
+4. New session, `/review`: "Merge; worth trying 'yeah sure but later' on your phone." You say merge:
+   it's on staging and `done`.
+5. On your phone: text `env staging`, then "reset", and go through onboarding to a plan. The plan is a bit
+   long: Claude files a bug. Otherwise good: tick the live checks. To see days of nudges in a minute, a dev
+   number texts `jump next`, `jump 3h`, `jump 2d` or `jump 7:30am` (the clock moves forward, a ⏩ line says
+   what happened); "reset" returns to real time.
+6. A few features later, `/release`: notes for v0.4.0, plus "Worth a look: #12's 'yeah sure' check isn't ticked".
+   You try it, say "ship", and testers have it a couple of minutes later.

@@ -29,15 +29,16 @@ after another instead. Never in parallel:
 
 This session coordinates: it starts the agents with the issue, plan and branch name, keeps the labels and PRs
 straight, and reports to Yanni once they're all done. They're reviewed and merged one at a time: after each merge,
-the next branch rebases on `main` and runs `npm run check` again. If two branches changed what ZOH says, rerun the
-touched eval cases once both are on `main`.
+the next branch rebases on `dev` and runs `npm run check` again. If two branches changed what ZOH says, rerun the
+touched eval cases once both are on `dev`.
 
 1. `gh issue view $ARGUMENTS --comments`. It must be labeled `plan-approved` and have a `## Plan (approved by Yanni...)`
    comment; if not, stop and say `/plan` comes first. The spec and plan are the contract.
 2. **Work in your own worktree,** so other sessions in this repo aren't disturbed (never switch branches in the
    main folder). If this session already runs in a worktree (the desktop app can create one per session), use it.
+   Feature work always starts from `dev` (staging), never `main` (production: only releases and hotfixes go there).
    Otherwise: `git fetch origin`, then
-   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/main`,
+   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`,
    `cd` into it and run `npm install`. Do everything below from there.
    `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
    **Check for overlap again** (the plan's check may be days old): for each other open PR, compare
@@ -45,7 +46,7 @@ touched eval cases once both are on `main`.
    `docs/coach-voice.md` or `src/pipeline/inbound.ts`, tell Yanni and post a `Decision:` comment on which lands first
    (two migrations collide: the later one regenerates its migration after the first merges). Note smaller overlaps
    under the PR's risks.
-3. Open a **draft PR** early (`gh pr create --draft`, body from `.github/pull_request_template.md`, first line
+3. Open a **draft PR** into `dev` early (`gh pr create --draft --base dev`, body from `.github/pull_request_template.md`, first line
    `Closes #$ARGUMENTS`) and push as you go, so Yanni can watch progress.
 4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
 5. **Decisions:** if you have to deviate in a small way, keep going and record it as an issue comment starting
@@ -58,7 +59,7 @@ touched eval cases once both are on `main`.
    changes are all in. Fix causes in the coach's instructions, not
    one-off cases (see "Changing what ZOH says" in `CLAUDE.md`). If the budget runs out before the target, stop and
    report honestly; live testing and the beta will catch the rest.
-7. `npm run check` green, rebased on the latest `main`.
+7. `npm run check` green, rebased on the latest `dev`.
 8. Fill in the PR description (template sections; for a group, a short section per issue, and the Watch list
    grouped by issue), mark it ready (`gh pr ready`), and
    `gh issue edit $ARGUMENTS --add-label in-review --remove-label building`.

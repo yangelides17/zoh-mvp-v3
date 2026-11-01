@@ -11,9 +11,14 @@ Give Yanni a short status of the work, from GitHub. If `$ARGUMENTS` names a feat
 2. Group by stage, in this order: `in-review`, `building`, `plan-approved`, `spec-approved`, `decide`,
    `bug`, `idea`. One line per issue: number, title, linked PR if any. Issues built as a group (one plan, one PR)
    share one line: "#41 + #42 + #48: <short name> → PR #60".
-3. **Changes outside the flow:** `git fetch origin && git log origin/main --since="7 days ago" --no-merges --format="%h %an %ar %s"`.
-   List commits on `main` from the last week that aren't from a merged PR and aren't mentioned on any issue (a
+3. **On staging, not released yet:** `git fetch origin --tags && git log --first-parent --format="%h %s" origin/main..origin/dev`.
+   List the issues merged into `dev` since the last release (by PR), with how many of their live checks are still
+   unticked, and the last release (`git describe --tags --abbrev=0 origin/main`) and when. If it's been a while or
+   the list is long, suggest `/release`.
+4. **Changes outside the flow:** `git log origin/dev origin/main --since="7 days ago" --no-merges --format="%h %an %ar %s"`.
+   List commits on `dev` or `main` from the last week that aren't from a merged PR and aren't mentioned on any issue (a
    rogue or hand-made change). For each: who, when, what it touched, and whether it touched risky areas
    (`src/db/schema.ts` or `drizzle/`, `src/coach/prompt.ts`, `src/pipeline/`, config). Offer to file each as a
    closed `Quick:` issue so the record is complete. Skip this section if there are none.
-4. End with what needs Yanni right now: specs or plans waiting for approval, PRs waiting for "merge" and `decide` items waiting for Yes / Later / No.
+5. End with what needs Yanni right now: specs or plans waiting for approval, PRs waiting for "merge", a release
+   waiting for "ship", and `decide` items waiting for Yes / Later / No.
