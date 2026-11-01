@@ -1,3 +1,4 @@
+import type { AppEnv } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { and, asc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
@@ -287,9 +288,31 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
  */
 export async function postFounderMessage(
   db: Db,
-  opts: { tester: Tester; founder: string; body: string; exact: boolean; sendNow: boolean; now: Date },
+  opts: {
+    tester: Tester;
+    founder: string;
+    body: string;
+    exact: boolean;
+    sendNow: boolean;
+    now: Date;
+    /** Staging and production (#82): set when the other app owns this number, which this app never texts. */
+    elsewhere?: AppEnv;
+  },
 ): Promise<{ needsAnswer: boolean }> {
   const { tester, founder, body, now } = opts;
+  if (opts.elsewhere) {
+    // The founder's line stays in the thread (an exact text as a cancelled request), with the reason under it.
+    if (opts.exact) await addRequest(db, { testerId: tester.id, author: founder, body, exact: true, sendNow: opts.sendNow, at: now, status: "cancelled" });
+    else await addThreadLine(db, { testerId: tester.id, kind: "founder", author: founder, body, at: now });
+    await addThreadLine(db, {
+      testerId: tester.id,
+      kind: "coach",
+      author: APP_AUTHOR,
+      body: `This number is on ${opts.elsewhere} right now, so this console can't text them. Use the ${opts.elsewhere} console, or have them text "env ${opts.elsewhere === "staging" ? "production" : "staging"}" first.`,
+      at: new Date(now.getTime() + 1),
+    });
+    return { needsAnswer: false };
+  }
   if (!opts.exact) {
     await addThreadLine(db, { testerId: tester.id, kind: "founder", author: founder, body, at: now });
     return { needsAnswer: true };

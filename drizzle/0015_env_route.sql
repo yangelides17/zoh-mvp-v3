@@ -1,0 +1,2 @@
+ALTER TABLE "testers" ADD COLUMN "route" text DEFAULT 'production' NOT NULL;--> statement-breakpoint
+ALTER TABLE "testers" ADD CONSTRAINT "testers_route_check" CHECK ("testers"."route" in ('production', 'staging'));

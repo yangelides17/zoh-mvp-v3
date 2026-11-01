@@ -1,3 +1,4 @@
+import { versionLabel, type BuildInfo } from "../../testers/env.js";
 import { esc } from "./shared.js";
 
 /**
@@ -33,6 +34,8 @@ h1 { font-size: 28px; margin: 0; line-height: 1.15; } h2 { font-size: 20px; marg
 .muted { color: var(--muted); font-size: 13px; } .warn { color: var(--warn); }
 .chip { display: inline-block; background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: 12px; line-height: 1.6; white-space: nowrap; }
 .chip.warn { background: var(--warn-soft); color: var(--warn); }
+.env-banner { background: var(--warn); color: #fff; text-align: center; font-weight: 600; letter-spacing: .06em; font-size: 13px; padding: 6px 12px; }
+body.staging nav.top { border-bottom: 3px solid var(--warn); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .spread { justify-content: space-between; }
 nav.top { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 nav.top .brand { font-family: var(--serif); font-weight: 600; font-size: 18px; color: var(--fg); }
@@ -226,6 +229,16 @@ export function layout(title: string, body: string, opts: { name?: string } = {}
 <link rel="manifest" href="/console/manifest.webmanifest"><link rel="icon" href="/console/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/console/icon.png">
 <style>${STYLE}</style></head>
 <body>${top}<main>${body}</main><script>${SCRIPT}</script></body></html>`;
+}
+
+/**
+ * Staging and production (#82): every staging console page opens with a banner, so the two are never confused.
+ * Added to the finished page, so it covers the login page and anything rendered later.
+ */
+export function withStagingBanner(page: string, build: BuildInfo = {}): string {
+  const version = versionLabel(build);
+  const banner = `<div class="env-banner" role="status">STAGING${version ? ` · ${esc(version)}` : ""} · founders only, not the testers' line</div>`;
+  return page.replace("<body>", `<body class="staging">${banner}`);
 }
 
 export function loginPage(error?: string): string {

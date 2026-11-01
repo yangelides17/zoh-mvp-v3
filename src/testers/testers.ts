@@ -45,6 +45,7 @@ export type TesterPatch = Partial<
     | "contextStartedAt"
     | "memoryThrough"
     | "memorySince"
+    | "route"
   >
 >;
 

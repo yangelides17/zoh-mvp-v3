@@ -1,3 +1,4 @@
+import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
 import type { Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
@@ -61,6 +62,8 @@ export interface NudgeSchedulerDeps {
   allowedNumbers: string[];
   /** Our Sendblue line, recorded on each text. */
   lineNumber?: string;
+  /** Staging and production (#82): only numbers this app owns get its texts. Production-only when missing. */
+  routing?: Routing;
   now?: () => Date;
 }
 
@@ -89,7 +92,10 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
     const decisions = new Map<string, NudgeDecision>();
     if (deps.allowedNumbers.length === 0) return decisions;
     const rows = await deps.db.select().from(testers).where(inArray(testers.phone, deps.allowedNumbers));
+    const routing = deps.routing ?? PRODUCTION_ONLY;
     for (const row of rows) {
+      // A number the other app owns gets nothing from this one (#82).
+      if (!owns(routing, row.phone, row.route)) continue;
       // Mid-jump, the jump runs this tester's ticks itself (#14).
       if (isJumping(row.id)) continue;
       try {
@@ -373,6 +379,7 @@ async function sendExact(
 ): Promise<boolean> {
   const { db, log } = deps;
   if (!deps.sendblue || tester.stoppedAt || ctx.unanswered >= MAX_UNANSWERED) return false;
+  if (!owns(deps.routing ?? PRODUCTION_ONLY, tester.phone, tester.route)) return false;
   const { now, lastInboundAt: lastIn, lastOutboundAt: lastOut } = ctx;
   const theirsIsLatest = lastIn !== undefined && (lastOut === undefined || lastIn > lastOut);
   if (theirsIsLatest && now.getTime() - lastIn.getTime() < REPLY_IN_PROGRESS_MS) return false;

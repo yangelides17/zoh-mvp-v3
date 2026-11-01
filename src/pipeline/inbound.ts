@@ -16,6 +16,7 @@ import { alertFailure, alertUnstop } from "../console/alerts.js";
 import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
 import { jumpSettled, onTesterClock, testerNow } from "../testers/clock.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
+import { envReply, ownsNumber, type AppEnv, type BuildInfo, type Routing } from "../testers/env.js";
 
 export type Logger = Pick<FastifyBaseLogger, "info" | "warn" | "error" | "debug">;
 
@@ -35,6 +36,10 @@ export interface PipelineDeps {
   allowedNumbers: string[];
   /** Dev accounts: test users who can text "reset". */
   devNumbers: string[];
+  /** Staging and production (#82): which app this is; production when missing. */
+  appEnv?: AppEnv;
+  /** The release and commit this app runs, for "env". */
+  build?: BuildInfo;
   typingIndicator: boolean;
   sendblue?: SendblueClient;
   /** The coach (src/coach); missing when ANTHROPIC_API_KEY isn't set. */
@@ -65,6 +70,12 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   if (!deps.allowedNumbers.includes(inbound.contactNumber)) {
     log.info(ctx, "Sender is not on ALLOWED_NUMBERS; stored without replying");
     await updateMessage(db, inbound.id, { status: "RECEIVED_NOT_ALLOWED" });
+    return;
+  }
+  // #82: the webhook already drops the other app's texts; a switch that landed since then wins.
+  if (!(await ownsNumber(db, routingOf(deps), inbound.contactNumber))) {
+    log.info({ messageId: inbound.id }, "Number moved to the other app before the reply; not answering");
+    await updateMessage(db, inbound.id, { status: "RECEIVED_OTHER_APP" });
     return;
   }
 
@@ -304,6 +315,17 @@ async function stampOnTesterClock(db: Db, tester: Tester, inbound: Message, real
   const at = testerNow(tester, real);
   const [row] = await db.update(messages).set({ createdAt: at, sentAt: at }).where(eq(messages.id, inbound.id)).returning();
   return row ?? inbound;
+}
+
+/** Who owns which number (#82), from the pipeline's settings. */
+export function routingOf(deps: Pick<PipelineDeps, "appEnv" | "devNumbers">): Routing {
+  return { appEnv: deps.appEnv ?? "production", devNumbers: deps.devNumbers };
+}
+
+/** "env" from a dev number, stored in this app (#82): answers with which app this is and its version. */
+export async function processEnvReply(deps: PipelineDeps, stored: Message): Promise<void> {
+  const tester = await getOrCreateTester(deps.db, stored.contactNumber, { firstTextAt: stored.createdAt, isTestUser: true });
+  await sendCommandReply(deps, stored, envReply(deps.appEnv ?? "production", deps.build), tester);
 }
 
 /** Sends a fixed reply (no typing bubble, no Claude) and records it. */

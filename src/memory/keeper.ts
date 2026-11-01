@@ -1,3 +1,4 @@
+import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
@@ -370,6 +371,8 @@ export interface MemoryKeeperDeps {
   model?: ClaudeModel;
   /** Only these testers get memory (ALLOWED_NUMBERS). */
   allowedNumbers: string[];
+  /** Staging and production (#82): only numbers this app owns. Production-only when missing. */
+  routing?: Routing;
   now?: () => Date;
 }
 
@@ -395,6 +398,7 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
     if (!deps.model || deps.allowedNumbers.length === 0) return written;
     const rows = await deps.db.select().from(testers).where(inArray(testers.phone, deps.allowedNumbers));
     for (const row of rows) {
+      if (!owns(deps.routing ?? PRODUCTION_ONLY, row.phone, row.route)) continue;
       // Mid-jump, the jump runs this tester's pass itself (#14).
       if (isJumping(row.id)) continue;
       const tester = (row.isTestUser && (await getTester(deps.db, row.id))) || row;
