@@ -52,6 +52,12 @@ export type JumpTarget =
   | { kind: "invalid" };
 
 /** The longest jump (spec #14, rule 5). */
+/** The fixed reply when "reset" or "jump" is switched off in this app (DEV_COMMANDS). */
+export function devCommandOffReply(command: "reset" | "jump", appEnv: "production" | "staging"): string {
+  const there = appEnv === "production" ? ' Text "env staging" to use it there.' : "";
+  return `"${command}" is off on ${appEnv}, so nothing changed.${there}`;
+}
+
 export const MAX_JUMP_MS = 14 * 24 * 60 * 60_000;
 
 export const JUMP_USAGE = "⏩ Try: jump 3h, jump 2d, jump 7:30am or jump next (up to 14 days).";

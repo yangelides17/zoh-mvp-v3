@@ -44,6 +44,11 @@ const envSchema = z.object({
     (v) => (typeof v === "string" && v.trim() === "" ? undefined : typeof v === "string" ? v.trim().toLowerCase() : v),
     z.enum(APP_ENVS).default("production"),
   ),
+  /** Dev accounts' "reset" and "jump": on/off. Unset means on for staging, off for production. */
+  DEV_COMMANDS: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : typeof v === "string" ? v.trim().toLowerCase() : v),
+    z.enum(["on", "off", "true", "false", "1", "0"]).optional(),
+  ),
   PORT: intWithDefault(3000),
   HOST: withDefault("::"),
   LOG_LEVEL: withDefault("info"),
@@ -93,6 +98,8 @@ export type Env = z.infer<typeof envSchema>;
 export interface Config {
   /** Staging and production (#82). */
   appEnv: AppEnv;
+  /** Whether dev accounts can text "reset" and "jump" here: off on production unless DEV_COMMANDS turns them on. */
+  devCommands: boolean;
   port: number;
   host: string;
   logLevel: string;
@@ -149,6 +156,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const e = parsed.data;
   return {
     appEnv: e.APP_ENV,
+    devCommands: e.DEV_COMMANDS === undefined ? e.APP_ENV === "staging" : ["on", "true", "1"].includes(e.DEV_COMMANDS),
     port: e.PORT,
     host: e.HOST,
     logLevel: e.LOG_LEVEL,

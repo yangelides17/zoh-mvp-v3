@@ -101,7 +101,8 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
     }
 
     // Test mode (#14): a dev account's "jump" is a ghost: never stored as a message, run in the background.
-    if (opts.jumper && !event.media_url && isJumpText(event.content) && devNumbers.includes(contact) && allowedNumbers.includes(contact)) {
+    // Switched off (DEV_COMMANDS), "jump" is stored like any text and the pipeline says it's off.
+    if (opts.jumper && opts.pipeline.devCommands !== false && !event.media_url && isJumpText(event.content) && devNumbers.includes(contact) && allowedNumbers.includes(contact)) {
       const jump = await opts.jumper.start({ contact, text: event.content!.trim(), handle: event.message_handle });
       if (!jump) return reply.code(200).send({ ok: true, duplicate: true });
       opts.queue.run(() => jump.done);
