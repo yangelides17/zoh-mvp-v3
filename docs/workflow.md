@@ -133,8 +133,8 @@ Claude handles all of it.
 | `main` | production (testers) | `/release` after your "ship"; a hotfix |
 
 Feature work goes through a PR into `dev` so the tests run on the exact code first. Small things (docs, wording,
-config, one-line fixes) go straight to `dev` once the tests pass. Each release is tagged (`v0.3.0`) and its notes are
-the release PR. There are no required approvals: the tests, the review session and your "merge" and "ship" are the check.
+config, one-line fixes) go straight to `dev` once the tests pass. Each release (and hotfix) is tagged (`v0.3.0`) and its
+notes are published on the repo's **Releases** page, and in the release PR. There are no required approvals: the tests, the review session and your "merge" and "ship" are the check.
 
 ## A feature, start to finish (example)
 

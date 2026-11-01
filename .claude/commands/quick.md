@@ -20,7 +20,9 @@ Make this small change: **$ARGUMENTS**
    `git worktree add ../zoh-worktrees/hotfix-<slug> -b hotfix/<slug> origin/main` and work there (never switch the
    main folder to `main`). Make the change with a test, `npm run check` must pass, then open a PR into `main`
    (`gh pr create --base main`, titled "Hotfix: ..."). When Yanni says "ship" (or already did, for a live breakage):
-   merge it, tag the next patch version (see `/release`, step 6), check production's `/health`, then bring `dev` up to
+   merge it, tag the next patch version and publish its GitHub Release (see `/release`, step 6; the notes are short:
+   what broke or why, what changed for testers, deploy notes such as a new variable, and links to the PR and record
+   issue), check production's `/health`, then bring `dev` up to
    date with `main` (`git -C <main folder> pull --ff-only`, `git -C <main folder> merge origin/main`, `npm run check`,
    push `dev`) so the fix isn't lost on the next release. Remove the worktree.
 5. If the build's tests fail on Railway, nothing deploys and that environment keeps running the old version.
