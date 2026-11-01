@@ -17,7 +17,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD` (the founders' shared console password),
   `CONSOLE_SESSION_SECRET` (signs console cookies; a long random string), optional `CONSOLE_NAMES`
   (default `Yanni,Stamati`), optional `GOAL_CAP` (goals a tester can have at once, focus plus
-  maintenance; default 3), `APP_ENV` (`staging` on the staging app only; unset means production).
+  maintenance; default 3), `APP_ENV` (`staging` on the staging app only; unset means production),
+  optional `DEV_COMMANDS` (`on`/`off`: whether dev numbers can text `reset` and `jump`; unset means on
+  for staging and **off for production**, which answers "reset is off on production" instead. To use
+  them on production for a while, set `DEV_COMMANDS=on` there, then delete it).
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only; ideally its own

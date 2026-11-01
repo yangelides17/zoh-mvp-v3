@@ -41,6 +41,7 @@ export function appDeps(
       allowedNumbers: pick("allowedNumbers", () => config.allowedNumbers),
       devNumbers: pick("devNumbers", () => config.devNumbers),
       appEnv: pick("appEnv", () => config.appEnv),
+      devCommands: pick("devCommands", () => config.devCommands),
       build: pick("build", buildInfo),
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       sendblue: pick("sendblue", () => makeSendblue(config)),
