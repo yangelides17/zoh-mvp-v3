@@ -13,7 +13,7 @@ import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
 import { alertFailure, alertUnstop } from "../console/alerts.js";
-import { isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
+import { devCommandOffReply, isJumpText, isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
 import { jumpSettled, onTesterClock, testerNow } from "../testers/clock.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
 import { envReply, ownsNumber, type AppEnv, type BuildInfo, type Routing } from "../testers/env.js";
@@ -36,6 +36,8 @@ export interface PipelineDeps {
   allowedNumbers: string[];
   /** Dev accounts: test users who can text "reset". */
   devNumbers: string[];
+  /** Whether dev accounts' "reset" and "jump" work here (DEV_COMMANDS); on when missing (tests, the eval). */
+  devCommands?: boolean;
   /** Staging and production (#82): which app this is; production when missing. */
   appEnv?: AppEnv;
   /** The release and commit this app runs, for "env". */
@@ -283,6 +285,14 @@ async function runCommands(
     return { handled: true };
   }
 
+  // "reset" and "jump" switched off here (DEV_COMMANDS, off on production by default): say so, change nothing.
+  const offCommand = tester.isTestUser && deps.devCommands === false ? devCommandIn(inbound.content) : undefined;
+  if (offCommand) {
+    log.info({ ...ctx, command: offCommand }, "Dev command is off in this app; not run");
+    await sendCommandReply(deps, inbound, devCommandOffReply(offCommand, deps.appEnv ?? "production"), tester);
+    return { handled: true };
+  }
+
   if (tester.isTestUser && isResetText(inbound.content)) {
     const moved = tester.clockOffsetMs;
     tester = await resetTester(db, tester, at);
@@ -315,6 +325,13 @@ async function stampOnTesterClock(db: Db, tester: Tester, inbound: Message, real
   const at = testerNow(tester, real);
   const [row] = await db.update(messages).set({ createdAt: at, sentAt: at }).where(eq(messages.id, inbound.id)).returning();
   return row ?? inbound;
+}
+
+/** "reset" or "jump" when the text is one of those dev commands. */
+function devCommandIn(text: string | null): "reset" | "jump" | undefined {
+  if (isResetText(text)) return "reset";
+  if (isJumpText(text)) return "jump";
+  return undefined;
 }
 
 /** Who owns which number (#82), from the pipeline's settings. */
