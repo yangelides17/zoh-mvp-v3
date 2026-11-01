@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APP_ENVS, type AppEnv } from "./testers/env.js";
 
 /** Treat empty strings (common for unset Railway variables) as missing. */
 const optionalString = z.preprocess(
@@ -38,6 +39,11 @@ const phoneList = z.preprocess(
 );
 
 const envSchema = z.object({
+  /** Staging and production (#82): "staging" on the staging app; production otherwise. */
+  APP_ENV: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : typeof v === "string" ? v.trim().toLowerCase() : v),
+    z.enum(APP_ENVS).default("production"),
+  ),
   PORT: intWithDefault(3000),
   HOST: withDefault("::"),
   LOG_LEVEL: withDefault("info"),
@@ -85,6 +91,8 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export interface Config {
+  /** Staging and production (#82). */
+  appEnv: AppEnv;
   port: number;
   host: string;
   logLevel: string;
@@ -140,6 +148,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   }
   const e = parsed.data;
   return {
+    appEnv: e.APP_ENV,
     port: e.PORT,
     host: e.HOST,
     logLevel: e.LOG_LEVEL,

@@ -2,27 +2,30 @@
 
 ZOH is a text-based coach: testers text an iMessage number (Sendblue), Claude replies, and the
 app nudges them through small daily steps. This repo is the server: one Node/TypeScript app on
-Railway with Postgres, a private bucket and a Speaches (Whisper) transcription service.
+Railway with Postgres, a private bucket and a Speaches (Whisper) transcription service, in two
+environments: **staging** (deploys `dev`, founders only) and **production** (deploys `main`, testers).
 
 Yanni and his brother run Claude Code from the terminal. Claude does all the git and GitHub work;
 they approve specs and plans, say "merge", and test on their phones.
 
 ## How we build
 GitHub Issues hold every feature, bug and idea. A label says where it stands:
-`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge)
+`idea` → `spec-approved` → `plan-approved` → `building` → `in-review` → `done` (on merge into `dev`)
 (plus `decide` for Yes / Later / No questions and `bug`). Phone checks don't hold anything up: on merge, the PR's
-Watch list is left as a "Live checks" comment on the issue, to come back to.
+Watch list is left as a "Live checks" comment on the issue, tried on staging (`env staging`) before the next release.
 
 One feature, one flow, using the commands in `.claude/commands/`:
 1. `/spec <idea>`: shape it with Yanni; the approved spec becomes the issue. **Gate 1.**
 2. `/plan <n>`: read the code, propose the build; the approved plan is posted on the issue. **Gate 2.**
-3. `/build <n>`: build on `feature/<n>-<slug>`, tests first, draft PR early, eval if ZOH's words change.
-4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges when Yanni says so.
-5. Live checks on Yanni's phone whenever he gets to them (from the issue's "Live checks" comment); problems become `bug` issues. `/status` shows the board anytime;
-   `/idea` files a new idea or bug to spec later; `/quick` makes a small change on `main` with a record.
+3. `/build <n>`: build on `feature/<n>-<slug>` from `dev`, tests first, draft PR into `dev` early, eval if ZOH's words change.
+4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges into `dev` (staging) when Yanni says so.
+5. Live checks on staging from Yanni's phone (from the issue's "Live checks" comment); problems become `bug` issues.
+6. `/release`: notes, a "Worth a look" list and the `dev` → `main` PR; on Yanni's "ship" it merges, tags the version
+   and checks production. `/status` shows the board anytime; `/idea` files a new idea or bug to spec later; `/quick`
+   makes a small change with a record, always asking first: dev (staging) or a hotfix on production.
 
 Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch
-branches in the main folder; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
+branches in the main folder, which stays on `dev`; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
 **Groups and parallel builds are optional.** The commands can take several issues at once (related, dependent, or
@@ -42,12 +45,14 @@ never lecture, never skip the tests.
 title or a few words saying what it is, e.g. "#21 (note a possible non-Eastern time zone)" or
 "plan agreement (#5)". Nobody memorizes the numbers.
 
-**Branches and PRs.** Feature work (anything from an issue, anything testers would notice, any
-database change) goes through a PR so the tests run on the exact code before it reaches `main`,
-which Railway deploys to the live line. Small things (docs, wording, eval checks, config cleanup,
-one-line fixes) go straight to `main` once `npm run check` passes. A live breakage during the beta
-can be fixed straight on `main`; open an issue afterward. No required approvals: the tests, the
-`/review` session and Yanni's "merge" are the check.
+**Branches and PRs.** `dev` is the default branch and deploys to staging; `main` deploys to production and
+changes only through a release (`/release`, a `dev` → `main` PR, tagged `v<version>`) or a hotfix. Feature work
+(anything from an issue, anything testers would notice, any database change) branches from `dev` and goes
+through a PR into `dev` so the tests run on the exact code first. Small things (docs, wording, eval checks,
+config cleanup, one-line fixes) go straight to `dev` once `npm run check` passes. A live breakage for testers
+is a hotfix: branch off `main`, PR into `main`, ship, tag a patch version, then merge `main` back into `dev`;
+open an issue afterward. Never commit feature work straight to `main`. No required approvals: the tests, the
+`/review` session and Yanni's "merge" and "ship" are the check.
 
 ## Commands
 - `npm run check`: type check + tests. Must pass before any commit.
@@ -64,7 +69,8 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
   `src/app.ts`: Fastify app built from injected dependencies.
 - `src/routes/`: HTTP routes (`/health`, `/webhooks/sendblue`).
 - `src/pipeline/inbound.ts`: what happens to each inbound text (tester, commands, media, coach, send).
-- `src/testers/`: testers, goals, "stop", dev-account "reset" and test-mode "jump" (#14). `src/coach/`: the coach's prompt,
+- `src/testers/`: testers, goals, "stop", dev-account "reset", test-mode "jump" (#14) and "env" plus who owns a
+  number on staging vs production (#82, `env.ts`). `src/coach/`: the coach's prompt,
   state and tools.
 - `src/memory/`: coach memory (#8): the store (pages, facts, links, search), the 3 am pass that
   files each day, photo descriptions, and `npm run memory -- <last 4>` to read a tester's pages.
@@ -85,6 +91,8 @@ can be fixed straight on `main`; open an issue afterward. No required approvals:
 - Never log or commit secrets, API keys or full phone numbers (use `maskNumber`).
 - Webhook handler stays fast: store, answer 2xx, then do slow work in the `TaskQueue`.
 - Replies only go to `ALLOWED_NUMBERS` until launch.
+- Each app (staging, production) only stores, answers or texts numbers it owns (`owns` in `src/testers/env.ts`);
+  anything new that starts a text or loops over testers checks it too.
 - A change that adds a service or Railway variable, reverses a recorded decision or hits a new outside limit updates
   `docs/reference.md` in the same commit or PR.
 - Keep changes to the issue's spec and plan. Product questions go to Yanni; ideas beyond scope

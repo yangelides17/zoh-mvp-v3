@@ -1,3 +1,4 @@
+import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { and, asc, desc, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import type { ClaudeModel } from "../claude/replier.js";
 import { localDate } from "../coach/state.js";
@@ -43,6 +44,8 @@ export interface ConsoleJobsDeps {
   log: Logger;
   /** A cheap model for whys and summaries; without it, summaries are numbers only. */
   model?: ClaudeModel;
+  /** Staging and production (#82): summaries only for numbers this app owns. Production-only when missing. */
+  routing?: Routing;
   now?: () => Date;
 }
 
@@ -100,6 +103,7 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
     const active = await deps.db.select().from(testers).where(eq(testers.phase, "active"));
     let written = 0;
     for (const tester of active) {
+      if (!owns(deps.routing ?? PRODUCTION_ONLY, tester.phone, tester.route)) continue;
       // Mid-jump, the jump writes this tester's summary itself (#14).
       if (isJumping(tester.id)) continue;
       if (await summaryFor(tester, testerNow(tester, now))) written += 1;

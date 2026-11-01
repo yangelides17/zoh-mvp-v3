@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { AppDeps } from "./app.js";
 import { createClaudeModel } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
@@ -10,10 +11,11 @@ import { createS3MediaStore, fetchMedia } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
-import type { Logger } from "./pipeline/inbound.js";
+import { routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
+import type { BuildInfo } from "./testers/env.js";
 
 /**
  * Everything the app needs, built from config the way production runs it.
@@ -38,6 +40,8 @@ export function appDeps(
       db,
       allowedNumbers: pick("allowedNumbers", () => config.allowedNumbers),
       devNumbers: pick("devNumbers", () => config.devNumbers),
+      appEnv: pick("appEnv", () => config.appEnv),
+      build: pick("build", buildInfo),
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       sendblue: pick("sendblue", () => makeSendblue(config)),
       replier: pick("replier", () => makeCoach(config, db)),
@@ -73,6 +77,19 @@ export function appDeps(
   return deps;
 }
 
+/** The release (package.json) and commit (Railway) this app runs, for "env" and the console (#82). */
+export function buildInfo(): BuildInfo {
+  let release: string | undefined;
+  try {
+    // src/ and dist/ both sit one level under the folder with package.json.
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version?: unknown };
+    release = typeof pkg.version === "string" ? pkg.version : undefined;
+  } catch {
+    release = undefined;
+  }
+  return { release, commit: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || undefined };
+}
+
 /** The nudge tick over the same database, Sendblue client, coach, allowed numbers and clock as the app. */
 export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string): NudgeScheduler {
   const p = deps.pipeline;
@@ -83,6 +100,7 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
     replier: p.replier,
     allowedNumbers: p.allowedNumbers,
     lineNumber,
+    routing: routingOf(p),
     now: p.now,
   });
 }
@@ -109,6 +127,7 @@ export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): Mem
         })
       : undefined,
     allowedNumbers: p.allowedNumbers,
+    routing: routingOf(p),
     now: p.now,
   });
 }
@@ -122,6 +141,7 @@ export function consoleJobsFor(config: Config, deps: AppDeps, log: Logger): Cons
     model: config.claude.apiKey
       ? createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_JOB_MAX_TOKENS, effort: "low" })
       : undefined,
+    routing: routingOf(p),
     now: p.now,
   });
 }

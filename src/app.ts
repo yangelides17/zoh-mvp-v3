@@ -1,5 +1,5 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
-import type { Logger, PipelineDeps } from "./pipeline/inbound.js";
+import { routingOf, type Logger, type PipelineDeps } from "./pipeline/inbound.js";
 import { TaskQueue } from "./pipeline/task-queue.js";
 import type { ConsoleConfig } from "./config.js";
 import type { ConsoleCoach } from "./console/chat.js";
@@ -59,7 +59,7 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
   app.get("/", async () => ({ name: "zoh-mvp-v3", ok: true }));
   await app.register(healthRoutes, health);
   await app.register(webhookRoutes, { webhookSecret: deps.webhookSecret, pipeline, queue, jumper: deps.jumper?.(app.log) });
-  await app.register(consoleRoutes, { names: [], ...deps.console, db: pipeline.db, media: pipeline.media, chat: deps.consoleCoach, queue, now: pipeline.now });
+  await app.register(consoleRoutes, { names: [], ...deps.console, routing: routingOf(pipeline), build: pipeline.build, db: pipeline.db, media: pipeline.media, chat: deps.consoleCoach, queue, now: pipeline.now });
 
   return { app, queue };
 }

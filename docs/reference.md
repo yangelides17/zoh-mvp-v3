@@ -5,26 +5,47 @@ built, known bugs) is the issue board: `/status`. Update this page in the same c
 anything here (a new service or variable, a reversed decision, a new outside limit).
 
 ## Infrastructure
-- **Railway project `zoh-mvp-v3`** (region us-east4): `app` (deploys `main`; build runs type check,
-  tests and build; migrations run at startup; health check `/health`, `?deep=1` pings Claude),
-  `Postgres`, `Speaches` (Whisper, CPU), bucket `zoh-media`.
+- **Railway project `zoh-mvp-v3`** (region us-east4), two environments (#82):
+  - `production`: `app` (deploys `main`; build runs type check, tests and build; migrations run at
+    startup; health check `/health`, `?deep=1` pings Claude), `Postgres`, `Speaches` (Whisper, CPU),
+    bucket `zoh-media`.
+  - `staging`: a duplicate with its own app (deploys `dev`), Postgres, Speaches and bucket; its own
+    public domain. Never shares a database or bucket with production.
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS` and
   `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
   `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD` (the founders' shared console password),
   `CONSOLE_SESSION_SECRET` (signs console cookies; a long random string), optional `CONSOLE_NAMES`
   (default `Yanni,Stamati`), optional `GOAL_CAP` (goals a tester can have at once, focus plus
-  maintenance; default 3). Model: `claude-sonnet-5-5`.
+  maintenance; default 3), `APP_ENV` (`staging` on the staging app only; unset means production).
+  Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
+  `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
+  the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only; ideally its own
+  low-limit `ANTHROPIC_API_KEY`.
 - **Founder console:** https://app-production-354a.up.railway.app/console (same app, no separate
-  service). One shared password, a 30-day cookie, your name picked once per device; "Add to Home
+  service). Staging has its own console at the staging app's domain, with a STAGING banner. One shared password, a 30-day cookie, your name picked once per device; "Add to Home
   Screen" gives it the ZOH Console name and icon.
 - **Sendblue:** AI Agent plan, line +1 917 741 2162. Webhooks for received and outbound status point
-  at the app's `/webhooks/sendblue`.
+  at both apps' `/webhooks/sendblue` (Sendblue allows several endpoints per event, each with its own
+  optional secret; it can't route by number).
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
   environments use `EVAL_ANTHROPIC_API_KEY` and run with `env -u ANTHROPIC_BASE_URL` (see
   `eval/README.md`). Use a separate key with a low spending limit.
 
 ## Decisions to carry forward (beyond `docs/coach-voice.md`)
+- Staging and production (#82, Nov 1): branches `feature/*` → `dev` (default branch, deploys staging)
+  → `main` (production) through a release: `/release` writes plain-language notes, opens the `dev` →
+  `main` PR and a "Worth a look" list (suggestions, never blockers); on "ship" it merges, tags
+  `v<version>` (`package.json`, bumped on `dev` first) and checks production's health. Hotfixes branch
+  off `main` and are merged back into `dev`. An issue is `done` when merged into `dev`; live checks
+  happen on staging before a release. Migrations run on staging first.
+- One line, two apps (#82): both apps get every webhook. Testers always belong to production; a dev
+  number belongs to the app named by `testers.route` (production until it texts `env staging`). Each
+  app drops the other's texts before storing anything (no message, media, memory, reply or log line
+  with the number), and its scheduler, memory pass, summaries and console sends skip numbers it
+  doesn't own. `env staging` / `env production` (dev numbers only) save the route in both apps; only
+  the app switched to stores the text and replies with its version. If one app was down, sending the
+  command again fixes it. Outbound status events only update messages the app has.
 - Starters (#75, replacing the old habit list): Put AI to work for you, Read & learn more, Start
   something on the side, Focus & get more done, Speak & connect better, Get fitter, Eat better, Sleep
   better, Learn a fun skill, plus "Not sure? Let's figure it out together" (a get-to-know-you chat,

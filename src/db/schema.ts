@@ -105,12 +105,15 @@ export const testers = pgTable(
     memorySince: timestamp("memory_since", { withTimezone: true }),
     /** Test mode (#14): how far a dev account's clock is ahead of real time, moved by "jump"; 0 for everyone else. */
     clockOffsetMs: bigint("clock_offset_ms", { mode: "number" }).notNull().default(0),
+    /** Staging and production (#82): which app a dev number is on, set by "env staging" / "env production". Testers are always on production. */
+    route: text("route", { enum: ["production", "staging"] }).notNull().default("production"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     check("testers_phase_check", sql`${t.phase} in ('onboarding', 'planning', 'active')`),
     check("testers_time_zone_status_check", sql`${t.timeZoneStatus} in ('assumed_eastern', 'needs_city', 'confirmed')`),
+    check("testers_route_check", sql`${t.route} in ('production', 'staging')`),
   ],
 );
 

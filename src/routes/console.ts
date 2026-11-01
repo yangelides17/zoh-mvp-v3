@@ -22,7 +22,7 @@ import {
 import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
 import { metricsPage } from "../console/metrics.js";
 import { listPage } from "../console/views/home.js";
-import { ICON_SVG, loginPage, MANIFEST, namePage, notConfiguredPage } from "../console/views/layout.js";
+import { ICON_SVG, loginPage, MANIFEST, namePage, notConfiguredPage, withStagingBanner } from "../console/views/layout.js";
 import { memoryCards, memoryPageView } from "../console/memory-view.js";
 import { memoryPageHtml, memoryTabHtml } from "../console/views/memory.js";
 import { metricsView } from "../console/views/metrics.js";
@@ -30,6 +30,7 @@ import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
 import { coachThinking, consoleTabHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
 import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
 import { SUGGESTION_KINDS, testers } from "../db/schema.js";
@@ -51,6 +52,9 @@ export interface ConsoleRouteOptions extends ConsoleConfig {
   chat?: ConsoleCoach;
   /** Where the coach's answer runs, after the page has redirected; without one, before. */
   queue?: TaskQueue;
+  /** Staging and production (#82): the staging console says so on every page, and texts only numbers it owns. */
+  routing?: Routing;
+  build?: BuildInfo;
   now?: () => Date;
 }
 
@@ -72,8 +76,14 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     done(null, Object.fromEntries(new URLSearchParams(body as string)));
   });
 
+  const routing = opts.routing ?? PRODUCTION_ONLY;
   const html = (reply: FastifyReply, page: string, code = 200) =>
-    reply.code(code).header("cache-control", "no-store").header("x-robots-tag", "noindex").type("text/html; charset=utf-8").send(page);
+    reply
+      .code(code)
+      .header("cache-control", "no-store")
+      .header("x-robots-tag", "noindex")
+      .type("text/html; charset=utf-8")
+      .send(routing.appEnv === "staging" ? withStagingBanner(page, opts.build) : page);
 
   const sessionOf = (request: FastifyRequest): Session | undefined =>
     configured ? decodeSession(parseCookies(request.headers.cookie)[SESSION_COOKIE], opts.sessionSecret!, clock()) : undefined;
@@ -260,7 +270,15 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!tester) return reply.code(404).send({ error: "not found" });
     const now = testerNow(tester, clock());
     const exact = request.body?.exact === "on";
-    const { needsAnswer } = await postFounderMessage(opts.db, { tester, founder: name, body, exact, sendNow: exact && request.body?.sendNow === "on", now });
+    const { needsAnswer } = await postFounderMessage(opts.db, {
+      tester,
+      founder: name,
+      body,
+      exact,
+      sendNow: exact && request.body?.sendNow === "on",
+      now,
+      elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
+    });
     if (needsAnswer) {
       const answer = async () => {
         try {
