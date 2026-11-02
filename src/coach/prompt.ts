@@ -303,7 +303,8 @@ function weekLines(s: CoachState, plan: Plan): string[] {
   const { understood, explained } = w.learnings;
   const lines = [
     `WEEK LOOK-BACK, ${label(weekdayOf(w.from))} ${w.from} to today: ${status}`,
-    `This week: ${tally} (each day in Recent step days and Today above).`,
+    // #103: a recap said "5 done in full, each with a voice recap" in a week with a miss; these numbers are the only count.
+    `This week: ${tally}, today included (each day in Recent step days and Today above). Use these numbers exactly; "every" or "each" only for what's true of every one of those days.`,
     `Understood this week (applied or recalled; only these count as understood or "can do"):\n${understood.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none yet"}`,
     `Only explained so far (starting to click):\n${explained.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none"}`,
   ];

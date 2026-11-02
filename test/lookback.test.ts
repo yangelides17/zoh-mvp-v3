@@ -267,7 +267,8 @@ describe("the state block on Sunday", () => {
     const sunday = await block(at(SUN2, "17:00"));
     expect(sunday).toContain(
       "WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet: once today's talk settles, or when they ask how they did (WEEK LOOK-BACK), with record_week_recap.\n" +
-        "This week: 5 done in full, 0 smaller, 0 missed (each day in Recent step days and Today above).\n" +
+        // #103: the tally is the only count ZOH may give, and "each" only for what's true of every day.
+        'This week: 5 done in full, 0 smaller, 0 missed, today included (each day in Recent step days and Today above). Use these numbers exactly; "every" or "each" only for what\'s true of every one of those days.\n' +
         'Understood this week (applied or recalled; only these count as understood or "can do"):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
         'Only explained so far (starting to click):\n- "Summarize each chapter in a line" (explained Fri 2026-11-06)\n' +
         "Their destination: finish Dune by Dec 1 (say where they stand vs. it).",
