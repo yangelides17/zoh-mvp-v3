@@ -75,9 +75,11 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   follow-up, a morning step moves the end to its heads-up; a moved time or temporary plan only for its
   own days, and that day ends (and a miss is counted) at the stretched start. Hours the tester chose
   (`quiet_hours_chosen`) never stretch: the coach asks once per step time (`quiet_hours_asked_for`).
-  After 3 days of silence ZOH stops automatic texts and the founders decide. One exception
-  (#78): the Sunday look-back goes 30 minutes after a late Sunday step's follow-up, even inside quiet
-  hours. Otherwise it goes at 6 pm Sunday, once a week (the `lookback` nudge row, also written when
+  The follow-up goes 5 minutes after the step should be finished (#71, `FOLLOWUP_AFTER_MS`: that
+  day's start + its length, or 60 minutes when unknown), at most once, and not if they've already
+  checked in. After 3 days of silence ZOH stops automatic texts and the founders decide. One exception
+  (#78): the Sunday look-back goes 1 hour after a late Sunday step should be finished (#71), even inside
+  quiet hours. Otherwise it goes at 6 pm Sunday, once a week (the `lookback` nudge row, also written when
   the recap happens in conversation), after 3 closed step days, and never while on the slip ladder.
 - Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
   went quiet) and each locked plan version to review are saved as console alerts, one per event
