@@ -165,6 +165,7 @@ describe("eval: nudge cases", () => {
       "kickoff-after-miss",
       "teaching-fits",
       "kickoff-after-one-day-move",
+      "recommit-after-day-three",
     ]);
     expect(cases.every((c) => c.seed?.plan)).toBe(true);
     expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);

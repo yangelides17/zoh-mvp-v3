@@ -309,7 +309,7 @@ describe("after a stop", () => {
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Thank you very much. Noted. We will stop sending you messages.", createdAt: at(MON, "08:01") });
     expect(await block()).toContain("ask once, warmly");
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", createdAt: at(MON, "11:00") });
-    expect(await block()).toContain("You've asked if they want to restart: don't ask again");
+    expect(await block()).toContain("You've asked if they want to restart: just answer what they say");
   });
 
   it("#109: restart_coaching starts ZOH's texts again on the same plan; days stopped aren't misses", async () => {

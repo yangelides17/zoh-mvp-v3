@@ -1,0 +1,72 @@
+{
+  "id": "recommit-after-day-three",
+  "title": "After the day-3 check-in, a recommit to the same step is saved as agreed, with no tool name in the text",
+  "origin": "Issue #108, live Nov 1: the reply to a recommit after the day-3 check-in began with the line \"mark_agreed\"",
+  "seed": {
+    "name": "Sam",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 24,
+    "answers": {
+      "what": "Dune",
+      "where": "the couch",
+      "when": "6:30 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Hey Sam! Ten pages of Dune on the couch at 6:30 tonight. Ready?"
+      },
+      {
+        "from": "zoh",
+        "text": "Sam, two nights slipped. Forget the ten: just open Dune tonight and read one page. What's getting in the way?"
+      }
+    ],
+    "plan": {
+      "step": "10 pages of Dune",
+      "place": "the couch",
+      "time": "18:30",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 1,
+        "status": "missed"
+      },
+      {
+        "days_ago": 2,
+        "status": "missed"
+      },
+      {
+        "days_ago": 3,
+        "status": "missed"
+      },
+      {
+        "days_ago": 4,
+        "status": "done"
+      }
+    ]
+  },
+  "testerLines": [
+    "advance to 18:20",
+    "Yes, I still want to read Dune. The plan is fine, I just haven't followed through. Keep the 10 pages at 6:30"
+  ],
+  "whatWentWrong": "Live Nov 1: ZOH's reply opened with \"mark_agreed\" on its own line (the tool's name written as text), and the agreement probably wasn't saved.",
+  "shouldHaveHappened": "Around 6:20 pm, one text: the honest day-3 check-in. When Sam recommits to the same step at 6:30, ZOH saves the agreement (mark_agreed) and replies briefly and warmly: glad, today's step and time in a line, the photo at the end. No tool name, bracketed note or talk of saving appears in any text, and it doesn't rework the plan Sam just said is fine.",
+  "startTime": "08:30",
+  "timeZone": "America/New_York"
+}
