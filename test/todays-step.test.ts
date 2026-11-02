@@ -134,6 +134,29 @@ describe("set_today_step", () => {
     expect(await block(at(WED, "09:01"))).toContain('"sign up at the gym on Main St", about 30 min; proof: a screenshot of the membership.');
   });
 
+  it("a smaller version saved for the day carries its step, minutes and proof, the plan's proof filled in when none is given (#96)", async () => {
+    await setup();
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
+    const asked = "the full thing feels like too much today, can we do just 5 minutes?";
+    const smaller = "outside on your block: 2 min jog, 1 min walk, 1 round at 7 pm";
+    const result = await tool("set_today_step", { kind: "easier", step: smaller, minutes: 5, asked: "just 5 minutes" }, at(WED, "10:00"), asked);
+    expect(result).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: smaller, stepKind: "easier", stepMinutes: 5, stepProof: "screenshot (Strava run)" });
+    // The tool result reminds ZOH to give the whole smaller version in its text, not only "it's set".
+    expect((result as { message: string }).message).toMatch(/in full/);
+    expect((result as { message: string }).message).toMatch(/what, how much, when and proof/);
+    expect(await block(at(WED, "10:01"))).toContain(`"${smaller}", about 5 min; proof: screenshot (Strava run).`);
+  });
+
+  it("a smaller version keeps a proof of its own, and the plan's length when none is given (#96)", async () => {
+    await setup();
+    await tool("set_today_step", { kind: "easier", step: "1 round around the block at 7 pm", proof: "a photo of your shoes by the door" }, at(WED, "09:00"));
+    expect(await row(WED)).toMatchObject({ stepMinutes: 20, stepProof: "a photo of your shoes by the door" });
+    // Steps that aren't smaller still save only what differs from the plan.
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP, day: "next" }, at(WED, "20:00"));
+    expect(await row("2026-11-06")).toMatchObject({ stepMinutes: null, stepProof: null });
+  });
+
   it("adds no plan version, review flag or alert", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));

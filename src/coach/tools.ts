@@ -44,7 +44,7 @@ import {
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, isStepDay, LOOKBACK_KIND, nextStepDay, weekdayOf } from "../nudges/schedule.js";
-import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
+import { dayStep, describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -913,9 +913,15 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       // A day's step is the coach's call (#76): no plan version, no founder review.
       // #77: a yes to the next step day's step, agreed ahead, makes that morning's kickoff a reminder.
-      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes: minutes ?? null, stepProof: proof || null, ...(reason ? { nextReason: reason } : {}), ...(agreed ? { agreedAt: at } : {}) }, at);
-      const extra = [minutes !== undefined && `${minutes} min`, proof && `proof: ${proof}`].filter(Boolean).join("; ");
-      return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.`);
+      // #96: a smaller version carries its own length and proof on the day, the plan's filled in when none is given.
+      const easier = kind === "easier";
+      const usual = dayStep(plan);
+      const stepMinutes = minutes ?? (easier ? usual.minutes : null);
+      const stepProof = proof || (easier ? usual.proof : null);
+      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes, stepProof, ...(reason ? { nextReason: reason } : {}), ...(agreed ? { agreedAt: at } : {}) }, at);
+      const extra = [stepMinutes !== null && `${stepMinutes} min`, stepProof && `proof: ${stepProof}`].filter(Boolean).join("; ");
+      const inFull = easier ? " Give the smaller version in full in your text: what, how much, when and proof, never just that it's set." : "";
+      return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.${inFull}`);
     }
 
     case "save_reflection": {

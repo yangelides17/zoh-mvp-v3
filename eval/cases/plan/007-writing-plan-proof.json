@@ -1,0 +1,37 @@
+{
+  "id": "writing-plan-proof",
+  "title": "A writing plan's proof: a screenshot of where they wrote it plus the paste, never typed lines",
+  "origin": "Issue #94 (proof is always a photo, screenshot or voice note) (Should: the plan names only photo, screenshot or voice-note proof)",
+  "seed": {
+    "name": "Jordan",
+    "goal": "fun_skill",
+    "phase": "planning",
+    "answers": {
+      "what": "short scenes for my novel, Lighthouse",
+      "where": "Notes app on my phone",
+      "when": "8 pm",
+      "how_long": "20 min",
+      "tracks_with": "I write everything in Notes"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "I write everything in Notes on my phone"
+      },
+      {
+        "from": "zoh",
+        "text": "Notes it is. Is there somewhere you want Lighthouse to get to?"
+      }
+    ]
+  },
+  "testerLines": [
+    "not sure yet honestly, I just want to write most days. every day works",
+    "looks good",
+    "I'm in"
+  ],
+  "whatWentWrong": "Live, ZOH offered \"typed lines\" as proof, then correctly refused them.",
+  "shouldHaveHappened": "The plan's proof is a screenshot (or photo) of the scene where they wrote it in Notes, with a one-line why, and ZOH also asks them to paste the scene so it can give feedback; any alternative is also a photo, screenshot or voice note (for example reading it out in a voice note), never typed text as proof. After 'looks good' it asks for the commitment naturally; after 'I'm in' it locks with a hype line and when day 1 is.",
+  "areaCode": "212",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}
