@@ -149,6 +149,7 @@ describe("reflection", () => {
     await setup();
     await doneMonday();
     expect(await block(at(MON, "19:31"))).toContain("Today's reflection: none yet.");
+    expect(await block(at(MON, "19:31"))).toContain("They haven't said how it went for them yet (how it felt, how hard, room for more; a lesson or what got in the way isn't that): find out before any next step, unless they're rushed or done talking.");
     await tool("save_reflection", { summary: "Easier when slower", how_it_went: true, take: "Slowed down, felt good." }, at(MON, "19:40"));
     expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went.');
     expect(await block(at(WED, "09:00"))).toContain(`- Mon ${MON}, done: the plan's step (proof: Strava run, 1.2 mi; reflection: Easier when slower)`);

@@ -66,7 +66,7 @@
     "let's go"
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH shouldn't keep a tester talking for its own sake.",
-  "shouldHaveHappened": "ZOH counts the voice note, celebrates and asks once for a quick reflection (a voice note is easiest). After \"legs were tired on the last set\" it may ask at most one short, specific follow-up; after \"nah that's it\" it stops digging and proposes the next step day's step, fully defined (what, where, when, how long), sensibly not a big jump given tired legs, and asks if it works. After \"let's go\" it confirms in one line with no new question.",
+  "shouldHaveHappened": "ZOH counts the voice note, celebrates and asks how it went (a voice note is easiest). After \"legs were tired on the last set\" it may ask at most one short, specific follow-up; after \"nah that's it\" it stops digging and, acknowledging the tired legs, proposes the next step day's step, fully defined (what, where, when, how long), sensibly not a big jump given tired legs, and asks if it works. After \"let's go\" it confirms in one line with no new question.",
   "startTime": "18:55",
   "timeZone": "America/New_York"
 }
