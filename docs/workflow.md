@@ -73,6 +73,11 @@ deploy and one round of phone checks. When the plan splits a group into separate
 3 of them at the same time. Claude decides when either is safe and worth it, and tells you when it would rather split
 an issue out (big, a database change, shared prompt files, an open question) or build one at a time.
 
+**Session names.** Typing `/spec`, `/plan`, `/build` or `/review` names the Claude Code session after exactly what
+you typed (`/build 80 90 120` → "build 80 90 120"), so each terminal is easy to tell apart in the resume picker and
+the terminal title. A hook does it (`.claude/hooks/session-title.mjs`, set up in `.claude/settings.json`); other
+prompts leave the name alone.
+
 Outside the commands, just talk normally: "file a bug: the recap was too long", "what did the build
 decide about time zones?", "mark #12 done".
 
