@@ -125,8 +125,13 @@ export interface TesterMetrics {
   verified?: { thisWeek: number; total: number; perWeek: number };
   /** Lessons applied or recalled (#77's takeaways, #78's "understood"): this week, and in all; undefined before a plan or a lesson. */
   understood?: { thisWeek: number; total: number };
-  /** Done days with a reflection (#77), this week and overall; undefined with no done days. */
+  /**
+   * #93: done days where they said how it went (a lesson alone doesn't count), this week and overall,
+   * out of done days recorded since it shipped (older days aren't recomputed); undefined with none.
+   */
   reflections: { thisWeek?: Share; overall?: Share };
+  /** Their first step day with how-it-went recorded: where the reflection rate starts counting. */
+  reflectionsSince?: string;
   progression: Progression;
   backOff: { pauses: number; flags: number };
   stops: number;
@@ -147,6 +152,8 @@ export interface Rollup {
   /** Understood lessons per tester, in all. */
   understood?: number;
   reflectionRate?: number;
+  /** The earliest day any tester's reflection rate counts from (#93). */
+  reflectionsSince?: string;
   hitRate?: number;
   streak?: number;
   progressed: number;
@@ -180,6 +187,7 @@ export async function testerMetrics(db: Db, tester: Tester, now: Date, titles?: 
     streak: focus?.current,
     hitRate: focus?.hitRate,
     reflections: { thisWeek: reflectionShare(days.filter((d) => d.date >= monday)), overall: reflectionShare(days) },
+    reflectionsSince: days.filter(recorded).map((d) => d.date).sort()[0],
     progression: { ...(await progression(db, tester)), ...harderSteps(days) },
     backOff: {
       pauses: pauseRows.length,
@@ -209,9 +217,12 @@ export async function testerMetrics(db: Db, tester: Tester, now: Date, titles?: 
 
 const isDone = (d: StepDay) => d.status === "done" || d.status === "done_reduced";
 
+/** #93: days from before how-it-went was recorded have it empty (null): they're left out, never guessed. */
+const recorded = (d: StepDay) => d.howItWentSaid !== null;
+
 function reflectionShare(days: StepDay[]): Share | undefined {
-  const done = days.filter(isDone);
-  return done.length ? { of: done.length, with: done.filter((d) => d.reflection).length } : undefined;
+  const done = days.filter((d) => isDone(d) && recorded(d));
+  return done.length ? { of: done.length, with: done.filter((d) => d.howItWentSaid).length } : undefined;
 }
 
 function harderSteps(days: StepDay[]): Pick<Progression, "harder"> {
@@ -267,6 +278,7 @@ export function rollup(rows: TesterMetrics[]): Rollup {
     verifiedPerWeek: average(rows.flatMap((r) => (r.verified ? [r.verified.perWeek] : []))),
     understood: average(rows.flatMap((r) => (r.understood ? [r.understood.total] : []))),
     reflectionRate: average(rows.flatMap((r) => (r.reflections.overall ? [r.reflections.overall.with / r.reflections.overall.of] : []))),
+    reflectionsSince: rows.flatMap((r) => (r.reflectionsSince ? [r.reflectionsSince] : [])).sort()[0],
     hitRate: average(rows.flatMap((r) => (r.hitRate?.closed ? [r.hitRate.done / r.hitRate.closed] : []))),
     streak: average(rows.flatMap((r) => (r.focusTitle ? [r.streak?.length ?? 0] : []))),
     progressed: rows.filter((r) => r.progression.harder || r.progression.deepened || r.progression.upgraded || r.progression.addedGoal).length,

@@ -102,6 +102,7 @@ ul.facts { margin: 8px 0; padding-left: 20px; } ul.facts li { margin: 4px 0; }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
 .legend .dot { width: 14px; height: 14px; font-size: 0; display: inline-block; vertical-align: -2px; margin-right: 4px; }
 .day-row { scroll-margin-top: 110px; } .day-row:target { outline: 2px solid var(--accent); }
+.day-log { margin-top: 6px; font-size: .9em; display: grid; gap: 2px; }
 `;
 
 /**
@@ -191,6 +192,21 @@ const SCRIPT = `(function () {
       }).catch(function () {}).then(function () { delete box.dataset.loading; });
     });
   });
+  // #93: "see in chat" opens the texts at that day, loading older texts until its divider shows.
+  var wanted = new URLSearchParams(location.search).get("day");
+  var texts = boxes.filter(function (b) { return b.dataset.kind === "texts"; })[0];
+  if (wanted && texts) {
+    var tries = 0;
+    function seek() {
+      var mark = texts.querySelector('.divider[data-day="' + wanted + '"]');
+      if (mark) { texts.scrollTop = mark.offsetTop - texts.offsetTop; return; }
+      if (!texts.dataset.before || ++tries > 30) return;
+      if (!texts.dataset.loading) { texts.scrollTop = 0; texts.dispatchEvent(new Event("scroll")); }
+      setTimeout(seek, 300);
+    }
+    // After the page's own scroll to the newest text on load.
+    window.addEventListener("load", function () { setTimeout(seek, 0); });
+  }
   if (!boxes.length) return;
   function poll() {
     if (document.hidden) return;

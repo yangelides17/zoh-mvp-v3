@@ -140,6 +140,8 @@ export interface StepDayView {
   day: StepDay;
   /** Photos, screenshots and voice notes they sent that day. */
   proofs: Message[];
+  /** Lessons saved that day (#93: the card's "Learned"). */
+  learned?: string[];
 }
 
 /** What every tab's header shows. */
@@ -311,7 +313,7 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
     switches: [...(await switchReasons(db, tester)).entries()].map(([pair, s]) => ({ pair, ...s })),
     checkins,
     plans: testerPlans,
-    stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [] })),
+    stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [], learned: lessons.filter((l) => l.day === day.date).map((l) => l.text) })),
     suggestions: await listSuggestions(db, tester.id),
     ...(current?.destination ? { destination: current.destination } : {}),
     learnings: learnings(lessons),

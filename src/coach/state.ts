@@ -198,9 +198,9 @@ export async function loadCoachState(
     draftShown: draft ? await planSentSince(db, tester, draft.id) : false,
     plan,
     today,
-    todayRow,
-    nextRow,
-    recentDays,
+    todayRow: forCoach(todayRow),
+    nextRow: forCoach(nextRow),
+    recentDays: recentDays.map((d) => forCoach(d)!),
     takeaways: recentTakeaways,
     week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
@@ -257,6 +257,11 @@ async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<b
       ),
     );
   return rows.some((r) => showsPlan(r.content));
+}
+
+/** #93: ZOH's take on a day is for the founders only, so it never reaches the coach's state (or its texts). */
+function forCoach(row: StepDay | undefined): StepDay | undefined {
+  return row && { ...row, coachTake: null };
 }
 
 /** Their closed step days before `date`, newest first: the last two weeks. */
