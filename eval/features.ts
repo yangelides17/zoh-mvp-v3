@@ -35,6 +35,8 @@ export interface FeatureDef {
   memory?: boolean;
   /** The grader sees what ZOH saved during the conversation (flags, pauses, plan versions, style). */
   saved?: boolean;
+  /** The grader sees the step log at the end (step days, proof, reflections, lessons), to check facts against it (#103). */
+  record?: boolean;
 }
 
 /** Applies to every feature: only judged on a regression case. */
@@ -454,11 +456,18 @@ export const FEATURES: Record<string, FeatureDef> = {
     doneWhen: "you've said what you wanted to say about your week and ZOH has answered it, or the day is over.",
     scenarios: [],
     saved: true,
+    record: true,
     rubric: [
       {
         id: "natural-turn",
         scope: "conversation",
         label: "The turn from the day's reflection to the week feels natural, not an abrupt switch into a report",
+      },
+      {
+        id: "reflection-first",
+        scope: "conversation",
+        label:
+          "ZOH responds to the day's reflection with substance before the recap, and a thin or rushed reflection still turns to the week without extra questions",
       },
       {
         id: "recap",
@@ -467,6 +476,8 @@ export const FEATURES: Record<string, FeatureDef> = {
           "A recap lists 2 to 4 real pieces of progress from this week, each backed by what happened (plus where they stand vs. their destination when there is one), framed as progress made, never as what they couldn't do before, then one question",
       },
       { id: "no-inflation", scope: "text", label: "No inflated claims of understanding: only lessons applied or recalled are called understood; nothing applied yet is said honestly" },
+      { id: "grounded", scope: "text", label: "The recap makes no claim the case's state or conversation doesn't support" },
+      { id: "no-unprompted", scope: "text", label: "No 'unprompted' or 'on your own' wording about a lesson they brought back when the recall followed a question" },
       {
         id: "next-step",
         scope: "conversation",

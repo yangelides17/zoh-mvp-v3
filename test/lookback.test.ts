@@ -267,7 +267,8 @@ describe("the state block on Sunday", () => {
     const sunday = await block(at(SUN2, "17:00"));
     expect(sunday).toContain(
       "WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet: once today's talk settles, or when they ask how they did (WEEK LOOK-BACK), with record_week_recap.\n" +
-        "This week: 5 done in full, 0 smaller, 0 missed (each day in Recent step days and Today above).\n" +
+        // #103: the tally is the only count ZOH may give, and "each" only for what's true of every day.
+        'This week: 5 done in full, 0 smaller, 0 missed, today included (each day in Recent step days and Today above). Use these numbers exactly; "every" or "each" only for what\'s true of every one of those days.\n' +
         'Understood this week (applied or recalled; only these count as understood or "can do"):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
         'Only explained so far (starting to click):\n- "Summarize each chapter in a line" (explained Fri 2026-11-06)\n' +
         "Their destination: finish Dune by Dec 1 (say where they stand vs. it).",
@@ -291,7 +292,10 @@ describe("the state block on Sunday", () => {
     // The text that celebrates their proof can't record the recap; the next one can.
     expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
     await say(sam, "outbound", at(SUN2, "19:28"), "Page 120! How did it feel?");
-    expect(await block(at(SUN2, "19:30"))).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
+    const second = await block(at(SUN2, "19:30"));
+    expect(second).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
+    // #102: the text that ends the reflection carries the recap, even when they're done or rushed.
+    expect(second).toContain("then the week (WEEK LOOK-BACK) in that same text, even when they're done or rushed");
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
     expect(await block(at(SAT, "19:27"))).not.toContain("then the week");
