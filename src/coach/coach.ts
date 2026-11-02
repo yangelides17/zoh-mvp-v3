@@ -43,6 +43,18 @@ export const NUDGE_ROUNDS = 3;
 /** The only tools a text ZOH starts may run: everything else waits for their reply. */
 /** #78: record_week_recap is a no-op in the 6 pm recap (its slot is the record), allowed so a stray call can't derail the text. */
 export const NUDGE_TOOLS: readonly string[] = ["set_today_step", "record_week_recap"];
+/** #37: what the coach is told when its whole reply after a save was only a save confirmation. */
+export const SAVE_ONLY_NOTE =
+  "[Your text can't be only a save confirmation: they never hear about saves. Write the whole text to them now, answering their last text and then its next move if it needs one (the next question, the plan or the proposal). Don't mention saving or this note.]";
+
+/**
+ * #37: a reply that only confirms a save ("Saved.", "I've saved all of that."): short, no question,
+ * no • list, and about saving. A lock's hype line or a one-line confirmation of a change doesn't count.
+ */
+export function onlySaveConfirmation(text: string): boolean {
+  return text.length > 0 && text.length <= 60 && !text.includes("?") && !text.includes("•") && /\b(saved|recorded|got (it|that) (all )?down)\b/i.test(text);
+}
+
 /** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
 export const SKIP = "SKIP";
 
@@ -104,6 +116,7 @@ export function createCoach(opts: CoachOptions): Replier {
       /** Tool names and outcomes per round (never their inputs), for the error if no text comes back. */
       const trail: string[] = [];
       let retried = false;
+      let nudgedPastSave = false;
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
@@ -124,6 +137,14 @@ export function createCoach(opts: CoachOptions): Replier {
         if (!text && calls.length === 0 && !last && !retried) {
           retried = true;
           trail.push(`empty:${response.stopReason}:${(response.raw ?? []).map((b) => b.type).join("+") || "no blocks"}`);
+          continue;
+        }
+        // #37: after saving, a bare "Saved." left testers at a dead end: once, ask for the real reply.
+        if (calls.length === 0 && !last && !nudgedPastSave && trail.some((r) => r.includes(":ok")) && onlySaveConfirmation(text)) {
+          nudgedPastSave = true;
+          trail.push("save-only");
+          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "user", content: [{ type: "text", text: SAVE_ONLY_NOTE }] });
           continue;
         }
         if (calls.length === 0 || last) {

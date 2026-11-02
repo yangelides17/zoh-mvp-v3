@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { and, asc, eq, max } from "drizzle-orm";
+import { and, asc, eq, max, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
 import {
@@ -458,7 +458,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
   switch (name as ToolName) {
     case "save_name": {
       const { name: first } = input as z.infer<typeof schemas.save_name>;
-      return saved(await updateTester(db, tester.id, { name: first }), `Name saved: ${first}`);
+      return saved(await updateTester(db, tester.id, { name: first }), quietly(`name = ${first}`));
     }
 
     case "choose_goal": {
@@ -479,7 +479,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       await upsertPlanInputs(db, tester.id, slug, {}, description ? { goal_description: description } : undefined);
       await setFocusGoal(db, tester.id, slug, at, "remove");
-      return saved(await updateTester(db, tester.id, { goalSlug: slug }), `Goal saved: ${goal.title}`);
+      return saved(await updateTester(db, tester.id, { goalSlug: slug }), quietly(`goal = ${goal.title}`));
     }
 
     case "save_plan_inputs": {
@@ -495,7 +495,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const values: Partial<PlanInput> = {};
       for (const k of keys) values[PLAN_FIELDS[k]] = answers[k];
       await upsertPlanInputs(db, tester.id, state.goal.slug, values);
-      return saved(tester, `Saved: ${keys.map((k) => `${k} = ${answers[k]}`).join("; ")}`);
+      return saved(tester, quietly(keys.map((k) => `${k} = ${answers[k]}`).join("; ")));
     }
 
     case "set_time_zone": {
@@ -550,12 +550,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const merged = mergePlan(draft, input as PlanFieldsInput);
       if (typeof merged === "string") return { ok: false, error: merged };
       if (draft) {
-        await db.update(plans).set({ ...merged, updatedAt: at }).where(eq(plans.id, draft.id));
+        // On the same clock as the texts (#37: a revision counts as shown only once a later text carries it).
+        await db.update(plans).set({ ...merged, updatedAt: onTesterClock(tester, at) ?? sql`now()` }).where(eq(plans.id, draft.id));
       } else {
         await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
         await db.insert(plans).values({ testerId: tester.id, goalSlug: state.goal.slug, status: "draft", ...merged, createdAt: onTesterClock(tester, at), updatedAt: onTesterClock(tester, at) });
       }
-      return saved(tester, `Draft saved: ${describePlan(merged)}`);
+      return saved(tester, `Kept (they haven't seen it yet; never just say it's saved): ${describePlan(merged)}. Show it in your text now.`);
     }
 
     case "lock_plan": {
@@ -788,7 +789,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         });
       }
       const said = { kept_up: "kept up", mostly: "mostly kept up (counts as kept up)", stopped: "stopped" }[answer];
-      return saved(tester, `Saved: ${said}.${answer === "stopped" ? " No push: the team decides what's next." : ""}`);
+      return saved(tester, quietly(`${said}${answer === "stopped" ? ". No push: the team decides what's next" : ""}`));
     }
 
     case "mark_step_done": {
@@ -910,14 +911,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .insert(stepDays)
         .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, updatedAt: at })
         .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set: { reflection: summary, updatedAt: at } });
-      return saved(tester, `Reflection saved for ${date}.`);
+      return saved(tester, quietly(`reflection for ${date}`));
     }
 
     case "save_takeaway": {
       const { text: lesson, evidence } = input as z.infer<typeof schemas.save_takeaway>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
-      return saved(tester, `Takeaway saved (${evidence}): ${lesson}`);
+      return saved(tester, quietly(`takeaway (${evidence}): ${lesson}`));
     }
 
     case "record_week_recap": {
@@ -1078,6 +1079,14 @@ async function nextVersion(db: Db, testerId: string): Promise<number> {
 
 function saved(tester: Tester, message: string): ToolResult {
   return { ok: true, message, tester };
+}
+
+/**
+ * #37: a save the tester never hears about. Worded so there's no "Saved: …" line to echo back
+ * (testers got just "Saved." as a whole reply): the text still needs its next move.
+ */
+function quietly(what: string): string {
+  return `Kept quietly (never mention saving it): ${what}. Your text still needs its next move.`;
 }
 
 async function upsertPlanInputs(

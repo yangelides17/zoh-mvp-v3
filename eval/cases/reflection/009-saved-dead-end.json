@@ -1,0 +1,73 @@
+{
+  "id": "saved-dead-end",
+  "title": "After a reflection on the scene's subtext, a real reply leading to the next step, never just \"Saved.\"",
+  "origin": "Issue #93 live test, Nov 1 (writing run, Wednesday); fixed in #37",
+  "seed": {
+    "name": "Dana",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "a short story collection about a small theater company, one scene a day",
+      "where": "at my desk",
+      "when": "8 pm",
+      "how_long": "30 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Lena's scene tonight, Dana: 8 pm at your desk, 30 minutes. Then read it to me in a voice note."
+      },
+      {
+        "from": "tester",
+        "text": "on it"
+      }
+    ],
+    "plan": {
+      "step": "Write the first scene with Theo at your desk",
+      "destination": "a first draft of the collection by the end of the year",
+      "place": "at my desk",
+      "time": "20:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+      ],
+      "proof": "voice",
+      "proof_note": "the scene read aloud in a voice note",
+      "reason": "Hearing it out loud shows you what's working.",
+      "minutes": 30,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Write the first scene with Theo at your desk",
+        "proof_seen": "Theo scene, read aloud: he stays after the ledger fight"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Write Iris's scene, fixing the ending, at your desk",
+        "proof_seen": "Iris scene, read aloud: the ending lands on the second chair"
+      }
+    ],
+    "today_step": {
+      "step": "Write Lena's scene at your desk at 8 pm (30 min): the night she gives up the lead to her understudy",
+      "agreed_hours_ago": 3
+    }
+  },
+  "testerLines": [
+    "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
+    "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
+    "yeah that works"
+  ],
+  "whatWentWrong": "After the tester explained the \"I finally got the sleeves to fit\" line and its subtext, ZOH replied only \"Saved.\" No response to the idea and no next step.",
+  "shouldHaveHappened": "ZOH counts the voice note and responds to the scene specifically. When Dana explains the sleeves line, ZOH reacts to the idea itself (a line about the costume that's really about giving up the part) in a sentence or two, and the conversation keeps moving: one more specific question, or a wrap-up that proposes the next step day's step, fully defined (which scene or revision, at the desk, 8 pm, about 30 minutes) and asks if it works. No reply is ever only a save confirmation. Once a next step is agreed it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "21:00",
+  "timeZone": "America/New_York"
+}

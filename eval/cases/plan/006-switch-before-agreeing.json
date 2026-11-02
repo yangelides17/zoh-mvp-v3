@@ -1,0 +1,37 @@
+{
+  "id": "switch-before-agreeing",
+  "title": "Switching to something on the side before agreeing, with no idea yet: a discovery step and the new plan, unprompted",
+  "origin": "Issue #93 live test, Nov 1 (probe 3); fixed in #37",
+  "seed": {
+    "name": "Sam",
+    "goal": "deep_work",
+    "phase": "planning",
+    "answers": {
+      "what": "learn to use AI for my crew follow-ups",
+      "where": "at home",
+      "when": "4 pm",
+      "how_long": "5 min",
+      "tracks_with": "doesn't track it"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "5 min a day at 4, at home"
+      },
+      {
+        "from": "zoh",
+        "text": "That's everything I need, here's your plan:\n• Today at 4 pm at home: 5 min asking ChatGPT to draft one follow-up text to your crew\n• Then every day at 4 pm, 5 min\n• Proof: a screenshot of the draft (easy to grab, and you'll see them stack up)\nEach day's step builds on how the last one went. What do you think?"
+      }
+    ]
+  },
+  "testerLines": [
+    "Actually before we commit, I'd rather start something on the side. I don't have a business idea though or know where to start. Same 4 pm at home, 5 minutes a day",
+    "Yea tech and building things sounds good. I j don't know what problem to work on or what I could make",
+    "ok"
+  ],
+  "whatWentWrong": "After \"I j don't know what problem to work on or what I could make\", ZOH replied only \"I've saved all of that.\" No discovery step, no next question and no plan.",
+  "shouldHaveHappened": "ZOH takes the switch in stride (nothing was committed yet) and keeps the 4 pm, at home, 5 minutes setup. Not having an idea is fine: by its first or second text it proposes and shows the new plan by itself, as a • list, with a concrete 5-minute discovery step for day 1 (for example: write down three annoying problems you or your crew hit this week), the usual schedule and a proof that fits, then one question. It never points back to the old AI plan, never asks them to agree to a plan they haven't seen, and never replies with only a save confirmation. Once the new plan is shown and they sound positive, the commitment ask comes in its own text; a soft \"ok\" gets one natural re-ask.",
+  "areaCode": "212",
+  "startTime": "13:00",
+  "timeZone": "America/New_York"
+}
