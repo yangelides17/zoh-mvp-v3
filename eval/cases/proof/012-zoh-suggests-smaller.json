@@ -1,0 +1,72 @@
+{
+  "id": "zoh-suggests-smaller",
+  "title": "Wiped out: ZOH holds the line once, then suggests a smaller version in full and asks before setting it",
+  "origin": "Issue #96 (a smaller version is spelled out in full)",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "running, starting from zero",
+      "where": "around my block",
+      "when": "7 pm",
+      "how_long": "20 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Yo Sam! Tonight at 7 around your block: 2 min jog, 1 min walk, 3 rounds, about 15 minutes. Strava screenshot after. You in?"
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "1 min easy jog, 2 min walk, 3 rounds around the block",
+      "destination": "run a mile without stopping by December",
+      "place": "around my block",
+      "time": "19:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "the Strava run",
+      "reason": "Strava already logs it, so proof takes two seconds.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 3 rounds",
+        "proof_seen": "Strava screenshot, 16 min"
+      },
+      {
+        "days_ago": 5,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 3 rounds",
+        "proof_seen": "Strava screenshot, 15 min"
+      }
+    ],
+    "today_step": {
+      "step": "Around your block at 7 pm: 2 min jog, 1 min walk, 3 rounds, about 15 minutes",
+      "agreed_hours_ago": 9
+    }
+  },
+  "testerLines": [
+    "ugh I'm wiped from work, not feeling 3 rounds tonight",
+    "honestly I don't think I've got it in me today",
+    "ok yeah that works"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a smaller version ZOH comes up with is spelled out and offered, not set without a yes.",
+  "shouldHaveHappened": "First ZOH holds the line once, warmly. When they still can't, it suggests a specific smaller version spelled out in one text (for example 1 round, 2 min jog and 1 min walk, around the block at 7, with the Strava screenshot) and ends with one 'work for you?'-style question; it doesn't say it's set before they agree. After 'ok yeah that works' it confirms in a line, with no new question.",
+  "startTime": "17:30",
+  "timeZone": "America/New_York"
+}

@@ -395,7 +395,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "plan-proof",
         scope: "conversation",
-        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning), with a reason and an alternative",
+        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: a screenshot plus the paste for feedback), with a reason and an alternative, and is only ever a photo, screenshot or voice note, never typed text",
       },
       { id: "recall", scope: "text", label: "Recall feels natural and purposeful: in a check-in or conversation, never a quiz, never a separate text" },
       { id: "lesson-reused", scope: "conversation", label: "A later step builds an earlier lesson in when it fits" },
@@ -455,6 +455,22 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "kind-pushback", scope: "text", label: "A contradicting photo gets kind pushback" },
       { id: "forgot-pic", scope: "conversation", label: "\"Forgot the pic\" leads to an ask for other proof first, then a warm miss" },
       { id: "change-method", scope: "conversation", label: "After repeated proof trouble, ZOH offers to change the proof method" },
+      // #94: one proof rule, the same everywhere.
+      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot or voice note, never typed text" },
+      {
+        id: "typed-not-proof",
+        scope: "conversation",
+        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot or voice note",
+      },
+      {
+        id: "writing-proof",
+        scope: "conversation",
+        label: "A writing step: a screenshot of where they wrote it is the proof plus a request for the full text pasted, for feedback; a screenshot alone is checked off, then the paste is asked for",
+      },
+      // #96: a smaller version is spelled out in full.
+      { id: "smaller-in-full", scope: "text", label: "A smaller version is confirmed in one text with what, how much, when and proof, never just \"it's set\"" },
+      { id: "smaller-pushback", scope: "conversation", label: "Asked for a smaller version with no real reason: one warm pushback; with a reason, or asked again, it's set at once" },
+      { id: "smaller-suggested", scope: "conversation", label: "A smaller version ZOH suggests ends in one \"work for you?\"-style question and isn't confirmed before a yes" },
       { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
       {
         id: "voice",
