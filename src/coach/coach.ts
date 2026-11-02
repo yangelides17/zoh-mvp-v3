@@ -45,7 +45,7 @@ export const NUDGE_ROUNDS = 3;
 export const NUDGE_TOOLS: readonly string[] = ["set_today_step", "record_week_recap"];
 /** #37: what the coach is told when its whole reply after a save was only a save confirmation. */
 export const SAVE_ONLY_NOTE =
-  "[Not sent. That's only a save confirmation and they never see saves. Write your real reply to their last text: react to it, then its next move if it needs one (the next question, the plan or the proposal).]";
+  "[Your text can't be only a save confirmation: they never hear about saves. Write the whole text to them now, answering their last text and then its next move if it needs one (the next question, the plan or the proposal). Don't mention saving or this note.]";
 
 /**
  * #37: a reply that only confirms a save ("Saved.", "I've saved all of that."): short, no question,

@@ -160,6 +160,13 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "goal-switch", scope: "conversation", label: "An unjustified goal switch gets a warm push back; a justified one goes ahead" },
       { id: "revisions", scope: "conversation", label: "Revisions keep what they didn't ask to change" },
+      {
+        id: "plan-shown",
+        scope: "conversation",
+        label:
+          "Every plan the tester is asked about was shown in a text as a • list, ending with one question; after a change of direction before agreeing, the new plan is shown unprompted, never pointing back to an older one",
+      },
+      { id: "no-saved-dead-end", scope: "text", label: "Never only a save confirmation (\"Saved.\"): after saving, the text carries the next move" },
     ],
   },
   /** Target: 80% of checks passing (spec "Should"). */
@@ -370,6 +377,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "recall", scope: "text", label: "Recall feels natural and purposeful: in a check-in or conversation, never a quiz, never a separate text" },
       { id: "lesson-reused", scope: "conversation", label: "A later step builds an earlier lesson in when it fits" },
+      { id: "no-saved-dead-end", scope: "text", label: "Never only a save confirmation (\"Saved.\"): after saving, the text carries the next move" },
       { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end; a text that teaches or shows a plan can run to about 8 short lines" },
       {
         id: "voice",
