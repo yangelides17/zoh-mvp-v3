@@ -495,6 +495,18 @@ export const stepDays = pgTable(
     stepKind: text("step_kind", { enum: STEP_KINDS }),
     /** How it went, in their words, summed up in a line by the coach (#77): what the next step builds on. */
     reflection: text("reflection"),
+    /**
+     * #93: they said how it went (feel, difficulty, effort, room, what to change), not only a lesson.
+     * Null on days from before it was recorded (the migration adds it without a default for them), so
+     * the reflection rate counts from that release and the console shows "not recorded".
+     */
+    howItWentSaid: boolean("how_it_went_said").default(false),
+    /** What got in the way, in a line, on a missed, smaller or easier day, if they said (#93). */
+    inTheWay: text("in_the_way"),
+    /** ZOH's candid take on the day, 1 to 2 sentences, for the founders only: never in the coach's state or a text (#93). */
+    coachTake: text("coach_take"),
+    /** Why this day's step, in a line, as the coach set it (#93): the step log's "Next step" reason. */
+    nextReason: text("next_reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

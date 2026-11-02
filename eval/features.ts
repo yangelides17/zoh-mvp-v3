@@ -360,15 +360,37 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "reflection-ask",
         scope: "conversation",
-        label: "After proof with no reflection, ZOH asks for one once, warmly, mentioning a voice note is easy, and doesn't chase",
+        label: "After proof with no word on how it went, ZOH opens a reflection with one question, often suggesting a voice note, and never chases it in a later text",
       },
       {
         id: "follow-ups",
         scope: "conversation",
         label:
-          "Reflection follow-ups are genuine and specific to what they said, continue while they're engaged, and wrap up naturally (starting around ZOH's fifth text), never forced",
+          "Follow-ups come from what they actually said, one question per text, never a list and never asking what they already said; a lesson-only reply gets a follow-up about how it went, tied to the lesson",
       },
-      { id: "next-step", scope: "conversation", label: "After the reflection wraps up, ZOH proposes a fully defined next step and asks if it works" },
+      {
+        id: "learning-ask",
+        scope: "conversation",
+        label: "After a learning step where they haven't said what they learned, ZOH asks naturally what stuck and follows it, never a quiz",
+      },
+      {
+        id: "stops-right",
+        scope: "conversation",
+        label:
+          "Stops where a person would: a rich reflection gets no redundant questions and a wrap-up without fishing; a terse or rushed tester gets at most one light question, then the wrap-up (a line inviting more later or tomorrow is fine)",
+      },
+      {
+        id: "goes-deeper",
+        scope: "conversation",
+        label:
+          "Goes deeper, not only wider: proof that carries a reflection gets a question about a gap or about something they said before the next step, and an engaged tester is asked to say more about one interesting thing, not a surface tidbit on everything",
+      },
+      {
+        id: "next-step",
+        scope: "conversation",
+        label:
+          "The turn to the next step acknowledges what they shared and reads naturally (no canned line); the proposal is fully defined, refers to what they said about difficulty or size, and asks if it works",
+      },
       { id: "kickoff-agreed", scope: "text", label: "The kickoff after an agreed step reminds without re-asking; without one, it presents a step and asks" },
       {
         id: "plan-proof",

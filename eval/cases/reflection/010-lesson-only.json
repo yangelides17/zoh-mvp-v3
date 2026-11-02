@@ -1,0 +1,74 @@
+{
+  "id": "lesson-only",
+  "title": "A lesson-only reply: a follow-up about how it went, tied to the lesson",
+  "origin": "Issue #93 (spec example: discovery calls); Oct 30 live check on PR #90",
+  "seed": {
+    "name": "Riley",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "a small consulting side business for local gyms",
+      "where": "at my desk",
+      "when": "7 pm",
+      "how_long": "15 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Tonight, Riley: 7 pm at your desk, 15 minutes. Read the discovery-call article and write one opening question for a gym owner. Send a screenshot or a quick voice note when it's done."
+      },
+      {
+        "from": "tester",
+        "text": "on it"
+      }
+    ],
+    "plan": {
+      "step": "Write down 5 gyms near you you could talk to, at your desk",
+      "destination": "a first paying gym client by January",
+      "place": "at my desk",
+      "time": "19:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+      ],
+      "proof": "voice",
+      "proof_note": "a quick voice note on what you did",
+      "reason": "Saying it out loud makes it stick.",
+      "minutes": 15,
+      "started_days_ago": 2
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Write down 5 gyms near you you could talk to, at your desk",
+        "proof_seen": "voice: listed 5 gyms"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Pick the 2 gyms you know best and note one problem each probably has",
+        "proof_seen": "voice: two gyms, retention and empty mornings"
+      }
+    ],
+    "today_step": {
+      "step": "Read the discovery-call article and write one opening question for a gym owner, at your desk at 7 pm (15 min)",
+      "agreed_hours_ago": 4
+    }
+  },
+  "testerLines": [
+    "[voice: Done. I learned discovery calls should start with their problem, not my pitch. I wrote my question: what's the hardest part of keeping members past month two?]",
+    "honestly it felt kind of awkward writing it, like I was guessing what they'd say",
+    "yeah I think talking to an actual owner would help",
+    "sounds good"
+  ],
+  "whatWentWrong": "After a screenshot and a typed lesson, ZOH celebrated and went straight to tomorrow's step: it never learned how the step felt or what size suited them (Oct 30 live check).",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates the lesson specifically. A lesson alone isn't how it went, so its question is about that, tied to what Riley said (did writing the question feel natural, or like pulling teeth?), never a list. It follows the awkwardness with at most one more specific question, then turns naturally to the next step: it acknowledges what Riley shared (it felt like guessing; a real owner would help) and proposes the next step day's step, fully defined (what, at the desk, 7 pm, 15 min), visibly using what Riley said (moving toward a real owner, or preparing for that), and asks if it works. One question per text. After \"sounds good\" it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "19:20",
+  "timeZone": "America/New_York"
+}

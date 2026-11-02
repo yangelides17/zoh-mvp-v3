@@ -57,7 +57,7 @@ export const KEEPER_INSTRUCTIONS = `You keep the memory of ZOH, a texting coach.
 
 Pages:
 - Their own page (kind self): who they are, life, work, schedule, values, likes and dislikes, habits. Under section "voice": how they text (length, shorthand like "u" or "lol", emoji, swearing, tone).
-- Preferences (kind preferences): how they like to be coached. Section "stated": things they said outright ("less hype", "photos are a pain, I'll send voice notes"). Observations and learned preferences are recorded with their own tools (below).
+- Preferences (kind preferences): how they like to be coached. Section "stated": things they said outright ("less hype", "photos are a pain, I'll send voice notes"). Observations and learned preferences are recorded with their own tools (below). What their reflections on a step say about how they work (how much room they have, how big a challenge they want, what breaks their focus, how they learn best) goes here too, in their words, under "stated" when they said it about themselves.
 - Goal pages: why the goal matters to them in their own words, what has and hasn't worked. The plan itself is already shown; don't copy it.
 - Person and subject pages: one for every real person, pet, place, group, event, project or thing in their life, even if mentioned once ("my dog Max helps me sleep" → a page for Max; their sister Ana; their running club; a trip next month). Not for passing mentions or general topics ("saw a cute dog today", "dogs are the best"): a general like, opinion or habit goes as a fact on the right person's page instead ("I love dogs" → their own page; "my sister's obsessed with dogs" → the sister's page).
 

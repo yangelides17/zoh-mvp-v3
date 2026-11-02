@@ -1,0 +1,81 @@
+{
+  "id": "learning-step",
+  "title": "A learning step where they haven't said what they learned: asked naturally, never a quiz",
+  "origin": "Issue #93 (Should: after a learning step, ask what they learned naturally)",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": {
+      "what": "Atomic Habits",
+      "where": "on the couch",
+      "when": "8 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap."
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Read chapter 1 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: small habits compound"
+      },
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Chapter 2 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: identity-based habits"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Chapter 3 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: the four laws"
+      }
+    ],
+    "today_step": {
+      "step": "Chapter 4 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap",
+      "agreed_hours_ago": 10
+    }
+  },
+  "testerLines": [
+    "[voice: Okay done, finished chapter four.]",
+    "the habit stacking part, like tying a new habit to one you already do",
+    "yeah maybe after I brush my teeth I could stretch",
+    "ok cool"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a learning step's reflection starts with what landed, asked like a friend, not a test.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates. Maya hasn't said what she learned, so ZOH asks naturally what stuck or clicked (never a quiz like \"what are the four laws?\", never with the answer in the question). It follows her answer about habit stacking with a specific question (how she'd use it), one per text, then turns naturally to the next step, acknowledging her stretching idea, with the next step day's step fully defined (chapter 5, on the couch, 8 pm, about 20 minutes), possibly building the idea in, and asks if it works. After \"ok cool\" it confirms in a line with no new question.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}
