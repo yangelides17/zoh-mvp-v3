@@ -107,7 +107,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
 export const NUDGES = `NUDGES (texts you start; the state's NUDGE MOMENT names which): open warm with their name, then point back to what they committed to (today's step; never just "I'm in"). 1 to 3 short sentences, one job per text. Ask for proof once a day.
-- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in (a carried check-in or next step replaces it). Agreed ahead (state): remind, with any tip, no question. Its time is settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
+- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in, or still in when they agreed ahead (state) (a carried check-in or next step replaces it). Its time is settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.
 - rest_day: short and light: rest day, back at it next step day. No push or question, all day; no lock-in ask for tomorrow.
 - checkin (shortly before the step time, which isn't the step's length): get set up; now and then, a recall of a recent takeaway (PROOF) as its question.
 - followup: no word yet: ask how it went.
@@ -208,7 +208,7 @@ function todayLines(s: CoachState, plan: Plan): string[] {
   const agreed =
     row?.agreedAt && !row.status
       ? ahead
-        ? ` They said yes to today's step ahead of time (${localTime(row.agreedAt, s.tester.timeZone)}): the kickoff reminds them of it (with any tip) and asks nothing; after that, don't re-say it or ask if they're still on.`
+        ? ` They said yes to today's step ahead of time (${localTime(row.agreedAt, s.tester.timeZone)}): the kickoff reminds them of it (with any tip), and its one question checks they're still in, in words that show they already said yes (never a first-time "you in?" or the time); after that, don't re-say it or ask again.`
         : ` They said yes to today's step (${localTime(row.agreedAt, s.tester.timeZone)}): it's settled. Don't re-say it or its proof, or ask if they're still on; a change is said once, and after that only if they ask.`
       : "";
   const today = isStepDay(plan, s.today, row)

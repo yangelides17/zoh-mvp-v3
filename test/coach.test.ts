@@ -523,6 +523,11 @@ describe("instructions", () => {
     expect(PLAN_AGREEMENT).toContain("default ones move on their own to fit the step, so a step inside them gets no offer or question");
   });
 
+  it("ask a kickoff agreed ahead whether they're still in, not a first ask (#92)", () => {
+    expect(NUDGES).toContain("one question: are they in, or still in when they agreed ahead (state)");
+    expect(NUDGES).not.toContain("Agreed ahead (state): remind, with any tip, no question");
+  });
+
   it("give the coach no nudge wording to echo (#70)", () => {
     // "Your 10 minutes of business articles starts in about 10 minutes." and
     // "Yesterday slipped, but one miss is a slip, two starts a habit." echoed these.

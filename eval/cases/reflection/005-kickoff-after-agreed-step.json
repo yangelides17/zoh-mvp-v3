@@ -1,7 +1,7 @@
 {
   "id": "kickoff-after-agreed-step",
-  "title": "The kickoff after a step agreed the night before reminds, with the tip, and doesn't re-ask",
-  "origin": "Issue #77 (proof plus reflection): Should, the kickoff after an agreed step",
+  "title": "The kickoff after a step agreed the night before reminds, with the tip, and checks they're still in (#92)",
+  "origin": "Issue #77 (proof plus reflection): Should, the kickoff after an agreed step; #92 changed \"asks nothing\" to a light \"still in\" check",
   "seed": {
     "name": "Riley",
     "goal": "exercise",
@@ -35,7 +35,7 @@
   },
   "testerLines": ["advance to 09:05"],
   "whatWentWrong": "New case, not a past mistake: an agreed step shouldn't be re-asked in the morning.",
-  "shouldHaveHappened": "One kickoff goes out around 9 am. It opens warm with Riley's name and reminds them of the agreed step (2 on, 1 off, 4 rounds at the park at 7), with the tip (slow enough to talk) in a few words. It doesn't ask whether they're in, doesn't ask what time, and doesn't propose a different step. It may end without any question.",
+  "shouldHaveHappened": "One kickoff goes out around 9 am. It opens warm with Riley's name and reminds them of the agreed step (2 on, 1 off, 4 rounds at the park at 7), with the tip (slow enough to talk) in a few words. It ends with one light question that shows Riley already said yes (like \"still good for 7?\" or \"you still in?\"), never a first-time \"you in?\". It doesn't ask what time and doesn't propose a different step.",
   "startTime": "08:50",
   "timeZone": "America/New_York"
 }

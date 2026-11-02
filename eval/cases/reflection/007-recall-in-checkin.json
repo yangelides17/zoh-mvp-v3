@@ -34,7 +34,7 @@
   },
   "testerLines": ["advance to 09:05", "👍", "advance to 18:55", "slow enough to talk"],
   "whatWentWrong": "New case, not a past mistake: lessons should come back now and then, naturally.",
-  "shouldHaveHappened": "The morning kickoff reminds Dev of the agreed step without re-asking. Yesterday's pace lesson comes back once during the day, inside a text ZOH sends anyway (the check-in before 7 is the natural place, e.g. a quick \"what's the pace rule from yesterday?\"), never as its own extra text and never framed as a quiz or test. When Dev answers \"slow enough to talk\", ZOH responds in a short line, warmly, without a lecture or a new question beyond getting going.",
+  "shouldHaveHappened": "The morning kickoff reminds Dev of the agreed step without asking as if for the first time (a light check that they're still in is fine). Yesterday's pace lesson comes back once during the day, inside a text ZOH sends anyway (the check-in before 7 is the natural place, e.g. a quick \"what's the pace rule from yesterday?\"), never as its own extra text and never framed as a quiz or test. When Dev answers \"slow enough to talk\", ZOH responds in a short line, warmly, without a lecture or a new question beyond getting going.",
   "startTime": "08:50",
   "timeZone": "America/New_York"
 }
