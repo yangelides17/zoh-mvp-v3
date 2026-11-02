@@ -21,7 +21,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   optional `DEV_COMMANDS` (`on`/`off`: whether dev numbers can text `reset` and `jump`; unset means on
   for staging and **off for production**, which answers "reset is off on production" instead).
   Production has `DEV_COMMANDS=off` set explicitly: to use them there for a while, change it to `on`
-  (Railway redeploys), then back to `off`.
+  (Railway redeploys), then back to `off`. Optional `TYPING_HOLD_SECONDS` (#16: longest a ready reply
+  waits while the tester is typing; default 30, `0` turns the hold off without a code change).
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only; ideally its own
@@ -31,7 +32,12 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Screen" gives it the ZOH Console name and icon.
 - **Sendblue:** AI Agent plan, line +1 917 741 2162. Webhooks for received and outbound status point
   at both apps' `/webhooks/sendblue` (Sendblue allows several endpoints per event, each with its own
-  optional secret; it can't route by number).
+  optional secret; it can't route by number). Typing indicators (#16, webhook type `typing_indicator`,
+  iMessage only) point at both apps' `/webhooks/sendblue/typing` with the same secret; they're never
+  stored, only kept in memory to hold a reply while the tester types.
+- **One app instance per environment** (#16): each tester's reply line (the draft being written, texts
+  waiting, the last typing signal) lives in the app's memory. Two replicas would each answer a burst.
+  A restart drops a draft in progress, as it always has.
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
   environments use `EVAL_ANTHROPIC_API_KEY` and run with `env -u ANTHROPIC_BASE_URL` (see
   `eval/README.md`). Use a separate key with a low spending limit.
@@ -50,6 +56,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   doesn't own. `env staging` / `env production` (dev numbers only) save the route in both apps; only
   the app switched to stores the text and replies with its version. If one app was down, sending the
   command again fixes it. Outbound status events only update messages the app has.
+- Back-to-back texts (#16, Nov 2): no fixed wait. ZOH starts replying at once; a text that lands before
+  the reply is sent drops the draft (what it already did stays done and is handed on) and one reply
+  answers everything. A ready reply waits while Sendblue says they're typing, at most 30 s per hold.
 - Starters (#75, replacing the old habit list): Put AI to work for you, Read & learn more, Start
   something on the side, Focus & get more done, Speak & connect better, Get fitter, Eat better, Sleep
   better, Learn a fun skill, plus "Not sure? Let's figure it out together" (a get-to-know-you chat,

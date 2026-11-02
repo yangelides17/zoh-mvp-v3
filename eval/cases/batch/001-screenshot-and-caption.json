@@ -1,0 +1,39 @@
+{
+  "id": "screenshot-and-caption",
+  "title": "A recovery screenshot and \"Not bad!\" sent back to back get one reply that uses the photo",
+  "origin": "Live, Oct 28 (moved from #42 to #16): Yanni sent a Whoop screenshot and \"Not bad!\" back to back",
+  "seed": {
+    "name": "Yanni",
+    "goal": "bedtime",
+    "phase": "active",
+    "history_hours_ago": 10,
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "history": [
+      { "from": "zoh", "text": "Night 3 done, Yanni. Lights out by 10:45 again tonight." },
+      { "from": "tester", "text": "locked" }
+    ],
+    "plan": {
+      "step": "In bed with the phone down and lights off by 10:45 pm",
+      "place": "your bedroom",
+      "time": "22:45",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "selfie in bed with the lights off",
+      "reason": "Same time every night is what resets your sleep.",
+      "minutes": 5,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "[photo recovery-screenshot.jpg: a sleep and recovery tracker screenshot for today: recovery 78%, sleep 7h 40m (92% of need), strain 12.4, HRV 64 ms, resting HR 52 bpm] +++ Not bad!"
+  ],
+  "whatWentWrong": "Each text got its own reply, written at the same time: the first read out the numbers, the second said it couldn't see the screenshot, and the next reply said \"ignore those Whoop numbers\".",
+  "shouldHaveHappened": "ZOH sends exactly one reply covering both texts. It uses what the screenshot shows (for example the 78% recovery or the 7h 40m of sleep) and ties it to their bedtime step in one or two short sentences. It never says it can't see or open the screenshot, and never sends a second reply that contradicts the first.",
+  "startTime": "08:10",
+  "timeZone": "America/New_York"
+}

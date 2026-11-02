@@ -79,4 +79,7 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
   that founder (`console Yanni (exact): ...` or `(exact, now)` for "send exactly this"); ZOH's console answer
   joins the transcript marked as console, and an exact text goes out on the next minute's tick. The
   estimate counts the coach's console calls loosely. See `eval/cases/console/`.
+- **Texts sent together** (#16): a case line with ` +++ ` between texts posts them a second apart
+  without waiting for ZOH in between (`[photo x.jpg: …] +++ Not bad!`); the grader reads the line as
+  written and sees every reply ZOH sent. See `eval/cases/batch/`.
 - **A feature:** add an entry to `FEATURES` in `eval/features.ts` and a scenarios file.

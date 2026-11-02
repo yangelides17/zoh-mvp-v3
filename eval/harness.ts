@@ -178,7 +178,31 @@ export async function startEvalApp(opts: {
 
 /** Sends one tester text through the real webhook and returns ZOH's replies to it. */
 export async function textZoh(app: EvalApp, text: string, handle: string, mediaUrl = ""): Promise<TranscriptLine[]> {
+  return textZohBurst(app, [{ text, mediaUrl }], handle);
+}
+
+/**
+ * A case line holding several texts sent back to back (#16): "[photo x.jpg: …] +++ Not bad!".
+ * The grader reads the line as written.
+ */
+export const BURST_SEPARATOR = " +++ ";
+
+/**
+ * Sends texts back to back, a second apart, without waiting for ZOH in between (#16), then
+ * returns every reply ZOH sent once it has settled.
+ */
+export async function textZohBurst(app: EvalApp, texts: { text: string; mediaUrl?: string }[], handle: string): Promise<TranscriptLine[]> {
   const before = app.sendblue.sent.length;
+  for (const [i, t] of texts.entries()) {
+    if (i > 0) app.clock.advance(1_000);
+    await postText(app, t.text, texts.length > 1 ? `${handle}-${i + 1}` : handle, t.mediaUrl ?? "");
+  }
+  await app.built.queue.idle();
+  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+}
+
+/** Posts one tester text to the real webhook; doesn't wait for the reply. */
+async function postText(app: EvalApp, text: string, handle: string, mediaUrl: string): Promise<void> {
   const at = app.clock.now();
   const res = await app.built.app.inject({
     method: "POST",
@@ -201,8 +225,6 @@ export async function textZoh(app: EvalApp, text: string, handle: string, mediaU
     },
   });
   if (res.statusCode !== 200) throw new Error(`Webhook answered ${res.statusCode}`);
-  await app.built.queue.idle();
-  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
 }
 
 /** A case line that moves time instead of texting: "advance to 18:50". */
@@ -605,8 +627,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       // The grader reads the line as written ("[photo ...: what it shows] caption"); ZOH gets the media.
       transcript.push({ from: "tester", text, at: clock.now().toISOString() });
       clock.advance(5_000);
-      const media = parseMediaLine(text);
-      transcript.push(...(await textZoh(app, media?.caption ?? text, `eval-${plan.key}-${turn}`, media?.mediaUrl)));
+      const texts = text.split(BURST_SEPARATOR).map((part) => {
+        const media = parseMediaLine(part);
+        return { text: media?.caption ?? part, mediaUrl: media?.mediaUrl };
+      });
+      transcript.push(...(await textZohBurst(app, texts, `eval-${plan.key}-${turn}`)));
       clock.advance(typingDelayMs(text));
     }
   } catch (err) {
