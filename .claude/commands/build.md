@@ -44,8 +44,13 @@ touched eval cases once both are on `dev`.
    `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`,
    `cd` into it and run `npm install`. Do everything below from there.
    `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
-   **Check for overlap again** (the plan's check may be days old): for each other open PR, compare
-   `gh pr diff <pr> --name-only` with the files the plan touches. If both change the database, `src/coach/prompt.ts`,
+   **Check the plan is still current** (it may be days old): list what merged into `dev` since the plan was
+   posted (`git log --since=<plan date> --name-only origin/dev`) and read any change to the files the plan touches.
+   If it changes the approach (a function the plan relies on moved or works differently), tell Yanni and propose the
+   adjustment before writing code; a small fit-up is a `Decision:` comment.
+   **Check for overlap again:** for each other open PR, compare `gh pr diff <pr> --name-only` with the files the
+   plan touches, and read the plans of `plan-approved` issues that have no PR yet
+   (`gh issue list --label plan-approved`). If both change the database, `src/coach/prompt.ts`,
    `docs/coach-voice.md` or `src/pipeline/inbound.ts`, tell Yanni and post a `Decision:` comment on which lands first
    (two migrations collide: the later one regenerates its migration after the first merges). Note smaller overlaps
    under the PR's risks.

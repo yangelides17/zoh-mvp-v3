@@ -91,7 +91,8 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Overlapping work is checked at every step.** `/spec` flags a feature in progress that changes the same moment
   for testers, `/plan` and `/build` name open work that touches the same files (a database or coach-prompt overlap
-  gets a decision on which lands first), and `/review` only merges a branch that's up to date with `dev`, then tells
+  gets a decision on which lands first), `/build` also checks that nothing merged since the plan changes its
+  approach, and `/review` only merges a branch that's up to date with `dev`, then tells
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
