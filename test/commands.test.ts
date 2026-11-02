@@ -308,6 +308,9 @@ describe("after a stop", () => {
     expect(await block()).toMatch(/STOPPED: they texted stop on .*ask once, warmly, if they want to pick their goal back up/);
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Thank you very much. Noted. We will stop sending you messages.", createdAt: at(MON, "08:01") });
     expect(await block()).toContain("ask once, warmly");
+    // A reply that never reached them doesn't count as asking.
+    await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", status: "SEND_FAILED", createdAt: at(MON, "10:00") });
+    expect(await block()).toContain("ask once, warmly");
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", createdAt: at(MON, "11:00") });
     expect(await block()).toContain("You've asked if they want to restart: just answer what they say");
   });

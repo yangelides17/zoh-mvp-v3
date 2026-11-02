@@ -248,10 +248,9 @@ export function showsPlan(text: string | null): boolean {
 }
 
 /**
- * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
- * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
+ * #109: ZOH replied after their stop (the stop's own confirmation aside): the restart question was asked.
+ * A failed send doesn't count: they never saw it, so the question is still to ask.
  */
-/** #109: ZOH replied after their stop (the stop's own confirmation aside): the restart question was asked. */
 async function repliedSinceStop(db: Db, tester: Tester, since: Date): Promise<boolean> {
   const [row] = await db
     .select({ id: messages.id })
@@ -262,12 +261,17 @@ async function repliedSinceStop(db: Db, tester: Tester, since: Date): Promise<bo
         eq(messages.direction, "outbound"),
         gte(messages.createdAt, since),
         ne(messages.content, OPT_OUT_CONFIRMATION),
+        sql`coalesce(${messages.status}, '') <> 'SEND_FAILED'`,
       ),
     )
     .limit(1);
   return row !== undefined;
 }
 
+/**
+ * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
+ * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
+ */
 export async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
   const rows = await db
     .select({ content: messages.content })
