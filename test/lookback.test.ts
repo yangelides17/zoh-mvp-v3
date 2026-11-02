@@ -291,7 +291,10 @@ describe("the state block on Sunday", () => {
     // The text that celebrates their proof can't record the recap; the next one can.
     expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
     await say(sam, "outbound", at(SUN2, "19:28"), "Page 120! How did it feel?");
-    expect(await block(at(SUN2, "19:30"))).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
+    const second = await block(at(SUN2, "19:30"));
+    expect(second).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
+    // #102: the text that ends the reflection carries the recap, even when they're done or rushed.
+    expect(second).toContain("then the week (WEEK LOOK-BACK) in that same text, even when they're done or rushed");
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
     expect(await block(at(SAT, "19:27"))).not.toContain("then the week");
