@@ -13,7 +13,7 @@ import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../m
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { safeError } from "../errors.js";
-import { alertFailure, alertUnstop } from "../console/alerts.js";
+import { alertFailure, alertTextedAfterStop } from "../console/alerts.js";
 import { devCommandOffReply, isJumpText, isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
 import { jumpSettled, onTesterClock, testerNow } from "../testers/clock.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
@@ -482,9 +482,9 @@ async function runCommands(
     if (moved) inbound = (await db.select().from(messages).where(eq(messages.id, inbound.id)))[0] ?? inbound;
     log.info(ctx, "Dev account reset; starting fresh");
   } else if (tester.stoppedAt) {
-    tester = await updateTester(db, tester.id, { stoppedAt: null });
-    log.info(ctx, "Opted-out tester texted again; un-stopped");
-    await alertUnstop(db, tester.id, inbound.id, at);
+    // #109: a text gets a reply, never a restart: ZOH starts nothing until they say yes (restart_coaching).
+    log.info(ctx, "Opted-out tester texted again; replying, still stopped");
+    await alertTextedAfterStop(db, tester.id, tester.stoppedAt, at);
     // They texted us themselves: take them off Sendblue's opt-out list so the reply gets through.
     if (deps.sendblue) {
       try {

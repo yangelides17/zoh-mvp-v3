@@ -77,8 +77,20 @@ export async function alertStop(db: Db, testerId: string, stoppedAt: Date, how: 
   await raiseAlert(db, { testerId, topic: "stop", key: `stop:${testerId}:${stoppedAt.getTime()}`, body: `Opted out (${how})`, at: stoppedAt });
 }
 
-export async function alertUnstop(db: Db, testerId: string, messageId: string, at: Date): Promise<void> {
-  await raiseAlert(db, { testerId, topic: "unstop", key: `unstop:${messageId}`, body: "Texted again after stopping: un-stopped", at });
+/** #109: their first text after a stop (one per stop). They stay stopped until they say yes to restarting. */
+export async function alertTextedAfterStop(db: Db, testerId: string, stoppedAt: Date, at: Date): Promise<void> {
+  await raiseAlert(db, {
+    testerId,
+    topic: "unstop",
+    key: `unstop:${testerId}:${stoppedAt.getTime()}`,
+    body: "Texted again after stopping: still stopped until they say yes to restarting",
+    at,
+  });
+}
+
+/** #109: they said yes to restarting after a stop (one per stop). */
+export async function alertRestart(db: Db, testerId: string, stoppedAt: Date, at: Date): Promise<void> {
+  await raiseAlert(db, { testerId, topic: "restart", key: `restart:${testerId}:${stoppedAt.getTime()}`, body: "Restarted after stopping: ZOH's texts start again", at });
 }
 
 /** Word for word; the same feedback twice (a retried reply) is one alert. */

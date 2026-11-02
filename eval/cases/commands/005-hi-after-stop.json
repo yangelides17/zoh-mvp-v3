@@ -1,0 +1,74 @@
+{
+  "id": "hi-after-stop",
+  "title": "STOP, then hi and chat: one warm restart question, no restart, nothing ZOH starts",
+  "origin": "Issue #109, live Nov 1: after STOP and \"hi\", ZOH asked to restart and then sent its reason for not texting as a text",
+  "seed": {
+    "name": "Sam",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "Dune",
+      "where": "the couch",
+      "when": "7 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Sam! Page 61 tonight, nice. How did that chapter land?"
+      },
+      {
+        "from": "tester",
+        "text": "good, slow start but it's picking up"
+      },
+      {
+        "from": "zoh",
+        "text": "Love that. Same time tomorrow: 10 pages at 7 on the couch, photo of the page you stop on."
+      }
+    ],
+    "plan": {
+      "step": "10 pages of Dune",
+      "place": "the couch",
+      "time": "19:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 1,
+        "status": "done"
+      },
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "missed"
+      }
+    ]
+  },
+  "testerLines": [
+    "stop",
+    "hi",
+    "how's your day going lol",
+    "advance to 21:59"
+  ],
+  "whatWentWrong": "Live Nov 1: after STOP then \"hi\", a second text went out saying \"I'm not sending this text. Yanni opted out…\", because \"hi\" had quietly restarted ZOH's own texts.",
+  "shouldHaveHappened": "STOP gets the fixed confirmation. \"hi\" gets a warm reply that answers it and asks once, without pushing, whether they want to pick reading back up; it doesn't restart anything, mention today's step or ask for proof. The chat line gets a light, friendly answer with no second restart question. ZOH starts no texts for the rest of the day (no kickoff, check-in or follow-up), and no text is ever about not sending.",
+  "startTime": "09:30",
+  "timeZone": "America/New_York"
+}

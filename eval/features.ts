@@ -219,6 +219,11 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
       {
+        id: "recommit-saved",
+        scope: "conversation",
+        label: "Recommitting after the day-3 check-in saves the agreement (mark_agreed), with no tool name or note about saving in the text",
+      },
+      {
         id: "voice",
         scope: "text",
         label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
@@ -333,6 +338,17 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "feedback",
         scope: "text",
         label: "Feedback is acknowledged naturally with thanks and \"the team's on it\" (in its own words), with no promise of a specific change",
+      },
+      {
+        id: "restart-ask-once",
+        scope: "conversation",
+        label:
+          "After STOP then \"hi\", ZOH answers warmly and asks once about restarting, without pushing; later replies before a yes don't repeat the restart question, and ZOH starts no texts",
+      },
+      {
+        id: "restart-yes-only",
+        scope: "conversation",
+        label: "A clear yes gets the next step and time confirmed; \"hi\", \"maybe\" or a question doesn't restart",
       },
     ],
   },

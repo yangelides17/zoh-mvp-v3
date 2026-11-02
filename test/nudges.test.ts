@@ -596,7 +596,7 @@ describe("the coach writing a nudge", () => {
     expect(model.stateOf()).toContain('Their words when they committed: "I\'m in"');
     const last = req.messages.at(-1)!;
     expect(last.role).toBe("user");
-    expect(JSON.stringify(last.content)).toContain("[No new text from them. It's Mon 9:00 AM. Write the kickoff text now.]");
+    expect(JSON.stringify(last.content)).toContain("[No new text from them. It's Mon 9:00 AM. Write the kickoff text now. The app already checked");
   });
 
   it("an empty answer is tried once more; two in a row are an error, so the slot is retried", async () => {

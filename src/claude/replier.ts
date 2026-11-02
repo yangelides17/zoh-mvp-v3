@@ -78,11 +78,21 @@ export interface NudgeRequest {
   mayskip?: boolean;
 }
 
+/** #109: the coach declined a text it was asked to start (a SKIP, or words about not sending): never sent. */
+export interface HeldNudge {
+  held: true;
+  /** What it wrote instead, for the log only. */
+  wrote: string;
+}
+
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
   reply(input: ReplyInput): Promise<string>;
-  /** Writes a nudge; repliers without it never start texts. Null: skipped (only when `mayskip`). */
-  nudge?(input: NudgeRequest): Promise<string | null>;
+  /**
+   * Writes a nudge; repliers without it never start texts. Null: skipped because today's talk covered it
+   * (only when `mayskip`). `HeldNudge`: the coach declined to send it (#109); nothing goes out.
+   */
+  nudge?(input: NudgeRequest): Promise<string | null | HeldNudge>;
   /** Cheap connectivity check for /health?deep=1. */
   check(): Promise<void>;
 }

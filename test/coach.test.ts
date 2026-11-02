@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { COACH_HISTORY_CAP, createCoach, MAX_ROUNDS } from "../src/coach/coach.js";
+import { COACH_HISTORY_CAP, createCoach, DECLINE_NOTE, hasToolNameLine, MAX_ROUNDS, readsAsSendDecision, TOOL_AS_TEXT_NOTE, withoutToolNames } from "../src/coach/coach.js";
 import {
   buildStateBlock,
   CORE_VOICE,
@@ -470,7 +470,7 @@ describe("opting out and failures", () => {
 describe("skipping a kickoff (#42)", () => {
   const lastNote = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
 
-  it("SKIP skips only when it was offered; otherwise it's retried and never sent", async () => {
+  it("SKIP skips only when it was offered; otherwise it's held, never sent (#109)", async () => {
     await text(ME, "Start");
     const me = await tester();
     const coach = createCoach({ db: t.db, model, voice: "v" });
@@ -482,11 +482,82 @@ describe("skipping a kickoff (#42)", () => {
     expect(await coach.nudge!({ ...ask, mayskip: true })).toBeNull();
     expect(lastNote()).toContain("answer only SKIP");
 
-    model.script("SKIP", "Hey! Ten pages at 7 tonight.");
+    model.script("Hey! Ten pages at 7 tonight.");
     expect(await coach.nudge!(ask)).toBe("Hey! Ten pages at 7 tonight.");
-    expect(lastNote()).not.toContain("SKIP");
-    model.script("SKIP", "SKIP.");
+    expect(lastNote()).not.toContain("already texted today");
+    model.script("SKIP.");
+    expect(await coach.nudge!(ask)).toEqual({ held: true, wrote: "SKIP." });
+    model.script("", "");
     await expect(coach.nudge!(ask)).rejects.toThrow(/no nudge text/);
+  });
+});
+
+describe("a tool's name written as text (#108)", () => {
+  it("gets one more round to make the call: the tool runs and the text they get is clean", async () => {
+    model.script("save_name\n\nNice to meet you!", { tools: [{ name: "save_name", input: { name: "Sam" } }] }, "Nice to meet you, Sam!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Nice to meet you, Sam!"]);
+    expect((await tester()).name).toBe("Sam");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(TOOL_AS_TEXT_NOTE);
+  });
+
+  it("still there after that one note: the line is removed before sending", async () => {
+    model.script("save_name\nHi!", "`save_name()`\n\nHi there!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Hi there!"]);
+  });
+
+  it("matches only a line that's just a tool's name", () => {
+    const names = ["mark_agreed", "save_name"];
+    // Delivered live on Nov 1, word for word.
+    const leaked = "mark_agreed\n\nGood, Yanni. That’s what I wanted to hear. At 6:30 it's 3 minutes at home.";
+    expect(hasToolNameLine(leaked, names)).toBe(true);
+    expect(withoutToolNames(leaked, names)).toBe("Good, Yanni. That’s what I wanted to hear. At 6:30 it's 3 minutes at home.");
+    expect(hasToolNameLine("You marked it agreed: mark_agreed is done", names)).toBe(false);
+    expect(hasToolNameLine("Agreed.", names)).toBe(false);
+  });
+
+  it("a text ZOH starts never carries one either", async () => {
+    await text(ME, "Start");
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    model.script("mark_on_it\nHey! Ten pages at 7 tonight.");
+    expect(await coach.nudge!({ tester: await tester(), turns: [], now: new Date("2026-11-02T14:00:00Z"), moment: "kickoff" })).toBe("Hey! Ten pages at 7 tonight.");
+  });
+});
+
+describe("a text ZOH starts that it declines (#109)", () => {
+  const lastNote = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
+  // Delivered live on Nov 1: the coach's reasons for not texting, sent as texts.
+  const LEAKED = [
+    "I'm not sending this text. Yanni opted out with “STOP\" on Nov 22. His \"hi\" afterward didn't ask to restart, and I've already asked once whether he wants to. Until he says he wants to restart, I won't text him.",
+    "[No text sent. It’s 9:05 PM, which is inside Yanni's quiet hours (9 pm to 8 am), and he hasn't sent a step or texted today. The Sunday look-back can only go out in quiet hours right after a late step, so I'm holding it. The recap can go in the next text he sends, or after 8 am.]",
+  ];
+
+  it("every text it starts may answer SKIP, and any decline is held, never sent", async () => {
+    await text(ME, "Start");
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    const ask = { tester: await tester(), turns: [], now: new Date("2026-11-02T23:00:00Z"), moment: "followup" as const };
+    for (const leaked of LEAKED) {
+      model.script(leaked);
+      expect(await coach.nudge!(ask)).toEqual({ held: true, wrote: leaked });
+      expect(lastNote()).toContain(DECLINE_NOTE.trim());
+    }
+    model.script("SKIP");
+    expect(await coach.nudge!(ask)).toEqual({ held: true, wrote: "SKIP" });
+  });
+
+  it("only text about not sending counts: coaching that mentions holding or skipping goes out", () => {
+    for (const leaked of LEAKED) expect(readsAsSendDecision(leaked)).toBe(true);
+    expect(readsAsSendDecision("Not sending anything else tonight.")).toBe(true);
+    for (const fine of [
+      "I'm holding you to 7 pm 😤",
+      "Skipping it isn't an option: 10 pages at 7.",
+      "No text needed back, just the photo when you're done.",
+      "I won't let you off that easy. 10 pages at 7?",
+      "Hey Sam [quick one]: 10 pages at 7 tonight?",
+    ]) {
+      expect(readsAsSendDecision(fine)).toBe(false);
+    }
   });
 });
 

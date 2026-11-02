@@ -104,11 +104,15 @@ async function walk(deps: JumperDeps, clock: () => Date, testerId: string, jumpI
 /** "⏩ Wed Oct 30, 7:30 am · sent: kickoff 9:00 am, check-in 6:50 pm · Tue missed · next: follow-up 7:50 pm (in 1h)". */
 async function logLine(db: Db, tester: Tester, from: Date, to: Date): Promise<string> {
   const within = (column: AnyPgColumn) => and(gt(column, from), lte(column, to));
-  const sent = await db
-    .select({ moment: nudges.moment, at: nudges.createdAt })
-    .from(nudges)
-    .where(and(eq(nudges.testerId, tester.id), eq(nudges.status, "sent"), within(nudges.createdAt)))
-    .orderBy(asc(nudges.createdAt));
+  const slots = (status: "sent" | "held") =>
+    db
+      .select({ moment: nudges.moment, at: nudges.createdAt })
+      .from(nudges)
+      .where(and(eq(nudges.testerId, tester.id), eq(nudges.status, status), within(nudges.createdAt)))
+      .orderBy(asc(nudges.createdAt));
+  const sent = await slots("sent");
+  // #109: texts the coach declined: nothing went out, so they're never listed as sent.
+  const held = await slots("held");
   const missed = await db
     .select({ date: stepDays.date })
     .from(stepDays)
@@ -129,6 +133,7 @@ async function logLine(db: Db, tester: Tester, from: Date, to: Date): Promise<st
   const when = (at: Date) => (serviceDate(at, clock) === today ? clockTime(at, tester) : `${weekday(serviceDate(at, clock))} ${clockTime(at, tester)}`);
   const parts = [`⏩ ${stamp(to, tester)}`];
   if (sent.length) parts.push(`sent: ${sent.map((n) => `${label(n.moment)} ${when(n.at)}`).join(", ")}`);
+  if (held.length) parts.push(`held, nothing sent: ${held.map((n) => `${label(n.moment)} ${when(n.at)}`).join(", ")}`);
   if (missed.length) parts.push(`${missed.map((d) => weekday(d.date)).join(", ")} missed`);
   if (filed.length) parts.push("memory filed");
   if (summaries.length) parts.push("weekly summary written");

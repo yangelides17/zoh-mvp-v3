@@ -8,6 +8,7 @@ import {
   maintenanceCheckins,
   MIN_DAYS_PER_WEEK,
   nudges,
+  pauses,
   planInputs,
   plans,
   PROOF_METHODS,
@@ -24,7 +25,7 @@ import {
   type Suggestion,
   type Tester,
 } from "../db/schema.js";
-import { alertFeedback, raiseAlert, saveFlag } from "../console/alerts.js";
+import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
 import { closeRequest, doneLine, findRequest } from "../console/requests.js";
 import { optOut } from "../testers/commands.js";
@@ -92,6 +93,7 @@ const schemas = {
     .object({ reason: text(200), back_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
     .strict(),
   resume_texts: z.object({}).strict(),
+  restart_coaching: z.object({}).strict(),
   send_feedback: z.object({ feedback: text(1000) }).strict(),
   flag_back_off: z.object({ reason: text(300) }).strict(),
   propose_plan: z.object(planFields).strict(),
@@ -240,6 +242,11 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "resume_texts",
     description: 'They\'re back from a pause ("I\'m back", "let\'s go again"): your texts start again.',
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "restart_coaching",
+    description: 'After a stop, only on a clear yes to starting again ("yes", "let\'s go", "I want to start again"); never on a hi, a maybe or a question. Your texts start again on the same plan.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -565,6 +572,16 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const ended = await endPause(db, tester.id, { at, by: "tester" });
       if (!ended) return { ok: false, error: "They aren't paused." };
       return saved(tester, "Pause lifted: your texts start again. Pick up where you left off.");
+    }
+
+    case "restart_coaching": {
+      const stoppedAt = tester.stoppedAt;
+      if (!stoppedAt) return { ok: false, error: "They aren't stopped." };
+      const restarted = await updateTester(db, tester.id, { stoppedAt: null });
+      // #109: the stopped stretch counts as a finished break: no day that ended in it is a miss, and going quiet counts from now.
+      await db.insert(pauses).values({ testerId: tester.id, startedAt: stoppedAt, reason: "stopped", endedAt: at, endedBy: "restart" });
+      await alertRestart(db, tester.id, stoppedAt, at);
+      return saved(restarted, "Restarted: your texts start again on the same plan. In this reply, confirm their next step and its time.");
     }
 
     case "send_feedback": {
