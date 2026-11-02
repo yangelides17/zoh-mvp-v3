@@ -138,7 +138,7 @@ describe("eval: nudge cases", () => {
     expect(result.transcript.map((l) => `${local(l.at)} ${l.text}${l.started ? " (started)" : ""}`)).toEqual([
       "09:00 nudge: kickoff (started)",
       "17:50 nudge: checkin (started)",
-      "19:00 nudge: followup (started)",
+      "18:35 nudge: followup (started)",
     ]);
     expect(graderUserPrompt({ plan, transcript: result.transcript })).toContain("[ZOH 1, started by ZOH, not a reply]");
     expect(result.savedState).toMatchObject({ nudges: [{ kind: "kickoff" }, { kind: "checkin" }, { kind: "followup" }] });

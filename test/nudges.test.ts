@@ -189,9 +189,9 @@ async function photo(when: Date, kind: "photo" | "voice" | "video" = "photo") {
 }
 
 describe("a step day", () => {
-  it("Pushy: kickoff when quiet hours end, check-in 10 minutes before, follow-up after step time + minutes + 30", async () => {
+  it("Pushy: kickoff when quiet hours end, check-in 10 minutes before, follow-up 5 minutes after the step should be done (#71)", async () => {
     await setup();
-    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:25"]);
     const rows = await t.db.select().from(nudges).orderBy(asc(nudges.createdAt));
     expect(rows.map((r) => [r.date, r.kind, r.status])).toEqual([
       [MON, "kickoff", "sent"],
@@ -217,12 +217,23 @@ describe("a step day", () => {
 
   it("uses 60 minutes when the plan doesn't say how long the step takes", async () => {
     await setup({ minutes: null });
-    expect(await day(MON, "19:00", "21:00")).toEqual(["followup@20:30"]);
+    expect(await day(MON, "19:00", "21:00")).toEqual(["followup@20:05"]);
+  });
+
+  it("the follow-up goes 5 minutes after the step should be done, once (#71)", async () => {
+    // 7:30 pm for 10 minutes: done by 7:40, follow-up 7:45, and no second one later (the old 8:10).
+    await setup({ time: "19:30", minutes: 10 });
+    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:20", "followup@19:45"]);
+  });
+
+  it("a 6:30 pm step lasting 10 minutes gets its follow-up at 6:45 (#71)", async () => {
+    await setup({ time: "18:30", minutes: 10 });
+    expect(await day(MON, "18:00", "21:59")).toEqual(["checkin@18:20", "followup@18:45"]);
   });
 
   it("merges kickoff and check-in when the step is within an hour of quiet hours ending", async () => {
     await setup({ time: "09:45" });
-    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff_checkin@09:00", "followup@10:35"]);
+    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff_checkin@09:00", "followup@10:10"]);
   });
 
   it("gives the coach the conversation and the moment", async () => {
@@ -237,14 +248,14 @@ describe("a step day", () => {
 
 describe("rule 1: never in quiet hours, never after stop", () => {
   it("respects custom quiet hours", async () => {
-    // The follow-up (9:20 pm) falls inside their quiet hours, so it never goes.
-    await setup({ quiet: ["21:00", "10:30"], time: "20:30" });
-    expect(await day(MON, "08:00", "23:59")).toEqual(["kickoff@10:30", "checkin@20:20"]);
+    // The follow-up (9:10 pm: 8:45 + 20 minutes + 5) falls inside their quiet hours, so it never goes.
+    await setup({ quiet: ["21:00", "10:30"], time: "20:45" });
+    expect(await day(MON, "08:00", "23:59")).toEqual(["kickoff@10:30", "checkin@20:35"]);
   });
 
   it("respects quiet hours that start after midnight: the evening's slots still belong to that day", async () => {
     await setup({ quiet: ["01:00", "11:00"], time: "23:30", minutes: 30 });
-    expect(await day(MON, "10:00", "02:00", TUE)).toEqual(["kickoff@11:00", "checkin@23:20", "followup@00:30"]);
+    expect(await day(MON, "10:00", "02:00", TUE)).toEqual(["kickoff@11:00", "checkin@23:20", "followup@00:05"]);
     const rows = await t.db.select().from(nudges);
     expect(rows.every((r) => r.date === MON)).toBe(true);
     // Monday ends at 1 am Tuesday: that's when its miss is recorded.
@@ -289,7 +300,7 @@ describe("rule 2: step days and rest days", () => {
     expect(await stepDay(tester, TUE)).toBeUndefined();
     // Monday (day 1, never ticked) was closed as a miss; the rest day in between doesn't break the ladder.
     expect(await stepDay(tester, MON)).toMatchObject({ status: "missed" });
-    expect(await day(WED, "08:00", "21:59")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(WED, "08:00", "21:59")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:25"]);
   });
 });
 
@@ -298,7 +309,7 @@ describe("rule 4: never more than 3 unanswered texts in a row", () => {
     const tester = await setup();
     await say(tester, "inbound", at(MON, "08:00"), "up early");
     await say(tester, "outbound", at(MON, "08:00"), "Love it");
-    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:25"]);
   });
 
   it("three unanswered nudges stop the day; their text resets the count", async () => {
@@ -307,21 +318,21 @@ describe("rule 4: never more than 3 unanswered texts in a row", () => {
       await t.db.insert(nudges).values({ testerId: tester.id, date: MON, kind, moment: "kickoff", status: "sent", createdAt: at(MON, "09:00") });
     }
     expect(await day(MON, "09:00", "21:59")).toEqual([]);
-    await say(tester, "inbound", at(MON, "19:30"), "reading now");
-    await say(tester, "outbound", at(MON, "19:30"), "Let's go");
-    expect(await day(MON, "19:35", "21:59")).toEqual(["followup@19:50"]);
+    await say(tester, "inbound", at(MON, "19:15"), "reading now");
+    await say(tester, "outbound", at(MON, "19:15"), "Let's go");
+    expect(await day(MON, "19:20", "21:59")).toEqual(["followup@19:25"]);
   });
 
   it("Steady: kickoff and follow-up", async () => {
     await setup({ pushiness: "steady" });
-    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "followup@19:50"]);
+    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "followup@19:25"]);
   });
 
   it("Steady: an early chat still leaves kickoff and follow-up", async () => {
     const tester = await setup({ pushiness: "steady" });
     await say(tester, "inbound", at(MON, "08:00"), "up early");
     await say(tester, "outbound", at(MON, "08:00"), "Love it");
-    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "followup@19:50"]);
+    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "followup@19:25"]);
   });
 
   it("Gentle: kickoff only", async () => {
@@ -408,7 +419,7 @@ describe("before the plan is locked", () => {
 describe("day 1", () => {
   it("locked today before step time: no kickoff, but today's check-in and follow-up", async () => {
     await setup({ startDate: MON, lockedAt: at(MON, "11:00") });
-    expect(await day(MON, "11:00", "21:59")).toEqual(["checkin@18:50", "followup@19:50"]);
+    expect(await day(MON, "11:00", "21:59")).toEqual(["checkin@18:50", "followup@19:25"]);
   });
 
   it("locked for tomorrow: nothing today, and no miss, until tomorrow's kickoff", async () => {
@@ -421,13 +432,13 @@ describe("day 1", () => {
   it("a one-off time for day 1 moves the check-in and follow-up, and skips slots from before the lock", async () => {
     await setup({ time: "07:30", startDate: MON, lockedAt: at(MON, "11:00") });
     expect(await tool("move_today", { time: "20:00" }, at(MON, "11:00"))).toMatchObject({ ok: true });
-    expect(await day(MON, "11:00", "21:59")).toEqual(["checkin@19:50", "followup@20:50"]);
+    expect(await day(MON, "11:00", "21:59")).toEqual(["checkin@19:50", "followup@20:25"]);
   });
 
   it("day 1 today on one of their off days works once it has a time", async () => {
     const tester = await setup({ days: ["wed", "fri", "sun"], startDate: MON, lockedAt: at(MON, "11:00") });
     expect(await tool("move_today", { time: "20:00" }, at(MON, "11:00"))).toMatchObject({ ok: true });
-    expect(await day(MON, "11:00", "22:00")).toEqual(["checkin@19:50", "followup@20:50"]);
+    expect(await day(MON, "11:00", "22:00")).toEqual(["checkin@19:50", "followup@20:25"]);
     expect(await stepDay(tester, MON)).toMatchObject({ status: "missed", movedTime: "20:00" });
   });
 });
@@ -437,7 +448,9 @@ describe("moving today and saying they're on it", () => {
     await setup();
     expect(await tick(MON, "09:00")).toEqual(["kickoff"]);
     await tool("move_today", { time: "21:00" }, at(MON, "12:00"));
-    expect(await day(MON, "12:05", "21:59")).toEqual(["checkin@20:50", "followup@21:50"]);
+    expect(await day(MON, "12:05", "21:59")).toEqual(["checkin@20:50", "followup@21:25"]);
+    // #71: only that day moves; the next day's follow-up is back to 7 pm + 20 minutes + 5.
+    expect(await day(TUE, "08:00", "21:59")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:25"]);
   });
 
   it("move_today is refused on a rest day", async () => {
@@ -450,14 +463,14 @@ describe("moving today and saying they're on it", () => {
     await say(tester, "inbound", at(MON, "18:30"), "heading to the couch now");
     await tool("mark_on_it", {}, at(MON, "18:30"));
     await say(tester, "outbound", at(MON, "18:30"), "Let's go!");
-    expect(await day(MON, "18:35", "21:59")).toEqual(["followup@19:50"]);
+    expect(await day(MON, "18:35", "21:59")).toEqual(["followup@19:25"]);
   });
 
   it("an unrelated text 5 minutes before skips nothing", async () => {
     const tester = await setup();
     await say(tester, "inbound", at(MON, "18:45"), "what's a good snack lol");
     await say(tester, "outbound", at(MON, "18:45"), "Ha, no idea. Ten pages at 7?");
-    expect(await day(MON, "18:50", "21:59")).toEqual(["checkin@18:50", "followup@19:50"]);
+    expect(await day(MON, "18:50", "21:59")).toEqual(["checkin@18:50", "followup@19:25"]);
   });
 });
 
@@ -632,10 +645,10 @@ describe("the slip ladder", () => {
   it("miss → harder kickoff → one text a day → day-3 check-in → pause and flag; texting again lifts it", async () => {
     const tester = await setup();
     // Monday: kickoff, check-in, follow-up, no reply: a miss at 10 pm.
-    expect(await day(MON, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(MON, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:25"]);
     expect(await stepDay(tester, MON)).toMatchObject({ status: "missed" });
     // The day after a miss: the kickoff pushes harder; the rest of the day as usual.
-    expect(await day(TUE, "09:00", "22:05")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(TUE, "09:00", "22:05")).toEqual(["after_miss@09:00", "checkin@18:50", "followup@19:25"]);
     // Two misses in a row: one text a day at their usual time.
     expect(await day(WED, "09:00", "22:05")).toEqual(["one_a_day@18:50"]);
     // Three: that text is the honest day-3 check-in.
@@ -696,7 +709,7 @@ describe("the slip ladder", () => {
     await day(TUE, "09:00", "22:05");
     expect(await day(WED, "09:00", "18:55")).toEqual(["one_a_day@18:50"]);
     await doneWithPhoto("reduced", at(WED, "19:30"), "5 pages");
-    expect(await day(THU, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
+    expect(await day(THU, "09:00", "22:05")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:25"]);
   });
 
   it("reworking the plan starts the ladder fresh", async () => {
@@ -705,7 +718,7 @@ describe("the slip ladder", () => {
     await day(TUE, "09:00", "22:05");
     expect(await tool("change_plan", { step: "5 pages of Dune", time: "21:00" }, at(WED, "08:00"))).toMatchObject({ ok: true });
     // Wednesday (untouched) is the new plan's first miss: Thursday is "after a miss", not day 3.
-    expect(await day(THU, "09:00", "21:55")).toEqual(["after_miss@09:00", "checkin@20:50", "followup@21:50"]);
+    expect(await day(THU, "09:00", "21:55")).toEqual(["after_miss@09:00", "checkin@20:50", "followup@21:25"]);
   });
 });
 
@@ -917,7 +930,7 @@ describe("proof (spec: Photo and voice verification)", () => {
     const after = await loadCoachState(t.db, tester, { now: at(WED, "09:35"), isFirstText: false });
     expect(after.days).toMatchObject({ streak: 1, missesInARow: 0 });
     // Off the ladder: a normal day again instead of one text at step time.
-    expect(await day(WED, "09:35", "21:55")).toEqual(["kickoff@09:35", "checkin@18:50", "followup@19:50"]);
+    expect(await day(WED, "09:35", "21:55")).toEqual(["kickoff@09:35", "checkin@18:50", "followup@19:25"]);
   });
 
   it("flag_proof_pattern saves a flag for the founders and sends nothing", async () => {
