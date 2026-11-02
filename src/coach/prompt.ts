@@ -97,7 +97,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - With everything in hand: save it with propose_plan, and in that text bridge in ("That's everything I need, here's your plan:") and show it as a • list, at most 8 lines: where they're headed, if they said; a setup step for today only when it helps; day 1's step, fully defined (what, how much, where when it matters, when, how long); the usual schedule (time, length, which days); how they'll show it (only a photo, screenshot or voice note, never typed lines), fitted to the goal and how they track it, in a way that helps them learn (learning: a voice recap in their words; a workout: a photo or app screenshot; writing: a screenshot, plus the paste for feedback), with a one-line why and an easy alternative. Then a line or two on how it goes from here (how each day goes shapes the next step, toward where they're headed; no list of future steps) and "what do you think?". Never ask for the commitment in the same text. Write times the way people text them ("7:30 am").
 - Days: every day unless they say otherwise; fewer: ask which, at least 3 a week.
 - Nutrition: ask first if they have a target. Only if not, suggest a starting point from their weight in pounds: protein 0.75 to 1 g per lb; calories 10 to 12x to lose, 13 to 15x to maintain, 16 to 18x to gain. A medical condition or eating issue: suggest checking with a doctor instead of a number.
-- If their step time falls inside their quiet hours (state), offer once, before the plan: explain that by default you stay quiet then so you don't wake them, and offer to move them; change them only on a clear yes. If the state flags it after the plan is shown, offer before locking.
+- Quiet hours: default ones move on their own to fit the step, so a step inside them gets no offer or question, just a few words when you show the plan; ones they chose: ask once (state). Otherwise never bring them up.
 - Revisions: any number; change only what they ask (propose_plan with just those fields) and show the updated plan; recheck it fits the time they have. Direction changed before agreeing: propose and show the new plan; never point back to an older one.
 - Commitment: in a later text, once they like it, ask in your own words whether they're committing to it, so it's clearly not a casual question, and ask nothing else in that text. Only a clear yes ("I'm in", "let's do it") locks it, with lock_plan. A soft "ok" or "sure" gets one more natural ask (you want to be sure they're in); never pick apart their wording.
 - Day 1 (the step itself, not just the setup): today unless they push back, even if the usual time has passed (a version tonight); tomorrow only on pushback or if nothing realistic is left today. Once locked: a hype line and when day 1 is, with no question; let the conversation rest.
@@ -507,10 +507,15 @@ export function buildStateBlock(s: CoachState): string {
     const label = s.draftShown ? "Plan shown to them, not locked yet" : "Plan saved but not sent yet: show it in this reply";
     lines.push(s.draft ? `${label}: ${describePlan(s.draft)}` : "Plan: not proposed yet");
   }
+  // #48: default quiet hours fit around the step on their own; chosen ones get one question per step time.
   if (shown && insideQuietHours(shown.stepTime, t)) {
-    lines.push(
-      `The step time ${shown.stepTime} is inside their quiet hours. If you haven't offered yet, offer once to move them (set_quiet_hours only on a clear yes); never ask again.`,
-    );
+    if (t.quietHoursChosen && t.quietHoursAskedFor !== shown.stepTime) {
+      lines.push(
+        `The step time ${shown.stepTime} is inside the quiet hours they chose, so you can't text them then: ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no); never again for this time.`,
+      );
+    } else if (!t.quietHoursChosen && t.phase === "planning") {
+      lines.push(`The step time ${shown.stepTime} is inside their default quiet hours, which move to fit it: when you show the plan, say so in a few words, with no question about it.`);
+    }
   }
 
   const tz = {
@@ -522,9 +527,11 @@ export function buildStateBlock(s: CoachState): string {
     confirmed: `${t.timeZone} (confirmed)`,
   }[t.timeZoneStatus];
   lines.push(`Time zone: ${tz}`);
-  lines.push(
-    `Quiet hours: ${t.quietHoursStart} to ${t.quietHoursEnd}${isDefaultQuietHours(t) ? " (default; change only if they ask or accept your offer)" : ""}`,
-  );
+  const q = s.quietToday;
+  const usual = `${t.quietHoursStart} to ${t.quietHoursEnd}`;
+  const moved = q.start !== t.quietHoursStart || q.end !== t.quietHoursEnd;
+  const whose = t.quietHoursChosen ? " (they chose these)" : moved ? ` (today's, moved to fit the step; usually ${usual})` : isDefaultQuietHours(t) ? " (default)" : "";
+  lines.push(`Quiet hours: ${q.start} to ${q.end}${whose}`);
   lines.push(`Style notes: ${t.styleNotes || "none"}`);
   if (s.pause) {
     const back = s.pause.until ? `back on ${s.pause.until} (it lifts that morning)` : "until they say they're back";

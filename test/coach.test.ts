@@ -514,8 +514,8 @@ describe("instructions", () => {
     // "Ha, I need a number" after "yea" to an either/or question.
     expect(ONBOARDING).toContain("never correcting them");
     expect(PLAN_AGREEMENT).toContain("a vague answer gets one kind follow-up, never a correction");
-    // Testers were asked to move quiet hours without ever hearing what they are.
-    expect(PLAN_AGREEMENT).toContain("explain that by default you stay quiet then");
+    // #48: default quiet hours move to fit the step on their own: no offer, no question, a few words.
+    expect(PLAN_AGREEMENT).toContain("default ones move on their own to fit the step, so a step inside them gets no offer or question");
   });
 
   it("give the coach no nudge wording to echo (#70)", () => {
