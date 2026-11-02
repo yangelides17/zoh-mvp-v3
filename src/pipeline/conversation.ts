@@ -40,6 +40,8 @@ export class ReplyLine {
   interrupted = false;
   /** "stop" or "reset": drop what's being written and send nothing for it. */
   cancelled = false;
+  /** Texts that were waiting when "stop" or "reset" came in: dropped with the draft, never answered. */
+  cancelledPending: PendingText[] = [];
   typing?: { on: boolean; at: number };
   private abort = new AbortController();
   private wakers = new Set<() => void>();
@@ -127,6 +129,8 @@ export class ReplyLines {
     const line = this.lines.get(phone);
     if (!line?.running) return;
     line.cancelled = true;
+    // Texts already waiting came before the stop: they're dropped too (texts after it are answered as usual).
+    line.cancelledPending.push(...line.pending.splice(0));
     line.interrupt();
   }
 }

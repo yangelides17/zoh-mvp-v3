@@ -115,6 +115,24 @@ describe("one reply to back-to-back texts", () => {
     const [hey] = await inboundRows();
     expect(hey).toMatchObject({ status: "REPLY_DROPPED" });
   });
+
+  it('"stop" right after a text that was still waiting: that text gets no reply either', async () => {
+    const lines = new ReplyLines();
+    t = await makeApp({ lines });
+    const draft = t.replier.pause();
+    await post("hey");
+    await draft.reached;
+    await post("wait");
+    await until(() => lines.line(ME).pending.length === 1);
+    await post("stop");
+    await until(() => lines.line(ME).cancelled);
+    draft.release();
+    await t.queue.idle();
+    expect(sent()).toEqual([OPT_OUT_CONFIRMATION]);
+    const [hey, wait] = await inboundRows();
+    expect(hey).toMatchObject({ status: "REPLY_DROPPED" });
+    expect(wait).toMatchObject({ status: "REPLY_DROPPED" });
+  });
 });
 
 describe("what a dropped draft did is kept and handed on (real coach)", () => {

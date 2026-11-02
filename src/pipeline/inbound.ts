@@ -165,7 +165,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
   let draftsDropped = 0;
   for (;;) {
     if (line.cancelled) {
-      for (const p of batch) {
+      for (const p of [...batch, ...line.cancelledPending.splice(0)]) {
         await mergeTimings(db, p.inbound.id, { ...p.timings, reply_dropped: "stop_or_reset" });
         await updateMessage(db, p.inbound.id, { status: "REPLY_DROPPED", error: null });
       }
@@ -297,7 +297,9 @@ async function draftReply(
         break;
       }
       log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; retrying");
-      await line.wait(delay);
+      // A typing signal also wakes the line: keep waiting out the delay unless they actually texted (or stopped).
+      const retryAt = Date.now() + delay;
+      while (!interrupted() && Date.now() < retryAt) await line.wait(retryAt - Date.now());
       if (interrupted()) return { kind: "dropped", draft: { actions: [] } };
     }
   }
