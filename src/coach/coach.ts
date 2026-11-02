@@ -74,6 +74,31 @@ export function droppedDraftNote(d: DroppedDraft | undefined): string | null {
 /** Lines per finished action in a dropped draft: the tool and the first line of its result. */
 const ACTION_RESULT_CHARS = 200;
 
+/** #108: told once when a reply's text has a tool's name on its own line (it wrote the call instead of making it). */
+export const TOOL_AS_TEXT_NOTE =
+  "[Your text had a tool's name on its own line, which they'd see. If you meant to use it, call it now; then write only your text to them. Don't mention this note.]";
+
+/** #108: a line that's only a tool's name ("mark_agreed", "`mark_agreed()`"). */
+function isToolNameLine(line: string, names: readonly string[]): boolean {
+  const bare = line.trim().replace(/^[`*_[(]+/, "").replace(/(\(\))?[`*_\]):.]*$/, "");
+  return bare !== "" && names.includes(bare);
+}
+
+/** #108: whether the text has a bare tool name on a line of its own. */
+export function hasToolNameLine(text: string, names: readonly string[]): boolean {
+  return text.split("\n").some((l) => isToolNameLine(l, names));
+}
+
+/** #108: the text without lines that are only a tool's name; it never reaches a tester. */
+export function withoutToolNames(text: string, names: readonly string[]): string {
+  return text
+    .split("\n")
+    .filter((l) => !isToolNameLine(l, names))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 /** The coach's whole answer when it skips a kickoff it was allowed to skip (#42), or declines any text it starts (#109). */
 export const SKIP = "SKIP";
 
@@ -158,6 +183,8 @@ export function createCoach(opts: CoachOptions): Replier {
       const trail: string[] = [];
       let retried = false;
       let nudgedPastSave = false;
+      let nudgedPastToolName = false;
+      const toolNames = tools.map((t) => t.name);
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
@@ -189,6 +216,14 @@ export function createCoach(opts: CoachOptions): Replier {
           trail.push(`empty:${response.stopReason}:${(response.raw ?? []).map((b) => b.type).join("+") || "no blocks"}`);
           continue;
         }
+        // #108: a tool's name written as text instead of called: once, ask it to make the call and write only the text.
+        if (calls.length === 0 && !last && !nudgedPastToolName && hasToolNameLine(text, toolNames)) {
+          nudgedPastToolName = true;
+          trail.push("tool-as-text");
+          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "user", content: [{ type: "text", text: TOOL_AS_TEXT_NOTE }] });
+          continue;
+        }
         // #37: after saving, a bare "Saved." left testers at a dead end: once, ask for the real reply.
         if (calls.length === 0 && !last && !nudgedPastSave && trail.some((r) => r.includes(":ok")) && onlySaveConfirmation(text)) {
           nudgedPastSave = true;
@@ -198,14 +233,14 @@ export function createCoach(opts: CoachOptions): Replier {
           continue;
         }
         if (calls.length === 0 || last) {
-          const reply = text || fallbackText;
+          const reply = withoutToolNames(text, toolNames) || fallbackText;
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
           checkpoint(reply);
           return reply;
         }
-        if (text) fallbackText = text;
+        if (text) fallbackText = withoutToolNames(text, toolNames);
 
         const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
@@ -293,7 +328,9 @@ export function createCoach(opts: CoachOptions): Replier {
         if (skipped && mayskip) return null;
         // #109: any other SKIP, or words about not sending, is a decline: held, never sent.
         if (skipped || readsAsSendDecision(text)) return { held: true, wrote: text } satisfies HeldNudge;
-        if (text) return text;
+        // #108: a tool's name on its own line never reaches them.
+        const clean = withoutToolNames(text, toolsFor(tester).map((t) => t.name));
+        if (clean) return clean;
         // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
         if (retried) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
         retried = true;

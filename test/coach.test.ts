@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { COACH_HISTORY_CAP, createCoach, DECLINE_NOTE, MAX_ROUNDS, readsAsSendDecision } from "../src/coach/coach.js";
+import { COACH_HISTORY_CAP, createCoach, DECLINE_NOTE, hasToolNameLine, MAX_ROUNDS, readsAsSendDecision, TOOL_AS_TEXT_NOTE, withoutToolNames } from "../src/coach/coach.js";
 import {
   buildStateBlock,
   CORE_VOICE,
@@ -489,6 +489,39 @@ describe("skipping a kickoff (#42)", () => {
     expect(await coach.nudge!(ask)).toEqual({ held: true, wrote: "SKIP." });
     model.script("", "");
     await expect(coach.nudge!(ask)).rejects.toThrow(/no nudge text/);
+  });
+});
+
+describe("a tool's name written as text (#108)", () => {
+  it("gets one more round to make the call: the tool runs and the text they get is clean", async () => {
+    model.script("save_name\n\nNice to meet you!", { tools: [{ name: "save_name", input: { name: "Sam" } }] }, "Nice to meet you, Sam!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Nice to meet you, Sam!"]);
+    expect((await tester()).name).toBe("Sam");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(TOOL_AS_TEXT_NOTE);
+  });
+
+  it("still there after that one note: the line is removed before sending", async () => {
+    model.script("save_name\nHi!", "`save_name()`\n\nHi there!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Hi there!"]);
+  });
+
+  it("matches only a line that's just a tool's name", () => {
+    const names = ["mark_agreed", "save_name"];
+    // Delivered live on Nov 1, word for word.
+    const leaked = "mark_agreed\n\nGood, Yanni. That’s what I wanted to hear. At 6:30 it's 3 minutes at home.";
+    expect(hasToolNameLine(leaked, names)).toBe(true);
+    expect(withoutToolNames(leaked, names)).toBe("Good, Yanni. That’s what I wanted to hear. At 6:30 it's 3 minutes at home.");
+    expect(hasToolNameLine("You marked it agreed: mark_agreed is done", names)).toBe(false);
+    expect(hasToolNameLine("Agreed.", names)).toBe(false);
+  });
+
+  it("a text ZOH starts never carries one either", async () => {
+    await text(ME, "Start");
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    model.script("mark_on_it\nHey! Ten pages at 7 tonight.");
+    expect(await coach.nudge!({ tester: await tester(), turns: [], now: new Date("2026-11-02T14:00:00Z"), moment: "kickoff" })).toBe("Hey! Ten pages at 7 tonight.");
   });
 });
 
