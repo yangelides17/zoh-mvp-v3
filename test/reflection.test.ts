@@ -265,7 +265,7 @@ describe("reflection that gets to know them (#93)", () => {
 });
 
 describe("the next step, agreed at the wrap-up", () => {
-  it("is saved for the next step day across a rest day, and that morning the kickoff reminds instead of re-asking", async () => {
+  it("is saved for the next step day across a rest day, and that morning the kickoff reminds and checks they're still in (#92)", async () => {
     await setup();
     await doneMonday();
     expect(await tool("set_today_step", { kind: "same", step: NEXT, day: "next" }, at(MON, "19:50"))).toMatchObject({ ok: true, message: `Step for ${WED} saved: ${NEXT}.` });
@@ -280,13 +280,30 @@ describe("the next step, agreed at the wrap-up", () => {
 
     const wed = await block(at(WED, "09:00"));
     expect(wed).toContain(`Today's step (set, holds for today): "${NEXT}"`);
-    expect(wed).toContain("They said yes to today's step ahead of time (Mon 7:55 PM): the kickoff reminds them of it (with any tip) and asks nothing");
+    expect(wed).toContain("They said yes to today's step ahead of time (Mon 7:55 PM): the kickoff reminds them of it (with any tip), and its one question checks they're still in, in words that show they already said yes");
+    expect(wed).not.toContain("asks nothing");
 
     // The kickoff that morning writes with that state.
     const model = new FakeClaudeModel("Morning Sam! 2 on, 1 off, 4 rounds tonight at 6:30. Same rule: slow enough to talk.");
     const coach = createCoach({ db: t.db, model, voice: "v" });
     await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
     expect(model.stateOf()).toContain("ahead of time (Mon 7:55 PM): the kickoff reminds them of it");
+  });
+
+  it("a changed step without a new yes is asked fresh; with a yes it stays agreed (#92)", async () => {
+    await setup();
+    await doneMonday();
+    await tool("set_today_step", { kind: "same", step: NEXT, day: "next", agreed: true }, at(MON, "19:55"), "let's go");
+    const CHANGED = "2 min jog, 1 min walk, 3 rounds at the park at 7 pm";
+    await tool("set_today_step", { kind: "same", step: CHANGED, day: "next", asked: "can we keep it at 3 rounds" }, at(MON, "20:10"), "can we keep it at 3 rounds");
+    expect(await row(WED)).toMatchObject({ step: CHANGED, agreedAt: null });
+    expect(await block(at(WED, "09:00"))).not.toContain("ahead of time");
+
+    await tool("set_today_step", { kind: "same", step: NEXT, day: "next", agreed: true, asked: "actually 4 is fine, let's do it" }, at(MON, "20:20"), "actually 4 is fine, let's do it");
+    expect(await row(WED)).toMatchObject({ step: NEXT, agreedAt: at(MON, "20:20") });
+    // The same step saved again without a yes keeps the yes.
+    await tool("set_today_step", { kind: "same", step: NEXT, day: "next" }, at(MON, "20:30"));
+    expect(await row(WED)).toMatchObject({ step: NEXT, agreedAt: at(MON, "20:20") });
   });
 
   it("without a yes, that morning's state has no reminder: the kickoff presents and asks as usual", async () => {

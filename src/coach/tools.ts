@@ -609,7 +609,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .where(eq(plans.id, draft.id));
       await alertPlanReview(db, tester, draft.id, version, at);
       // Day 1's step is the plan's (#76); later days get their own with set_today_step.
-      const day1 = { step: draft.step, stepKind: "first" as const, planId: draft.id, updatedAt: at };
+      // #92: locking is their yes to day 1's step, so a day 1 tomorrow gets a "still in?" kickoff, not a first ask.
+      const day1 = { step: draft.step, stepKind: "first" as const, planId: draft.id, agreedAt: at, updatedAt: at };
       await db
         .insert(stepDays)
         .values({ testerId: tester.id, date: startDate, ...day1 })
@@ -937,7 +938,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const usual = dayStep(plan);
       const stepMinutes = minutes ?? (easier ? usual.minutes : null);
       const stepProof = proof || (easier ? usual.proof : null);
-      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes, stepProof, ...(reason ? { nextReason: reason } : {}), ...(agreed ? { agreedAt: at } : {}) }, at);
+      // #92: a yes was to the old step; a changed step without a new yes is asked fresh.
+      const changed = !!row?.step && row.step !== step;
+      const yes = agreed ? { agreedAt: at } : changed ? { agreedAt: null } : {};
+      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes, stepProof, ...(reason ? { nextReason: reason } : {}), ...yes }, at);
       const extra = [stepMinutes !== null && `${stepMinutes} min`, stepProof && `proof: ${stepProof}`].filter(Boolean).join("; ");
       const inFull = easier ? " Give the smaller version in full in your text: what, how much, when and proof, never just that it's set." : "";
       return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.${inFull}`);

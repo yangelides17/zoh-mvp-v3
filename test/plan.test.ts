@@ -263,8 +263,8 @@ describe("locking", () => {
     ]);
     expect((await tester()).phase).toBe("active");
     expect(buildStateBlock(await state())).toContain("Locked plan (version 1, day 1 2026-10-27;");
-    // Day 1 is the plan's step, the "first" kind (#88).
-    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-27", step: GYM.step, stepKind: "first" }]);
+    // Day 1 is the plan's step, the "first" kind (#88), and locking is their yes to it (#92).
+    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-27", step: GYM.step, stepKind: "first", agreedAt: at }]);
   });
 
   it("starts tomorrow when asked, by the tester's local date", async () => {
@@ -275,6 +275,11 @@ describe("locking", () => {
     expect((await allPlans())[0]!.startDate).toBe("2026-10-28");
     expect(localDate(late, "America/New_York")).toBe("2026-10-27");
     expect(localDate(late, "America/Los_Angeles", 1)).toBe("2026-10-28");
+    // #92: the lock is a yes ahead, so day 1's kickoff checks they're still in rather than asking fresh.
+    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-28", agreedAt: late }]);
+    const morning = buildStateBlock(await state("", ME, new Date("2026-10-28T13:00:00Z")));
+    expect(morning).toContain("They said yes to today's step ahead of time (");
+    expect(morning).toContain("its one question checks they're still in, in words that show they already said yes");
   });
 
   it("works end to end: the coach locks on the tester's text", async () => {

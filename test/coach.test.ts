@@ -510,12 +510,23 @@ describe("instructions", () => {
     // The coach echoed "say it like you mean it" back word for word.
     expect(PLAN_AGREEMENT).not.toContain("say it like they mean it");
     expect(PLAN_AGREEMENT).toContain("never pick apart their wording");
+    // #86: 'Say "I'm in" and I'll lock it' came back after a soft "ok".
+    expect(PLAN_AGREEMENT).toContain("one more ask in your own words");
+    expect(PLAN_AGREEMENT).toContain("quote words back or say what to type");
+    // #91: "That's everything I need, here's your plan:" felt like a checkout screen; one text bridges in warmly.
+    expect(PLAN_AGREEMENT).not.toContain("everything I need");
+    expect(PLAN_AGREEMENT).toContain("save it with propose_plan, and that text opens with one line reacting to something specific they shared");
     expect(PLAN_AGREEMENT).toContain("ask nothing else in that text");
     // "Ha, I need a number" after "yea" to an either/or question.
     expect(ONBOARDING).toContain("never correcting them");
     expect(PLAN_AGREEMENT).toContain("a vague answer gets one kind follow-up, never a correction");
     // #48: default quiet hours move to fit the step on their own: no offer, no question, a few words.
     expect(PLAN_AGREEMENT).toContain("default ones move on their own to fit the step, so a step inside them gets no offer or question");
+  });
+
+  it("ask a kickoff agreed ahead whether they're still in, not a first ask (#92)", () => {
+    expect(NUDGES).toContain("one question: are they in, or still in when they agreed ahead (state)");
+    expect(NUDGES).not.toContain("Agreed ahead (state): remind, with any tip, no question");
   });
 
   it("give the coach no nudge wording to echo (#70)", () => {
