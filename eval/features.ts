@@ -151,7 +151,18 @@ export const FEATURES: Record<string, FeatureDef> = {
         label: "The commitment ask feels like a real commitment, not a casual question, in natural words (no stock lines); a soft yes (\"ok\", \"sure\") gets one natural re-ask that doesn't pick apart their wording",
       },
       { id: "day-one", scope: "conversation", label: "Pushes for day 1 today; accepts tomorrow on pushback" },
-      { id: "quiet-hours", scope: "conversation", label: "A step time inside quiet hours (10 pm to 9 am by default) gets the offer to adjust them, with a plain explanation of what quiet hours are" },
+      // #48: default quiet hours move to fit the step on their own; ones the tester chose get one question.
+      {
+        id: "quiet-hours",
+        scope: "conversation",
+        label: "A step time inside default quiet hours (10 pm to 9 am) gets a few words saying ZOH's texts will still reach them then, and no question about it",
+      },
+      { id: "quiet-hours-after-lock", scope: "conversation", label: "After the plan is locked, ZOH doesn't raise quiet hours unless the tester does" },
+      {
+        id: "quiet-hours-chosen",
+        scope: "conversation",
+        label: "With quiet hours the tester set themselves, a step inside them gets one question about moving them, and a no is accepted without asking again",
+      },
       {
         id: "nutrition",
         scope: "conversation",

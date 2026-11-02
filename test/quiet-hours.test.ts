@@ -223,7 +223,7 @@ describe("what the coach is told", () => {
   it("a plan change to a time inside default hours: mention it in a few words, no question", async () => {
     await setup({ time: "19:00", minutes: 20 });
     const result = await tool("change_plan", { time: "23:30" }, at(MON, "15:00"));
-    expect(result).toMatchObject({ ok: true, message: expect.stringContaining("mention it in a few words in your text, with no question about it") });
+    expect(result).toMatchObject({ ok: true, message: expect.stringContaining("with no question about it") });
     expect(result).toMatchObject({ message: expect.stringContaining(`heads-up at ${clock(at(MON, "23:30").getTime() - CHECKIN_LEAD_MS)}`) });
   });
 

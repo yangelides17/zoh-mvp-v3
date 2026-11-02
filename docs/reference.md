@@ -61,7 +61,12 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always
-  replies. After 3 days of silence ZOH stops automatic texts and the founders decide. One exception
+  replies. Default quiet hours stretch each day to fit that day's step (#48, `quietOn` in
+  `src/nudges/schedule.ts`): a night step moves the start to `QUIET_AFTER_FOLLOWUP_MS` after its
+  follow-up, a morning step moves the end to its heads-up; a moved time or temporary plan only for its
+  own days, and that day ends (and a miss is counted) at the stretched start. Hours the tester chose
+  (`quiet_hours_chosen`) never stretch: the coach asks once per step time (`quiet_hours_asked_for`).
+  After 3 days of silence ZOH stops automatic texts and the founders decide. One exception
   (#78): the Sunday look-back goes 30 minutes after a late Sunday step's follow-up, even inside quiet
   hours. Otherwise it goes at 6 pm Sunday, once a week (the `lookback` nudge row, also written when
   the recap happens in conversation), after 3 closed step days, and never while on the slip ladder.

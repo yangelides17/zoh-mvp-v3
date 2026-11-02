@@ -1139,7 +1139,7 @@ export function quietNote(tester: Tester, time: string, minutes: number | null):
   const day = "2000-01-01";
   const q = quietOn(day, { ...tester, steps: { [day]: { time, minutes } } });
   const headsUp = new Date(Date.UTC(2000, 0, 1, ...time.split(":").map(Number) as [number, number]) - CHECKIN_LEAD_MS).toISOString().slice(11, 16);
-  return ` ${time} is inside their default quiet hours, which move to fit it (${q.start} to ${q.end} that day), so your heads-up at ${headsUp} and any follow-up still reach them: mention it in a few words in your text, with no question about it.`;
+  return ` ${time} is inside their default quiet hours, which move to fit it (${q.start} to ${q.end} that day), so your heads-up at ${headsUp} and any follow-up still reach them: say in a few words that you'll reach them then (the heads-up time, not "quiet hours"), with no question about it.`;
 }
 
 function saved(tester: Tester, message: string): ToolResult {
