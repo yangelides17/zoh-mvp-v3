@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import {
   DraftDroppedError,
   NoReplyTextError,
+  type HeldNudge,
   toClaudeMessages,
   type DroppedDraft,
   type ClaudeModel,
@@ -73,8 +74,21 @@ export function droppedDraftNote(d: DroppedDraft | undefined): string | null {
 /** Lines per finished action in a dropped draft: the tool and the first line of its result. */
 const ACTION_RESULT_CHARS = 200;
 
-/** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
+/** The coach's whole answer when it skips a kickoff it was allowed to skip (#42), or declines any text it starts (#109). */
 export const SKIP = "SKIP";
+
+/** #109: every text ZOH starts may be declined, in one word, never with an explanation the tester would get. */
+export const DECLINE_NOTE = ` The app already checked this text may go now (stops, breaks and quiet hours included). If it still shouldn't, answer only ${SKIP}: never explain.`;
+
+/**
+ * #109: a text ZOH starts that's really a decision about sending ("I'm not sending this text…",
+ * "[No text sent. It's 9:05 PM…]"): the whole text in brackets, or opening with not sending.
+ */
+export function readsAsSendDecision(text: string): boolean {
+  const t = text.trim();
+  if (/^\[[\s\S]*\]$/.test(t)) return true;
+  return /^\W*(i'?m not sending|i am not sending|not sending (this|it|a text|anything)|no text (sent|goes out)|nothing (sent|goes out|to send)|i won'?t send (this|it|a text|anything))\b/i.test(t.replace(/’/g, "'"));
+}
 
 /**
  * Output budget per Claude call. Thinking counts against it, so it sits well above a text's
@@ -238,7 +252,7 @@ export function createCoach(opts: CoachOptions): Replier {
       const skip = mayskip
         ? ` They've already texted today. If today's conversation already covered what this text would say (today's step and time agreed, they're on it or moved it, or they owned a miss and talked through today's plan), answer only ${SKIP} and nothing goes out. Otherwise write it without repeating what was already said.`
         : "";
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}]`;
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}${DECLINE_NOTE}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
       let state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
@@ -277,8 +291,9 @@ export function createCoach(opts: CoachOptions): Replier {
         // Starts with SKIP: a reason tacked on after it ("SKIP. Alex already agreed") must never reach them.
         const skipped = new RegExp(`^\\W*${SKIP}\\b`).test(text);
         if (skipped && mayskip) return null;
-        // SKIP when it wasn't offered counts as no text: retried, never sent and never dropped.
-        if (text && !skipped) return text;
+        // #109: any other SKIP, or words about not sending, is a decline: held, never sent.
+        if (skipped || readsAsSendDecision(text)) return { held: true, wrote: text } satisfies HeldNudge;
+        if (text) return text;
         // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
         if (retried) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
         retried = true;

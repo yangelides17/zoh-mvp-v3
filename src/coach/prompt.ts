@@ -539,6 +539,15 @@ export function buildStateBlock(s: CoachState): string {
       `PAUSED: they asked for a break on ${localDate(s.pause.startedAt, t.timeZone)} (${s.pause.reason ?? "no reason saved"}), ${back}. You start no texts; answer as usual. Asking to pause again: they already are, say so in one line. Back ("I'm back", "let's go again"): resume_texts.`,
     );
   }
+  // #109: a text after a stop gets a reply, never a restart: that takes their clear yes.
+  if (s.stopped) {
+    const ask = s.stopped.asked
+      ? "You've asked if they want to restart: don't ask again; answer what they say."
+      : "Answer what they said, then ask once, warmly, if they want to pick their goal back up.";
+    lines.push(
+      `STOPPED: they texted stop on ${localDate(s.stopped.since, t.timeZone)}. Nothing you'd start goes out, and no coaching (no step, proof or check-in asks) until they restart. ${ask} A clear yes ("yes", "let's go"): restart_coaching, then confirm their next step and its time; a hi, maybe or question isn't one.`,
+    );
+  }
 
   // #75: "something_else" is the hidden off-list route; "Not sure?" isn't a goal, it opens the get-to-know-you chat.
   const listed = s.goals.filter((g) => g.slug !== OFF_LIST_SLUG).map((g) => `• ${g.title}`);

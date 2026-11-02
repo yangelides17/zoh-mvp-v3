@@ -33,6 +33,7 @@ import { addDays, nextStepDay, quietOn, serviceDate, type NudgeCarry, type Nudge
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
+import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
 import { loadWeek, type WeekLookback } from "./week.js";
 
@@ -106,6 +107,8 @@ export interface CoachState {
   teamNotes: ConsoleMessage[];
   /** The break they asked for, while it's on (spec "Commands and safety"). */
   pause?: Pause;
+  /** #109: they texted stop and haven't said yes to restarting; `asked`: ZOH has replied since, so it asked. */
+  stopped?: { since: Date; asked: boolean };
   /** The founders' requests to carry in ZOH's words, due now, oldest first. */
   teamRequests: ConsoleMessage[];
   /** Requests marked done in this reply: this text must still carry them. */
@@ -228,6 +231,7 @@ export async function loadCoachState(
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
     pause: await activePause(db, tester.id),
+    stopped: tester.stoppedAt ? { since: tester.stoppedAt, asked: await repliedSinceStop(db, tester, tester.stoppedAt) } : undefined,
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
     teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
@@ -247,6 +251,23 @@ export function showsPlan(text: string | null): boolean {
  * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
  * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
  */
+/** #109: ZOH replied after their stop (the stop's own confirmation aside): the restart question was asked. */
+async function repliedSinceStop(db: Db, tester: Tester, since: Date): Promise<boolean> {
+  const [row] = await db
+    .select({ id: messages.id })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.contactNumber, tester.phone),
+        eq(messages.direction, "outbound"),
+        gte(messages.createdAt, since),
+        ne(messages.content, OPT_OUT_CONFIRMATION),
+      ),
+    )
+    .limit(1);
+  return row !== undefined;
+}
+
 export async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
   const rows = await db
     .select({ content: messages.content })

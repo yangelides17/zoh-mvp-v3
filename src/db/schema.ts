@@ -424,7 +424,7 @@ export const flags = pgTable(
   (t) => [index("flags_tester_idx").on(t.testerId)],
 );
 
-export const PAUSE_END_REASONS = ["tester", "end_date", "stop", "reset"] as const;
+export const PAUSE_END_REASONS = ["tester", "end_date", "stop", "reset", "restart"] as const;
 export type PauseEndReason = (typeof PAUSE_END_REASONS)[number];
 
 /**
@@ -449,7 +449,7 @@ export const pauses = pgTable(
   (t) => [
     index("pauses_tester_idx").on(t.testerId),
     uniqueIndex("pauses_one_open_idx").on(t.testerId).where(sql`${t.endedAt} is null`),
-    check("pauses_ended_by_check", sql`${t.endedBy} in ('tester', 'end_date', 'stop', 'reset')`),
+    check("pauses_ended_by_check", sql`${t.endedBy} in ('tester', 'end_date', 'stop', 'reset', 'restart')`),
   ],
 );
 
@@ -558,7 +558,7 @@ export const takeaways = pgTable(
  * "skipped": the coach found the morning's conversation already covered the kickoff (#42), or gave the
  * Sunday recap in conversation (#78, kind "lookback"); nothing was sent.
  */
-export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped"] as const;
+export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped", "held"] as const;
 
 /**
  * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
@@ -583,7 +583,7 @@ export const nudges = pgTable(
   },
   (t) => [
     unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
-    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped')`),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped', 'held')`),
   ],
 );
 

@@ -153,6 +153,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **Sendblue opt-out:** Sendblue keeps its own opt-out list (STOP, QUIT, END, REVOKE, OPT OUT,
   CANCEL, UNSUBSCRIBE; START opts back in) and refuses every send to a number on it, the stop
   confirmation included. When a stopped tester texts us again, the app calls
-  `POST /api/v2/contacts/opt-out` with `opted_out: false` before replying (#12). Turning the filter off,
+  `POST /api/v2/contacts/opt-out` with `opted_out: false` before replying (#12). That only lets the
+  reply through: since #109 they stay stopped in ZOH (nothing it starts goes out) until they say a clear
+  yes to restarting (`restart_coaching`), which records the stopped stretch as a closed pause. Turning the filter off,
   narrowing its match, and whether Sendblue sends its own STOP reply need Sendblue support (#30).
 - **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s).

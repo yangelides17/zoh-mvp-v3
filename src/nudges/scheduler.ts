@@ -1,6 +1,6 @@
 import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
-import type { Replier } from "../claude/replier.js";
+import type { HeldNudge, Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
 import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
@@ -485,7 +485,7 @@ async function send(
   // Another tick (or the app before a restart) has this slot.
   if (!claim) return;
 
-  let text: string | null;
+  let text: string | null | HeldNudge;
   let carry: NudgeCarry | undefined;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
@@ -513,6 +513,12 @@ async function send(
   if (text === null) {
     await db.update(nudges).set({ status: "skipped" }).where(eq(nudges.id, claim.id));
     log.info(ctx, "Nudge skipped: today's conversation already covered it");
+    return;
+  }
+  // #109: the coach declined it: nothing goes out and the slot is used up for today (no retry).
+  if (typeof text !== "string") {
+    await db.update(nudges).set({ status: "held" }).where(eq(nudges.id, claim.id));
+    log.info({ ...ctx, wroteChars: text.wrote.length }, "Nudge held: the coach declined to send it");
     return;
   }
 

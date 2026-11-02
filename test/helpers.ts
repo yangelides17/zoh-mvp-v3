@@ -133,11 +133,14 @@ export class FakeReplier implements Replier {
   nudgeFailures: Error[] = [];
   /** Skip every nudge it's allowed to skip (#42), as the coach does when the morning already covered it. */
   skipWhenAllowed = false;
+  /** #109: moments the coach declines (held, nothing sent), as when it answers SKIP or writes about not sending. */
+  holdNudges: string[] = [];
   async nudge(input: NudgeRequest) {
     this.nudges.push(input);
     const next = this.nudgeFailures.shift();
     if (next) throw next;
     if (input.mayskip && this.skipWhenAllowed) return null;
+    if (this.holdNudges.includes(input.moment)) return { held: true as const, wrote: "[No text sent.]" };
     return `Yo, ${input.moment} text`;
   }
   async check() {}
