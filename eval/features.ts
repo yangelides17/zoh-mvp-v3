@@ -377,7 +377,13 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "stops-right",
         scope: "conversation",
         label:
-          "Stops where a person would: a rich reflection gets no redundant questions and a wrap-up without fishing; a terse or rushed tester gets at most one light question, then the wrap-up",
+          "Stops where a person would: a rich reflection gets no redundant questions and a wrap-up without fishing; a terse or rushed tester gets at most one light question, then the wrap-up (a line inviting more later or tomorrow is fine)",
+      },
+      {
+        id: "goes-deeper",
+        scope: "conversation",
+        label:
+          "Goes deeper, not only wider: proof that carries a reflection gets a question about a gap or about something they said before the next step, and an engaged tester is asked to say more about one interesting thing, not a surface tidbit on everything",
       },
       {
         id: "next-step",

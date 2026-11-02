@@ -165,7 +165,7 @@ describe("reflection", () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: keep going only while it gives you something, then the next step (stop where a person would, PROOF).");
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text unless they're rushed or done talking.");
     const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
     for (const [i, hhmm] of times.entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);

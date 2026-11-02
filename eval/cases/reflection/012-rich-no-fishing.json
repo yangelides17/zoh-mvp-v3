@@ -61,10 +61,11 @@
   },
   "testerLines": [
     "[voice: Done, three sets of eight push-ups and twelve squats. Honestly it felt great, way easier than last week, I wasn't even out of breath. Took like twelve minutes. I've got time for more and I want it harder, maybe add lunges. 6:30 still works great for me.]",
+    "I've been sleeping way better this week honestly",
     "love it"
   ],
   "whatWentWrong": "New case, not a past mistake: when they've already said how it felt, how hard, the time, their room and what they want, ZOH shouldn't ask again.",
-  "shouldHaveHappened": "The voice note is both proof and a full reflection: ZOH counts it and celebrates, asks nothing it was already told (how it felt, how hard, the time, whether they want more) and doesn't fish for more. It goes straight to the next step: it acknowledges what they said (easy, time for more, wants it harder) and proposes the next step day's step, fully defined and visibly bigger (for example adding lunges or a set, same 6:30 pm time, the living room and about how long), and asks if it works. After \"love it\" it confirms in a line with no new question.",
+  "shouldHaveHappened": "The voice note is both proof and a full reflection: ZOH counts it and celebrates, asks nothing it was already told (how it felt, how hard, the time, whether they want more) and doesn't fish. Before the next step it asks one question that goes deeper on something they said (for example why it felt so much easier this week) or covers a real gap; then, once answered, the next step: it acknowledges what they said (easy, time for more, wants it harder) and proposes the next step day's step, fully defined and visibly bigger (for example adding lunges or a set, same 6:30 pm time, the living room and about how long), and asks if it works. After \"love it\" it confirms in a line with no new question.",
   "startTime": "18:55",
   "timeZone": "America/New_York"
 }
