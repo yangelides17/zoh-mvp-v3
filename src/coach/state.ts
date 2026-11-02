@@ -61,6 +61,8 @@ export interface CoachState {
   openOptional: PlanQuestion[];
   /** The plan ZOH is proposing, not locked yet. */
   draft?: Plan;
+  /** #37: a text with the draft's • list has gone out since it was last saved (a revision resets it). */
+  draftShown: boolean;
   /** The latest locked plan for their current goal (a temporary one only until its end date). */
   plan?: Plan;
   /** Their local day (`serviceDate`): what "today" means for their step. */
@@ -180,6 +182,7 @@ export async function loadCoachState(
   const recentDays = await loadRecentDays(db, tester, today);
   const proof = await loadProof(db, tester, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
+  const draft = testerPlans.find((p) => p.status === "draft");
   const description = inputs?.extraNotes.goal_description;
   return {
     tester,
@@ -191,7 +194,8 @@ export async function loadCoachState(
     declinedGoals: declined.filter((f) => f.createdAt >= tester.contextStartedAt).map((f) => f.detail ?? ""),
     openRequired: open.filter((q) => q.required),
     openOptional: open.filter((q) => !q.required),
-    draft: testerPlans.find((p) => p.status === "draft"),
+    draft,
+    draftShown: draft ? await planSentSince(db, tester, draft.id) : false,
     plan,
     today,
     todayRow,
@@ -226,6 +230,33 @@ export async function loadCoachState(
     justFinished: opts.justFinished ?? false,
     now: opts.now,
   };
+}
+
+/** A text shows a plan when it carries it as a • list: two or more • lines (the plan format the prompt requires). */
+export function showsPlan(text: string | null): boolean {
+  return (text ?? "").split("\n").filter((line) => line.trim().startsWith("•")).length >= 2;
+}
+
+/**
+ * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
+ * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
+ */
+async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
+  const rows = await db
+    .select({ content: messages.content })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.contactNumber, tester.phone),
+        eq(messages.direction, "outbound"),
+        gte(messages.createdAt, tester.contextStartedAt),
+        // At or after: a reply is always sent after its own save (the test database's clock is millisecond-grained).
+        sql`${messages.createdAt} >= (select ${plans.updatedAt} from ${plans} where ${plans.id} = ${draftId})`,
+        sql`coalesce(${messages.status}, '') <> 'SEND_FAILED'`,
+        sql`${messages.content} like '%•%'`,
+      ),
+    );
+  return rows.some((r) => showsPlan(r.content));
 }
 
 /** Their closed step days before `date`, newest first: the last two weeks. */

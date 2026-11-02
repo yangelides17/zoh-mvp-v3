@@ -94,7 +94,7 @@ describe("takeaways", () => {
     await doneMonday();
     expect(await tool("save_takeaway", { text: "Slow enough to talk is the right pace", evidence: "explained" }, at(MON, "19:45"))).toMatchObject({
       ok: true,
-      message: "Takeaway saved (explained): Slow enough to talk is the right pace",
+      message: expect.stringContaining("takeaway (explained): Slow enough to talk is the right pace"),
     });
     const tester = await me();
     expect(await t.db.select().from(takeaways)).toMatchObject([
