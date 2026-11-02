@@ -7,6 +7,7 @@ import { consoleMessages, jumps, memoryPages, nudges, stepDays, type Tester } fr
 import { safeError } from "../errors.js";
 import type { MemoryKeeper } from "../memory/keeper.js";
 import { addDays, localClock, serviceDate, weekdayOf, zonedTime } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
 import { forecastNudge, type NudgeScheduler } from "../nudges/scheduler.js";
 import { maskNumber, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
@@ -122,8 +123,10 @@ async function logLine(db: Db, tester: Tester, from: Date, to: Date): Promise<st
     .from(consoleMessages)
     .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "summary"), within(consoleMessages.createdAt)));
 
-  const today = serviceDate(to, tester);
-  const when = (at: Date) => (serviceDate(at, tester) === today ? clockTime(at, tester) : `${weekday(serviceDate(at, tester))} ${clockTime(at, tester)}`);
+  // #48: days that fit around the step, as the scheduler sees them (a 12:30 am follow-up is still that night).
+  const clock = await withDaySteps(db, tester, to);
+  const today = serviceDate(to, clock);
+  const when = (at: Date) => (serviceDate(at, clock) === today ? clockTime(at, tester) : `${weekday(serviceDate(at, clock))} ${clockTime(at, tester)}`);
   const parts = [`⏩ ${stamp(to, tester)}`];
   if (sent.length) parts.push(`sent: ${sent.map((n) => `${label(n.moment)} ${when(n.at)}`).join(", ")}`);
   if (missed.length) parts.push(`${missed.map((d) => weekday(d.date)).join(", ")} missed`);

@@ -43,8 +43,8 @@ import {
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
-import { addDays, isStepDay, LOOKBACK_KIND, nextStepDay, weekdayOf } from "../nudges/schedule.js";
-import { dayStep, describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
+import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, quietOn, weekdayOf } from "../nudges/schedule.js";
+import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -86,6 +86,7 @@ const schemas = {
     .strict(),
   set_time_zone: z.object({ city: text(80), time_zone: text(60) }).strict(),
   set_quiet_hours: z.object({ start: clock, end: clock }).strict(),
+  keep_quiet_hours: z.object({}).strict(),
   opt_out: z.object({}).strict(),
   pause_texts: z
     .object({ reason: text(200), back_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
@@ -208,12 +209,18 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "set_quiet_hours",
-    description: 'When they ask, or accept your offer to move them around their step time: when ZOH must not start texts, local 24-hour "HH:MM".',
+    description:
+      'When they ask for quiet hours ("don\'t text me after 10"), or say yes to moving the ones they chose around their step time: when ZOH must not start texts, local 24-hour "HH:MM". Default quiet hours fit around the step on their own: never call this for that.',
     input_schema: {
       type: "object",
       properties: { start: { type: "string" }, end: { type: "string" } },
       required: ["start", "end"],
     },
+  },
+  {
+    name: "keep_quiet_hours",
+    description: "They said no to moving the quiet hours they chose around their step time: keeps them, and you won't ask again for that time.",
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "opt_out",
@@ -527,7 +534,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     case "set_quiet_hours": {
       const { start, end } = input as z.infer<typeof schemas.set_quiet_hours>;
       if (start === end) return { ok: false, error: "start and end can't be the same" };
-      return saved(await updateTester(db, tester.id, { quietHoursStart: start, quietHoursEnd: end }), `Quiet hours: ${start} to ${end}`);
+      // #48: hours they chose stay as set (no stretching around the step), and the step time's question is answered.
+      const asked = (state.plan ?? state.draft)?.stepTime ?? tester.quietHoursAskedFor;
+      const updated = await updateTester(db, tester.id, { quietHoursStart: start, quietHoursEnd: end, quietHoursChosen: true, quietHoursAskedFor: asked });
+      return saved(updated, `Quiet hours: ${start} to ${end}`);
+    }
+
+    case "keep_quiet_hours": {
+      const time = (state.plan ?? state.draft)?.stepTime;
+      if (!time) return { ok: false, error: "No step time to keep them around yet." };
+      const updated = await updateTester(db, tester.id, { quietHoursAskedFor: time });
+      return saved(updated, quietly(`quiet hours kept at ${tester.quietHoursStart} to ${tester.quietHoursEnd}; no texts from you at ${time}, and you won't ask about it again`));
     }
 
     case "opt_out": {
@@ -572,7 +589,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
         await db.insert(plans).values({ testerId: tester.id, goalSlug: state.goal.slug, status: "draft", ...merged, createdAt: onTesterClock(tester, at), updatedAt: onTesterClock(tester, at) });
       }
-      return saved(tester, `Kept (they haven't seen it yet; never just say it's saved): ${describePlan(merged)}. Show it in your text now.`);
+      return saved(tester, `Kept (they haven't seen it yet; never just say it's saved): ${describePlan(merged)}. Show it in your text now.${quietNote(tester, merged.stepTime, merged.minutes)}`);
     }
 
     case "lock_plan": {
@@ -670,7 +687,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
       const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
-      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}`);
+      const quiet = merged.stepTime !== state.plan.stepTime ? quietNote(tester, merged.stepTime, merged.minutes) : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}`);
     }
 
     case "switch_goal": {
@@ -893,7 +911,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       // They picked the new time themselves: that's agreeing to it.
       await saveToday(db, state, { movedTime: time, agreedAt: at }, at);
-      return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
+      const minutes = state.todayRow?.stepMinutes ?? plan.minutes;
+      return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).${quietNote(tester, time, minutes)}`);
     }
 
     case "set_today_step": {
@@ -1105,6 +1124,22 @@ function saidIt(words: string, latest: string): boolean {
 async function nextVersion(db: Db, testerId: string): Promise<number> {
   const [row] = await db.select({ v: max(plans.version) }).from(plans).where(eq(plans.testerId, testerId));
   return (row?.v ?? 0) + 1;
+}
+
+/**
+ * #48: what a step time inside quiet hours means for the text that sets it. Default hours fit around it on
+ * their own, so a few words and no question; hours they chose get one question, once per step time.
+ */
+export function quietNote(tester: Tester, time: string, minutes: number | null): string {
+  if (!insideQuietHours(time, tester)) return "";
+  if (tester.quietHoursChosen) {
+    if (tester.quietHoursAskedFor === time) return "";
+    return ` ${time} is inside the quiet hours they chose (${tester.quietHoursStart} to ${tester.quietHoursEnd}), so you can't text them then: ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no).`;
+  }
+  const day = "2000-01-01";
+  const q = quietOn(day, { ...tester, steps: { [day]: { time, minutes } } });
+  const headsUp = new Date(Date.UTC(2000, 0, 1, ...time.split(":").map(Number) as [number, number]) - CHECKIN_LEAD_MS).toISOString().slice(11, 16);
+  return ` ${time} is inside their default quiet hours, which move to fit it (${q.start} to ${q.end} that day), so your heads-up at ${headsUp} and any follow-up still reach them: say in a few words that you'll reach them then (the heads-up time, not "quiet hours"), with no question about it.`;
 }
 
 function saved(tester: Tester, message: string): ToolResult {

@@ -423,12 +423,14 @@ describe("quiet hours", () => {
     expect(insideQuietHours("23:30", sameDay)).toBe(false);
   });
 
-  it("flags a step time inside quiet hours, and a change agreed during planning is saved", async () => {
-    await run("propose_plan", { ...GYM, time: "23:30" });
-    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their quiet hours. If you haven't offered yet, offer once");
+  it("a step time inside default quiet hours gets a few words and no offer (#48); hours they set are saved as theirs", async () => {
+    const proposed = await run("propose_plan", { ...GYM, time: "23:30" });
+    expect(proposed).toMatchObject({ ok: true, message: expect.stringContaining("with no question about it") });
+    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their default quiet hours, which move to fit it");
+    expect(buildStateBlock(await state())).not.toContain("ask once");
     expect(await run("set_quiet_hours", { start: "00:00", end: "09:00" })).toMatchObject({ ok: true });
-    expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00" });
-    expect(buildStateBlock(await state())).not.toContain("inside their quiet hours");
+    expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00", quietHoursChosen: true });
+    expect(buildStateBlock(await state())).not.toContain("inside their default quiet hours");
   });
 });
 

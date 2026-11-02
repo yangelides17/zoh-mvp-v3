@@ -29,7 +29,8 @@ import {
 } from "../db/schema.js";
 import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
-import { addDays, nextStepDay, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { addDays, nextStepDay, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
@@ -67,6 +68,8 @@ export interface CoachState {
   plan?: Plan;
   /** Their local day (`serviceDate`): what "today" means for their step. */
   today: string;
+  /** #48: today's quiet hours, stretched around today's step when theirs are the default. */
+  quietToday: { start: string; end: string };
   /** What's recorded for today's step: its step (#76), done, a moved time, "on it". */
   todayRow?: StepDay;
   /** The next step day's row, when its step was set ahead (#77: agreed after today's reflection). */
@@ -129,7 +132,9 @@ export async function loadCoachState(
     goalCap?: number;
   },
 ): Promise<CoachState> {
-  const today = serviceDate(opts.now, tester);
+  // #48: their day (and its quiet hours) fits around the step: 12:30 am after an 11:50 pm step is still that night.
+  const clock = await withDaySteps(db, tester, opts.now);
+  const today = serviceDate(opts.now, clock);
   const testerGoalRows = await loadTesterGoals(db, tester.id);
   const since = gte(suggestions.createdAt, tester.contextStartedAt);
   const suggestionRows = await db
@@ -180,7 +185,7 @@ export async function loadCoachState(
     .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.day, addDays(today, -14)), gte(takeaways.createdAt, tester.contextStartedAt)))
     .orderBy(desc(takeaways.day), desc(takeaways.createdAt));
   const recentDays = await loadRecentDays(db, tester, today);
-  const proof = await loadProof(db, tester, today, opts.now);
+  const proof = await loadProof(db, clock, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
   const draft = testerPlans.find((p) => p.status === "draft");
   const description = inputs?.extraNotes.goal_description;
@@ -198,6 +203,7 @@ export async function loadCoachState(
     draftShown: draft ? await planSentSince(db, tester, draft.id) : false,
     plan,
     today,
+    quietToday: quietOn(today, clock),
     todayRow: forCoach(todayRow),
     nextRow: forCoach(nextRow),
     recentDays: recentDays.map((d) => forCoach(d)!),
@@ -241,7 +247,7 @@ export function showsPlan(text: string | null): boolean {
  * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
  * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
  */
-async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
+export async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
   const rows = await db
     .select({ content: messages.content })
     .from(messages)

@@ -86,6 +86,13 @@ export const testers = pgTable(
     /** Local "HH:MM". ZOH never starts a text between start and end. */
     quietHoursStart: text("quiet_hours_start").notNull().default(DEFAULT_QUIET_HOURS.start),
     quietHoursEnd: text("quiet_hours_end").notNull().default(DEFAULT_QUIET_HOURS.end),
+    /**
+     * #48: quiet hours they chose themselves ("don't text me after 10"). Default ones stretch on their own
+     * each day to fit the step's texts; chosen ones move only on their yes.
+     */
+    quietHoursChosen: boolean("quiet_hours_chosen").notNull().default(false),
+    /** #48: the step time ZOH last asked about moving chosen quiet hours for ("HH:MM"), so it asks once per time. */
+    quietHoursAskedFor: text("quiet_hours_asked_for"),
     pushiness: text("pushiness").notNull().default(DEFAULT_PUSHINESS),
     /** What they've asked of the coach's style ("fewer emojis"). */
     styleNotes: text("style_notes").notNull().default(""),

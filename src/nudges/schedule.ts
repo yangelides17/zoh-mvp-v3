@@ -25,6 +25,8 @@ export const CHECKIN_LEAD_MS = 10 * MINUTE;
 export const MERGE_WITHIN_MS = HOUR;
 /** The follow-up goes this long after the step should be finished. */
 export const FOLLOWUP_AFTER_MS = 30 * MINUTE;
+/** #48: a night step's quiet hours start this long after its follow-up would go. */
+export const QUIET_AFTER_FOLLOWUP_MS = 15 * MINUTE;
 /** How long a step takes when the plan doesn't say. */
 export const DEFAULT_STEP_MINUTES = 60;
 
@@ -79,10 +81,7 @@ export const REQUEST_CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kic
 
 export interface NudgeInput {
   now: Date;
-  tester: Pick<
-    Tester,
-    "timeZone" | "quietHoursStart" | "quietHoursEnd" | "phase" | "pushiness" | "stoppedAt" | "autoTextsPausedAt"
-  >;
+  tester: QuietClock & Pick<Tester, "phase" | "pushiness" | "stoppedAt" | "autoTextsPausedAt">;
   /** The latest locked plan for their current goal. */
   plan?: Pick<Plan, "stepTime" | "days" | "startDate" | "minutes" | "lockedAt">;
   /** Their step-day row for the service date (`serviceDate`), if any. */
@@ -131,7 +130,7 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
   const { now, tester } = input;
   if (tester.stoppedAt) return none("stopped");
   if (tester.autoTextsPausedAt) return none("paused");
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   const date = serviceDate(now, tester);
   // Only the look-back after a late Sunday step may land in quiet hours (#78).
   if (quiet) return lookback(input, date, true) ?? none("quiet hours");
@@ -271,7 +270,7 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
  */
 export function daysToClose(input: {
   now: Date;
-  tester: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">;
+  tester: QuietClock;
   plan: Pick<Plan, "days" | "startDate" | "lockedAt">;
   /** Rows for those days, by date. */
   rows: Record<string, Pick<StepDay, "status" | "movedTime"> | undefined>;
@@ -291,6 +290,52 @@ export function daysToClose(input: {
 }
 
 // ---- Their local day ----
+
+/** #48: a day's step, for fitting that day's quiet hours around it (local "HH:MM" and its length). */
+export interface DayStep {
+  time: string;
+  minutes: number | null;
+}
+
+/**
+ * A tester's clock: time zone and stored quiet hours, plus (#48) each local date's step when it's known
+ * (`withDaySteps`). Default quiet hours stretch around a step inside them; chosen ones never do.
+ */
+export type QuietClock = Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd"> &
+  Partial<Pick<Tester, "quietHoursChosen">> & { steps?: Record<string, DayStep | undefined> };
+
+/**
+ * #48: the quiet hours of one local day (that morning's end, that night's start). A step inside default
+ * quiet hours moves them so its texts get through: a night step pushes the start to just after its
+ * follow-up (step + length + FOLLOWUP_AFTER_MS + QUIET_AFTER_FOLLOWUP_MS); a morning step pulls the end
+ * to its heads-up (CHECKIN_LEAD_MS before). A step outside them, a rest day or chosen hours: unchanged.
+ */
+export function quietOn(date: string, t: QuietClock): { start: string; end: string } {
+  const stored = { start: t.quietHoursStart, end: t.quietHoursEnd };
+  const step = t.steps?.[date];
+  if (!step || t.quietHoursChosen || !insideQuietHours(step.time, t)) return stored;
+  const start = clockMinutes(stored.start);
+  const span = (clockMinutes(stored.end) - start + 1440) % 1440;
+  const into = (clockMinutes(step.time) - start + 1440) % 1440;
+  // Before the middle of the quiet stretch it's a night step (bed at 11:50, 12:30); after it, a morning one (a 6 am run).
+  if (into < span / 2) {
+    const after = (step.minutes ?? DEFAULT_STEP_MINUTES) + (FOLLOWUP_AFTER_MS + QUIET_AFTER_FOLLOWUP_MS) / MINUTE;
+    return { start: clockOf(start + Math.min(into + after, span)), end: stored.end };
+  }
+  return { start: stored.start, end: clockOf(start + into - CHECKIN_LEAD_MS / MINUTE) };
+}
+
+/** Whether ZOH's own texts are held at this moment: inside the quiet hours of the day it falls in (#48). */
+export function quietNow(at: Date, t: QuietClock): boolean {
+  const date = serviceDate(at, t);
+  const stretched = [addDays(date, -1), date].some((d) => {
+    const q = quietOn(d, t);
+    return q.start !== t.quietHoursStart || q.end !== t.quietHoursEnd;
+  });
+  if (!stretched) return insideQuietHours(localClock(at, t.timeZone), t);
+  const day = dayBounds(date, t);
+  return at.getTime() < day.start || at.getTime() >= day.end;
+}
 
 /**
  * Whether the plan has a step on this local date. Day 1 always does once it has a time set for it
@@ -340,20 +385,23 @@ export function localClock(at: Date, timeZone: string): string {
  * The local day a moment belongs to: the calendar date, except between midnight and quiet hours
  * when they start after midnight (quiet hours 00:30 to 08:00: 00:15 is still yesterday's evening).
  */
-export function serviceDate(at: Date, t: Pick<Tester, "timeZone" | "quietHoursStart">): string {
+export function serviceDate(at: Date, t: QuietClock): string {
   const date = localDate(at, t.timeZone);
-  return t.quietHoursStart < "12:00" && localClock(at, t.timeZone) < t.quietHoursStart ? addDays(date, -1) : date;
+  // #48: yesterday's own quiet hours, which a late step pushes past midnight.
+  const start = quietOn(addDays(date, -1), t).start;
+  return start < "12:00" && localClock(at, t.timeZone) < start ? addDays(date, -1) : date;
 }
 
-/** A local day's waking window: from the end of quiet hours to their start (that night, or after midnight). */
-export function dayBounds(date: string, t: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">): { start: number; end: number } {
-  const start = zonedTime(date, t.quietHoursEnd, t.timeZone).getTime();
-  const endDate = t.quietHoursStart >= "12:00" ? date : addDays(date, 1);
-  return { start, end: zonedTime(endDate, t.quietHoursStart, t.timeZone).getTime() };
+/** A local day's waking window: from the end of that day's quiet hours to their start (that night, or after midnight). */
+export function dayBounds(date: string, t: QuietClock): { start: number; end: number } {
+  const q = quietOn(date, t);
+  const start = zonedTime(date, q.end, t.timeZone).getTime();
+  const endDate = q.start >= "12:00" ? date : addDays(date, 1);
+  return { start, end: zonedTime(endDate, q.start, t.timeZone).getTime() };
 }
 
 /** The step's instant on a local day; a time after midnight (a late bedtime) belongs to that night. */
-export function stepInstant(date: string, time: string, t: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">): number {
+export function stepInstant(date: string, time: string, t: QuietClock): number {
   const day = dayBounds(date, t);
   const same = zonedTime(date, time, t.timeZone).getTime();
   if (same >= day.start) return same;
@@ -386,6 +434,16 @@ function offsetMs(at: Date, timeZone: string): number {
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
   const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
   return asUtc - Math.floor(at.getTime() / 1000) * 1000;
+}
+
+/** "HH:MM" as minutes after midnight, and back (any number of minutes, wrapped to a day). */
+function clockMinutes(clock: string): number {
+  const [h, m] = clock.split(":").map(Number);
+  return h! * 60 + m!;
+}
+function clockOf(minutes: number): string {
+  const m = ((minutes % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
 function none(reason: string): NudgeDecision {

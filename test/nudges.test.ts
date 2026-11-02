@@ -550,8 +550,8 @@ describe("dueNudge", () => {
   });
 
   it("puts the small hours in yesterday when quiet hours start after midnight", () => {
-    expect(serviceDate(at(TUE, "00:30"), { timeZone: TZ, quietHoursStart: "01:00" })).toBe(MON);
-    expect(serviceDate(at(TUE, "00:30"), { timeZone: TZ, quietHoursStart: "22:00" })).toBe(TUE);
+    expect(serviceDate(at(TUE, "00:30"), { timeZone: TZ, quietHoursStart: "01:00", quietHoursEnd: "09:00" })).toBe(MON);
+    expect(serviceDate(at(TUE, "00:30"), { timeZone: TZ, quietHoursStart: "22:00", quietHoursEnd: "09:00" })).toBe(TUE);
   });
 });
 

@@ -35,6 +35,8 @@ export const seedSchema = z.object({
     tracks_with: z.string().optional(),
   }),
   history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  /** #48: quiet hours they chose themselves (local "HH:MM"); without it, the default ones, which fit around the step. */
+  quiet_hours: z.object({ start: z.string().regex(/^\d{2}:\d{2}$/), end: z.string().regex(/^\d{2}:\d{2}$/) }).optional(),
   /** How long before the run's first line the seeded conversation ended (default: a minute before). */
   history_hours_ago: z.number().min(0).max(72).default(0),
   plan: z

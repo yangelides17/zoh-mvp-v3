@@ -341,6 +341,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       timeZoneStatus: status,
       consentAt: contextStart,
       contextStartedAt: contextStart,
+      ...(seed.quiet_hours ? { quietHoursStart: seed.quiet_hours.start, quietHoursEnd: seed.quiet_hours.end, quietHoursChosen: true } : {}),
       styleNotes: (seed.memory?.pages ?? [])
         .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
         .join("; "),
