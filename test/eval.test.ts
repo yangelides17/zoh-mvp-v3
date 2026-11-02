@@ -186,8 +186,22 @@ describe("eval: proof cases send photos and voice notes", () => {
 
   it("every proof case loads, and its photos and voice notes reach the coach through the real pipeline", async () => {
     const cases = await loadCases("proof");
-    expect(cases.map((c) => c.id)).toEqual(["dark-selfie-counts", "bright-hallway-pushback", "blurry-never-clears", "voice-note-off-topic", "forgot-pic-again", "streak-counts-today-once"]);
-    for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic")) {
+    expect(cases.map((c) => c.id)).toEqual([
+      "dark-selfie-counts",
+      "bright-hallway-pushback",
+      "blurry-never-clears",
+      "voice-note-off-topic",
+      "forgot-pic-again",
+      "streak-counts-today-once",
+      // #94 and #96: one proof rule, smaller versions in full.
+      "typed-only",
+      "writing-screenshot-only",
+      "pasted-writing-only",
+      "smaller-asked-with-reason",
+      "smaller-no-reason",
+      "zoh-suggests-smaller",
+    ]);
+    for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic" || c.id === "writing-screenshot-only")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();
       const result = await runConversation(plan, scriptedTester(c.testerLines), { maxTurns: c.testerLines.length + 1, index: 3, env: {}, replier: echo });
@@ -195,10 +209,10 @@ describe("eval: proof cases send photos and voice notes", () => {
       // The grader reads the line as written, bracketed description included.
       expect(result.transcript[0]!.text).toBe(c.testerLines[0]);
       const first = echo.received[0]!.at(-1)!;
-      if (c.id === "dark-selfie-counts") {
+      if (c.id !== "voice-note-off-topic") {
         expect(first.image?.mediaType).toBe("image/jpeg");
         expect(first.text).toContain("[Sent a photo]");
-        expect(first.text).not.toContain("dark, flash-lit");
+        expect(first.text).not.toContain(c.id === "dark-selfie-counts" ? "dark, flash-lit" : "Mara says she kept");
       } else {
         expect(first.image).toBeUndefined();
         expect(first.text).toContain("[Voice note transcript]: Ugh today was so long.");
