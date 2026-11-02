@@ -13,7 +13,7 @@ import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, sugge
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
-import { insideQuietHours } from "../coach/state.js";
+import { withDaySteps } from "./quiet.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
@@ -26,7 +26,7 @@ import {
   CARRYING_MOMENTS,
   daysToClose,
   dueNudge,
-  localClock,
+  quietNow,
   REPLY_IN_PROGRESS_MS,
   REQUEST_CARRYING_MOMENTS,
   serviceDate,
@@ -149,8 +149,10 @@ async function lastSent(db: Db, testerId: string, moment: string): Promise<strin
   return row?.content ?? undefined;
 }
 
-async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): Promise<NudgeDecision> {
+async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): Promise<NudgeDecision> {
   const { db } = deps;
+  // #48: each day's quiet hours fit around that day's step, for everything below (nudges, misses, the team's texts).
+  const tester = await withDaySteps(db, stored, now);
   const date = serviceDate(now, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
 
@@ -201,7 +203,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     }
   }
   const unanswered = input.nudgesSinceReply;
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   // A request still pending past its too-late-after time is dropped with a note, never sent late.
   const blockedBy = tester.stoppedAt
     ? "they texted stop"
@@ -257,12 +259,13 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
  */
 export async function forecastNudge(
   db: Db,
-  tester: Tester,
+  stored: Tester,
   from: Date,
   until: Date,
   stepMs: number,
 ): Promise<{ at: Date; moment: string } | undefined> {
-  if (await activePause(db, tester.id)) return undefined;
+  if (await activePause(db, stored.id)) return undefined;
+  const tester = await withDaySteps(db, stored, from);
   const date = serviceDate(from, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
   const base = await loadNudgeInput(db, tester, plan, date, from);
@@ -383,7 +386,7 @@ async function sendExact(
   const { now, lastInboundAt: lastIn, lastOutboundAt: lastOut } = ctx;
   const theirsIsLatest = lastIn !== undefined && (lastOut === undefined || lastIn > lastOut);
   if (theirsIsLatest && now.getTime() - lastIn.getTime() < REPLY_IN_PROGRESS_MS) return false;
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   const request = (await pendingExact(db, tester.id, now)).find((r) => r.sendNow || !quiet);
   if (!request) return false;
 

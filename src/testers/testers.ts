@@ -37,6 +37,8 @@ export type TesterPatch = Partial<
     | "clockOffsetMs"
     | "quietHoursStart"
     | "quietHoursEnd"
+    | "quietHoursChosen"
+    | "quietHoursAskedFor"
     | "pushiness"
     | "styleNotes"
     | "isTestUser"
