@@ -128,8 +128,10 @@ describe("a day's quiet hours (pure)", () => {
 
   it("past midnight still belongs to that night, and it isn't quiet yet", () => {
     const t0 = { ...stored, steps: { [MON]: { time: "23:50", minutes: 20 } } };
-    expect(serviceDate(at(TUE, "00:30"), t0)).toBe(MON);
-    expect(quietNow(at(TUE, "00:30"), t0)).toBe(false);
+    // 11:50 pm + 20 minutes: the follow-up at 12:15 am, quiet from 12:30 (#71: 20 minutes after it should be done).
+    expect(serviceDate(at(TUE, "00:20"), t0)).toBe(MON);
+    expect(quietNow(at(TUE, "00:20"), t0)).toBe(false);
+    expect(quietOn(MON, t0).start).toBe("00:30");
     expect(quietNow(at(TUE, "03:00"), t0)).toBe(true);
     // Without the step, 12:30 am is quiet and belongs to Tuesday, as before.
     expect(serviceDate(at(TUE, "00:30"), stored)).toBe(TUE);

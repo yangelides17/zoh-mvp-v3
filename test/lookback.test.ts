@@ -182,11 +182,11 @@ describe("the 6 pm Sunday recap", () => {
 });
 
 describe("the recap's time on a Sunday step day", () => {
-  it("a late Sunday step: 30 minutes after its follow-up, even into quiet hours", async () => {
-    // Every day at 9 pm for 30 minutes: the follow-up time is 10 pm, so the recap goes at 10:30 pm.
+  it("a late Sunday step: an hour after it should be done, even into quiet hours", async () => {
+    // Every day at 9 pm for 30 minutes: done by 9:30, the follow-up at 9:35, the recap at 10:30 pm (#71).
     const sam = await setup({ days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], time: "21:00", minutes: 30 });
     await done(sam, ...WEEK);
-    expect(await day(SUN2, "09:00", "21:35")).toEqual(["kickoff@09:00", "checkin@20:50"]);
+    expect(await day(SUN2, "09:00", "21:30")).toEqual(["kickoff@09:00", "checkin@20:50"]);
     await done(sam, SUN2);
     expect(await day(SUN2, "21:40", "23:55")).toEqual(["lookback@22:30"]);
   });
@@ -194,12 +194,22 @@ describe("the recap's time on a Sunday step day", () => {
   it("an evening step whose follow-up is after 6 pm: the recap waits for it, outside quiet hours", async () => {
     const sam = await setup({ days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] });
     await done(sam, ...WEEK);
-    // 7 pm, 20 minutes: follow-up time 7:50 pm, recap 8:20 pm, not 6 pm.
-    expect(await day(SUN2, "09:00", "19:25")).toEqual(["kickoff@09:00", "checkin@18:50"]);
+    // 7 pm, 20 minutes: done by 7:20, follow-up 7:25 pm, recap 8:20 pm, not 6 pm.
+    expect(await day(SUN2, "09:00", "19:20")).toEqual(["kickoff@09:00", "checkin@18:50"]);
     await done(sam, SUN2);
     await say(sam, "inbound", at(SUN2, "19:30"), "done! 12 pages");
     await say(sam, "outbound", at(SUN2, "19:31"), "Let's go!");
     expect(await day(SUN2, "19:30", "21:55")).toEqual(["lookback@20:20"]);
+  });
+
+  it("a 7:30 pm Sunday step lasting 10 minutes, no reply: follow-up 7:45, recap text 8:40 (#71)", async () => {
+    const sam = await setup({ days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], time: "19:30", minutes: 10 });
+    await done(sam, ...WEEK);
+    // A morning reply, then nothing: the check-in, the follow-up and the recap are the day's texts after it.
+    expect(await day(SUN2, "09:00", "09:00")).toEqual(["kickoff@09:00"]);
+    await say(sam, "inbound", at(SUN2, "09:30"), "on it tonight");
+    await say(sam, "outbound", at(SUN2, "09:31"), "Love it");
+    expect(await day(SUN2, "09:35", "21:55")).toEqual(["checkin@19:20", "followup@19:45", "lookback@20:40"]);
   });
 
   it("an ordinary Sunday: quiet hours hold, even after downtime", async () => {

@@ -231,12 +231,12 @@ describe("check-in and follow-up use the day's step", () => {
   it("the follow-up waits for the day's own length; a moved time still moves check-in and follow-up", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 45 }, at(MON, "08:00"));
-    // 7 pm + 45 min + 30 (the plan's 20 would make it 7:50).
-    expect(await day(MON, "09:00", "21:00")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@20:15"]);
+    // #71: 7 pm + 45 min + 5 = 7:50 (the plan's 20 would make it 7:25).
+    expect(await day(MON, "09:00", "21:00")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
 
     await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 10 }, at(WED, "08:00"));
     await tool("move_today", { time: "20:00" }, at(WED, "08:01"));
-    expect(await day(WED, "09:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@20:40"]);
+    expect(await day(WED, "09:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@20:15"]);
   });
 });
 

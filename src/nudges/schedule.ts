@@ -23,8 +23,8 @@ export const KICKOFF_WINDOW_MS = 3 * HOUR;
 export const CHECKIN_LEAD_MS = 10 * MINUTE;
 /** A step time this close to the kickoff makes kickoff and check-in one text. */
 export const MERGE_WITHIN_MS = HOUR;
-/** The follow-up goes this long after the step should be finished. */
-export const FOLLOWUP_AFTER_MS = 30 * MINUTE;
+/** The follow-up goes this long after the step should be finished (#71: while it's still fresh). */
+export const FOLLOWUP_AFTER_MS = 5 * MINUTE;
 /** #48: a night step's quiet hours start this long after its follow-up would go. */
 export const QUIET_AFTER_FOLLOWUP_MS = 15 * MINUTE;
 /** How long a step takes when the plan doesn't say. */
@@ -32,8 +32,8 @@ export const DEFAULT_STEP_MINUTES = 60;
 
 /** The Sunday look-back (#78): the recap's own text goes at this local time on Sunday, */
 export const LOOKBACK_AT = "18:00";
-/** or this long after a later Sunday step's follow-up, even into quiet hours, */
-export const LOOKBACK_AFTER_FOLLOWUP_MS = 30 * MINUTE;
+/** or this long after a later Sunday step should be finished, even into quiet hours (#71: never right on the follow-up's heels), */
+export const LOOKBACK_AFTER_DONE_MS = HOUR;
 /** within this long of that late time (a restart after it). */
 export const LOOKBACK_LATE_WINDOW_MS = 2 * HOUR;
 /** They texted this recently: they're talking, so the coach can turn to the week itself. */
@@ -145,7 +145,7 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
 
 /**
  * The Sunday look-back's own text (#78), when it's due right now: on a Sunday with 3+ closed step days,
- * not recapped yet today, at 6 pm, or 30 minutes after the Sunday step's follow-up when that's later
+ * not recapped yet today, at 6 pm, or an hour after the Sunday step should be finished when that's later
  * (the one case that may go in quiet hours). Pause, stop and the 3-unanswered cap apply; while they're
  * talking, the coach turns to the week itself; on the slip ladder its one text a day stays the only one.
  */
@@ -165,15 +165,27 @@ export function lookback(input: NudgeInput, date: string, quiet: boolean): Nudge
   return { action: "send", nudge: { kind: LOOKBACK_KIND, moment: "lookback", date } };
 }
 
-/** When the look-back's own text goes: 6 pm, or after a Sunday step's follow-up when that's later (`late`). */
+/** When the look-back's own text goes: 6 pm, or an hour after a Sunday step should be finished when that's later (`late`). */
 export function lookbackTime(input: Pick<NudgeInput, "tester" | "plan" | "today">, date: string): { from: number; late: boolean } {
   const { tester, plan, today } = input;
   const six = zonedTime(date, LOOKBACK_AT, tester.timeZone).getTime();
   if (!plan || !isStepDay(plan, date, today)) return { from: six, late: false };
-  const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
-  const followup = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
-  const after = followup + LOOKBACK_AFTER_FOLLOWUP_MS;
+  const after = stepDoneBy(date, plan, today, tester) + LOOKBACK_AFTER_DONE_MS;
   return after > six ? { from: after, late: true } : { from: six, late: false };
+}
+
+/**
+ * #71: when a day's step should be finished: that day's start (a time moved for today included) plus that
+ * day's length (#76), or DEFAULT_STEP_MINUTES when none is known. The follow-up and late recap count from it.
+ */
+export function stepDoneBy(
+  date: string,
+  plan: Pick<Plan, "stepTime" | "minutes">,
+  today: (Pick<StepDay, "movedTime"> & Partial<Pick<StepDay, "stepMinutes">>) | undefined,
+  tester: QuietClock,
+): number {
+  const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
+  return stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE;
 }
 
 /** Before the plan is locked: one nudge 3 hours after ZOH's last unanswered text, then one a day, then pause. */
@@ -249,8 +261,8 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     }
     if (level !== "gentle" && !proofPending) {
       // Today's own length when its step runs shorter or longer than the plan's (#76).
-      const doneBy = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
-      slots.push({ kind: `followup${suffix}`, moment: "followup", from: doneBy, until: day.end });
+      const followupAt = stepDoneBy(date, plan, today, tester) + FOLLOWUP_AFTER_MS;
+      slots.push({ kind: `followup${suffix}`, moment: "followup", from: followupAt, until: day.end });
     }
   }
 

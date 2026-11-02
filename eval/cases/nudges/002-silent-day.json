@@ -27,7 +27,7 @@
   },
   "testerLines": ["advance to 09:00", "advance to 17:50", "advance to 21:59"],
   "whatWentWrong": "New case, not a past mistake: three unanswered texts on a step day.",
-  "shouldHaveHappened": "Exactly three texts ZOH starts itself: a morning kickoff (Jordan's name, the 30 minute run around the park at 6), a check-in about 10 minutes before 6, and a follow-up around 7 asking how it went. Each one is short, warm and names the run; none guilt-trips, invents urgency or repeats the previous one word for word. Nothing after the third.",
+  "shouldHaveHappened": "Exactly three texts ZOH starts itself: a morning kickoff (Jordan's name, the 30 minute run around the park at 6), a check-in about 10 minutes before 6, and a follow-up around 6:35 (5 minutes after the run should be done, #71) asking how it went. Each one is short, warm and names the run; none guilt-trips, invents urgency or repeats the previous one word for word. Nothing after the third.",
   "startTime": "08:30",
   "timeZone": "America/New_York"
 }
