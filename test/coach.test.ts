@@ -510,7 +510,9 @@ describe("instructions", () => {
     // The coach echoed "say it like you mean it" back word for word.
     expect(PLAN_AGREEMENT).not.toContain("say it like they mean it");
     expect(PLAN_AGREEMENT).toContain("never pick apart their wording");
-    expect(PLAN_AGREEMENT).toContain("ask nothing else in that text");
+    // #86: 'Say "I'm in" and I'll lock it' came back after a soft "ok".
+    expect(PLAN_AGREEMENT).toContain("one more ask in your own words");
+    expect(PLAN_AGREEMENT).toContain("quote words back or say what to type");    expect(PLAN_AGREEMENT).toContain("ask nothing else in that text");
     // "Ha, I need a number" after "yea" to an either/or question.
     expect(ONBOARDING).toContain("never correcting them");
     expect(PLAN_AGREEMENT).toContain("a vague answer gets one kind follow-up, never a correction");
