@@ -193,12 +193,14 @@ describe("Metrics page", () => {
     expect((await testerMetrics(t.db, fresh, now)).understood).toBeUndefined();
   });
 
-  it("reflection rate is done days with a reflection out of done days, this week and overall (#88)", async () => {
+  it("reflection rate counts a done day only when they said how it went; a lesson alone doesn't (#93)", async () => {
     const sam = await seedSam();
-    // Done days: Nov 3, 4 (smaller), 6, 9, 10; Nov 5 was missed, so its reflection isn't counted.
+    // Done days: Nov 3, 4 (smaller), 6, 9, 10; Nov 5 was missed, so it isn't counted either way.
     for (const date of ["2026-11-03", "2026-11-05", "2026-11-09"]) {
-      await t.db.update(stepDays).set({ reflection: "went well" }).where(eq(stepDays.date, date));
+      await t.db.update(stepDays).set({ reflection: "felt easy, wants more", howItWentSaid: true }).where(eq(stepDays.date, date));
     }
+    // A lesson recap alone (or ZOH asking) leaves how-it-went unsaid.
+    await t.db.update(stepDays).set({ reflection: "learned to open with their problem" }).where(eq(stepDays.date, "2026-11-10"));
     const m = await testerMetrics(t.db, sam, now);
     expect(m.reflections).toEqual({ thisWeek: { of: 2, with: 1 }, overall: { of: 5, with: 2 } });
     const page = (await get("/console/metrics")).body;
@@ -207,6 +209,20 @@ describe("Metrics page", () => {
     const fresh = await tester(WESTERN, "New");
     expect((await testerMetrics(t.db, fresh, now)).reflections).toEqual({ thisWeek: undefined, overall: undefined });
     expect((await metricsPage(t.db, now, { includeTest: false })).rollup.reflectionRate).toBeCloseTo(0.4);
+  });
+
+  it("counts from when it shipped: days from before are left out of both sides, and the page says so (#93)", async () => {
+    const sam = await seedSam();
+    // Days from before the release have how-it-went empty: never recomputed, not counted.
+    for (const date of ["2026-11-03", "2026-11-04"]) {
+      await t.db.update(stepDays).set({ reflection: "went well", howItWentSaid: null }).where(eq(stepDays.date, date));
+    }
+    await t.db.update(stepDays).set({ howItWentSaid: true }).where(eq(stepDays.date, "2026-11-06"));
+    const m = await testerMetrics(t.db, sam, now);
+    expect(m.reflections.overall).toEqual({ of: 3, with: 1 });
+    expect(m.reflectionsSince).toBe("2026-11-05");
+    const page = (await get("/console/metrics")).body;
+    expect(page).toContain("a lesson alone doesn't count) out of done days, counted from 2026-11-05; earlier days aren't recomputed");
   });
 
   it("progressed lists harder steps with a count and first date; untagged days don't count (#88)", async () => {

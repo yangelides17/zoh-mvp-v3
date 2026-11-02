@@ -276,7 +276,7 @@ describe("the state block on Sunday", () => {
     await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "", mediaUrl: "https://cdn.example/p.jpg", mediaContentType: "image/jpeg", createdAt: at(SUN2, "19:25"), sentAt: at(SUN2, "19:25") });
     expect(await tool("mark_step_done", { how: "full", proof: "clear", seen: "Dune open at page 120" }, at(SUN2, "19:26"))).toMatchObject({ ok: true });
     const first = await block(at(SUN2, "19:27"));
-    expect(first).toContain("This reply is your 1st text since their proof today: if they're into it, follow up and keep the week (WEEK LOOK-BACK) for the wrap-up");
+    expect(first).toContain("This reply is your 1st text since their proof today: keep going only while it gives you something, then the week (WEEK LOOK-BACK)");
     expect(first).toContain("Not given yet: not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up");
     // The text that celebrates their proof can't record the recap; the next one can.
     expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
@@ -284,7 +284,7 @@ describe("the state block on Sunday", () => {
     expect(await block(at(SUN2, "19:30"))).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
-    expect(await block(at(SAT, "19:27"))).not.toContain("keep the week");
+    expect(await block(at(SAT, "19:27"))).not.toContain("then the week");
   });
 
   it("nothing understood yet says so, and no block before 3 step days", async () => {

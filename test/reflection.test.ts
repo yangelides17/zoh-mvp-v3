@@ -8,7 +8,11 @@ import { messages, plans, stepDays, takeaways, testers, type Tester } from "../s
 import { zonedTime } from "../src/nudges/schedule.js";
 import { setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
-import { FakeClaudeModel, ME, makeApp, type TestApp } from "./helpers.js";
+import { createNudgeScheduler } from "../src/nudges/scheduler.js";
+import type { Logger } from "../src/pipeline/inbound.js";
+import { FakeClaudeModel, LINE, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
+
+const silent: Logger = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
 
 /** Proof plus reflection, and reinforcement (#77). */
 
@@ -136,7 +140,7 @@ describe("reflection", () => {
     const without = await loadDaySummary(t.db, tester.id, "exercise", MON);
     expect(without.streak).toBe(1);
 
-    expect(await tool("save_reflection", { summary: "Second round was way easier once they slowed down" }, at(MON, "19:40"))).toMatchObject({ ok: true });
+    expect(await tool("save_reflection", { summary: "Second round was way easier once they slowed down", how_it_went: true, take: "Did the full step, found it easy." }, at(MON, "19:40"))).toMatchObject({ ok: true });
     expect(await row(MON)).toMatchObject({ status: "done", reflection: "Second round was way easier once they slowed down" });
     expect(await loadDaySummary(t.db, tester.id, "exercise", MON)).toEqual(without);
   });
@@ -145,30 +149,117 @@ describe("reflection", () => {
     await setup();
     await doneMonday();
     expect(await block(at(MON, "19:31"))).toContain("Today's reflection: none yet.");
-    await tool("save_reflection", { summary: "Easier when slower" }, at(MON, "19:40"));
-    expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower".');
+    await tool("save_reflection", { summary: "Easier when slower", how_it_went: true, take: "Slowed down, felt good." }, at(MON, "19:40"));
+    expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went.');
     expect(await block(at(WED, "09:00"))).toContain(`- Mon ${MON}, done: the plan's step (proof: Strava run, 1.2 mi; reflection: Easier when slower)`);
   });
 
   it("yesterday's reflection goes on yesterday's row; a reflection alone never closes a day", async () => {
     await setup();
-    await tool("save_reflection", { summary: "Too tired, work ran late", day: "yesterday" }, at(TUE, "09:00"));
-    expect(await row(MON)).toMatchObject({ reflection: "Too tired, work ran late", status: null });
+    await tool("save_reflection", { summary: "Too tired, work ran late", how_it_went: true, in_the_way: "work ran late", take: "Missed it after a long day.", day: "yesterday" }, at(TUE, "09:00"));
+    expect(await row(MON)).toMatchObject({ reflection: "Too tired, work ran late", status: null, inTheWay: "work ran late" });
   });
 
-  it("counts ZOH's texts since their proof today, for the soft wrap-up around the fifth", async () => {
+  it("counts ZOH's texts since their proof today: no fixed wrap-up at the fifth, a safety net at the eighth (#93)", async () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: if they're into it, follow up and keep the next step for the wrap-up; a short reply that's all they've got: wrap up now.");
-    for (const [i, hhmm] of ["19:31", "19:34", "19:38", "19:42"].entries()) {
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: keep going only while it gives you something, then the next step (stop where a person would, PROOF).");
+    const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
+    for (const [i, hhmm] of times.entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
+      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: keep going only while it gives you something");
     }
-    expect(await block(at(MON, "19:50"))).toContain("This reply is your 5th text since their proof today: start wrapping up unless they're clearly still going, then the next step.");
+    expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today: wrap up now unless they're clearly still going, then the next step.");
     // A text ZOH starts isn't part of the exchange.
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(MON, "19:50"), isFirstText: false, nudgeMoment: "followup" }));
     expect(nudge).not.toContain("since their proof");
+  });
+});
+
+describe("reflection that gets to know them (#93)", () => {
+  it("how it went is marked only when they said it; a lesson alone isn't, and once said it stays said", async () => {
+    await setup();
+    await doneMonday();
+    // A lesson recap alone: saved, but how it went is still unsaid.
+    expect(await tool("save_reflection", { summary: "Learned slow is the trick", how_it_went: false, take: "Lesson only so far." }, at(MON, "19:35"))).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ status: "done", howItWentSaid: false, reflection: "Learned slow is the trick", coachTake: "Lesson only so far." });
+    // The talk deepens: they say how it felt.
+    await tool("save_reflection", { summary: "Slow is the trick; felt easy, wants a 4th round", how_it_went: true, take: "Did the full step, found it easy, wants more." }, at(MON, "19:40"));
+    expect(await row(MON)).toMatchObject({ howItWentSaid: true, coachTake: "Did the full step, found it easy, wants more." });
+    // A later, fuller line without it doesn't unsay it.
+    await tool("save_reflection", { summary: "Slow is the trick; felt easy; 4 rounds next", how_it_went: false, take: "Ready for more." }, at(MON, "19:45"));
+    expect(await row(MON)).toMatchObject({ howItWentSaid: true, reflection: "Slow is the trick; felt easy; 4 rounds next" });
+    // how_it_went and take are required: the coach has to decide.
+    expect(await tool("save_reflection", { summary: "x" }, at(MON, "19:46"))).toMatchObject({ ok: false });
+  });
+
+  it("a done day without any reflection stays done", async () => {
+    await setup();
+    await doneMonday();
+    expect(await row(MON)).toMatchObject({ status: "done", reflection: null, howItWentSaid: false });
+    expect(await block(at(TUE, "10:00"))).toContain(`- Mon ${MON}, done`);
+  });
+
+  it("ZOH's take never reaches the coach's state or a text", async () => {
+    await setup();
+    await doneMonday();
+    const take = "FOUNDERS-ONLY: coasting, step too small.";
+    await tool("save_reflection", { summary: "Easy one", how_it_went: true, take }, at(MON, "19:40"));
+    expect((await state(at(MON, "19:41"))).todayRow?.coachTake).toBeNull();
+    expect(await block(at(MON, "19:41"))).not.toContain("FOUNDERS-ONLY");
+    expect(await block(at(WED, "09:00"))).not.toContain("FOUNDERS-ONLY");
+
+  });
+
+  it("end to end through the real coach: the take is saved, and never in a later state block or a text", async () => {
+    await t.close();
+    const model = new FakeClaudeModel();
+    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }) });
+    await setup();
+    await doneMonday();
+    const take = "FOUNDERS-ONLY: coasting, step too small.";
+    model.script({ tools: [{ name: "save_reflection", input: { summary: "Easy", how_it_went: true, take } }] }, "Love it. Four rounds Wednesday?");
+    await postWebhook(t, inboundEvent({ content: "felt easy honestly", from_number: ME, number: ME }));
+    await t.queue.idle();
+    expect(await row(MON)).toMatchObject({ coachTake: take, howItWentSaid: true });
+    expect(model.requests).toHaveLength(2);
+    for (let i = 0; i < model.requests.length; i++) expect(model.stateOf(i)).not.toContain("FOUNDERS-ONLY");
+    const out = await t.db.select().from(messages).where(eq(messages.direction, "outbound"));
+    expect(out.map((m) => m.content)).toEqual(["Love it. Four rounds Wednesday?"]);
+  });
+
+  it("no text is ever sent to chase a reflection", async () => {
+    await setup();
+    await doneMonday();
+    const scheduler = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: t.replier, allowedNumbers: [ME], lineNumber: LINE });
+    // The rest of Monday evening after the done day with no reflection: nothing goes out.
+    for (let ms = at(MON, "19:31").getTime(); ms <= at(MON, "23:59").getTime(); ms += 5 * 60_000) await scheduler.tick(new Date(ms));
+    expect(t.sendblue.sends).toHaveLength(0);
+    // Tuesday is a rest day: whatever goes out is the rest-day text, never about Monday's reflection.
+    for (let ms = at(TUE, "08:00").getTime(); ms <= at(TUE, "22:00").getTime(); ms += 5 * 60_000) await scheduler.tick(new Date(ms));
+    expect(t.replier.nudges.map((n) => n.moment).every((m) => m === "rest_day")).toBe(true);
+  });
+
+  it("yesterday's step done with no word on how it went: picked up in a line when they text, never in a text ZOH starts", async () => {
+    await setup();
+    await doneMonday();
+    expect(await block(at(TUE, "10:00"))).toContain("Yesterday's step was done with no word on how it went: you may pick it up in a line now");
+    const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(TUE, "10:00"), isFirstText: false, nudgeMoment: "rest_day" }));
+    expect(nudge).not.toContain("Yesterday's step was done");
+    // Once they've said, or for a day from before it was recorded, nothing.
+    await t.db.update(stepDays).set({ howItWentSaid: null }).where(eq(stepDays.date, MON));
+    expect(await block(at(TUE, "10:00"))).not.toContain("Yesterday's step was done");
+    await t.db.update(stepDays).set({ howItWentSaid: true }).where(eq(stepDays.date, MON));
+    expect(await block(at(TUE, "10:00"))).not.toContain("Yesterday's step was done");
+  });
+
+  it("the next step's reason is saved with it", async () => {
+    await setup();
+    await doneMonday();
+    await tool("set_today_step", { kind: "harder", step: NEXT, day: "next", reason: "Said 3 rounds felt easy and wants more" }, at(MON, "19:50"));
+    expect(await row(WED)).toMatchObject({ step: NEXT, nextReason: "Said 3 rounds felt easy and wants more" });
   });
 });
 
