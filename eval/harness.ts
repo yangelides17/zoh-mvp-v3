@@ -19,6 +19,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
+import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { COACH_AUTHOR } from "../src/console/requests.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
@@ -288,13 +289,35 @@ export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<T
   return out;
 }
 
-/** The tester's dated step log as the console coach sees it, for the grader (console feature). */
-async function readStepLog(app: EvalApp): Promise<string | undefined> {
+/**
+ * The tester's dated step log as the console coach sees it, for the grader (console feature). With
+ * `lessons`, also each day's proof and reflection and every lesson with its evidence (#103: the
+ * look-back's facts are checked against what ZOH had).
+ */
+async function readStepLog(app: EvalApp, lessons = false): Promise<string | undefined> {
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) return undefined;
   const today = serviceDate(app.clock.now(), tester);
   const plan = await loadCurrentPlan(app.db, tester, today);
-  return plan ? stepLog(app.db, tester, plan, today) : undefined;
+  if (!plan) return undefined;
+  const log = await stepLog(app.db, tester, plan, today);
+  if (!lessons) return log;
+  // Read at the end: today's step, proof and anything ZOH saved during the conversation are in it.
+  const days = await app.db.select().from(schema.stepDays).where(eq(schema.stepDays.testerId, tester.id)).orderBy(asc(schema.stepDays.date));
+  const kept = await app.db.select().from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id)).orderBy(asc(schema.takeaways.day));
+  // The same tally the coach's look-back reads, so the grader checks counts instead of recounting them.
+  const week = days.filter((d) => d.status && d.date >= weekStart(today) && d.date <= today);
+  const n = (status: string) => week.filter((d) => d.status === status).length;
+  return [
+    "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)",
+    `This week (${weekStart(today)} to today): ${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed.`,
+    log,
+    ...days.flatMap((d) => [
+      ...(d.proofSeen ? [`Proof for ${d.date}: ${d.proofSeen}`] : []),
+      ...(d.reflection ? [`Reflection for ${d.date}: ${d.reflection}`] : []),
+    ]),
+    ...kept.map((k) => `Lesson (${k.evidence}, ${k.day}): ${k.text}`),
+  ].join("\n");
 }
 
 /** Plays the tester's side: returns the next text, or null when the tester is done. */
@@ -332,6 +355,8 @@ export interface RunOptions {
   memory?: boolean;
   /** Show the grader what ZOH saved during the run. */
   saved?: boolean;
+  /** Show the grader the step log, lessons included, read at the end (console lines get it at the start). */
+  record?: boolean;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -651,7 +676,8 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
-      ...(record ? { record } : {}),
+      // #103: the look-back's facts include today's step, so its log is read once the conversation is over.
+      ...(opts.record ? { record: await readStepLog(app, true) } : record ? { record } : {}),
       ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,

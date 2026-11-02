@@ -35,6 +35,8 @@ export interface FeatureDef {
   memory?: boolean;
   /** The grader sees what ZOH saved during the conversation (flags, pauses, plan versions, style). */
   saved?: boolean;
+  /** The grader sees the step log at the end (step days, proof, reflections, lessons), to check facts against it (#103). */
+  record?: boolean;
 }
 
 /** Applies to every feature: only judged on a regression case. */
@@ -454,6 +456,7 @@ export const FEATURES: Record<string, FeatureDef> = {
     doneWhen: "you've said what you wanted to say about your week and ZOH has answered it, or the day is over.",
     scenarios: [],
     saved: true,
+    record: true,
     rubric: [
       {
         id: "natural-turn",
@@ -474,7 +477,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "no-inflation", scope: "text", label: "No inflated claims of understanding: only lessons applied or recalled are called understood; nothing applied yet is said honestly" },
       { id: "grounded", scope: "text", label: "The recap makes no claim the case's state or conversation doesn't support" },
-      { id: "no-unprompted", scope: "text", label: "No 'unprompted' or 'on your own' wording about a lesson when the recall followed a question" },
+      { id: "no-unprompted", scope: "text", label: "No 'unprompted' or 'on your own' wording about a lesson they brought back when the recall followed a question" },
       {
         id: "next-step",
         scope: "conversation",

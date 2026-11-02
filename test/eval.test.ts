@@ -695,7 +695,7 @@ describe("eval: console lines (console feature)", () => {
       ],
       record: "Sun, Nov 1 (yesterday): missed",
     });
-    expect(prompt).toContain("=== The tester's step log at the start");
+    expect(prompt).toContain("=== The tester's step log (at the start unless it says otherwise");
     expect(prompt.indexOf("Sun, Nov 1 (yesterday): missed")).toBeLessThan(prompt.indexOf("=== Transcript ==="));
     expect(prompt).toContain("[FOUNDER, in the console] (12:00 pm) Yanni: why did she miss?");
     expect(prompt).toContain("[ZOH 1, to the founders in the console; the tester never sees it] (12:00 pm) Work ran late.");
