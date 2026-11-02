@@ -319,6 +319,7 @@ describe("the console", () => {
       allowedNumbers: [DEV],
       routing: { appEnv: "staging", devNumbers: [DEV] },
     }).tick(new Date());
-    expect(t.sendblue.sends).toHaveLength(0);
+    // Only the refused text matters: on the wall clock, day 1's own kickoff can be due (its start date is fixed).
+    expect(t.sendblue.sends.filter((s) => s.content?.includes("Hey from Yanni"))).toHaveLength(0);
   });
 });

@@ -294,7 +294,9 @@ describe("after a jump", () => {
     const tester = await fresh(dev);
     expect(tester.clockOffsetMs).toBe(0);
     expect(tester.phase).toBe("onboarding");
-    const future = (d: Date | null) => d !== null && d.getTime() > real.getTime() + 60_000;
+    // Rows the database stamps itself carry the wall clock, which can be past the test's fixed date: the jump is 5 days, so this still catches it.
+    const now = Math.max(real.getTime(), Date.now());
+    const future = (d: Date | null) => d !== null && d.getTime() > now + 60_000;
     expect((await allMessages()).filter((m) => future(m.createdAt) || future(m.sentAt))).toEqual([]);
     expect((await t.db.select().from(flags).where(eq(flags.testerId, dev.id))).filter((f) => future(f.createdAt))).toEqual([]);
     expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.testerId, dev.id))).filter((c) => future(c.createdAt))).toEqual([]);
