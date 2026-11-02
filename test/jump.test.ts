@@ -189,7 +189,7 @@ describe("what happens on the way", () => {
     expect(slots.find((n) => n.moment === "checkin")?.status).toBe("held");
     const out = sendsSince(before);
     expect(out).toHaveLength(3);
-    expect(out[2]).toContain("sent: kickoff Mon 9:00 am, follow-up Mon 7:50 pm · held, nothing sent: check-in Mon 6:50 pm");
+    expect(out[2]).toContain("sent: kickoff Mon 9:00 am, follow-up Mon 7:25 pm · held, nothing sent: check-in Mon 6:50 pm");
   });
 
   it("a silent jump reaches the point where ZOH stops texting on its own, never past the 3-a-day cap", async () => {
