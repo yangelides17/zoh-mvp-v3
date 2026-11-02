@@ -496,7 +496,7 @@ async function send(
     const mayskip = textedToday && !carry && SKIPPABLE_MOMENTS.includes(nudge.moment);
     text = await deps.replier.nudge({
       tester,
-      turns: toTurns(history, "", {}),
+      turns: toTurns(history, new Map()),
       now,
       moment: nudge.moment,
       previous,

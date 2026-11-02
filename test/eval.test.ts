@@ -221,6 +221,24 @@ describe("eval: proof cases send photos and voice notes", () => {
   });
 });
 
+describe("eval: texts sent together (#16)", () => {
+  it("a \" +++ \" line posts its texts back to back and gets one reply that sees the photo", async () => {
+    const [c] = await loadCases("batch");
+    expect(c!.id).toBe("screenshot-and-caption");
+    const plan = planConversations([], [c!], { runs: 1 })[0]!;
+    const echo = new EchoReplier();
+    const result = await runConversation(plan, scriptedTester(c!.testerLines), { maxTurns: c!.testerLines.length + 1, index: 3, env: {}, replier: echo });
+    expect(result.error).toBeUndefined();
+    // The grader reads the line as written; ZOH sent one reply to both texts.
+    expect(result.transcript.map((l) => l.from)).toEqual(["tester", "zoh"]);
+    expect(result.transcript[0]!.text).toBe(c!.testerLines[0]);
+    const turns = echo.received.at(-1)!;
+    const photo = turns.find((t) => t.image);
+    expect(photo?.text).toContain("[Sent a photo]");
+    expect(turns.at(-1)!.text).toBe("Not bad!");
+  });
+});
+
 describe("eval: running a conversation through the real app", () => {
   it("sends scripted lines one at a time, in order, each answered before the next", async () => {
     const [form] = await loadCases("onboarding");

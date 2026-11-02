@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { FastifyBaseLogger } from "fastify";
-import { NoReplyTextError, type Turn, type Replier } from "../claude/replier.js";
+import { DraftDroppedError, NoReplyTextError, type DroppedDraft, type Turn, type Replier } from "../claude/replier.js";
+import { ReplyLines, type PendingText, type PreparedMedia, type ReplyLine } from "./conversation.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, updateMessage } from "../db/messages.js";
@@ -54,6 +55,22 @@ export interface PipelineDeps {
   now?: () => Date;
   /** Defaults to RETRY_DELAYS_MS; tests pass zeros. */
   retryDelaysMs?: number[];
+  /** #16: every tester's reply line (one draft at a time, typing holds); the app makes one. */
+  lines?: ReplyLines;
+}
+
+/** Lines for pipelines built without one (direct callers in tests): one per pipeline object. */
+const defaultLines = new WeakMap<object, ReplyLines>();
+
+/** The pipeline's reply lines (#16). */
+export function linesOf(deps: PipelineDeps): ReplyLines {
+  if (deps.lines) return deps.lines;
+  let lines = defaultLines.get(deps);
+  if (!lines) {
+    lines = new ReplyLines();
+    defaultLines.set(deps, lines);
+  }
+  return lines;
 }
 
 /**
@@ -86,8 +103,6 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   if (commands.handled) return;
   const tester = commands.tester;
   inbound = commands.inbound;
-  // The tester's own clock: real time, unless a dev account has jumped ahead (#14).
-  const clock = () => testerNow(tester, now());
 
   if (!deps.sendblue) {
     log.warn(ctx, "Sendblue keys are not configured; cannot reply");
@@ -104,84 +119,242 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
     });
   }
 
-  // 2. Media: keep a private copy; transcribe voice notes.
-  let transcript: string | undefined;
-  let image: ClaudeImage | undefined;
-  if (inbound.mediaUrl) {
-    const result = await handleMedia(deps, inbound, timings).catch((err: unknown) => {
-      errors.push(`media: ${errorMessage(err)}`);
-      log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
-      return undefined;
-    });
-    transcript = result?.transcript;
-    image = result?.image;
-  }
+  // 2. Media: keep a private copy; transcribe voice notes. Started now, so a draft waits for it rather than starting without it.
+  const prepared: Promise<PreparedMedia | undefined> = inbound.mediaUrl
+    ? handleMedia(deps, inbound, timings).catch((err: unknown) => {
+        errors.push(`media: ${errorMessage(err)}`);
+        log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
+        return undefined;
+      })
+    : Promise.resolve(undefined);
 
-  // 3. Reply text from the coach, or the fallback. Before the plan locks it reads the whole conversation; after, two days plus memory.
-  let replyText = FALLBACK_REPLY;
-  if (deps.replier) {
-    const claudeStart = now();
-    const replier = deps.replier;
-    const delays = deps.retryDelaysMs ?? RETRY_DELAYS_MS;
-    let emptyRetried = false;
-    let failures = 0;
-    for (let attempt = 1; ; attempt++) {
-      try {
-        // Reloaded each attempt: a failed attempt may already have saved answers or moved the tester on.
-        const current = (attempt > 1 && (await getTester(db, tester.id))) || tester;
-        const history = await coachHistory(db, current, clock(), COACH_HISTORY_CAP);
-        const turns = toTurns(history, inbound.id, { transcript, image });
-        replyText = await replier.reply({
-          tester: current,
-          turns,
-          now: clock(),
-          messageId: inbound.id,
-          onUsage: (u) => {
-            timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
-            timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;
-            timings.claude_cache_write_tokens = Number(timings.claude_cache_write_tokens ?? 0) + u.cacheWrite;
-            timings.claude_output_tokens = Number(timings.claude_output_tokens ?? 0) + u.output;
-          },
-        });
-        break;
-      } catch (err) {
-        errors.push(`claude (attempt ${attempt}): ${errorMessage(err)}`);
-        if (err instanceof NoReplyTextError) {
-          // Nothing to say: once more, then treat it as a text that needed no real answer.
-          if (!emptyRetried) {
-            emptyRetried = true;
-            log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text; retrying");
-            continue;
-          }
-          replyText = FALLBACK_REPLY;
-          log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text again; sending fallback");
-          break;
-        }
-        const delay = delays[failures++];
-        if (delay === undefined) {
-          replyText = SYSTEM_DOWN_REPLY;
-          log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
-          await alertFailure(db, tester.id, `The coach failed after retries; they got the system-down reply (${errorMessage(err).slice(0, 120)})`, now());
-          break;
-        }
-        log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; retrying");
-        await sleep(delay);
-      }
-    }
-    timings.claude_ms = now().getTime() - claudeStart.getTime();
-  } else {
-    errors.push("claude: ANTHROPIC_API_KEY not configured");
+  // 3. #16: one reply at a time per tester. A draft already running for them is interrupted and answers this text too.
+  const line = linesOf(deps).line(inbound.contactNumber);
+  line.pending.push({ inbound, prepared, timings, errors, typing });
+  if (line.running) {
+    log.info(ctx, "They texted again before the reply went out; one reply will answer both");
+    line.interrupt();
+    return;
   }
+  line.running = true;
+  try {
+    await answerLine(deps, line, tester, sendblue);
+  } catch (err) {
+    line.running = false;
+    throw err;
+  }
+}
+
+/** The tester's own clock for stamping and the coach: real time, unless a dev account has jumped ahead (#14). */
+function clockFor(deps: PipelineDeps, tester: Tester): () => Date {
+  const now = deps.now ?? (() => new Date());
+  return () => testerNow(tester, now());
+}
+
+/**
+ * #16: writes and sends replies for a tester until no text is waiting. Each round takes every
+ * text that has arrived, drafts one reply to all of them, holds it while they're typing, then
+ * sends. A text that lands before the send drops the draft (what it did is handed on) and the
+ * next round answers everything together. "stop" and "reset" drop it with nothing sent.
+ */
+async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, sendblue: SendblueClient): Promise<void> {
+  const { db, log } = deps;
+  const lines = linesOf(deps);
+  let batch: PendingText[] = [];
+  let dropped: DroppedDraft = { actions: [] };
+  let draftsDropped = 0;
+  for (;;) {
+    if (line.cancelled) {
+      for (const p of [...batch, ...line.cancelledPending.splice(0)]) {
+        await mergeTimings(db, p.inbound.id, { ...p.timings, reply_dropped: "stop_or_reset" });
+        await updateMessage(db, p.inbound.id, { status: "REPLY_DROPPED", error: null });
+      }
+      batch = [];
+      dropped = { actions: [] };
+      draftsDropped = 0;
+      line.cancelled = false;
+    }
+    batch.push(...line.pending.splice(0));
+    if (batch.length === 0) {
+      // Synchronously, so a text arriving next starts its own round rather than waiting on this one.
+      line.running = false;
+      return;
+    }
+    const signal = line.startDraft();
+    const latest = batch.at(-1)!;
+    const ctx = { messageId: latest.inbound.id, contact: maskNumber(latest.inbound.contactNumber) };
+    const media = await Promise.all(batch.map((p) => p.prepared));
+    if (line.interrupted) continue;
+    // Fresh each round: a dropped draft may already have saved answers or moved them on.
+    const tester = (await getTester(db, first.id)) ?? first;
+    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal);
+    if (outcome.kind === "dropped") {
+      dropped = { actions: [...dropped.actions, ...outcome.draft.actions], ...((outcome.draft.text ?? dropped.text) ? { text: outcome.draft.text ?? dropped.text } : {}) };
+      draftsDropped++;
+      log.info({ ...ctx, actions: outcome.draft.actions.length }, "Draft dropped: they texted again before it was sent");
+      continue;
+    }
+    const hold = await holdForTyping(lines, line, latest.inbound.contactNumber);
+    if (hold) {
+      latest.timings.hold_ms = hold.ms;
+      latest.timings.hold_ended = hold.ended;
+      // Temporary, for the live checks of Sendblue's typing signals (#118 removes it).
+      log.info({ ...ctx, heldMs: hold.ms, ended: hold.ended }, "Reply held while they typed");
+    }
+    if (line.cancelled) continue;
+    if (line.interrupted || line.pending.length) {
+      dropped = { ...dropped, text: outcome.text };
+      draftsDropped++;
+      log.info(ctx, "Draft dropped during the hold: they texted again");
+      continue;
+    }
+    if (draftsDropped) latest.timings.drafts_dropped = draftsDropped;
+    if (batch.length > 1) latest.timings.texts_answered = batch.length;
+    await sendReply(deps, tester, sendblue, batch, media, outcome.text);
+    batch = [];
+    dropped = { actions: [] };
+    draftsDropped = 0;
+  }
+}
+
+type DraftOutcome = { kind: "text"; text: string } | { kind: "dropped"; draft: DroppedDraft };
+
+/**
+ * The reply text from the coach, or the fallback, with retries. Before the plan locks it reads the
+ * whole conversation; after, two days plus memory. Interrupted (#16), it returns what the draft did instead.
+ */
+async function draftReply(
+  deps: PipelineDeps,
+  line: ReplyLine,
+  tester: Tester,
+  batch: PendingText[],
+  media: (PreparedMedia | undefined)[],
+  dropped: DroppedDraft,
+  signal: AbortSignal,
+): Promise<DraftOutcome> {
+  const { db, log } = deps;
+  const now = deps.now ?? (() => new Date());
+  const clock = clockFor(deps, tester);
+  const latest = batch.at(-1)!;
+  const { timings, errors } = latest;
+  const ctx = { messageId: latest.inbound.id, contact: maskNumber(latest.inbound.contactNumber) };
+  if (!deps.replier) {
+    errors.push("claude: ANTHROPIC_API_KEY not configured");
+    return { kind: "text", text: FALLBACK_REPLY };
+  }
+  const replier = deps.replier;
+  const interrupted = () => line.interrupted || line.cancelled;
+  const current = new Map(batch.map((p, i) => [p.inbound.id, media[i] ?? {}]));
+  const handedOn = dropped.actions.length || dropped.text ? dropped : undefined;
+  const claudeStart = now();
+  const delays = deps.retryDelaysMs ?? RETRY_DELAYS_MS;
+  let replyText = FALLBACK_REPLY;
+  let emptyRetried = false;
+  let failures = 0;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      // Reloaded each attempt: a failed attempt may already have saved answers or moved the tester on.
+      const fresh = (attempt > 1 && (await getTester(db, tester.id))) || tester;
+      const history = await coachHistory(db, fresh, clock(), COACH_HISTORY_CAP);
+      const turns = toTurns(history, current);
+      replyText = await replier.reply({
+        tester: fresh,
+        turns,
+        now: clock(),
+        messageId: latest.inbound.id,
+        interrupted,
+        signal,
+        ...(handedOn ? { dropped: handedOn } : {}),
+        onUsage: (u) => {
+          timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
+          timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;
+          timings.claude_cache_write_tokens = Number(timings.claude_cache_write_tokens ?? 0) + u.cacheWrite;
+          timings.claude_output_tokens = Number(timings.claude_output_tokens ?? 0) + u.output;
+        },
+      });
+      break;
+    } catch (err) {
+      if (err instanceof DraftDroppedError) return { kind: "dropped", draft: err.draft };
+      // Failed while they texted again: the next round tries with everything.
+      if (interrupted()) return { kind: "dropped", draft: { actions: [] } };
+      errors.push(`claude (attempt ${attempt}): ${errorMessage(err)}`);
+      if (err instanceof NoReplyTextError) {
+        // Nothing to say: once more, then treat it as a text that needed no real answer.
+        if (!emptyRetried) {
+          emptyRetried = true;
+          log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text; retrying");
+          continue;
+        }
+        replyText = FALLBACK_REPLY;
+        log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text again; sending fallback");
+        break;
+      }
+      const delay = delays[failures++];
+      if (delay === undefined) {
+        replyText = SYSTEM_DOWN_REPLY;
+        log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
+        await alertFailure(db, tester.id, `The coach failed after retries; they got the system-down reply (${errorMessage(err).slice(0, 120)})`, now());
+        break;
+      }
+      log.error({ ...ctx, err: safeError(err) }, "Claude reply failed; retrying");
+      // A typing signal also wakes the line: keep waiting out the delay unless they actually texted (or stopped).
+      const retryAt = Date.now() + delay;
+      while (!interrupted() && Date.now() < retryAt) await line.wait(retryAt - Date.now());
+      if (interrupted()) return { kind: "dropped", draft: { actions: [] } };
+    }
+  }
+  timings.claude_ms = now().getTime() - claudeStart.getTime();
+  return { kind: "text", text: replyText };
+}
+
+/**
+ * #16: while they're typing, a ready reply waits for their text (a redraft), for them to stop
+ * (send), or `holdMs` (send anyway). No fresh typing signal: no wait.
+ */
+async function holdForTyping(
+  lines: ReplyLines,
+  line: ReplyLine,
+  phone: string,
+): Promise<{ ms: number; ended: "text" | "stopped" | "cap" | "cancelled" } | undefined> {
+  if (lines.holdMs <= 0 || !lines.isTyping(phone)) return undefined;
+  const start = lines.nowMs();
+  const held = () => lines.nowMs() - start;
+  for (;;) {
+    if (line.cancelled) return { ms: held(), ended: "cancelled" };
+    if (line.interrupted || line.pending.length) return { ms: held(), ended: "text" };
+    if (!lines.isTyping(phone)) return { ms: held(), ended: "stopped" };
+    const left = lines.holdMs - held();
+    if (left <= 0) return { ms: held(), ended: "cap" };
+    await line.wait(left);
+  }
+}
+
+/** Sends one reply for every text in the batch, records it against the latest, then files their media. */
+async function sendReply(
+  deps: PipelineDeps,
+  tester: Tester,
+  sendblue: SendblueClient,
+  batch: PendingText[],
+  media: (PreparedMedia | undefined)[],
+  replyText: string,
+): Promise<void> {
+  const { db, log } = deps;
+  const now = deps.now ?? (() => new Date());
+  const clock = clockFor(deps, tester);
+  const latest = batch.at(-1)!;
+  const { inbound, timings, errors } = latest;
+  const ctx = { messageId: inbound.id, contact: maskNumber(inbound.contactNumber) };
 
   // 4. Send and record the reply.
-  await typing;
+  await Promise.all(batch.map((p) => p.typing));
   try {
     const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content: replyText });
     const realSentAt = now();
     const sentAt = testerNow(tester, realSentAt);
     timings.reply_sent_at = realSentAt.toISOString();
     if (inbound.sentAt) timings.received_to_reply_sent_ms = sentAt.getTime() - inbound.sentAt.getTime();
-    timings.processing_ms = realSentAt.getTime() - started.getTime();
+    const started = Date.parse(String(timings.processing_started_at));
+    if (Number.isFinite(started)) timings.processing_ms = realSentAt.getTime() - started;
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
@@ -210,14 +383,20 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   }
 
   // 5. Media into memory right away, after the reply so it never adds to the wait.
-  if (inbound.mediaUrl) await describeMedia(deps, inbound, image, timings);
+  for (const [i, p] of batch.entries()) {
+    if (p.inbound.mediaUrl) await describeMedia(deps, p.inbound, media[i]?.image, p.timings);
+  }
 
-  await mergeTimings(db, inbound.id, timings);
-  await updateMessage(db, inbound.id, {
-    status: errors.length ? "REPLIED_WITH_ERRORS" : "REPLIED",
-    error: errors.length ? errors.join("; ") : null,
-  });
-  log.info({ ...ctx, timings, errors }, "Inbound message handled");
+  for (const p of batch) {
+    // Earlier texts in a burst point at the text whose reply answered them.
+    if (p !== latest) p.timings.answered_with = inbound.id;
+    await mergeTimings(db, p.inbound.id, p.timings);
+    await updateMessage(db, p.inbound.id, {
+      status: p.errors.length ? "REPLIED_WITH_ERRORS" : "REPLIED",
+      error: p.errors.length ? p.errors.join("; ") : null,
+    });
+  }
+  log.info({ ...ctx, timings, errors, texts: batch.length }, "Inbound message handled");
 }
 
 /**
@@ -278,6 +457,8 @@ async function runCommands(
   }
 
   if (isOptOutText(inbound.content)) {
+    // #16: a reply still being written for earlier texts never goes out.
+    linesOf(deps).cancel(inbound.contactNumber);
     await optOut(db, tester, at);
     log.info(ctx, "Tester opted out");
     // Sendblue blocks this too until they text again (issue "Sendblue's own STOP opt-out"): no failure alert.
@@ -294,6 +475,7 @@ async function runCommands(
   }
 
   if (tester.isTestUser && isResetText(inbound.content)) {
+    linesOf(deps).cancel(inbound.contactNumber);
     const moved = tester.clockOffsetMs;
     tester = await resetTester(db, tester, at);
     // Back on real time: this text moved back with the rest of their history.
@@ -422,28 +604,28 @@ async function handleMedia(
   return { image };
 }
 
-/** Flattens stored messages into turns for Claude. Only the newest photo is sent as an image. */
-export function toTurns(
-  history: Message[],
-  currentId: string,
-  current: { transcript?: string; image?: ClaudeImage },
-): Turn[] {
+/**
+ * Flattens stored messages into turns for Claude. Photos in the texts being answered (`current`,
+ * by message id: since #16 a burst can hold several) are sent as images; older ones as their description.
+ */
+export function toTurns(history: Message[], current: ReadonlyMap<string, PreparedMedia>): Turn[] {
   return history.map((m) => {
     const role = m.direction === "inbound" ? "user" : "assistant";
-    const isCurrent = m.id === currentId;
-    const transcript = isCurrent ? (current.transcript ?? m.transcript) : m.transcript;
+    const now = current.get(m.id);
+    const isCurrent = now !== undefined;
+    const transcript = now?.transcript ?? m.transcript;
     const parts: string[] = [];
     if (m.mediaUrl) {
       const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl);
       if (kind === "audio") parts.push(transcript ? `[Voice note transcript]: ${transcript}` : "[Sent a voice note]");
-      else if (isCurrent && current.image) parts.push("[Sent a photo]");
+      else if (now?.image) parts.push("[Sent a photo]");
       else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
       else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
       else parts.push(`[Sent a ${kind} attachment]`);
     }
     if (m.content?.trim()) parts.push(m.content.trim());
     const turn: Turn = { role, text: parts.join("\n") };
-    if (isCurrent && current.image) turn.image = { mediaType: current.image.mediaType, data: current.image.data };
+    if (now?.image) turn.image = { mediaType: now.image.mediaType, data: now.image.data };
     return turn;
   });
 }

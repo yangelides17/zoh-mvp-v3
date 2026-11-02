@@ -27,3 +27,19 @@ export const sendblueMessageEvent = z.looseObject({
 });
 
 export type SendblueMessageEvent = z.infer<typeof sendblueMessageEvent>;
+
+/**
+ * Sendblue typing-indicator webhook body (#16): the tester started or stopped typing (iMessage only).
+ * https://docs.sendblue.com/api-v2/typing-indicators/
+ */
+export const sendblueTypingEvent = z.looseObject({
+  /** The tester's number. */
+  number: z.string().min(1),
+  is_typing: z.boolean(),
+  /** Our line. */
+  from_number: z.string().nullish(),
+  /** When Sendblue saw it (ISO 8601). */
+  timestamp: z.string().nullish(),
+});
+
+export type SendblueTypingEvent = z.infer<typeof sendblueTypingEvent>;

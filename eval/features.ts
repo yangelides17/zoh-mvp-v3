@@ -336,6 +336,19 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** Back-to-back texts (#16): several texts sent together get one reply. Cases only. Target 80%. */
+  batch: {
+    name: "batch",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      {
+        id: "one-reply-uses-photo",
+        scope: "conversation",
+        label: "Whoop screenshot + \"Not bad!\" get one reply that uses the photo and never says it can't see it",
+      },
+    ],
+  },
   /** Metrics (#13): back-off requests are flagged and answered with what the app can do. Cases only. */
   "back-off": {
     name: "back-off",

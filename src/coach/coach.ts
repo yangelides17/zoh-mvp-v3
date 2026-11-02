@@ -1,7 +1,9 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import {
+  DraftDroppedError,
   NoReplyTextError,
   toClaudeMessages,
+  type DroppedDraft,
   type ClaudeModel,
   type NudgeRequest,
   type Replier,
@@ -55,6 +57,22 @@ export function onlySaveConfirmation(text: string): boolean {
   return text.length > 0 && text.length <= 60 && !text.includes("?") && !text.includes("•") && /\b(saved|recorded|got (it|that) (all )?down)\b/i.test(text);
 }
 
+/**
+ * #16: told to the reply that replaces dropped drafts (they texted again before it went out).
+ * Null when the drafts did nothing and wrote nothing: the history already holds every text.
+ */
+export function droppedDraftNote(d: DroppedDraft | undefined): string | null {
+  if (!d || (d.actions.length === 0 && !d.text)) return null;
+  const parts = ["[They sent more before your reply went out, so it was never sent."];
+  if (d.actions.length) parts.push(`Already done while answering, so keep it and don't redo it (change it only if their new texts ask): ${d.actions.join("; ")}.`);
+  if (d.text) parts.push(`Your unsent draft, which they never saw: "${d.text}"`);
+  parts.push("Reply once to everything they've sent since your last text. Don't mention this note.]");
+  return parts.join(" ");
+}
+
+/** Lines per finished action in a dropped draft: the tool and the first line of its result. */
+const ACTION_RESULT_CHARS = 200;
+
 /** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
 export const SKIP = "SKIP";
 
@@ -83,10 +101,19 @@ export function createCoach(opts: CoachOptions): Replier {
   // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
   const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, interrupted, signal, dropped }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
+      // #16: the reply that replaces dropped drafts hears what they did and wrote.
+      const note = droppedDraftNote(dropped);
+      if (note) (messages.at(-1)!.content as Anthropic.ContentBlockParam[]).push({ type: "text", text: note });
       markCached(messages);
+      /** Actions this draft finished, handed on if it's dropped. */
+      const done: string[] = [];
+      /** #16: a safe point. They texted again: stop here, before the next call, action or send. */
+      const checkpoint = (text?: string) => {
+        if (interrupted?.()) throw new DraftDroppedError({ actions: done, ...(text ? { text } : {}) });
+      };
       // Read once per reply: it only changes overnight (or on a preference or forget, which the tool result reports).
       const memory = usesMemory(initial) ? await memoryBlock(db, initial) : undefined;
       const budget: LookupBudget = { lookups: 0, searches: 0 };
@@ -120,12 +147,21 @@ export function createCoach(opts: CoachOptions): Replier {
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
-        const response = await model.create({
-          system: systemBlocks(fixed, state, memory),
-          messages,
-          tools,
-          toolChoice: last ? "none" : "auto",
-        });
+        checkpoint(fallbackText);
+        let response: Awaited<ReturnType<ClaudeModel["create"]>>;
+        try {
+          response = await model.create({
+            system: systemBlocks(fixed, state, memory),
+            messages,
+            tools,
+            toolChoice: last ? "none" : "auto",
+            ...(signal ? { signal } : {}),
+          });
+        } catch (err) {
+          // Cut off because they texted again: nothing from this call ran.
+          if (signal?.aborted) throw new DraftDroppedError({ actions: done, ...(fallbackText ? { text: fallbackText } : {}) });
+          throw err;
+        }
         addUsage(usage, response.usage);
         const text = response.content
           .filter((b) => b.type === "text")
@@ -152,17 +188,20 @@ export function createCoach(opts: CoachOptions): Replier {
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
+          checkpoint(reply);
           return reply;
         }
         if (text) fallbackText = text;
 
         const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
+          checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
             : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
+            done.push(`${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`);
             tester = result.tester;
             state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
