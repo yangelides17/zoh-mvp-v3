@@ -1,0 +1,52 @@
+{
+  "id": "rushed-sunday",
+  "title": "Sunday: a thin, rushed reflection turns to the week without extra questions",
+  "origin": "Issue #102 (reflection finishes before the Sunday recap): edge case, they sound rushed",
+  "startDay": "sun",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Chapter 9 tonight, Maya: 8 pm on the couch, about 20 minutes, phone in the kitchen. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Read a chapter of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits by Nov 30",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 13
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "Chapter 7 on the couch, phone in the kitchen", "proof_seen": "voice recap: the Goldilocks rule" },
+      { "days_ago": 5, "status": "done", "step": "Chapter 8 on the couch, phone in the kitchen", "proof_seen": "voice recap: make it attractive" },
+      { "days_ago": 4, "status": "missed" },
+      { "days_ago": 3, "status": "done", "step": "Chapter 8 again, right after the dishes", "proof_seen": "voice recap: temptation bundling" },
+      { "days_ago": 2, "status": "done", "step": "Half of chapter 9 right after the dishes", "proof_seen": "voice recap: the role of family and friends" },
+      { "days_ago": 1, "status": "missed" }
+    ],
+    "today_step": { "step": "Finish chapter 9 of Atomic Habits on the couch at 8 pm (about 20 min), phone in the kitchen, then a voice recap", "agreed_hours_ago": 12 },
+    "takeaways": [
+      { "days_ago": 5, "text": "Pair the reading with something you look forward to (temptation bundling)", "evidence": "explained" },
+      { "days_ago": 3, "text": "Pair the reading with something you look forward to (temptation bundling)", "evidence": "applied" }
+    ]
+  },
+  "testerLines": [
+    "[voice: finished chapter nine, the bit about copying the people around you]",
+    "it was fine. that's all I got today, long day",
+    "eh just keep going I guess",
+    "ok"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the guard against over-correcting #102, so Sundays don't drag when they're tired.",
+  "shouldHaveHappened": "The voice note counts and is celebrated, with at most one light question about how it went. After \"that's all I got today, long day\", no more reflection questions: ZOH acknowledges it briefly and turns to the week in the same text (no permission ask), with a short recap of 2 to 4 pieces of progress backed by the record (temptation bundling applied; chapters done, the misses fine to leave out or mention lightly), where she stands vs. finishing by Nov 30, and one easy question. After \"just keep going\", a fully defined next step, asked if it works, kept light; after \"ok\", a one-line confirm.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

@@ -461,6 +461,12 @@ export const FEATURES: Record<string, FeatureDef> = {
         label: "The turn from the day's reflection to the week feels natural, not an abrupt switch into a report",
       },
       {
+        id: "reflection-first",
+        scope: "conversation",
+        label:
+          "ZOH responds to the day's reflection with substance before the recap, and a thin or rushed reflection still turns to the week without extra questions",
+      },
+      {
         id: "recap",
         scope: "text",
         label:

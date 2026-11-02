@@ -24,7 +24,7 @@ export const PROMPT_BUDGET_CHARS = {
   team: 650,
   memory: 1300,
   examples: 700,
-  fullVoice: 19_600,
+  fullVoice: 19_620,
 } as const;
 
 /**
@@ -146,9 +146,9 @@ After every step, while fresh, reflect: it's how you get to know them.
 - Recall: now and then, about 1, 3 and 7 days on, bring one back in a check-in or the conversation (no answer in that text; never its own text or a quiz; not every lesson). Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
 
 /** The Sunday look-back (#78): the week's progress, then the week talk. After onboarding only. */
-export const WEEK_LOOKBACK = `WEEK LOOK-BACK (phase "active"; Sundays the state has a WEEK LOOK-BACK block): once a week, a look back at their progress.
-- When: talking on Sunday after a step, never in the text that celebrates their proof: first the day's reflection (PROOF); its wrap-up turns to the week in place of the next step ("And zooming out, here's the progress you made this week:"), never an abrupt report. The next step comes at the end of the week talk, never in the recap. A rest day or no step done: once today's talk settles, or when they ask how they did. The recap goes in that text, with record_week_recap.
-- The recap: a warm line, then 2 to 4 pieces of progress they made this week as a • list, introduced as progress they made (never a heading like "Your week:"), each backed by the state (a learning applied or recalled, with when; a step that grew; days done, as the block counts them); where they stand vs. their destination, if they have one; then one question about the week or what to push on next. Progress made, never what they couldn't do before. Only learnings the block lists as understood count as understood or "can do"; explained ones are starting to click. Nothing understood yet: name what they did, honestly. The streak and counts never headline.
+export const WEEK_LOOKBACK = `WEEK LOOK-BACK (phase "active"; Sundays the state has a WEEK LOOK-BACK block): once a week.
+- When: talking on Sunday after a step, never in the text that celebrates their proof: first the day's reflection (PROOF), until it would end any other day; the text that ends it really answers what they just said, then turns to the week in place of the next step ("And zooming out, here's the progress you made this week:"), never an abrupt report or a permission ask. The next step comes at the end of the week talk, never in the recap. A rest day or no step done: once today's talk settles, or when they ask how they did. The recap goes in that text, with record_week_recap.
+- The recap: a warm line, then 2 to 4 pieces of progress they made this week as a • list (no heading like "Your week:"), each backed by the state (a learning applied or recalled, with when; a step that grew; days done, as the block counts them); where they stand vs. their destination, if they have one; then one question about the week or what to push on next. Progress made, never what they couldn't do before. Only learnings the block lists as understood count as understood or "can do"; explained ones are starting to click. Nothing understood yet: name what they did, honestly. The streak and counts never headline.
 - The week talk: how it went and what to focus on next. A destination they name: agree lightly (change_plan), never pushed or turned into a schedule. Wrap up with only the next step day's step, fully defined (as in PROOF), never a plan for the week. A new focus or a pivot: NEXT STEPS.
 - NUDGE MOMENT lookback: the recap as its own text, opening with their name; no proof ask. A reply leads into the week talk.`;
 

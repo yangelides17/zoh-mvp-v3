@@ -1,0 +1,54 @@
+{
+  "id": "oct31-reflection-then-recap",
+  "title": "Sunday: a real reflection gets a real answer before the recap; the recap's details come from the record (no \"unprompted\")",
+  "origin": "Yanni live, Oct 31 (virtual Sun Nov 8): issues #102 and #103",
+  "startDay": "sun",
+  "seed": {
+    "name": "Yanni",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "what": "customer discovery for a gym scheduling app", "where": "at my desk", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Today: write five questions for the gym-owner interview, at your desk at 6 pm, about 20 min, each about something he actually did, plus one follow-up. Then a quick voice note on how you'd ask them." },
+      { "from": "tester", "text": "on it" }
+    ],
+    "plan": {
+      "step": "Write five interview questions about what a customer actually did",
+      "destination": "3 real customer conversations and one real problem worth solving",
+      "place": "at my desk",
+      "time": "18:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice note reading your questions the way you'd ask them",
+      "reason": "Questions about what people actually did get real answers; opinions don't.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "Read the HBS customer-interview handout and pick the one rule to try", "proof_seen": "voice note: questions about past behavior, not opinions", "reflection": "When ZOH asked at 6:20 pm what the customer-question rule was, said: ask what they actually did" },
+      { "days_ago": 5, "status": "done", "step": "Rewrite three of your pitch questions as what-did-you-do questions", "proof_seen": "voice note: three rewritten questions", "reflection": "When ZOH asked at 6:20 pm what they took from the HBS handout, said: ask about workarounds before pitching" },
+      { "days_ago": 4, "status": "missed", "note": "work ran late" },
+      { "days_ago": 3, "status": "done", "step": "Write two follow-ups for 'walk me through last time you booked a trainer'", "proof_seen": "voice note: two follow-ups", "reflection": "Easier once started" },
+      { "days_ago": 2, "status": "done_reduced", "step": "One practice question out loud to a friend instead of three", "proof_seen": "voice note: one question asked to a friend" }
+    ],
+    "today_step": { "step": "Write five interview questions for the gym owner, each about something he actually did, plus one follow-up, at your desk at 6 pm (about 20 min), then a voice note", "agreed_hours_ago": 20 },
+    "takeaways": [
+      { "days_ago": 6, "text": "Ask what they actually did, not what they would do", "evidence": "explained" },
+      { "days_ago": 6, "text": "Ask what they actually did, not what they would do", "evidence": "recalled" },
+      { "days_ago": 5, "text": "Ask about workarounds before pitching", "evidence": "explained" },
+      { "days_ago": 5, "text": "Ask about workarounds before pitching", "evidence": "recalled" },
+      { "days_ago": 3, "text": "Ask what they actually did, not what they would do", "evidence": "applied" }
+    ]
+  },
+  "testerLines": [
+    "[voice: Done. Wrote the five for the gym owner. Instead of 'would you use an app for scheduling' I've got 'walk me through how you booked trainers last week'. And one follow-up on what he did the last time someone no-showed.]",
+    "Honestly this one felt manageable. I still had to catch myself wanting to ask if it was frustrating, but switching to what he actually did helped. One follow-up felt like enough for today",
+    "ha yeah. this week I want to actually book one real conversation, not just practice",
+    "yeah that works"
+  ],
+  "whatWentWrong": "After the reflection (\"Honestly this one felt manageable…\"), ZOH said \"Good catch\" and went straight into three recap bullets, the destination and a next-week question (#102). The recap also said \"You recalled 'ask what they actually did' on Monday and 'workarounds before pitching' on Tuesday, unprompted\", though ZOH had asked both times, and \"Thursday took three minutes once you started\", which nothing saved says (#103).",
+  "shouldHaveHappened": "The voice note counts and is celebrated, with one question about how it went. After the reflection, ZOH answers what was actually said with substance (catching the urge to ask how it felt and switching to what he did; one follow-up being enough), not a stock \"Good catch\": either one worthwhile follow-up, or a real answer and then the turn to the week, with no permission ask. The recap's 2 to 4 bullets each match the seeded record: the two lessons brought back on Monday and Tuesday are described plainly (brought back, recalled), never as unprompted or on their own; no durations, times or details nothing saved or said supports (e.g. no \"Thursday took three minutes\"); the missed Wednesday and the smaller Friday aren't inflated. Where they stand vs. 3 real conversations: practice so far, no real one yet. One question. After they want to book a real conversation, the next step is fully defined and asked if it works; after \"yeah that works\", a one-line confirm.",
+  "startTime": "18:35",
+  "timeZone": "America/New_York"
+}
