@@ -489,6 +489,13 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "text",
         label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
       },
+      {
+        id: "monday-recap",
+        scope: "text",
+        label:
+          "After a quiet Sunday, the Monday kickoff gives an evidenced recap of last week (only from the record), then a fully defined step and one question (none about the week)",
+      },
+      { id: "miss-light", scope: "text", label: "After a missed Sunday, the miss is named lightly, never as a scolding headline" },
     ],
   },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
