@@ -194,18 +194,13 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
       log.info({ ...ctx, actions: outcome.draft.actions.length }, "Draft dropped: they texted again before it was sent");
       continue;
     }
-    const hold = await holdForTyping(lines, line, latest.inbound.contactNumber);
-    if (hold) {
-      latest.timings.hold_ms = hold.ms;
-      latest.timings.hold_ended = hold.ended;
-      // Temporary, for the live checks of Sendblue's typing signals (#118 removes it).
-      log.info({ ...ctx, heldMs: hold.ms, ended: hold.ended }, "Reply held while they typed");
-    }
+    await waitBeforeSend(lines, line, latest, log, ctx);
     if (line.cancelled) continue;
     if (line.interrupted || line.pending.length) {
-      dropped = { ...dropped, text: outcome.text };
+      // #132: what it saved stays saved; the redraft is told it and the unsent words, so it doesn't redo them.
+      dropped = { actions: [...dropped.actions, ...outcome.actions], text: outcome.text };
       draftsDropped++;
-      log.info(ctx, "Draft dropped during the hold: they texted again");
+      log.info({ ...ctx, actions: outcome.actions.length }, "Draft dropped before sending: they texted again");
       continue;
     }
     if (draftsDropped) latest.timings.drafts_dropped = draftsDropped;
@@ -217,7 +212,8 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
   }
 }
 
-type DraftOutcome = { kind: "text"; text: string } | { kind: "dropped"; draft: DroppedDraft };
+/** A finished draft carries the actions it took (#132), handed on if it's dropped before sending. */
+type DraftOutcome = { kind: "text"; text: string; actions: string[] } | { kind: "dropped"; draft: DroppedDraft };
 
 /**
  * The reply text from the coach, or the fallback, with retries. Before the plan locks it reads the
@@ -240,13 +236,15 @@ async function draftReply(
   const ctx = { messageId: latest.inbound.id, contact: maskNumber(latest.inbound.contactNumber) };
   if (!deps.replier) {
     errors.push("claude: ANTHROPIC_API_KEY not configured");
-    return { kind: "text", text: FALLBACK_REPLY };
+    return { kind: "text", text: FALLBACK_REPLY, actions: [] };
   }
   const replier = deps.replier;
   const interrupted = () => line.interrupted || line.cancelled;
   const current = new Map(batch.map((p, i) => [p.inbound.id, media[i] ?? {}]));
   const handedOn = dropped.actions.length || dropped.text ? dropped : undefined;
   const claudeStart = now();
+  /** Actions finished by this draft's attempts, so far. */
+  const actions: string[] = [];
   const delays = deps.retryDelaysMs ?? RETRY_DELAYS_MS;
   let replyText = FALLBACK_REPLY;
   let emptyRetried = false;
@@ -264,6 +262,7 @@ async function draftReply(
         messageId: latest.inbound.id,
         interrupted,
         signal,
+        onAction: (a) => actions.push(a),
         ...(handedOn ? { dropped: handedOn } : {}),
         onUsage: (u) => {
           timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
@@ -304,7 +303,75 @@ async function draftReply(
     }
   }
   timings.claude_ms = now().getTime() - claudeStart.getTime();
-  return { kind: "text", text: replyText };
+  return { kind: "text", text: replyText, actions };
+}
+
+/**
+ * #132: before a ready reply goes out it waits a short grace for a late typing signal or another
+ * text. Typing turns it into #16's hold; a hold that ends because they stopped typing gets one more
+ * grace (a "stopped" often lands just before their text); a hold at the cap sends at once. A text or
+ * "stop" ends the wait and the caller drops the draft. Bounded: each extra grace follows a new hold,
+ * and each hold needs a fresh typing signal and is capped.
+ */
+async function waitBeforeSend(
+  lines: ReplyLines,
+  line: ReplyLine,
+  latest: PendingText,
+  log: Logger,
+  ctx: Record<string, unknown>,
+): Promise<void> {
+  const phone = latest.inbound.contactNumber;
+  const timings = latest.timings;
+  let graceDue = true;
+  for (;;) {
+    if (line.cancelled || line.interrupted || line.pending.length) return;
+    if (graceDue) {
+      graceDue = false;
+      const grace = await graceBeforeSend(lines, line, phone);
+      if (grace) {
+        timings.grace_ms = Number(timings.grace_ms ?? 0) + grace.ms;
+        timings.graces = Number(timings.graces ?? 0) + 1;
+        timings.grace_ended = grace.ended;
+        // Temporary, for the live checks of the grace (#118 removes it); the timings stay.
+        log.info(
+          { ...ctx, graceMs: grace.ms, startedAt: new Date(grace.start).toISOString(), endedAt: new Date(grace.start + grace.ms).toISOString(), ended: grace.ended },
+          "Reply grace",
+        );
+        if (grace.ended !== "typing") continue;
+      }
+    }
+    const hold = await holdForTyping(lines, line, phone);
+    if (!hold) return;
+    timings.hold_ms = Number(timings.hold_ms ?? 0) + hold.ms;
+    timings.holds = Number(timings.holds ?? 0) + 1;
+    timings.hold_ended = hold.ended;
+    // Temporary, for the live checks of Sendblue's typing signals (#118 removes it).
+    log.info({ ...ctx, heldMs: hold.ms, ended: hold.ended }, "Reply held while they typed");
+    if (hold.ended === "cap") return;
+    if (hold.ended === "stopped") graceDue = true;
+  }
+}
+
+/**
+ * #132: waits `graceMs` unless they text, start typing or say "stop" first. Off (0), or already
+ * typing (straight to the hold): no grace.
+ */
+async function graceBeforeSend(
+  lines: ReplyLines,
+  line: ReplyLine,
+  phone: string,
+): Promise<{ start: number; ms: number; ended: "sent" | "text" | "typing" | "cancelled" } | undefined> {
+  if (lines.graceMs <= 0 || lines.isTyping(phone)) return undefined;
+  const start = lines.nowMs();
+  const waited = () => lines.nowMs() - start;
+  for (;;) {
+    if (line.cancelled) return { start, ms: waited(), ended: "cancelled" };
+    if (line.interrupted || line.pending.length) return { start, ms: waited(), ended: "text" };
+    if (lines.isTyping(phone)) return { start, ms: waited(), ended: "typing" };
+    const left = lines.graceMs - waited();
+    if (left <= 0) return { start, ms: waited(), ended: "sent" };
+    await line.wait(left);
+  }
 }
 
 /**

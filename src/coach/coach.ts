@@ -140,7 +140,7 @@ export function createCoach(opts: CoachOptions): Replier {
   // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
   const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, interrupted, signal, dropped }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, interrupted, signal, dropped }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
@@ -250,7 +250,9 @@ export function createCoach(opts: CoachOptions): Replier {
             : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
-            done.push(`${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`);
+            const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
+            done.push(action);
+            onAction?.(action);
             tester = result.tester;
             state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {

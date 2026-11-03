@@ -85,6 +85,11 @@ export interface ReplyLinesOptions {
   holdMs?: number;
   /** How long a "typing" signal counts without a fresh one. */
   freshMs?: number;
+  /**
+   * #132: grace before a ready reply goes out, and again after a hold ends on "stopped". Defaults to 0
+   * (off) so tests run at full speed; the app passes REPLY_GRACE_SECONDS through wiring.
+   */
+  graceMs?: number;
   /** Real time in ms (tests can move it). */
   nowMs?: () => number;
 }
@@ -93,12 +98,14 @@ export interface ReplyLinesOptions {
 export class ReplyLines {
   readonly holdMs: number;
   readonly freshMs: number;
+  readonly graceMs: number;
   readonly nowMs: () => number;
   private lines = new Map<string, ReplyLine>();
 
   constructor(opts: ReplyLinesOptions = {}) {
     this.holdMs = opts.holdMs ?? TYPING_HOLD_MS;
     this.freshMs = opts.freshMs ?? TYPING_FRESH_MS;
+    this.graceMs = opts.graceMs ?? 0;
     this.nowMs = opts.nowMs ?? Date.now;
   }
 

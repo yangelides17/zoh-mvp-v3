@@ -11,6 +11,7 @@ import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
+import { ReplyLines } from "../src/pipeline/conversation.js";
 import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
@@ -149,6 +150,9 @@ export async function startEvalApp(opts: {
       describer: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
+      // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would
+      // only add 2.5 seconds of real time to every turn (and to the free tests that use this harness).
+      lines: new ReplyLines({ holdMs: opts.config.typingHoldSeconds * 1000 }),
       ...(opts.replier ? { replier: opts.replier } : {}),
     },
     { webhookSecret: WEBHOOK_SECRET, logger: false, ...(opts.consoleCoach ? { consoleCoach: opts.consoleCoach } : {}) },

@@ -29,6 +29,11 @@ export interface ReplyInput {
   interrupted?: () => boolean;
   /** Aborts a Claude call in flight when the draft is interrupted (no side effects yet). */
   signal?: AbortSignal;
+  /**
+   * #132: told each action as it finishes (the same line a dropped draft hands on), so a draft that
+   * finished but is dropped before sending (a text during the grace or a hold) still hands on what it did.
+   */
+  onAction?: (action: string) => void;
   /** What earlier drafts of this reply did before they were dropped: the coach is told, so it doesn't redo it. */
   dropped?: DroppedDraft;
 }
