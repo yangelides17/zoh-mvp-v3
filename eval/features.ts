@@ -226,6 +226,12 @@ export const FEATURES: Record<string, FeatureDef> = {
         label: "Recommitting after the day-3 check-in saves the agreement (mark_agreed), with no tool name or note about saving in the text",
       },
       {
+        id: "still-in-keeps-reminder",
+        scope: "conversation",
+        label:
+          "After a \"still in\" reply to a morning kickoff (the step already agreed ahead), the check-in about 10 minutes before the step still goes out, and nothing ZOH says treats them as already starting (#137)",
+      },
+      {
         id: "voice",
         scope: "text",
         label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",

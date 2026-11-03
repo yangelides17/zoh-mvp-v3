@@ -472,6 +472,52 @@ describe("moving today and saying they're on it", () => {
     await say(tester, "outbound", at(MON, "18:45"), "Ha, no idea. Ten pages at 7?");
     expect(await day(MON, "18:50", "21:59")).toEqual(["checkin@18:50", "followup@19:25"]);
   });
+
+  // #137: on staging a morning "Still locked in for 8 tonight" was saved as on it and the 7:50 reminder never came.
+  it("#137: with no reply all day, an 8 pm hour-long step gets its reminder at 7:50 and follow-up at 9:05", async () => {
+    await setup({ time: "20:00", minutes: 60 });
+    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@21:05"]);
+  });
+
+  it("#137: a morning yes, even with on it called, keeps the 7:50 reminder, once, and the 9:05 follow-up", async () => {
+    const tester = await setup({ time: "20:00", minutes: 60 });
+    expect(await tick(MON, "09:00")).toEqual(["kickoff"]);
+    await say(tester, "inbound", at(MON, "09:01"), "Still locked in for 8 tonight");
+    expect(await tool("mark_agreed", {}, at(MON, "09:01"))).toMatchObject({ ok: true });
+    expect(await tool("mark_on_it", {}, at(MON, "09:01"))).toMatchObject({ ok: true });
+    await say(tester, "outbound", at(MON, "09:01"), "Good. Tonight at 8.");
+    expect(await day(MON, "09:05", "21:59")).toEqual(["checkin@19:50", "followup@21:05"]);
+    // Ticks again over the same minutes: nothing goes twice.
+    expect(await day(MON, "19:50", "21:10")).toEqual([]);
+    const sent = await t.db.select().from(nudges).where(and(eq(nudges.testerId, tester.id), eq(nudges.date, MON)));
+    expect(sent.filter((n) => n.kind === "checkin")).toHaveLength(1);
+  });
+
+  it("#137: on it more than an hour before the step is saved as a yes, and the coach isn't told they're on it", async () => {
+    const tester = await setup({ time: "20:00", minutes: 60 });
+    const result = await tool("mark_on_it", {}, at(MON, "09:01"));
+    expect(result).toMatchObject({ ok: true });
+    expect(JSON.stringify(result)).toContain("reminder still goes");
+    expect(await stepDay(tester, MON)).toMatchObject({ onItAt: null, agreedAt: at(MON, "09:01") });
+    const block = buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "09:02"), isFirstText: false }));
+    expect(block).not.toContain("on it");
+    expect(block).toContain("They said yes to today's step");
+  });
+
+  it("#137: on it within the hour still counts, right up to the step", async () => {
+    const tester = await setup({ time: "20:00", minutes: 60 });
+    await tool("mark_on_it", {}, at(MON, "19:00"));
+    expect((await stepDay(tester, MON))?.onItAt).toEqual(at(MON, "19:00"));
+    expect(await day(MON, "19:05", "21:59")).toEqual(["followup@21:05"]);
+  });
+
+  it("#137: on it at 7:30, then the step moved to 9 pm: the new time's reminder goes at 8:50", async () => {
+    const tester = await setup({ time: "20:00" });
+    await tool("mark_on_it", {}, at(MON, "19:30"));
+    expect((await stepDay(tester, MON))?.onItAt).toEqual(at(MON, "19:30"));
+    await tool("move_today", { time: "21:00" }, at(MON, "19:35"));
+    expect(await day(MON, "19:35", "21:59")).toEqual(["checkin@20:50", "followup@21:25"]);
+  });
 });
 
 describe("restarts and failures", () => {
@@ -559,6 +605,10 @@ describe("dueNudge", () => {
     expect(dueNudge({ ...base, tester: { ...base.tester, autoTextsPausedAt: at(SUN, "09:00") } })).toMatchObject({ reason: "paused" });
     expect(dueNudge({ ...base, today: { status: "done", movedTime: null, onItAt: null } })).toMatchObject({ reason: "today is done" });
     expect(dueNudge({ ...base, nudgesSinceReply: 3 })).toMatchObject({ reason: "unanswered cap" });
+    // #137: an on it saved hours before the step (an older row) doesn't hold the check-in; within the hour it does.
+    const onIt = (hhmm: string) => ({ ...base, now: at(MON, "18:50"), claimedToday: ["kickoff"], today: { status: null, movedTime: null, onItAt: at(MON, hhmm) } });
+    expect(dueNudge(onIt("09:00"))).toMatchObject({ action: "send", nudge: { kind: "checkin" } });
+    expect(dueNudge(onIt("18:00"))).toMatchObject({ reason: "no slot open" });
     expect(dueNudge({ ...base, claimedToday: ["kickoff"] })).toMatchObject({ reason: "no slot open" });
   });
 

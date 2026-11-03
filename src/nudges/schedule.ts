@@ -21,6 +21,8 @@ export const REPLY_IN_PROGRESS_MS = 2 * MINUTE;
 export const KICKOFF_WINDOW_MS = 3 * HOUR;
 /** The check-in goes this long before step time. */
 export const CHECKIN_LEAD_MS = 10 * MINUTE;
+/** #137: "on it" said this close to the step (or later) skips its check-in; said earlier, it's only a yes. */
+export const ON_IT_WINDOW_MS = HOUR;
 /** A step time this close to the kickoff makes kickoff and check-in one text. */
 export const MERGE_WITHIN_MS = HOUR;
 /** The follow-up goes this long after the step should be finished (#71: while it's still fresh). */
@@ -264,7 +266,7 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     const suffix = today?.movedTime ? `@${today.movedTime}` : "";
     // Unclear proof being sorted out in the conversation: no "did you do it?" over the top of it.
     const proofPending = Boolean(today?.proofPendingAt);
-    if (level === "pushy" && !merged && !today?.onItAt && !proofPending) {
+    if (level === "pushy" && !merged && !onItCounts(today?.onItAt, stepAt) && !proofPending) {
       slots.push({ kind: `checkin${suffix}`, moment: "checkin", from: checkinAt, until: stepAt });
     }
     if (level !== "gentle" && !proofPending) {
@@ -282,6 +284,11 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     if (at >= slot.from && at < slot.until) return { action: "send", nudge: { kind: slot.kind, moment: slot.moment, date } };
   }
   return none("no slot open");
+}
+
+/** #137: whether "on it" said at `onItAt` skips the check-in for a step at `stepAt`: only within the hour before it, or later. */
+export function onItCounts(onItAt: Date | null | undefined, stepAt: number): boolean {
+  return onItAt != null && onItAt.getTime() >= stepAt - ON_IT_WINDOW_MS;
 }
 
 /**

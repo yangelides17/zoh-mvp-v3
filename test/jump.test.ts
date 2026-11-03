@@ -233,6 +233,19 @@ describe("what happens on the way", () => {
     expect(sendsSince(before).at(-1)).toContain("sent: check-in 7:20 pm · next: follow-up 7:45 pm");
   });
 
+  it("#137: a morning on it (as saved on staging Nov 4) still gets the reminder on a jump, once", async () => {
+    const dev = await setup();
+    await text("jump 9:05am");
+    await t.db.insert(stepDays).values({ testerId: dev.id, date: MON, agreedAt: at(MON, "09:01"), onItAt: at(MON, "09:01"), updatedAt: at(MON, "09:01") });
+    let before = t.sendblue.sends.length;
+    await text("jump 6:50pm");
+    expect(sendsSince(before).at(-1)).toBe("⏩ Mon Nov 2, 6:50 pm · sent: check-in 6:50 pm · next: follow-up 7:25 pm (in 35 min)");
+    before = t.sendblue.sends.length;
+    await text("jump 7:30pm");
+    expect(sendsSince(before).at(-1)).toContain("sent: follow-up 7:25 pm");
+    expect(t.replier.nudges.map((n) => n.moment)).toEqual(["kickoff", "checkin", "followup"]);
+  });
+
   it("jump to a time of day lands on the next one", async () => {
     const dev = await setup();
     await text("jump 7:30am");
