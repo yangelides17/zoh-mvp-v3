@@ -18,7 +18,7 @@ export const PROMPT_BUDGET_CHARS = {
   plan: 3800,
   nudges: 2200,
   todaysStep: 1700,
-  proof: 3100,
+  proof: 3300,
   weekLookback: 1870,
   nextSteps: 1450,
   team: 650,
@@ -139,9 +139,9 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - flag_proof_pattern only for days of unclear or mismatched proof, like gaming.
 After every step, while fresh, reflect: it's how you get to know them.
 - Done, no word on how it went: celebrate and ask, often suggesting a voice note. Depth fits the day: a first or hard step gets more, a routine one a line or two. Proof alone counts; never a later text chasing it. Missed or smaller: lightly, what got in the way.
-- What you're after (what fits the step, never a list): what they learned, how it landed; how it felt; how hard; effort and time; what got in the way; their room and appetite for challenge; how they work and learn; what they want next. Follow what they said, one question per text, toward what shapes the next step; never re-ask. Go deeper too: now and then pick one thing they said that matters and ask them to say more; one real answer beats a tidbit on everything. Proof with a reflection still gets a question before the next step: the gap (something key they didn't cover) or deeper on something they said. A lesson alone isn't how it went: ask that, tied to it. A learning step with no word on what they learned: ask naturally, never a quiz.
-- Stop where a person would: you have real insight, they've run out, or they sound rushed or annoyed (then at most one light question). "Skip" or "later" ends it at once; at most 2 follow-ups that get little back. No next step while they're still telling you. save_reflection as it grows.
-- Then the next step, in your own words: acknowledge what they shared, propose the next step day's step, fully defined (TODAY'S STEP), visibly using it (bigger, smaller, new angle), and ask if it works: set_today_step day next, with its reason; their yes, or a version they adjust: again with agreed.
+- What you're after (what fits the step, never a list): what they learned, how it landed; how it felt; how hard; effort and time; what got in the way; their room and appetite for challenge; how they work and learn; what they want next. Follow what they said, one question per text, toward what shapes the next step; never re-ask. Mix new ground with going deeper: a worry, surprise or something that clicked gets one question before you reassure or move on; not every question goes deeper. Proof with a reflection still gets a question first: a key gap, or deeper on something they said. A lesson alone isn't how it went: ask that, tied to it. A learning step with no word on what they learned: ask naturally, never a quiz.
+- A thin "okay" or "fine" is an opening: ask what's behind it, never guess. Stop where a person would: you have something specific that shapes the next step, or they've run out (at most 2 follow-ups that get little back). Rushed, annoyed, "skip" or "later": let them go, no question (a light "tell me more tomorrow" is fine). No next step while they're still telling you. save_reflection as it grows.
+- Then the next step, in your own words: acknowledge what they shared, propose the next step day's step, fully defined (TODAY'S STEP), visibly using it (bigger, smaller, new angle), and ask if it works: set_today_step day next, with its reason; their yes once they've seen it (or a version they adjust): again with agreed. Talk of tomorrow before you propose: note it, keep reflecting, use it then; never a yes.
 - A clear lesson from it: save_takeaway.
 - Recall: now and then, about 1, 3 and 7 days on, bring one back in a check-in or the conversation (no answer in that text; never its own text or a quiz; not every lesson). Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
 
@@ -225,6 +225,8 @@ function todayLines(s: CoachState, plan: Plan): string[] {
 /** #77: how today went in their words, and where the reflection exchange is (its soft cap is about 5 of your texts). */
 /** #93: past this many texts since their proof, wrap up even if they're still going (a safety net, not a target). */
 export const REFLECTION_SAFETY_NET = 8;
+/** #131: by this text, two follow-ups have got little back (nothing real on how it went): wrap up warmly. */
+export const REFLECTION_LITTLE_BACK = 4;
 
 function reflectionLine(s: CoachState): string {
   const row = s.todayRow;
@@ -234,9 +236,11 @@ function reflectionLine(s: CoachState): string {
   const saved = row?.reflection ? `Today's reflection: "${row.reflection}".` : "Today's reflection: none yet.";
   if (!done || s.nudgeMoment || s.proof.today === 0) return saved;
   // #93: a lesson or what got in the way isn't how it went for them; the saved flag says which it is.
-  const went = row?.howItWentSaid
+  // #131: a thin answer ("okay") isn't said: the guard stays until there's something behind it.
+  const said = !!row?.howItWentSaid;
+  const went = said
     ? " They've said how it went."
-    : " They haven't said how it went for them yet (how it felt, how hard, room for more; a lesson or what got in the way isn't that): find out before any next step, unless they're rushed or done talking.";
+    : " They haven't said how it went for them yet (how it felt, how hard, room for more; a lesson, what got in the way or a thin \"okay\" isn't that): find out before any next step, unless they're rushed or say skip.";
   const n = s.proof.zohTextsSince + 1;
   // The coach can't count its own texts reliably, so the state says where the exchange is.
   // #78: on a look-back Sunday the wrap-up turns to the week, and the next step waits for the week talk.
@@ -247,9 +251,14 @@ function reflectionLine(s: CoachState): string {
   const where =
     n === 1
       ? `celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); ${next} waits for a later text unless they're rushed or done talking`
-      : n < REFLECTION_SAFETY_NET
-      ? `keep going only while it gives you something, then ${then} (stop where a person would, PROOF)`
-      : `wrap up now unless they're clearly still going, then ${then}`;
+      : n >= REFLECTION_SAFETY_NET
+      ? `wrap up now unless they're clearly still going, then ${then}`
+      : // #131: the next step never comes from the count alone while nothing real is in.
+      !said && n < REFLECTION_LITTLE_BACK
+      ? `find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; ${next} waits, unless they're rushed or say skip: then ${then}`
+      : !said
+      ? `they've given little back twice: wrap up warmly now, no more questions, then ${then}`
+      : `keep going while it gives you something, mixing new ground with going deeper (a worry, a surprise or something that clicked: one question about it before reassuring or moving on); ${then} once you have something specific that shapes it, or they've run out (PROOF)`;
   return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 

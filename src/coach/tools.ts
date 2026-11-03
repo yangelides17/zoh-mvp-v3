@@ -420,7 +420,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them (how it felt, how hard, effort or time, room for more, what to change); a lesson alone is false. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them, with something behind it (how it felt and why, how hard, effort or time, room for more, what to change); a lesson alone, or a thin word with nothing behind it (\"okay\", \"fine\", \"a little awkward\"), is false: ask what's behind it. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
       properties: {
@@ -942,6 +942,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
       if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      // #131: a yes is only to a step they've seen, so the next step day's step must come from an earlier reply
+      // (this reply's text hasn't gone out yet); what they say about tomorrow before that isn't a yes.
+      if (day === "next" && agreed && (!row?.step || row.updatedAt.getTime() >= at.getTime())) {
+        return {
+          ok: false,
+          error: `They haven't seen a step for ${date} yet: save it without agreed, give it in full in your text and ask if it works; agreed only after their yes.`,
+        };
+      }
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,

@@ -1,6 +1,6 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createCoach, NUDGE_ROUNDS } from "../src/coach/coach.js";
+import { createCoach, NOT_SENT_NOTE, NUDGE_ROUNDS } from "../src/coach/coach.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { dayStep, loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
@@ -252,6 +252,16 @@ describe("the kickoff saves today's step while writing", () => {
     expect(model.requests).toHaveLength(2);
     expect(model.requests[0]!.toolChoice).toBe("auto");
     expect(model.stateOf(1)).toContain(`Today's step (set, holds for today): "${TODAY_STEP}"`);
+  });
+
+  it("text written with the save isn't sent, and the next round is told so (#131)", async () => {
+    await setup();
+    const model = new FakeClaudeModel();
+    model.script({ text: "Morning Sam!", tools: [{ name: "set_today_step", input: { kind: "same", step: TODAY_STEP } }] }, "Morning Sam! 2 on, 1 off on your block at 7. You in?");
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    const text = await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
+    expect(text).toBe("Morning Sam! 2 on, 1 off on your block at 7. You in?");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(NOT_SENT_NOTE);
   });
 
   it("runs no other tool, and the last round must write", async () => {

@@ -149,7 +149,9 @@ describe("reflection", () => {
     await setup();
     await doneMonday();
     expect(await block(at(MON, "19:31"))).toContain("Today's reflection: none yet.");
-    expect(await block(at(MON, "19:31"))).toContain("They haven't said how it went for them yet (how it felt, how hard, room for more; a lesson or what got in the way isn't that): find out before any next step, unless they're rushed or done talking.");
+    expect(await block(at(MON, "19:31"))).toContain(
+      'They haven\'t said how it went for them yet (how it felt, how hard, room for more; a lesson, what got in the way or a thin "okay" isn\'t that): find out before any next step, unless they\'re rushed or say skip.',
+    );
     await tool("save_reflection", { summary: "Easier when slower", how_it_went: true, take: "Slowed down, felt good." }, at(MON, "19:40"));
     expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went.');
     expect(await block(at(WED, "09:00"))).toContain(`- Mon ${MON}, done: the plan's step (proof: Strava run, 1.2 mi; reflection: Easier when slower)`);
@@ -166,16 +168,89 @@ describe("reflection", () => {
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
     expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text unless they're rushed or done talking.");
+    // They said how it went early, so the talk runs on its content, not a count.
+    await tool("save_reflection", { summary: "Felt easy, slower pace helped", how_it_went: true, take: "Easy, wants more." }, at(MON, "19:30"));
     const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
     for (const [i, hhmm] of times.entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
-      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: keep going only while it gives you something");
+      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: keep going while it gives you something, mixing new ground with going deeper");
     }
     expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today: wrap up now unless they're clearly still going, then the next step.");
     // A text ZOH starts isn't part of the exchange.
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(MON, "19:50"), isFirstText: false, nudgeMoment: "followup" }));
     expect(nudge).not.toContain("since their proof");
+  });
+});
+
+describe("reflection probes thin answers and waits before the next step (#131)", () => {
+  /** Proof at 7:30, ZOH's first text at 7:31, then each tester reply answered two minutes later. */
+  async function talk(replies: number) {
+    await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    for (let i = 0; i < replies; i++) {
+      await say("inbound", at(MON, `19:3${2 + i * 2}`), "okay");
+      if (i < replies - 1) await say("outbound", at(MON, `19:3${3 + i * 2}`), "What made it okay?");
+    }
+  }
+  const FIND_OUT = "find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; the next step waits, unless they're rushed or say skip: then the next step";
+
+  it("a thin answer keeps the guard: saved, not said, and the next step waits at texts 2 and 3", async () => {
+    await setup();
+    await talk(1);
+    // "okay" is saved as thin: the coach marks how it went false (tool description), so it isn't said.
+    expect(await tool("save_reflection", { summary: 'Said it felt "okay"', how_it_went: false, take: "Thin so far." }, at(MON, "19:32"))).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ reflection: 'Said it felt "okay"', howItWentSaid: false });
+    const second = await block(at(MON, "19:32"));
+    expect(second).toContain('Today\'s reflection: "Said it felt "okay"". They haven\'t said how it went for them yet');
+    expect(second).toContain(`This reply is your 2nd text since their proof today: ${FIND_OUT}.`);
+    expect(second).not.toContain("keep going while it gives you something");
+    await say("outbound", at(MON, "19:33"), "What made it okay?");
+    await say("inbound", at(MON, "19:34"), "dunno, fine");
+    expect(await block(at(MON, "19:34"))).toContain(`This reply is your 3rd text since their proof today: ${FIND_OUT}.`);
+  });
+
+  it("the next step never comes from the count alone: little back twice wraps up warmly at text 4; a real answer turns to the balance line", async () => {
+    await setup();
+    await talk(3);
+    expect(await block(at(MON, "19:37"))).toContain("This reply is your 4th text since their proof today: they've given little back twice: wrap up warmly now, no more questions, then the next step.");
+    // Once there's something real, the talk runs on content and the next step comes when it shapes it.
+    await tool("save_reflection", { summary: "Okay, but the hill in round 2 was brutal", how_it_went: true, take: "Hill was hard." }, at(MON, "19:37"));
+    const real = await block(at(MON, "19:37"));
+    expect(real).toContain("They've said how it went.");
+    expect(real).toContain(
+      "keep going while it gives you something, mixing new ground with going deeper (a worry, a surprise or something that clicked: one question about it before reassuring or moving on); the next step once you have something specific that shapes it, or they've run out (PROOF)",
+    );
+    // Rushed and "skip" are the coach's call from their words: the not-said line names them as the way out.
+    await t.db.update(stepDays).set({ howItWentSaid: false }).where(eq(stepDays.date, MON));
+    expect(await block(at(MON, "19:37"))).toContain("find out before any next step, unless they're rushed or say skip.");
+  });
+
+  it("a next step is agreed only after it's been shown: never in the reply that first saves it", async () => {
+    await setup();
+    await doneMonday();
+    // Talk of tomorrow before any proposal ("I'd keep it to 20 minutes"): saving it as agreed is refused.
+    const first = await tool("set_today_step", { step: NEXT, kind: "same", day: "next", agreed: true }, at(MON, "19:40"));
+    expect(first).toMatchObject({ ok: false, error: expect.stringContaining(`They haven't seen a step for ${WED} yet`) });
+    expect(await row(WED)).toBeUndefined();
+    // Proposed (saved without agreed) in this reply, then agreed in the same reply: still refused.
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:41"))).toMatchObject({ ok: true });
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next", agreed: true }, at(MON, "19:41"))).toMatchObject({ ok: false });
+    expect(await row(WED)).toMatchObject({ step: NEXT, agreedAt: null });
+    // Their yes in a later reply: agreed.
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next", agreed: true }, at(MON, "19:45"))).toMatchObject({ ok: true });
+    expect((await row(WED))?.agreedAt).toEqual(at(MON, "19:45"));
+  });
+
+  it("a version they adjust after seeing it is agreed", async () => {
+    await setup();
+    await doneMonday();
+    await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:41"));
+    const adjusted = "2 min jog, 1 min walk, 3 rounds on your block at 6:30 pm";
+    const asked = "can we do 3 rounds instead of 4?";
+    expect(await tool("set_today_step", { step: adjusted, kind: "same", day: "next", agreed: true, asked }, at(MON, "19:45"), asked)).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: adjusted, agreedAt: at(MON, "19:45") });
   });
 });
 
