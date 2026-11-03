@@ -167,14 +167,14 @@ describe("reflection", () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text unless they're rushed or done talking.");
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text, even when they've said what they want next, unless they're rushed or done talking.");
     // They said how it went early, so the talk runs on its content, not a count.
     await tool("save_reflection", { summary: "Felt easy, slower pace helped", how_it_went: true, take: "Easy, wants more." }, at(MON, "19:30"));
     const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
     for (const [i, hhmm] of times.entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
-      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: keep going while it gives you something, mixing new ground with going deeper");
+      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: follow what they just said: if it opens something");
     }
     expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today: wrap up now unless they're clearly still going, then the next step.");
     // A text ZOH starts isn't part of the exchange.
@@ -205,7 +205,7 @@ describe("reflection probes thin answers and waits before the next step (#131)",
     const second = await block(at(MON, "19:32"));
     expect(second).toContain('Today\'s reflection: "Said it felt "okay"". They haven\'t said how it went for them yet');
     expect(second).toContain(`This reply is your 2nd text since their proof today: ${FIND_OUT}.`);
-    expect(second).not.toContain("keep going while it gives you something");
+    expect(second).not.toContain("follow what they just said");
     await say("outbound", at(MON, "19:33"), "What made it okay?");
     await say("inbound", at(MON, "19:34"), "dunno, fine");
     expect(await block(at(MON, "19:34"))).toContain(`This reply is your 3rd text since their proof today: ${FIND_OUT}.`);
@@ -220,7 +220,7 @@ describe("reflection probes thin answers and waits before the next step (#131)",
     const real = await block(at(MON, "19:37"));
     expect(real).toContain("They've said how it went.");
     expect(real).toContain(
-      "keep going while it gives you something, mixing new ground with going deeper (a worry, a surprise or something that clicked: one question about it before reassuring or moving on); the next step once you have something specific that shapes it, or they've run out (PROOF)",
+      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (how it felt, how hard, room for more). What they want for tomorrow is noted, not the end. Move on only once a reply gives you nothing new to follow, or they've run out; then the next step (PROOF)",
     );
     // Rushed and "skip" are the coach's call from their words: the not-said line names them as the way out.
     await t.db.update(stepDays).set({ howItWentSaid: false }).where(eq(stepDays.date, MON));

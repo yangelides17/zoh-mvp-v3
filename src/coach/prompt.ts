@@ -250,7 +250,7 @@ function reflectionLine(s: CoachState): string {
   // #93 (Yanni): even when the proof carries a reflection, the text that celebrates it asks first (a gap, or deeper on something they said).
   const where =
     n === 1
-      ? `celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); ${next} waits for a later text unless they're rushed or done talking`
+      ? `celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); ${next} waits for a later text, even when they've said what they want next, unless they're rushed or done talking`
       : n >= REFLECTION_SAFETY_NET
       ? `wrap up now unless they're clearly still going, then ${then}`
       : // #131: the next step never comes from the count alone while nothing real is in.
@@ -258,7 +258,7 @@ function reflectionLine(s: CoachState): string {
       ? `find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; ${next} waits, unless they're rushed or say skip: then ${then}`
       : !said
       ? `they've given little back twice: wrap up warmly now, no more questions, then ${then}`
-      : `keep going while it gives you something, mixing new ground with going deeper (a worry, a surprise or something that clicked: one question about it before reassuring or moving on); ${then} once you have something specific that shapes it, or they've run out (PROOF)`;
+      : `follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (how it felt, how hard, room for more). What they want for tomorrow is noted, not the end. Move on only once a reply gives you nothing new to follow, or they've run out; then ${then} (PROOF)`;
   return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 
