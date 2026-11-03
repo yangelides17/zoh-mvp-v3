@@ -74,6 +74,14 @@ export function droppedDraftNote(d: DroppedDraft | undefined): string | null {
 /** Lines per finished action in a dropped draft: the tool and the first line of its result. */
 const ACTION_RESULT_CHARS = 200;
 
+/**
+ * #131: told when a round writes text alongside tool calls. Only the final round's text is sent, but the
+ * model sees its own earlier text in the history and took it as said ("still waiting on your answer" to a
+ * step they never saw).
+ */
+export const NOT_SENT_NOTE =
+  "[Nothing has gone out yet: they haven't seen the text you wrote with these tool calls. Only your final text is sent, so write your whole reply to them next. Don't mention this note.]";
+
 /** #108: told once when a reply's text has a tool's name on its own line (it wrote the call instead of making it). */
 export const TOOL_AS_TEXT_NOTE =
   "[Your text had a tool's name on its own line, which they'd see. If you meant to use it, call it now; then write only your text to them. Don't mention this note.]";
@@ -174,6 +182,8 @@ export function createCoach(opts: CoachOptions): Replier {
       let tester: Tester = initial;
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
+      // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
+      const start = { howItWentSaid: !!state.todayRow?.howItWentSaid };
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -247,7 +257,7 @@ export function createCoach(opts: CoachOptions): Replier {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
-            : await runTool(db, state, call.name, call.input, now);
+            : await runTool(db, state, call.name, call.input, now, start);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
@@ -269,6 +279,8 @@ export function createCoach(opts: CoachOptions): Replier {
         }
 
         trail.push(calls.map((c, i) => `${c.name}:${(results[i] as Anthropic.ToolResultBlockParam).is_error ? "error" : "ok"}`).join(","));
+        // #131: text written with tool calls never reaches them; say so, so the next round doesn't treat it as seen.
+        if (text) results.push({ type: "text", text: NOT_SENT_NOTE });
         // The model sometimes answers a forced-text round with nothing unless it's told why.
         if (round + 1 === MAX_ROUNDS) results.push({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." });
         messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
@@ -307,7 +319,7 @@ export function createCoach(opts: CoachOptions): Replier {
         });
         const calls = last ? [] : response.content.filter((b) => b.type === "tool_use");
         if (calls.length) {
-          const results: Anthropic.ToolResultBlockParam[] = [];
+          const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
           for (const call of calls) {
             const result = NUDGE_TOOLS.includes(call.name)
               ? await runTool(db, state, call.name, call.input, now)
@@ -315,6 +327,8 @@ export function createCoach(opts: CoachOptions): Replier {
             if (result.ok) state = await loadCoachState(db, result.tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
             results.push({ type: "tool_result", tool_use_id: call.id, ...(result.ok ? { content: result.message } : { content: result.error, is_error: true }) });
           }
+          // #131: as in replies, text written with tool calls isn't sent.
+          if (response.content.some((b) => b.type === "text" && b.text.trim())) results.push({ type: "text", text: NOT_SENT_NOTE });
           messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
           messages.push({ role: "user", content: results });
           round++;

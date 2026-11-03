@@ -46,7 +46,7 @@ import {
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, quietOn, weekdayOf } from "../nudges/schedule.js";
-import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
+import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -147,6 +147,7 @@ const schemas = {
       agreed: z.boolean().optional(),
       asked: text(300).optional(),
       reason: text(200).optional(),
+      ready: text(160).optional(),
     })
     .strict(),
   save_reflection: z
@@ -414,6 +415,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         agreed: { type: "boolean" },
         asked: { type: "string" },
         reason: { type: "string", description: "Why this step, in a line: what they said that shaped it (#93)" },
+        ready: { type: "string", description: "Only when told it's early: why the next step goes now (they asked for it, rushed, said skip)" },
       },
       required: ["step", "kind"],
     },
@@ -421,7 +423,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them (how it felt, how hard, effort or time, room for more, what to change); a lesson alone is false. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them, with something behind it (how it felt and why, how hard, effort or time, room for more, what to change); a lesson alone, or a thin word with nothing behind it (\"okay\", \"fine\", \"a little awkward\"), is false: ask what's behind it. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
       properties: {
@@ -477,7 +479,39 @@ export type ToolResult = { ok: true; message: string; tester: Tester; optedOut?:
  * Validates and runs one tool call against the current state. Never throws for bad input:
  * the model gets the error back and can fix its call.
  */
-export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date): Promise<ToolResult> {
+/** #131: what a tool can't tell from the state mid-reply, which reloads after every call: how the reply began. */
+export interface ReplyStart {
+  /** Whether how it went was already said (something real) when this reply began. */
+  howItWentSaid: boolean;
+}
+
+/**
+ * #131 (soft hold): why proposing the next step day's step now is early in today's reflection, or undefined
+ * when it isn't. Early: the text that celebrates their proof, the reply where their first real answer came in,
+ * or a thin reflection before they've given little back twice. The coach can go ahead with a reason (`ready`),
+ * so it pushes back once, never forces a question. The safety net and texts ZOH starts are never early.
+ */
+export function earlyProposal(state: CoachState, start?: ReplyStart): string | undefined {
+  const row = state.todayRow;
+  const done = row?.status === "done" || row?.status === "done_reduced";
+  if (!done || state.nudgeMoment || state.proof.today === 0) return undefined;
+  const n = state.proof.zohTextsSince + 1;
+  if (n >= REFLECTION_SAFETY_NET) return undefined;
+  const said = !!row?.howItWentSaid;
+  const why =
+    n === 1
+      ? "this text celebrates their proof: ask your one question about it first"
+      : (start?.howItWentSaid ?? said)
+        ? undefined
+        : said
+          ? "they just gave you their first real answer: ask one question about it first (a worry, a difficulty, what clicked, or their idea for tomorrow)"
+          : n < REFLECTION_LITTLE_BACK
+            ? "nothing real on how it went yet: ask what's behind their answer first"
+            : undefined;
+  return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. If they asked for it, are rushed or said skip, call again with ready: why.`;
+}
+
+export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date, start?: ReplyStart): Promise<ToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as ToolName].safeParse(rawInput ?? {});
   if (!parsed.success) {
@@ -935,7 +969,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "set_today_step": {
-      const { step, kind, minutes, proof, day, agreed, asked, reason } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, kind, minutes, proof, day, agreed, asked, reason, ready } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
       const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
@@ -943,6 +977,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
       if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      // #131: a yes is only to a step they've seen, so the next step day's step must come from an earlier reply
+      // (this reply's text hasn't gone out yet); what they say about tomorrow before that isn't a yes.
+      if (day === "next" && agreed && (!row?.step || row.updatedAt.getTime() >= at.getTime())) {
+        return {
+          ok: false,
+          error: `They haven't seen a step for ${date} yet: save it without agreed, give it in full in your text and ask if it works; agreed only after their yes.`,
+        };
+      }
+      // #131 (soft hold): proposing it too early in today's reflection gets one push back; a reason lets it through.
+      const early = day === "next" && !agreed && !ready ? earlyProposal(state, start) : undefined;
+      if (early) return { ok: false, error: early };
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,

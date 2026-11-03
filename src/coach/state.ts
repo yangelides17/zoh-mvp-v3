@@ -37,6 +37,11 @@ import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
 import { loadLastWeek, loadWeek, type WeekLookback } from "./week.js";
 
+/** #93: past this many texts since their proof, wrap up even if they're still going (a safety net, not a target). */
+export const REFLECTION_SAFETY_NET = 8;
+/** #131: by this text, two follow-ups have got little back (nothing real on how it went): wrap up warmly. */
+export const REFLECTION_LITTLE_BACK = 4;
+
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
   what: "what",

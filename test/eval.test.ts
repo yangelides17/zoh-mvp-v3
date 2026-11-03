@@ -12,7 +12,7 @@ import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
-import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
+import { evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
@@ -219,6 +219,20 @@ describe("eval: proof cases send photos and voice notes", () => {
         expect(first.text).toContain("[Voice note transcript]: Ugh today was so long.");
       }
     }
+  });
+});
+
+describe("eval: ZOH's reply lands after the text it answers, as live (#131)", () => {
+  it("the reply to proof is stamped after it, so the count of ZOH's texts since proof matches live", async () => {
+    const c = (await loadCases("reflection")).find((x) => x.id === "live-felt-okay")!;
+    const plan = planConversations([], [c], { runs: 1 })[0]!;
+    const result = await runConversation(plan, scriptedTester(c.testerLines), { maxTurns: c.testerLines.length + 1, index: 3, env: {}, replier: new EchoReplier() });
+    expect(result.error).toBeUndefined();
+    expect(result.transcript.map((l) => l.from)).toEqual(["tester", "zoh", "tester", "zoh"]);
+    // The transcript stamps a tester line 5 s before it's posted (typing); the proof is sent at that post time.
+    const [proof, reply] = result.transcript.map((l) => Date.parse(l.at));
+    const proofSent = proof! + 5_000;
+    expect(reply! - proofSent).toBeGreaterThanOrEqual(REPLY_LAG_MS);
   });
 });
 

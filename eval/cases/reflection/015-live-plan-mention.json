@@ -1,0 +1,72 @@
+{
+  "id": "live-plan-mention",
+  "title": "Live Nov 5: mentioning tomorrow's size ended the reflection",
+  "origin": "Yanni live on staging, Nov 2 (simulated days), issue #131",
+  "seed": {
+    "name": "Yanni",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 0,
+    "answers": {
+      "what": "customer discovery for a side project: how freelancers handle client follow-ups",
+      "where": "at home",
+      "when": "6:30 pm",
+      "how_long": "5 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Hey! It's 6:40, so your freelancer list should be happening right now. A photo of whatever you've got gets today counted."
+      }
+    ],
+    "plan": {
+      "step": "Write 2 interview questions about the past: an opener plus one follow-up",
+      "destination": "find a problem worth building for by talking to freelancers",
+      "place": "at home",
+      "time": "18:30",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "a photo or screenshot of what you made, or a voice note",
+      "reason": "Talking to real freelancers about follow-ups shows whether the problem is real.",
+      "minutes": 5,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "status": "done",
+        "step": "Say all three questions out loud twice, voice note of the best run",
+        "proof_seen": "voice note of the three questions",
+        "reflection": "Saying the three questions out loud felt okay.",
+        "days_ago": 1
+      },
+      {
+        "status": "done_reduced",
+        "step": "Write 2 interview questions about the past (2-minute version)",
+        "proof_seen": "Notes screenshot with two questions",
+        "reflection": "2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.",
+        "days_ago": 2
+      }
+    ],
+    "today_step": {
+      "step": "At home at 6:30 pm, 5 minutes: write down 3 freelancers you could ask for a quick chat. Send a photo of the list.",
+      "agreed_hours_ago": 24
+    }
+  },
+  "testerLines": [
+    "[photo freelancer-list.jpg: a list of three freelancers: Alex (late invoices), Priya (approvals), Sam (deposits)]",
+    "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.",
+    "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too."
+  ],
+  "whatWentWrong": "Five minutes it is. ... tomorrow ... draft a short text to Alex ... Work for you?",
+  "shouldHaveHappened": "ZOH notes the five minutes and keeps reflecting, asking about what makes reaching out intimidating, before proposing tomorrow's step.",
+  "startTime": "18:42",
+  "timeZone": "America/New_York"
+}

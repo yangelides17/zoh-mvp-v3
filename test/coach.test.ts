@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { COACH_HISTORY_CAP, createCoach, DECLINE_NOTE, hasToolNameLine, MAX_ROUNDS, readsAsSendDecision, TOOL_AS_TEXT_NOTE, withoutToolNames } from "../src/coach/coach.js";
+import { COACH_HISTORY_CAP, createCoach, DECLINE_NOTE, hasToolNameLine, MAX_ROUNDS, NOT_SENT_NOTE, readsAsSendDecision, TOOL_AS_TEXT_NOTE, withoutToolNames } from "../src/coach/coach.js";
 import {
   buildStateBlock,
   CORE_VOICE,
@@ -489,6 +489,23 @@ describe("skipping a kickoff (#42)", () => {
     expect(await coach.nudge!(ask)).toEqual({ held: true, wrote: "SKIP." });
     model.script("", "");
     await expect(coach.nudge!(ask)).rejects.toThrow(/no nudge text/);
+  });
+});
+
+describe("text written alongside tool calls is never treated as seen (#131)", () => {
+  it("the next round is told it wasn't sent, and only the final text goes out", async () => {
+    // Nov 6 live: round 1 wrote the proposal and saved it; round 2 took that text as seen ("still waiting on your answer").
+    model.script({ text: "Nice to meet you! Tomorrow: 10 pages at 7. Work for you?", tools: [{ name: "save_name", input: { name: "Sam" } }] }, "Nice to meet you, Sam!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Nice to meet you, Sam!"]);
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(NOT_SENT_NOTE);
+  });
+
+  it("no note when the round only calls tools", async () => {
+    model.script({ tools: [{ name: "save_name", input: { name: "Sam" } }] }, "Nice to meet you, Sam!");
+    await text(ME, "I'm Sam");
+    expect(sent()).toEqual(["Nice to meet you, Sam!"]);
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).not.toContain(NOT_SENT_NOTE);
   });
 });
 

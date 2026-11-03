@@ -1,0 +1,64 @@
+{
+  "id": "live-felt-okay",
+  "title": "Live Nov 4: 'It felt okay' moved straight to the next step",
+  "origin": "Yanni live on staging, Nov 2 (simulated days), issue #131",
+  "seed": {
+    "name": "Yanni",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 0,
+    "answers": {
+      "what": "customer discovery for a side project: how freelancers handle client follow-ups",
+      "where": "at home",
+      "when": "6:30 pm",
+      "how_long": "5 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Hey! Ten minutes to your 6:30. After each question, stop and leave a real pause, like you're waiting for their answer."
+      }
+    ],
+    "plan": {
+      "step": "Write 2 interview questions about the past: an opener plus one follow-up",
+      "destination": "find a problem worth building for by talking to freelancers",
+      "place": "at home",
+      "time": "18:30",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "a photo or screenshot of what you made, or a voice note",
+      "reason": "Talking to real freelancers about follow-ups shows whether the problem is real.",
+      "minutes": 5,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "status": "done_reduced",
+        "step": "Write 2 interview questions about the past (2-minute version)",
+        "proof_seen": "Notes screenshot with two questions",
+        "reflection": "2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.",
+        "days_ago": 1
+      }
+    ],
+    "today_step": {
+      "step": "At home at 6:30 pm, 5 minutes: add your tracking question to your two, then say all three questions out loud twice, as if talking to a freelancer. Record one voice note of your best run.",
+      "agreed_hours_ago": 24
+    }
+  },
+  "testerLines": [
+    "[voice: Tell me about the last time you had to follow up with a client. ... What did you do next? ... What did you use to keep track of that follow-up?]",
+    "It felt okay"
+  ],
+  "whatWentWrong": "Okay is a fine place to land. It means saying the questions out loud isn't scary... Tomorrow at 6:30 pm: write down 3 freelancers. Work for you?",
+  "shouldHaveHappened": "After 'It felt okay', ZOH asks a proof-grounded follow-up about what's behind it, without guessing what okay means, and does not propose tomorrow's step yet.",
+  "startTime": "18:53",
+  "timeZone": "America/New_York"
+}

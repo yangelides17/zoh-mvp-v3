@@ -206,9 +206,15 @@ export async function textZohBurst(app: EvalApp, texts: { text: string; mediaUrl
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
 }
 
+/** How long after a tester's text ZOH's work on it happens, on the eval's clock (#131). */
+export const REPLY_LAG_MS = 2_000;
+
 /** Posts one tester text to the real webhook; doesn't wait for the reply. */
 async function postText(app: EvalApp, text: string, handle: string, mediaUrl: string): Promise<void> {
   const at = app.clock.now();
+  // #131: the reply is written after the text arrives, so ZOH's texts land after the ones they answer, as live.
+  // Without this they shared its instant, and the count of ZOH's texts since proof ran one behind live.
+  app.clock.advance(REPLY_LAG_MS);
   const res = await app.built.app.inject({
     method: "POST",
     url: "/webhooks/sendblue",
