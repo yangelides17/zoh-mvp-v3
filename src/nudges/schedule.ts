@@ -118,7 +118,9 @@ export type NudgeDecision =
   | { action: "none"; reason: string }
   | { action: "send"; nudge: DueNudge }
   /** Silent too long (before lock, or after the day-3 check-in): pause ZOH's texts and flag it. */
-  | { action: "pause"; date: string };
+  | { action: "pause"; date: string }
+  /** #110: the Sunday recap is due but 3 texts went unanswered: Monday's morning text gives it instead. */
+  | { action: "owe"; date: string };
 
 /** After this many misses in a row, one text a day at their usual time (voice page, "When they start to slip"). */
 export const ONE_A_DAY_AFTER_MISSES = 2;
@@ -146,15 +148,16 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
 /**
  * The Sunday look-back's own text (#78), when it's due right now: on a Sunday with 3+ closed step days,
  * not recapped yet today, at 6 pm, or an hour after the Sunday step should be finished when that's later
- * (the one case that may go in quiet hours). Pause, stop and the 3-unanswered cap apply; while they're
- * talking, the coach turns to the week itself; on the slip ladder its one text a day stays the only one.
+ * (the one case that may go in quiet hours). Pause and stop apply; while they're talking, the coach turns to
+ * the week itself; on the slip ladder its one text a day stays the only one. At the 3-unanswered cap it's
+ * owed instead (#110): a silent Sunday gets no fourth text, and Monday's morning text gives the recap.
  */
 export function lookback(input: NudgeInput, date: string, quiet: boolean): NudgeDecision | undefined {
   const { now, tester, plan } = input;
   if (tester.phase !== "active" || !plan?.startDate || plan.startDate > date) return undefined;
   if (weekdayOf(date) !== "sun" || input.claimedToday.includes(LOOKBACK_KIND)) return undefined;
   if ((input.closedStepDays ?? 0) < LOOKBACK_MIN_STEP_DAYS) return undefined;
-  if (input.nudgesSinceReply >= LOOKBACK_CAP || (input.missesInARow ?? 0) >= ONE_A_DAY_AFTER_MISSES) return undefined;
+  if ((input.missesInARow ?? 0) >= ONE_A_DAY_AFTER_MISSES) return undefined;
   if (input.lastInboundAt && now.getTime() - input.lastInboundAt.getTime() < LOOKBACK_TALKING_MS) return undefined;
   const { from, late } = lookbackTime(input, date);
   if (quiet && !late) return undefined;
@@ -162,8 +165,13 @@ export function lookback(input: NudgeInput, date: string, quiet: boolean): Nudge
   const until = late ? Math.max(from + LOOKBACK_LATE_WINDOW_MS, end) : end;
   const at = now.getTime();
   if (at < from || at >= until || from < (plan.lockedAt?.getTime() ?? 0)) return undefined;
+  // Checked last: only a recap that would go right now becomes owed.
+  if (input.nudgesSinceReply >= LOOKBACK_CAP) return { action: "owe", date };
   return { action: "send", nudge: { kind: LOOKBACK_KIND, moment: "lookback", date } };
 }
+
+/** #110: Monday's morning texts, which give a recap owed from a silent Sunday (not the slip ladder's, nor later ones). */
+export const OWED_RECAP_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin", "after_miss", "rest_day"];
 
 /** When the look-back's own text goes: 6 pm, or an hour after a Sunday step should be finished when that's later (`late`). */
 export function lookbackTime(input: Pick<NudgeInput, "tester" | "plan" | "today">, date: string): { from: number; late: boolean } {

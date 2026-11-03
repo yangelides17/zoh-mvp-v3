@@ -1,7 +1,7 @@
 import { and, asc, count, eq, gte, isNotNull, lte } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { nudges, stepDays, type StepDay, type Takeaway, type TakeawayEvidence, type Tester } from "../db/schema.js";
-import { addDays, LOOKBACK_KIND, LOOKBACK_MIN_STEP_DAYS, weekdayOf } from "../nudges/schedule.js";
+import { addDays, LOOKBACK_KIND, LOOKBACK_MIN_STEP_DAYS, weekdayOf, zonedTime } from "../nudges/schedule.js";
 
 /**
  * The Sunday look-back (#78): what counts as progress this week, shared by the coach's state, the
@@ -106,5 +106,53 @@ export async function loadWeek(
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, today), eq(nudges.kind, LOOKBACK_KIND)));
   // A reply's tool calls all run at its `now`: a recap recorded at exactly this instant is this reply's.
   const recappedNow = recap?.status === "skipped" && recap.createdAt.getTime() === now.getTime();
-  return { from, to: today, days, learnings: learnings(takeaways, from), recapped: Boolean(recap), recappedNow };
+  // #110: owed to Monday isn't given yet: talking Sunday night, they still get it today.
+  return { from, to: today, days, learnings: learnings(takeaways, from), recapped: Boolean(recap) && recap!.status !== "owed", recappedNow };
+}
+
+/**
+ * #110: on a Monday, the week before it when Sunday's recap was owed (a silent Sunday at the unanswered cap):
+ * still owed (`recapped` false), or given today (by the morning text or a reply), for the week talk.
+ * Undefined on any other day, or when Sunday's recap went (or was dropped) on Sunday.
+ */
+export async function loadLastWeek(
+  db: Db,
+  tester: Pick<Tester, "id" | "timeZone">,
+  today: string,
+  takeaways: Pick<Takeaway, "text" | "day" | "evidence">[],
+  now: Date,
+): Promise<WeekLookback | undefined> {
+  if (weekdayOf(today) !== "mon") return undefined;
+  const sunday = addDays(today, -1);
+  const recap = await owedRecap(db, tester, sunday);
+  if (!recap) return undefined;
+  const givenToday = recap.status === "skipped" && recap.createdAt >= zonedTime(today, "00:00", tester.timeZone);
+  if (recap.status !== "owed" && !givenToday) return undefined;
+  const from = weekStart(sunday);
+  const days = await db
+    .select()
+    .from(stepDays)
+    .where(and(eq(stepDays.testerId, tester.id), isNotNull(stepDays.status), gte(stepDays.date, from), lte(stepDays.date, sunday)))
+    .orderBy(asc(stepDays.date));
+  const recappedNow = givenToday && recap.createdAt.getTime() === now.getTime();
+  return { from, to: sunday, days, learnings: learnings(takeaways, from), recapped: givenToday, recappedNow };
+}
+
+/** #110: Sunday's look-back slot, when there is one. */
+export async function owedRecap(db: Db, tester: Pick<Tester, "id">, sunday: string): Promise<{ id: string; status: string; createdAt: Date } | undefined> {
+  const [row] = await db
+    .select({ id: nudges.id, status: nudges.status, createdAt: nudges.createdAt })
+    .from(nudges)
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, sunday), eq(nudges.kind, LOOKBACK_KIND)));
+  return row;
+}
+
+/** #110: Monday's text gave the recap owed from Sunday: the slot is used, stamped when it was given. */
+export async function giveOwedRecap(db: Db, tester: Pick<Tester, "id">, sunday: string, at: Date, messageId?: string): Promise<boolean> {
+  const rows = await db
+    .update(nudges)
+    .set({ status: "skipped", createdAt: at, ...(messageId ? { messageId } : {}) })
+    .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, sunday), eq(nudges.kind, LOOKBACK_KIND), eq(nudges.status, "owed")))
+    .returning({ id: nudges.id });
+  return rows.length > 0;
 }

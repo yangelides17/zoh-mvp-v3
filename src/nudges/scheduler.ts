@@ -3,8 +3,8 @@ import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } fro
 import type { HeldNudge, Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
-import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
-import { closedStepDays } from "../coach/week.js";
+import { loadCurrentPlan, loadRecentDays, owedRecapShows } from "../coach/state.js";
+import { closedStepDays, giveOwedRecap, owedRecap } from "../coach/week.js";
 import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
@@ -26,6 +26,8 @@ import {
   CARRYING_MOMENTS,
   daysToClose,
   dueNudge,
+  LOOKBACK_KIND,
+  OWED_RECAP_MOMENTS,
   quietNow,
   REPLY_IN_PROGRESS_MS,
   REQUEST_CARRYING_MOMENTS,
@@ -37,6 +39,7 @@ import {
   type NudgeCarry,
   type NudgeDecision,
   type NudgeInput,
+  type NudgeMoment,
 } from "./schedule.js";
 
 export const WENT_QUIET_FLAG = "went_quiet";
@@ -135,6 +138,17 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
       await chain;
     },
   };
+}
+
+/**
+ * #110: the Sunday whose recap this Monday morning text gives: owed, and shown to the coach (the same check as
+ * its state, so the app records only a recap the coach was asked to give).
+ */
+async function owedSunday(db: Db, tester: Tester, date: string, moment: NudgeMoment): Promise<string | undefined> {
+  if (weekdayOf(date) !== "mon") return undefined;
+  const sunday = addDays(date, -1);
+  if ((await owedRecap(db, tester, sunday))?.status !== "owed") return undefined;
+  return owedRecapShows(await loadRecentDays(db, tester, date), moment) ? sunday : undefined;
 }
 
 /** The last text ZOH sent this tester for the same moment, so the next one can read differently. */
@@ -247,6 +261,13 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
     deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
   } else if (decision.action === "send") {
     await send(deps, tester, decision.nudge, now, undefined, lastInboundAt);
+  } else if (decision.action === "owe") {
+    // #110: a silent Sunday gets no fourth text: the recap's slot waits for Monday's morning text.
+    await db
+      .insert(nudges)
+      .values({ testerId: tester.id, date: decision.date, kind: LOOKBACK_KIND, moment: "lookback", status: "owed", createdAt: now })
+      .onConflictDoNothing();
+    deps.log.info({ contact: maskNumber(tester.phone), kind: LOOKBACK_KIND }, "Sunday recap owed to Monday: 3 texts unanswered");
   }
   return decision;
 }
@@ -487,13 +508,16 @@ async function send(
 
   let text: string | null | HeldNudge;
   let carry: NudgeCarry | undefined;
+  let owedFrom: string | undefined;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
     carry = given ?? (await carryFor(db, tester, nudge, now));
     // A kickoff that carries something has its own job, so it always goes.
     const textedToday = lastInboundAt !== undefined && lastInboundAt >= zonedTime(nudge.date, "00:00", tester.timeZone);
-    const mayskip = textedToday && !carry && SKIPPABLE_MOMENTS.includes(nudge.moment);
+    // #110: a recap owed from Sunday rides on Monday's morning text, so that text can't be skipped.
+    owedFrom = OWED_RECAP_MOMENTS.includes(nudge.moment) ? await owedSunday(db, tester, nudge.date, nudge.moment) : undefined;
+    const mayskip = textedToday && !carry && !owedFrom && SKIPPABLE_MOMENTS.includes(nudge.moment);
     text = await deps.replier.nudge({
       tester,
       turns: toTurns(history, new Map()),
@@ -536,6 +560,7 @@ async function send(
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
+    if (owedFrom) await giveOwedRecap(db, tester, owedFrom, now, message.id);
     if (carry && "requestId" in carry) {
       const [request] = await db.select().from(consoleMessages).where(eq(consoleMessages.id, carry.requestId));
       if (request) await closeRequest(db, { request, status: "done", at: now, messageId: message.id, line: doneLine(request.body, nudge.moment === "team" ? "in its own text" : "in the morning text", now) });

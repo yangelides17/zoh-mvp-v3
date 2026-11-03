@@ -4,7 +4,7 @@ import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
-import { evidenceText } from "./week.js";
+import { evidenceText, type WeekLookback } from "./week.js";
 
 /**
  * The coach's instructions, all in this file. Keep them lean (CLAUDE.md, "Changing what ZOH says"):
@@ -300,16 +300,47 @@ function weekLines(s: CoachState, plan: Plan): string[] {
       : w.recapped
         ? "The recap is done for this week (in conversation or its own text): never again today; their replies to it are the week talk."
         : `Not given yet: ${weekWhen(s)} (WEEK LOOK-BACK), with record_week_recap.`;
-  const { understood, explained } = w.learnings;
   const lines = [
     `WEEK LOOK-BACK, ${label(weekdayOf(w.from))} ${w.from} to today: ${status}`,
     // #103: a recap said "5 done in full, each with a voice recap" in a week with a miss; these numbers are the only count.
     `This week: ${tally}, today included (each day in Recent step days and Today above). Use these numbers exactly; "every" or "each" only for what's true of every one of those days.`,
-    `Understood this week (applied or recalled; only these count as understood or "can do"):\n${understood.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none yet"}`,
+    ...weekProgress(w, plan, "this week"),
+  ];
+  return [lines.join("\n")];
+}
+
+/** #110: on a Monday after a silent Sunday, last week's recap, owed to this morning's text or their first reply. */
+function lastWeekLines(s: CoachState, plan: Plan): string[] {
+  const w = s.lastWeek;
+  if (!w) return [];
+  const n = (status: StepDayStatus) => w.days.filter((d) => d.status === status).length;
+  const tally = `${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed`;
+  const owed = "owed: they didn't answer Sunday's texts, so it waited for today.";
+  const recap = "the recap (WEEK LOOK-BACK), minus its question about the week; a miss in it named lightly, never the headline";
+  const status = w.recappedNow
+    ? "This text (not sent yet) is the recap."
+    : w.recapped
+      ? "Given today: never again; their replies about last week are the week talk, kept short."
+      : s.nudgeMoment
+        ? `${owed} This text (not sent yet) opens with ${recap}, then does its own job, its one question (if it has one) last. The app records it: no tool call.`
+        : `${owed} Not given yet: open this reply with ${recap}, then answer what they said, with record_week_recap.`;
+  const lines = [
+    `LAST WEEK'S LOOK-BACK, ${label(weekdayOf(w.from))} ${w.from} to ${label(weekdayOf(w.to))} ${w.to}: ${status}`,
+    `Last week: ${tally} (each day in Recent step days above). Use these numbers exactly; "every" or "each" only for what's true of every one of those days.`,
+    ...weekProgress(w, plan, "last week"),
+  ];
+  return [lines.join("\n")];
+}
+
+/** #78: what a recap may call progress: understood (applied or recalled) vs. only explained, and the destination. */
+function weekProgress(w: WeekLookback, plan: Plan, which: string): string[] {
+  const { understood, explained } = w.learnings;
+  const lines = [
+    `Understood ${which} (applied or recalled; only these count as understood or "can do"):\n${understood.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none yet"}`,
     `Only explained so far (starting to click):\n${explained.map((l) => `- "${l.text}" (${evidenceText(l)})`).join("\n") || "- none"}`,
   ];
   if (plan.destination) lines.push(`Their destination: ${plan.destination} (say where they stand vs. it).`);
-  return [lines.join("\n")];
+  return lines;
 }
 
 /** Today's own step (#76), or the ask to pick it; the plan's step applies until then. */
@@ -504,7 +535,7 @@ export function buildStateBlock(s: CoachState): string {
     lines.push(`Locked plan (version ${s.plan.version}, day 1 ${s.plan.startDate}; its step was day 1's, each later day gets its own): ${describePlan(s.plan)}`);
     if (!s.plan.destination) lines.push("Destination: none yet (they can add one anytime with change_plan; don't push for it).");
     if (s.plan.commitment) lines.push(`Their words when they committed: "${s.plan.commitment}"`);
-    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...takeawayLines(s), ...weekLines(s, s.plan), ...nextStepLines(s, s.plan));
+    lines.push(...todayLines(s, s.plan), ...historyLines(s, s.plan), ...takeawayLines(s), ...weekLines(s, s.plan), ...lastWeekLines(s, s.plan), ...nextStepLines(s, s.plan));
   } else if (t.phase === "planning") {
     // #37: "shown" only once a text with it went out; a draft saved in a turn that sent nothing, or revised since, wasn't seen.
     const label = s.draftShown ? "Plan shown to them, not locked yet" : "Plan saved but not sent yet: show it in this reply";
