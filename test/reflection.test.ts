@@ -217,7 +217,8 @@ describe("reflection that gets to know them (#93)", () => {
   it("end to end through the real coach: the take is saved, and never in a later state block or a text", async () => {
     await t.close();
     const model = new FakeClaudeModel();
-    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }) });
+    // #133: a fixed Monday evening clock; on the real clock the reflection lands on whatever today is.
+    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }), now: () => at(MON, "19:40") });
     await setup();
     await doneMonday();
     const take = "FOUNDERS-ONLY: coasting, step too small.";

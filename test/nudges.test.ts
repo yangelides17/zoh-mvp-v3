@@ -1027,10 +1027,15 @@ describe("goals foundation (spec: Step log and next step)", () => {
     await tool("change_plan", { time: "20:00" }, at(MON, "20:05"));
     const [flag] = await t.db.select().from(flags);
     const version2 = (await t.db.select().from(plans).where(eq(plans.version, 2)))[0]!;
-    expect(await alerts()).toMatchObject([
-      { topic: "proof_pattern", eventKey: `flag:${flag!.id}`, body: "Third day of blurry photos", testerId: tester.id },
-      { topic: "plan_review", eventKey: `plan_review:${version2.id}`, planId: version2.id },
-    ]);
+    // #133: one alert per event, in any order (the flag's is stamped on the real clock, the plan's on the test's).
+    const raised = await alerts();
+    expect(raised).toHaveLength(2);
+    expect(raised).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ topic: "proof_pattern", eventKey: `flag:${flag!.id}`, body: "Third day of blurry photos", testerId: tester.id }),
+        expect.objectContaining({ topic: "plan_review", eventKey: `plan_review:${version2.id}`, planId: version2.id }),
+      ]),
+    );
     const again = { testerId: tester.id, topic: "plan_review", key: `plan_review:${version2.id}`, body: "again" };
     expect(await raiseAlert(t.db, again)).toBe(false);
     expect(await alerts()).toHaveLength(2);
