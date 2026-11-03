@@ -39,9 +39,8 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
 
   // #16: Sendblue's typing signals (the tester started or stopped typing). Never stored.
   app.post("/webhooks/sendblue/typing", async (request, reply) => {
-    const receivedAt = new Date();
     if (refused(request, reply)) return reply;
-    return reply.code(200).send(await typingSignal(opts, request, receivedAt));
+    return reply.code(200).send(await typingSignal(opts, request));
   });
 
   app.post("/webhooks/sendblue", async (request, reply) => {
@@ -49,7 +48,7 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
     if (refused(request, reply)) return reply;
 
     // A typing signal sent to the message URL is handled the same way.
-    if (isTypingBody(request.body)) return reply.code(200).send(await typingSignal(opts, request, receivedAt));
+    if (isTypingBody(request.body)) return reply.code(200).send(await typingSignal(opts, request));
 
     const parsed = sendblueMessageEvent.safeParse(request.body);
     if (!parsed.success) {
@@ -150,9 +149,9 @@ function isTypingBody(body: unknown): boolean {
 
 /**
  * #16: a typing signal for a tester this app answers updates their reply line (a ready reply
- * waits while they type). Logged with Sendblue's time and ours for the live checks; temporary (#118).
+ * waits while they type). Not logged one by one (#118): a hold shows in the reply's saved timings.
  */
-async function typingSignal(opts: WebhookRouteOptions, request: FastifyRequest, receivedAt: Date): Promise<Record<string, unknown>> {
+async function typingSignal(opts: WebhookRouteOptions, request: FastifyRequest): Promise<Record<string, unknown>> {
   const parsed = sendblueTypingEvent.safeParse(request.body);
   if (!parsed.success) {
     request.log.warn({ issues: parsed.error.issues.slice(0, 5) }, "Unrecognized typing webhook body");
@@ -162,17 +161,6 @@ async function typingSignal(opts: WebhookRouteOptions, request: FastifyRequest, 
   if (!contact || !opts.pipeline.allowedNumbers.includes(contact)) return { ok: true, ignored: "not allowed" };
   if (!(await ownsNumber(opts.pipeline.db, routingOf(opts.pipeline), contact))) return { ok: true, ignored: "other environment" };
   linesOf(opts.pipeline).typing(contact, parsed.data.is_typing);
-  const sentAt = parsed.data.timestamp ? Date.parse(parsed.data.timestamp) : NaN;
-  request.log.info(
-    {
-      contact: maskNumber(contact),
-      isTyping: parsed.data.is_typing,
-      sendblueAt: parsed.data.timestamp ?? null,
-      receivedAt: receivedAt.toISOString(),
-      ...(Number.isFinite(sentAt) ? { lagMs: receivedAt.getTime() - sentAt } : {}),
-    },
-    "Typing signal",
-  );
   return { ok: true, typing: parsed.data.is_typing };
 }
 

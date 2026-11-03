@@ -194,7 +194,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
       log.info({ ...ctx, actions: outcome.draft.actions.length }, "Draft dropped: they texted again before it was sent");
       continue;
     }
-    await waitBeforeSend(lines, line, latest, log, ctx);
+    await waitBeforeSend(lines, line, latest);
     if (line.cancelled) continue;
     if (line.interrupted || line.pending.length) {
       // #132: what it saved stays saved; the redraft is told it and the unsent words, so it doesn't redo them.
@@ -317,8 +317,6 @@ async function waitBeforeSend(
   lines: ReplyLines,
   line: ReplyLine,
   latest: PendingText,
-  log: Logger,
-  ctx: Record<string, unknown>,
 ): Promise<void> {
   const phone = latest.inbound.contactNumber;
   const timings = latest.timings;
@@ -332,11 +330,6 @@ async function waitBeforeSend(
         timings.grace_ms = Number(timings.grace_ms ?? 0) + grace.ms;
         timings.graces = Number(timings.graces ?? 0) + 1;
         timings.grace_ended = grace.ended;
-        // Temporary, for the live checks of the grace (#118 removes it); the timings stay.
-        log.info(
-          { ...ctx, graceMs: grace.ms, startedAt: new Date(grace.start).toISOString(), endedAt: new Date(grace.start + grace.ms).toISOString(), ended: grace.ended },
-          "Reply grace",
-        );
         if (grace.ended !== "typing") continue;
       }
     }
@@ -345,8 +338,6 @@ async function waitBeforeSend(
     timings.hold_ms = Number(timings.hold_ms ?? 0) + hold.ms;
     timings.holds = Number(timings.holds ?? 0) + 1;
     timings.hold_ended = hold.ended;
-    // Temporary, for the live checks of Sendblue's typing signals (#118 removes it).
-    log.info({ ...ctx, heldMs: hold.ms, ended: hold.ended }, "Reply held while they typed");
     if (hold.ended === "cap") return;
     if (hold.ended === "stopped") graceDue = true;
   }

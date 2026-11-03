@@ -251,7 +251,7 @@ describe("holding a ready reply while they type", () => {
 });
 
 describe("typing signals", () => {
-  it("are logged with a masked number, and numbers this app doesn't answer are ignored", async () => {
+  it("are not logged one by one (#118), and numbers this app doesn't answer are ignored", async () => {
     const lines: Record<string, unknown>[] = [];
     const stream = new Writable({
       write(chunk, _enc, done) {
@@ -262,10 +262,7 @@ describe("typing signals", () => {
     t = await makeApp({ logger: { level: "info", stream } });
     expect(await typing(true)).toMatchObject({ ok: true, typing: true });
     expect(await typing(true, STRANGER)).toMatchObject({ ignored: "not allowed" });
-    const logged = lines.filter((l) => l.msg === "Typing signal");
-    expect(logged).toHaveLength(1);
-    expect(logged[0]).toMatchObject({ contact: "********0100", isTyping: true });
-    expect(logged[0]).toHaveProperty("lagMs");
+    expect(lines.filter((l) => l.msg === "Typing signal")).toHaveLength(0);
     expect(JSON.stringify(lines)).not.toContain(ME);
   });
 
@@ -428,7 +425,7 @@ describe("a short grace before a ready reply goes out (#132)", () => {
     expect(sent()).toHaveLength(1);
   });
 
-  it("each grace is logged with a masked number and app timestamps", async () => {
+  it("graces are saved on the reply's timings, not logged one by one (#118)", async () => {
     const logged: Record<string, unknown>[] = [];
     const stream = new Writable({
       write(chunk, _enc, done) {
@@ -439,11 +436,9 @@ describe("a short grace before a ready reply goes out (#132)", () => {
     t = await makeApp({ logger: { level: "info", stream }, lines: new ReplyLines({ holdMs: 5000, graceMs: 30 }) });
     await post("hey");
     await t.queue.idle();
-    const grace = logged.filter((l) => l.msg === "Reply grace");
-    expect(grace).toHaveLength(1);
-    expect(grace[0]).toMatchObject({ contact: "********0100", ended: "sent" });
-    expect(grace[0]).toHaveProperty("startedAt");
-    expect(grace[0]).toHaveProperty("endedAt");
+    const [hey] = await inboundRows();
+    expect(hey!.timings).toMatchObject({ graces: 1, grace_ended: "sent" });
+    expect(logged.filter((l) => l.msg === "Reply grace" || l.msg === "Reply held while they typed")).toHaveLength(0);
     expect(JSON.stringify(logged)).not.toContain(ME);
   });
 });
