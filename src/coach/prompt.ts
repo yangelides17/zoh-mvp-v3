@@ -2,7 +2,7 @@ import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
-import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, type CoachState } from "./state.js";
+import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
 import { evidenceText, type WeekLookback } from "./week.js";
 
@@ -223,10 +223,7 @@ function todayLines(s: CoachState, plan: Plan): string[] {
 }
 
 /** #77: how today went in their words, and where the reflection exchange is (its soft cap is about 5 of your texts). */
-/** #93: past this many texts since their proof, wrap up even if they're still going (a safety net, not a target). */
-export const REFLECTION_SAFETY_NET = 8;
-/** #131: by this text, two follow-ups have got little back (nothing real on how it went): wrap up warmly. */
-export const REFLECTION_LITTLE_BACK = 4;
+export { REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET } from "./state.js";
 
 function reflectionLine(s: CoachState): string {
   const row = s.todayRow;

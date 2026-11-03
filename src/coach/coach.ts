@@ -182,6 +182,8 @@ export function createCoach(opts: CoachOptions): Replier {
       let tester: Tester = initial;
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
+      // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
+      const start = { howItWentSaid: !!state.todayRow?.howItWentSaid };
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -255,7 +257,7 @@ export function createCoach(opts: CoachOptions): Replier {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
-            : await runTool(db, state, call.name, call.input, now);
+            : await runTool(db, state, call.name, call.input, now, start);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             done.push(`${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`);
