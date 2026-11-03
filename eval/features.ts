@@ -419,19 +419,29 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "stops-right",
         scope: "conversation",
         label:
-          "Stops where a person would: a rich reflection gets no redundant questions and a wrap-up without fishing; a terse or rushed tester gets at most one light question, then the wrap-up (a line inviting more later or tomorrow is fine)",
+          "Stops where a person would: rushed (or \"skip\", \"later\") gets no question, just a light line inviting more tomorrow at most; a rich reflection gets no redundant questions and no fishing; a tester who stays flat after two follow-ups gets a warm wrap-up, never a third push",
+      },
+      {
+        id: "thin-answer",
+        scope: "conversation",
+        label: "A thin answer (\"okay\", \"fine\", \"a little awkward\") gets a proof-grounded follow-up about what's behind it, with no guess at what it means, before any next step",
+      },
+      {
+        id: "tomorrow-mention",
+        scope: "conversation",
+        label: "A mention of tomorrow during the reflection (its size, an idea for it) is acknowledged in a few words and the reflection continues; it isn't treated as a yes to a step",
       },
       {
         id: "goes-deeper",
         scope: "conversation",
         label:
-          "Goes deeper, not only wider: proof that carries a reflection gets a question about a gap or about something they said before the next step, and an engaged tester is asked to say more about one interesting thing, not a surface tidbit on everything",
+          "The reflection mixes new ground and going deeper: a worry or difficulty they name gets one question about it before reassurance or a proposal, without every question going deeper; proof that carries a reflection still gets a question (a gap, or deeper on something they said) before the next step",
       },
       {
         id: "next-step",
         scope: "conversation",
         label:
-          "The turn to the next step acknowledges what they shared and reads naturally (no canned line); the proposal is fully defined, refers to what they said about difficulty or size, and asks if it works",
+          "The turn to the next step acknowledges what they shared and reads naturally (no canned line); the proposal is fully defined, uses what they said (difficulty, size, what they mentioned for tomorrow), and agreement is asked only after it's shown in full",
       },
       { id: "kickoff-agreed", scope: "text", label: "The kickoff after an agreed step reminds without re-asking; without one, it presents a step and asks" },
       {
