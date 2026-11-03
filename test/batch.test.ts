@@ -281,3 +281,169 @@ describe("typing signals", () => {
     expect(res.statusCode).toBe(401);
   });
 });
+
+describe("a short grace before a ready reply goes out (#132)", () => {
+  const GRACE = 150;
+
+  it("no typing and no text: sent after the grace, not before, with one grace", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: GRACE }) });
+    await post("hey");
+    await until(() => t.replier.inputs.length === 1);
+    await sleep(GRACE / 3);
+    expect(sent()).toHaveLength(0);
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    const [hey] = await inboundRows();
+    expect(hey!.timings).toMatchObject({ graces: 1, grace_ended: "sent" });
+    expect(Number(hey!.timings!.grace_ms)).toBeGreaterThanOrEqual(GRACE);
+    expect(hey!.timings).not.toHaveProperty("hold_ms");
+  });
+
+  it("typing during the grace holds the reply; when they stop, one more grace, then it goes out", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: GRACE }) });
+    await post("ok so");
+    await until(() => t.replier.inputs.length === 1);
+    await sleep(20);
+    await typing(true);
+    await sleep(GRACE + 30);
+    expect(sent()).toHaveLength(0);
+    await typing(false);
+    await sleep(GRACE / 3);
+    expect(sent()).toHaveLength(0);
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    const [text] = await inboundRows();
+    expect(text!.timings).toMatchObject({ graces: 2, holds: 1, hold_ended: "stopped", grace_ended: "sent" });
+  });
+
+  it("a text during the grace: one reply covering both, the first draft never sent", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: GRACE }) });
+    await post("ok so");
+    await until(() => t.replier.inputs.length === 1);
+    await sleep(20);
+    await post("I'm in");
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    expect(userTexts(1)).toEqual(["ok so", "I'm in"]);
+    expect(t.replier.inputs[1]!.dropped).toMatchObject({ text: "Hey! Thanks for the message." });
+    const [first] = await inboundRows();
+    expect(first!.timings).toMatchObject({ grace_ended: "text" });
+  });
+
+  it("a text during a hold that followed the grace: one reply covering both", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: GRACE }) });
+    await post("ok so");
+    await until(() => t.replier.inputs.length === 1);
+    await typing(true);
+    await sleep(30);
+    await post("I'm in");
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    expect(userTexts(1)).toEqual(["ok so", "I'm in"]);
+    const [first] = await inboundRows();
+    expect(first!.timings).toMatchObject({ hold_ended: "text" });
+  });
+
+  it("a text during the grace after they stopped typing: one reply covering both", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: GRACE }) });
+    await post("ok so");
+    await until(() => t.replier.inputs.length === 1);
+    await typing(true);
+    await sleep(30);
+    await typing(false);
+    await sleep(20);
+    await post("I'm in");
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    expect(userTexts(1)).toEqual(["ok so", "I'm in"]);
+    const [first] = await inboundRows();
+    expect(first!.timings).toMatchObject({ hold_ended: "stopped", grace_ended: "text" });
+  });
+
+  it("a hold that reaches the cap sends at once, with no further grace", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 100, graceMs: GRACE }) });
+    await post("ok so");
+    await until(() => t.replier.inputs.length === 1);
+    await typing(true);
+    await t.queue.idle();
+    expect(sent()).toHaveLength(1);
+    const [text] = await inboundRows();
+    expect(text!.timings).toMatchObject({ graces: 1, holds: 1, hold_ended: "cap" });
+  });
+
+  it('"stop" during the grace: only the confirmation goes out', async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: 5000 }) });
+    await post("hey");
+    await until(() => t.replier.inputs.length === 1);
+    await post("stop");
+    await t.queue.idle();
+    expect(sent()).toEqual([OPT_OUT_CONFIRMATION]);
+    const [hey] = await inboundRows();
+    expect(hey).toMatchObject({ status: "REPLY_DROPPED" });
+  });
+
+  it("commands get no grace", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: 5000 }) });
+    const start = Date.now();
+    await post("stop");
+    await t.queue.idle();
+    expect(sent()).toEqual([OPT_OUT_CONFIRMATION]);
+    expect(Date.now() - start).toBeLessThan(2000);
+  });
+
+  it("a finished draft dropped during the grace hands on what it did, and the redraft doesn't redo it (real coach)", async () => {
+    const { db } = await makeDb();
+    const model = new FakeClaudeModel();
+    t = await makeApp({ replier: createCoach({ db, model }), lines: new ReplyLines({ holdMs: 5000, graceMs: 300 }) });
+    model.script(
+      // Draft 1 finishes: saves the name and writes its reply, then waits out the grace.
+      { tools: [{ name: "save_name", input: { name: "Sam" } }] },
+      "Nice to meet you, Sam!",
+      // Draft 2, after the second text lands in the grace.
+      { tools: [{ name: "choose_goal", input: { slug: "reading" } }] },
+      "Sam, reading it is. When in your day could 10 minutes of it fit?",
+    );
+    await post("I'm Sam");
+    await until(() => model.requests.length === 2);
+    await sleep(30);
+    await post("I want to read more");
+    await until(() => sent().length === 1, 4000);
+
+    expect(sent()).toEqual(["Sam, reading it is. When in your day could 10 minutes of it fit?"]);
+    expect(await getTesterByPhone(t.db, ME)).toMatchObject({ name: "Sam", goalSlug: "reading" });
+    const redraft = JSON.stringify(model.requests[2]!.messages.at(-1));
+    expect(redraft).toContain("never sent");
+    expect(redraft).toContain("save_name");
+    expect(redraft).toContain("Nice to meet you, Sam!");
+    const calls = model.requests.flatMap((r) => r.messages).flatMap((m) => (Array.isArray(m.content) ? m.content : []));
+    expect(calls.filter((b) => b.type === "tool_use" && b.name === "save_name")).toHaveLength(1);
+  });
+
+  it("a grace of 0 turns it off", async () => {
+    t = await makeApp({ lines: new ReplyLines({ holdMs: 5000, graceMs: 0 }) });
+    await post("hey");
+    await t.queue.idle();
+    const [hey] = await inboundRows();
+    expect(hey!.timings).not.toHaveProperty("graces");
+    expect(sent()).toHaveLength(1);
+  });
+
+  it("each grace is logged with a masked number and app timestamps", async () => {
+    const logged: Record<string, unknown>[] = [];
+    const stream = new Writable({
+      write(chunk, _enc, done) {
+        for (const l of String(chunk).split("\n").filter(Boolean)) logged.push(JSON.parse(l) as Record<string, unknown>);
+        done();
+      },
+    });
+    t = await makeApp({ logger: { level: "info", stream }, lines: new ReplyLines({ holdMs: 5000, graceMs: 30 }) });
+    await post("hey");
+    await t.queue.idle();
+    const grace = logged.filter((l) => l.msg === "Reply grace");
+    expect(grace).toHaveLength(1);
+    expect(grace[0]).toMatchObject({ contact: "********0100", ended: "sent" });
+    expect(grace[0]).toHaveProperty("startedAt");
+    expect(grace[0]).toHaveProperty("endedAt");
+    expect(JSON.stringify(logged)).not.toContain(ME);
+  });
+});

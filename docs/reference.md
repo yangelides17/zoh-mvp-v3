@@ -23,6 +23,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Production has `DEV_COMMANDS=off` set explicitly: to use them there for a while, change it to `on`
   (Railway redeploys), then back to `off`. Optional `TYPING_HOLD_SECONDS` (#16: longest a ready reply
   waits while the tester is typing; default 30, `0` turns the hold off without a code change).
+  Optional `REPLY_GRACE_SECONDS` (#132: how long a ready reply waits for a late typing signal or
+  another text before it goes out, and again after a hold ends on "stopped"; default 2.5, decimals
+  allowed, `0` turns it off).
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only; ideally its own
