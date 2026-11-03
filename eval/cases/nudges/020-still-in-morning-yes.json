@@ -1,0 +1,41 @@
+{
+  "id": "still-in-morning-yes",
+  "title": "A morning \"still in\" to a step agreed ahead: the 7:50 reminder still goes",
+  "origin": "Issue #137, from Yanni's staging run on Nov 3 (simulated Wed Nov 4): \"Still locked in for 8 tonight\" at 9:00 was saved as on it, and no reminder came before the 8 pm step",
+  "seed": {
+    "name": "Yanni",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 13,
+    "answers": { "what": "build the podcast pilot", "where": "desk at home", "when": "8 pm", "how_long": "60 min" },
+    "history": [
+      { "from": "zoh", "text": "Tomorrow at 8: sharpen the four episodes first, then build the 10-name guest list for episode 1 and mark your top 3. Screenshot of the doc when it's done. Work for you?" },
+      { "from": "tester", "text": "Yes! Love that" }
+    ],
+    "plan": {
+      "step": "60 minutes on the podcast pilot",
+      "place": "desk at home",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "a screenshot of the updated doc",
+      "reason": "An hour a night turns the pilot from an idea into episodes.",
+      "minutes": 60,
+      "started_days_ago": 1
+    },
+    "step_days": [{ "days_ago": 1, "status": "done" }],
+    "today_step": {
+      "step": "Sharpen the four episodes first, then build the 10-name guest list for episode 1 and mark your top 3",
+      "agreed_hours_ago": 13
+    }
+  },
+  "testerLines": [
+    "advance to 09:00",
+    "Kalimera! Still locked in for 8 tonight. Refine the episodes first, then the 10-name guest list and top 3. I'll send the screenshot",
+    "advance to 19:55"
+  ],
+  "whatWentWrong": "The morning \"still locked in for 8 tonight\" was saved as on it (starting now), which cancelled the reminder 10 minutes before the 8 pm step; the next text ZOH started was the 9:05 follow-up.",
+  "shouldHaveHappened": "ZOH answers the morning yes briefly without re-asking anything. Around 7:50 pm, about 10 minutes before the step, ZOH starts the check-in (get set up for the 8 pm hour). Nothing in the morning reply or later treats them as already starting.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}
