@@ -29,13 +29,13 @@ import {
 } from "../db/schema.js";
 import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
-import { addDays, nextStepDay, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
 import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
-import { loadWeek, type WeekLookback } from "./week.js";
+import { loadLastWeek, loadWeek, type WeekLookback } from "./week.js";
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -81,6 +81,8 @@ export interface CoachState {
   takeaways: Takeaway[];
   /** Sundays with 3+ closed step days (#78): the week the look-back reads. */
   week?: WeekLookback;
+  /** #110: Mondays after a silent Sunday: last week's recap, owed (or given today, for the week talk). */
+  lastWeek?: WeekLookback;
   /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
@@ -212,6 +214,7 @@ export async function loadCoachState(
     recentDays: recentDays.map((d) => forCoach(d)!),
     takeaways: recentTakeaways,
     week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
+    lastWeek: plan && tester.phase === "active" && owedRecapShows(recentDays, opts.nudgeMoment) ? await loadLastWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,
@@ -293,6 +296,16 @@ export async function planSentSince(db: Db, tester: Tester, draftId: string): Pr
 /** #93: ZOH's take on a day is for the founders only, so it never reaches the coach's state (or its texts). */
 function forCoach(row: StepDay | undefined): StepDay | undefined {
   return row && { ...row, coachTake: null };
+}
+
+/**
+ * #110: whether a recap owed from Sunday belongs in this text: a reply, or Monday's morning text; never a
+ * slip-ladder Monday (its one text a day stays about getting back to it) or a later text ZOH starts.
+ */
+export function owedRecapShows(recentDays: Pick<StepDay, "status">[], moment: NudgeMoment | undefined): boolean {
+  if (moment && !OWED_RECAP_MOMENTS.includes(moment)) return false;
+  const lastTwo = recentDays.slice(0, ONE_A_DAY_AFTER_MISSES);
+  return !(lastTwo.length === ONE_A_DAY_AFTER_MISSES && lastTwo.every((d) => d.status === "missed"));
 }
 
 /** Their closed step days before `date`, newest first: the last two weeks. */

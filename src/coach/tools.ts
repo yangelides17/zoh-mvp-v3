@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { and, asc, eq, max, sql } from "drizzle-orm";
+import { giveOwedRecap } from "./week.js";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
 import {
@@ -1001,6 +1002,12 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "record_week_recap": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      // #110: a recap owed from a silent Sunday, given in Monday's first reply (the morning text's is the app's to record).
+      if (state.lastWeek && !state.lastWeek.recapped) {
+        if (state.nudgeMoment) return saved(tester, "Nothing to record: the app records this text as the recap.");
+        await giveOwedRecap(db, tester, state.lastWeek.to, at);
+        return saved(tester, "Recorded: last week's recap is given. Nothing has been sent yet: your text now gives the recap.");
+      }
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
       // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
       if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
@@ -1010,10 +1017,11 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
       }
       // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
+      // #110: owed to Monday and they're talking tonight after all: it's given now, and Monday's text is a normal one.
       await db
         .insert(nudges)
         .values({ testerId: tester.id, date: state.today, kind: LOOKBACK_KIND, moment: LOOKBACK_KIND, status: "skipped", createdAt: at })
-        .onConflictDoNothing();
+        .onConflictDoUpdate({ target: [nudges.testerId, nudges.date, nudges.kind], set: { status: "skipped", createdAt: at }, setWhere: eq(nudges.status, "owed") });
       return saved(tester, "Recorded: no recap text goes out later today. Nothing has been sent yet: your text now gives the recap.");
     }
 

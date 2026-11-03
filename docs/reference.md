@@ -81,6 +81,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   (#78): the Sunday look-back goes 1 hour after a late Sunday step should be finished (#71), even inside
   quiet hours. Otherwise it goes at 6 pm Sunday, once a week (the `lookback` nudge row, also written when
   the recap happens in conversation), after 3 closed step days, and never while on the slip ladder.
+  At the 3-unanswered cap (a silent Sunday) there's no fourth text: the row is `owed` (#110) and
+  Monday's morning text (kickoff, after-miss or rest day), or their first reply, gives the recap, then
+  marks the row `skipped`; a held recap, a missed evening or a slip-ladder Monday never carries it.
 - Nothing is texted or emailed to the founders: flags (declined goals, goal switches, proof gaming,
   went quiet) and each locked plan version to review are saved as console alerts, one per event
   (`raiseAlert`), which the founder console (#10) shows. Since #12 alerts also cover a stop, a

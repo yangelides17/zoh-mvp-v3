@@ -556,9 +556,11 @@ export const takeaways = pgTable(
 
 /**
  * "skipped": the coach found the morning's conversation already covered the kickoff (#42), or gave the
- * Sunday recap in conversation (#78, kind "lookback"); nothing was sent.
+ * Sunday recap in conversation (#78, kind "lookback"), or Monday's first text gave the one owed (#110); nothing was sent.
+ * "owed" (#110, kind "lookback" only): the recap was due Sunday but they hadn't answered 3 texts, so Monday's
+ * morning text (or their first reply) gives it instead.
  */
-export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped", "held"] as const;
+export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped", "held", "owed"] as const;
 
 /**
  * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
@@ -583,7 +585,7 @@ export const nudges = pgTable(
   },
   (t) => [
     unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
-    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped', 'held')`),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped', 'held', 'owed')`),
   ],
 );
 

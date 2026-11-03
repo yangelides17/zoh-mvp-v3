@@ -1,0 +1,53 @@
+{
+  "id": "quiet-sunday-monday-recap",
+  "title": "Silent all Sunday at the unanswered cap: no fourth text Sunday; Monday's kickoff opens with last week's recap, then today's step",
+  "origin": "Issue #110 (silent Sunday: the week recap moves to Monday's kickoff): the Nov 8 and Dec 13 live runs, where the recap never came",
+  "startDay": "sun",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "running from zero", "where": "around my block", "when": "6:30 pm", "how_long": "15 min", "tracks_with": "Strava" },
+    "history": [
+      { "from": "tester", "text": "done, 3 min straight without stopping!!" },
+      { "from": "zoh", "text": "THREE minutes, Sam. That's real. Same time tomorrow." }
+    ],
+    "plan": {
+      "step": "outside around your block: 3 min easy jog, 1 min walk, 3 rounds",
+      "destination": "run a mile without stopping by Nov 14",
+      "place": "around the block",
+      "time": "18:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "screenshot",
+      "proof_note": "Strava run",
+      "reason": "Short intervals build up to the mile without wrecking your legs.",
+      "minutes": 5,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "1 min easy jog, 2 min walk, 3 rounds around the block", "note": "harder than expected", "proof_seen": "Strava, 10 min, 0.6 mi" },
+      { "days_ago": 5, "status": "done", "step": "1.5 min jog, 1.5 min walk, 3 rounds, at talk-test pace", "proof_seen": "Strava, 10 min, 0.7 mi", "reflection": "Slowing to a pace where I could talk made it doable" },
+      { "days_ago": 4, "status": "done_reduced", "step": "2 min jog, 1 min walk, 3 rounds, talk-test pace", "note": "only 2 rounds, shins sore", "proof_seen": "Strava, 7 min" },
+      { "days_ago": 3, "status": "done", "step": "2 min jog, 1 min walk, 3 rounds, talk-test pace", "proof_seen": "Strava, 10 min, 0.8 mi" },
+      { "days_ago": 2, "status": "done", "step": "2.5 min jog, 1 min walk, 3 rounds, talk-test pace", "proof_seen": "Strava, 11 min, 0.9 mi" },
+      { "days_ago": 1, "status": "done", "step": "3 min jog, 1 min walk, 3 rounds, talk-test pace", "note": "3 min straight without stopping", "proof_seen": "Strava, 12 min, 1.0 mi" }
+    ],
+    "takeaways": [
+      { "days_ago": 5, "text": "Slow enough to talk is the right pace", "evidence": "explained" },
+      { "days_ago": 3, "text": "Slow enough to talk is the right pace", "evidence": "applied" },
+      { "days_ago": 1, "text": "Slow enough to talk is the right pace", "evidence": "recalled" },
+      { "days_ago": 4, "text": "Sore shins: walk more, not less", "evidence": "explained" }
+    ]
+  },
+  "testerLines": [
+    "advance to 09:01",
+    "advance to 20:30",
+    "advance to 09:01",
+    "in"
+  ],
+  "whatWentWrong": "Live Nov 8 and Dec 13: a tester silent through Sunday's kickoff, check-in and follow-up never got the week's recap, Sunday or Monday (the 3-unanswered cap blocked it).",
+  "shouldHaveHappened": "Sunday: the kickoff, the 6:20 pm check-in and the 6:40 pm follow-up, and NO recap text on Sunday evening (three texts already unanswered). Monday 9 am: one text that opens with last week's recap (a warm line, 2 to 4 pieces of progress each backed by the record: 3 minutes without stopping Saturday; the talk-test pace, applied and recalled; 5 runs in full and 1 smaller, Sunday missed, using those numbers), where he stands vs. the mile by Nov 14, with Sunday's miss named lightly, never as the headline; then today's step fully defined (what, around the block, 6:30 pm, about 5 to 15 minutes, Strava screenshot) and exactly one question, whether he's in. No question about the week, no report headings, the shin lesson not called understood. After 'in': a short confirmation, no new recap.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}
