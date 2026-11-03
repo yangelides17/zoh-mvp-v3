@@ -45,7 +45,8 @@ import {
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
-import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, quietOn, weekdayOf } from "../nudges/schedule.js";
+import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
 import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
@@ -385,7 +386,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_on_it",
     description:
-      'They are doing today\'s step now or about to ("heading to the gym now"). Not for chatting or answering a question. Skips today\'s check-in.',
+      'They are starting today\'s step now or within the hour ("heading to the gym now"). A yes or "still in" to today\'s step is mark_agreed, not this; nor is chatting or a question. Skips today\'s check-in.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -942,7 +943,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "mark_on_it": {
-      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
+      // #137: hours ahead, "on it" is a yes to today's step: the reminder before it still goes.
+      if (isStepDay(plan, state.today, state.todayRow)) {
+        const clock = await withDaySteps(db, tester, at);
+        const stepAt = stepInstant(state.today, state.todayRow?.movedTime ?? plan.stepTime, clock);
+        if (!onItCounts(at, stepAt)) {
+          if (!state.todayRow?.agreedAt) await saveToday(db, state, { agreedAt: at }, at);
+          return saved(tester, "More than an hour before the step, so it's saved as a yes to today's step, not on it: today's reminder still goes. It's settled: don't re-say it.");
+        }
+      }
       await saveToday(db, state, { onItAt: at }, at);
       return saved(tester, "Noted they're on it: today's check-in is skipped.");
     }
