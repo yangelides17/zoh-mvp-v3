@@ -18,8 +18,11 @@ import {
   testerGoals,
   testers,
   type Plan,
+  type StepDay,
   type Tester,
 } from "../src/db/schema.js";
+import type { StepDayView } from "../src/console/data.js";
+import { stepLogSections } from "../src/console/views/progress.js";
 import { zonedTime } from "../src/nudges/schedule.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { FakeClaudeModel, ME, WESTERN, makeApp, type TestApp } from "./helpers.js";
@@ -721,5 +724,71 @@ describe("weekly summary", () => {
     await t.db.insert(testers).values({ phone: WESTERN, name: "New", phase: "onboarding", timeZone: TZ, timeZoneStatus: "assumed_eastern", consentAt: now, contextStartedAt: now });
     const jobs = createConsoleJobs({ db: t.db, log: silent });
     expect((await jobs.tick(at("2026-11-08", "09:00"))).summaries).toBe(0);
+  });
+});
+
+describe("the Step log card's reflection sections (#93)", () => {
+  const base: StepDay = {
+    id: "d",
+    testerId: "t1",
+    date: "2026-11-02",
+    planId: null,
+    status: "done",
+    movedTime: null,
+    onItAt: null,
+    agreedAt: null,
+    note: null,
+    proofVerdict: "clear",
+    proofSeen: "Dune open at page 40",
+    proofPendingAt: null,
+    step: "chapter 3 of Dune",
+    stepMinutes: null,
+    stepProof: null,
+    stepKind: "same",
+    reflection: null,
+    howItWentSaid: false,
+    inTheWay: null,
+    coachTake: null,
+    nextReason: null,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+  };
+  const view = (day: Partial<StepDay>, learned: string[] = []): StepDayView => ({ day: { ...base, ...day }, proofs: [], learned });
+
+  it("shows each section with its label, the reflection and the next step's reason, with a link to that day's texts", () => {
+    const mon = view({ reflection: "Felt easy, wants a longer chapter", howItWentSaid: true, coachTake: "Did the full step, found it easy, wants more. Proof clear." }, ["Reading on the train beats bedtime"]);
+    const tue = view({ date: "2026-11-03", step: "chapter 4 and 5 of Dune", nextReason: "Said one chapter felt easy", agreedAt: new Date(0), status: null });
+    const html = stepLogSections(mon, [tue, mon], "t1");
+    for (const label of ["Reflection:", "Learned:", "ZOH's take:", "Next step:"]) expect(html).toContain(label);
+    expect(html).toContain("Felt easy, wants a longer chapter");
+    expect(html).toContain("Reading on the train beats bedtime");
+    expect(html).toContain("Did the full step, found it easy, wants more. Proof clear.");
+    expect(html).toContain("chapter 4 and 5 of Dune");
+    expect(html).toContain("Said one chapter felt easy");
+    expect(html).toContain(">agreed<");
+    expect(html).toContain('href="/console/testers/t1?tab=texts&amp;day=2026-11-02"');
+    // A done day in full doesn't show what got in the way.
+    expect(html).not.toContain("What got in the way");
+  });
+
+  it('says "None" when empty, "not recorded" for days from before, and shows what got in the way on a missed day', () => {
+    const empty = stepLogSections(view({}), [], "t1");
+    expect(empty.match(/>None</g)).toHaveLength(4);
+    const old = stepLogSections(view({ howItWentSaid: null }), [], "t1");
+    expect(old.match(/>not recorded</g)).toHaveLength(4);
+    expect(old).not.toContain(">None<");
+    const missed = stepLogSections(view({ status: "missed", inTheWay: "work ran late" }), [], "t1");
+    expect(missed).toContain("What got in the way:</span> work ran late");
+    const proposed = stepLogSections(view({}), [view({ date: "2026-11-04", step: "chapter 4" }), view({})], "t1");
+    expect(proposed).toContain(">proposed<");
+  });
+
+  it("is on the Progress tab below the proof", async () => {
+    const s = await seed();
+    await t.db.update(stepDays).set({ reflection: "Train reading works", howItWentSaid: true, coachTake: "Steady, proof clear." }).where(eq(stepDays.testerId, s.tester.id));
+    const page = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
+    expect(page).toContain("Train reading works");
+    expect(page).toContain("Steady, proof clear.");
+    expect(page.indexOf("Dune open at page 40")).toBeLessThan(page.indexOf("Train reading works"));
   });
 });

@@ -61,6 +61,16 @@ const envSchema = z.object({
   SENDBLUE_NUMBER: optionalString,
   SENDBLUE_WEBHOOK_SECRET: optionalString,
   TYPING_INDICATOR: boolWithDefault(true),
+  /** #16: longest a ready reply waits while the tester is typing, in seconds; 0 turns the hold off. */
+  TYPING_HOLD_SECONDS: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.coerce.number().int().min(0).max(120).default(30),
+  ),
+  /** #132: seconds a ready reply waits for typing or another text before it goes out (decimals allowed); 0 turns it off. */
+  REPLY_GRACE_SECONDS: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.coerce.number().min(0).max(10).default(2.5),
+  ),
 
   ANTHROPIC_API_KEY: optionalString,
   CLAUDE_MODEL: withDefault("claude-sonnet-5-5"),
@@ -107,6 +117,10 @@ export interface Config {
   allowedNumbers: string[];
   devNumbers: string[];
   typingIndicator: boolean;
+  /** #16: longest hold while they type, in seconds (0: off). */
+  typingHoldSeconds: number;
+  /** #132: grace before a ready reply goes out, in seconds (0: off). */
+  replyGraceSeconds: number;
   /** Focus plus maintenance goals a tester can have at once. */
   goalCap: number;
   sendblue: {
@@ -164,6 +178,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     allowedNumbers: e.ALLOWED_NUMBERS,
     devNumbers: e.DEV_NUMBERS,
     typingIndicator: e.TYPING_INDICATOR,
+    typingHoldSeconds: e.TYPING_HOLD_SECONDS,
+    replyGraceSeconds: e.REPLY_GRACE_SECONDS,
     goalCap: e.GOAL_CAP,
     sendblue: {
       baseUrl: e.SENDBLUE_BASE_URL.replace(/\/+$/, ""),

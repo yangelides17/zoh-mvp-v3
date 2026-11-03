@@ -96,12 +96,12 @@ describe("testers", () => {
       });
     }
 
-    it("un-stops a stopped tester who texts again and gives them a normal reply", async () => {
+    it("#109: a stopped tester who texts again gets a normal reply and stays stopped until they say yes", async () => {
       await text(t, ME, "stop");
       // History breaks same-millisecond ties by id: a tester can't answer within the millisecond, so neither do we.
       await new Promise((resolve) => setTimeout(resolve, 5));
       await text(t, ME, "hey");
-      expect((await tester(t, ME)).stoppedAt).toBeNull();
+      expect((await tester(t, ME)).stoppedAt).not.toBeNull();
       expect(t.replier.received).toHaveLength(1);
       expect(t.replier.received[0]?.at(-1)).toMatchObject({ role: "user", text: "hey" });
       expect(t.sendblue.sends.map((s) => s.content)).toEqual([OPT_OUT_CONFIRMATION, "Hey! Thanks for the message."]);

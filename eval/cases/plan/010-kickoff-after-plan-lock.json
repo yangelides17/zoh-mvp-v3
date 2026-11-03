@@ -1,0 +1,32 @@
+{
+  "id": "kickoff-after-plan-lock",
+  "title": "Plan locked the night before: the morning kickoff reminds and checks they're still in, not a first \"You in?\"",
+  "origin": "Issue #92, from Yanni's live test on Oct 30 (c27bece): \"Yes, I'm committing to it\" the night before, then a kickoff ending \"You in?\"",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "planning",
+    "answers": {
+      "what": "bodyweight strength, push-ups mostly",
+      "where": "at home",
+      "when": "6:30 pm",
+      "how_long": "20 min",
+      "tracks_with": "nothing, just my phone camera"
+    },
+    "history": [
+      { "from": "tester", "text": "Honestly I can barely do 3 push-ups right now" },
+      { "from": "zoh", "text": "Everyone starts somewhere, and 3 is a start. Is there something you're working toward with this?" }
+    ]
+  },
+  "testerLines": [
+    "I want to do 10 real push-ups in a row by Christmas. Every day except Sunday works",
+    "love it",
+    "Yes, I'm committing to it. Let's start tomorrow",
+    "advance to 09:05"
+  ],
+  "whatWentWrong": "On Oct 30 the plan was locked for the next day with a clear yes, and the next morning's kickoff restated the step correctly but ended \"You in?\", as if asking for the first time.",
+  "shouldHaveHappened": "The plan text opens with one short line reacting to something specific Jordan shared (10 push-ups by Christmas, starting from 3), not a canned \"That's everything I need\", then the plan and one question. After \"love it\" ZOH asks for the commitment in its own words; after the yes it locks the plan with day 1 tomorrow and a hype line, with no question. The next morning one kickoff goes out: warm, with Jordan's name, today's step in a sentence or two (at home, 6:30 pm), and one light question that shows Jordan already committed (like \"still good for 6:30?\" or \"you still in?\"), never a first-time \"you in?\". It doesn't ask what time and doesn't ask for the commitment again.",
+  "areaCode": "212",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

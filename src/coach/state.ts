@@ -29,11 +29,18 @@ import {
 } from "../db/schema.js";
 import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
-import { addDays, nextStepDay, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
+import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { DEFAULT_GOAL_CAP, goalStreaks, loadCheckins, loadGoalDays, loadTesterGoals, type GoalStreak } from "../testers/goals.js";
-import { loadWeek, type WeekLookback } from "./week.js";
+import { loadLastWeek, loadWeek, type WeekLookback } from "./week.js";
+
+/** #93: past this many texts since their proof, wrap up even if they're still going (a safety net, not a target). */
+export const REFLECTION_SAFETY_NET = 8;
+/** #131: by this text, two follow-ups have got little back (nothing real on how it went): wrap up warmly. */
+export const REFLECTION_LITTLE_BACK = 4;
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -61,10 +68,14 @@ export interface CoachState {
   openOptional: PlanQuestion[];
   /** The plan ZOH is proposing, not locked yet. */
   draft?: Plan;
+  /** #37: a text with the draft's • list has gone out since it was last saved (a revision resets it). */
+  draftShown: boolean;
   /** The latest locked plan for their current goal (a temporary one only until its end date). */
   plan?: Plan;
   /** Their local day (`serviceDate`): what "today" means for their step. */
   today: string;
+  /** #48: today's quiet hours, stretched around today's step when theirs are the default. */
+  quietToday: { start: string; end: string };
   /** What's recorded for today's step: its step (#76), done, a moved time, "on it". */
   todayRow?: StepDay;
   /** The next step day's row, when its step was set ahead (#77: agreed after today's reflection). */
@@ -75,6 +86,8 @@ export interface CoachState {
   takeaways: Takeaway[];
   /** Sundays with 3+ closed step days (#78): the week the look-back reads. */
   week?: WeekLookback;
+  /** #110: Mondays after a silent Sunday: last week's recap, owed (or given today, for the week talk). */
+  lastWeek?: WeekLookback;
   /** Streak and in-a-row counts for the focus goal, today included once it's closed. */
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
@@ -101,6 +114,8 @@ export interface CoachState {
   teamNotes: ConsoleMessage[];
   /** The break they asked for, while it's on (spec "Commands and safety"). */
   pause?: Pause;
+  /** #109: they texted stop and haven't said yes to restarting; `asked`: ZOH has replied since, so it asked. */
+  stopped?: { since: Date; asked: boolean };
   /** The founders' requests to carry in ZOH's words, due now, oldest first. */
   teamRequests: ConsoleMessage[];
   /** Requests marked done in this reply: this text must still carry them. */
@@ -127,7 +142,9 @@ export async function loadCoachState(
     goalCap?: number;
   },
 ): Promise<CoachState> {
-  const today = serviceDate(opts.now, tester);
+  // #48: their day (and its quiet hours) fits around the step: 12:30 am after an 11:50 pm step is still that night.
+  const clock = await withDaySteps(db, tester, opts.now);
+  const today = serviceDate(opts.now, clock);
   const testerGoalRows = await loadTesterGoals(db, tester.id);
   const since = gte(suggestions.createdAt, tester.contextStartedAt);
   const suggestionRows = await db
@@ -178,8 +195,9 @@ export async function loadCoachState(
     .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.day, addDays(today, -14)), gte(takeaways.createdAt, tester.contextStartedAt)))
     .orderBy(desc(takeaways.day), desc(takeaways.createdAt));
   const recentDays = await loadRecentDays(db, tester, today);
-  const proof = await loadProof(db, tester, today, opts.now);
+  const proof = await loadProof(db, clock, today, opts.now);
   const open = goal ? openQuestions(goal, inputs) : [];
+  const draft = testerPlans.find((p) => p.status === "draft");
   const description = inputs?.extraNotes.goal_description;
   return {
     tester,
@@ -191,14 +209,17 @@ export async function loadCoachState(
     declinedGoals: declined.filter((f) => f.createdAt >= tester.contextStartedAt).map((f) => f.detail ?? ""),
     openRequired: open.filter((q) => q.required),
     openOptional: open.filter((q) => !q.required),
-    draft: testerPlans.find((p) => p.status === "draft"),
+    draft,
+    draftShown: draft ? await planSentSince(db, tester, draft.id) : false,
     plan,
     today,
-    todayRow,
-    nextRow,
-    recentDays,
+    quietToday: quietOn(today, clock),
+    todayRow: forCoach(todayRow),
+    nextRow: forCoach(nextRow),
+    recentDays: recentDays.map((d) => forCoach(d)!),
     takeaways: recentTakeaways,
     week: plan && tester.phase === "active" ? await loadWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
+    lastWeek: plan && tester.phase === "active" && owedRecapShows(recentDays, opts.nudgeMoment) ? await loadLastWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
     nudgeMoment: opts.nudgeMoment,
@@ -218,6 +239,7 @@ export async function loadCoachState(
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
     pause: await activePause(db, tester.id),
+    stopped: tester.stoppedAt ? { since: tester.stoppedAt, asked: await repliedSinceStop(db, tester, tester.stoppedAt) } : undefined,
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
     teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
@@ -226,6 +248,69 @@ export async function loadCoachState(
     justFinished: opts.justFinished ?? false,
     now: opts.now,
   };
+}
+
+/** A text shows a plan when it carries it as a • list: two or more • lines (the plan format the prompt requires). */
+export function showsPlan(text: string | null): boolean {
+  return (text ?? "").split("\n").filter((line) => line.trim().startsWith("•")).length >= 2;
+}
+
+/**
+ * #109: ZOH replied after their stop (the stop's own confirmation aside): the restart question was asked.
+ * A failed send doesn't count: they never saw it, so the question is still to ask.
+ */
+async function repliedSinceStop(db: Db, tester: Tester, since: Date): Promise<boolean> {
+  const [row] = await db
+    .select({ id: messages.id })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.contactNumber, tester.phone),
+        eq(messages.direction, "outbound"),
+        gte(messages.createdAt, since),
+        ne(messages.content, OPT_OUT_CONFIRMATION),
+        sql`coalesce(${messages.status}, '') <> 'SEND_FAILED'`,
+      ),
+    )
+    .limit(1);
+  return row !== undefined;
+}
+
+/**
+ * #37: whether ZOH sent a text showing the plan after the draft was last saved. Compared in the
+ * database, where both sit on the same clock (`onTesterClock`); a failed send doesn't count.
+ */
+export async function planSentSince(db: Db, tester: Tester, draftId: string): Promise<boolean> {
+  const rows = await db
+    .select({ content: messages.content })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.contactNumber, tester.phone),
+        eq(messages.direction, "outbound"),
+        gte(messages.createdAt, tester.contextStartedAt),
+        // At or after: a reply is always sent after its own save (the test database's clock is millisecond-grained).
+        sql`${messages.createdAt} >= (select ${plans.updatedAt} from ${plans} where ${plans.id} = ${draftId})`,
+        sql`coalesce(${messages.status}, '') <> 'SEND_FAILED'`,
+        sql`${messages.content} like '%•%'`,
+      ),
+    );
+  return rows.some((r) => showsPlan(r.content));
+}
+
+/** #93: ZOH's take on a day is for the founders only, so it never reaches the coach's state (or its texts). */
+function forCoach(row: StepDay | undefined): StepDay | undefined {
+  return row && { ...row, coachTake: null };
+}
+
+/**
+ * #110: whether a recap owed from Sunday belongs in this text: a reply, or Monday's morning text; never a
+ * slip-ladder Monday (its one text a day stays about getting back to it) or a later text ZOH starts.
+ */
+export function owedRecapShows(recentDays: Pick<StepDay, "status">[], moment: NudgeMoment | undefined): boolean {
+  if (moment && !OWED_RECAP_MOMENTS.includes(moment)) return false;
+  const lastTwo = recentDays.slice(0, ONE_A_DAY_AFTER_MISSES);
+  return !(lastTwo.length === ONE_A_DAY_AFTER_MISSES && lastTwo.every((d) => d.status === "missed"));
 }
 
 /** Their closed step days before `date`, newest first: the last two weeks. */

@@ -22,6 +22,36 @@ export interface ReplyInput {
   messageId?: string;
   /** Called once per reply with the tokens it used, for the message's timings. */
   onUsage?: (usage: TokenUsage) => void;
+  /**
+   * #16: true once they've texted again (or stopped) since this draft began. The coach checks it
+   * between steps and gives up with `DraftDroppedError`, never mid-action.
+   */
+  interrupted?: () => boolean;
+  /** Aborts a Claude call in flight when the draft is interrupted (no side effects yet). */
+  signal?: AbortSignal;
+  /**
+   * #132: told each action as it finishes (the same line a dropped draft hands on), so a draft that
+   * finished but is dropped before sending (a text during the grace or a hold) still hands on what it did.
+   */
+  onAction?: (action: string) => void;
+  /** What earlier drafts of this reply did before they were dropped: the coach is told, so it doesn't redo it. */
+  dropped?: DroppedDraft;
+}
+
+/** What a draft did before it was dropped (#16): actions it saved and words it had written. */
+export interface DroppedDraft {
+  /** One line per action that finished: the tool and its result. */
+  actions: string[];
+  /** The text it had written, never sent. */
+  text?: string;
+}
+
+/** Thrown by a reply that was interrupted at a safe point (#16): it carries what the draft did. */
+export class DraftDroppedError extends Error {
+  override name = "DraftDroppedError";
+  constructor(readonly draft: DroppedDraft) {
+    super("Draft dropped: they texted again before it was sent");
+  }
 }
 
 /** Tokens one reply used across its Claude calls. */
@@ -53,11 +83,21 @@ export interface NudgeRequest {
   mayskip?: boolean;
 }
 
+/** #109: the coach declined a text it was asked to start (a SKIP, or words about not sending): never sent. */
+export interface HeldNudge {
+  held: true;
+  /** What it wrote instead, for the log only. */
+  wrote: string;
+}
+
 /** What the pipeline asks for a reply. The coach (src/coach) is the real one; tests fake it. */
 export interface Replier {
   reply(input: ReplyInput): Promise<string>;
-  /** Writes a nudge; repliers without it never start texts. Null: skipped (only when `mayskip`). */
-  nudge?(input: NudgeRequest): Promise<string | null>;
+  /**
+   * Writes a nudge; repliers without it never start texts. Null: skipped because today's talk covered it
+   * (only when `mayskip`). `HeldNudge`: the coach declined to send it (#109); nothing goes out.
+   */
+  nudge?(input: NudgeRequest): Promise<string | null | HeldNudge>;
   /** Cheap connectivity check for /health?deep=1. */
   check(): Promise<void>;
 }
@@ -95,6 +135,8 @@ export interface ModelRequest {
   tools: Anthropic.Tool[];
   /** "none" forces a text answer (the coach's last tool round). */
   toolChoice?: "auto" | "none";
+  /** Cuts the call off (#16: the draft was interrupted). */
+  signal?: AbortSignal;
 }
 
 export type ModelBlock =
@@ -140,7 +182,7 @@ export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
         ...(withTools ? { tools: req.tools } : {}),
         ...(opts.effort ? { output_config: { effort: opts.effort } } : {}),
         ...(withTools && req.toolChoice === "none" ? { tool_choice: { type: "none" } } : {}),
-      });
+      }, req.signal ? { signal: req.signal } : undefined);
       const content: ModelBlock[] = [];
       for (const b of response.content) {
         if (b.type === "text") content.push({ type: "text", text: b.text });

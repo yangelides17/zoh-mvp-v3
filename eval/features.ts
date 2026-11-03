@@ -35,6 +35,8 @@ export interface FeatureDef {
   memory?: boolean;
   /** The grader sees what ZOH saved during the conversation (flags, pauses, plan versions, style). */
   saved?: boolean;
+  /** The grader sees the step log at the end (step days, proof, reflections, lessons), to check facts against it (#103). */
+  record?: boolean;
 }
 
 /** Applies to every feature: only judged on a regression case. */
@@ -151,7 +153,18 @@ export const FEATURES: Record<string, FeatureDef> = {
         label: "The commitment ask feels like a real commitment, not a casual question, in natural words (no stock lines); a soft yes (\"ok\", \"sure\") gets one natural re-ask that doesn't pick apart their wording",
       },
       { id: "day-one", scope: "conversation", label: "Pushes for day 1 today; accepts tomorrow on pushback" },
-      { id: "quiet-hours", scope: "conversation", label: "A step time inside quiet hours (10 pm to 9 am by default) gets the offer to adjust them, with a plain explanation of what quiet hours are" },
+      // #48: default quiet hours move to fit the step on their own; ones the tester chose get one question.
+      {
+        id: "quiet-hours",
+        scope: "conversation",
+        label: "A step time inside default quiet hours (10 pm to 9 am) gets a few words saying ZOH's texts will still reach them then, and no question about it",
+      },
+      { id: "quiet-hours-after-lock", scope: "conversation", label: "After the plan is locked, ZOH doesn't raise quiet hours unless the tester does" },
+      {
+        id: "quiet-hours-chosen",
+        scope: "conversation",
+        label: "With quiet hours the tester set themselves, a step inside them gets one question about moving them, and a no is accepted without asking again",
+      },
       {
         id: "nutrition",
         scope: "conversation",
@@ -160,6 +173,13 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
       { id: "goal-switch", scope: "conversation", label: "An unjustified goal switch gets a warm push back; a justified one goes ahead" },
       { id: "revisions", scope: "conversation", label: "Revisions keep what they didn't ask to change" },
+      {
+        id: "plan-shown",
+        scope: "conversation",
+        label:
+          "Every plan the tester is asked about was shown in a text as a • list, ending with one question; after a change of direction before agreeing, the new plan is shown unprompted, never pointing back to an older one",
+      },
+      { id: "no-saved-dead-end", scope: "text", label: "Never only a save confirmation (\"Saved.\"): after saving, the text carries the next move" },
     ],
   },
   /** Target: 80% of checks passing (spec "Should"). */
@@ -200,6 +220,17 @@ export const FEATURES: Record<string, FeatureDef> = {
         label: "Teaching matches what this person needs that day (a lot, a little, a reminder or nothing), feels natural and grounded, never forced or invented",
       },
       { id: "plain-words", scope: "text", label: "Plain words: no markdown, hashtags or filler" },
+      {
+        id: "recommit-saved",
+        scope: "conversation",
+        label: "Recommitting after the day-3 check-in saves the agreement (mark_agreed), with no tool name or note about saving in the text",
+      },
+      {
+        id: "still-in-keeps-reminder",
+        scope: "conversation",
+        label:
+          "After a \"still in\" reply to a morning kickoff (the step already agreed ahead), the check-in about 10 minutes before the step still goes out, and nothing ZOH says treats them as already starting (#137)",
+      },
       {
         id: "voice",
         scope: "text",
@@ -316,6 +347,30 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "text",
         label: "Feedback is acknowledged naturally with thanks and \"the team's on it\" (in its own words), with no promise of a specific change",
       },
+      {
+        id: "restart-ask-once",
+        scope: "conversation",
+        label:
+          "After STOP then \"hi\", ZOH answers warmly and asks once about restarting, without pushing; later replies before a yes don't repeat the restart question, and ZOH starts no texts",
+      },
+      {
+        id: "restart-yes-only",
+        scope: "conversation",
+        label: "A clear yes gets the next step and time confirmed; \"hi\", \"maybe\" or a question doesn't restart",
+      },
+    ],
+  },
+  /** Back-to-back texts (#16): several texts sent together get one reply. Cases only. Target 80%. */
+  batch: {
+    name: "batch",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      {
+        id: "one-reply-uses-photo",
+        scope: "conversation",
+        label: "Whoop screenshot + \"Not bad!\" get one reply that uses the photo and never says it can't see it",
+      },
     ],
   },
   /** Metrics (#13): back-off requests are flagged and answered with what the app can do. Cases only. */
@@ -353,23 +408,56 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "reflection-ask",
         scope: "conversation",
-        label: "After proof with no reflection, ZOH asks for one once, warmly, mentioning a voice note is easy, and doesn't chase",
+        label: "After proof with no word on how it went, ZOH opens a reflection with one question, often suggesting a voice note, and never chases it in a later text",
       },
       {
         id: "follow-ups",
         scope: "conversation",
         label:
-          "Reflection follow-ups are genuine and specific to what they said, continue while they're engaged, and wrap up naturally (starting around ZOH's fifth text), never forced",
+          "Follow-ups come from what they actually said, one question per text, never a list and never asking what they already said; a lesson-only reply gets a follow-up about how it went, tied to the lesson",
       },
-      { id: "next-step", scope: "conversation", label: "After the reflection wraps up, ZOH proposes a fully defined next step and asks if it works" },
+      {
+        id: "learning-ask",
+        scope: "conversation",
+        label: "After a learning step where they haven't said what they learned, ZOH asks naturally what stuck and follows it, never a quiz",
+      },
+      {
+        id: "stops-right",
+        scope: "conversation",
+        label:
+          "Stops where a person would: rushed (or \"skip\", \"later\") gets no question, just a light line inviting more tomorrow at most; a rich reflection gets no redundant questions and no fishing; a tester who stays flat after two follow-ups gets a warm wrap-up, never a third push",
+      },
+      {
+        id: "thin-answer",
+        scope: "conversation",
+        label: "A thin answer (\"okay\", \"fine\", \"a little awkward\") gets a proof-grounded follow-up about what's behind it, with no guess at what it means, before any next step",
+      },
+      {
+        id: "tomorrow-mention",
+        scope: "conversation",
+        label: "A mention of tomorrow during the reflection (its size, an idea for it) is acknowledged in a few words and the reflection continues; it isn't treated as a yes to a step",
+      },
+      {
+        id: "goes-deeper",
+        scope: "conversation",
+        label:
+          "The reflection mixes new ground and going deeper: a worry or difficulty they name gets one question about it before reassurance or a proposal, without every question going deeper; proof that carries a reflection still gets a question (a gap, or deeper on something they said) before the next step",
+      },
+      {
+        id: "next-step",
+        scope: "conversation",
+        label:
+          "The turn to the next step acknowledges what they shared and reads naturally (no canned line); the proposal is fully defined, uses what they said (difficulty, size, what they mentioned for tomorrow), and agreement is asked only after it's shown in full",
+      },
       { id: "kickoff-agreed", scope: "text", label: "The kickoff after an agreed step reminds without re-asking; without one, it presents a step and asks" },
       {
         id: "plan-proof",
         scope: "conversation",
-        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning), with a reason and an alternative",
+        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: a screenshot plus the paste for feedback), with a reason and an alternative, and is only ever a photo, screenshot or voice note, never typed text",
       },
       { id: "recall", scope: "text", label: "Recall feels natural and purposeful: in a check-in or conversation, never a quiz, never a separate text" },
       { id: "lesson-reused", scope: "conversation", label: "A later step builds an earlier lesson in when it fits" },
+      { id: "no-saved-dead-end", scope: "text", label: "Never only a save confirmation (\"Saved.\"): after saving, the text carries the next move" },
       { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end; a text that teaches or shows a plan can run to about 8 short lines" },
       {
         id: "voice",
@@ -384,11 +472,18 @@ export const FEATURES: Record<string, FeatureDef> = {
     doneWhen: "you've said what you wanted to say about your week and ZOH has answered it, or the day is over.",
     scenarios: [],
     saved: true,
+    record: true,
     rubric: [
       {
         id: "natural-turn",
         scope: "conversation",
         label: "The turn from the day's reflection to the week feels natural, not an abrupt switch into a report",
+      },
+      {
+        id: "reflection-first",
+        scope: "conversation",
+        label:
+          "ZOH responds to the day's reflection with substance before the recap, and a thin or rushed reflection still turns to the week without extra questions",
       },
       {
         id: "recap",
@@ -397,6 +492,8 @@ export const FEATURES: Record<string, FeatureDef> = {
           "A recap lists 2 to 4 real pieces of progress from this week, each backed by what happened (plus where they stand vs. their destination when there is one), framed as progress made, never as what they couldn't do before, then one question",
       },
       { id: "no-inflation", scope: "text", label: "No inflated claims of understanding: only lessons applied or recalled are called understood; nothing applied yet is said honestly" },
+      { id: "grounded", scope: "text", label: "The recap makes no claim the case's state or conversation doesn't support" },
+      { id: "no-unprompted", scope: "text", label: "No 'unprompted' or 'on your own' wording about a lesson they brought back when the recall followed a question" },
       {
         id: "next-step",
         scope: "conversation",
@@ -408,6 +505,13 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "text",
         label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
       },
+      {
+        id: "monday-recap",
+        scope: "text",
+        label:
+          "After a quiet Sunday, the Monday kickoff gives an evidenced recap of last week (only from the record), then a fully defined step and one question (none about the week)",
+      },
+      { id: "miss-light", scope: "text", label: "After a missed Sunday, the miss is named lightly, never as a scolding headline" },
     ],
   },
   /** Photo and voice verification (#7): regression cases only, each sending a photo or voice note. */
@@ -425,6 +529,22 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "kind-pushback", scope: "text", label: "A contradicting photo gets kind pushback" },
       { id: "forgot-pic", scope: "conversation", label: "\"Forgot the pic\" leads to an ask for other proof first, then a warm miss" },
       { id: "change-method", scope: "conversation", label: "After repeated proof trouble, ZOH offers to change the proof method" },
+      // #94: one proof rule, the same everywhere.
+      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot or voice note, never typed text" },
+      {
+        id: "typed-not-proof",
+        scope: "conversation",
+        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot or voice note",
+      },
+      {
+        id: "writing-proof",
+        scope: "conversation",
+        label: "A writing step: a screenshot of where they wrote it is the proof plus a request for the full text pasted, for feedback; a screenshot alone is checked off, then the paste is asked for",
+      },
+      // #96: a smaller version is spelled out in full.
+      { id: "smaller-in-full", scope: "text", label: "A smaller version is confirmed in one text with what, how much, when and proof, never just \"it's set\"" },
+      { id: "smaller-pushback", scope: "conversation", label: "Asked for a smaller version with no real reason: one warm pushback; with a reason, or asked again, it's set at once" },
+      { id: "smaller-suggested", scope: "conversation", label: "A smaller version ZOH suggests ends in one \"work for you?\"-style question and isn't confirmed before a yes" },
       { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end" },
       {
         id: "voice",

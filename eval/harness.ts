@@ -11,6 +11,7 @@ import { maskNumber } from "../src/pipeline/inbound.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
+import { ReplyLines } from "../src/pipeline/conversation.js";
 import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
@@ -19,6 +20,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
+import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { COACH_AUTHOR } from "../src/console/requests.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
@@ -148,6 +150,9 @@ export async function startEvalApp(opts: {
       describer: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
+      // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would
+      // only add 2.5 seconds of real time to every turn (and to the free tests that use this harness).
+      lines: new ReplyLines({ holdMs: opts.config.typingHoldSeconds * 1000 }),
       ...(opts.replier ? { replier: opts.replier } : {}),
     },
     { webhookSecret: WEBHOOK_SECRET, logger: false, ...(opts.consoleCoach ? { consoleCoach: opts.consoleCoach } : {}) },
@@ -178,8 +183,38 @@ export async function startEvalApp(opts: {
 
 /** Sends one tester text through the real webhook and returns ZOH's replies to it. */
 export async function textZoh(app: EvalApp, text: string, handle: string, mediaUrl = ""): Promise<TranscriptLine[]> {
+  return textZohBurst(app, [{ text, mediaUrl }], handle);
+}
+
+/**
+ * A case line holding several texts sent back to back (#16): "[photo x.jpg: …] +++ Not bad!".
+ * The grader reads the line as written.
+ */
+export const BURST_SEPARATOR = " +++ ";
+
+/**
+ * Sends texts back to back, a second apart, without waiting for ZOH in between (#16), then
+ * returns every reply ZOH sent once it has settled.
+ */
+export async function textZohBurst(app: EvalApp, texts: { text: string; mediaUrl?: string }[], handle: string): Promise<TranscriptLine[]> {
   const before = app.sendblue.sent.length;
+  for (const [i, t] of texts.entries()) {
+    if (i > 0) app.clock.advance(1_000);
+    await postText(app, t.text, texts.length > 1 ? `${handle}-${i + 1}` : handle, t.mediaUrl ?? "");
+  }
+  await app.built.queue.idle();
+  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+}
+
+/** How long after a tester's text ZOH's work on it happens, on the eval's clock (#131). */
+export const REPLY_LAG_MS = 2_000;
+
+/** Posts one tester text to the real webhook; doesn't wait for the reply. */
+async function postText(app: EvalApp, text: string, handle: string, mediaUrl: string): Promise<void> {
   const at = app.clock.now();
+  // #131: the reply is written after the text arrives, so ZOH's texts land after the ones they answer, as live.
+  // Without this they shared its instant, and the count of ZOH's texts since proof ran one behind live.
+  app.clock.advance(REPLY_LAG_MS);
   const res = await app.built.app.inject({
     method: "POST",
     url: "/webhooks/sendblue",
@@ -201,8 +236,6 @@ export async function textZoh(app: EvalApp, text: string, handle: string, mediaU
     },
   });
   if (res.statusCode !== 200) throw new Error(`Webhook answered ${res.statusCode}`);
-  await app.built.queue.idle();
-  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
 }
 
 /** A case line that moves time instead of texting: "advance to 18:50". */
@@ -266,13 +299,35 @@ export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<T
   return out;
 }
 
-/** The tester's dated step log as the console coach sees it, for the grader (console feature). */
-async function readStepLog(app: EvalApp): Promise<string | undefined> {
+/**
+ * The tester's dated step log as the console coach sees it, for the grader (console feature). With
+ * `lessons`, also each day's proof and reflection and every lesson with its evidence (#103: the
+ * look-back's facts are checked against what ZOH had).
+ */
+async function readStepLog(app: EvalApp, lessons = false): Promise<string | undefined> {
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) return undefined;
   const today = serviceDate(app.clock.now(), tester);
   const plan = await loadCurrentPlan(app.db, tester, today);
-  return plan ? stepLog(app.db, tester, plan, today) : undefined;
+  if (!plan) return undefined;
+  const log = await stepLog(app.db, tester, plan, today);
+  if (!lessons) return log;
+  // Read at the end: today's step, proof and anything ZOH saved during the conversation are in it.
+  const days = await app.db.select().from(schema.stepDays).where(eq(schema.stepDays.testerId, tester.id)).orderBy(asc(schema.stepDays.date));
+  const kept = await app.db.select().from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id)).orderBy(asc(schema.takeaways.day));
+  // The same tally the coach's look-back reads, so the grader checks counts instead of recounting them.
+  const week = days.filter((d) => d.status && d.date >= weekStart(today) && d.date <= today);
+  const n = (status: string) => week.filter((d) => d.status === status).length;
+  return [
+    "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)",
+    `This week (${weekStart(today)} to today): ${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed.`,
+    log,
+    ...days.flatMap((d) => [
+      ...(d.proofSeen ? [`Proof for ${d.date}: ${d.proofSeen}`] : []),
+      ...(d.reflection ? [`Reflection for ${d.date}: ${d.reflection}`] : []),
+    ]),
+    ...kept.map((k) => `Lesson (${k.evidence}, ${k.day}): ${k.text}`),
+  ].join("\n");
 }
 
 /** Plays the tester's side: returns the next text, or null when the tester is done. */
@@ -310,6 +365,8 @@ export interface RunOptions {
   memory?: boolean;
   /** Show the grader what ZOH saved during the run. */
   saved?: boolean;
+  /** Show the grader the step log, lessons included, read at the end (console lines get it at the start). */
+  record?: boolean;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -341,6 +398,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       timeZoneStatus: status,
       consentAt: contextStart,
       contextStartedAt: contextStart,
+      ...(seed.quiet_hours ? { quietHoursStart: seed.quiet_hours.start, quietHoursEnd: seed.quiet_hours.end, quietHoursChosen: true } : {}),
       styleNotes: (seed.memory?.pages ?? [])
         .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
         .join("; "),
@@ -604,8 +662,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       // The grader reads the line as written ("[photo ...: what it shows] caption"); ZOH gets the media.
       transcript.push({ from: "tester", text, at: clock.now().toISOString() });
       clock.advance(5_000);
-      const media = parseMediaLine(text);
-      transcript.push(...(await textZoh(app, media?.caption ?? text, `eval-${plan.key}-${turn}`, media?.mediaUrl)));
+      const texts = text.split(BURST_SEPARATOR).map((part) => {
+        const media = parseMediaLine(part);
+        return { text: media?.caption ?? part, mediaUrl: media?.mediaUrl };
+      });
+      transcript.push(...(await textZohBurst(app, texts, `eval-${plan.key}-${turn}`)));
       clock.advance(typingDelayMs(text));
     }
   } catch (err) {
@@ -625,7 +686,8 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
-      ...(record ? { record } : {}),
+      // #103: the look-back's facts include today's step, so its log is read once the conversation is over.
+      ...(opts.record ? { record: await readStepLog(app, true) } : record ? { record } : {}),
       ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
       ...(opts.memory ? { memory: `--- At the start of the conversation ---\n${memoryBefore}\n\n--- At the end ---\n${await readMemory(app)}` } : {}),
       savedState,

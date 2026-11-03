@@ -620,6 +620,6 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     const mike = await tester();
     const photo = await say(mike, "inbound", at(MON, "19:30"), "done", { mediaUrl: "https://cdn/x.jpg", mediaContentType: "image/jpeg", description: "Dune open at page 112" });
     const now = await say(mike, "inbound", at(MON, "19:40"), "next");
-    expect(toTurns([photo, now], now.id, {})[0]!.text).toBe("[Sent a photo earlier: Dune open at page 112]\ndone");
+    expect(toTurns([photo, now], new Map([[now.id, {}]]))[0]!.text).toBe("[Sent a photo earlier: Dune open at page 112]\ndone");
   });
 });

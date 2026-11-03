@@ -1,0 +1,24 @@
+{
+  "id": "chosen-quiet-hours",
+  "title": "A 10:30 pm step inside quiet hours the tester set themselves: one question, a no accepted, never asked again",
+  "origin": "Issue #48 (quiet hours move to fit the step time), the spec's example for quiet hours they set",
+  "testerLines": ["10:30 pm in bed, 20 minutes, every night", "nah keep them, I don't need a reminder", "looks good", "I'm in"],
+  "whatWentWrong": "New case, not a past mistake: quiet hours the tester chose are theirs, so ZOH asks once instead of moving them.",
+  "shouldHaveHappened": "Because 10:30 pm is inside the quiet hours they set (no texts after 10), ZOH asks once, plainly, whether that's okay or whether it should move them so it can nudge them then; one question. After 'nah keep them', it accepts without pushing and doesn't ask again: it shows the plan (Atomic Habits in bed at 10:30 pm, 20 minutes, every night, with a voice recap as proof) ending in one question. After 'looks good' it asks for the commitment; after 'I'm in' it locks with a hype line and when day 1 is, never raising quiet hours again.",
+  "areaCode": "212",
+  "startTime": "18:00",
+  "seed": {
+    "name": "Priya",
+    "goal": "reading",
+    "phase": "planning",
+    "quiet_hours": { "start": "22:00", "end": "08:00" },
+    "answers": {
+      "what": "Atomic Habits",
+      "where": "in bed"
+    },
+    "history": [
+      { "from": "tester", "text": "btw don't text me after 10, that's my wind-down time" },
+      { "from": "zoh", "text": "Got it, nothing from me after 10 pm. When do you want to read, and for how long?" }
+    ]
+  }
+}

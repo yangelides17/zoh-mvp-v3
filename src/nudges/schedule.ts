@@ -21,17 +21,21 @@ export const REPLY_IN_PROGRESS_MS = 2 * MINUTE;
 export const KICKOFF_WINDOW_MS = 3 * HOUR;
 /** The check-in goes this long before step time. */
 export const CHECKIN_LEAD_MS = 10 * MINUTE;
+/** #137: "on it" said this close to the step (or later) skips its check-in; said earlier, it's only a yes. */
+export const ON_IT_WINDOW_MS = HOUR;
 /** A step time this close to the kickoff makes kickoff and check-in one text. */
 export const MERGE_WITHIN_MS = HOUR;
-/** The follow-up goes this long after the step should be finished. */
-export const FOLLOWUP_AFTER_MS = 30 * MINUTE;
+/** The follow-up goes this long after the step should be finished (#71: while it's still fresh). */
+export const FOLLOWUP_AFTER_MS = 5 * MINUTE;
+/** #48: a night step's quiet hours start this long after its follow-up would go. */
+export const QUIET_AFTER_FOLLOWUP_MS = 15 * MINUTE;
 /** How long a step takes when the plan doesn't say. */
 export const DEFAULT_STEP_MINUTES = 60;
 
 /** The Sunday look-back (#78): the recap's own text goes at this local time on Sunday, */
 export const LOOKBACK_AT = "18:00";
-/** or this long after a later Sunday step's follow-up, even into quiet hours, */
-export const LOOKBACK_AFTER_FOLLOWUP_MS = 30 * MINUTE;
+/** or this long after a later Sunday step should be finished, even into quiet hours (#71: never right on the follow-up's heels), */
+export const LOOKBACK_AFTER_DONE_MS = HOUR;
 /** within this long of that late time (a restart after it). */
 export const LOOKBACK_LATE_WINDOW_MS = 2 * HOUR;
 /** They texted this recently: they're talking, so the coach can turn to the week itself. */
@@ -79,10 +83,7 @@ export const REQUEST_CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kic
 
 export interface NudgeInput {
   now: Date;
-  tester: Pick<
-    Tester,
-    "timeZone" | "quietHoursStart" | "quietHoursEnd" | "phase" | "pushiness" | "stoppedAt" | "autoTextsPausedAt"
-  >;
+  tester: QuietClock & Pick<Tester, "phase" | "pushiness" | "stoppedAt" | "autoTextsPausedAt">;
   /** The latest locked plan for their current goal. */
   plan?: Pick<Plan, "stepTime" | "days" | "startDate" | "minutes" | "lockedAt">;
   /** Their step-day row for the service date (`serviceDate`), if any. */
@@ -119,7 +120,9 @@ export type NudgeDecision =
   | { action: "none"; reason: string }
   | { action: "send"; nudge: DueNudge }
   /** Silent too long (before lock, or after the day-3 check-in): pause ZOH's texts and flag it. */
-  | { action: "pause"; date: string };
+  | { action: "pause"; date: string }
+  /** #110: the Sunday recap is due but 3 texts went unanswered: Monday's morning text gives it instead. */
+  | { action: "owe"; date: string };
 
 /** After this many misses in a row, one text a day at their usual time (voice page, "When they start to slip"). */
 export const ONE_A_DAY_AFTER_MISSES = 2;
@@ -131,7 +134,7 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
   const { now, tester } = input;
   if (tester.stoppedAt) return none("stopped");
   if (tester.autoTextsPausedAt) return none("paused");
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   const date = serviceDate(now, tester);
   // Only the look-back after a late Sunday step may land in quiet hours (#78).
   if (quiet) return lookback(input, date, true) ?? none("quiet hours");
@@ -146,16 +149,17 @@ export function dueNudge(input: NudgeInput): NudgeDecision {
 
 /**
  * The Sunday look-back's own text (#78), when it's due right now: on a Sunday with 3+ closed step days,
- * not recapped yet today, at 6 pm, or 30 minutes after the Sunday step's follow-up when that's later
- * (the one case that may go in quiet hours). Pause, stop and the 3-unanswered cap apply; while they're
- * talking, the coach turns to the week itself; on the slip ladder its one text a day stays the only one.
+ * not recapped yet today, at 6 pm, or an hour after the Sunday step should be finished when that's later
+ * (the one case that may go in quiet hours). Pause and stop apply; while they're talking, the coach turns to
+ * the week itself; on the slip ladder its one text a day stays the only one. At the 3-unanswered cap it's
+ * owed instead (#110): a silent Sunday gets no fourth text, and Monday's morning text gives the recap.
  */
 export function lookback(input: NudgeInput, date: string, quiet: boolean): NudgeDecision | undefined {
   const { now, tester, plan } = input;
   if (tester.phase !== "active" || !plan?.startDate || plan.startDate > date) return undefined;
   if (weekdayOf(date) !== "sun" || input.claimedToday.includes(LOOKBACK_KIND)) return undefined;
   if ((input.closedStepDays ?? 0) < LOOKBACK_MIN_STEP_DAYS) return undefined;
-  if (input.nudgesSinceReply >= LOOKBACK_CAP || (input.missesInARow ?? 0) >= ONE_A_DAY_AFTER_MISSES) return undefined;
+  if ((input.missesInARow ?? 0) >= ONE_A_DAY_AFTER_MISSES) return undefined;
   if (input.lastInboundAt && now.getTime() - input.lastInboundAt.getTime() < LOOKBACK_TALKING_MS) return undefined;
   const { from, late } = lookbackTime(input, date);
   if (quiet && !late) return undefined;
@@ -163,18 +167,35 @@ export function lookback(input: NudgeInput, date: string, quiet: boolean): Nudge
   const until = late ? Math.max(from + LOOKBACK_LATE_WINDOW_MS, end) : end;
   const at = now.getTime();
   if (at < from || at >= until || from < (plan.lockedAt?.getTime() ?? 0)) return undefined;
+  // Checked last: only a recap that would go right now becomes owed.
+  if (input.nudgesSinceReply >= LOOKBACK_CAP) return { action: "owe", date };
   return { action: "send", nudge: { kind: LOOKBACK_KIND, moment: "lookback", date } };
 }
 
-/** When the look-back's own text goes: 6 pm, or after a Sunday step's follow-up when that's later (`late`). */
+/** #110: Monday's morning texts, which give a recap owed from a silent Sunday (not the slip ladder's, nor later ones). */
+export const OWED_RECAP_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kickoff_checkin", "after_miss", "rest_day"];
+
+/** When the look-back's own text goes: 6 pm, or an hour after a Sunday step should be finished when that's later (`late`). */
 export function lookbackTime(input: Pick<NudgeInput, "tester" | "plan" | "today">, date: string): { from: number; late: boolean } {
   const { tester, plan, today } = input;
   const six = zonedTime(date, LOOKBACK_AT, tester.timeZone).getTime();
   if (!plan || !isStepDay(plan, date, today)) return { from: six, late: false };
-  const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
-  const followup = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
-  const after = followup + LOOKBACK_AFTER_FOLLOWUP_MS;
+  const after = stepDoneBy(date, plan, today, tester) + LOOKBACK_AFTER_DONE_MS;
   return after > six ? { from: after, late: true } : { from: six, late: false };
+}
+
+/**
+ * #71: when a day's step should be finished: that day's start (a time moved for today included) plus that
+ * day's length (#76), or DEFAULT_STEP_MINUTES when none is known. The follow-up and late recap count from it.
+ */
+export function stepDoneBy(
+  date: string,
+  plan: Pick<Plan, "stepTime" | "minutes">,
+  today: (Pick<StepDay, "movedTime"> & Partial<Pick<StepDay, "stepMinutes">>) | undefined,
+  tester: QuietClock,
+): number {
+  const stepAt = stepInstant(date, today?.movedTime ?? plan.stepTime, tester);
+  return stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE;
 }
 
 /** Before the plan is locked: one nudge 3 hours after ZOH's last unanswered text, then one a day, then pause. */
@@ -245,13 +266,13 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     const suffix = today?.movedTime ? `@${today.movedTime}` : "";
     // Unclear proof being sorted out in the conversation: no "did you do it?" over the top of it.
     const proofPending = Boolean(today?.proofPendingAt);
-    if (level === "pushy" && !merged && !today?.onItAt && !proofPending) {
+    if (level === "pushy" && !merged && !onItCounts(today?.onItAt, stepAt) && !proofPending) {
       slots.push({ kind: `checkin${suffix}`, moment: "checkin", from: checkinAt, until: stepAt });
     }
     if (level !== "gentle" && !proofPending) {
       // Today's own length when its step runs shorter or longer than the plan's (#76).
-      const doneBy = stepAt + (today?.stepMinutes ?? plan.minutes ?? DEFAULT_STEP_MINUTES) * MINUTE + FOLLOWUP_AFTER_MS;
-      slots.push({ kind: `followup${suffix}`, moment: "followup", from: doneBy, until: day.end });
+      const followupAt = stepDoneBy(date, plan, today, tester) + FOLLOWUP_AFTER_MS;
+      slots.push({ kind: `followup${suffix}`, moment: "followup", from: followupAt, until: day.end });
     }
   }
 
@@ -265,13 +286,18 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
   return none("no slot open");
 }
 
+/** #137: whether "on it" said at `onItAt` skips the check-in for a step at `stepAt`: only within the hour before it, or later. */
+export function onItCounts(onItAt: Date | null | undefined, stepAt: number): boolean {
+  return onItAt != null && onItAt.getTime() >= stepAt - ON_IT_WINDOW_MS;
+}
+
 /**
  * Step days that have ended (quiet hours started) with nothing marked done: they become misses.
  * Looks at yesterday and today, so a restart over midnight still closes yesterday.
  */
 export function daysToClose(input: {
   now: Date;
-  tester: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">;
+  tester: QuietClock;
   plan: Pick<Plan, "days" | "startDate" | "lockedAt">;
   /** Rows for those days, by date. */
   rows: Record<string, Pick<StepDay, "status" | "movedTime"> | undefined>;
@@ -291,6 +317,52 @@ export function daysToClose(input: {
 }
 
 // ---- Their local day ----
+
+/** #48: a day's step, for fitting that day's quiet hours around it (local "HH:MM" and its length). */
+export interface DayStep {
+  time: string;
+  minutes: number | null;
+}
+
+/**
+ * A tester's clock: time zone and stored quiet hours, plus (#48) each local date's step when it's known
+ * (`withDaySteps`). Default quiet hours stretch around a step inside them; chosen ones never do.
+ */
+export type QuietClock = Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd"> &
+  Partial<Pick<Tester, "quietHoursChosen">> & { steps?: Record<string, DayStep | undefined> };
+
+/**
+ * #48: the quiet hours of one local day (that morning's end, that night's start). A step inside default
+ * quiet hours moves them so its texts get through: a night step pushes the start to just after its
+ * follow-up (step + length + FOLLOWUP_AFTER_MS + QUIET_AFTER_FOLLOWUP_MS); a morning step pulls the end
+ * to its heads-up (CHECKIN_LEAD_MS before). A step outside them, a rest day or chosen hours: unchanged.
+ */
+export function quietOn(date: string, t: QuietClock): { start: string; end: string } {
+  const stored = { start: t.quietHoursStart, end: t.quietHoursEnd };
+  const step = t.steps?.[date];
+  if (!step || t.quietHoursChosen || !insideQuietHours(step.time, t)) return stored;
+  const start = clockMinutes(stored.start);
+  const span = (clockMinutes(stored.end) - start + 1440) % 1440;
+  const into = (clockMinutes(step.time) - start + 1440) % 1440;
+  // Before the middle of the quiet stretch it's a night step (bed at 11:50, 12:30); after it, a morning one (a 6 am run).
+  if (into < span / 2) {
+    const after = (step.minutes ?? DEFAULT_STEP_MINUTES) + (FOLLOWUP_AFTER_MS + QUIET_AFTER_FOLLOWUP_MS) / MINUTE;
+    return { start: clockOf(start + Math.min(into + after, span)), end: stored.end };
+  }
+  return { start: stored.start, end: clockOf(start + into - CHECKIN_LEAD_MS / MINUTE) };
+}
+
+/** Whether ZOH's own texts are held at this moment: inside the quiet hours of the day it falls in (#48). */
+export function quietNow(at: Date, t: QuietClock): boolean {
+  const date = serviceDate(at, t);
+  const stretched = [addDays(date, -1), date].some((d) => {
+    const q = quietOn(d, t);
+    return q.start !== t.quietHoursStart || q.end !== t.quietHoursEnd;
+  });
+  if (!stretched) return insideQuietHours(localClock(at, t.timeZone), t);
+  const day = dayBounds(date, t);
+  return at.getTime() < day.start || at.getTime() >= day.end;
+}
 
 /**
  * Whether the plan has a step on this local date. Day 1 always does once it has a time set for it
@@ -340,20 +412,23 @@ export function localClock(at: Date, timeZone: string): string {
  * The local day a moment belongs to: the calendar date, except between midnight and quiet hours
  * when they start after midnight (quiet hours 00:30 to 08:00: 00:15 is still yesterday's evening).
  */
-export function serviceDate(at: Date, t: Pick<Tester, "timeZone" | "quietHoursStart">): string {
+export function serviceDate(at: Date, t: QuietClock): string {
   const date = localDate(at, t.timeZone);
-  return t.quietHoursStart < "12:00" && localClock(at, t.timeZone) < t.quietHoursStart ? addDays(date, -1) : date;
+  // #48: yesterday's own quiet hours, which a late step pushes past midnight.
+  const start = quietOn(addDays(date, -1), t).start;
+  return start < "12:00" && localClock(at, t.timeZone) < start ? addDays(date, -1) : date;
 }
 
-/** A local day's waking window: from the end of quiet hours to their start (that night, or after midnight). */
-export function dayBounds(date: string, t: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">): { start: number; end: number } {
-  const start = zonedTime(date, t.quietHoursEnd, t.timeZone).getTime();
-  const endDate = t.quietHoursStart >= "12:00" ? date : addDays(date, 1);
-  return { start, end: zonedTime(endDate, t.quietHoursStart, t.timeZone).getTime() };
+/** A local day's waking window: from the end of that day's quiet hours to their start (that night, or after midnight). */
+export function dayBounds(date: string, t: QuietClock): { start: number; end: number } {
+  const q = quietOn(date, t);
+  const start = zonedTime(date, q.end, t.timeZone).getTime();
+  const endDate = q.start >= "12:00" ? date : addDays(date, 1);
+  return { start, end: zonedTime(endDate, q.start, t.timeZone).getTime() };
 }
 
 /** The step's instant on a local day; a time after midnight (a late bedtime) belongs to that night. */
-export function stepInstant(date: string, time: string, t: Pick<Tester, "timeZone" | "quietHoursStart" | "quietHoursEnd">): number {
+export function stepInstant(date: string, time: string, t: QuietClock): number {
   const day = dayBounds(date, t);
   const same = zonedTime(date, time, t.timeZone).getTime();
   if (same >= day.start) return same;
@@ -386,6 +461,16 @@ function offsetMs(at: Date, timeZone: string): number {
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
   const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
   return asUtc - Math.floor(at.getTime() / 1000) * 1000;
+}
+
+/** "HH:MM" as minutes after midnight, and back (any number of minutes, wrapped to a day). */
+function clockMinutes(clock: string): number {
+  const [h, m] = clock.split(":").map(Number);
+  return h! * 60 + m!;
+}
+function clockOf(minutes: number): string {
+  const m = ((minutes % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
 function none(reason: string): NudgeDecision {

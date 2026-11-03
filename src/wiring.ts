@@ -15,6 +15,7 @@ import { routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
+import { ReplyLines } from "./pipeline/conversation.js";
 import type { BuildInfo } from "./testers/env.js";
 
 /**
@@ -44,6 +45,7 @@ export function appDeps(
       devCommands: pick("devCommands", () => config.devCommands),
       build: pick("build", buildInfo),
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
+      lines: pick("lines", () => new ReplyLines({ holdMs: config.typingHoldSeconds * 1000, graceMs: Math.round(config.replyGraceSeconds * 1000) })),
       sendblue: pick("sendblue", () => makeSendblue(config)),
       replier: pick("replier", () => makeCoach(config, db)),
       media: pick("media", () => makeMedia(config)),

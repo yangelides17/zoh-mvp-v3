@@ -86,6 +86,13 @@ export const testers = pgTable(
     /** Local "HH:MM". ZOH never starts a text between start and end. */
     quietHoursStart: text("quiet_hours_start").notNull().default(DEFAULT_QUIET_HOURS.start),
     quietHoursEnd: text("quiet_hours_end").notNull().default(DEFAULT_QUIET_HOURS.end),
+    /**
+     * #48: quiet hours they chose themselves ("don't text me after 10"). Default ones stretch on their own
+     * each day to fit the step's texts; chosen ones move only on their yes.
+     */
+    quietHoursChosen: boolean("quiet_hours_chosen").notNull().default(false),
+    /** #48: the step time ZOH last asked about moving chosen quiet hours for ("HH:MM"), so it asks once per time. */
+    quietHoursAskedFor: text("quiet_hours_asked_for"),
     pushiness: text("pushiness").notNull().default(DEFAULT_PUSHINESS),
     /** What they've asked of the coach's style ("fewer emojis"). */
     styleNotes: text("style_notes").notNull().default(""),
@@ -417,7 +424,7 @@ export const flags = pgTable(
   (t) => [index("flags_tester_idx").on(t.testerId)],
 );
 
-export const PAUSE_END_REASONS = ["tester", "end_date", "stop", "reset"] as const;
+export const PAUSE_END_REASONS = ["tester", "end_date", "stop", "reset", "restart"] as const;
 export type PauseEndReason = (typeof PAUSE_END_REASONS)[number];
 
 /**
@@ -442,7 +449,7 @@ export const pauses = pgTable(
   (t) => [
     index("pauses_tester_idx").on(t.testerId),
     uniqueIndex("pauses_one_open_idx").on(t.testerId).where(sql`${t.endedAt} is null`),
-    check("pauses_ended_by_check", sql`${t.endedBy} in ('tester', 'end_date', 'stop', 'reset')`),
+    check("pauses_ended_by_check", sql`${t.endedBy} in ('tester', 'end_date', 'stop', 'reset', 'restart')`),
   ],
 );
 
@@ -495,6 +502,18 @@ export const stepDays = pgTable(
     stepKind: text("step_kind", { enum: STEP_KINDS }),
     /** How it went, in their words, summed up in a line by the coach (#77): what the next step builds on. */
     reflection: text("reflection"),
+    /**
+     * #93: they said how it went (feel, difficulty, effort, room, what to change), not only a lesson.
+     * Null on days from before it was recorded (the migration adds it without a default for them), so
+     * the reflection rate counts from that release and the console shows "not recorded".
+     */
+    howItWentSaid: boolean("how_it_went_said").default(false),
+    /** What got in the way, in a line, on a missed, smaller or easier day, if they said (#93). */
+    inTheWay: text("in_the_way"),
+    /** ZOH's candid take on the day, 1 to 2 sentences, for the founders only: never in the coach's state or a text (#93). */
+    coachTake: text("coach_take"),
+    /** Why this day's step, in a line, as the coach set it (#93): the step log's "Next step" reason. */
+    nextReason: text("next_reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -537,9 +556,11 @@ export const takeaways = pgTable(
 
 /**
  * "skipped": the coach found the morning's conversation already covered the kickoff (#42), or gave the
- * Sunday recap in conversation (#78, kind "lookback"); nothing was sent.
+ * Sunday recap in conversation (#78, kind "lookback"), or Monday's first text gave the one owed (#110); nothing was sent.
+ * "owed" (#110, kind "lookback" only): the recap was due Sunday but they hadn't answered 3 texts, so Monday's
+ * morning text (or their first reply) gives it instead.
  */
-export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped"] as const;
+export const NUDGE_STATUSES = ["claimed", "sent", "failed", "skipped", "held", "owed"] as const;
 
 /**
  * Texts ZOH starts on its own. A row is claimed before the text is written, so a slot goes out
@@ -564,7 +585,7 @@ export const nudges = pgTable(
   },
   (t) => [
     unique("nudges_tester_date_kind_unique").on(t.testerId, t.date, t.kind),
-    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped')`),
+    check("nudges_status_check", sql`${t.status} in ('claimed', 'sent', 'failed', 'skipped', 'held', 'owed')`),
   ],
 );
 

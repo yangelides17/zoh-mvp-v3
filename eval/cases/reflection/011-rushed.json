@@ -1,0 +1,80 @@
+{
+  "id": "rushed",
+  "title": "A rushed tester: no reflection question, let go with the next step",
+  "origin": "Issue #93 (spec example: \"ok fine, busy day\"); #131: rushed gets no question (Yanni)",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": {
+      "what": "Atomic Habits",
+      "where": "on the couch",
+      "when": "8 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap."
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Read chapter 1 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: small habits compound"
+      },
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Chapter 2 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: identity-based habits"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Chapter 3 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: the four laws"
+      }
+    ],
+    "today_step": {
+      "step": "Chapter 4 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap",
+      "agreed_hours_ago": 10
+    }
+  },
+  "testerLines": [
+    "[voice: done, chapter four, gotta run]",
+    "ok fine, busy day",
+    "sure"
+  ],
+  "whatWentWrong": "New case, not a past mistake: depth fits the day, and a rushed tester isn't fished for more.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates briefly. \"gotta run\" means Maya is rushed, so ZOH asks no question about how it went, in that text or after \"ok fine, busy day\"; a light line inviting more tomorrow (\"tell me what stuck tomorrow\") is good. It gives the next step day's step fully defined (chapter 5, on the couch, 8 pm, about 20 minutes, the same size) and asks only if it works. After \"sure\" it confirms in a line with no new question. No later text ever chases a longer reflection.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

@@ -112,7 +112,7 @@ async function main(): Promise<number> {
       plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, simulate, feature.doneWhen);
     // A case gets one turn past its script so it ends "by script", not by the cap.
     const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
-    const result = await runConversation(plan, tester, { maxTurns, index, env, memory: feature.memory, saved: feature.saved });
+    const result = await runConversation(plan, tester, { maxTurns, index, env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const graded: GradedConversation = { ...result };
     // Simulator measured; the coach runs inside the app, so its share is estimated per ZOH text.
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;

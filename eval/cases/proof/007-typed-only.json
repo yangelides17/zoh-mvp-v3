@@ -1,0 +1,71 @@
+{
+  "id": "typed-only",
+  "title": "Done, said in words only: no check mark yet, a warm why, a request for real proof; a voice note then counts",
+  "origin": "Issue #94 (proof is always a photo, screenshot or voice note); Oct 30 live check on PR #90",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "running, starting from zero",
+      "where": "around my block",
+      "when": "7 pm",
+      "how_long": "20 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Yo Sam! Tonight at 7 around your block: 2 min jog, 1 min walk, 3 rounds, about 15 minutes. Strava screenshot after. You in?"
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "1 min easy jog, 2 min walk, 3 rounds around the block",
+      "destination": "run a mile without stopping by December",
+      "place": "around my block",
+      "time": "19:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "the Strava run",
+      "reason": "Strava already logs it, so proof takes two seconds.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 3 rounds",
+        "proof_seen": "Strava screenshot, 16 min"
+      },
+      {
+        "days_ago": 5,
+        "status": "done",
+        "step": "1 min jog, 2 min walk, 3 rounds",
+        "proof_seen": "Strava screenshot, 15 min"
+      }
+    ],
+    "today_step": {
+      "step": "Around your block at 7 pm: 2 min jog, 1 min walk, 3 rounds, about 15 minutes",
+      "agreed_hours_ago": 9
+    }
+  },
+  "testerLines": [
+    "done! 3 rounds around the block, 2 min jog 1 min walk each. legs felt great",
+    "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there"
+  ],
+  "whatWentWrong": "Live, for a smaller step ZOH said: \"Send it as a quick voice note or typed lines and I'll log it.\" Typed text is never proof.",
+  "shouldHaveHappened": "After the typed message ZOH is happy for them but doesn't count it yet: it says why in its own words, warmly and never suspiciously (real proof is how it keeps them honest; anyone could type 'done'), and asks for a Strava screenshot or a quick photo or voice note. It never offers typed text as proof. After the voice note it counts the day and celebrates, then asks one reflection question.",
+  "startTime": "19:30",
+  "timeZone": "America/New_York"
+}

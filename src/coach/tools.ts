@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { and, asc, eq, max } from "drizzle-orm";
+import { and, asc, eq, max, sql } from "drizzle-orm";
+import { giveOwedRecap } from "./week.js";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
 import {
@@ -8,6 +9,7 @@ import {
   maintenanceCheckins,
   MIN_DAYS_PER_WEEK,
   nudges,
+  pauses,
   planInputs,
   plans,
   PROOF_METHODS,
@@ -24,7 +26,7 @@ import {
   type Suggestion,
   type Tester,
 } from "../db/schema.js";
-import { alertFeedback, raiseAlert, saveFlag } from "../console/alerts.js";
+import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
 import { closeRequest, doneLine, findRequest } from "../console/requests.js";
 import { optOut } from "../testers/commands.js";
@@ -43,8 +45,9 @@ import {
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
-import { addDays, isStepDay, LOOKBACK_KIND, nextStepDay, weekdayOf } from "../nudges/schedule.js";
-import { describeDays, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
+import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
+import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -86,11 +89,13 @@ const schemas = {
     .strict(),
   set_time_zone: z.object({ city: text(80), time_zone: text(60) }).strict(),
   set_quiet_hours: z.object({ start: clock, end: clock }).strict(),
+  keep_quiet_hours: z.object({}).strict(),
   opt_out: z.object({}).strict(),
   pause_texts: z
     .object({ reason: text(200), back_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional() })
     .strict(),
   resume_texts: z.object({}).strict(),
+  restart_coaching: z.object({}).strict(),
   send_feedback: z.object({ feedback: text(1000) }).strict(),
   flag_back_off: z.object({ reason: text(300) }).strict(),
   propose_plan: z.object(planFields).strict(),
@@ -142,9 +147,19 @@ const schemas = {
       day: z.enum(["today", "next"]).optional(),
       agreed: z.boolean().optional(),
       asked: text(300).optional(),
+      reason: text(200).optional(),
+      ready: text(160).optional(),
     })
     .strict(),
-  save_reflection: z.object({ summary: text(300), day: z.enum(["today", "yesterday"]).optional() }).strict(),
+  save_reflection: z
+    .object({
+      summary: text(300),
+      how_it_went: z.boolean(),
+      in_the_way: text(200).optional(),
+      take: text(300),
+      day: z.enum(["today", "yesterday"]).optional(),
+    })
+    .strict(),
   save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
   record_week_recap: z.object({}).strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
@@ -199,12 +214,18 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "set_quiet_hours",
-    description: 'When they ask, or accept your offer to move them around their step time: when ZOH must not start texts, local 24-hour "HH:MM".',
+    description:
+      'When they ask for quiet hours ("don\'t text me after 10"), or say yes to moving the ones they chose around their step time: when ZOH must not start texts, local 24-hour "HH:MM". Default quiet hours fit around the step on their own: never call this for that.',
     input_schema: {
       type: "object",
       properties: { start: { type: "string" }, end: { type: "string" } },
       required: ["start", "end"],
     },
+  },
+  {
+    name: "keep_quiet_hours",
+    description: "They said no to moving the quiet hours they chose around their step time: keeps them, and you won't ask again for that time.",
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "opt_out",
@@ -224,6 +245,11 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "resume_texts",
     description: 'They\'re back from a pause ("I\'m back", "let\'s go again"): your texts start again.',
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "restart_coaching",
+    description: 'After a stop, only on a clear yes to starting again ("yes", "let\'s go", "I want to start again"); never on a hi, a maybe or a question. Your texts start again on the same plan.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -360,7 +386,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_on_it",
     description:
-      'They are doing today\'s step now or about to ("heading to the gym now"). Not for chatting or answering a question. Skips today\'s check-in.',
+      'They are starting today\'s step now or within the hour ("heading to the gym now"). A yes or "still in" to today\'s step is mark_agreed, not this; nor is chatting or a question. Skips today\'s check-in.',
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -389,6 +415,8 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         day: { type: "string", enum: ["today", "next"] },
         agreed: { type: "boolean" },
         asked: { type: "string" },
+        reason: { type: "string", description: "Why this step, in a line: what they said that shaped it (#93)" },
+        ready: { type: "string", description: "Only when told it's early: why the next step goes now (they asked for it, rushed, said skip)" },
       },
       required: ["step", "kind"],
     },
@@ -396,11 +424,17 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line for choosing their next steps. Again later replaces it with a fuller one. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them, with something behind it (how it felt and why, how hard, effort or time, room for more, what to change); a lesson alone, or a thin word with nothing behind it (\"okay\", \"fine\", \"a little awkward\"), is false: ask what's behind it. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
-      properties: { summary: { type: "string" }, day: { type: "string", enum: ["today", "yesterday"] } },
-      required: ["summary"],
+      properties: {
+        summary: { type: "string" },
+        how_it_went: { type: "boolean" },
+        in_the_way: { type: "string" },
+        take: { type: "string" },
+        day: { type: "string", enum: ["today", "yesterday"] },
+      },
+      required: ["summary", "how_it_went", "take"],
     },
   },
   {
@@ -446,7 +480,39 @@ export type ToolResult = { ok: true; message: string; tester: Tester; optedOut?:
  * Validates and runs one tool call against the current state. Never throws for bad input:
  * the model gets the error back and can fix its call.
  */
-export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date): Promise<ToolResult> {
+/** #131: what a tool can't tell from the state mid-reply, which reloads after every call: how the reply began. */
+export interface ReplyStart {
+  /** Whether how it went was already said (something real) when this reply began. */
+  howItWentSaid: boolean;
+}
+
+/**
+ * #131 (soft hold): why proposing the next step day's step now is early in today's reflection, or undefined
+ * when it isn't. Early: the text that celebrates their proof, the reply where their first real answer came in,
+ * or a thin reflection before they've given little back twice. The coach can go ahead with a reason (`ready`),
+ * so it pushes back once, never forces a question. The safety net and texts ZOH starts are never early.
+ */
+export function earlyProposal(state: CoachState, start?: ReplyStart): string | undefined {
+  const row = state.todayRow;
+  const done = row?.status === "done" || row?.status === "done_reduced";
+  if (!done || state.nudgeMoment || state.proof.today === 0) return undefined;
+  const n = state.proof.zohTextsSince + 1;
+  if (n >= REFLECTION_SAFETY_NET) return undefined;
+  const said = !!row?.howItWentSaid;
+  const why =
+    n === 1
+      ? "this text celebrates their proof: ask your one question about it first"
+      : (start?.howItWentSaid ?? said)
+        ? undefined
+        : said
+          ? "they just gave you their first real answer: ask one question about it first (a worry, a difficulty, what clicked, or their idea for tomorrow)"
+          : n < REFLECTION_LITTLE_BACK
+            ? "nothing real on how it went yet: ask what's behind their answer first"
+            : undefined;
+  return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. If they asked for it, are rushed or said skip, call again with ready: why.`;
+}
+
+export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date, start?: ReplyStart): Promise<ToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as ToolName].safeParse(rawInput ?? {});
   if (!parsed.success) {
@@ -458,7 +524,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
   switch (name as ToolName) {
     case "save_name": {
       const { name: first } = input as z.infer<typeof schemas.save_name>;
-      return saved(await updateTester(db, tester.id, { name: first }), `Name saved: ${first}`);
+      return saved(await updateTester(db, tester.id, { name: first }), quietly(`name = ${first}`));
     }
 
     case "choose_goal": {
@@ -479,7 +545,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       await upsertPlanInputs(db, tester.id, slug, {}, description ? { goal_description: description } : undefined);
       await setFocusGoal(db, tester.id, slug, at, "remove");
-      return saved(await updateTester(db, tester.id, { goalSlug: slug }), `Goal saved: ${goal.title}`);
+      return saved(await updateTester(db, tester.id, { goalSlug: slug }), quietly(`goal = ${goal.title}`));
     }
 
     case "save_plan_inputs": {
@@ -495,7 +561,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const values: Partial<PlanInput> = {};
       for (const k of keys) values[PLAN_FIELDS[k]] = answers[k];
       await upsertPlanInputs(db, tester.id, state.goal.slug, values);
-      return saved(tester, `Saved: ${keys.map((k) => `${k} = ${answers[k]}`).join("; ")}`);
+      return saved(tester, quietly(keys.map((k) => `${k} = ${answers[k]}`).join("; ")));
     }
 
     case "set_time_zone": {
@@ -511,7 +577,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     case "set_quiet_hours": {
       const { start, end } = input as z.infer<typeof schemas.set_quiet_hours>;
       if (start === end) return { ok: false, error: "start and end can't be the same" };
-      return saved(await updateTester(db, tester.id, { quietHoursStart: start, quietHoursEnd: end }), `Quiet hours: ${start} to ${end}`);
+      // #48: hours they chose stay as set (no stretching around the step), and the step time's question is answered.
+      const asked = (state.plan ?? state.draft)?.stepTime ?? tester.quietHoursAskedFor;
+      const updated = await updateTester(db, tester.id, { quietHoursStart: start, quietHoursEnd: end, quietHoursChosen: true, quietHoursAskedFor: asked });
+      return saved(updated, `Quiet hours: ${start} to ${end}`);
+    }
+
+    case "keep_quiet_hours": {
+      const time = (state.plan ?? state.draft)?.stepTime;
+      if (!time) return { ok: false, error: "No step time to keep them around yet." };
+      const updated = await updateTester(db, tester.id, { quietHoursAskedFor: time });
+      return saved(updated, quietly(`quiet hours kept at ${tester.quietHoursStart} to ${tester.quietHoursEnd}; no texts from you at ${time}, and you won't ask about it again`));
     }
 
     case "opt_out": {
@@ -534,6 +610,16 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       return saved(tester, "Pause lifted: your texts start again. Pick up where you left off.");
     }
 
+    case "restart_coaching": {
+      const stoppedAt = tester.stoppedAt;
+      if (!stoppedAt) return { ok: false, error: "They aren't stopped." };
+      const restarted = await updateTester(db, tester.id, { stoppedAt: null });
+      // #109: the stopped stretch counts as a finished break: no day that ended in it is a miss, and going quiet counts from now.
+      await db.insert(pauses).values({ testerId: tester.id, startedAt: stoppedAt, reason: "stopped", endedAt: at, endedBy: "restart" });
+      await alertRestart(db, tester.id, stoppedAt, at);
+      return saved(restarted, "Restarted: your texts start again on the same plan. In this reply, confirm their next step and its time.");
+    }
+
     case "send_feedback": {
       const { feedback } = input as z.infer<typeof schemas.send_feedback>;
       await alertFeedback(db, tester.id, feedback, at);
@@ -550,12 +636,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const merged = mergePlan(draft, input as PlanFieldsInput);
       if (typeof merged === "string") return { ok: false, error: merged };
       if (draft) {
-        await db.update(plans).set({ ...merged, updatedAt: at }).where(eq(plans.id, draft.id));
+        // On the same clock as the texts (#37: a revision counts as shown only once a later text carries it).
+        await db.update(plans).set({ ...merged, updatedAt: onTesterClock(tester, at) ?? sql`now()` }).where(eq(plans.id, draft.id));
       } else {
         await db.delete(plans).where(and(eq(plans.testerId, tester.id), eq(plans.status, "draft")));
         await db.insert(plans).values({ testerId: tester.id, goalSlug: state.goal.slug, status: "draft", ...merged, createdAt: onTesterClock(tester, at), updatedAt: onTesterClock(tester, at) });
       }
-      return saved(tester, `Draft saved: ${describePlan(merged)}`);
+      return saved(tester, `Kept (they haven't seen it yet; never just say it's saved): ${describePlan(merged)}. Show it in your text now.${quietNote(tester, merged.stepTime, merged.minutes)}`);
     }
 
     case "lock_plan": {
@@ -575,7 +662,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .where(eq(plans.id, draft.id));
       await alertPlanReview(db, tester, draft.id, version, at);
       // Day 1's step is the plan's (#76); later days get their own with set_today_step.
-      const day1 = { step: draft.step, stepKind: "first" as const, planId: draft.id, updatedAt: at };
+      // #92: locking is their yes to day 1's step, so a day 1 tomorrow gets a "still in?" kickoff, not a first ask.
+      const day1 = { step: draft.step, stepKind: "first" as const, planId: draft.id, agreedAt: at, updatedAt: at };
       await db
         .insert(stepDays)
         .values({ testerId: tester.id, date: startDate, ...day1 })
@@ -653,7 +741,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
       const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
-      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}`);
+      const quiet = merged.stepTime !== state.plan.stepTime ? quietNote(tester, merged.stepTime, merged.minutes) : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}`);
     }
 
     case "switch_goal": {
@@ -788,7 +877,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         });
       }
       const said = { kept_up: "kept up", mostly: "mostly kept up (counts as kept up)", stopped: "stopped" }[answer];
-      return saved(tester, `Saved: ${said}.${answer === "stopped" ? " No push: the team decides what's next." : ""}`);
+      return saved(tester, quietly(`${said}${answer === "stopped" ? ". No push: the team decides what's next" : ""}`));
     }
 
     case "mark_step_done": {
@@ -854,7 +943,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "mark_on_it": {
-      if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      const plan = state.plan;
+      if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet." };
+      // #137: hours ahead, "on it" is a yes to today's step: the reminder before it still goes.
+      if (isStepDay(plan, state.today, state.todayRow)) {
+        const clock = await withDaySteps(db, tester, at);
+        const stepAt = stepInstant(state.today, state.todayRow?.movedTime ?? plan.stepTime, clock);
+        if (!onItCounts(at, stepAt)) {
+          if (!state.todayRow?.agreedAt) await saveToday(db, state, { agreedAt: at }, at);
+          return saved(tester, "More than an hour before the step, so it's saved as a yes to today's step, not on it: today's reminder still goes. It's settled: don't re-say it.");
+        }
+      }
       await saveToday(db, state, { onItAt: at }, at);
       return saved(tester, "Noted they're on it: today's check-in is skipped.");
     }
@@ -876,11 +975,12 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       // They picked the new time themselves: that's agreeing to it.
       await saveToday(db, state, { movedTime: time, agreedAt: at }, at);
-      return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).`);
+      const minutes = state.todayRow?.stepMinutes ?? plan.minutes;
+      return saved(tester, `Today's step moved to ${time} (today only; the plan keeps ${plan.stepTime}).${quietNote(tester, time, minutes)}`);
     }
 
     case "set_today_step": {
-      const { step, kind, minutes, proof, day, agreed, asked } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, kind, minutes, proof, day, agreed, asked, reason, ready } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
       const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
@@ -888,6 +988,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
       if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      // #131: a yes is only to a step they've seen, so the next step day's step must come from an earlier reply
+      // (this reply's text hasn't gone out yet); what they say about tomorrow before that isn't a yes.
+      if (day === "next" && agreed && (!row?.step || row.updatedAt.getTime() >= at.getTime())) {
+        return {
+          ok: false,
+          error: `They haven't seen a step for ${date} yet: save it without agreed, give it in full in your text and ask if it works; agreed only after their yes.`,
+        };
+      }
+      // #131 (soft hold): proposing it too early in today's reflection gets one push back; a reason lets it through.
+      const early = day === "next" && !agreed && !ready ? earlyProposal(state, start) : undefined;
+      if (early) return { ok: false, error: early };
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,
@@ -896,32 +1007,55 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       }
       // A day's step is the coach's call (#76): no plan version, no founder review.
       // #77: a yes to the next step day's step, agreed ahead, makes that morning's kickoff a reminder.
-      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes: minutes ?? null, stepProof: proof || null, ...(agreed ? { agreedAt: at } : {}) }, at);
-      const extra = [minutes !== undefined && `${minutes} min`, proof && `proof: ${proof}`].filter(Boolean).join("; ");
-      return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.`);
+      // #96: a smaller version carries its own length and proof on the day, the plan's filled in when none is given.
+      const easier = kind === "easier";
+      const usual = dayStep(plan);
+      const stepMinutes = minutes ?? (easier ? usual.minutes : null);
+      const stepProof = proof || (easier ? usual.proof : null);
+      // #92: a yes was to the old step; a changed step without a new yes is asked fresh.
+      const changed = !!row?.step && row.step !== step;
+      const yes = agreed ? { agreedAt: at } : changed ? { agreedAt: null } : {};
+      await saveDay(db, state, date, { step, stepKind: kind, stepMinutes, stepProof, ...(reason ? { nextReason: reason } : {}), ...yes }, at);
+      const extra = [stepMinutes !== null && `${stepMinutes} min`, stepProof && `proof: ${stepProof}`].filter(Boolean).join("; ");
+      const inFull = easier ? " Give the smaller version in full in your text: what, how much, when and proof, never just that it's set." : "";
+      return saved(tester, `Step for ${date} saved${agreed ? ", agreed" : ""}: ${step}${extra ? ` (${extra})` : ""}.${inFull}`);
     }
 
     case "save_reflection": {
-      const { summary, day } = input as z.infer<typeof schemas.save_reflection>;
+      const { summary, how_it_went, in_the_way, take, day } = input as z.infer<typeof schemas.save_reflection>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
       // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
+      // #93: once they've said how it went it stays said, however the talk goes on; a later call keeps what got in the way unless it has a new one.
+      const set = {
+        reflection: summary,
+        howItWentSaid: how_it_went ? true : sql`coalesce(${stepDays.howItWentSaid}, false)`,
+        ...(in_the_way ? { inTheWay: in_the_way } : {}),
+        coachTake: take,
+        updatedAt: at,
+      };
       await db
         .insert(stepDays)
-        .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, updatedAt: at })
-        .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set: { reflection: summary, updatedAt: at } });
-      return saved(tester, `Reflection saved for ${date}.`);
+        .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, howItWentSaid: how_it_went, inTheWay: in_the_way ?? null, coachTake: take, updatedAt: at })
+        .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
+      return saved(tester, quietly(`reflection for ${date}`));
     }
 
     case "save_takeaway": {
       const { text: lesson, evidence } = input as z.infer<typeof schemas.save_takeaway>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
-      return saved(tester, `Takeaway saved (${evidence}): ${lesson}`);
+      return saved(tester, quietly(`takeaway (${evidence}): ${lesson}`));
     }
 
     case "record_week_recap": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
+      // #110: a recap owed from a silent Sunday, given in Monday's first reply (the morning text's is the app's to record).
+      if (state.lastWeek && !state.lastWeek.recapped) {
+        if (state.nudgeMoment) return saved(tester, "Nothing to record: the app records this text as the recap.");
+        await giveOwedRecap(db, tester, state.lastWeek.to, at);
+        return saved(tester, "Recorded: last week's recap is given. Nothing has been sent yet: your text now gives the recap.");
+      }
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
       // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
       if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
@@ -931,10 +1065,11 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
       }
       // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
+      // #110: owed to Monday and they're talking tonight after all: it's given now, and Monday's text is a normal one.
       await db
         .insert(nudges)
         .values({ testerId: tester.id, date: state.today, kind: LOOKBACK_KIND, moment: LOOKBACK_KIND, status: "skipped", createdAt: at })
-        .onConflictDoNothing();
+        .onConflictDoUpdate({ target: [nudges.testerId, nudges.date, nudges.kind], set: { status: "skipped", createdAt: at }, setWhere: eq(nudges.status, "owed") });
       return saved(tester, "Recorded: no recap text goes out later today. Nothing has been sent yet: your text now gives the recap.");
     }
 
@@ -1076,8 +1211,32 @@ async function nextVersion(db: Db, testerId: string): Promise<number> {
   return (row?.v ?? 0) + 1;
 }
 
+/**
+ * #48: what a step time inside quiet hours means for the text that sets it. Default hours fit around it on
+ * their own, so a few words and no question; hours they chose get one question, once per step time.
+ */
+export function quietNote(tester: Tester, time: string, minutes: number | null): string {
+  if (!insideQuietHours(time, tester)) return "";
+  if (tester.quietHoursChosen) {
+    if (tester.quietHoursAskedFor === time) return "";
+    return ` ${time} is inside the quiet hours they chose (${tester.quietHoursStart} to ${tester.quietHoursEnd}), so you can't text them then: ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no).`;
+  }
+  const day = "2000-01-01";
+  const q = quietOn(day, { ...tester, steps: { [day]: { time, minutes } } });
+  const headsUp = new Date(Date.UTC(2000, 0, 1, ...time.split(":").map(Number) as [number, number]) - CHECKIN_LEAD_MS).toISOString().slice(11, 16);
+  return ` ${time} is inside their default quiet hours, which move to fit it (${q.start} to ${q.end} that day), so your heads-up at ${headsUp} and any follow-up still reach them: say in a few words that you'll reach them then (the heads-up time, not "quiet hours"), with no question about it.`;
+}
+
 function saved(tester: Tester, message: string): ToolResult {
   return { ok: true, message, tester };
+}
+
+/**
+ * #37: a save the tester never hears about. Worded so there's no "Saved: …" line to echo back
+ * (testers got just "Saved." as a whole reply): the text still needs its next move.
+ */
+function quietly(what: string): string {
+  return `Kept quietly (never mention saving it): ${what}. Your text still needs its next move.`;
 }
 
 async function upsertPlanInputs(

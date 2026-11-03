@@ -1,0 +1,73 @@
+{
+  "id": "yes-restart",
+  "title": "STOP, hey, then a clear yes: restart and confirm the next step and time",
+  "origin": "Issue #109: only a clear yes restarts, and the reply confirms the next step and time on the same plan",
+  "seed": {
+    "name": "Sam",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "Dune",
+      "where": "the couch",
+      "when": "7 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Sam! Page 61 tonight, nice. How did that chapter land?"
+      },
+      {
+        "from": "tester",
+        "text": "good, slow start but it's picking up"
+      },
+      {
+        "from": "zoh",
+        "text": "Love that. Same time tomorrow: 10 pages at 7 on the couch, photo of the page you stop on."
+      }
+    ],
+    "plan": {
+      "step": "10 pages of Dune",
+      "place": "the couch",
+      "time": "19:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages a night builds the habit without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 1,
+        "status": "done"
+      },
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "missed"
+      }
+    ]
+  },
+  "testerLines": [
+    "stop",
+    "hey",
+    "yes let's go again"
+  ],
+  "whatWentWrong": "New case for #109: before it, any text after STOP restarted ZOH's own texts.",
+  "shouldHaveHappened": "STOP gets the fixed confirmation. \"hey\" gets a warm reply asking once whether they want to pick reading back up, with no restart. \"yes let's go again\" restarts (restart_coaching) and the reply confirms the next step and its time on the same plan (10 pages of Dune at 7 tonight on the couch, a photo of the page), short and glad, with no lecture about stopping.",
+  "startTime": "09:30",
+  "timeZone": "America/New_York"
+}

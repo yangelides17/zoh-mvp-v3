@@ -12,7 +12,7 @@ import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
-import { evalConfig, guardFetch, runConversation, scriptedTester } from "../eval/harness.js";
+import { evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
@@ -138,7 +138,7 @@ describe("eval: nudge cases", () => {
     expect(result.transcript.map((l) => `${local(l.at)} ${l.text}${l.started ? " (started)" : ""}`)).toEqual([
       "09:00 nudge: kickoff (started)",
       "17:50 nudge: checkin (started)",
-      "19:00 nudge: followup (started)",
+      "18:35 nudge: followup (started)",
     ]);
     expect(graderUserPrompt({ plan, transcript: result.transcript })).toContain("[ZOH 1, started by ZOH, not a reply]");
     expect(result.savedState).toMatchObject({ nudges: [{ kind: "kickoff" }, { kind: "checkin" }, { kind: "followup" }] });
@@ -165,6 +165,8 @@ describe("eval: nudge cases", () => {
       "kickoff-after-miss",
       "teaching-fits",
       "kickoff-after-one-day-move",
+      "recommit-after-day-three",
+      "still-in-morning-yes",
     ]);
     expect(cases.every((c) => c.seed?.plan)).toBe(true);
     expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);
@@ -186,8 +188,22 @@ describe("eval: proof cases send photos and voice notes", () => {
 
   it("every proof case loads, and its photos and voice notes reach the coach through the real pipeline", async () => {
     const cases = await loadCases("proof");
-    expect(cases.map((c) => c.id)).toEqual(["dark-selfie-counts", "bright-hallway-pushback", "blurry-never-clears", "voice-note-off-topic", "forgot-pic-again", "streak-counts-today-once"]);
-    for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic")) {
+    expect(cases.map((c) => c.id)).toEqual([
+      "dark-selfie-counts",
+      "bright-hallway-pushback",
+      "blurry-never-clears",
+      "voice-note-off-topic",
+      "forgot-pic-again",
+      "streak-counts-today-once",
+      // #94 and #96: one proof rule, smaller versions in full.
+      "typed-only",
+      "writing-screenshot-only",
+      "pasted-writing-only",
+      "smaller-asked-with-reason",
+      "smaller-no-reason",
+      "zoh-suggests-smaller",
+    ]);
+    for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic" || c.id === "writing-screenshot-only")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();
       const result = await runConversation(plan, scriptedTester(c.testerLines), { maxTurns: c.testerLines.length + 1, index: 3, env: {}, replier: echo });
@@ -195,15 +211,47 @@ describe("eval: proof cases send photos and voice notes", () => {
       // The grader reads the line as written, bracketed description included.
       expect(result.transcript[0]!.text).toBe(c.testerLines[0]);
       const first = echo.received[0]!.at(-1)!;
-      if (c.id === "dark-selfie-counts") {
+      if (c.id !== "voice-note-off-topic") {
         expect(first.image?.mediaType).toBe("image/jpeg");
         expect(first.text).toContain("[Sent a photo]");
-        expect(first.text).not.toContain("dark, flash-lit");
+        expect(first.text).not.toContain(c.id === "dark-selfie-counts" ? "dark, flash-lit" : "Mara says she kept");
       } else {
         expect(first.image).toBeUndefined();
         expect(first.text).toContain("[Voice note transcript]: Ugh today was so long.");
       }
     }
+  });
+});
+
+describe("eval: ZOH's reply lands after the text it answers, as live (#131)", () => {
+  it("the reply to proof is stamped after it, so the count of ZOH's texts since proof matches live", async () => {
+    const c = (await loadCases("reflection")).find((x) => x.id === "live-felt-okay")!;
+    const plan = planConversations([], [c], { runs: 1 })[0]!;
+    const result = await runConversation(plan, scriptedTester(c.testerLines), { maxTurns: c.testerLines.length + 1, index: 3, env: {}, replier: new EchoReplier() });
+    expect(result.error).toBeUndefined();
+    expect(result.transcript.map((l) => l.from)).toEqual(["tester", "zoh", "tester", "zoh"]);
+    // The transcript stamps a tester line 5 s before it's posted (typing); the proof is sent at that post time.
+    const [proof, reply] = result.transcript.map((l) => Date.parse(l.at));
+    const proofSent = proof! + 5_000;
+    expect(reply! - proofSent).toBeGreaterThanOrEqual(REPLY_LAG_MS);
+  });
+});
+
+describe("eval: texts sent together (#16)", () => {
+  it("a \" +++ \" line posts its texts back to back and gets one reply that sees the photo", async () => {
+    const [c] = await loadCases("batch");
+    expect(c!.id).toBe("screenshot-and-caption");
+    const plan = planConversations([], [c!], { runs: 1 })[0]!;
+    const echo = new EchoReplier();
+    const result = await runConversation(plan, scriptedTester(c!.testerLines), { maxTurns: c!.testerLines.length + 1, index: 3, env: {}, replier: echo });
+    expect(result.error).toBeUndefined();
+    // The grader reads the line as written; ZOH sent one reply to both texts.
+    expect(result.transcript.map((l) => l.from)).toEqual(["tester", "zoh"]);
+    expect(result.transcript[0]!.text).toBe(c!.testerLines[0]);
+    const turns = echo.received.at(-1)!;
+    const photo = turns.find((t) => t.image);
+    expect(photo?.text).toContain("[Sent a photo]");
+    expect(turns.at(-1)!.text).toBe("Not bad!");
   });
 });
 
@@ -662,7 +710,7 @@ describe("eval: console lines (console feature)", () => {
       ],
       record: "Sun, Nov 1 (yesterday): missed",
     });
-    expect(prompt).toContain("=== The tester's step log at the start");
+    expect(prompt).toContain("=== The tester's step log (at the start unless it says otherwise");
     expect(prompt.indexOf("Sun, Nov 1 (yesterday): missed")).toBeLessThan(prompt.indexOf("=== Transcript ==="));
     expect(prompt).toContain("[FOUNDER, in the console] (12:00 pm) Yanni: why did she miss?");
     expect(prompt).toContain("[ZOH 1, to the founders in the console; the tester never sees it] (12:00 pm) Work ran late.");

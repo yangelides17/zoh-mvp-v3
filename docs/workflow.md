@@ -41,7 +41,7 @@ version). Each app keeps its own texts, memory and console; the staging console 
 | Step | Command | Who | Result |
 | --- | --- | --- | --- |
 | 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
-| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
+| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code on `dev` and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
 | 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the Watch list as a "Live checks" comment (checkboxes) on the issue. |
 | Live check | | You, on staging | Text `env staging`, then try the issue's "Live checks" and tick them. Not good: Claude files a `bug`. Best done before the next release. |
@@ -73,6 +73,11 @@ deploy and one round of phone checks. When the plan splits a group into separate
 3 of them at the same time. Claude decides when either is safe and worth it, and tells you when it would rather split
 an issue out (big, a database change, shared prompt files, an open question) or build one at a time.
 
+**Session names.** Typing `/spec`, `/plan`, `/build` or `/review` names the Claude Code session after exactly what
+you typed (`/build 80 90 120` → "build 80 90 120"), so each terminal is easy to tell apart in the resume picker and
+the terminal title. A hook does it (`.claude/hooks/session-title.mjs`, set up in `.claude/settings.json`); other
+prompts leave the name alone.
+
 Outside the commands, just talk normally: "file a bug: the recap was too long", "what did the build
 decide about time zones?", "mark #12 done".
 
@@ -91,7 +96,8 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Overlapping work is checked at every step.** `/spec` flags a feature in progress that changes the same moment
   for testers, `/plan` and `/build` name open work that touches the same files (a database or coach-prompt overlap
-  gets a decision on which lands first), and `/review` only merges a branch that's up to date with `dev`, then tells
+  gets a decision on which lands first), `/build` also checks that nothing merged since the plan changes its
+  approach, and `/review` only merges a branch that's up to date with `dev`, then tells
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
@@ -133,8 +139,8 @@ Claude handles all of it.
 | `main` | production (testers) | `/release` after your "ship"; a hotfix |
 
 Feature work goes through a PR into `dev` so the tests run on the exact code first. Small things (docs, wording,
-config, one-line fixes) go straight to `dev` once the tests pass. Each release is tagged (`v0.3.0`) and its notes are
-the release PR. There are no required approvals: the tests, the review session and your "merge" and "ship" are the check.
+config, one-line fixes) go straight to `dev` once the tests pass. Each release (and hotfix) is tagged (`v0.3.0`) and its
+notes are published on the repo's **Releases** page, and in the release PR. There are no required approvals: the tests, the review session and your "merge" and "ship" are the check.
 
 ## A feature, start to finish (example)
 

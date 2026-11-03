@@ -1,10 +1,10 @@
 import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
-import type { Replier } from "../claude/replier.js";
+import type { HeldNudge, Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
-import { loadCurrentPlan, loadRecentDays } from "../coach/state.js";
-import { closedStepDays } from "../coach/week.js";
+import { loadCurrentPlan, loadRecentDays, owedRecapShows } from "../coach/state.js";
+import { closedStepDays, giveOwedRecap, owedRecap } from "../coach/week.js";
 import { alertSecondMiss } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
@@ -13,7 +13,7 @@ import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, sugge
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
-import { insideQuietHours } from "../coach/state.js";
+import { withDaySteps } from "./quiet.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
@@ -26,7 +26,9 @@ import {
   CARRYING_MOMENTS,
   daysToClose,
   dueNudge,
-  localClock,
+  LOOKBACK_KIND,
+  OWED_RECAP_MOMENTS,
+  quietNow,
   REPLY_IN_PROGRESS_MS,
   REQUEST_CARRYING_MOMENTS,
   serviceDate,
@@ -37,6 +39,7 @@ import {
   type NudgeCarry,
   type NudgeDecision,
   type NudgeInput,
+  type NudgeMoment,
 } from "./schedule.js";
 
 export const WENT_QUIET_FLAG = "went_quiet";
@@ -137,6 +140,17 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
   };
 }
 
+/**
+ * #110: the Sunday whose recap this Monday morning text gives: owed, and shown to the coach (the same check as
+ * its state, so the app records only a recap the coach was asked to give).
+ */
+async function owedSunday(db: Db, tester: Tester, date: string, moment: NudgeMoment): Promise<string | undefined> {
+  if (weekdayOf(date) !== "mon") return undefined;
+  const sunday = addDays(date, -1);
+  if ((await owedRecap(db, tester, sunday))?.status !== "owed") return undefined;
+  return owedRecapShows(await loadRecentDays(db, tester, date), moment) ? sunday : undefined;
+}
+
 /** The last text ZOH sent this tester for the same moment, so the next one can read differently. */
 async function lastSent(db: Db, testerId: string, moment: string): Promise<string | undefined> {
   const [row] = await db
@@ -149,8 +163,10 @@ async function lastSent(db: Db, testerId: string, moment: string): Promise<strin
   return row?.content ?? undefined;
 }
 
-async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): Promise<NudgeDecision> {
+async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): Promise<NudgeDecision> {
   const { db } = deps;
+  // #48: each day's quiet hours fit around that day's step, for everything below (nudges, misses, the team's texts).
+  const tester = await withDaySteps(db, stored, now);
   const date = serviceDate(now, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
 
@@ -201,7 +217,7 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     }
   }
   const unanswered = input.nudgesSinceReply;
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   // A request still pending past its too-late-after time is dropped with a note, never sent late.
   const blockedBy = tester.stoppedAt
     ? "they texted stop"
@@ -245,6 +261,13 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
     deps.log.info({ contact: maskNumber(tester.phone) }, "Tester went quiet; ZOH's own texts paused and flagged");
   } else if (decision.action === "send") {
     await send(deps, tester, decision.nudge, now, undefined, lastInboundAt);
+  } else if (decision.action === "owe") {
+    // #110: a silent Sunday gets no fourth text: the recap's slot waits for Monday's morning text.
+    await db
+      .insert(nudges)
+      .values({ testerId: tester.id, date: decision.date, kind: LOOKBACK_KIND, moment: "lookback", status: "owed", createdAt: now })
+      .onConflictDoNothing();
+    deps.log.info({ contact: maskNumber(tester.phone), kind: LOOKBACK_KIND }, "Sunday recap owed to Monday: 3 texts unanswered");
   }
   return decision;
 }
@@ -257,12 +280,13 @@ async function forTester(deps: NudgeSchedulerDeps, tester: Tester, now: Date): P
  */
 export async function forecastNudge(
   db: Db,
-  tester: Tester,
+  stored: Tester,
   from: Date,
   until: Date,
   stepMs: number,
 ): Promise<{ at: Date; moment: string } | undefined> {
-  if (await activePause(db, tester.id)) return undefined;
+  if (await activePause(db, stored.id)) return undefined;
+  const tester = await withDaySteps(db, stored, from);
   const date = serviceDate(from, tester);
   const plan = tester.phase === "active" ? await loadCurrentPlan(db, tester, date) : undefined;
   const base = await loadNudgeInput(db, tester, plan, date, from);
@@ -383,7 +407,7 @@ async function sendExact(
   const { now, lastInboundAt: lastIn, lastOutboundAt: lastOut } = ctx;
   const theirsIsLatest = lastIn !== undefined && (lastOut === undefined || lastIn > lastOut);
   if (theirsIsLatest && now.getTime() - lastIn.getTime() < REPLY_IN_PROGRESS_MS) return false;
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const quiet = quietNow(now, tester);
   const request = (await pendingExact(db, tester.id, now)).find((r) => r.sendNow || !quiet);
   if (!request) return false;
 
@@ -482,18 +506,21 @@ async function send(
   // Another tick (or the app before a restart) has this slot.
   if (!claim) return;
 
-  let text: string | null;
+  let text: string | null | HeldNudge;
   let carry: NudgeCarry | undefined;
+  let owedFrom: string | undefined;
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
     carry = given ?? (await carryFor(db, tester, nudge, now));
     // A kickoff that carries something has its own job, so it always goes.
     const textedToday = lastInboundAt !== undefined && lastInboundAt >= zonedTime(nudge.date, "00:00", tester.timeZone);
-    const mayskip = textedToday && !carry && SKIPPABLE_MOMENTS.includes(nudge.moment);
+    // #110: a recap owed from Sunday rides on Monday's morning text, so that text can't be skipped.
+    owedFrom = OWED_RECAP_MOMENTS.includes(nudge.moment) ? await owedSunday(db, tester, nudge.date, nudge.moment) : undefined;
+    const mayskip = textedToday && !carry && !owedFrom && SKIPPABLE_MOMENTS.includes(nudge.moment);
     text = await deps.replier.nudge({
       tester,
-      turns: toTurns(history, "", {}),
+      turns: toTurns(history, new Map()),
       now,
       moment: nudge.moment,
       previous,
@@ -512,6 +539,12 @@ async function send(
     log.info(ctx, "Nudge skipped: today's conversation already covered it");
     return;
   }
+  // #109: the coach declined it: nothing goes out and the slot is used up for today (no retry).
+  if (typeof text !== "string") {
+    await db.update(nudges).set({ status: "held" }).where(eq(nudges.id, claim.id));
+    log.info({ ...ctx, wroteChars: text.wrote.length }, "Nudge held: the coach declined to send it");
+    return;
+  }
 
   try {
     const sent = await deps.sendblue.sendMessage({ number: tester.phone, content: text });
@@ -527,6 +560,7 @@ async function send(
       raw: sent.raw as object,
     });
     await db.update(nudges).set({ status: "sent", messageId: message.id }).where(eq(nudges.id, claim.id));
+    if (owedFrom) await giveOwedRecap(db, tester, owedFrom, now, message.id);
     if (carry && "requestId" in carry) {
       const [request] = await db.select().from(consoleMessages).where(eq(consoleMessages.id, carry.requestId));
       if (request) await closeRequest(db, { request, status: "done", at: now, messageId: message.id, line: doneLine(request.body, nudge.moment === "team" ? "in its own text" : "in the morning text", now) });

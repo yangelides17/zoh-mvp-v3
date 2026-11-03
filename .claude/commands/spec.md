@@ -20,7 +20,9 @@ you may suggest a group. For a group: ask questions shared by several issues onc
 own spec in its own body (small bugs can be a few lines: what's wrong, what should happen, Must and Watch), with
 `Part of a group with #a, #b` and `Depends on #n` lines where they apply. Approve and save them together.
 
-1. **Get context, quietly.** Read `CLAUDE.md` and `docs/coach-voice.md`. Run `gh issue list --state all --limit 50`
+1. **Get context, quietly,** from `dev` (the newest code; `main` lags until the next release): `git fetch origin`, and
+   if this folder isn't on a current `dev` (`git merge-base --is-ancestor origin/dev HEAD` fails), `git pull --ff-only`
+   on a clean `dev`, or read files with `git show origin/dev:<path>` without switching branches. Read `CLAUDE.md` and `docs/coach-voice.md`. Run `gh issue list --state all --limit 50`
    to see what exists. If `$ARGUMENTS` is an issue number, read it with `gh issue view`. Skim the code only as far
    as you need to know what already exists. If an issue already in progress (`spec-approved` through `in-review`)
    changes the same moment for testers (the same nudge, the same step of onboarding), say so and ask Yanni how the

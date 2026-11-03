@@ -1,0 +1,49 @@
+{
+  "id": "quiet-sunday-thin-week",
+  "title": "Silent Sunday after a patchy week with no destination: Monday's kickoff gives an honest, short recap, then the step",
+  "origin": "Issue #110 (silent Sunday: the week recap moves to Monday's kickoff): spec example 'no destination, a thin week'",
+  "startDay": "sun",
+  "seed": {
+    "name": "Jo",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 15,
+    "answers": { "what": "reading more instead of scrolling", "where": "couch", "when": "8 pm", "how_long": "15 min", "tracks_with": "nothing" },
+    "history": [
+      { "from": "tester", "text": "read it, 8 pages" },
+      { "from": "zoh", "text": "8 pages, nice. Same time tomorrow 📖" }
+    ],
+    "plan": {
+      "step": "10 pages of The Martian on the couch, phone in the other room",
+      "place": "the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stopped on",
+      "reason": "A small nightly read replaces the scroll before bed.",
+      "minutes": 15,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "10 pages of The Martian", "proof_seen": "photo, page 24" },
+      { "days_ago": 5, "status": "missed" },
+      { "days_ago": 4, "status": "done_reduced", "step": "10 pages of The Martian", "note": "5 pages, tired", "proof_seen": "photo, page 29" },
+      { "days_ago": 3, "status": "missed" },
+      { "days_ago": 2, "status": "done", "step": "10 pages, phone in the kitchen", "proof_seen": "photo, page 40", "reflection": "Phone out of reach made it easy" },
+      { "days_ago": 1, "status": "done_reduced", "step": "10 pages, phone in the kitchen", "note": "8 pages", "proof_seen": "photo, page 48" }
+    ],
+    "takeaways": [
+      { "days_ago": 2, "text": "Phone in another room keeps the scroll away", "evidence": "explained" }
+    ]
+  },
+  "testerLines": [
+    "advance to 09:01",
+    "advance to 21:30",
+    "advance to 09:01",
+    "ok"
+  ],
+  "whatWentWrong": "New case for #110: a patchy week with nothing applied yet and no destination, recap owed to Monday after a silent Sunday.",
+  "shouldHaveHappened": "Sunday: the kickoff, the 7:50 pm check-in and the 8:20 pm follow-up, and no recap text Sunday. Monday 9 am: one text that opens with a short, honest recap of last week from the record (2 or 3 points: 2 nights in full and 2 smaller, 3 missed with Sunday; the phone-in-the-kitchen trick starting to click, not called understood; never inflated, nothing about a destination), Sunday's miss named lightly, then today's step fully defined (10 pages of The Martian, couch, 8 pm, phone in another room, photo of the page) and one question, whether she's in. No question about the week. After 'ok': a short confirmation.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}

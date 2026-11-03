@@ -1,0 +1,51 @@
+{
+  "id": "detail-not-in-record",
+  "title": "A sparse week's record: the recap invents no durations, paces or times, and a recall ZOH asked for isn't called unprompted",
+  "origin": "Issue #103 (recap details come from the record): the Oct 31 \"Thursday took three minutes\" claim, on another goal",
+  "startDay": "sun",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 10,
+    "answers": { "what": "jogging", "where": "the park loop", "when": "7 am", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Today: two laps of the park loop at 7, at talk-test pace (slow enough to say a sentence). Then a quick voice note." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Jog the park loop at talk-test pace",
+      "destination": "run a mile without stopping by Nov 30",
+      "place": "the park loop",
+      "time": "07:00",
+      "days": ["mon", "wed", "fri", "sun"],
+      "proof": "voice",
+      "proof_note": "a quick voice note after the run",
+      "reason": "Slow enough to talk keeps you going longer.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "One lap of the park loop, walk when you need to", "proof_seen": "voice note: did the lap, walked twice" },
+      { "days_ago": 4, "status": "done", "step": "One lap of the park loop at talk-test pace", "proof_seen": "voice note: did the lap", "reflection": "When ZOH asked what the pace rule was, said: slow enough to talk" },
+      { "days_ago": 2, "status": "done", "step": "Two laps of the park loop at talk-test pace", "proof_seen": "voice note: two laps" }
+    ],
+    "today_step": { "step": "Two laps of the park loop at 7 am at talk-test pace, then a voice note", "agreed_hours_ago": 24 },
+    "takeaways": [
+      { "days_ago": 6, "text": "Slow enough to talk is the right pace", "evidence": "explained" },
+      { "days_ago": 4, "text": "Slow enough to talk is the right pace", "evidence": "recalled" },
+      { "days_ago": 2, "text": "Slow enough to talk is the right pace", "evidence": "applied" }
+    ]
+  },
+  "testerLines": [
+    "[voice: did the two laps again, legs felt heavy at the start]",
+    "heavy at first but it loosened up, kept the talk pace the whole way",
+    "that's about it",
+    "more of the same honestly, maybe a bit longer",
+    "yep"
+  ],
+  "whatWentWrong": "New case built from #103: on Oct 31 a recap said \"Thursday took three minutes once you started\", a detail nothing saved supports, and called recalls ZOH asked for \"unprompted\".",
+  "shouldHaveHappened": "After the reflection runs its course, the recap names 2 to 4 pieces of progress, each matching the seeded record and what he said today: one lap with walk breaks Monday, the talk-test pace recalled Wednesday and applied since, two laps Friday and today. It invents no times, paces, distances or durations nothing saved or said supports (no \"in 12 minutes\", no \"without walking\" for Monday), and never calls the Wednesday recall unprompted or done on his own. Where he stands vs. a mile without stopping, honestly. One question. Then a fully defined next step that's a bit longer, asked if it works; after \"yep\", a one-line confirm.",
+  "startTime": "07:30",
+  "timeZone": "America/New_York"
+}

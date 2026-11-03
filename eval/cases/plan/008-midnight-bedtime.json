@@ -1,0 +1,36 @@
+{
+  "id": "midnight-bedtime",
+  "title": "An 11:50 pm bedtime with default quiet hours: a few words that ZOH will still reach them, no question, nothing about quiet hours after lock",
+  "origin": "Issue #48 (quiet hours move to fit the step time), the spec's planning example",
+  "testerLines": [
+    "Sunday to Thursday, weekends I'm out late anyway",
+    "not sure yet honestly",
+    "looks good",
+    "I'm in"
+  ],
+  "whatWentWrong": "New case, not a past mistake: before #48 ZOH offered to move quiet hours, then could offer again after lock because it no longer saw the earlier offer.",
+  "shouldHaveHappened": "ZOH shows the plan (bed by 11:50 pm with screens away, Sunday to Thursday, with a photo as proof) and says in a few words that it will stay up to reach them around then (for example a heads-up at 11:40), with no question about quiet hours; the text ends with one question about the plan. After 'looks good' it asks for the commitment in natural words; after 'I'm in' it locks with a hype line and when day 1 is. It never asks to move quiet hours or brings them up again.",
+  "areaCode": "212",
+  "startTime": "18:00",
+  "seed": {
+    "name": "Dana",
+    "goal": "bedtime",
+    "phase": "planning",
+    "answers": {
+      "what": "in bed with screens away, phone charging in the kitchen",
+      "when": "11:50 pm",
+      "how_long": "10 min",
+      "tracks_with": "nothing"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "I want to be in bed by 11:50 with my phone charging in the kitchen"
+      },
+      {
+        "from": "zoh",
+        "text": "Love that, Dana. Which nights do you want this to happen?"
+      }
+    ]
+  }
+}

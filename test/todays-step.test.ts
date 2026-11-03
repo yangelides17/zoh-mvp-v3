@@ -1,6 +1,6 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createCoach, NUDGE_ROUNDS } from "../src/coach/coach.js";
+import { createCoach, NOT_SENT_NOTE, NUDGE_ROUNDS } from "../src/coach/coach.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { dayStep, loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
@@ -134,6 +134,29 @@ describe("set_today_step", () => {
     expect(await block(at(WED, "09:01"))).toContain('"sign up at the gym on Main St", about 30 min; proof: a screenshot of the membership.');
   });
 
+  it("a smaller version saved for the day carries its step, minutes and proof, the plan's proof filled in when none is given (#96)", async () => {
+    await setup();
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
+    const asked = "the full thing feels like too much today, can we do just 5 minutes?";
+    const smaller = "outside on your block: 2 min jog, 1 min walk, 1 round at 7 pm";
+    const result = await tool("set_today_step", { kind: "easier", step: smaller, minutes: 5, asked: "just 5 minutes" }, at(WED, "10:00"), asked);
+    expect(result).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: smaller, stepKind: "easier", stepMinutes: 5, stepProof: "screenshot (Strava run)" });
+    // The tool result reminds ZOH to give the whole smaller version in its text, not only "it's set".
+    expect((result as { message: string }).message).toMatch(/in full/);
+    expect((result as { message: string }).message).toMatch(/what, how much, when and proof/);
+    expect(await block(at(WED, "10:01"))).toContain(`"${smaller}", about 5 min; proof: screenshot (Strava run).`);
+  });
+
+  it("a smaller version keeps a proof of its own, and the plan's length when none is given (#96)", async () => {
+    await setup();
+    await tool("set_today_step", { kind: "easier", step: "1 round around the block at 7 pm", proof: "a photo of your shoes by the door" }, at(WED, "09:00"));
+    expect(await row(WED)).toMatchObject({ stepMinutes: 20, stepProof: "a photo of your shoes by the door" });
+    // Steps that aren't smaller still save only what differs from the plan.
+    await tool("set_today_step", { kind: "same", step: TODAY_STEP, day: "next" }, at(WED, "20:00"));
+    expect(await row("2026-11-06")).toMatchObject({ stepMinutes: null, stepProof: null });
+  });
+
   it("adds no plan version, review flag or alert", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"));
@@ -208,12 +231,12 @@ describe("check-in and follow-up use the day's step", () => {
   it("the follow-up waits for the day's own length; a moved time still moves check-in and follow-up", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 45 }, at(MON, "08:00"));
-    // 7 pm + 45 min + 30 (the plan's 20 would make it 7:50).
-    expect(await day(MON, "09:00", "21:00")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@20:15"]);
+    // #71: 7 pm + 45 min + 5 = 7:50 (the plan's 20 would make it 7:25).
+    expect(await day(MON, "09:00", "21:00")).toEqual(["kickoff@09:00", "checkin@18:50", "followup@19:50"]);
 
     await tool("set_today_step", { kind: "same", step: TODAY_STEP, minutes: 10 }, at(WED, "08:00"));
     await tool("move_today", { time: "20:00" }, at(WED, "08:01"));
-    expect(await day(WED, "09:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@20:40"]);
+    expect(await day(WED, "09:00", "21:59")).toEqual(["kickoff@09:00", "checkin@19:50", "followup@20:15"]);
   });
 });
 
@@ -229,6 +252,16 @@ describe("the kickoff saves today's step while writing", () => {
     expect(model.requests).toHaveLength(2);
     expect(model.requests[0]!.toolChoice).toBe("auto");
     expect(model.stateOf(1)).toContain(`Today's step (set, holds for today): "${TODAY_STEP}"`);
+  });
+
+  it("text written with the save isn't sent, and the next round is told so (#131)", async () => {
+    await setup();
+    const model = new FakeClaudeModel();
+    model.script({ text: "Morning Sam!", tools: [{ name: "set_today_step", input: { kind: "same", step: TODAY_STEP } }] }, "Morning Sam! 2 on, 1 off on your block at 7. You in?");
+    const coach = createCoach({ db: t.db, model, voice: "v" });
+    const text = await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
+    expect(text).toBe("Morning Sam! 2 on, 1 off on your block at 7. You in?");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(NOT_SENT_NOTE);
   });
 
   it("runs no other tool, and the last round must write", async () => {

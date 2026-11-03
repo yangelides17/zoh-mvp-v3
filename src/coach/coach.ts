@@ -1,7 +1,10 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import {
+  DraftDroppedError,
   NoReplyTextError,
+  type HeldNudge,
   toClaudeMessages,
+  type DroppedDraft,
   type ClaudeModel,
   type NudgeRequest,
   type Replier,
@@ -43,8 +46,82 @@ export const NUDGE_ROUNDS = 3;
 /** The only tools a text ZOH starts may run: everything else waits for their reply. */
 /** #78: record_week_recap is a no-op in the 6 pm recap (its slot is the record), allowed so a stray call can't derail the text. */
 export const NUDGE_TOOLS: readonly string[] = ["set_today_step", "record_week_recap"];
-/** The coach's whole answer when it skips a kickoff it was allowed to skip (#42). */
+/** #37: what the coach is told when its whole reply after a save was only a save confirmation. */
+export const SAVE_ONLY_NOTE =
+  "[Your text can't be only a save confirmation: they never hear about saves. Write the whole text to them now, answering their last text and then its next move if it needs one (the next question, the plan or the proposal). Don't mention saving or this note.]";
+
+/**
+ * #37: a reply that only confirms a save ("Saved.", "I've saved all of that."): short, no question,
+ * no • list, and about saving. A lock's hype line or a one-line confirmation of a change doesn't count.
+ */
+export function onlySaveConfirmation(text: string): boolean {
+  return text.length > 0 && text.length <= 60 && !text.includes("?") && !text.includes("•") && /\b(saved|recorded|got (it|that) (all )?down)\b/i.test(text);
+}
+
+/**
+ * #16: told to the reply that replaces dropped drafts (they texted again before it went out).
+ * Null when the drafts did nothing and wrote nothing: the history already holds every text.
+ */
+export function droppedDraftNote(d: DroppedDraft | undefined): string | null {
+  if (!d || (d.actions.length === 0 && !d.text)) return null;
+  const parts = ["[They sent more before your reply went out, so it was never sent."];
+  if (d.actions.length) parts.push(`Already done while answering, so keep it and don't redo it (change it only if their new texts ask): ${d.actions.join("; ")}.`);
+  if (d.text) parts.push(`Your unsent draft, which they never saw: "${d.text}"`);
+  parts.push("Reply once to everything they've sent since your last text. Don't mention this note.]");
+  return parts.join(" ");
+}
+
+/** Lines per finished action in a dropped draft: the tool and the first line of its result. */
+const ACTION_RESULT_CHARS = 200;
+
+/**
+ * #131: told when a round writes text alongside tool calls. Only the final round's text is sent, but the
+ * model sees its own earlier text in the history and took it as said ("still waiting on your answer" to a
+ * step they never saw).
+ */
+export const NOT_SENT_NOTE =
+  "[Nothing has gone out yet: they haven't seen the text you wrote with these tool calls. Only your final text is sent, so write your whole reply to them next. Don't mention this note.]";
+
+/** #108: told once when a reply's text has a tool's name on its own line (it wrote the call instead of making it). */
+export const TOOL_AS_TEXT_NOTE =
+  "[Your text had a tool's name on its own line, which they'd see. If you meant to use it, call it now; then write only your text to them. Don't mention this note.]";
+
+/** #108: a line that's only a tool's name ("mark_agreed", "`mark_agreed()`"). */
+function isToolNameLine(line: string, names: readonly string[]): boolean {
+  const bare = line.trim().replace(/^[`*_[(]+/, "").replace(/(\(\))?[`*_\]):.]*$/, "");
+  return bare !== "" && names.includes(bare);
+}
+
+/** #108: whether the text has a bare tool name on a line of its own. */
+export function hasToolNameLine(text: string, names: readonly string[]): boolean {
+  return text.split("\n").some((l) => isToolNameLine(l, names));
+}
+
+/** #108: the text without lines that are only a tool's name; it never reaches a tester. */
+export function withoutToolNames(text: string, names: readonly string[]): string {
+  return text
+    .split("\n")
+    .filter((l) => !isToolNameLine(l, names))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** The coach's whole answer when it skips a kickoff it was allowed to skip (#42), or declines any text it starts (#109). */
 export const SKIP = "SKIP";
+
+/** #109: every text ZOH starts may be declined, in one word, never with an explanation the tester would get. */
+export const DECLINE_NOTE = ` The app already checked this text may go now (stops, breaks and quiet hours included). If it still shouldn't, answer only ${SKIP}: never explain.`;
+
+/**
+ * #109: a text ZOH starts that's really a decision about sending ("I'm not sending this text…",
+ * "[No text sent. It's 9:05 PM…]"): the whole text in brackets, or opening with not sending.
+ */
+export function readsAsSendDecision(text: string): boolean {
+  const t = text.trim();
+  if (/^\[[\s\S]*\]$/.test(t)) return true;
+  return /^\W*(i'?m not sending|i am not sending|not sending (this|it|a text|anything)|no text (sent|goes out)|nothing (sent|goes out|to send)|i won'?t send (this|it|a text|anything))\b/i.test(t.replace(/’/g, "'"));
+}
 
 /**
  * Output budget per Claude call. Thinking counts against it, so it sits well above a text's
@@ -71,10 +148,19 @@ export function createCoach(opts: CoachOptions): Replier {
   // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
   const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, interrupted, signal, dropped }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
+      // #16: the reply that replaces dropped drafts hears what they did and wrote.
+      const note = droppedDraftNote(dropped);
+      if (note) (messages.at(-1)!.content as Anthropic.ContentBlockParam[]).push({ type: "text", text: note });
       markCached(messages);
+      /** Actions this draft finished, handed on if it's dropped. */
+      const done: string[] = [];
+      /** #16: a safe point. They texted again: stop here, before the next call, action or send. */
+      const checkpoint = (text?: string) => {
+        if (interrupted?.()) throw new DraftDroppedError({ actions: done, ...(text ? { text } : {}) });
+      };
       // Read once per reply: it only changes overnight (or on a preference or forget, which the tool result reports).
       const memory = usesMemory(initial) ? await memoryBlock(db, initial) : undefined;
       const budget: LookupBudget = { lookups: 0, searches: 0 };
@@ -96,6 +182,8 @@ export function createCoach(opts: CoachOptions): Replier {
       let tester: Tester = initial;
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
+      // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
+      const start = { howItWentSaid: !!state.todayRow?.howItWentSaid };
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -104,15 +192,27 @@ export function createCoach(opts: CoachOptions): Replier {
       /** Tool names and outcomes per round (never their inputs), for the error if no text comes back. */
       const trail: string[] = [];
       let retried = false;
+      let nudgedPastSave = false;
+      let nudgedPastToolName = false;
+      const toolNames = tools.map((t) => t.name);
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
-        const response = await model.create({
-          system: systemBlocks(fixed, state, memory),
-          messages,
-          tools,
-          toolChoice: last ? "none" : "auto",
-        });
+        checkpoint(fallbackText);
+        let response: Awaited<ReturnType<ClaudeModel["create"]>>;
+        try {
+          response = await model.create({
+            system: systemBlocks(fixed, state, memory),
+            messages,
+            tools,
+            toolChoice: last ? "none" : "auto",
+            ...(signal ? { signal } : {}),
+          });
+        } catch (err) {
+          // Cut off because they texted again: nothing from this call ran.
+          if (signal?.aborted) throw new DraftDroppedError({ actions: done, ...(fallbackText ? { text: fallbackText } : {}) });
+          throw err;
+        }
         addUsage(usage, response.usage);
         const text = response.content
           .filter((b) => b.type === "text")
@@ -126,22 +226,43 @@ export function createCoach(opts: CoachOptions): Replier {
           trail.push(`empty:${response.stopReason}:${(response.raw ?? []).map((b) => b.type).join("+") || "no blocks"}`);
           continue;
         }
+        // #108: a tool's name written as text instead of called: once, ask it to make the call and write only the text.
+        if (calls.length === 0 && !last && !nudgedPastToolName && hasToolNameLine(text, toolNames)) {
+          nudgedPastToolName = true;
+          trail.push("tool-as-text");
+          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "user", content: [{ type: "text", text: TOOL_AS_TEXT_NOTE }] });
+          continue;
+        }
+        // #37: after saving, a bare "Saved." left testers at a dead end: once, ask for the real reply.
+        if (calls.length === 0 && !last && !nudgedPastSave && trail.some((r) => r.includes(":ok")) && onlySaveConfirmation(text)) {
+          nudgedPastSave = true;
+          trail.push("save-only");
+          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "user", content: [{ type: "text", text: SAVE_ONLY_NOTE }] });
+          continue;
+        }
         if (calls.length === 0 || last) {
-          const reply = text || fallbackText;
+          const reply = withoutToolNames(text, toolNames) || fallbackText;
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
+          checkpoint(reply);
           return reply;
         }
-        if (text) fallbackText = text;
+        if (text) fallbackText = withoutToolNames(text, toolNames);
 
         const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
+          checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
-            : await runTool(db, state, call.name, call.input, now);
+            : await runTool(db, state, call.name, call.input, now, start);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
+            const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
+            done.push(action);
+            onAction?.(action);
             tester = result.tester;
             state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
@@ -158,6 +279,8 @@ export function createCoach(opts: CoachOptions): Replier {
         }
 
         trail.push(calls.map((c, i) => `${c.name}:${(results[i] as Anthropic.ToolResultBlockParam).is_error ? "error" : "ok"}`).join(","));
+        // #131: text written with tool calls never reaches them; say so, so the next round doesn't treat it as seen.
+        if (text) results.push({ type: "text", text: NOT_SENT_NOTE });
         // The model sometimes answers a forced-text round with nothing unless it's told why.
         if (round + 1 === MAX_ROUNDS) results.push({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." });
         messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
@@ -178,7 +301,7 @@ export function createCoach(opts: CoachOptions): Replier {
       const skip = mayskip
         ? ` They've already texted today. If today's conversation already covered what this text would say (today's step and time agreed, they're on it or moved it, or they owned a miss and talked through today's plan), answer only ${SKIP} and nothing goes out. Otherwise write it without repeating what was already said.`
         : "";
-      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}]`;
+      const note = `[No new text from them. It's ${localTime(now, tester.timeZone)}. Write the ${moment} text now.${carries}${fresh}${skip}${DECLINE_NOTE}]`;
       const messages = toClaudeMessages([...turns, { role: "user", text: note }]);
       let state = await loadCoachState(db, tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
@@ -196,7 +319,7 @@ export function createCoach(opts: CoachOptions): Replier {
         });
         const calls = last ? [] : response.content.filter((b) => b.type === "tool_use");
         if (calls.length) {
-          const results: Anthropic.ToolResultBlockParam[] = [];
+          const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
           for (const call of calls) {
             const result = NUDGE_TOOLS.includes(call.name)
               ? await runTool(db, state, call.name, call.input, now)
@@ -204,6 +327,8 @@ export function createCoach(opts: CoachOptions): Replier {
             if (result.ok) state = await loadCoachState(db, result.tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
             results.push({ type: "tool_result", tool_use_id: call.id, ...(result.ok ? { content: result.message } : { content: result.error, is_error: true }) });
           }
+          // #131: as in replies, text written with tool calls isn't sent.
+          if (response.content.some((b) => b.type === "text" && b.text.trim())) results.push({ type: "text", text: NOT_SENT_NOTE });
           messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
           messages.push({ role: "user", content: results });
           round++;
@@ -217,8 +342,11 @@ export function createCoach(opts: CoachOptions): Replier {
         // Starts with SKIP: a reason tacked on after it ("SKIP. Alex already agreed") must never reach them.
         const skipped = new RegExp(`^\\W*${SKIP}\\b`).test(text);
         if (skipped && mayskip) return null;
-        // SKIP when it wasn't offered counts as no text: retried, never sent and never dropped.
-        if (text && !skipped) return text;
+        // #109: any other SKIP, or words about not sending, is a decline: held, never sent.
+        if (skipped || readsAsSendDecision(text)) return { held: true, wrote: text } satisfies HeldNudge;
+        // #108: a tool's name on its own line never reaches them.
+        const clean = withoutToolNames(text, toolsFor(tester).map((t) => t.name));
+        if (clean) return clean;
         // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
         if (retried) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
         retried = true;

@@ -16,7 +16,8 @@ then nothing reaches testers.
    if Yanni gave one. Bump it on `dev` so staging shows it too: in the main folder on a clean `dev`
    (`git pull --ff-only`), `npm version <v> --no-git-tag-version`, `npm run check`, commit "Release v<v>: version",
    push `dev`.
-3. **Release notes**, in plain words for Yanni (what testers will notice, not code). The shape:
+3. **Release notes**, in plain words for Yanni (what testers will notice, not code). Save them to a file: they go in
+   the release PR now and on the GitHub Release at ship (step 6), so every version's page says what it included. The shape:
    ```
    ## Release v<v>
    **What testers will notice**: one line per issue, "#n (<title>): <what changes for them>".
@@ -41,7 +42,11 @@ then nothing reaches testers.
 6. **Only when Yanni says ship:**
    - Check the deploy notes first (for example, ask Yanni to set a new variable on production) and that CI is green.
    - `gh pr merge <pr> --merge` (never `--delete-branch`: `dev` stays).
-   - Tag the merge commit: `git fetch origin && git tag -a v<v> origin/main -m "Release v<v>"` and `git push origin v<v>`.
+   - Tag the merge commit: `git fetch origin && git tag -a v<v> origin/main -m "Release v<v>: <one-line summary>"` and
+     `git push origin v<v>`.
+   - Publish the notes as a GitHub Release, so the repo's Releases page lists what each version included:
+     `gh release create v<v> --title "v<v>" --notes-file <notes>` (the notes from step 3, plus a last line linking the
+     release PR). Check it shows on the Releases page.
    - Bring `dev` level with `main` so they don't drift: `git push origin origin/main:dev` (a fast-forward; if it
      isn't one, merge `origin/main` into `dev`, `npm run check`, push).
    - Production deploys in a couple of minutes. Check it: production's `/health` (see `docs/reference.md` for the

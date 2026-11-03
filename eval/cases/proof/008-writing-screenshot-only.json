@@ -1,0 +1,80 @@
+{
+  "id": "writing-screenshot-only",
+  "title": "Writing step, screenshot only: it counts, then a request for the full text, for feedback",
+  "origin": "Issue #94 (proof is always a photo, screenshot or voice note)",
+  "seed": {
+    "name": "Jordan",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "short scenes for my novel, Lighthouse",
+      "where": "Notes app on my phone",
+      "when": "8 pm",
+      "how_long": "20 min",
+      "tracks_with": "I write everything in Notes"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?"
+      },
+      {
+        "from": "tester",
+        "text": "in"
+      }
+    ],
+    "plan": {
+      "step": "Write one 200-word scene of Lighthouse in Notes",
+      "destination": "a full draft of Lighthouse by spring",
+      "place": "Notes app",
+      "time": "20:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "screenshot",
+      "proof_note": "a screenshot of the scene in Notes",
+      "reason": "A screenshot of where you wrote it keeps it honest; pasting it lets me give you real feedback.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Scene 1 of Lighthouse: Mara opens the bar",
+        "proof_seen": "screenshot of the scene in Notes"
+      },
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Scene 2 of Lighthouse: the storm night",
+        "proof_seen": "screenshot of the scene in Notes"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Scene 3 of Lighthouse: Theo's letter",
+        "proof_seen": "screenshot of the scene in Notes"
+      }
+    ],
+    "today_step": {
+      "step": "Scene 4 of Lighthouse in Notes: Theo comes back to Mara's bar, about 200 words, 8 pm, 20 minutes",
+      "agreed_hours_ago": 10
+    }
+  },
+  "testerLines": [
+    "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor] done!",
+    "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again."
+  ],
+  "whatWentWrong": "New case, not a past mistake: a screenshot is the proof for writing, and ZOH should ask for the paste to give real feedback.",
+  "shouldHaveHappened": "ZOH counts the screenshot right away and celebrates, then asks them to paste the whole scene so it can read it and give feedback (that request is its question). After the paste it reacts specifically to the writing (something real in it, like the second chair or the name nobody says) and asks one reflection question. It never asks for more proof.",
+  "startTime": "20:25",
+  "timeZone": "America/New_York"
+}

@@ -1,10 +1,11 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createCoach } from "../src/coach/coach.js";
+import { createCoach, onlySaveConfirmation } from "../src/coach/coach.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { insideQuietHours, loadCoachState, localDate } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
-import { flags, planInputs, plans, stepDays, type Tester } from "../src/db/schema.js";
+import { insertOutbound } from "../src/db/messages.js";
+import { flags, messages, planInputs, plans, stepDays, type Tester } from "../src/db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../src/testers/commands.js";
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
 import { DEV, FakeClaudeModel, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
@@ -94,7 +95,7 @@ describe("proposing a plan", () => {
       needsReview: false,
     });
     expect(buildStateBlock(await state())).toContain(
-      "Plan shown to them, not locked yet: setup: dumbbells next to your bed tonight; step: 20 min dumbbells",
+      "Plan saved but not sent yet: show it in this reply: setup: dumbbells next to your bed tonight; step: 20 min dumbbells",
     );
     expect(buildStateBlock(await state())).toContain("at 07:00, Mon, Wed, Fri");
   });
@@ -112,6 +113,111 @@ describe("proposing a plan", () => {
     await updateTester(t.db, row.id, { phase: "planning" });
     await t.db.update(planInputs).set({ where: null }).where(eq(planInputs.testerId, row.id));
     expect(await run("propose_plan", GYM)).toMatchObject({ ok: false, error: "Ask these first: where" });
+  });
+});
+
+describe("whether the plan was shown (#37)", () => {
+  beforeEach(async () => {
+    await onboarded();
+    model.requests = [];
+  });
+
+  const PLAN_TEXT = "That's everything I need, here's your plan:\n• 20 min dumbbells at 7:30 am\n• Mon, Wed, Fri\n• a watch screenshot\nWhat do you think?";
+  const sent = async (content: string, createdAt?: Date) =>
+    insertOutbound(t.db, { contactNumber: ME, content, ...(createdAt ? { createdAt } : {}) });
+  const shown = async (now = at) => (await state("", ME, now)).draftShown;
+  /** The test database's clock is millisecond-grained: a revision in a later reply is always a moment later. */
+  const later = () => new Promise((r) => setTimeout(r, 5));
+
+  it("reads not shown when no text went out after it, or the text didn't carry the plan", async () => {
+    await run("propose_plan", GYM);
+    expect(await shown()).toBe(false);
+    await sent("Love it. One more thing first: which days work best?");
+    expect(await shown()).toBe(false);
+    expect(buildStateBlock(await state())).toContain("Plan saved but not sent yet: show it in this reply");
+  });
+
+  it("a failed send doesn't count", async () => {
+    await run("propose_plan", GYM);
+    await insertOutbound(t.db, { contactNumber: ME, content: PLAN_TEXT, status: "SEND_FAILED" });
+    expect(await shown()).toBe(false);
+  });
+
+  it("reads shown once a text with the • plan goes out; a revision or replacement resets it until sent", async () => {
+    await run("propose_plan", GYM);
+    await sent(PLAN_TEXT);
+    expect(await shown()).toBe(true);
+    expect(buildStateBlock(await state())).toContain("Plan shown to them, not locked yet: setup:");
+
+    await later();
+    await run("propose_plan", { time: "07:00" });
+    expect(await shown()).toBe(false);
+    await sent(PLAN_TEXT.replace("7:30", "7"));
+    expect(await shown()).toBe(true);
+
+    // A replacement: a switch drops the draft, the new goal's plan starts unseen.
+    await t.db.delete(plans).where(eq(plans.status, "draft"));
+    await later();
+    await run("propose_plan", GYM);
+    expect(await shown()).toBe(false);
+  });
+
+  it("works on a test-mode clock that has jumped ahead", async () => {
+    const row = await tester();
+    const offset = 3 * 86_400_000;
+    await updateTester(t.db, row.id, { clockOffsetMs: offset });
+    const ahead = new Date(Date.now() + offset);
+    await run("propose_plan", GYM, "", ahead);
+    await sent(PLAN_TEXT, new Date(ahead.getTime() + 60_000));
+    expect(await shown(ahead)).toBe(true);
+    const revisedAt = new Date(ahead.getTime() + 120_000);
+    await run("propose_plan", { time: "07:00" }, "", revisedAt);
+    expect(await shown(revisedAt)).toBe(false);
+    await sent(PLAN_TEXT, new Date(ahead.getTime() + 180_000));
+    expect(await shown(revisedAt)).toBe(true);
+  });
+
+  it("the retry after an empty reply is told the plan wasn't sent, and its plan text counts as shown", async () => {
+    model.script({ tools: [{ name: "propose_plan", input: GYM }] }, "", "", PLAN_TEXT);
+    await text(ME, "sounds good, what's the plan?");
+    // The fourth call is the pipeline's retry, after the first attempt saved the draft and sent nothing.
+    expect(model.requests).toHaveLength(4);
+    expect(model.stateOf(3)).toContain("Plan saved but not sent yet: show it in this reply");
+    expect(model.stateOf(3)).not.toContain("Plan shown to them");
+    expect(await shown()).toBe(true);
+  });
+});
+
+describe("a reply that only confirms a save (#37)", () => {
+  beforeEach(async () => {
+    await onboarded();
+    model.requests = [];
+  });
+
+  it("gets one more round to write the real reply", async () => {
+    model.script({ tools: [{ name: "propose_plan", input: GYM }] }, "Saved.", "Here's your plan:\n• 20 min dumbbells\n• Mon, Wed, Fri\nWhat do you think?");
+    await text(ME, "ok let's do it");
+    expect(model.requests).toHaveLength(3);
+    const note = JSON.stringify(model.requests[2]!.messages.at(-1));
+    expect(note).toContain("only a save confirmation");
+    const [out] = await t.db.select().from(messages).where(eq(messages.direction, "outbound")).orderBy(desc(messages.createdAt)).limit(1);
+    expect(out!.content).toContain("Here's your plan");
+  });
+
+  it("only once, and never without a save first or for a real reply", async () => {
+    model.script({ tools: [{ name: "save_plan_inputs", input: { when: "7 am" } }] }, "Saved.", "I've saved all of that.");
+    await text(ME, "7 am works");
+    expect(model.requests).toHaveLength(3);
+    expect(onlySaveConfirmation("Saved.")).toBe(true);
+    expect(onlySaveConfirmation("I’ve saved all of that.")).toBe(true);
+    expect(onlySaveConfirmation("Saved. What time works best?")).toBe(false);
+    expect(onlySaveConfirmation("Locked in! Day 1 is today at 7:30 pm, let's go!")).toBe(false);
+    expect(onlySaveConfirmation("Noted, go get it!")).toBe(false);
+
+    model.requests = [];
+    model.script("Saved.");
+    await text(ME, "cool");
+    expect(model.requests).toHaveLength(1);
   });
 });
 
@@ -157,8 +263,8 @@ describe("locking", () => {
     ]);
     expect((await tester()).phase).toBe("active");
     expect(buildStateBlock(await state())).toContain("Locked plan (version 1, day 1 2026-10-27;");
-    // Day 1 is the plan's step, the "first" kind (#88).
-    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-27", step: GYM.step, stepKind: "first" }]);
+    // Day 1 is the plan's step, the "first" kind (#88), and locking is their yes to it (#92).
+    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-27", step: GYM.step, stepKind: "first", agreedAt: at }]);
   });
 
   it("starts tomorrow when asked, by the tester's local date", async () => {
@@ -169,6 +275,11 @@ describe("locking", () => {
     expect((await allPlans())[0]!.startDate).toBe("2026-10-28");
     expect(localDate(late, "America/New_York")).toBe("2026-10-27");
     expect(localDate(late, "America/Los_Angeles", 1)).toBe("2026-10-28");
+    // #92: the lock is a yes ahead, so day 1's kickoff checks they're still in rather than asking fresh.
+    expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-28", agreedAt: late }]);
+    const morning = buildStateBlock(await state("", ME, new Date("2026-10-28T13:00:00Z")));
+    expect(morning).toContain("They said yes to today's step ahead of time (");
+    expect(morning).toContain("its one question checks they're still in, in words that show they already said yes");
   });
 
   it("works end to end: the coach locks on the tester's text", async () => {
@@ -317,12 +428,14 @@ describe("quiet hours", () => {
     expect(insideQuietHours("23:30", sameDay)).toBe(false);
   });
 
-  it("flags a step time inside quiet hours, and a change agreed during planning is saved", async () => {
-    await run("propose_plan", { ...GYM, time: "23:30" });
-    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their quiet hours. If you haven't offered yet, offer once");
+  it("a step time inside default quiet hours gets a few words and no offer (#48); hours they set are saved as theirs", async () => {
+    const proposed = await run("propose_plan", { ...GYM, time: "23:30" });
+    expect(proposed).toMatchObject({ ok: true, message: expect.stringContaining("with no question about it") });
+    expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their default quiet hours, which move to fit it");
+    expect(buildStateBlock(await state())).not.toContain("ask once");
     expect(await run("set_quiet_hours", { start: "00:00", end: "09:00" })).toMatchObject({ ok: true });
-    expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00" });
-    expect(buildStateBlock(await state())).not.toContain("inside their quiet hours");
+    expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00", quietHoursChosen: true });
+    expect(buildStateBlock(await state())).not.toContain("inside their default quiet hours");
   });
 });
 

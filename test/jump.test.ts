@@ -165,18 +165,31 @@ describe("what happens on the way", () => {
     expect(t.replier.nudges.map((n) => [n.moment, n.now.toISOString()])).toEqual([
       ["kickoff", at(MON, "09:00").toISOString()],
       ["checkin", at(MON, "18:50").toISOString()],
-      ["followup", at(MON, "19:50").toISOString()],
+      ["followup", at(MON, "19:25").toISOString()],
     ]);
     const [monday] = await t.db.select().from(stepDays).where(and(eq(stepDays.testerId, dev.id), eq(stepDays.date, MON)));
     expect(monday?.status).toBe("missed");
     // Each nudge is a real text on the tester's clock, then one log line.
     const sent = await t.db.select().from(messages).where(and(eq(messages.contactNumber, DEV), eq(messages.direction, "outbound"), gt(messages.createdAt, at(MON, "08:00"))));
-    expect(sent.map((m) => m.createdAt.toISOString()).sort()).toEqual([at(MON, "09:00"), at(MON, "18:50"), at(MON, "19:50")].map((d) => d.toISOString()));
+    expect(sent.map((m) => m.createdAt.toISOString()).sort()).toEqual([at(MON, "09:00"), at(MON, "18:50"), at(MON, "19:25")].map((d) => d.toISOString()));
     const out = sendsSince(before);
     expect(out).toHaveLength(4);
     expect(out[3]).toBe(
-      "⏩ Tue Nov 3, 8:00 am · sent: kickoff Mon 9:00 am, check-in Mon 6:50 pm, follow-up Mon 7:50 pm · Mon missed · next: after-miss kickoff 9:00 am (in 1h)",
+      "⏩ Tue Nov 3, 8:00 am · sent: kickoff Mon 9:00 am, check-in Mon 6:50 pm, follow-up Mon 7:25 pm · Mon missed · next: after-miss kickoff 9:00 am (in 1h)",
     );
+  });
+
+  it("#109: a text the coach declines is held: nothing goes out, the slot isn't retried, and the line says held", async () => {
+    const dev = await setup();
+    t.replier.holdNudges = ["checkin"];
+    const before = t.sendblue.sends.length;
+    await text("jump 1d");
+    expect(t.replier.nudges.filter((n) => n.moment === "checkin")).toHaveLength(1);
+    const slots = await t.db.select().from(nudges).where(eq(nudges.testerId, dev.id));
+    expect(slots.find((n) => n.moment === "checkin")?.status).toBe("held");
+    const out = sendsSince(before);
+    expect(out).toHaveLength(3);
+    expect(out[2]).toContain("sent: kickoff Mon 9:00 am, follow-up Mon 7:25 pm · held, nothing sent: check-in Mon 6:50 pm");
   });
 
   it("a silent jump reaches the point where ZOH stops texting on its own, never past the 3-a-day cap", async () => {
@@ -207,6 +220,30 @@ describe("what happens on the way", () => {
     const out = sendsSince(before);
     expect(out).toHaveLength(2);
     expect(out[1]).toBe("⏩ Mon Nov 2, 9:00 am · sent: kickoff 9:00 am · next: check-in 6:50 pm (in 9h50)");
+  });
+
+  it("the clock line shows the follow-up 5 minutes after the step should be done (#71)", async () => {
+    const dev = await setup();
+    // A 7:30 pm step lasting 10 minutes: done by 7:40, follow-up 7:45.
+    await t.db.update(plans).set({ stepTime: "19:30", minutes: 10 }).where(eq(plans.testerId, dev.id));
+    await text("jump next");
+    const before = t.sendblue.sends.length;
+    await text("jump next");
+    expect(t.replier.nudges.map((n) => n.moment)).toEqual(["kickoff", "checkin"]);
+    expect(sendsSince(before).at(-1)).toContain("sent: check-in 7:20 pm · next: follow-up 7:45 pm");
+  });
+
+  it("#137: a morning on it (as saved on staging Nov 4) still gets the reminder on a jump, once", async () => {
+    const dev = await setup();
+    await text("jump 9:05am");
+    await t.db.insert(stepDays).values({ testerId: dev.id, date: MON, agreedAt: at(MON, "09:01"), onItAt: at(MON, "09:01"), updatedAt: at(MON, "09:01") });
+    let before = t.sendblue.sends.length;
+    await text("jump 6:50pm");
+    expect(sendsSince(before).at(-1)).toBe("⏩ Mon Nov 2, 6:50 pm · sent: check-in 6:50 pm · next: follow-up 7:25 pm (in 35 min)");
+    before = t.sendblue.sends.length;
+    await text("jump 7:30pm");
+    expect(sendsSince(before).at(-1)).toContain("sent: follow-up 7:25 pm");
+    expect(t.replier.nudges.map((n) => n.moment)).toEqual(["kickoff", "checkin", "followup"]);
   });
 
   it("jump to a time of day lands on the next one", async () => {
@@ -294,7 +331,9 @@ describe("after a jump", () => {
     const tester = await fresh(dev);
     expect(tester.clockOffsetMs).toBe(0);
     expect(tester.phase).toBe("onboarding");
-    const future = (d: Date | null) => d !== null && d.getTime() > real.getTime() + 60_000;
+    // Rows the database stamps itself carry the wall clock, which can be past the test's fixed date: the jump is 5 days, so this still catches it.
+    const now = Math.max(real.getTime(), Date.now());
+    const future = (d: Date | null) => d !== null && d.getTime() > now + 60_000;
     expect((await allMessages()).filter((m) => future(m.createdAt) || future(m.sentAt))).toEqual([]);
     expect((await t.db.select().from(flags).where(eq(flags.testerId, dev.id))).filter((f) => future(f.createdAt))).toEqual([]);
     expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.testerId, dev.id))).filter((c) => future(c.createdAt))).toEqual([]);

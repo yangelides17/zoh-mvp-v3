@@ -1,15 +1,15 @@
 import { timingSafeEqual } from "node:crypto";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { normalizePhone } from "../config.js";
 import { insertInboundOnce, updateStatusByHandle } from "../db/messages.js";
 import type { Db } from "../db/client.js";
-import { processEnvReply, processInbound, maskNumber, routingOf, type PipelineDeps } from "../pipeline/inbound.js";
+import { linesOf, processEnvReply, processInbound, maskNumber, routingOf, type PipelineDeps } from "../pipeline/inbound.js";
 import { ownsNumber, parseEnv, type AppEnv } from "../testers/env.js";
 import { getOrCreateTester, getTesterByPhone, updateTester } from "../testers/testers.js";
 import type { TaskQueue } from "../pipeline/task-queue.js";
 import { isJumpText } from "../testers/commands.js";
 import type { Jumper } from "../testers/jump.js";
-import { sendblueMessageEvent } from "../sendblue/webhook-payload.js";
+import { sendblueMessageEvent, sendblueTypingEvent } from "../sendblue/webhook-payload.js";
 
 /** Sendblue sends the configured secret verbatim in this header. */
 export const SECRET_HEADER = "sb-signing-secret";
@@ -22,17 +22,33 @@ export interface WebhookRouteOptions {
 }
 
 export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOptions): Promise<void> {
-  app.post("/webhooks/sendblue", async (request, reply) => {
-    const receivedAt = new Date();
-
+  /** Refuses the request (and answers) unless it carries our webhook secret. */
+  const refused = (request: FastifyRequest, reply: FastifyReply): boolean => {
     if (!opts.webhookSecret) {
       request.log.warn("SENDBLUE_WEBHOOK_SECRET is not set; refusing webhook");
-      return reply.code(503).send({ error: "webhook secret not configured" });
+      void reply.code(503).send({ error: "webhook secret not configured" });
+      return true;
     }
     if (!secretMatches(request.headers[SECRET_HEADER], opts.webhookSecret)) {
       request.log.warn({ headerNames: Object.keys(request.headers) }, "Webhook secret missing or wrong");
-      return reply.code(401).send({ error: "unauthorized" });
+      void reply.code(401).send({ error: "unauthorized" });
+      return true;
     }
+    return false;
+  };
+
+  // #16: Sendblue's typing signals (the tester started or stopped typing). Never stored.
+  app.post("/webhooks/sendblue/typing", async (request, reply) => {
+    if (refused(request, reply)) return reply;
+    return reply.code(200).send(await typingSignal(opts, request));
+  });
+
+  app.post("/webhooks/sendblue", async (request, reply) => {
+    const receivedAt = new Date();
+    if (refused(request, reply)) return reply;
+
+    // A typing signal sent to the message URL is handled the same way.
+    if (isTypingBody(request.body)) return reply.code(200).send(await typingSignal(opts, request));
 
     const parsed = sendblueMessageEvent.safeParse(request.body);
     if (!parsed.success) {
@@ -124,6 +140,28 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
     opts.queue.run(() => processInbound(opts.pipeline, inbound));
     return reply.code(200).send({ ok: true, id: inbound.id });
   });
+}
+
+/** A typing-indicator body: `is_typing` and no message handle. */
+function isTypingBody(body: unknown): boolean {
+  return typeof body === "object" && body !== null && typeof (body as { is_typing?: unknown }).is_typing === "boolean" && !("message_handle" in body);
+}
+
+/**
+ * #16: a typing signal for a tester this app answers updates their reply line (a ready reply
+ * waits while they type). Not logged one by one (#118): a hold shows in the reply's saved timings.
+ */
+async function typingSignal(opts: WebhookRouteOptions, request: FastifyRequest): Promise<Record<string, unknown>> {
+  const parsed = sendblueTypingEvent.safeParse(request.body);
+  if (!parsed.success) {
+    request.log.warn({ issues: parsed.error.issues.slice(0, 5) }, "Unrecognized typing webhook body");
+    return { ignored: "unrecognized payload" };
+  }
+  const contact = normalizePhone(parsed.data.number);
+  if (!contact || !opts.pipeline.allowedNumbers.includes(contact)) return { ok: true, ignored: "not allowed" };
+  if (!(await ownsNumber(opts.pipeline.db, routingOf(opts.pipeline), contact))) return { ok: true, ignored: "other environment" };
+  linesOf(opts.pipeline).typing(contact, parsed.data.is_typing);
+  return { ok: true, typing: parsed.data.is_typing };
 }
 
 /**

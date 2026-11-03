@@ -3,6 +3,7 @@ import sharp from "sharp";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { buildApp, type AppDeps } from "../src/app.js";
+import { DraftDroppedError } from "../src/claude/replier.js";
 import type {
   ClaudeModel,
   ModelBlock,
@@ -75,6 +76,26 @@ export class FakeSendblue implements SendblueClient {
   }
 }
 
+interface Gate {
+  reached: () => void;
+  released: Promise<void>;
+}
+
+/** A paused reply or Claude call (#16): `reached` once it's waiting, `release` to let it go on. */
+export interface Pause {
+  reached: Promise<void>;
+  release: () => void;
+}
+
+function addGate(gates: Gate[]): Pause {
+  let reached!: () => void;
+  let release!: () => void;
+  const atGate = new Promise<void>((resolve) => (reached = resolve));
+  const released = new Promise<void>((resolve) => (release = resolve));
+  gates.push({ reached, released });
+  return { reached: atGate, release };
+}
+
 /** Stands in for the whole coach: records the turns it was asked about. */
 export class FakeReplier implements Replier {
   received: Turn[][] = [];
@@ -82,13 +103,29 @@ export class FakeReplier implements Replier {
   fail = false;
   /** Thrown one per call, in order, before any reply succeeds. */
   failures: Error[] = [];
+  private gates: Gate[] = [];
+  /** #16: the next reply stops mid-draft until released, as if Claude were still writing. */
+  pause(): Pause {
+    return addGate(this.gates);
+  }
+  /** What a dropped draft says it had done (the real coach lists its finished actions). */
+  draftActions: string[] = [];
+  /** The reply text; tests can vary it. */
+  replyText = "Hey! Thanks for the message.";
   async reply(input: ReplyInput) {
     this.received.push(input.turns);
     this.inputs.push(input);
+    const gate = this.gates.shift();
+    if (gate) {
+      gate.reached();
+      await gate.released;
+    }
     if (this.fail) throw new Error("Claude unavailable");
     const next = this.failures.shift();
     if (next) throw next;
-    return "Hey! Thanks for the message.";
+    // Like the coach's last safe point: interrupted before the send, it hands back what it did.
+    if (input.interrupted?.()) throw new DraftDroppedError({ actions: this.draftActions, text: this.replyText });
+    return this.replyText;
   }
   /** Every nudge asked for, in order. */
   nudges: NudgeRequest[] = [];
@@ -96,11 +133,14 @@ export class FakeReplier implements Replier {
   nudgeFailures: Error[] = [];
   /** Skip every nudge it's allowed to skip (#42), as the coach does when the morning already covered it. */
   skipWhenAllowed = false;
+  /** #109: moments the coach declines (held, nothing sent), as when it answers SKIP or writes about not sending. */
+  holdNudges: string[] = [];
   async nudge(input: NudgeRequest) {
     this.nudges.push(input);
     const next = this.nudgeFailures.shift();
     if (next) throw next;
     if (input.mayskip && this.skipWhenAllowed) return null;
+    if (this.holdNudges.includes(input.moment)) return { held: true as const, wrote: "[No text sent.]" };
     return `Yo, ${input.moment} text`;
   }
   async check() {}
@@ -126,8 +166,24 @@ export class FakeClaudeModel implements ClaudeModel {
     this.steps.push(...steps);
     return this;
   }
+  private gates: Gate[] = [];
+  /** #16: the next call waits until released; an abort (the draft was interrupted) cuts it off. */
+  pause(): Pause {
+    return addGate(this.gates);
+  }
   async create(req: ModelRequest): Promise<ModelResponse> {
-    this.requests.push(structuredClone(req));
+    const { signal, ...copy } = req;
+    this.requests.push(structuredClone(copy));
+    const gate = this.gates.shift();
+    if (gate) {
+      gate.reached();
+      await new Promise<void>((resolve, reject) => {
+        void gate.released.then(resolve);
+        const abort = () => reject(new Error("Request was aborted."));
+        if (signal?.aborted) abort();
+        signal?.addEventListener("abort", abort, { once: true });
+      });
+    }
     const step = this.steps.shift() ?? this.defaultText;
     if (step instanceof Error) throw step;
     const usage = { ...FAKE_USAGE };
@@ -207,6 +263,8 @@ export async function makeApp(
     consoleCoach?: AppDeps["consoleCoach"];
     /** Test mode (#14): wire "jump" to a nudge scheduler on the same fakes and clock. */
     jumps?: boolean;
+    /** Fastify logger options, e.g. a stream to read log lines (#16). */
+    logger?: AppDeps["logger"];
   } = {},
 ): Promise<TestApp> {
   const { db } = await makeDb();
@@ -214,7 +272,7 @@ export async function makeApp(
   const replier = new FakeReplier();
   const media = new FakeMedia();
   const transcriber = new FakeTranscriber();
-  const { webhookSecret, console: consoleConfig, consoleCoach, jumps, ...pipelineOverrides } = overrides;
+  const { webhookSecret, console: consoleConfig, consoleCoach, jumps, logger, ...pipelineOverrides } = overrides;
   const built = await buildApp({
     pipeline: {
       db,
@@ -233,6 +291,7 @@ export async function makeApp(
     console: consoleConfig,
     consoleCoach,
     missingSettings: () => [],
+    ...(logger ? { logger } : {}),
     ...(jumps
       ? {
           jumper: (log: Logger) =>

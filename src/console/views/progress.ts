@@ -80,20 +80,54 @@ function learningsHtml(tab: ProgressTab): string {
 <h3>Explained only, starting to click</h3>${explained.map(item).join("") || `<p class="empty">None.</p>`}`;
 }
 
+/** The next later day in the log with a step: what ZOH proposed after this one (#93). */
+function nextDayAfter(days: StepDayView[], date: string): StepDay | undefined {
+  return days
+    .map((v) => v.day)
+    .filter((d) => d.date > date && d.step)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+}
+
+/**
+ * #93: the day's reflection in small labeled sections, below the proof. Days from before it was
+ * recorded (how-it-went empty) say "not recorded", never a guess; recorded days with nothing say "None".
+ */
+export function stepLogSections(view: StepDayView, days: StepDayView[], testerId: string): string {
+  const { day } = view;
+  const empty = day.howItWentSaid === null ? "not recorded" : "None";
+  const none = `<span class="muted">${empty}</span>`;
+  const chat = `<a href="/console/testers/${esc(testerId)}?tab=texts&amp;day=${esc(day.date)}">see in chat</a>`;
+  const line = (label: string, body: string) => `<div><span class="muted">${label}:</span> ${body}</div>`;
+  const s = status(day);
+  const offDay = s === "missed" || s === "done_reduced" || day.stepKind === "easier";
+  const next = nextDayAfter(days, day.date);
+  const nextHtml = next
+    ? `${esc(next.step!)}${next.nextReason ? ` <span class="muted">· ${esc(next.nextReason)}</span>` : ""} <span class="chip">${next.agreedAt ? "agreed" : "proposed"}</span>`
+    : none;
+  return `<div class="day-log">${[
+    line("Reflection", day.reflection ? `${esc(day.reflection)} · ${chat}` : none),
+    line("Learned", view.learned?.length ? `${view.learned.map(esc).join("; ")} · ${chat}` : none),
+    offDay ? line("What got in the way", day.inTheWay ? esc(day.inTheWay) : none) : "",
+    line("ZOH's take", day.coachTake ? esc(day.coachTake) : none),
+    line("Next step", nextHtml),
+  ].join("")}</div>`;
+}
+
 export function progressTabHtml(goals: GoalView[], tab: ProgressTab, testerId: string, titles: Map<string, Goal>): string {
   const goalsHtml = goals.map((v) => goalCard(v, tab.checkins)).join("") || `<p class="empty">No goals yet.</p>`;
   const switches = tab.switches.length
     ? `<h3>Goal switches</h3>${tab.switches.map((s) => `<div class="card">${esc(s.pair)} <span class="muted">${esc(when(s.at))}</span><div>${esc(s.reason)}</div></div>`).join("")}`
     : "";
   const dayRows = tab.stepDays
-    .map(({ day, proofs }) => {
+    .map((view) => {
+      const { day, proofs } = view;
       const s = status(day);
       // The day's own step (#76): length and proof only when they differ from the plan's.
       const extras = [day.stepMinutes != null && `${day.stepMinutes} min`, day.stepProof && `proof: ${day.stepProof}`].filter(Boolean).join(" · ");
       const step = day.step ? `<div class="day-step">Step: ${esc(day.step)}${extras ? ` <span class="muted">· ${esc(extras)}</span>` : ""}</div>` : "";
       const verdict = day.proofVerdict ? `<div class="muted">proof ${esc(day.proofVerdict)}${day.proofSeen ? `: ${esc(day.proofSeen)}` : ""}</div>` : "";
       return `<div class="card day-row" id="${dayAnchor(day.date)}"><div class="row"><span class="dot ${esc(s)}" aria-hidden="true">${STATUS_MARKS[s] ?? "·"}</span><strong>${esc(shortDay(day.date))}</strong><span class="muted">${esc(day.date)} · ${esc(STATUS_LABELS[s] ?? s)} · kind: ${esc(day.stepKind ?? "–")}</span></div>
-${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length ? `<div class="row" style="margin-top:6px">${proofs.map(proofHtml).join("")}</div>` : ""}</div>`;
+${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length ? `<div class="row" style="margin-top:6px">${proofs.map(proofHtml).join("")}</div>` : ""}${stepLogSections(view, tab.stepDays, testerId)}</div>`;
     })
     .join("");
   const decided = tab.suggestions.filter((s) => s.decision !== "waiting");

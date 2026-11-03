@@ -98,7 +98,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       ]
     : [];
   const record = input.record
-    ? ["", "=== The tester's step log at the start (ZOH could see this; check its facts about their days against it) ===", input.record]
+    ? ["", "=== The tester's step log (at the start unless it says otherwise; ZOH could see this; check its facts about their days against it) ===", input.record]
     : [];
   const saved = input.saved
     ? ["", "=== What ZOH saved during the conversation (the tester never sees this; check rules about flagging or saving against it) ===", input.saved]

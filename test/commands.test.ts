@@ -284,6 +284,59 @@ describe("after a stop", () => {
     await text("hi again");
     const kinds = t.sendblue.calls.filter((c) => c.kind !== "typing").map((c) => c.kind === "send" ? c.content : c.kind);
     expect(kinds).toEqual([expect.any(String), "opt_in", "Hey! Thanks for the message."]);
+    expect((await alerts("unstop")).map((a) => a.body)).toEqual(["Texted again after stopping: still stopped until they say yes to restarting"]);
+  });
+
+  it("#109: a text after stop gets a reply but no restart: nothing ZOH starts goes out, team texts included", async () => {
+    const sam = await setup();
+    await t.db.update(testers).set({ stoppedAt: at(MON, "08:00") }).where(eq(testers.id, sam.id));
+    await addRequest(t.db, { testerId: sam.id, author: "Yanni", body: "Hey from Yanni", exact: true, sendNow: true, at: at(MON, "10:00") });
+    await addRequest(t.db, { testerId: sam.id, author: "Yanni", body: "Ask about the trip", exact: false, sendNow: false, delivery: "own_text", dueAt: at(MON, "10:00"), at: at(MON, "10:00") });
+    await text("hi");
+    await text("how are you?");
+    expect((await getTester(t.db, sam.id))!.stoppedAt).not.toBeNull();
+    expect(await alerts("unstop")).toHaveLength(1);
+    const sends = t.sendblue.sends.length;
+    expect([...(await ticks(MON, "09:00", "21:55")), ...(await ticks(TUE, "09:00", "21:55"))]).toEqual([]);
+    expect(t.sendblue.sends.length).toBe(sends);
+  });
+
+  it("#109: the coach is told they're stopped, and that it already asked once ZOH has replied", async () => {
+    const sam = await setup();
+    await t.db.update(testers).set({ stoppedAt: at(MON, "08:00") }).where(eq(testers.id, sam.id));
+    const block = async () => buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, sam.id))!, { now: at(MON, "12:00"), isFirstText: false, lastTesterText: "" }));
+    expect(await block()).toMatch(/STOPPED: they texted stop on .*ask once, warmly, if they want to pick their goal back up/);
+    await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Thank you very much. Noted. We will stop sending you messages.", createdAt: at(MON, "08:01") });
+    expect(await block()).toContain("ask once, warmly");
+    // A reply that never reached them doesn't count as asking.
+    await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", status: "SEND_FAILED", createdAt: at(MON, "10:00") });
+    expect(await block()).toContain("ask once, warmly");
+    await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", createdAt: at(MON, "11:00") });
+    expect(await block()).toContain("You've asked if they want to restart: just answer what they say");
+  });
+
+  it("#109: restart_coaching starts ZOH's texts again on the same plan; days stopped aren't misses", async () => {
+    const sam = await setup();
+    await t.db.update(testers).set({ stoppedAt: at(MON, "08:00") }).where(eq(testers.id, sam.id));
+    // Monday and Tuesday end while they're stopped; they say yes on Wednesday morning.
+    await ticks(MON, "09:00", "23:55");
+    await ticks(TUE, "09:00", "23:55");
+    const restarted = await tool("restart_coaching", {}, at(WED, "10:00"));
+    expect(restarted.ok).toBe(true);
+    expect((await getTester(t.db, sam.id))!.stoppedAt).toBeNull();
+    expect(await ticks(WED, "10:05", "21:55")).toContain("checkin");
+    const days = await t.db.select().from(stepDays).where(eq(stepDays.testerId, sam.id));
+    expect(days.filter((d) => d.status === "missed").map((d) => d.date)).not.toContain(TUE);
+    expect((await alerts("restart")).map((a) => a.body)).toEqual(["Restarted after stopping: ZOH's texts start again"]);
+    expect(await tool("restart_coaching", {}, at(WED, "11:00"))).toEqual({ ok: false, error: "They aren't stopped." });
+  });
+
+  it("#109: stop again before restarting changes nothing and raises nothing new", async () => {
+    await text("stop");
+    await text("hi");
+    await text("stop");
+    await text("hi");
+    expect(await alerts("stop")).toHaveLength(1);
     expect(await alerts("unstop")).toHaveLength(1);
   });
 

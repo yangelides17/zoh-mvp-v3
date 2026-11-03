@@ -5,7 +5,7 @@ import { z } from "zod";
 import { toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { buildStateBlock } from "../coach/prompt.js";
-import { insideQuietHours, loadCoachState, localTime } from "../coach/state.js";
+import { loadCoachState, localTime } from "../coach/state.js";
 import { loadVoiceDoc } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
 import { consoleMessages, nudges, stepDays, SUGGESTION_KINDS, testers, type ConsoleMessage, type Message, type Plan, type RequestDelivery, type StepDayStatus, type Tester } from "../db/schema.js";
@@ -13,7 +13,8 @@ import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
-import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, serviceDate, zonedTime } from "../nudges/schedule.js";
+import { addDays, dayBounds, isStepDay, KICKOFF_WINDOW_MS, localClock, quietNow, quietOn, serviceDate, zonedTime, type QuietClock } from "../nudges/schedule.js";
+import { withDaySteps } from "../nudges/quiet.js";
 import { activePause } from "../testers/pauses.js";
 import { goalTitles } from "./data.js";
 import { addRequest, addThreadLine, APP_AUTHOR, awaitingAnswer, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
@@ -115,13 +116,16 @@ export const CAPABILITIES: Record<string, Capability> = {
       if (delivery === "morning" && t.phase !== "active") throw new CapabilityError(`They're in ${t.phase}: no morning texts yet. Use naturally (your next reply) or own_text.`);
       const asked = at ? zoned(at, t.timeZone) : undefined;
       const dueAt = delivery === "own_text" ? new Date(Math.max(asked?.getTime() ?? 0, ctx.now.getTime())) : asked;
-      if (delivery === "own_text" && insideQuietHours(localClock(dueAt!, t.timeZone), t)) {
+      // #48: quiet hours that day, fitted around its step.
+      const clock = await withDaySteps(ctx.db, t, ctx.now);
+      if (delivery === "own_text" && quietNow(dueAt!, clock)) {
+        const q = quietOn(serviceDate(dueAt!, clock), clock);
         throw new CapabilityError(
-          `That's inside their quiet hours (${t.quietHoursStart} to ${t.quietHoursEnd} their time): your own texts never go then. Offer ${t.quietHoursEnd} their time, or the founders' "Send exactly this" with "send now".`,
+          `That's inside their quiet hours (${q.start} to ${q.end} their time): your own texts never go then. Offer ${localClock(new Date(nextMorning(dueAt!, clock)), t.timeZone)} their time, or the founders' "Send exactly this" with "send now".`,
         );
       }
       // Its own text is about that day: by default, too late once their day ends (quiet hours start).
-      const expiresAt = too_late_after ? zoned(too_late_after, t.timeZone) : delivery === "own_text" ? new Date(dayBounds(serviceDate(dueAt!, t), t).end) : undefined;
+      const expiresAt = too_late_after ? zoned(too_late_after, t.timeZone) : delivery === "own_text" ? new Date(dayBounds(serviceDate(dueAt!, clock), clock).end) : undefined;
       if (expiresAt && expiresAt <= (dueAt ?? ctx.now)) throw new CapabilityError("too_late_after has to be after it can go out.");
       const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now });
       const theirs = (d: Date) => `${localTime(d, t.timeZone)} their time`;
@@ -324,8 +328,9 @@ export async function postFounderMessage(
     return { needsAnswer: false };
   }
   await addRequest(db, { testerId: tester.id, author: founder, body, exact: true, sendNow: opts.sendNow, at: now });
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
-  const when = opts.sendNow || !quiet ? "within a minute" : `when their quiet hours end (${tester.quietHoursEnd} their time)`;
+  const clock = await withDaySteps(db, tester, now);
+  const quiet = quietNow(now, clock);
+  const when = opts.sendNow || !quiet ? "within a minute" : `when their quiet hours end (${localClock(new Date(nextMorning(now, clock)), tester.timeZone)} their time)`;
   await addThreadLine(db, {
     testerId: tester.id,
     kind: "coach",
@@ -459,16 +464,23 @@ export async function nextChance(db: Db, tester: Tester, now: Date): Promise<str
   }
   const reply = "or sooner, in your reply, if they text first";
   if (tester.phase !== "active") return `in your reply to their next text (they're in ${tester.phase}: no morning texts yet).`;
-  const today = serviceDate(now, tester);
+  const clock = await withDaySteps(db, tester, now);
+  const today = serviceDate(now, clock);
   const [claimed] = await db
     .select({ id: nudges.id })
     .from(nudges)
     .where(and(eq(nudges.testerId, tester.id), eq(nudges.date, today), eq(nudges.kind, "kickoff")));
-  const start = dayBounds(today, tester).start;
-  const quiet = insideQuietHours(localClock(now, tester.timeZone), tester);
+  const start = dayBounds(today, clock).start;
+  const quiet = quietNow(now, clock);
   if (!claimed && !quiet && now.getTime() >= start && now.getTime() < start + KICKOFF_WINDOW_MS) return `this morning's text, in the next few minutes, ${reply}.`;
-  const date = now.getTime() < start ? today : addDays(today, 1);
-  return `the morning text, ${localTime(new Date(dayBounds(date, tester).start), tester.timeZone)} their time, ${reply}.`;
+  return `the morning text, ${localTime(new Date(nextMorning(now, clock)), tester.timeZone)} their time, ${reply}.`;
+}
+
+/** When their next day starts (its quiet hours end): today's if that's still ahead, otherwise tomorrow's. */
+function nextMorning(at: Date, clock: QuietClock): number {
+  const today = serviceDate(at, clock);
+  const start = dayBounds(today, clock).start;
+  return at.getTime() < start ? start : dayBounds(addDays(today, 1), clock).start;
 }
 
 /** Their local "YYYY-MM-DD HH:MM" as an instant. */
