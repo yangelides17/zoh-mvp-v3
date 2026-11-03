@@ -1,0 +1,79 @@
+{
+  "id": "live-awkward-unseen-step",
+  "title": "Live Nov 6: asked agreement to a step the tester never saw",
+  "origin": "Yanni live on staging, Nov 2 (simulated days), issue #131",
+  "seed": {
+    "name": "Yanni",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 0,
+    "answers": {
+      "what": "customer discovery for a side project: how freelancers handle client follow-ups",
+      "where": "at home",
+      "when": "6:30 pm",
+      "how_long": "5 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Hey! It's 6:40, so the Alex draft is up. Two lines is plenty. Send me a screenshot when it's written, and don't send it to him yet."
+      }
+    ],
+    "plan": {
+      "step": "Write 2 interview questions about the past: an opener plus one follow-up",
+      "destination": "find a problem worth building for by talking to freelancers",
+      "place": "at home",
+      "time": "18:30",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "a photo or screenshot of what you made, or a voice note",
+      "reason": "Talking to real freelancers about follow-ups shows whether the problem is real.",
+      "minutes": 5,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "status": "done",
+        "step": "Write down 3 freelancers you could ask for a quick chat, photo of the list",
+        "proof_seen": "photo: Alex, Priya, Sam with a follow-up situation each",
+        "reflection": "Five minutes was enough, felt easy; reaching out feels a little intimidating. Wants to keep tomorrow at 5 minutes.",
+        "days_ago": 1
+      },
+      {
+        "status": "done",
+        "step": "Say all three questions out loud twice, voice note of the best run",
+        "proof_seen": "voice note of the three questions",
+        "reflection": "Saying the three questions out loud felt okay.",
+        "days_ago": 2
+      },
+      {
+        "status": "done_reduced",
+        "step": "Write 2 interview questions about the past (2-minute version)",
+        "proof_seen": "Notes screenshot with two questions",
+        "reflection": "2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.",
+        "days_ago": 3
+      }
+    ],
+    "today_step": {
+      "step": "At home at 6:30 pm, 5 minutes: draft a short text to Alex asking for a 10-minute chat about how he handles client follow-ups. Don't send it yet. Send a photo or screenshot of the draft.",
+      "agreed_hours_ago": 24
+    }
+  },
+  "testerLines": [
+    "[photo alex-draft.jpg: an unsent Notes draft to Alex asking for 10 minutes, no pitch]",
+    "It felt a little awkward",
+    "Asking for his time. I worry it’ll feel like I’m bothering him"
+  ],
+  "whatWentWrong": "Sorry, I got ahead of myself there. I'm still waiting on your answer: does tomorrow's step work for you?",
+  "shouldHaveHappened": "ZOH goes deeper on the worry about bothering Alex before any next step, and never asks agreement to a step the tester hasn't seen.",
+  "startTime": "18:47",
+  "timeZone": "America/New_York"
+}
