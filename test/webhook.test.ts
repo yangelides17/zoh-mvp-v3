@@ -95,6 +95,14 @@ describe("POST /webhooks/sendblue", () => {
     expect(t.sendblue.calls).toHaveLength(0);
   });
 
+  it("answers any number once ALLOWED_NUMBERS is \"*\" (launched)", async () => {
+    await t.close();
+    t = await makeApp({ allowedNumbers: ["*"] });
+    await postWebhook(t, inboundEvent({ number: STRANGER, from_number: STRANGER }));
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.number)).toEqual([STRANGER]);
+  });
+
   it("tells the tester the system is down if Claude keeps failing after two retries", async () => {
     t.replier.fail = true;
     await postWebhook(t, inboundEvent());

@@ -266,6 +266,11 @@ describe("typing signals", () => {
     expect(JSON.stringify(lines)).not.toContain(ME);
   });
 
+  it("from any number count once ALLOWED_NUMBERS is \"*\"", async () => {
+    t = await makeApp({ allowedNumbers: ["*"] });
+    expect(await typing(true, STRANGER)).toMatchObject({ ok: true, typing: true });
+  });
+
   it("sent to the message URL are handled the same way", async () => {
     t = await makeApp();
     const res = await postWebhook(t, { number: ME, is_typing: true, from_number: LINE });

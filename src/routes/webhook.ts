@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { normalizePhone } from "../config.js";
+import { isAllowed, normalizePhone } from "../config.js";
 import { insertInboundOnce, updateStatusByHandle } from "../db/messages.js";
 import type { Db } from "../db/client.js";
 import { linesOf, processEnvReply, processInbound, maskNumber, routingOf, type PipelineDeps } from "../pipeline/inbound.js";
@@ -95,7 +95,7 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
       });
 
     // Staging and production (#82): a dev number's "env" is read by both apps, before anything is stored.
-    const env = !event.media_url && devNumbers.includes(contact) && allowedNumbers.includes(contact) ? parseEnv(event.content) : undefined;
+    const env = !event.media_url && devNumbers.includes(contact) && isAllowed(allowedNumbers, contact) ? parseEnv(event.content) : undefined;
     if (env) {
       if (env.kind === "switch") await saveRoute(db, contact, env.to, receivedAt);
       const mine = env.kind === "switch" ? env.to === routing.appEnv : await ownsNumber(db, routing, contact);
@@ -118,7 +118,7 @@ export async function webhookRoutes(app: FastifyInstance, opts: WebhookRouteOpti
 
     // Test mode (#14): a dev account's "jump" is a ghost: never stored as a message, run in the background.
     // Switched off (DEV_COMMANDS), "jump" is stored like any text and the pipeline says it's off.
-    if (opts.jumper && opts.pipeline.devCommands !== false && !event.media_url && isJumpText(event.content) && devNumbers.includes(contact) && allowedNumbers.includes(contact)) {
+    if (opts.jumper && opts.pipeline.devCommands !== false && !event.media_url && isJumpText(event.content) && devNumbers.includes(contact) && isAllowed(allowedNumbers, contact)) {
       const jump = await opts.jumper.start({ contact, text: event.content!.trim(), handle: event.message_handle });
       if (!jump) return reply.code(200).send({ ok: true, duplicate: true });
       opts.queue.run(() => jump.done);
@@ -158,7 +158,7 @@ async function typingSignal(opts: WebhookRouteOptions, request: FastifyRequest):
     return { ignored: "unrecognized payload" };
   }
   const contact = normalizePhone(parsed.data.number);
-  if (!contact || !opts.pipeline.allowedNumbers.includes(contact)) return { ok: true, ignored: "not allowed" };
+  if (!contact || !isAllowed(opts.pipeline.allowedNumbers, contact)) return { ok: true, ignored: "not allowed" };
   if (!(await ownsNumber(opts.pipeline.db, routingOf(opts.pipeline), contact))) return { ok: true, ignored: "other environment" };
   linesOf(opts.pipeline).typing(contact, parsed.data.is_typing);
   return { ok: true, typing: parsed.data.is_typing };

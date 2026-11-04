@@ -23,7 +23,7 @@ import {
 import { zonedTime } from "../src/nudges/schedule.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { getTester, resetTester } from "../src/testers/testers.js";
-import { DEV, FakeClaudeModel, inboundEvent, makeApp, ME, postWebhook, WESTERN, type TestApp } from "./helpers.js";
+import { DEV, FakeClaudeModel, inboundEvent, makeApp, ME, postWebhook, STRANGER, WESTERN, type TestApp } from "./helpers.js";
 import { runMemoryTool } from "../src/memory/coach-tools.js";
 
 const TZ = "America/New_York";
@@ -73,6 +73,17 @@ function keeper(model: FakeClaudeModel, phones = [ME]) {
 }
 
 describe("the overnight pass", () => {
+  it("files days for testers off the list once ALLOWED_NUMBERS is \"*\" (launched)", async () => {
+    const newcomer = await tester(STRANGER);
+    await say(newcomer, "inbound", at(MON, "19:30"), "done, 10 pages");
+    const model = new FakeClaudeModel().script(
+      { tools: [{ name: "write_daily_doc", input: { title: "Mon Nov 2: 10 pages", summary: "Read 10 pages.", body: "Done." } }] },
+      "",
+    );
+    expect((await keeper(model).tick(at(TUE, "03:00"))).size).toBe(0);
+    expect([...(await keeper(model, ["*"]).tick(at(TUE, "03:00"))).values()]).toEqual([[MON]]);
+  });
+
   it("writes exactly one daily doc per texting day at 3 am, none for a silent day, and never runs a day twice", async () => {
     const mike = await tester();
     const m1 = await say(mike, "inbound", at(MON, "19:30"), "done, 10 pages");

@@ -17,7 +17,7 @@ coach, onboards them and helps them start one small daily habit and stick with i
 3. The coach (Claude with tools) replies from the conversation and the tester's saved state, saving
    what it learns; the reply is sent and stored with timings. If Claude fails, the reply is "Got it".
 
-Only numbers in `ALLOWED_NUMBERS` get replies until launch.
+Only numbers in `ALLOWED_NUMBERS` get replies; `ALLOWED_NUMBERS=*` (production since launch) answers everyone.
 
 ## Stack
 
