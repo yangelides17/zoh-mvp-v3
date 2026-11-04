@@ -1,5 +1,6 @@
 import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } from "drizzle-orm";
+import { allowsEveryone } from "../config.js";
 import type { HeldNudge, Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
@@ -94,7 +95,7 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
   async function run(now: Date): Promise<Map<string, NudgeDecision>> {
     const decisions = new Map<string, NudgeDecision>();
     if (deps.allowedNumbers.length === 0) return decisions;
-    const rows = await deps.db.select().from(testers).where(inArray(testers.phone, deps.allowedNumbers));
+    const rows = await deps.db.select().from(testers).where(allowsEveryone(deps.allowedNumbers) ? undefined : inArray(testers.phone, deps.allowedNumbers));
     const routing = deps.routing ?? PRODUCTION_ONLY;
     for (const row of rows) {
       // A number the other app owns gets nothing from this one (#82).

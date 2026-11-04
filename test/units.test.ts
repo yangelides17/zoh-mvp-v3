@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toClaudeMessages } from "../src/claude/replier.js";
-import { loadConfig, missingSettings, normalizePhone } from "../src/config.js";
+import { EVERYONE, isAllowed, loadConfig, missingSettings, normalizePhone } from "../src/config.js";
 import { mediaKind } from "../src/media/storage.js";
 import sharp from "sharp";
 import { prepareImageForClaude, sniffImageFormat } from "../src/media/images.js";
@@ -25,6 +25,16 @@ describe("config", () => {
     expect(c.goalCap).toBe(3);
     expect(loadConfig({ DATABASE_URL: "postgres://x", GOAL_CAP: "4" }).goalCap).toBe(4);
     expect(missingSettings(c)).toContain("ANTHROPIC_API_KEY");
+  });
+
+  it("reads \"*\" in ALLOWED_NUMBERS as everyone (launched)", () => {
+    const open = loadConfig({ DATABASE_URL: "postgres://x", ALLOWED_NUMBERS: " * " }).allowedNumbers;
+    expect(open).toEqual([EVERYONE]);
+    expect(isAllowed(open, "+17325550100")).toBe(true);
+    expect(missingSettings(loadConfig({ DATABASE_URL: "postgres://x", ALLOWED_NUMBERS: "*" }))).not.toContain("ALLOWED_NUMBERS");
+    const closed = loadConfig({ DATABASE_URL: "postgres://x", ALLOWED_NUMBERS: "9085550100" }).allowedNumbers;
+    expect(isAllowed(closed, "+19085550100")).toBe(true);
+    expect(isAllowed(closed, "+17325550100")).toBe(false);
   });
 
   it("requires DATABASE_URL", () => {

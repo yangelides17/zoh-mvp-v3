@@ -38,6 +38,17 @@ const phoneList = z.preprocess(
   ),
 );
 
+/** ALLOWED_NUMBERS: like phoneList, but "*" means everyone (after launch). */
+const allowList = z.preprocess(
+  (v) => (typeof v === "string" ? v : ""),
+  z.string().transform((s) =>
+    s
+      .split(",")
+      .map((p) => (p.trim() === EVERYONE ? EVERYONE : normalizePhone(p)))
+      .filter((p) => p.length > 0),
+  ),
+);
+
 const envSchema = z.object({
   /** Staging and production (#82): "staging" on the staging app; production otherwise. */
   APP_ENV: z.preprocess(
@@ -76,8 +87,8 @@ const envSchema = z.object({
   CLAUDE_MODEL: withDefault("claude-sonnet-5-5"),
   CLAUDE_MAX_TOKENS: intWithDefault(400),
 
-  /** Comma-separated E.164 numbers that get replies while we build. */
-  ALLOWED_NUMBERS: phoneList,
+  /** Comma-separated E.164 numbers that get replies, or "*" for everyone (launched). */
+  ALLOWED_NUMBERS: allowList,
   /** Comma-separated E.164 dev accounts (test users who can text "reset"). */
   DEV_NUMBERS: phoneList,
 
@@ -222,6 +233,19 @@ export function normalizePhone(raw: string): string {
   const digits = trimmed.replace(/[^\d]/g, "");
   if (!digits) return "";
   return trimmed.startsWith("+") ? `+${digits}` : digits.length === 10 ? `+1${digits}` : `+${digits}`;
+}
+
+/** In ALLOWED_NUMBERS, answers every number (launched); staging still only answers its own dev numbers (#82). */
+export const EVERYONE = "*";
+
+/** True when the allowlist is open to everyone. */
+export function allowsEveryone(allowed: readonly string[]): boolean {
+  return allowed.includes(EVERYONE);
+}
+
+/** True when this number gets replies, nudges and memory. */
+export function isAllowed(allowed: readonly string[], phone: string): boolean {
+  return allowsEveryone(allowed) || allowed.includes(phone);
 }
 
 /** Names of settings that are still missing, for /health and startup logs. Never values. */

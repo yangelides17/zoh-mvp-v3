@@ -90,7 +90,7 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - Schema changes only through `src/db/schema.ts` + a generated migration. Never edit applied migrations.
 - Never log or commit secrets, API keys or full phone numbers (use `maskNumber`).
 - Webhook handler stays fast: store, answer 2xx, then do slow work in the `TaskQueue`.
-- Replies only go to `ALLOWED_NUMBERS` until launch.
+- Replies only go to `ALLOWED_NUMBERS` (`*` on production since launch: everyone).
 - Each app (staging, production) only stores, answers or texts numbers it owns (`owns` in `src/testers/env.ts`);
   anything new that starts a text or loops over testers checks it too.
 - A change that adds a service or Railway variable, reverses a recorded decision or hits a new outside limit updates

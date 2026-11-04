@@ -12,6 +12,7 @@ import type { MediaDescriber } from "../memory/describe.js";
 import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
+import { isAllowed } from "../config.js";
 import { safeError } from "../errors.js";
 import { alertFailure, alertTextedAfterStop } from "../console/alerts.js";
 import { devCommandOffReply, isJumpText, isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
@@ -86,7 +87,7 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   const timings: Record<string, string | number> = { processing_started_at: started.toISOString() };
   const errors: string[] = [];
 
-  if (!deps.allowedNumbers.includes(inbound.contactNumber)) {
+  if (!isAllowed(deps.allowedNumbers, inbound.contactNumber)) {
     log.info(ctx, "Sender is not on ALLOWED_NUMBERS; stored without replying");
     await updateMessage(db, inbound.id, { status: "RECEIVED_NOT_ALLOWED" });
     return;

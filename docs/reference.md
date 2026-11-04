@@ -12,8 +12,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   - `staging`: a duplicate with its own app (deploys `dev`), Postgres, Speaches and bucket; its own
     public domain. Never shares a database or bucket with production.
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
-  `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS` and
-  `DEV_NUMBERS` (both: Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
+  `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`
+  (who gets replies, nudges and memory; `*` means everyone, set on production at launch, Nov 3 2026),
+  `DEV_NUMBERS` (Yanni's and Stamati's numbers), `BUCKET_*`, `SPEACHES_URL`,
   `SPEACHES_API_KEY`, `LOG_LEVEL`, `CONSOLE_PASSWORD` (the founders' shared console password),
   `CONSOLE_SESSION_SECRET` (signs console cookies; a long random string), optional `CONSOLE_NAMES`
   (default `Yanni,Stamati`), optional `GOAL_CAP` (goals a tester can have at once, focus plus
@@ -28,7 +29,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   allowed, `0` turns it off).
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
-  the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only; ideally its own
+  the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only (with `*`, staging
+  still answers only dev numbers routed to it, #82); ideally its own
   low-limit `ANTHROPIC_API_KEY`.
 - **Founder console:** https://app-production-354a.up.railway.app/console (same app, no separate
   service). Staging has its own console at the staging app's domain, with a STAGING banner. One shared password, a 30-day cookie, your name picked once per device; "Add to Home

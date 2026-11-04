@@ -204,6 +204,15 @@ describe("a step day", () => {
     expect(t.sendblue.sends.map((s) => s.number)).toEqual([ME, ME, ME]);
   });
 
+  it("reaches testers off the list once ALLOWED_NUMBERS is \"*\" (launched)", async () => {
+    await setup({ phone: STRANGER });
+    expect(await day(MON, "08:00", "09:30")).toEqual([]);
+    await scheduler.stop();
+    scheduler = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: t.replier, allowedNumbers: ["*"], lineNumber: LINE });
+    expect(await day(MON, "08:00", "09:30")).toEqual(["kickoff@09:00"]);
+    expect(t.sendblue.sends.map((s) => s.number)).toEqual([STRANGER]);
+  });
+
   it("hands the coach its last text for the same moment, so the next one reads differently", async () => {
     const sam = await setup();
     await tick(MON, "09:00");

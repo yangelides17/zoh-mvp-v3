@@ -1,6 +1,6 @@
 {
   "name": "zoh-mvp-v3",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "ZOH MVP v3: text-based coach over iMessage (Sendblue + Claude)",
   "type": "module",
