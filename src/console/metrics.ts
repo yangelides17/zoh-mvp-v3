@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, inArray } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNull } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import { BACK_OFF_FLAG } from "../coach/tools.js";
 import { learnings } from "../coach/week.js";
@@ -290,7 +290,7 @@ export function rollup(rows: TesterMetrics[]): Rollup {
 /** The Metrics page: real testers only unless `includeTest`, longest-running first. */
 export async function metricsPage(db: Db, now: Date, opts: { includeTest: boolean }): Promise<{ rows: TesterMetrics[]; rollup: Rollup }> {
   const titles = await goalTitles(db);
-  const all = await db.select().from(testers).where(opts.includeTest ? undefined : eq(testers.isTestUser, false));
+  const all = await db.select().from(testers).where(and(isNull(testers.scenario), opts.includeTest ? undefined : eq(testers.isTestUser, false)));
   const rows: TesterMetrics[] = [];
   for (const tester of all) rows.push(await testerMetrics(db, tester, now, titles));
   rows.sort((a, b) => (a.start ?? "9999").localeCompare(b.start ?? "9999") || (a.tester.name ?? "").localeCompare(b.tester.name ?? ""));
