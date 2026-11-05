@@ -20,6 +20,7 @@ function headerHtml(h: TesterHeader): string {
   const maintenance = h.goals.filter((g) => g.goal.role === "maintenance");
   const paused = h.pause && `paused${h.pause.until ? ` until ${h.pause.until}` : ""}`;
   const status = [
+    t.scenario && "synthetic",
     t.stoppedAt && "stopped",
     paused,
     t.autoTextsPausedAt && "automatic texts paused",
@@ -32,7 +33,7 @@ function headerHtml(h: TesterHeader): string {
     : "";
   return `<div class="card"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;gap:14px"><div class="avatar big">${esc(initials(t.name))}</div><div style="flex:1;min-width:0">
 <h1>${esc(t.name ?? "Unnamed")}</h1>
-<div class="row" style="margin-top:6px"><span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip warn">${esc(s)}</span>`).join("")}<span class="muted">${esc(maskNumber(t.phone))}</span></div>
+<div class="row" style="margin-top:6px"><span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip${s === "synthetic" ? "" : " warn"}">${esc(s)}</span>`).join("")}<span class="muted">${esc(maskNumber(t.phone))}</span></div>
 <div style="margin-top:6px">${focus ? `Focus: <strong>${esc(focus.title)}</strong>` : `<span class="muted">No focus goal yet</span>`}</div>
 <div class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)} · ${esc(t.pushiness)}</div></div></div>${stats}</div>`;
 }

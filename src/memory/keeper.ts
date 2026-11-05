@@ -1,6 +1,6 @@
 import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
-import { inArray } from "drizzle-orm";
+import { and, inArray, isNull } from "drizzle-orm";
 import { allowsEveryone } from "../config.js";
 import { z } from "zod";
 import type { ClaudeModel } from "../claude/replier.js";
@@ -397,7 +397,7 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
   async function run(now: Date): Promise<Map<string, string[]>> {
     const written = new Map<string, string[]>();
     if (!deps.model || deps.allowedNumbers.length === 0) return written;
-    const rows = await deps.db.select().from(testers).where(allowsEveryone(deps.allowedNumbers) ? undefined : inArray(testers.phone, deps.allowedNumbers));
+    const rows = await deps.db.select().from(testers).where(and(isNull(testers.scenario), allowsEveryone(deps.allowedNumbers) ? undefined : inArray(testers.phone, deps.allowedNumbers)));
     for (const row of rows) {
       if (!owns(deps.routing ?? PRODUCTION_ONLY, row.phone, row.route)) continue;
       // Mid-jump, the jump runs this tester's pass itself (#14).

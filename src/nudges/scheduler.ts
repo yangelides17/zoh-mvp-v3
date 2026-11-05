@@ -95,7 +95,7 @@ export function createNudgeScheduler(deps: NudgeSchedulerDeps): NudgeScheduler {
   async function run(now: Date): Promise<Map<string, NudgeDecision>> {
     const decisions = new Map<string, NudgeDecision>();
     if (deps.allowedNumbers.length === 0) return decisions;
-    const rows = await deps.db.select().from(testers).where(allowsEveryone(deps.allowedNumbers) ? undefined : inArray(testers.phone, deps.allowedNumbers));
+    const rows = await deps.db.select().from(testers).where(and(isNull(testers.scenario), allowsEveryone(deps.allowedNumbers) ? undefined : inArray(testers.phone, deps.allowedNumbers)));
     const routing = deps.routing ?? PRODUCTION_ONLY;
     for (const row of rows) {
       // A number the other app owns gets nothing from this one (#82).
