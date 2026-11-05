@@ -66,7 +66,7 @@ touched eval cases once both are on `dev`.
 4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
 5. **Decisions:** if you have to deviate from the approved plan, it must go on the issue as a comment starting
    `Decision:` (what and why) — never only in the PR summary.
-   - **Stop and ask** if it changes what the tester experiences or the spec's intent.
+   - **Stop and ask the founders** if it changes what the tester experiences or the spec's intent.
    - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format, or what
      gets written to the DB: post the `Decision:` comment and add `needs-signoff`
      (`gh issue edit $ARGUMENTS --add-label needs-signoff`). Don't block — keep building.
