@@ -20,12 +20,17 @@ the rest: revert or leave out its commits, drop its `Closes` line, move it back 
 `Decision:` comment saying why. Tell Yanni.
 
 **Parallel build agents (optional).** When the plan has separate branches, you may build them at the same time with
-one background agent per branch, at most 3, each following this command in its own worktree. It's your call in the
-moment: do it only when it's clearly safe and saves real time, and if you have concerns, say so and build them one
-after another instead. Never in parallel:
+one background agent per branch, at most 3. It's your call in the moment: do it only when it's clearly safe and
+saves real time, and if you have concerns, say so and build them one after another instead. Never in parallel:
 - two branches that change the database (`src/db/schema.ts`, `drizzle/`): their migrations would collide;
 - two branches that touch `src/coach/prompt.ts`, `docs/coach-voice.md` or `src/pipeline/inbound.ts`;
 - anything whose spec or plan still has an open question (an agent can't stop to ask Yanni mid-build).
+
+**Rules for build agents.** Each agent works in this session's worktree (pass the absolute path; **never use
+`isolation: "worktree"`**, which creates an uncontrolled worktree that may be based on `main`, not `dev`). At most
+**one build agent per worktree** at a time. The agent **never pushes** — only the orchestrating session pushes,
+after it has verified the work (`npm run check`, base-branch check, drizzle check). The agent prompt must include
+the issue number, the full plan text, branch name, and worktree path.
 
 This session coordinates: it starts the agents with the issue, plan and branch name, keeps the labels and PRs
 straight, and reports to Yanni once they're all done. They're reviewed and merged one at a time: after each merge,
@@ -67,7 +72,13 @@ touched eval cases once both are on `dev`.
    changes are all in. Fix causes in the coach's instructions, not
    one-off cases (see "Changing what ZOH says" in `CLAUDE.md`). If the budget runs out before the target, stop and
    report honestly; live testing and the beta will catch the rest.
-7. `npm run check` green, rebased on the latest `dev`.
+7. **Before pushing or opening the PR, run these checks:**
+   - `npm run check` green, rebased on the latest `dev`.
+   - **Base-branch check:** `git merge-base --is-ancestor origin/dev HEAD` must pass. If it fails, stop — the branch
+     is not based on `dev`.
+   - **Drizzle migrations:** if the build generated a migration, confirm `drizzle/meta/NNNN_snapshot.json` exists for
+     it, and run `npx drizzle-kit generate` to verify it reports "No schema changes, nothing to migrate." If the
+     snapshot is missing or drizzle sees pending changes, regenerate it before pushing.
 8. Fill in the PR description (template sections; for a group, a short section per issue, and the Watch list
    grouped by issue), mark it ready (`gh pr ready`), and
    `gh issue edit $ARGUMENTS --add-label in-review --remove-label building`.
