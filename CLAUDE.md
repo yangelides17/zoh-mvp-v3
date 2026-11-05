@@ -80,6 +80,7 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `eval/`: the judgment harness. `docs/coach-voice.md`: how ZOH talks (applies to every feature).
 - `docs/reference.md`: infrastructure, decisions to carry forward and outside limits (read once). Where things
   stand is the issue board (`/status`).
+- Memory work: read `docs/memory-design.md` first; the memory lab and synthetic testers: `docs/memory-lab.md`.
 - `docs/workflow.md`: the same flow written for people (setup, commands, habits). Keep it in sync when
   the commands change.
 
