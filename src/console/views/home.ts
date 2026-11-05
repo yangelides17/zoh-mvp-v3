@@ -16,7 +16,7 @@ export function listPage(rows: TesterRow[], alerts: ConsoleMessage[], name: stri
       const last = r.lastText
         ? `<span>${r.lastText.direction === "inbound" ? "" : "ZOH: "}${esc((r.lastText.content || "(photo or voice note)").slice(0, 120))}</span>`
         : `<span>No texts yet</span>`;
-      const status = [t.stoppedAt && "stopped", t.autoTextsPausedAt && "auto texts paused"].filter(Boolean).map((s) => `<span class="chip warn">${esc(s)}</span>`).join("");
+      const status = [t.scenario && "synthetic", t.stoppedAt && "stopped", t.autoTextsPausedAt && "auto texts paused"].filter(Boolean).map((s) => `<span class="chip${s === "synthetic" ? "" : " warn"}">${esc(s)}</span>`).join("");
       return `<a class="tester" href="/console/testers/${esc(t.id)}"><div class="card"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;gap:12px">
 <div class="avatar">${esc(initials(t.name))}</div>
 <div style="flex:1;min-width:0">

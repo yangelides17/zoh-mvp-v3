@@ -25,7 +25,7 @@ function metricsRow(m: TesterMetrics): string {
   const reflections = m.reflections.overall ? `${share(m.reflections.thisWeek)} · ${share(m.reflections.overall)} (${m.reflections.overall.with} / ${m.reflections.overall.of})` : DASH;
   const hit = m.hitRate?.closed ? `${m.hitRate.done} / ${m.hitRate.closed} (${pct(m.hitRate.done / m.hitRate.closed)})` : DASH;
   const cells = [
-    `<a href="/console/testers/${esc(t.id)}">${esc(t.name ?? "Unnamed")}</a>${t.isTestUser ? ` <span class="chip">test</span>` : ""}`,
+    `<a href="/console/testers/${esc(t.id)}">${esc(t.name ?? "Unnamed")}</a>${t.isTestUser ? ` <span class="chip">test</span>` : ""}${t.scenario ? ` <span class="chip">synthetic</span>` : ""}`,
     m.start ?? DASH,
     r ? (r.current ? `${r.current.days}` : `ended ${r.runs.at(-1)!.to}`) : DASH,
     r ? `${r.total}` : DASH,
