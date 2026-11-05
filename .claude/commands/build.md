@@ -64,8 +64,13 @@ touched eval cases once both are on `dev`.
 3. Open a **draft PR** into `dev` early (`gh pr create --draft --base dev`, body from `.github/pull_request_template.md`, first line
    `Closes #$ARGUMENTS`) and push as you go, so Yanni can watch progress.
 4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
-5. **Decisions:** if you have to deviate in a small way, keep going and record it as an issue comment starting
-   `Decision:` (what and why). If it changes what the tester experiences or the spec's intent, stop and ask Yanni.
+5. **Decisions:** if you have to deviate from the approved plan, it must go on the issue as a comment starting
+   `Decision:` (what and why) — never only in the PR summary.
+   - **Stop and ask** if it changes what the tester experiences or the spec's intent.
+   - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format, or what
+     gets written to the DB: post the `Decision:` comment and add `needs-signoff`
+     (`gh issue edit $ARGUMENTS --add-label needs-signoff`). Don't block — keep building.
+   - Purely internal choices (a variable name, a loop vs. map) need neither.
 6. **Eval** (only if ZOH's words change): run only the cases this change touches, adding a regression case in
    `eval/cases/<feature>/` when none covers it: `npm run eval -- <feature> --case <id> [--case <id>]` (check the
    cost first with `--dry-run`; it's free). A full run (no `--case`) only for changes that affect every
@@ -78,6 +83,9 @@ touched eval cases once both are on `dev`.
    - `npm run check` green, rebased on the latest `dev`.
    - **Base-branch check:** `git merge-base --is-ancestor origin/dev HEAD` must pass. If it fails, stop — the branch
      is not based on `dev`.
+   - **Protected files:** run `git diff origin/dev -- eval/memory-lab/fixtures/ docs/memory-*.md docs/coach-voice.md`
+     and stop if it shows changes the plan didn't call for. Hand-authored fixtures and docs are read-only to builders
+     unless the plan explicitly says to change them.
    - **Drizzle migrations:** if the build generated a migration, confirm `drizzle/meta/NNNN_snapshot.json` exists for
      it, and run `npx drizzle-kit generate` to verify it reports "No schema changes, nothing to migrate." If the
      snapshot is missing or drizzle sees pending changes, regenerate it before pushing.

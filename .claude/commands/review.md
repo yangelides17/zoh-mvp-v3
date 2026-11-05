@@ -31,6 +31,9 @@ not a feature: say so and stop (unless it's a hotfix Yanni asked for through `/q
    - Every **Must** item has a real test, and `npm run check` passes on the PR branch.
    - **Should** results: read the eval summary in the PR. Don't rerun the eval.
    - Nothing out of scope got built; every `Decision:` comment is reasonable.
+   - **Unsigned decisions:** if the issue has the `needs-signoff` label, the review verdict is **fix first** — list the
+     unsigned decisions and stop. The label is removed by a founder once the decisions are approved; only then can the
+     review give a merge verdict.
    - The `CLAUDE.md` rules hold: no secrets or full phone numbers in code or logs, one generated migration at most,
      the webhook stays fast, replies only to allowed numbers, and `docs/reference.md` is updated if the PR adds a
      service or Railway variable or reverses a decision recorded there.
