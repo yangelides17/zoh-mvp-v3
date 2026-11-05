@@ -20,17 +20,19 @@ the rest: revert or leave out its commits, drop its `Closes` line, move it back 
 `Decision:` comment saying why. Tell Yanni.
 
 **Parallel build agents (optional).** When the plan has separate branches, you may build them at the same time with
-one background agent per branch, at most 3. It's your call in the moment: do it only when it's clearly safe and
-saves real time, and if you have concerns, say so and build them one after another instead. Never in parallel:
+one background agent per branch, at most 3, each in its own worktree. It's your call in the moment: do it only when
+it's clearly safe and saves real time, and if you have concerns, say so and build them one after another instead.
+Never in parallel:
 - two branches that change the database (`src/db/schema.ts`, `drizzle/`): their migrations would collide;
 - two branches that touch `src/coach/prompt.ts`, `docs/coach-voice.md` or `src/pipeline/inbound.ts`;
 - anything whose spec or plan still has an open question (an agent can't stop to ask Yanni mid-build).
 
-**Rules for build agents.** Each agent works in this session's worktree (pass the absolute path; **never use
-`isolation: "worktree"`**, which creates an uncontrolled worktree that may be based on `main`, not `dev`). At most
-**one build agent per worktree** at a time. The agent **never pushes** — only the orchestrating session pushes,
-after it has verified the work (`npm run check`, base-branch check, drizzle check). The agent prompt must include
-the issue number, the full plan text, branch name, and worktree path.
+**Rules for build agents.** The orchestrator creates one worktree per branch from `origin/dev`
+(`git worktree add ../zoh-worktrees/<slug> -b <branch> origin/dev`) and passes each agent the **absolute worktree
+path**. **Never use `isolation: "worktree"`** — it creates an uncontrolled worktree that may be based on `main`, not
+`dev`. At most **one agent per worktree** at a time. The agent **never pushes** — only the orchestrating session
+pushes, after it has verified the work (`npm run check`, base-branch check, drizzle check). The agent prompt must
+include the issue number, the full plan text, branch name, and worktree path.
 
 This session coordinates: it starts the agents with the issue, plan and branch name, keeps the labels and PRs
 straight, and reports to Yanni once they're all done. They're reviewed and merged one at a time: after each merge,
