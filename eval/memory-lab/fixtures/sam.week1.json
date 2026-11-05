@@ -1,141 +1,101 @@
 {
   "scenario": "sam",
   "week": 1,
-  "phone": "+12125550101",
+  "format": 1,
+  "notes": "Synthetic tester for the memory lab. Days are relative (day 1 = a Monday); times are Sam's local time (America/New_York). The loader picks the real start date. Rows map 1:1 to the testers, messages, plans, tester_goals and step_days tables.",
+  "tester": {
+    "phone": "+15555550101",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "21:40" }
+  },
   "events": [
-    {
-      "kind": "tester_update",
-      "day": 1,
-      "time": "09:00",
-      "set": { "name": "Sam", "time_zone": "America/New_York", "time_zone_status": "confirmed" }
-    },
-    {
-      "kind": "phase",
-      "day": 1,
-      "time": "09:05",
-      "to": "planning"
-    },
-    {
-      "kind": "message",
-      "day": 1,
-      "time": "09:00",
-      "from": "tester",
-      "text": "Hey, I want to get into reading more",
-      "tests": ["should not appear in any DB column"]
-    },
-    {
-      "kind": "message",
-      "day": 1,
-      "time": "09:01",
-      "from": "zoh",
-      "text": "Nice! Let's figure out a plan for that."
-    },
-    {
-      "kind": "goal_chosen",
-      "day": 1,
-      "time": "09:10",
-      "goal": "reading",
-      "role": "focus"
-    },
-    {
-      "kind": "phase",
-      "day": 2,
-      "time": "08:00",
-      "to": "active"
-    },
-    {
-      "kind": "plan_locked",
-      "day": 2,
-      "time": "08:01",
-      "plan": {
-        "version": 1,
-        "goal": "reading",
-        "step": "Read 10 pages",
-        "step_time": "21:00",
-        "days": ["mon", "tue", "wed", "thu", "fri"],
-        "proof": "photo",
-        "reason": "I want to read more books",
-        "start_day": 2,
-        "minutes": 20,
-        "proof_note": "Photo of the page you stopped on"
-      }
-    },
-    {
-      "kind": "step_day",
-      "day": 3,
-      "status": "done",
-      "step": "Read 10 pages of Atomic Habits",
-      "step_kind": "first",
-      "proof_verdict": "clear",
-      "proof_seen": "Photo shows page 42 of Atomic Habits",
-      "reflection": "It was easier than I thought"
-    },
-    {
-      "kind": "message",
-      "day": 3,
-      "time": "21:30",
-      "from": "tester",
-      "text": "Done! Read chapter 3",
-      "media": {
-        "kind": "photo",
-        "content_type": "image/jpeg",
-        "description": "Photo of page 42 of Atomic Habits"
-      }
-    },
-    {
-      "kind": "message",
-      "day": 3,
-      "time": "21:31",
-      "from": "zoh",
-      "text": "Great work on chapter 3! How did it go?"
-    },
-    {
-      "kind": "takeaway",
-      "day": 3,
-      "time": "21:45",
-      "goal": "reading",
-      "text": "Reading before bed helps me wind down",
-      "evidence": "explained"
-    },
-    {
-      "kind": "step_day",
-      "day": 4,
-      "status": "missed"
-    },
-    {
-      "kind": "message",
-      "day": 5,
-      "time": "08:00",
-      "from": "zoh",
-      "text": "Good morning! Ready for today's reading?"
-    },
-    {
-      "kind": "message",
-      "day": 5,
-      "time": "17:20",
-      "from": "tester",
-      "text": "Sending a voice note",
-      "media": {
-        "kind": "voice",
-        "content_type": "audio/mp4",
-        "transcript": "Yeah I'll read tonight for sure"
-      }
-    },
-    {
-      "kind": "suggestion",
-      "day": 5,
-      "time": "18:00",
-      "goal": "reading",
-      "kind_": "deepen",
-      "raised_by": "coach",
-      "proposal": "Read 15 pages instead of 10",
-      "reasoning": "They're finding 10 pages easy",
-      "decision": "waiting"
-    },
-    {
-      "kind": "went_quiet",
-      "day": 7,
-      "time": "10:00"
-    }
+    { "day": 1, "time": "21:52", "kind": "tester_update", "set": { "name": "Sam" } },
+    { "day": 1, "time": "22:14", "kind": "goal_chosen", "goal": "exercise", "role": "focus" },
+    { "day": 2, "time": "15:30", "kind": "tester_update", "set": { "quiet_hours_start": "08:00", "quiet_hours_end": "14:00", "quiet_hours_chosen": true } },
+    { "day": 2, "time": "16:11", "kind": "phase", "to": "planning" },
+    { "day": 2, "time": "16:20", "kind": "plan_locked", "plan": {
+        "version": 1, "goal": "exercise",
+        "step": "Walk-run 1 mile", "place": "the park near home",
+        "step_time": "16:30", "days": ["mon", "thu", "sat"], "minutes": 25,
+        "proof": "screenshot", "proof_note": "Strava screenshot",
+        "reason": "A mile on your days off gets your energy back without wrecking your sleep.",
+        "commitment": "yeah im in", "start_day": 4 } },
+    { "day": 2, "time": "16:20", "kind": "phase", "to": "active" },
+    { "day": 4, "kind": "step_day", "status": "done", "agreed_at": "14:40", "note": "1.1 miles, late start",
+      "proof_verdict": "clear", "proof_seen": "Strava run, 1.10 mi in 14:02, Forest Park", "step_kind": "first",
+      "reflection": "Lungs on fire, legs fine." },
+    { "day": 6, "kind": "step_day", "status": "missed", "note": "Fell asleep." }
+  ],
+  "messages": [
+    { "day": 1, "time": "21:40", "from": "tester", "text": "hey my coworker said to text this?" },
+    { "day": 1, "time": "21:40", "from": "zoh", "text": "Hey! I'm ZOH, a coach you text. I help people start one small habit and actually stick with it. What should I call you?" },
+    { "day": 1, "time": "21:52", "from": "tester", "text": "sam" },
+    { "day": 1, "time": "21:52", "from": "zoh", "text": "Good to meet you, Sam! What's something you'd love to feel different about right now?" },
+    { "day": 1, "time": "22:01", "from": "tester", "text": "idk" },
+    { "day": 1, "time": "22:01", "from": "tester", "text": "not feel dead all the time i guess" },
+    { "day": 1, "time": "22:02", "from": "zoh", "text": "That's a real one. What's wearing you down most these days?" },
+    { "day": 1, "time": "22:09", "from": "tester", "text": "work. im a nurse, ER" },
+    { "day": 1, "time": "22:09", "from": "tester", "text": "i work nights" },
+    { "day": 1, "time": "22:10", "from": "zoh", "text": "Nights in the ER, respect. Things that tend to help with that: getting fitter, sleeping better, or eating better. Any of those sound like you?" },
+    { "day": 1, "time": "22:14", "from": "tester", "text": "fitter maybe" },
+    { "day": 1, "time": "22:14", "from": "zoh", "text": "Love that, let's get you fitter! Where could you work out, and when in your day could it fit?", "tests": "asks two things; he answers neither" },
+    { "day": 1, "time": "22:15", "from": "tester", "text": "ok gotta crash, talk tmrw" },
+    { "day": 1, "time": "22:15", "from": "zoh", "text": "Get some rest. Kalinixta, Sam 🌙" },
+
+    { "day": 2, "time": "09:00", "from": "zoh", "text": "Morning Sam! ☀️ Picking up where we left off: where could you work out, and roughly when?", "tests": "stall nudge at the end of default quiet hours, while he sleeps" },
+    { "day": 2, "time": "14:55", "from": "tester", "text": "sorry was asleep" },
+    { "day": 2, "time": "14:56", "from": "tester", "text": "i sleep like 8 to 2 after shifts" },
+    { "day": 2, "time": "14:56", "from": "zoh", "text": "No stress! Want me to keep my texts out of 8am to 2pm so I'm not buzzing you mid-sleep?" },
+    { "day": 2, "time": "15:30", "from": "tester", "text": "ya" },
+    { "day": 2, "time": "15:30", "from": "zoh", "text": "Done. Now, what kind of workout are you thinking?" },
+    { "day": 2, "time": "15:38", "from": "tester", "text": "running i guess. used to run in college kinda" },
+    { "day": 2, "time": "15:38", "from": "tester", "text": "been a while lol" },
+    { "day": 2, "time": "15:39", "from": "zoh", "text": "The legs remember more than you think. Where would you run?" },
+    { "day": 2, "time": "15:41", "from": "tester", "text": "theres a park near me" },
+    { "day": 2, "time": "15:41", "from": "zoh", "text": "Perfect. When in your day could a short run fit?" },
+    { "day": 2, "time": "15:50", "from": "tester", "text": "whenever i wake up, like 4?" },
+    { "day": 2, "time": "15:51", "from": "zoh", "text": "4ish works. How long can you give it, realistically?" },
+    { "day": 2, "time": "16:02", "from": "tester", "text": "idk 20 min" },
+    { "day": 2, "time": "16:03", "from": "zoh", "text": "Easy. Do you track anything already, like Strava or a watch?" },
+    { "day": 2, "time": "16:10", "from": "tester", "text": "strava" },
+    { "day": 2, "time": "16:11", "from": "zoh", "text": "Here's the plan, Sam:\n• Walk-run 1 mile in the park\n• Mon, Thu, Sat at 4:30\n• Proof: a Strava screenshot after\nA mile on your days off gets your energy back without wrecking your sleep. You in?" },
+    { "day": 2, "time": "16:18", "from": "tester", "text": "ok sure", "tests": "not a clear commitment" },
+    { "day": 2, "time": "16:18", "from": "zoh", "text": "Need a real yes before I lock it in 😄 Mon, Thu, Sat at 4:30, one mile. You in?" },
+    { "day": 2, "time": "16:20", "from": "tester", "text": "yeah im in" },
+    { "day": 2, "time": "16:20", "from": "zoh", "text": "LET'S GO! Locked in. First one is Thursday at 4:30. I'll text you that afternoon." },
+
+    { "day": 4, "time": "14:00", "from": "zoh", "text": "Hey Sam! Day one 🏃 A mile at 4:30, walk when you need to, run when you can. You said you want to stop feeling dead all the time. This is how that starts. You in?" },
+    { "day": 4, "time": "14:40", "from": "tester", "text": "yep" },
+    { "day": 4, "time": "14:40", "from": "zoh", "text": "Love it 💪" },
+    { "day": 4, "time": "16:20", "from": "zoh", "text": "10 minutes, Sam! Shoes on? 👟" },
+    { "day": 4, "time": "17:20", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 1.10 mi, 14:02, Forest Park, avg pace 12:45/mi." } },
+    { "day": 4, "time": "17:20", "from": "tester", "text": "almost died lol" },
+    { "day": 4, "time": "17:21", "from": "zoh", "text": "1.1 miles on day one?! That's THAT 🔥 How did it feel?" },
+    { "day": 4, "time": "17:40", "from": "tester", "text": "lungs on fire, legs fine" },
+    { "day": 4, "time": "17:41", "from": "zoh", "text": "Lungs catch up fast, and legs being fine is the good news. Saturday's round two." },
+    { "day": 4, "time": "17:45", "from": "tester", "text": "ran in forest park. my roommate laughed when i came back red", "tests": "Forest Park under Places; roommate on the root" },
+    { "day": 4, "time": "17:46", "from": "zoh", "text": "Red face means you worked. Tell your roommate Saturday is round two 😂" },
+
+    { "day": 5, "time": "13:10", "from": "tester", "text": "my sisters getting married next saturday and i have to give a toast. kill me", "tests": "wedding Event on day 13; sister page" },
+    { "day": 5, "time": "13:11", "from": "zoh", "text": "Ha, giving the toast is a big honor! What's her name?" },
+    { "day": 5, "time": "13:58", "from": "tester", "text": "ana" },
+    { "day": 5, "time": "13:59", "from": "zoh", "text": "Ana's lucky to have you up there. Started the toast yet?" },
+
+    { "day": 6, "time": "14:00", "from": "zoh", "text": "Hey Sam! Round two today, one mile at 4:30. You in?" },
+    { "day": 6, "time": "16:20", "from": "zoh", "text": "10 minutes! Let's get it 👟" },
+    { "day": 6, "time": "17:25", "from": "zoh", "text": "How'd it go, Sam? Send the Strava when you've got it." },
+    { "day": 6, "time": "19:00", "from": "zoh", "text": "Still time for a short one if today got away from you. Even half a mile counts." },
+    { "day": 6, "time": "21:05", "from": "tester", "text": "ugh fell asleep. didnt go" },
+    { "day": 6, "time": "21:06", "from": "zoh", "text": "Happens. Monday matters most now: one mile at 4:30. Deal?" },
+    { "day": 6, "time": "21:20", "from": "tester", "text": "ya" },
+
+    { "day": 7, "time": "12:40", "from": "tester", "text": "took a melatonin to fix my sleep and still woke up at 3", "tests": "sensitive: must never be stored" },
+    { "day": 7, "time": "12:41", "from": "zoh", "text": "Ugh, broken sleep is the worst. Hope you get some real rest today." },
+    { "day": 7, "time": "12:44", "from": "tester", "text": "neighbors dog barked all night smh", "tests": "passing mention: creates nothing" },
+    { "day": 7, "time": "12:44", "from": "zoh", "text": "That would do it 😩" },
+    { "day": 7, "time": "18:00", "from": "zoh", "text": "Hey Sam! Week one: plan locked and your first mile done on Thursday. Saturday slipped, but Monday's right there. What would make Monday easier?" },
+    { "day": 7, "time": "19:45", "from": "tester", "text": "1 out of 2, could be worse", "tests": "doesn't answer the question" },
+    { "day": 7, "time": "19:46", "from": "zoh", "text": "Could be a lot worse. 1 for 1 on Monday is the goal 💪" }
   ]
 }

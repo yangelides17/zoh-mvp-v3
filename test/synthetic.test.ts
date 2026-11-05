@@ -42,7 +42,7 @@ const at = (date: string, hhmm: string) => zonedTime(date, hhmm, TZ);
 const silent = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
 /** A Monday start date for all fixture tests. */
 const START = new Date("2026-11-02T00:00:00Z");
-const SAM_PHONE = "+12125550101";
+const SAM_PHONE = "+15555550101";
 
 const FIXTURE_PATH = path.resolve(import.meta.dirname, "../eval/memory-lab/fixtures/sam.week1.json");
 
@@ -85,19 +85,18 @@ describe("loader", () => {
     expect(result.scenario).toBe("sam");
     expect(result.phone).toBe(SAM_PHONE);
     expect(result.tables.testers).toBe(1);
-    expect(result.tables.messages).toBeGreaterThanOrEqual(5);
+    // 64 messages in sam.week1
+    expect(result.tables.messages).toBe(64);
     expect(result.tables.plans).toBe(1);
     expect(result.tables.step_days).toBe(2);
-    expect(result.tables.takeaways).toBe(1);
-    expect(result.tables.suggestions).toBe(1);
-    expect(result.tables.flags).toBeGreaterThanOrEqual(1);
+    expect(result.tables.tester_goals).toBe(1);
 
     // Tester has scenario set
     const [tester] = await db.select().from(testers).where(eq(testers.phone, SAM_PHONE));
     expect(tester!.scenario).toBe("sam");
     expect(tester!.name).toBe("Sam");
     expect(tester!.phase).toBe("active");
-    expect(tester!.goalSlug).toBe("reading");
+    expect(tester!.goalSlug).toBe("exercise");
   });
 
   it("refuses a production-like DB (real testers exist)", async () => {
@@ -131,8 +130,10 @@ describe("loader", () => {
     const bad = JSON.stringify({
       scenario: "bad",
       week: 1,
-      phone: "+12125550102",
+      format: 1,
+      tester: { phone: "+15555550102", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "09:00" } },
       events: [{ kind: "explode", day: 1, time: "09:00" }],
+      messages: [{ day: 1, time: "09:00", from: "tester", text: "hi" }],
     });
     expect(() => parseFixture(bad, "bad.json")).toThrow();
   });
@@ -141,18 +142,34 @@ describe("loader", () => {
     const bad = JSON.stringify({
       scenario: "bad",
       week: 1,
-      phone: "+12125550102",
+      format: 1,
+      tester: { phone: "+15555550102", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "09:00" } },
       events: [
-        { kind: "message", day: 1, time: "09:00", from: "tester", text: "hi", extra_field: true },
+        { kind: "phase", day: 1, time: "09:00", to: "active", extra_field: true },
       ],
+      messages: [{ day: 1, time: "09:00", from: "tester", text: "hi" }],
     });
     expect(() => parseFixture(bad, "bad.json")).toThrow("extra_field");
+  });
+
+  it("rejects format other than 1", () => {
+    const bad = JSON.stringify({
+      scenario: "bad",
+      week: 1,
+      format: 2,
+      tester: { phone: "+15555550102", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "09:00" } },
+      events: [],
+      messages: [{ day: 1, time: "09:00", from: "tester", text: "hi" }],
+    });
+    expect(() => parseFixture(bad, "bad.json")).toThrow();
   });
 
   it("fixture-only `tests` fields never appear in any DB column", async () => {
     const fixture = loadSamFixture();
     const testStrings = collectTestStrings([fixture]);
     expect(testStrings.length).toBeGreaterThan(0);
+    // tests is a string, not an array
+    expect(typeof testStrings[0]).toBe("string");
 
     await loadScenario(db, [fixture], START);
 
@@ -179,12 +196,12 @@ describe("loader", () => {
     const fixture = loadSamFixture();
     await loadScenario(db, [fixture], START);
 
-    // Day 1 time 09:00 in Eastern = the first message
+    // The first message is day 1 time 21:40 Eastern (Sam's first text)
     const allMessages = await db.select().from(messages).where(eq(messages.contactNumber, SAM_PHONE));
     const sorted = allMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     const first = sorted[0]!;
-    // Start is 2026-11-02 (Mon). Day 1 = Nov 2, 09:00 Eastern
-    const expected = at("2026-11-02", "09:00");
+    // Start is 2026-11-02 (Mon). Day 1 = Nov 2, 21:40 Eastern
+    const expected = at("2026-11-02", "21:40");
     expect(first.sentAt!.getTime()).toBe(expected.getTime());
     expect(first.createdAt.getTime()).toBe(expected.getTime());
   });
@@ -193,7 +210,7 @@ describe("loader", () => {
     const fixture = loadSamFixture();
     await loadScenario(db, [fixture], START);
     const [tester] = await db.select().from(testers).where(eq(testers.phone, SAM_PHONE));
-    expect(tester!.goalSlug).toBe("reading");
+    expect(tester!.goalSlug).toBe("exercise");
   });
 
   it("start date must be a Monday", async () => {
@@ -210,11 +227,11 @@ describe("textsOn", () => {
     const fixture = loadSamFixture();
     await loadScenario(db, [fixture], START);
     const [tester] = await db.select().from(testers).where(eq(testers.phone, SAM_PHONE));
-    // Day 1 = 2026-11-02: should have the two messages from the fixture
+    // Day 1 = 2026-11-02: should have Sam's evening onboarding messages
     const texts = await textsOn(db, tester!, "2026-11-02");
-    expect(texts.length).toBe(2);
-    expect(texts[0]!.content).toBe("Hey, I want to get into reading more");
-    expect(texts[1]!.content).toBe("Nice! Let's figure out a plan for that.");
+    expect(texts.length).toBeGreaterThanOrEqual(2);
+    const contents = texts.map((t) => t.content);
+    expect(contents).toContain("hey my coworker said to text this?");
   });
 });
 
@@ -226,7 +243,7 @@ describe("timeline", () => {
     await loadScenario(db, [fixture], START);
     const [tester] = await db.select().from(testers).where(eq(testers.phone, SAM_PHONE));
     const items = await timeline(db, tester!, 30);
-    // Day 3 has a photo message; the timeline includes media items (kind "photo", "voice note", etc.)
+    // Day 4 has an image message (Strava screenshot); the timeline includes media items
     const mediaItems = items.filter((i) => i.kind === "photo" || i.kind === "voice note" || i.kind === "video");
     expect(mediaItems.length).toBeGreaterThanOrEqual(1);
   });

@@ -46,21 +46,23 @@ const dayField = z.number().int().min(1).max(28);
 const timeField = z.string().regex(/^\d{2}:\d{2}$/);
 
 const mediaSchema = z.object({
-  kind: z.enum(["photo", "voice", "video"]),
+  kind: z.enum(["image", "audio"]),
   content_type: z.string(),
   description: z.string().optional(),
   transcript: z.string().optional(),
 }).strict();
 
-const messageEvent = z.object({
-  kind: z.literal("message"),
+/** Standalone message schema (lives in fixture.messages[], not inside events). */
+const messageSchema = z.object({
   day: dayField,
   time: timeField,
   from: z.enum(["tester", "zoh"]),
   text: z.string(),
   media: mediaSchema.optional(),
-  tests: z.array(z.string()).optional(),
+  tests: z.string().optional(),
 }).strict();
+
+export type FixtureMessage = z.infer<typeof messageSchema>;
 
 const testerUpdateEvent = z.object({
   kind: z.literal("tester_update"),
@@ -160,12 +162,16 @@ const takeawayEvent = z.object({
   evidence: z.enum(["explained", "applied", "recalled"]),
 }).strict();
 
+/**
+ * Suggestion event. The suggestion's own kind (deepen/upgrade/new_focus) is stored as
+ * `suggestion_kind` to avoid collision with the Zod discriminator field `kind`.
+ */
 const suggestionEvent = z.object({
   kind: z.literal("suggestion"),
   day: dayField,
   time: timeField,
   goal: z.string(),
-  kind_: z.enum(SUGGESTION_KINDS as unknown as [string, ...string[]]),
+  suggestion_kind: z.enum(SUGGESTION_KINDS as unknown as [string, ...string[]]),
   raised_by: z.enum(SUGGESTION_SOURCES as unknown as [string, ...string[]]),
   proposal: z.string(),
   reasoning: z.string().optional(),
@@ -174,9 +180,9 @@ const suggestionEvent = z.object({
   decided_kind: z.enum(SUGGESTION_KINDS as unknown as [string, ...string[]]).optional(),
   decided_proposal: z.string().optional(),
   outcome: z.enum(SUGGESTION_OUTCOMES as unknown as [string, ...string[]]).optional(),
-  decided_at: z.object({ day: dayField, time: timeField }).optional(),
-  delivered_at: z.object({ day: dayField, time: timeField }).optional(),
-  outcome_at: z.object({ day: dayField, time: timeField }).optional(),
+  decided_at: z.object({ day: dayField, time: timeField }).strict().optional(),
+  delivered_at: z.object({ day: dayField, time: timeField }).strict().optional(),
+  outcome_at: z.object({ day: dayField, time: timeField }).strict().optional(),
 }).strict();
 
 const wentQuietEvent = z.object({
@@ -187,7 +193,6 @@ const wentQuietEvent = z.object({
 }).strict();
 
 const eventSchema = z.discriminatedUnion("kind", [
-  messageEvent,
   testerUpdateEvent,
   phaseEvent,
   goalChosenEvent,
@@ -202,11 +207,24 @@ const eventSchema = z.discriminatedUnion("kind", [
 
 export type FixtureEvent = z.infer<typeof eventSchema>;
 
+const testerSchema = z.object({
+  phone: z.string().regex(SYNTHETIC_PHONE),
+  time_zone: z.string(),
+  time_zone_status: z.enum(["assumed_eastern", "needs_city", "confirmed"]),
+  first_text: z.object({
+    day: dayField,
+    time: timeField,
+  }).strict(),
+}).strict();
+
 const fixtureSchema = z.object({
   scenario: z.string().min(1),
   week: z.number().int().positive(),
-  phone: z.string().regex(SYNTHETIC_PHONE),
-  events: z.array(eventSchema).min(1),
+  format: z.literal(1),
+  notes: z.string().optional(),
+  tester: testerSchema,
+  events: z.array(eventSchema),
+  messages: z.array(messageSchema).min(1),
 }).strict();
 
 export type Fixture = z.infer<typeof fixtureSchema>;
@@ -275,6 +293,14 @@ export async function checkNotProduction(db: Db): Promise<void> {
 }
 
 /**
+ * A unified timeline entry: either a tracker event or a message, tagged with its source week's
+ * start date and a sort key (day, time) for chronological ordering.
+ */
+type TimelineEntry =
+  | { tag: "event"; event: FixtureEvent; weekStartDate: Date; day: number; time: string }
+  | { tag: "message"; message: FixtureMessage; weekStartDate: Date; day: number; time: string };
+
+/**
  * Loads one scenario (all weeks) into the database. Idempotent: deletes existing messages and
  * tester data for this scenario before reinserting.
  */
@@ -288,10 +314,10 @@ export async function loadScenario(
   if (startDate.getUTCDay() !== 1) throw new Error(`Start date must be a Monday, got ${startDate.toISOString().slice(0, 10)}`);
 
   const scenario = fixtures[0]!.scenario;
-  const phone = fixtures[0]!.phone;
+  const phone = fixtures[0]!.tester.phone;
   for (const f of fixtures) {
     if (f.scenario !== scenario) throw new Error(`Scenario mismatch: expected "${scenario}", got "${f.scenario}"`);
-    if (f.phone !== phone) throw new Error(`Phone mismatch: expected "${phone}", got "${f.phone}"`);
+    if (f.tester.phone !== phone) throw new Error(`Phone mismatch: expected "${phone}", got "${f.tester.phone}"`);
   }
   if (!isSyntheticPhone(phone)) throw new Error(`Phone ${phone} is not in the synthetic 555-01xx range`);
 
@@ -302,36 +328,29 @@ export async function loadScenario(
   await db.delete(messages).where(eq(messages.contactNumber, phone));
   await db.delete(testers).where(eq(testers.scenario, scenario));
 
-  // Build all events across all weeks
-  const allEvents: Array<{ event: FixtureEvent; weekStartDate: Date }> = [];
+  // Merge events and messages into a combined timeline sorted by (day, time)
+  const timeline: TimelineEntry[] = [];
   for (const fixture of sorted) {
     // Each week starts 7*(week-1) days after the scenario start
     const weekStart = new Date(startDate);
     weekStart.setUTCDate(weekStart.getUTCDate() + 7 * (fixture.week - 1));
     for (const event of fixture.events) {
-      allEvents.push({ event, weekStartDate: weekStart });
+      // step_day events may lack a time field; default to "23:59" for sorting
+      const time = "time" in event && typeof event.time === "string" ? event.time : "23:59";
+      timeline.push({ tag: "event", event, weekStartDate: weekStart, day: event.day, time });
+    }
+    for (const msg of fixture.messages) {
+      timeline.push({ tag: "message", message: msg, weekStartDate: weekStart, day: msg.day, time: msg.time });
     }
   }
+  // Sort by (day, time) for chronological processing
+  timeline.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
 
-  // Find the first message to set consent_at and context_started_at
-  const firstMessage = allEvents.find((e) => e.event.kind === "message");
-  if (!firstMessage) throw new Error("Fixture must contain at least one message");
-  const fm = firstMessage.event as z.infer<typeof messageEvent>;
-
-  // Default time zone before any tester_update sets one
-  let timeZone = "America/New_York";
-  let timeZoneStatus: "assumed_eastern" | "needs_city" | "confirmed" = "assumed_eastern";
-
-  // Look ahead for any tester_update that sets time zone before the first message
-  for (const { event } of allEvents) {
-    if (event.kind === "tester_update" && event.set.time_zone) {
-      timeZone = event.set.time_zone;
-      if (event.set.time_zone_status) timeZoneStatus = event.set.time_zone_status;
-      break;
-    }
-  }
-
-  const firstAt = resolveTime(firstMessage.weekStartDate, fm.day, fm.time, timeZone);
+  // Read timezone and first-text info from the first fixture's tester object
+  const testerInfo = sorted[0]!.tester;
+  const timeZone = testerInfo.time_zone;
+  const timeZoneStatus = testerInfo.time_zone_status;
+  const firstAt = resolveTime(startDate, testerInfo.first_text.day, testerInfo.first_text.time, timeZone);
 
   // Create the tester
   const [tester] = await db
@@ -355,27 +374,32 @@ export async function loadScenario(
   const plansByVersion = new Map<number, string>();
   let latestPlanId: string | undefined;
 
-  // Process events in order
-  for (const { event, weekStartDate } of allEvents) {
-    switch (event.kind) {
-      case "message": {
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
-        const mediaUrl = event.media ? `synthetic://${scenario}/${event.day}-${event.time}` : undefined;
-        await db.insert(messages).values({
-          direction: event.from === "tester" ? "inbound" : "outbound",
-          contactNumber: phone,
-          content: event.text,
-          mediaUrl: mediaUrl ?? null,
-          mediaContentType: event.media?.content_type ?? null,
-          description: event.media?.description ?? null,
-          transcript: event.media?.transcript ?? null,
-          sentAt: at,
-          createdAt: at,
-        });
-        inc("messages");
-        break;
-      }
+  // Process timeline in order
+  for (const entry of timeline) {
+    if (entry.tag === "message") {
+      const msg = entry.message;
+      const at = resolveTime(entry.weekStartDate, msg.day, msg.time, tester.timeZone);
+      const mediaUrl = msg.media ? `synthetic://${scenario}/${msg.day}-${msg.time}` : undefined;
+      await db.insert(messages).values({
+        direction: msg.from === "tester" ? "inbound" : "outbound",
+        contactNumber: phone,
+        content: msg.text,
+        mediaUrl: mediaUrl ?? null,
+        mediaContentType: msg.media?.content_type ?? null,
+        description: msg.media?.description ?? null,
+        transcript: msg.media?.transcript ?? null,
+        sentAt: at,
+        createdAt: at,
+      });
+      inc("messages");
+      continue;
+    }
 
+    // entry.tag === "event"
+    const event = entry.event;
+    const weekStartDate = entry.weekStartDate;
+
+    switch (event.kind) {
       case "tester_update": {
         const patch: Record<string, unknown> = {};
         const s = event.set;
@@ -531,7 +555,7 @@ export async function loadScenario(
         await db.insert(suggestions).values({
           testerId: tester.id,
           goalSlug: event.goal,
-          kind: event.kind_ as "deepen" | "upgrade" | "new_focus",
+          kind: event.suggestion_kind as "deepen" | "upgrade" | "new_focus",
           raisedBy: event.raised_by as "coach" | "tester" | "founder",
           proposal: event.proposal,
           reasoning: event.reasoning ?? null,
@@ -569,6 +593,7 @@ export async function loadScenario(
 
 /**
  * Parses and validates a fixture JSON string. Throws on unknown fields or event kinds.
+ * Rejects any format other than 1.
  */
 export function parseFixture(json: string, filename: string): Fixture {
   let raw: unknown;
@@ -582,19 +607,23 @@ export function parseFixture(json: string, filename: string): Fixture {
     const issues = result.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`).join("\n");
     throw new Error(`Invalid fixture ${filename}:\n${issues}`);
   }
+  // format === 1 is enforced by z.literal(1) in the schema, but be explicit
+  if (result.data.format !== 1) {
+    throw new Error(`Unsupported fixture format ${result.data.format} in ${filename} (expected 1)`);
+  }
   return result.data;
 }
 
 /**
- * Collects all `tests` strings from fixture events (fixture-only fields that should never
+ * Collects all `tests` strings from fixture messages (fixture-only fields that should never
  * appear in any database column).
  */
 export function collectTestStrings(fixtures: Fixture[]): string[] {
   const strings: string[] = [];
   for (const fixture of fixtures) {
-    for (const event of fixture.events) {
-      if (event.kind === "message" && event.tests) {
-        strings.push(...event.tests);
+    for (const msg of fixture.messages) {
+      if (msg.tests) {
+        strings.push(msg.tests);
       }
     }
   }

@@ -76,7 +76,10 @@ async function main() {
     process.exit(1);
   }
 
+  // All fixtures must agree on phone; use the first to display it
+  const phone = fixtures[0]!.tester.phone;
   const host = new URL(databaseUrl).hostname;
+  console.log(`Phone: ${phone}`);
   console.log(`Database host: ${host}`);
 
   const pool = new pg.Pool({ connectionString: databaseUrl });
