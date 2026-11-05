@@ -63,8 +63,10 @@ reinserts.
 - Event kinds: `tester_update`, `phase`, `goal_chosen` (with role), `goal_role` (focus / maintenance /
   dropped), `goal_switch` (writes the same goal-switch flag the app writes; memory builds goal pages from
   it), `plan_locked` (any version, change kind deepen / upgrade / other, optional end date),
-  `step_day`, `takeaway`, `suggestion` (raised by, kind, proposal, founders' decision, outcome),
-  `went_quiet` (auto-texts paused + founder alert). Unknown kinds are rejected.
+  `step_day`, `takeaway`, `suggestion` (raised by, `suggestion_kind` for the suggestion's own
+  kind — `suggestion_kind` not `kind`, because `kind` is the event discriminator — proposal,
+  founders' decision, outcome), `went_quiet` (auto-texts paused + founder alert via `saveFlag`).
+  Unknown kinds are rejected.
 - `notes` and `tests` are fixture-only and are never written to the database (memory must never see the
   answer key).
 

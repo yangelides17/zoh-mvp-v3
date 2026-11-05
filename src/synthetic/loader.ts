@@ -26,10 +26,10 @@ import {
   stepDays,
   takeaways,
   suggestions,
-  flags,
   type Tester,
   type Weekday,
 } from "../db/schema.js";
+import { saveFlag } from "../console/alerts.js";
 
 // ---- Phone pattern: reserved 555-01xx range ----
 
@@ -460,15 +460,11 @@ export async function loadScenario(
         // Update tester's goal_slug to the new goal
         await db.update(testers).set({ goalSlug: event.to }).where(eq(testers.id, tester.id));
         tester.goalSlug = event.to;
-        // Record the switch as a flag
+        // Record the switch as a flag + console alert, same as the real app (coach/tools.ts)
         const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
-        await db.insert(flags).values({
-          testerId: tester.id,
-          kind: "goal_switch",
-          detail: `${event.from} → ${event.to}: ${event.reason}`,
-          createdAt: at,
-        });
+        await saveFlag(db, tester.id, "goal_switch", `${event.from} → ${event.to}: ${event.reason}`, at);
         inc("flags");
+        inc("console_messages");
         break;
       }
 
@@ -576,13 +572,10 @@ export async function loadScenario(
       case "went_quiet": {
         const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
         await db.update(testers).set({ autoTextsPausedAt: at }).where(eq(testers.id, tester.id));
-        await db.insert(flags).values({
-          testerId: tester.id,
-          kind: "went_quiet",
-          detail: event.body ?? null,
-          createdAt: at,
-        });
+        const body = event.body ?? `Went quiet on day ${event.day}; ZOH's own texts paused`;
+        await saveFlag(db, tester.id, "went_quiet", body, at);
         inc("flags");
+        inc("console_messages");
         break;
       }
     }
