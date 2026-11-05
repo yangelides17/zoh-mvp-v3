@@ -218,6 +218,72 @@ describe("loader", () => {
     const tuesday = new Date("2026-11-03T00:00:00Z");
     await expect(loadScenario(db, [fixture], tuesday)).rejects.toThrow("Monday");
   });
+
+  it("went_quiet and goal_switch write flags, console_messages alerts, and backdated timestamps", async () => {
+    // Minimal inline fixture exercising both events
+    const fixture = parseFixture(JSON.stringify({
+      scenario: "wq",
+      week: 1,
+      format: 1,
+      tester: { phone: "+12125550103", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "10:00" } },
+      events: [
+        { kind: "tester_update", day: 1, time: "10:05", set: { name: "Tess" } },
+        { kind: "goal_chosen", day: 1, time: "10:10", goal: "exercise", role: "focus" },
+        { kind: "phase", day: 1, time: "10:15", to: "active" },
+        { kind: "goal_switch", day: 3, time: "14:00", from: "exercise", to: "reading", reason: "hurt my knee" },
+        { kind: "went_quiet", day: 5, time: "20:00", body: "No reply for 3 days" },
+      ],
+      messages: [
+        { day: 1, time: "10:00", from: "tester", text: "hi" },
+        { day: 1, time: "10:01", from: "zoh", text: "hey" },
+      ],
+    }), "inline.json");
+
+    const result = await loadScenario(db, [fixture], START);
+    const [tester] = await db.select().from(testers).where(eq(testers.phone, "+12125550103"));
+
+    // --- Flags ---
+    const allFlags = await db.select().from(flags).where(eq(flags.testerId, tester!.id));
+    expect(allFlags.length).toBe(2);
+    const switchFlag = allFlags.find((f) => f.kind === "goal_switch")!;
+    const quietFlag = allFlags.find((f) => f.kind === "went_quiet")!;
+    expect(switchFlag).toBeDefined();
+    expect(quietFlag).toBeDefined();
+    expect(switchFlag.detail).toContain("exercise → reading");
+    expect(quietFlag.detail).toBe("No reply for 3 days");
+
+    // --- Console messages (alerts from saveFlag) ---
+    const alerts = await db.select().from(consoleMessages).where(eq(consoleMessages.testerId, tester!.id));
+    expect(alerts.length).toBe(2);
+    const switchAlert = alerts.find((a) => a.topic === "goal_switch")!;
+    const quietAlert = alerts.find((a) => a.topic === "went_quiet")!;
+    expect(switchAlert).toBeDefined();
+    expect(quietAlert).toBeDefined();
+    expect(switchAlert.kind).toBe("alert");
+    expect(quietAlert.kind).toBe("alert");
+
+    // --- Backdated timestamps ---
+    // goal_switch on day 3 at 14:00 Eastern. START is 2026-11-02 (Mon), so day 3 = Nov 4.
+    const expectedSwitch = at("2026-11-04", "14:00");
+    expect(switchFlag.createdAt!.getTime()).toBe(expectedSwitch.getTime());
+    expect(switchAlert.createdAt!.getTime()).toBe(expectedSwitch.getTime());
+
+    // went_quiet on day 5 at 20:00 Eastern. Day 5 = Nov 6.
+    const expectedQuiet = at("2026-11-06", "20:00");
+    expect(quietFlag.createdAt!.getTime()).toBe(expectedQuiet.getTime());
+    expect(quietAlert.createdAt!.getTime()).toBe(expectedQuiet.getTime());
+
+    // --- auto_texts_paused_at ---
+    expect(tester!.autoTextsPausedAt).not.toBeNull();
+    expect(tester!.autoTextsPausedAt!.getTime()).toBe(expectedQuiet.getTime());
+
+    // --- goal_switch updated goal_slug ---
+    expect(tester!.goalSlug).toBe("reading");
+
+    // --- Row counts ---
+    expect(result.tables.flags).toBe(2);
+    expect(result.tables.console_messages).toBe(2);
+  });
 });
 
 // ---- textsOn returns loaded texts ----
