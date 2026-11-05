@@ -114,6 +114,8 @@ export const testers = pgTable(
     clockOffsetMs: bigint("clock_offset_ms", { mode: "number" }).notNull().default(0),
     /** Staging and production (#82): which app a dev number is on, set by "env staging" / "env production". Testers are always on production. */
     route: text("route", { enum: ["production", "staging"] }).notNull().default("production"),
+    /** Synthetic testers (#142): the fixture scenario name; null for real testers. */
+    scenario: text("scenario"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

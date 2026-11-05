@@ -141,6 +141,13 @@
       "when": 1793720741524,
       "tag": "0019_recap_owed",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793906271187,
+      "tag": "0020_fine_demogoblin",
+      "breakpoints": true
     }
   ]
 }
