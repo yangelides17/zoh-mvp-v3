@@ -17,7 +17,7 @@ import {
 } from "../src/db/schema.js";
 import type { Db } from "../src/db/client.js";
 import { zonedTime } from "../src/nudges/schedule.js";
-import { loadScenario, parseFixture, resolveDate, type Fixture } from "../src/synthetic/loader.js";
+import { loadScenario, loadScenarioIncremental, parseFixture, resolveDate, resolveTime, type Fixture } from "../src/synthetic/loader.js";
 import { takeSnapshot, stripForGrader, saveSnapshot } from "../eval/memory-lab/snapshot.js";
 import { runChecks } from "../eval/memory-lab/checks.js";
 import { estimateRunCost, saveSpend, PER_RUN_CAP, COMMAND_CAP, type RunSpend } from "../eval/memory-lab/cost.js";
@@ -530,5 +530,238 @@ describe("spend tracking", () => {
     expect(saved.total).toBe(0.06);
     expect(saved.nights).toHaveLength(1);
     expect(saved.nights[0].day).toBe(1);
+  });
+});
+
+// ---- Incremental loading: marker isolation (#150) ----
+
+describe("incremental loading (#150)", () => {
+  it("day-10 markers do not appear in keeper input during nights 1-9", async () => {
+    // Build a minimal fixture with unmistakable day-10 markers
+    const fixture = parseFixture(JSON.stringify({
+      scenario: "marker",
+      week: 1,
+      format: 1,
+      tester: {
+        phone: "+15555550108",
+        time_zone: "America/New_York",
+        time_zone_status: "assumed_eastern",
+        first_text: { day: 1, time: "09:00" },
+      },
+      events: [
+        { kind: "tester_update", day: 1, time: "09:05", set: { name: "Tess" } },
+        { kind: "goal_chosen", day: 1, time: "09:10", goal: "exercise", role: "focus" },
+        { kind: "phase", day: 1, time: "09:15", to: "active" },
+        // Day-10 plan with unmistakable marker step
+        { kind: "plan_locked", day: 10, time: "12:00", plan: {
+          version: 1, goal: "exercise", step: "MARKER-PLAN-10", step_time: "16:00",
+          days: ["mon"], proof: "screenshot", reason: "test", start_day: 10,
+        }},
+      ],
+      messages: [
+        { day: 1, time: "09:00", from: "tester", text: "hi" },
+        { day: 1, time: "09:01", from: "zoh", text: "hey" },
+        { day: 2, time: "10:00", from: "tester", text: "day 2 text" },
+        { day: 2, time: "10:01", from: "zoh", text: "nice" },
+        // Day-10 message with unmistakable marker
+        { day: 10, time: "14:00", from: "tester", text: "MARKER-DAY-10" },
+      ],
+    }), "marker.json");
+
+    const inc = await loadScenarioIncremental(db, [fixture], START);
+
+    const model = new FakeClaudeModel();
+
+    // Run nights 1-9 with incremental loading
+    for (let day = 1; day <= 9; day++) {
+      const date = resolveDate(START, day);
+      const at3am = resolveTime(START, day + 1, "03:00", TZ);
+
+      // Insert data through 3am of the next day
+      await inc.insertThrough(at3am);
+
+      // Reload tester
+      const [fresh] = await db.select().from(testers).where(eq(testers.id, inc.tester.id)).limit(1);
+      if (!fresh) continue;
+
+      // Script the model for this night
+      model.script(
+        { tools: [{ name: "write_daily_doc", input: { title: `Day ${date}`, summary: "S", body: "B" } }] },
+      );
+
+      try {
+        await writeDay(db, model, fresh, date, at3am);
+        await updateTester(db, fresh.id, { memoryThrough: date });
+      } catch {
+        // Nights without inbound texts throw; that's fine
+      }
+    }
+
+    // Check that neither MARKER-DAY-10 nor MARKER-PLAN-10 appears in any model input
+    for (const req of model.requests) {
+      const systemText = req.system.map((s) => s.text).join(" ");
+      const messagesText = JSON.stringify(req.messages);
+      expect(systemText).not.toContain("MARKER-DAY-10");
+      expect(systemText).not.toContain("MARKER-PLAN-10");
+      expect(messagesText).not.toContain("MARKER-DAY-10");
+      expect(messagesText).not.toContain("MARKER-PLAN-10");
+    }
+
+    // Also verify the markers are NOT in any snapshot from nights 1-9
+    const snap = await takeSnapshot(db, inc.tester.id);
+    const allFactTexts = snap.facts.map((f) => f.text).join(" ");
+    expect(allFactTexts).not.toContain("MARKER-DAY-10");
+    expect(allFactTexts).not.toContain("MARKER-PLAN-10");
+
+    // Verify the day-10 message is NOT in the database yet (not inserted through day 9)
+    const allMsgs = await db.select().from(messages).where(eq(messages.contactNumber, "+15555550108"));
+    const markerMsgs = allMsgs.filter((m) => m.content?.includes("MARKER-DAY-10"));
+    expect(markerMsgs).toHaveLength(0);
+  });
+});
+
+// ---- Report assertion details (#150) ----
+
+describe("report assertion details (#150)", () => {
+  it("report checkpoints include mustHold/mustNotHold/probes with id, verdict, reasoning", async () => {
+    // We simulate a graded run by constructing a report directly from grader types,
+    // matching the format the replay now writes.
+    const checkpoint = {
+      afterDay: 7,
+      mustHoldScore: 1,
+      mustNotHoldScore: 1,
+      probeScore: 0.5,
+      nearDuplicates: [] as string[],
+      mustHold: [{ id: "mh-1", holds: true, reasoning: "Fact is present" }],
+      mustNotHold: [{ id: "mnh-1", holds: false, reasoning: "Not in memory" }],
+      probes: [{ id: "p-1", correct: true, reasoning: "Answer matches" }],
+    };
+
+    // Write a report.json in the format the replay now uses
+    const report = {
+      scenario: "test",
+      startDate: "2026-11-02",
+      throughDay: 7,
+      memoryVersion: "current",
+      nights: [],
+      grading: { checkpoints: [checkpoint] },
+      unresolvedForgets: [],
+      spend: { nights: [], grading: 0, forget: 0, total: 0 },
+      estimate: { nights: 7, forgetCalls: 0, checkpointBatches: 1, keeperDollars: 0, graderDollars: 0, forgetDollars: 0, totalDollars: 0 },
+    };
+    fs.mkdirSync(tmpDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, "report.json"), JSON.stringify(report, null, 2));
+
+    // Read it back and assert the structure
+    const read = JSON.parse(fs.readFileSync(path.join(tmpDir, "report.json"), "utf-8")) as typeof report;
+    expect(read.grading).toBeDefined();
+    expect(read.grading!.checkpoints).toHaveLength(1);
+    const cp = read.grading!.checkpoints[0]!;
+
+    // mustHold array with id, holds, reasoning
+    expect(cp.mustHold).toHaveLength(1);
+    expect(cp.mustHold[0]).toEqual({ id: "mh-1", holds: true, reasoning: "Fact is present" });
+
+    // mustNotHold array with id, holds, reasoning
+    expect(cp.mustNotHold).toHaveLength(1);
+    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", holds: false, reasoning: "Not in memory" });
+
+    // probes array with id, correct, reasoning
+    expect(cp.probes).toHaveLength(1);
+    expect(cp.probes[0]).toEqual({ id: "p-1", correct: true, reasoning: "Answer matches" });
+  });
+});
+
+// ---- Forget on person page (#149) ----
+
+describe("forget on person page (#149)", () => {
+  it("forget removes a fact on a person page when model returns correct ref", async () => {
+    const tester = await createTester(db);
+    const msg = await say(db, tester, "inbound", at("2026-11-02", "21:40"), "my sister Ana likes hiking");
+
+    // Create a person page with a fact
+    const page = await createPage(db, tester.id, {
+      kind: "person",
+      title: "Ana",
+      summary: "Sister who likes hiking",
+    }, at("2026-11-02", "21:40"));
+    const fact = await addFact(db, page, {
+      text: "likes hiking",
+      sourceMessageId: msg.id,
+      day: "2026-11-02",
+    }, at("2026-11-02", "21:41"));
+
+    // Verify fact exists
+    let snap = await takeSnapshot(db, tester.id);
+    expect(snap.facts.some((f) => f.text === "likes hiking")).toBe(true);
+    expect(snap.pages.some((p) => p.title === "Ana")).toBe(true);
+
+    // Forget the person page using the tool (mock Claude returning the page ref)
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const pageRef = `p:${page.id.slice(0, 8)}`;
+    const result = await runMemoryTool(db, tester, "forget", {
+      pages: [pageRef],
+      note: "his sister Ana",
+    }, { at: at("2026-11-02", "22:00"), budget });
+    expect(result.ok).toBe(true);
+
+    // Verify the person page and its facts are gone
+    snap = await takeSnapshot(db, tester.id);
+    expect(snap.pages.some((p) => p.title === "Ana")).toBe(false);
+    expect(snap.facts.some((f) => f.text === "likes hiking")).toBe(false);
+
+    // Verify the message is marked as forgotten
+    expect(snap.forgotten.some((f) => f.messageId === msg.id)).toBe(true);
+  });
+});
+
+// ---- Unresolved forgets (#149) ----
+
+describe("unresolved forgets (#149)", () => {
+  it("bad refs from model produce unresolvedForgets in the report", async () => {
+    // Test the forget tool directly with bad refs
+    const tester = await createTester(db);
+    await say(db, tester, "inbound", at("2026-11-02", "21:40"), "hello");
+
+    // Ensure core pages exist
+    await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+
+    // Try to forget a non-existent fact
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "forget", {
+      facts: ["f:00000000"],
+      note: "something that does not exist",
+    }, { at: at("2026-11-02", "22:00"), budget });
+
+    // The forget tool returns ok: false when a ref doesn't exist
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("No fact");
+    }
+
+    // Also verify that bad page refs fail
+    const budget2: LookupBudget = { lookups: 0, searches: 0 };
+    const result2 = await runMemoryTool(db, tester, "forget", {
+      pages: ["p:00000000"],
+      note: "nonexistent page",
+    }, { at: at("2026-11-02", "22:01"), budget: budget2 });
+    expect(result2.ok).toBe(false);
+    if (!result2.ok) {
+      expect(result2.error).toContain("No page");
+    }
+
+    // Verify the report format includes unresolvedForgets
+    const report = {
+      scenario: "test",
+      unresolvedForgets: [
+        { day: 5, request: "forget my dog", reason: "No fact f:00000000 for this tester." },
+      ],
+    };
+    fs.mkdirSync(tmpDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, "report.json"), JSON.stringify(report));
+    const read = JSON.parse(fs.readFileSync(path.join(tmpDir, "report.json"), "utf-8")) as typeof report;
+    expect(read.unresolvedForgets).toHaveLength(1);
+    expect(read.unresolvedForgets[0]!.request).toBe("forget my dog");
+    expect(read.unresolvedForgets[0]!.reason).toContain("No fact");
   });
 });

@@ -345,20 +345,34 @@ export async function checkNotProduction(db: Db): Promise<void> {
  * start date and a sort key (day, time) for chronological ordering.
  */
 type TimelineEntry =
-  | { tag: "event"; event: FixtureEvent; day: number; time: string }
-  | { tag: "message"; message: FixtureMessage; day: number; time: string };
+  | { tag: "event"; event: FixtureEvent; day: number; time: string; resolvedAt: Date }
+  | { tag: "message"; message: FixtureMessage; day: number; time: string; resolvedAt: Date };
 
 /**
- * Loads one scenario (all weeks) into the database. Idempotent: deletes existing messages and
- * tester data for this scenario before reinserting.
+ * Result of `loadScenarioIncremental`: holds the tester, live-write events, and an
+ * `insertThrough` function that incrementally inserts timeline entries up to a cutoff time.
  */
-export async function loadScenario(
+export interface IncrementalLoader {
+  tester: Tester;
+  liveWrites: LiveWrite[];
+  /**
+   * Insert all timeline entries whose resolved timestamp <= cutoff that haven't been inserted yet.
+   * Returns cumulative insertion counts.
+   */
+  insertThrough(cutoff: Date): Promise<Record<string, number>>;
+}
+
+/**
+ * Sets up incremental loading for one scenario. Creates the tester row and builds the timeline,
+ * but does NOT insert any messages or events until `insertThrough(cutoff)` is called.
+ * The replay calls this before each night's 3 am pass (#150).
+ */
+export async function loadScenarioIncremental(
   db: Db,
   fixtures: Fixture[],
   startDate: Date,
-): Promise<LoadResult> {
+): Promise<IncrementalLoader> {
   if (fixtures.length === 0) throw new Error("No fixture files provided");
-  // Validate start date is a Monday
   if (startDate.getUTCDay() !== 1) throw new Error(`Start date must be a Monday, got ${startDate.toISOString().slice(0, 10)}`);
 
   const scenario = fixtures[0]!.scenario;
@@ -369,29 +383,11 @@ export async function loadScenario(
   }
   if (!isSyntheticPhone(phone)) throw new Error(`Phone ${phone} is not in the synthetic 555-01xx range`);
 
-  // Sort by week number
   const sorted = [...fixtures].sort((a, b) => a.week - b.week);
 
-  // Idempotent: delete messages by contact_number, then tester by scenario (cascade handles children)
+  // Idempotent: delete existing data before reinserting
   await db.delete(messages).where(eq(messages.contactNumber, phone));
   await db.delete(testers).where(eq(testers.scenario, scenario));
-
-  // Merge events and messages into a combined timeline sorted by (day, time).
-  // Days are absolute across all week files (1-28+), resolved from startDate directly.
-  const timeline: TimelineEntry[] = [];
-  for (const fixture of sorted) {
-    for (const event of fixture.events) {
-      // step_day events may lack a time field; default to "23:59" for sorting
-      const time = "time" in event && typeof event.time === "string" ? event.time : "23:59";
-      timeline.push({ tag: "event", event, day: event.day, time });
-    }
-    for (const msg of fixture.messages) {
-      timeline.push({ tag: "message", message: msg, day: msg.day, time: msg.time });
-    }
-  }
-  // Sort by (day, time) for chronological processing; messages before events at the same time,
-  // so events that look up a message (checkin → messageId) find it already inserted.
-  timeline.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time) || (a.tag === "message" ? -1 : 1));
 
   // Read timezone and first-text info from the first fixture's tester object
   const testerInfo = sorted[0]!.tester;
@@ -400,7 +396,7 @@ export async function loadScenario(
   const firstAt = resolveTime(startDate, testerInfo.first_text.day, testerInfo.first_text.time, timeZone);
 
   // Create the tester
-  const [tester] = await db
+  const [testerRow] = await db
     .insert(testers)
     .values({
       phone,
@@ -412,277 +408,320 @@ export async function loadScenario(
       isTestUser: false,
     })
     .returning();
-  if (!tester) throw new Error("Failed to create synthetic tester");
+  if (!testerRow) throw new Error("Failed to create synthetic tester");
+  // Mutable local copy: events update it (phase, name, goalSlug, etc.) and the closure reads it.
+  const tester: Tester = { ...testerRow };
 
-  const counts: Record<string, number> = { testers: 1 };
-  const inc = (table: string) => { counts[table] = (counts[table] ?? 0) + 1; };
+  // Merge events and messages into a combined timeline sorted by (day, time).
+  const timeline: TimelineEntry[] = [];
+  for (const fixture of sorted) {
+    for (const event of fixture.events) {
+      const time = "time" in event && typeof event.time === "string" ? event.time : "23:59";
+      const resolvedAt = resolveTime(startDate, event.day, time, timeZone);
+      timeline.push({ tag: "event", event, day: event.day, time, resolvedAt });
+    }
+    for (const msg of fixture.messages) {
+      const resolvedAt = resolveTime(startDate, msg.day, msg.time, timeZone);
+      timeline.push({ tag: "message", message: msg, day: msg.day, time: msg.time, resolvedAt });
+    }
+  }
+  // Sort by (day, time) for chronological processing; messages before events at the same time,
+  // so events that look up a message (checkin -> messageId) find it already inserted.
+  timeline.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time) || (a.tag === "message" ? -1 : 1));
 
   // Collect live-write events for the replay runner (#147)
   const liveWrites: LiveWrite[] = [];
-
-  // Track plan IDs for step_day references
-  const plansByVersion = new Map<number, string>();
-  let latestPlanId: string | undefined;
-
-  // Process timeline in order
   for (const entry of timeline) {
-    if (entry.tag === "message") {
-      const msg = entry.message;
-      const at = resolveTime(startDate, msg.day, msg.time, tester.timeZone);
-      const mediaUrl = msg.media ? `synthetic://${scenario}/${msg.day}-${msg.time}` : undefined;
-      await db.insert(messages).values({
-        direction: msg.from === "tester" ? "inbound" : "outbound",
-        contactNumber: phone,
-        content: msg.text,
-        mediaUrl: mediaUrl ?? null,
-        mediaContentType: msg.media?.content_type ?? null,
-        description: msg.media?.description ?? null,
-        transcript: msg.media?.transcript ?? null,
-        sentAt: at,
-        createdAt: at,
-      });
-      inc("messages");
-      // A tester message after went_quiet clears the pause, same as the real app
-      if (msg.from === "tester" && tester.autoTextsPausedAt) {
-        await db.update(testers).set({ autoTextsPausedAt: null }).where(eq(testers.id, tester.id));
-        tester.autoTextsPausedAt = null;
-      }
-      continue;
-    }
-
-    // entry.tag === "event"
-    const event = entry.event;
-
-    switch (event.kind) {
-      case "tester_update": {
-        const patch: Record<string, unknown> = {};
-        const s = event.set;
-        if (s.name !== undefined) patch.name = s.name;
-        if (s.quiet_hours_start !== undefined) patch.quietHoursStart = s.quiet_hours_start;
-        if (s.quiet_hours_end !== undefined) patch.quietHoursEnd = s.quiet_hours_end;
-        if (s.quiet_hours_chosen !== undefined) patch.quietHoursChosen = s.quiet_hours_chosen;
-        if (s.time_zone !== undefined) patch.timeZone = s.time_zone;
-        if (s.time_zone_status !== undefined) patch.timeZoneStatus = s.time_zone_status;
-        if (s.pushiness !== undefined) patch.pushiness = s.pushiness;
-        if (s.style_notes !== undefined) patch.styleNotes = s.style_notes;
-        if (Object.keys(patch).length > 0) {
-          await db.update(testers).set(patch).where(eq(testers.id, tester.id));
-          // Keep our local copy current for resolveTime calls
-          Object.assign(tester, patch);
-        }
-        break;
-      }
-
-      case "phase": {
-        await db.update(testers).set({ phase: event.to }).where(eq(testers.id, tester.id));
-        tester.phase = event.to;
-        break;
-      }
-
-      case "goal_chosen": {
-        await db.insert(testerGoals).values({
-          testerId: tester.id,
-          goalSlug: event.goal,
-          role: event.role,
-          checkinsPerWeek: event.checkins_per_week ?? (event.role === "maintenance" ? 2 : 0),
-          nudges: event.role === "focus",
-          proof: event.role === "focus",
-        }).onConflictDoNothing();
-        inc("tester_goals");
-        // Focus sets the tester's goal_slug
-        if (event.role === "focus") {
-          await db.update(testers).set({ goalSlug: event.goal }).where(eq(testers.id, tester.id));
-          tester.goalSlug = event.goal;
-        }
-        break;
-      }
-
-      case "goal_role": {
-        const patch: Record<string, unknown> = { role: event.role };
-        if (event.checkins_per_week !== undefined) patch.checkinsPerWeek = event.checkins_per_week;
-        if (event.role === "maintenance") {
-          patch.nudges = false;
-          patch.proof = false;
-          if (event.checkins_per_week === undefined) patch.checkinsPerWeek = 2;
-        }
-        await db
-          .update(testerGoals)
-          .set(patch)
-          .where(and(eq(testerGoals.testerId, tester.id), eq(testerGoals.goalSlug, event.goal)));
-        break;
-      }
-
-      case "goal_switch": {
-        // Update old goal to dropped
-        await db
-          .update(testerGoals)
-          .set({ role: "dropped" })
-          .where(and(eq(testerGoals.testerId, tester.id), eq(testerGoals.goalSlug, event.from)));
-        // Update tester's goal_slug to the new goal
-        await db.update(testers).set({ goalSlug: event.to }).where(eq(testers.id, tester.id));
-        tester.goalSlug = event.to;
-        // Record the switch as a flag + console alert, same as the real app (coach/tools.ts)
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        await saveFlag(db, tester.id, "goal_switch", `${event.from} → ${event.to}: ${event.reason}`, at);
-        inc("flags");
-        inc("console_messages");
-        break;
-      }
-
-      case "plan_locked": {
-        const p = event.plan;
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        const startDateStr = resolveDate(startDate, p.start_day);
-        const endsOn = p.ends_on_day ? resolveDate(startDate, p.ends_on_day) : undefined;
-        const [plan] = await db
-          .insert(plans)
-          .values({
-            testerId: tester.id,
-            goalSlug: p.goal,
-            status: "locked",
-            version: p.version,
-            step: p.step,
-            setupStep: p.setup_step ?? null,
-            destination: p.destination ?? null,
-            place: p.place ?? null,
-            stepTime: p.step_time,
-            days: p.days as Weekday[],
-            proof: p.proof as "photo" | "screenshot" | "voice",
-            proofNote: p.proof_note ?? null,
-            reason: p.reason,
-            minutes: p.minutes ?? null,
-            startDate: startDateStr,
-            commitment: p.commitment ?? null,
-            changeKind: (p.change_kind as "deepen" | "upgrade" | "other" | undefined) ?? null,
-            endsOn: endsOn ?? null,
-            needsReview: true,
-            lockedAt: at,
-            createdAt: at,
-          })
-          .returning();
-        if (plan) {
-          plansByVersion.set(p.version, plan.id);
-          latestPlanId = plan.id;
-        }
-        inc("plans");
-        break;
-      }
-
-      case "step_day": {
-        const dateStr = resolveDate(startDate, event.day);
-        const at = resolveTime(startDate, event.day, "23:59", tester.timeZone);
-        await db.insert(stepDays).values({
-          testerId: tester.id,
-          date: dateStr,
-          planId: latestPlanId ?? null,
-          status: (event.status as "done" | "done_reduced" | "missed" | undefined) ?? null,
-          step: event.step ?? null,
-          stepKind: (event.step_kind as "first" | "same" | "easier" | "harder" | undefined) ?? null,
-          stepMinutes: event.step_minutes ?? null,
-          movedTime: event.moved_time ?? null,
-          agreedAt: event.agreed_at ? resolveTime(startDate, event.day, event.agreed_at, tester.timeZone) : null,
-          onItAt: event.on_it_at ? resolveTime(startDate, event.day, event.on_it_at, tester.timeZone) : null,
-          note: event.note ?? null,
-          proofVerdict: (event.proof_verdict as "clear" | "plausible" | "unclear" | "doesnt_match" | undefined) ?? null,
-          proofSeen: event.proof_seen ?? null,
-          reflection: event.reflection ?? null,
-          createdAt: at,
-        }).onConflictDoNothing();
-        inc("step_days");
-        break;
-      }
-
-      case "takeaway": {
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        const dateStr = resolveDate(startDate, event.day);
-        await db.insert(takeaways).values({
-          testerId: tester.id,
-          goalSlug: event.goal,
-          day: dateStr,
-          text: event.text,
-          evidence: event.evidence,
-          createdAt: at,
-        });
-        inc("takeaways");
-        break;
-      }
-
-      case "suggestion": {
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        await db.insert(suggestions).values({
-          testerId: tester.id,
-          goalSlug: event.goal,
-          kind: event.suggestion_kind as "deepen" | "upgrade" | "new_focus",
-          raisedBy: event.raised_by as "coach" | "tester" | "founder",
-          proposal: event.proposal,
-          reasoning: event.reasoning ?? null,
-          newGoalSlug: event.new_goal ?? null,
-          decision: event.decision as "waiting" | "approved" | "changed" | "rejected",
-          decidedKind: (event.decided_kind as "deepen" | "upgrade" | "new_focus" | undefined) ?? null,
-          decidedProposal: event.decided_proposal ?? null,
-          outcome: (event.outcome as "delivered" | "agreed" | "declined" | undefined) ?? null,
-          decidedAt: event.decided_at ? resolveTime(startDate, event.decided_at.day, event.decided_at.time, tester.timeZone) : null,
-          deliveredAt: event.delivered_at ? resolveTime(startDate, event.delivered_at.day, event.delivered_at.time, tester.timeZone) : null,
-          outcomeAt: event.outcome_at ? resolveTime(startDate, event.outcome_at.day, event.outcome_at.time, tester.timeZone) : null,
-          createdAt: at,
-        });
-        inc("suggestions");
-        break;
-      }
-
-      case "checkin": {
-        const dateStr = resolveDate(startDate, event.day);
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        // Link to the ZOH message at the same day+time, if one was loaded (1-second window for rounding)
-        const [matchingMsg] = await db
-          .select({ id: messages.id })
-          .from(messages)
-          .where(and(
-            eq(messages.contactNumber, phone),
-            eq(messages.direction, "outbound"),
-            gte(messages.sentAt, new Date(at.getTime() - 1000)),
-            lte(messages.sentAt, new Date(at.getTime() + 1000)),
-          ))
-          .limit(1);
-        await db.insert(maintenanceCheckins).values({
-          testerId: tester.id,
-          goalSlug: event.goal,
-          date: dateStr,
-          messageId: matchingMsg?.id ?? null,
-          answer: (event.answer as "kept_up" | "mostly" | "stopped" | undefined) ?? null,
-          answeredAt: event.answered_at ? resolveTime(startDate, event.answered_at.day, event.answered_at.time, tester.timeZone) : null,
-          createdAt: at,
-        });
-        inc("maintenance_checkins");
-        break;
-      }
-
-      case "went_quiet": {
-        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
-        await db.update(testers).set({ autoTextsPausedAt: at }).where(eq(testers.id, tester.id));
-        tester.autoTextsPausedAt = at;
-        const body = event.body ?? `Went quiet on day ${event.day}; ZOH's own texts paused`;
-        await saveFlag(db, tester.id, "went_quiet", body, at);
-        inc("flags");
-        inc("console_messages");
-        break;
-      }
-
-      case "stated_preference": {
-        // Parsed but not executed: the replay runner applies these (#147)
-        liveWrites.push({ kind: "stated_preference", day: event.day, time: event.time, preference: event.preference, replaces: event.replaces });
-        break;
-      }
-
-      case "forget": {
-        // Parsed but not executed: the replay runner applies these (#147)
-        liveWrites.push({ kind: "forget", day: event.day, time: event.time, request: event.request });
-        break;
+    if (entry.tag === "event") {
+      if (entry.event.kind === "stated_preference") {
+        liveWrites.push({ kind: "stated_preference", day: entry.event.day, time: entry.event.time, preference: entry.event.preference, replaces: entry.event.replaces });
+      } else if (entry.event.kind === "forget") {
+        liveWrites.push({ kind: "forget", day: entry.event.day, time: entry.event.time, request: entry.event.request });
       }
     }
   }
 
-  return { scenario, phone, tables: counts, liveWrites };
+  // Internal cursor: tracks how far we've inserted
+  let cursor = 0;
+  const counts: Record<string, number> = { testers: 1 };
+  const inc = (table: string) => { counts[table] = (counts[table] ?? 0) + 1; };
+  const plansByVersion = new Map<number, string>();
+  let latestPlanId: string | undefined;
+
+  async function insertThrough(cutoff: Date): Promise<Record<string, number>> {
+    const cutoffMs = cutoff.getTime();
+    while (cursor < timeline.length) {
+      const entry = timeline[cursor]!;
+      if (entry.resolvedAt.getTime() > cutoffMs) break;
+      cursor++;
+
+      if (entry.tag === "message") {
+        const msg = entry.message;
+        const at = entry.resolvedAt;
+        const mediaUrl = msg.media ? `synthetic://${scenario}/${msg.day}-${msg.time}` : undefined;
+        await db.insert(messages).values({
+          direction: msg.from === "tester" ? "inbound" : "outbound",
+          contactNumber: phone,
+          content: msg.text,
+          mediaUrl: mediaUrl ?? null,
+          mediaContentType: msg.media?.content_type ?? null,
+          description: msg.media?.description ?? null,
+          transcript: msg.media?.transcript ?? null,
+          sentAt: at,
+          createdAt: at,
+        });
+        inc("messages");
+        // A tester message after went_quiet clears the pause, same as the real app
+        if (msg.from === "tester" && tester.autoTextsPausedAt) {
+          await db.update(testers).set({ autoTextsPausedAt: null }).where(eq(testers.id, tester.id));
+          tester.autoTextsPausedAt = null;
+        }
+        continue;
+      }
+
+      // entry.tag === "event"
+      const event = entry.event;
+
+      switch (event.kind) {
+        case "tester_update": {
+          const patch: Record<string, unknown> = {};
+          const s = event.set;
+          if (s.name !== undefined) patch.name = s.name;
+          if (s.quiet_hours_start !== undefined) patch.quietHoursStart = s.quiet_hours_start;
+          if (s.quiet_hours_end !== undefined) patch.quietHoursEnd = s.quiet_hours_end;
+          if (s.quiet_hours_chosen !== undefined) patch.quietHoursChosen = s.quiet_hours_chosen;
+          if (s.time_zone !== undefined) patch.timeZone = s.time_zone;
+          if (s.time_zone_status !== undefined) patch.timeZoneStatus = s.time_zone_status;
+          if (s.pushiness !== undefined) patch.pushiness = s.pushiness;
+          if (s.style_notes !== undefined) patch.styleNotes = s.style_notes;
+          if (Object.keys(patch).length > 0) {
+            await db.update(testers).set(patch).where(eq(testers.id, tester.id));
+            // Keep our local copy current for resolveTime calls
+            Object.assign(tester, patch);
+          }
+          break;
+        }
+
+        case "phase": {
+          await db.update(testers).set({ phase: event.to }).where(eq(testers.id, tester.id));
+          tester.phase = event.to;
+          break;
+        }
+
+        case "goal_chosen": {
+          await db.insert(testerGoals).values({
+            testerId: tester.id,
+            goalSlug: event.goal,
+            role: event.role,
+            checkinsPerWeek: event.checkins_per_week ?? (event.role === "maintenance" ? 2 : 0),
+            nudges: event.role === "focus",
+            proof: event.role === "focus",
+          }).onConflictDoNothing();
+          inc("tester_goals");
+          // Focus sets the tester's goal_slug
+          if (event.role === "focus") {
+            await db.update(testers).set({ goalSlug: event.goal }).where(eq(testers.id, tester.id));
+            tester.goalSlug = event.goal;
+          }
+          break;
+        }
+
+        case "goal_role": {
+          const patch: Record<string, unknown> = { role: event.role };
+          if (event.checkins_per_week !== undefined) patch.checkinsPerWeek = event.checkins_per_week;
+          if (event.role === "maintenance") {
+            patch.nudges = false;
+            patch.proof = false;
+            if (event.checkins_per_week === undefined) patch.checkinsPerWeek = 2;
+          }
+          await db
+            .update(testerGoals)
+            .set(patch)
+            .where(and(eq(testerGoals.testerId, tester.id), eq(testerGoals.goalSlug, event.goal)));
+          break;
+        }
+
+        case "goal_switch": {
+          // Update old goal to dropped
+          await db
+            .update(testerGoals)
+            .set({ role: "dropped" })
+            .where(and(eq(testerGoals.testerId, tester.id), eq(testerGoals.goalSlug, event.from)));
+          // Update tester's goal_slug to the new goal
+          await db.update(testers).set({ goalSlug: event.to }).where(eq(testers.id, tester.id));
+          tester.goalSlug = event.to;
+          // Record the switch as a flag + console alert, same as the real app (coach/tools.ts)
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          await saveFlag(db, tester.id, "goal_switch", `${event.from} → ${event.to}: ${event.reason}`, at);
+          inc("flags");
+          inc("console_messages");
+          break;
+        }
+
+        case "plan_locked": {
+          const p = event.plan;
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          const startDateStr = resolveDate(startDate, p.start_day);
+          const endsOn = p.ends_on_day ? resolveDate(startDate, p.ends_on_day) : undefined;
+          const [plan] = await db
+            .insert(plans)
+            .values({
+              testerId: tester.id,
+              goalSlug: p.goal,
+              status: "locked",
+              version: p.version,
+              step: p.step,
+              setupStep: p.setup_step ?? null,
+              destination: p.destination ?? null,
+              place: p.place ?? null,
+              stepTime: p.step_time,
+              days: p.days as Weekday[],
+              proof: p.proof as "photo" | "screenshot" | "voice",
+              proofNote: p.proof_note ?? null,
+              reason: p.reason,
+              minutes: p.minutes ?? null,
+              startDate: startDateStr,
+              commitment: p.commitment ?? null,
+              changeKind: (p.change_kind as "deepen" | "upgrade" | "other" | undefined) ?? null,
+              endsOn: endsOn ?? null,
+              needsReview: true,
+              lockedAt: at,
+              createdAt: at,
+            })
+            .returning();
+          if (plan) {
+            plansByVersion.set(p.version, plan.id);
+            latestPlanId = plan.id;
+          }
+          inc("plans");
+          break;
+        }
+
+        case "step_day": {
+          const dateStr = resolveDate(startDate, event.day);
+          const at = resolveTime(startDate, event.day, "23:59", tester.timeZone);
+          await db.insert(stepDays).values({
+            testerId: tester.id,
+            date: dateStr,
+            planId: latestPlanId ?? null,
+            status: (event.status as "done" | "done_reduced" | "missed" | undefined) ?? null,
+            step: event.step ?? null,
+            stepKind: (event.step_kind as "first" | "same" | "easier" | "harder" | undefined) ?? null,
+            stepMinutes: event.step_minutes ?? null,
+            movedTime: event.moved_time ?? null,
+            agreedAt: event.agreed_at ? resolveTime(startDate, event.day, event.agreed_at, tester.timeZone) : null,
+            onItAt: event.on_it_at ? resolveTime(startDate, event.day, event.on_it_at, tester.timeZone) : null,
+            note: event.note ?? null,
+            proofVerdict: (event.proof_verdict as "clear" | "plausible" | "unclear" | "doesnt_match" | undefined) ?? null,
+            proofSeen: event.proof_seen ?? null,
+            reflection: event.reflection ?? null,
+            createdAt: at,
+          }).onConflictDoNothing();
+          inc("step_days");
+          break;
+        }
+
+        case "takeaway": {
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          const dateStr = resolveDate(startDate, event.day);
+          await db.insert(takeaways).values({
+            testerId: tester.id,
+            goalSlug: event.goal,
+            day: dateStr,
+            text: event.text,
+            evidence: event.evidence,
+            createdAt: at,
+          });
+          inc("takeaways");
+          break;
+        }
+
+        case "suggestion": {
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          await db.insert(suggestions).values({
+            testerId: tester.id,
+            goalSlug: event.goal,
+            kind: event.suggestion_kind as "deepen" | "upgrade" | "new_focus",
+            raisedBy: event.raised_by as "coach" | "tester" | "founder",
+            proposal: event.proposal,
+            reasoning: event.reasoning ?? null,
+            newGoalSlug: event.new_goal ?? null,
+            decision: event.decision as "waiting" | "approved" | "changed" | "rejected",
+            decidedKind: (event.decided_kind as "deepen" | "upgrade" | "new_focus" | undefined) ?? null,
+            decidedProposal: event.decided_proposal ?? null,
+            outcome: (event.outcome as "delivered" | "agreed" | "declined" | undefined) ?? null,
+            decidedAt: event.decided_at ? resolveTime(startDate, event.decided_at.day, event.decided_at.time, tester.timeZone) : null,
+            deliveredAt: event.delivered_at ? resolveTime(startDate, event.delivered_at.day, event.delivered_at.time, tester.timeZone) : null,
+            outcomeAt: event.outcome_at ? resolveTime(startDate, event.outcome_at.day, event.outcome_at.time, tester.timeZone) : null,
+            createdAt: at,
+          });
+          inc("suggestions");
+          break;
+        }
+
+        case "checkin": {
+          const dateStr = resolveDate(startDate, event.day);
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          // Link to the ZOH message at the same day+time, if one was loaded (1-second window for rounding)
+          const [matchingMsg] = await db
+            .select({ id: messages.id })
+            .from(messages)
+            .where(and(
+              eq(messages.contactNumber, phone),
+              eq(messages.direction, "outbound"),
+              gte(messages.sentAt, new Date(at.getTime() - 1000)),
+              lte(messages.sentAt, new Date(at.getTime() + 1000)),
+            ))
+            .limit(1);
+          await db.insert(maintenanceCheckins).values({
+            testerId: tester.id,
+            goalSlug: event.goal,
+            date: dateStr,
+            messageId: matchingMsg?.id ?? null,
+            answer: (event.answer as "kept_up" | "mostly" | "stopped" | undefined) ?? null,
+            answeredAt: event.answered_at ? resolveTime(startDate, event.answered_at.day, event.answered_at.time, tester.timeZone) : null,
+            createdAt: at,
+          });
+          inc("maintenance_checkins");
+          break;
+        }
+
+        case "went_quiet": {
+          const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+          await db.update(testers).set({ autoTextsPausedAt: at }).where(eq(testers.id, tester.id));
+          tester.autoTextsPausedAt = at;
+          const body = event.body ?? `Went quiet on day ${event.day}; ZOH's own texts paused`;
+          await saveFlag(db, tester.id, "went_quiet", body, at);
+          inc("flags");
+          inc("console_messages");
+          break;
+        }
+
+        case "stated_preference":
+        case "forget":
+          // Live-write events: collected above, applied by the replay runner (#147)
+          break;
+      }
+    }
+    return { ...counts };
+  }
+
+  return { tester, liveWrites, insertThrough };
+}
+
+/**
+ * Loads one scenario (all weeks) into the database. Idempotent: deletes existing messages and
+ * tester data for this scenario before reinserting. Thin wrapper around loadScenarioIncremental
+ * that inserts everything at once (#150).
+ */
+export async function loadScenario(
+  db: Db,
+  fixtures: Fixture[],
+  startDate: Date,
+): Promise<LoadResult> {
+  const inc = await loadScenarioIncremental(db, fixtures, startDate);
+  const tables = await inc.insertThrough(new Date("9999-12-31T23:59:59Z"));
+  return { scenario: fixtures[0]!.scenario, phone: inc.tester.phone, tables, liveWrites: inc.liveWrites };
 }
 
 /**
