@@ -1,0 +1,74 @@
+{
+  "scenario": "maya",
+  "week": 3,
+  "format": 1,
+  "notes": "Days 15-21: the goal switch to studying, reading kept as maintenance, the econ midterm, a joke about switching majors.",
+  "tester": {
+    "phone": "+15555550102",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "23:40" }
+  },
+  "events": [
+    { "kind": "goal_switch", "day": 15, "time": "23:05", "from": "reading", "to": "deep_work",
+      "reason": "Midterms: she asked for study help and wants to keep reading a little." },
+    { "kind": "goal_chosen", "day": 15, "time": "23:06", "goal": "deep_work", "role": "focus" },
+    { "kind": "goal_role", "day": 15, "time": "23:07", "goal": "reading", "role": "maintenance", "checkins_per_week": 2 },
+    { "kind": "plan_locked", "day": 15, "time": "23:08", "plan": {
+        "version": 2, "goal": "deep_work", "step": "One 45-minute study block, phone in another room", "place": "her desk",
+        "step_time": "22:00", "days": ["sun", "mon", "tue", "thu"], "minutes": 45,
+        "proof": "photo", "proof_note": "a photo of your notes or desk when you finish",
+        "reason": "Midterms: econ on Wednesday, stats next Monday.",
+        "commitment": "ya ok", "start_day": 16 } },
+    { "kind": "step_day", "day": 16, "status": "done", "step": "45 minutes of econ, phone in another room", "step_kind": "first", "agreed_at": "21:40",
+      "note": "50 minutes of econ", "proof_verdict": "clear", "proof_seen": "Desk with an econ textbook, highlighted notes and a practice exam on a laptop" },
+    { "kind": "checkin", "day": 18, "time": "11:00", "goal": "reading", "answer": "mostly", "answered_at": { "day": 18, "time": "22:20" } },
+    { "kind": "step_day", "day": 18, "status": "done_reduced", "step": "45 minutes of stats", "step_kind": "same",
+      "note": "30 minutes, couldn't focus", "proof_verdict": "clear", "proof_seen": "Stats notes with probability problems, half finished" },
+    { "kind": "checkin", "day": 21, "time": "11:00", "goal": "reading", "answer": "stopped", "answered_at": { "day": 21, "time": "21:45" } },
+    { "kind": "step_day", "day": 21, "status": "done", "step": "45 minutes of stats before Monday's exam", "step_kind": "harder",
+      "note": "2 hours of stats practice", "proof_verdict": "clear", "proof_seen": "Stack of stats practice problems, most worked through" }
+  ],
+  "messages": [
+    { "day": 15, "time": "22:40", "from": "zoh", "text": "Hey Maya! The team and I talked it through. For midterms: one 45-minute study block a night, phone in another room, Sun, Mon, Tue and Thu at 10pm. Reading becomes a side habit, and I'll just check in on it twice a week. You in?" },
+    { "day": 15, "time": "22:55", "from": "tester", "text": "wait whats first. econ is wednesday", "tests": "Event: econ midterm on day 17" },
+    { "day": 15, "time": "22:56", "from": "zoh", "text": "Then tomorrow's block is all econ. Start Tuesday at 10?" },
+    { "day": 15, "time": "23:05", "from": "tester", "text": "ya ok" },
+    { "day": 15, "time": "23:05", "from": "zoh", "text": "Locked 🔥 Econ, you're going down. Tuesday at 10." },
+
+    { "day": 16, "time": "11:00", "from": "zoh", "text": "Hey Maya! First study block tonight at 10: 45 minutes of econ, phone in the other room. You in?" },
+    { "day": 16, "time": "21:40", "from": "tester", "text": "ya" },
+    { "day": 16, "time": "21:50", "from": "zoh", "text": "10 minutes! Phone in the other room 📵" },
+    { "day": 16, "time": "22:55", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of a desk with an open econ textbook, highlighted notes and a laptop showing a practice exam." } },
+    { "day": 16, "time": "22:55", "from": "tester", "text": "did 50 min" },
+    { "day": 16, "time": "22:56", "from": "zoh", "text": "50 minutes, phone away?! That's a real study block 🔥" },
+
+    { "day": 17, "time": "15:10", "from": "tester", "text": "econ midterm done. i think i passed??", "tests": "econ midterm Event closed as done" },
+    { "day": 17, "time": "15:11", "from": "zoh", "text": "You definitely passed in spirit 😂 How do you feel?" },
+    { "day": 17, "time": "15:30", "from": "tester", "text": "tired" },
+
+    { "day": 18, "time": "11:00", "from": "zoh", "text": "Hey Maya! Study block at 10 tonight. What's next, stats? Also, still reading a bit before bed?", "tests": "maintenance check-in folded into the kickoff" },
+    { "day": 18, "time": "21:50", "from": "zoh", "text": "10 minutes! Phone away 📵" },
+    { "day": 18, "time": "22:20", "from": "tester", "text": "mostly. like 5 pages lol" },
+    { "day": 18, "time": "22:20", "from": "tester", "text": "and ya stats. econ majors suffer", "tests": "major revealed: econ; stats midterm Monday day 22" },
+    { "day": 18, "time": "22:21", "from": "zoh", "text": "5 pages counts 📚 Stats it is, whenever you're ready." },
+    { "day": 18, "time": "23:15", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of stats notes with probability problems, about half of them worked." } },
+    { "day": 18, "time": "23:15", "from": "tester", "text": "only 30 min. couldnt focus" },
+    { "day": 18, "time": "23:16", "from": "zoh", "text": "30 focused minutes beats 2 distracted hours 💪" },
+
+    { "day": 19, "time": "23:50", "from": "tester", "text": "devon put me on 3 closes next week. during midterms. i hate it here" },
+    { "day": 19, "time": "23:51", "from": "zoh", "text": "That's rough timing 😩 Did he know about your exams?" },
+
+    { "day": 20, "time": "00:30", "from": "tester", "text": "if i fail stats im switching majors lol", "tests": "joke, not a plan: no fact about switching majors" },
+    { "day": 20, "time": "00:31", "from": "zoh", "text": "You're not failing stats 😂 Sunday's block gets you there." },
+
+    { "day": 21, "time": "11:00", "from": "zoh", "text": "Hey Maya! Big stats block tonight at 10 before tomorrow's exam. And reading this week?" },
+    { "day": 21, "time": "18:00", "from": "zoh", "text": "Hey Maya! This week: econ midterm done, two study blocks, and a few pages here and there. Stats tomorrow. What does tonight need to cover?" },
+    { "day": 21, "time": "21:45", "from": "tester", "text": "stopped lol no time for reading", "tests": "stopped during midterms is not quitting the goal" },
+    { "day": 21, "time": "21:46", "from": "tester", "text": "probability stuff. im so behind" },
+    { "day": 21, "time": "21:46", "from": "zoh", "text": "Totally fair during midterms. Probability tonight, one problem at a time 📵" },
+    { "day": 21, "time": "23:40", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of a stack of stats practice problems, most of them worked through." } },
+    { "day": 21, "time": "23:40", "from": "tester", "text": "2 hours. im cooked" },
+    { "day": 21, "time": "23:41", "from": "zoh", "text": "2 hours?! You're ready, Maya 🔥 Go sleep." }
+  ]
+}

@@ -437,6 +437,27 @@ describe("full scenario", () => {
     expect(result.tables.plans).toBe(3);
     expect(result.tables.step_days).toBe(12);
   });
+
+  it("loads all four maya.week*.json files without errors", async () => {
+    const dir = path.resolve(import.meta.dirname, "../eval/memory-lab/fixtures");
+    const files = ["maya.week1.json", "maya.week2.json", "maya.week3.json", "maya.week4.json"];
+    const fixtures = files.map((f) => parseFixture(fs.readFileSync(path.join(dir, f), "utf-8"), f));
+    const result = await loadScenario(db, fixtures, START);
+    expect(result.scenario).toBe("maya");
+    expect(result.tables.testers).toBe(1);
+    expect(result.tables.messages).toBe(148);
+    expect(result.tables.plans).toBe(2);
+    expect(result.tables.step_days).toBe(15);
+    expect(result.tables.maintenance_checkins).toBe(4);
+    expect(result.tables.suggestions).toBe(2);
+
+    // Reading goal ends as maintenance
+    const [tester] = await db.select().from(testers).where(eq(testers.phone, "+15555550102"));
+    const goals = await db.select().from(testerGoals).where(eq(testerGoals.testerId, tester!.id));
+    const reading = goals.find((g) => g.goalSlug === "reading");
+    expect(reading).toBeDefined();
+    expect(reading!.role).toBe("maintenance");
+  });
 });
 
 // ---- textsOn returns loaded texts ----

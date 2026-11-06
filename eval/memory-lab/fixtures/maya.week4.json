@@ -1,0 +1,60 @@
+{
+  "scenario": "maya",
+  "week": 4,
+  "format": 1,
+  "notes": "Days 22-28: the stats midterm, a paper, two unanswered check-ins, a weekend home, and a request to go back to reading.",
+  "tester": {
+    "phone": "+15555550102",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "23:40" }
+  },
+  "events": [
+    { "kind": "takeaway", "day": 22, "time": "16:25", "goal": "deep_work",
+      "text": "Working practice problems helps more than rereading notes.", "evidence": "explained" },
+    { "kind": "step_day", "day": 22, "status": "missed", "step": "One 45-minute study block", "note": "Took the night off after the stats midterm." },
+    { "kind": "step_day", "day": 23, "status": "done", "step": "One 45-minute block on the paper", "step_kind": "same",
+      "note": "An hour on the paper", "proof_verdict": "clear", "proof_seen": "Laptop with an essay draft, about half written", "reflection": "Paper's halfway." },
+    { "kind": "checkin", "day": 25, "time": "11:00", "goal": "reading" },
+    { "kind": "step_day", "day": 25, "status": "done", "step": "Finish the paper", "step_kind": "same",
+      "note": "Finished and submitted the paper", "proof_verdict": "clear", "proof_seen": "Submission confirmation page stamped 11:58 PM" },
+    { "kind": "checkin", "day": 27, "time": "11:00", "goal": "reading", "answer": "kept_up", "answered_at": { "day": 28, "time": "23:21" } },
+    { "kind": "step_day", "day": 28, "status": "missed", "step": "One 45-minute study block", "note": "Travelling back from home." },
+    { "kind": "suggestion", "day": 28, "time": "23:26", "goal": "deep_work", "suggestion_kind": "new_focus", "raised_by": "tester",
+      "proposal": "Make reading the focus again now that midterms are over.", "new_goal": "reading",
+      "reasoning": "Exams are done; she finished Normal People and wants the next Sally Rooney.", "decision": "waiting" }
+  ],
+  "messages": [
+    { "day": 22, "time": "16:20", "from": "tester", "text": "stats done. i actually knew stuff??", "tests": "stats midterm Event closed as done" },
+    { "day": 22, "time": "16:21", "from": "zoh", "text": "TOLD YOU 🎉 The study blocks paid off." },
+    { "day": 22, "time": "16:25", "from": "tester", "text": "doing practice problems saved me. rereading notes does nothing" },
+    { "day": 22, "time": "16:25", "from": "zoh", "text": "That's a real lesson. Practice beats rereading every time 💪" },
+    { "day": 22, "time": "21:30", "from": "tester", "text": "taking tonight off lol" },
+    { "day": 22, "time": "21:31", "from": "zoh", "text": "Earned it. Anything else left this week?" },
+    { "day": 22, "time": "21:45", "from": "tester", "text": "one paper due friday", "tests": "Event: paper due day 26" },
+    { "day": 22, "time": "21:45", "from": "zoh", "text": "Then the paper gets tomorrow's block. Last push!" },
+
+    { "day": 23, "time": "11:00", "from": "zoh", "text": "Hey Maya! Paper block at 10 tonight. You in?" },
+    { "day": 23, "time": "21:50", "from": "zoh", "text": "10 minutes! Phone away 📵" },
+    { "day": 23, "time": "23:10", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of a laptop screen with an essay draft, about half written." } },
+    { "day": 23, "time": "23:10", "from": "tester", "text": "paper. 1 hr" },
+    { "day": 23, "time": "23:11", "from": "zoh", "text": "An hour on the paper 🔥 How far along?" },
+    { "day": 23, "time": "23:30", "from": "tester", "text": "halfway" },
+
+    { "day": 25, "time": "11:00", "from": "zoh", "text": "Hey Maya! Paper block at 10, almost there. Still squeezing in any reading?", "tests": "check-in never answered" },
+    { "day": 25, "time": "21:50", "from": "zoh", "text": "10 minutes! Last stretch 📵" },
+    { "day": 25, "time": "23:59", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Screenshot of a course site submission confirmation, stamped 11:58 PM." } },
+    { "day": 25, "time": "23:59", "from": "tester", "text": "submitted. 11:58pm lmao", "tests": "paper Event done a day early; she ignored the reading question" },
+    { "day": 26, "time": "00:00", "from": "zoh", "text": "Two minutes to spare?! Midterms: DONE 🎉" },
+
+    { "day": 27, "time": "11:00", "from": "zoh", "text": "Hey Maya! Exams are done 🎉 Quick one: are you still reading before bed at all?", "tests": "second unanswered check-in, so ZOH asks directly" },
+
+    { "day": 28, "time": "11:00", "from": "zoh", "text": "Hey Maya! Study block at 10 tonight, or are we in post-exam mode?" },
+    { "day": 28, "time": "18:00", "from": "zoh", "text": "Hey Maya! Two midterms and a paper, all done, with study blocks most nights. What do you want next?" },
+    { "day": 28, "time": "23:20", "from": "tester", "text": "back from home. exams are DONE", "tests": "second weekend home, explained after the fact" },
+    { "day": 28, "time": "23:21", "from": "tester", "text": "and ya i finished normal people on the train lol", "tests": "answers the day-27 check-in: kept up" },
+    { "day": 28, "time": "23:21", "from": "zoh", "text": "You FINISHED it?! 📚🔥 How was the ending?" },
+    { "day": 28, "time": "23:25", "from": "tester", "text": "devastating. i want the next sally rooney", "tests": "a new-focus request back to reading; still waiting" },
+    { "day": 28, "time": "23:26", "from": "zoh", "text": "Love that. Let me think on it." }
+  ]
+}
