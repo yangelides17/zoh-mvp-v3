@@ -1,0 +1,73 @@
+{
+  "scenario": "sam",
+  "week": 4,
+  "format": 1,
+  "notes": "Days 22-28: Marco returns, a maybe (new job), a few-hours thread (the car), a plan upgrade.",
+  "tester": {
+    "phone": "+15555550101",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "21:40" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 24, "status": "done", "step": "Walk-run 1 mile", "step_kind": "same",
+      "note": "1.3 miles", "proof_verdict": "clear", "proof_seen": "Strava run, 1.31 mi in 15:40, Forest Park",
+      "reflection": "Felt easy." },
+    { "kind": "suggestion", "day": 24, "time": "08:00", "goal": "exercise", "suggestion_kind": "deepen", "raised_by": "coach",
+      "proposal": "Run 1.5 miles, same days and time.", "reasoning": "1.3 miles felt easy; three of the last four runs went past a mile.",
+      "decision": "approved", "decided_kind": "deepen", "decided_proposal": "Run 1.5 miles, same days and time.",
+      "decided_at": { "day": 26, "time": "10:00" }, "outcome": "agreed",
+      "delivered_at": { "day": 28, "time": "18:00" }, "outcome_at": { "day": 28, "time": "18:25" } },
+    { "kind": "step_day", "day": 25, "status": "done", "step": "Walk-run 1 mile", "step_kind": "same",
+      "note": "2 miles with Marco", "proof_verdict": "clear", "proof_seen": "Strava run, 2.03 mi in 26:10, Forest Park",
+      "reflection": "Way easier with someone; he talks the whole time." },
+    { "kind": "takeaway", "day": 25, "time": "08:20", "goal": "exercise",
+      "text": "Running with someone makes the miles easier and keeps the pace conversational.", "evidence": "explained" },
+    { "kind": "step_day", "day": 27, "status": "done_reduced", "step": "Walk-run 1 mile", "step_kind": "same",
+      "note": "Walked most of it; too tired after a shift", "proof_verdict": "clear", "proof_seen": "Strava walk, 1.00 mi in 19:40, Forest Park" },
+    { "kind": "plan_locked", "day": 28, "time": "18:25", "plan": {
+        "version": 3, "goal": "exercise", "step": "Run 1.5 miles", "place": "Forest Park",
+        "step_time": "07:45", "days": ["wed", "thu", "sat"], "minutes": 25,
+        "proof": "screenshot", "proof_note": "Strava screenshot",
+        "reason": "1.3 miles felt easy; time to step up.",
+        "commitment": "ok fine 1.5", "start_day": 31, "change_kind": "deepen" } }
+  ],
+  "messages": [
+    { "day": 22, "time": "14:45", "from": "tester", "text": "marc wants to run thursday after our shift", "tests": "Marc matches Marco; Event: run with Marco on day 25" },
+    { "day": 22, "time": "14:46", "from": "zoh", "text": "YES. A running buddy! Thursday's going to be a good one 🏃" },
+
+    { "day": 23, "time": "16:10", "from": "tester", "text": "thinking about applying for a day shift job at another hospital. idk", "tests": "Unsure or a Note on Work, never a fact" },
+    { "day": 23, "time": "16:11", "from": "zoh", "text": "Big thought. What's pulling you toward it?" },
+    { "day": 23, "time": "18:35", "from": "tester", "text": "car wont start, gonna be late for shift ugh", "tests": "hours-long thread: nothing lasting" },
+    { "day": 23, "time": "18:35", "from": "zoh", "text": "Ugh, nightmare. Hope it starts!" },
+    { "day": 23, "time": "18:50", "from": "tester", "text": "roommate jumped it, all good" },
+    { "day": 23, "time": "18:50", "from": "zoh", "text": "Roommate MVP 🙌" },
+
+    { "day": 24, "time": "07:00", "from": "zoh", "text": "Morning Sam! One mile at 7:45. You in?" },
+    { "day": 24, "time": "07:50", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 1.31 mi, 15:40, Forest Park." } },
+    { "day": 24, "time": "07:50", "from": "tester", "text": "felt easy actually" },
+    { "day": 24, "time": "07:51", "from": "zoh", "text": "Felt easy?! That's the sound of you getting fitter 🔥" },
+
+    { "day": 25, "time": "07:00", "from": "zoh", "text": "Morning Sam! Running with Marco today? One mile at 7:45 👟" },
+    { "day": 25, "time": "08:05", "from": "tester", "text": "ran w marc, 2 miles" },
+    { "day": 25, "time": "08:05", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 2.03 mi, 26:10, Forest Park." } },
+    { "day": 25, "time": "08:06", "from": "tester", "text": "way easier with someone ngl", "tests": "Running fact: easier with company; Marco event done" },
+    { "day": 25, "time": "08:06", "from": "zoh", "text": "2 MILES?! Double your step 🔥 How was running together?" },
+    { "day": 25, "time": "08:20", "from": "tester", "text": "good. he talks the whole time lol" },
+    { "day": 25, "time": "08:20", "from": "zoh", "text": "Perfect, means you're at a good pace 😂 Sleep well." },
+
+    { "day": 27, "time": "07:00", "from": "zoh", "text": "Morning Sam! Last run of the week, one mile at 7:45. You in?" },
+    { "day": 27, "time": "07:35", "from": "zoh", "text": "10 minutes! 🌅" },
+    { "day": 27, "time": "08:20", "from": "tester", "text": "too tired, walked most of it" },
+    { "day": 27, "time": "08:20", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Walk, 1.00 mi, 19:40, Forest Park." } },
+    { "day": 27, "time": "08:21", "from": "zoh", "text": "Walking it still counts, Sam. Showing up tired is the habit. Get some sleep 😴" },
+
+    { "day": 28, "time": "18:00", "from": "zoh", "text": "Hey Sam! Big week: 1.3 easy miles, 2 with Marco, and you showed up tired on Saturday. You've earned a step up: 1.5 miles, same days and time, starting Wednesday. You in?" },
+    { "day": 28, "time": "18:20", "from": "tester", "text": "honestly this week was good. marc might keep running w me on thursdays", "tests": "Unsure: Marco might run Thursdays; not a schedule" },
+    { "day": 28, "time": "18:21", "from": "zoh", "text": "That would be amazing. So, 1.5 miles?" },
+    { "day": 28, "time": "18:25", "from": "tester", "text": "ok fine 1.5" },
+    { "day": 28, "time": "18:25", "from": "zoh", "text": "LET'S GO 💪 Locked in from Wednesday." },
+    { "day": 28, "time": "18:30", "from": "tester", "text": "did you think about the friends thing", "tests": "request still open: stays a Note on Socializing" },
+    { "day": 28, "time": "18:31", "from": "zoh", "text": "Honestly, not yet. I haven't forgotten, and I'll come back to you on it." }
+  ]
+}

@@ -367,6 +367,22 @@ describe("loader", () => {
   });
 });
 
+// ---- Full scenario (all 4 weeks) ----
+
+describe("full scenario", () => {
+  it("loads all four sam.week*.json files without errors", async () => {
+    const dir = path.resolve(import.meta.dirname, "../eval/memory-lab/fixtures");
+    const files = ["sam.week1.json", "sam.week2.json", "sam.week3.json", "sam.week4.json"];
+    const fixtures = files.map((f) => parseFixture(fs.readFileSync(path.join(dir, f), "utf-8"), f));
+    const result = await loadScenario(db, fixtures, START);
+    expect(result.scenario).toBe("sam");
+    expect(result.tables.testers).toBe(1);
+    expect(result.tables.messages).toBe(168);
+    expect(result.tables.plans).toBe(3);
+    expect(result.tables.step_days).toBe(12);
+  });
+});
+
 // ---- textsOn returns loaded texts ----
 
 describe("textsOn", () => {
