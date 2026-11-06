@@ -204,6 +204,29 @@ const wentQuietEvent = z.object({
   body: z.string().optional(),
 }).strict();
 
+/**
+ * Stated preference: the replay runner calls `runMemoryTool("save_preference", ...)` at the right
+ * time. The loader parses but does NOT execute it; only the replay does (#147).
+ */
+const statedPreferenceEvent = z.object({
+  kind: z.literal("stated_preference"),
+  day: dayField,
+  time: timeField,
+  preference: z.string(),
+  replaces: z.array(z.string()).optional(),
+}).strict();
+
+/**
+ * Forget request: the replay runner calls Claude to identify refs, then
+ * `runMemoryTool("forget", ...)`. Parsed but not executed by the loader (#147).
+ */
+const forgetEvent = z.object({
+  kind: z.literal("forget"),
+  day: dayField,
+  time: timeField,
+  request: z.string(),
+}).strict();
+
 const eventSchema = z.discriminatedUnion("kind", [
   testerUpdateEvent,
   phaseEvent,
@@ -216,6 +239,8 @@ const eventSchema = z.discriminatedUnion("kind", [
   suggestionEvent,
   checkinEvent,
   wentQuietEvent,
+  statedPreferenceEvent,
+  forgetEvent,
 ]);
 
 export type FixtureEvent = z.infer<typeof eventSchema>;
@@ -244,17 +269,27 @@ export type Fixture = z.infer<typeof fixtureSchema>;
 
 // ---- Loading ----
 
+/**
+ * A live-write event: parsed by the loader but only executed by the replay runner (#147).
+ * These aren't applied to the database during loading; the replay applies them at the right time.
+ */
+export type LiveWrite =
+  | { kind: "stated_preference"; day: number; time: string; preference: string; replaces?: string[] }
+  | { kind: "forget"; day: number; time: string; request: string };
+
 export interface LoadResult {
   scenario: string;
   phone: string;
   tables: Record<string, number>;
+  /** Events the replay runner must execute at the right time (#147). */
+  liveWrites: LiveWrite[];
 }
 
 /**
  * Resolves a fixture day + time to a real timestamp from a Monday start date.
  * Day 1 in the fixture = startDate (a Monday).
  */
-function resolveTime(startDate: Date, day: number, time: string, timeZone: string): Date {
+export function resolveTime(startDate: Date, day: number, time: string, timeZone: string): Date {
   // day 1 = startDate. Work in UTC to avoid DST issues: add days, then parse at the right time.
   const date = new Date(startDate);
   date.setUTCDate(date.getUTCDate() + (day - 1));
@@ -285,7 +320,7 @@ function resolveTime(startDate: Date, day: number, time: string, timeZone: strin
 }
 
 /** Resolves a fixture day to a local date string YYYY-MM-DD from a Monday start date. */
-function resolveDate(startDate: Date, day: number): string {
+export function resolveDate(startDate: Date, day: number): string {
   const d = new Date(startDate);
   d.setUTCDate(d.getUTCDate() + (day - 1));
   return d.toISOString().slice(0, 10);
@@ -381,6 +416,9 @@ export async function loadScenario(
 
   const counts: Record<string, number> = { testers: 1 };
   const inc = (table: string) => { counts[table] = (counts[table] ?? 0) + 1; };
+
+  // Collect live-write events for the replay runner (#147)
+  const liveWrites: LiveWrite[] = [];
 
   // Track plan IDs for step_day references
   const plansByVersion = new Map<number, string>();
@@ -629,10 +667,22 @@ export async function loadScenario(
         inc("console_messages");
         break;
       }
+
+      case "stated_preference": {
+        // Parsed but not executed: the replay runner applies these (#147)
+        liveWrites.push({ kind: "stated_preference", day: event.day, time: event.time, preference: event.preference, replaces: event.replaces });
+        break;
+      }
+
+      case "forget": {
+        // Parsed but not executed: the replay runner applies these (#147)
+        liveWrites.push({ kind: "forget", day: event.day, time: event.time, request: event.request });
+        break;
+      }
     }
   }
 
-  return { scenario, phone, tables: counts };
+  return { scenario, phone, tables: counts, liveWrites };
 }
 
 /**

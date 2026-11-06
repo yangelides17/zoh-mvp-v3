@@ -1,0 +1,92 @@
+{
+  "scenario": "maya",
+  "format": 1,
+  "checkpoints": [
+    {
+      "after_day": 4,
+      "must_hold": [
+        { "id": "name", "statement": "The tester's name is Maya." },
+        { "id": "junior", "statement": "Maya is a junior in college." },
+        { "id": "cafe-job", "statement": "Maya works at a café on campus and does closing shifts." },
+        { "id": "reading-normal-people", "statement": "Maya is reading Normal People, which a friend lent her about a year ago." },
+        { "id": "night-owl", "statement": "Maya goes to bed around 1 to 2 am." },
+        { "id": "why-reading", "statement": "Maya wants to read for fun again instead of scrolling." }
+      ],
+      "must_not_hold": [
+        { "id": "not-sophomore", "statement": "Maya is a sophomore (as the current information)." },
+        { "id": "no-lost-id", "statement": "Anything about Maya losing her student ID." },
+        { "id": "no-age", "statement": "Any age for Maya." }
+      ],
+      "probes": [
+        { "id": "year", "question": "What year of college is Maya in?", "expected": "Junior." }
+      ]
+    },
+    {
+      "after_day": 12,
+      "must_hold": [
+        { "id": "lily-roommate", "statement": "Maya's roommate is Lily." },
+        { "id": "lily-resolved", "statement": "Maya and Lily fought over dishes and have since made up." },
+        { "id": "devon-work", "statement": "Devon is someone at Maya's café job who makes her close and stay late." },
+        { "id": "midterms-next-week", "statement": "Maya's midterms start the following week." }
+      ],
+      "must_not_hold": [
+        { "id": "lily-still-fighting", "statement": "Maya and Lily are currently fighting or not talking." },
+        { "id": "no-connell-person", "statement": "Connell as a person in Maya's life (he's a character in her book)." }
+      ],
+      "probes": [
+        { "id": "who-lily", "question": "Who is Lily, and how are things between her and Maya?", "expected": "Her roommate; they had a fight over dishes but made up." }
+      ]
+    },
+    {
+      "after_day": 15,
+      "must_hold": [
+        { "id": "switched-to-studying", "statement": "Maya's focus has switched to studying for midterms." },
+        { "id": "keep-reading", "statement": "Maya still wants to keep reading a little." },
+        { "id": "econ-midterm", "statement": "Maya has an econ midterm on day 17 (Wednesday)." }
+      ],
+      "must_not_hold": [
+        { "id": "not-quit-reading", "statement": "Maya gave up reading or dropped it entirely." }
+      ],
+      "probes": []
+    },
+    {
+      "after_day": 21,
+      "must_hold": [
+        { "id": "econ-major", "statement": "Maya is an econ major." },
+        { "id": "econ-done", "statement": "Maya took her econ midterm on day 17." },
+        { "id": "stats-midterm", "statement": "Maya has a stats midterm on day 22." },
+        { "id": "reading-paused", "statement": "Maya mostly kept reading early in the week but stopped during midterms (as of day 21)." }
+      ],
+      "must_not_hold": [
+        { "id": "not-switching-majors", "statement": "Maya is switching or considering switching majors." },
+        { "id": "not-quit-reading-21", "statement": "Maya has quit reading for good." }
+      ],
+      "probes": [
+        { "id": "major", "question": "What does Maya study?", "expected": "Economics." }
+      ]
+    },
+    {
+      "after_day": 28,
+      "must_hold": [
+        { "id": "practice-problems", "statement": "Practice problems work better for Maya than rereading notes." },
+        { "id": "stats-done", "statement": "Maya took her stats midterm on day 22 and felt she knew the material." },
+        { "id": "paper-submitted", "statement": "Maya submitted her paper on day 25, just before midnight." },
+        { "id": "finished-book", "statement": "Maya finished Normal People." },
+        { "id": "wants-reading-back", "statement": "Maya wants to make reading her focus again and read the next Sally Rooney book." },
+        { "id": "home-weekends", "statement": "Maya sometimes goes home on weekends." }
+      ],
+      "must_not_hold": [
+        { "id": "not-switching-majors-28", "statement": "Maya is switching or considering switching majors." },
+        { "id": "no-lost-id-28", "statement": "Anything about Maya losing her student ID." },
+        { "id": "no-connell-person-28", "statement": "Connell as a person in Maya's life." },
+        { "id": "midterms-not-upcoming", "statement": "Maya's midterms described as still upcoming." }
+      ],
+      "probes": [
+        { "id": "still-reading", "question": "Is Maya still reading?", "expected": "Yes: she finished Normal People and wants the next Sally Rooney book." },
+        { "id": "study-tip", "question": "What study method works best for Maya?", "expected": "Doing practice problems rather than rereading notes." },
+        { "id": "open-request", "question": "What has Maya asked ZOH for that is still open?", "expected": "Making reading her focus again." },
+        { "id": "major-28", "question": "What's Maya's major?", "expected": "Economics." }
+      ]
+    }
+  ]
+}
