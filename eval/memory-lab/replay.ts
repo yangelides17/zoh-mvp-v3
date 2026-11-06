@@ -19,8 +19,10 @@ import type { ClaudeModel } from "../../src/claude/replier.js";
 import { writeDay } from "../../src/memory/keeper.js";
 import { memoryBlock } from "../../src/memory/context.js";
 import { runMemoryTool, type LookupBudget } from "../../src/memory/coach-tools.js";
+import { getPages } from "../../src/memory/store.js";
+import { renderPage } from "../../src/memory/render.js";
 import { updateTester } from "../../src/testers/testers.js";
-import { loadScenario, parseFixture, resolveTime, resolveDate, type Fixture, type LiveWrite } from "../../src/synthetic/loader.js";
+import { loadScenarioIncremental, parseFixture, resolveTime, resolveDate, type Fixture, type LiveWrite } from "../../src/synthetic/loader.js";
 import { takeSnapshot, saveSnapshot, type MemorySnapshot } from "./snapshot.js";
 import { runChecks, type CheckResult } from "./checks.js";
 import { loadAnswerKey, gradeRun, type GradeResult } from "./grader.js";
@@ -70,10 +72,18 @@ export interface NightResult {
   error?: string;
 }
 
+/** A forget request that could not be resolved or failed (#149). */
+export interface UnresolvedForget {
+  day: number;
+  request: string;
+  reason: string;
+}
+
 export interface ReplayResult {
   scenario: string;
   nights: NightResult[];
   grading?: GradeResult;
+  unresolvedForgets: UnresolvedForget[];
   spend: RunSpend;
   estimate: CostEstimate;
 }
@@ -145,21 +155,18 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
 
   const fixtures = loadFixtures(opts.scenario);
   const throughDay = opts.throughDay ?? lastDayWithTexts(fixtures);
-  const { liveWrites } = await (async () => {
-    // We need a temp DB just to get liveWrites from the loader
-    // But we can also parse them directly from fixtures
-    const result = { liveWrites: [] as LiveWrite[] };
-    for (const f of fixtures) {
-      for (const event of f.events) {
-        if (event.kind === "stated_preference") {
-          result.liveWrites.push({ kind: "stated_preference", day: event.day, time: event.time, preference: event.preference, replaces: event.replaces });
-        } else if (event.kind === "forget") {
-          result.liveWrites.push({ kind: "forget", day: event.day, time: event.time, request: event.request });
-        }
+
+  // Parse liveWrites from fixtures directly for cost estimation (before DB exists)
+  const liveWrites: LiveWrite[] = [];
+  for (const f of fixtures) {
+    for (const event of f.events) {
+      if (event.kind === "stated_preference") {
+        liveWrites.push({ kind: "stated_preference", day: event.day, time: event.time, preference: event.preference, replaces: event.replaces });
+      } else if (event.kind === "forget") {
+        liveWrites.push({ kind: "forget", day: event.day, time: event.time, request: event.request });
       }
     }
-    return result;
-  })();
+  }
 
   const forgetCalls = countForgetEvents(liveWrites, throughDay);
   const checkpointBatches = countCheckpointBatches(opts.scenario, throughDay);
@@ -181,33 +188,39 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
     return {
       scenario: opts.scenario,
       nights: [],
+      unresolvedForgets: [],
       spend: { nights: [], grading: 0, forget: 0, total: 0 },
       estimate,
     };
   }
 
-  // Create fresh database and load fixtures
+  // Create fresh database and load fixtures incrementally (#150)
   const { db, client } = await createReplayDb();
   try {
-    const loadResult = await loadScenario(db, fixtures, opts.startDate);
-
-    // Get the tester row
-    const [testerRow] = await db.select().from(testers).where(eq(testers.scenario, opts.scenario)).limit(1);
-    if (!testerRow) throw new Error(`No tester found for scenario "${opts.scenario}"`);
-    let tester: Tester = testerRow;
+    const inc = await loadScenarioIncremental(db, fixtures, opts.startDate);
+    let tester: Tester = inc.tester;
 
     const nights: NightResult[] = [];
     const nightSpends: NightSpend[] = [];
     let totalForgetSpend = 0;
     let previousSnapshot: MemorySnapshot | undefined;
+    const unresolvedForgets: UnresolvedForget[] = [];
 
     // Iterate days
     for (let day = 1; day <= throughDay; day++) {
       const date = resolveDate(opts.startDate, day);
       const at3am = resolveTime(opts.startDate, day + 1, "03:00", tester.timeZone);
 
+      // Insert all fixture data through 3 am of the next day (#150).
+      // This matches production: the 3 am pass's database holds texts sent up to 3 am.
+      await inc.insertThrough(at3am);
+
+      // Reload tester in case insertThrough updated it (phase, name, goalSlug, etc.)
+      const [freshAfterLoad] = await db.select().from(testers).where(eq(testers.id, tester.id)).limit(1);
+      if (freshAfterLoad) tester = freshAfterLoad;
+
       // 1. Apply stated_preference events for this day
-      for (const w of liveWrites) {
+      for (const w of inc.liveWrites) {
         if (w.kind !== "stated_preference" || w.day !== day) continue;
         const prefAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
         // Find the nearest inbound message to use as source
@@ -225,16 +238,20 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
         if (result.ok) tester = result.tester;
       }
 
-      // 2. Apply forget events for this day
-      for (const w of liveWrites) {
+      // 2. Apply forget events for this day (#149: full refs via getPages + renderPage)
+      for (const w of inc.liveWrites) {
         if (w.kind !== "forget" || w.day !== day) continue;
         const forgetAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
-        // Use a Claude call to identify what to forget
-        const rendered = await memoryBlock(db, tester);
+        // Render every page with refs so the model sees p: and f: identifiers (#149)
+        const allPages = await getPages(db, tester.id);
+        const renderedPages = await Promise.all(
+          allPages.map((page) => renderPage(db, tester, page, { refs: true })),
+        );
+        const fullMemory = renderedPages.join("\n\n");
         const forgetPrompt = `The tester said: "${w.request}". Based on their memory below, identify which facts and/or pages to forget. Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }
 
 MEMORY:
-${rendered}`;
+${fullMemory}`;
         const response = await opts.keeperModel.create({
           system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
           messages: [{ role: "user", content: forgetPrompt }],
@@ -249,9 +266,19 @@ ${rendered}`;
           const forgetInput = JSON.parse(jsonStr) as Record<string, unknown>;
           const budget: LookupBudget = { lookups: 0, searches: 0 };
           const result = await runMemoryTool(db, tester, "forget", forgetInput, { at: forgetAt, budget });
-          if (result.ok) tester = result.tester;
-        } catch {
-          // If the forget call fails, continue
+          if (result.ok) {
+            tester = result.tester;
+          } else {
+            // Forget tool returned an error (#149)
+            unresolvedForgets.push({ day, request: w.request, reason: result.error });
+          }
+        } catch (err) {
+          // JSON parse failed or other error (#149)
+          unresolvedForgets.push({
+            day,
+            request: w.request,
+            reason: err instanceof Error ? err.message : String(err),
+          });
         }
       }
 
@@ -341,7 +368,7 @@ ${rendered}`;
     };
     saveSpend(opts.outputDir, spend);
 
-    // Save report
+    // Save report (#150: include full assertion details, #149: include unresolvedForgets)
     const report = {
       scenario: opts.scenario,
       startDate: opts.startDate.toISOString().slice(0, 10),
@@ -362,15 +389,19 @@ ${rendered}`;
           mustNotHoldScore: c.mustNotHoldScore,
           probeScore: c.probeScore,
           nearDuplicates: c.nearDuplicates,
+          mustHold: c.mustHold.map((v) => ({ id: v.id, holds: v.holds, reasoning: v.reasoning })),
+          mustNotHold: c.mustNotHold.map((v) => ({ id: v.id, holds: v.holds, reasoning: v.reasoning })),
+          probes: c.probes.map((v) => ({ id: v.id, correct: v.correct, reasoning: v.reasoning })),
         })),
       } : undefined,
+      unresolvedForgets,
       spend,
       estimate,
     };
     fs.mkdirSync(opts.outputDir, { recursive: true });
     fs.writeFileSync(path.join(opts.outputDir, "report.json"), JSON.stringify(report, null, 2));
 
-    return { scenario: opts.scenario, nights, grading, spend, estimate };
+    return { scenario: opts.scenario, nights, grading, unresolvedForgets, spend, estimate };
   } finally {
     await client.close();
   }
