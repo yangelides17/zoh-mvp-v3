@@ -67,8 +67,13 @@ reinserts.
   (maintenance check-in: goal, optional answer and answered_at; links to the ZOH message at that
   day+time when one matches), `suggestion` (raised by, `suggestion_kind` for the suggestion's own
   kind — `suggestion_kind` not `kind`, because `kind` is the event discriminator — proposal,
-  founders' decision, outcome), `went_quiet` (auto-texts paused + founder alert via `saveFlag`).
+  founders' decision, outcome), `went_quiet` (auto-texts paused + founder alert via `saveFlag`),
+  `stated_preference` (a coaching-style preference: `preference` string, optional `replaces` array of
+  f: refs to drop), `forget` (a forget request: `request` string describing what to forget).
   Unknown kinds are rejected.
+- **`stated_preference` and `forget` are replay-only.** `load-scenario` parses them and returns them in
+  `liveWrites` but does NOT execute them. Only the replay runner (`npm run lab:replay`) applies them at the
+  right time, because they need memory to exist first.
 - `notes` and `tests` are fixture-only and are never written to the database (memory must never see the
   answer key).
 
@@ -109,6 +114,34 @@ graded.
 
 A/B: same frozen fixtures, different memory versions, 3 runs each (Claude varies; stability across runs
 is itself measured). Baseline today's memory first.
+
+## Replay (`npm run lab:replay`)
+
+The replay runner creates a throwaway PGlite database, loads a scenario's fixtures, then steps through
+each day calling the real `writeDay` (and any `stated_preference` / `forget` fixture events) at their
+simulated 3 am time. After each night it snapshots all memory rows to JSON, renders the memory block to
+text, and runs free structure checks. After all nights, it grades checkpoint nights against the answer key.
+
+```
+npm run lab:replay -- <scenario> --start <YYYY-MM-DD> [options]
+```
+
+Options:
+- `--start <YYYY-MM-DD>`: the Monday that day 1 maps to (required).
+- `--through-day <N>`: replay only through day N (default: last day with inbound texts).
+- `--runs <N>`: run N times for stability analysis (default: 1).
+- `--memory <version>`: memory version to test (default: "current").
+- `--dry-run`: print cost estimate and exit without calling Claude.
+
+Output: `eval/memory-lab/runs/<run-id>/` with `night-NN.json`, `night-NN.txt`, `spend.json` and
+`report.json`. The runs directory is gitignored.
+
+Cost: $8 per-run cap, $25 per-command (all runs combined) hard cap, checked before each run starts.
+`--dry-run` shows the estimate.
+
+Answer keys: `eval/memory-lab/keys/<scenario>.json` (format 1). Checkpoints say what memory should and
+should not hold after a given day, plus probe questions. The grader sees only stripped memory (no message
+text); probes see the rendered memory block.
 
 ## Before freezing a fixture
 
