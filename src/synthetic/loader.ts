@@ -42,7 +42,7 @@ export function isSyntheticPhone(phone: string): boolean {
 
 // ---- Fixture Zod schemas (strict: unknown fields rejected) ----
 
-const dayField = z.number().int().min(1).max(28);
+const dayField = z.number().int().min(1).max(60);
 const timeField = z.string().regex(/^\d{2}:\d{2}$/);
 
 const mediaSchema = z.object({
@@ -125,7 +125,7 @@ const planLockedEvent = z.object({
     days: z.array(z.enum(WEEKDAYS as unknown as [string, ...string[]])),
     proof: z.enum(PROOF_METHODS as unknown as [string, ...string[]]),
     reason: z.string(),
-    start_day: z.number().int().min(1).max(28),
+    start_day: z.number().int().min(1).max(60),
     setup_step: z.string().optional(),
     destination: z.string().optional(),
     place: z.string().optional(),
@@ -133,7 +133,7 @@ const planLockedEvent = z.object({
     proof_note: z.string().optional(),
     commitment: z.string().optional(),
     change_kind: z.enum(CHANGE_KINDS as unknown as [string, ...string[]]).optional(),
-    ends_on_day: z.number().int().min(1).max(28).optional(),
+    ends_on_day: z.number().int().min(1).max(60).optional(),
   }).strict(),
 }).strict();
 
@@ -224,7 +224,7 @@ const fixtureSchema = z.object({
   notes: z.string().optional(),
   tester: testerSchema,
   events: z.array(eventSchema),
-  messages: z.array(messageSchema).min(1),
+  messages: z.array(messageSchema),
 }).strict();
 
 export type Fixture = z.infer<typeof fixtureSchema>;
@@ -297,8 +297,8 @@ export async function checkNotProduction(db: Db): Promise<void> {
  * start date and a sort key (day, time) for chronological ordering.
  */
 type TimelineEntry =
-  | { tag: "event"; event: FixtureEvent; weekStartDate: Date; day: number; time: string }
-  | { tag: "message"; message: FixtureMessage; weekStartDate: Date; day: number; time: string };
+  | { tag: "event"; event: FixtureEvent; day: number; time: string }
+  | { tag: "message"; message: FixtureMessage; day: number; time: string };
 
 /**
  * Loads one scenario (all weeks) into the database. Idempotent: deletes existing messages and
@@ -328,19 +328,17 @@ export async function loadScenario(
   await db.delete(messages).where(eq(messages.contactNumber, phone));
   await db.delete(testers).where(eq(testers.scenario, scenario));
 
-  // Merge events and messages into a combined timeline sorted by (day, time)
+  // Merge events and messages into a combined timeline sorted by (day, time).
+  // Days are absolute across all week files (1-28+), resolved from startDate directly.
   const timeline: TimelineEntry[] = [];
   for (const fixture of sorted) {
-    // Each week starts 7*(week-1) days after the scenario start
-    const weekStart = new Date(startDate);
-    weekStart.setUTCDate(weekStart.getUTCDate() + 7 * (fixture.week - 1));
     for (const event of fixture.events) {
       // step_day events may lack a time field; default to "23:59" for sorting
       const time = "time" in event && typeof event.time === "string" ? event.time : "23:59";
-      timeline.push({ tag: "event", event, weekStartDate: weekStart, day: event.day, time });
+      timeline.push({ tag: "event", event, day: event.day, time });
     }
     for (const msg of fixture.messages) {
-      timeline.push({ tag: "message", message: msg, weekStartDate: weekStart, day: msg.day, time: msg.time });
+      timeline.push({ tag: "message", message: msg, day: msg.day, time: msg.time });
     }
   }
   // Sort by (day, time) for chronological processing
@@ -362,7 +360,7 @@ export async function loadScenario(
       timeZoneStatus,
       consentAt: firstAt,
       contextStartedAt: firstAt,
-      isTestUser: true,
+      isTestUser: false,
     })
     .returning();
   if (!tester) throw new Error("Failed to create synthetic tester");
@@ -378,7 +376,7 @@ export async function loadScenario(
   for (const entry of timeline) {
     if (entry.tag === "message") {
       const msg = entry.message;
-      const at = resolveTime(entry.weekStartDate, msg.day, msg.time, tester.timeZone);
+      const at = resolveTime(startDate, msg.day, msg.time, tester.timeZone);
       const mediaUrl = msg.media ? `synthetic://${scenario}/${msg.day}-${msg.time}` : undefined;
       await db.insert(messages).values({
         direction: msg.from === "tester" ? "inbound" : "outbound",
@@ -392,12 +390,16 @@ export async function loadScenario(
         createdAt: at,
       });
       inc("messages");
+      // A tester message after went_quiet clears the pause, same as the real app
+      if (msg.from === "tester" && tester.autoTextsPausedAt) {
+        await db.update(testers).set({ autoTextsPausedAt: null }).where(eq(testers.id, tester.id));
+        tester.autoTextsPausedAt = null;
+      }
       continue;
     }
 
     // entry.tag === "event"
     const event = entry.event;
-    const weekStartDate = entry.weekStartDate;
 
     switch (event.kind) {
       case "tester_update": {
@@ -461,7 +463,7 @@ export async function loadScenario(
         await db.update(testers).set({ goalSlug: event.to }).where(eq(testers.id, tester.id));
         tester.goalSlug = event.to;
         // Record the switch as a flag + console alert, same as the real app (coach/tools.ts)
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
         await saveFlag(db, tester.id, "goal_switch", `${event.from} → ${event.to}: ${event.reason}`, at);
         inc("flags");
         inc("console_messages");
@@ -470,9 +472,9 @@ export async function loadScenario(
 
       case "plan_locked": {
         const p = event.plan;
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
-        const startDateStr = resolveDate(weekStartDate, p.start_day);
-        const endsOn = p.ends_on_day ? resolveDate(weekStartDate, p.ends_on_day) : undefined;
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+        const startDateStr = resolveDate(startDate, p.start_day);
+        const endsOn = p.ends_on_day ? resolveDate(startDate, p.ends_on_day) : undefined;
         const [plan] = await db
           .insert(plans)
           .values({
@@ -508,8 +510,8 @@ export async function loadScenario(
       }
 
       case "step_day": {
-        const dateStr = resolveDate(weekStartDate, event.day);
-        const at = resolveTime(weekStartDate, event.day, "23:59", tester.timeZone);
+        const dateStr = resolveDate(startDate, event.day);
+        const at = resolveTime(startDate, event.day, "23:59", tester.timeZone);
         await db.insert(stepDays).values({
           testerId: tester.id,
           date: dateStr,
@@ -519,8 +521,8 @@ export async function loadScenario(
           stepKind: (event.step_kind as "first" | "same" | "easier" | "harder" | undefined) ?? null,
           stepMinutes: event.step_minutes ?? null,
           movedTime: event.moved_time ?? null,
-          agreedAt: event.agreed_at ? resolveTime(weekStartDate, event.day, event.agreed_at, tester.timeZone) : null,
-          onItAt: event.on_it_at ? resolveTime(weekStartDate, event.day, event.on_it_at, tester.timeZone) : null,
+          agreedAt: event.agreed_at ? resolveTime(startDate, event.day, event.agreed_at, tester.timeZone) : null,
+          onItAt: event.on_it_at ? resolveTime(startDate, event.day, event.on_it_at, tester.timeZone) : null,
           note: event.note ?? null,
           proofVerdict: (event.proof_verdict as "clear" | "plausible" | "unclear" | "doesnt_match" | undefined) ?? null,
           proofSeen: event.proof_seen ?? null,
@@ -532,8 +534,8 @@ export async function loadScenario(
       }
 
       case "takeaway": {
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
-        const dateStr = resolveDate(weekStartDate, event.day);
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+        const dateStr = resolveDate(startDate, event.day);
         await db.insert(takeaways).values({
           testerId: tester.id,
           goalSlug: event.goal,
@@ -547,7 +549,7 @@ export async function loadScenario(
       }
 
       case "suggestion": {
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
         await db.insert(suggestions).values({
           testerId: tester.id,
           goalSlug: event.goal,
@@ -560,9 +562,9 @@ export async function loadScenario(
           decidedKind: (event.decided_kind as "deepen" | "upgrade" | "new_focus" | undefined) ?? null,
           decidedProposal: event.decided_proposal ?? null,
           outcome: (event.outcome as "delivered" | "agreed" | "declined" | undefined) ?? null,
-          decidedAt: event.decided_at ? resolveTime(weekStartDate, event.decided_at.day, event.decided_at.time, tester.timeZone) : null,
-          deliveredAt: event.delivered_at ? resolveTime(weekStartDate, event.delivered_at.day, event.delivered_at.time, tester.timeZone) : null,
-          outcomeAt: event.outcome_at ? resolveTime(weekStartDate, event.outcome_at.day, event.outcome_at.time, tester.timeZone) : null,
+          decidedAt: event.decided_at ? resolveTime(startDate, event.decided_at.day, event.decided_at.time, tester.timeZone) : null,
+          deliveredAt: event.delivered_at ? resolveTime(startDate, event.delivered_at.day, event.delivered_at.time, tester.timeZone) : null,
+          outcomeAt: event.outcome_at ? resolveTime(startDate, event.outcome_at.day, event.outcome_at.time, tester.timeZone) : null,
           createdAt: at,
         });
         inc("suggestions");
@@ -570,8 +572,9 @@ export async function loadScenario(
       }
 
       case "went_quiet": {
-        const at = resolveTime(weekStartDate, event.day, event.time, tester.timeZone);
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
         await db.update(testers).set({ autoTextsPausedAt: at }).where(eq(testers.id, tester.id));
+        tester.autoTextsPausedAt = at;
         const body = event.body ?? `Went quiet on day ${event.day}; ZOH's own texts paused`;
         await saveFlag(db, tester.id, "went_quiet", body, at);
         inc("flags");

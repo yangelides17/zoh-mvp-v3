@@ -284,6 +284,87 @@ describe("loader", () => {
     expect(result.tables.flags).toBe(2);
     expect(result.tables.console_messages).toBe(2);
   });
+
+  it("tester message after went_quiet clears auto_texts_paused_at", async () => {
+    const fixture = parseFixture(JSON.stringify({
+      scenario: "unpause",
+      week: 1,
+      format: 1,
+      tester: { phone: "+12125550104", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "10:00" } },
+      events: [
+        { kind: "went_quiet", day: 3, time: "12:00" },
+      ],
+      messages: [
+        { day: 1, time: "10:00", from: "tester", text: "hi" },
+        { day: 1, time: "10:01", from: "zoh", text: "hey" },
+        { day: 5, time: "14:00", from: "tester", text: "im back" },
+      ],
+    }), "inline.json");
+
+    await loadScenario(db, [fixture], START);
+    const [tester] = await db.select().from(testers).where(eq(testers.phone, "+12125550104"));
+    // Tester texted on day 5, after went_quiet on day 3 → auto_texts_paused_at cleared
+    expect(tester!.autoTextsPausedAt).toBeNull();
+  });
+
+  it("days are absolute across weeks; step_day links to correct plan version", async () => {
+    // Week 1: plan v1 locked on day 2, step_day on day 4
+    // Week 2: plan v2 locked on day 9
+    // Day 4 step_day should link to plan v1 (not v2)
+    const week1 = parseFixture(JSON.stringify({
+      scenario: "multi",
+      week: 1,
+      format: 1,
+      tester: { phone: "+12125550105", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "10:00" } },
+      events: [
+        { kind: "goal_chosen", day: 1, time: "10:05", goal: "exercise", role: "focus" },
+        { kind: "phase", day: 1, time: "10:10", to: "active" },
+        { kind: "plan_locked", day: 2, time: "12:00", plan: {
+          version: 1, goal: "exercise", step: "Walk 1 mile", step_time: "16:00",
+          days: ["mon", "thu", "sat"], proof: "screenshot", reason: "Get moving", start_day: 3
+        }},
+        { kind: "step_day", day: 4, status: "done", step_kind: "first", note: "first mile" },
+      ],
+      messages: [
+        { day: 1, time: "10:00", from: "tester", text: "hi" },
+      ],
+    }), "multi.week1.json");
+
+    const week2 = parseFixture(JSON.stringify({
+      scenario: "multi",
+      week: 2,
+      format: 1,
+      tester: { phone: "+12125550105", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "10:00" } },
+      events: [
+        { kind: "plan_locked", day: 9, time: "12:00", plan: {
+          version: 2, goal: "exercise", step: "Run 2 miles", step_time: "16:00",
+          days: ["mon", "thu", "sat"], proof: "screenshot", reason: "Level up",
+          start_day: 10, change_kind: "deepen"
+        }},
+      ],
+      messages: [],
+    }), "multi.week2.json");
+
+    const result = await loadScenario(db, [week1, week2], START);
+    expect(result.tables.plans).toBe(2);
+    expect(result.tables.step_days).toBe(1);
+
+    // The step_day on day 4 should be linked to plan v1 (locked on day 2), not v2 (locked on day 9)
+    const [sd] = await db.select().from(stepDays).where(eq(stepDays.date, "2026-11-05")); // day 4 = START + 3
+    expect(sd).toBeDefined();
+    const [planV1] = await db.select().from(plans).where(eq(plans.version, 1));
+    const [planV2] = await db.select().from(plans).where(eq(plans.version, 2));
+    expect(sd!.planId).toBe(planV1!.id);
+    expect(sd!.planId).not.toBe(planV2!.id);
+
+    // Day 4 = START (2026-11-02) + 3 days = Nov 5
+    expect(sd!.date).toBe("2026-11-05");
+
+    // is_test_user should be false for synthetic testers
+    const [tester] = await db.select().from(testers).where(eq(testers.phone, "+12125550105"));
+    expect(tester!.isTestUser).toBe(false);
+    expect(tester!.scenario).toBe("multi");
+  });
 });
 
 // ---- textsOn returns loaded texts ----
