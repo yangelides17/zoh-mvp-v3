@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   GOAL_ROLES,
@@ -18,6 +18,7 @@ import {
   PROOF_VERDICTS,
   PROOF_METHODS,
   CHANGE_KINDS,
+  CHECKIN_ANSWERS,
   WEEKDAYS,
   messages,
   testers,
@@ -26,6 +27,7 @@ import {
   stepDays,
   takeaways,
   suggestions,
+  maintenanceCheckins,
   type Tester,
   type Weekday,
 } from "../db/schema.js";
@@ -102,6 +104,7 @@ const goalRoleEvent = z.object({
   time: timeField,
   goal: z.string(),
   role: z.enum(["focus", "maintenance", "dropped"]),
+  checkins_per_week: z.number().int().optional(),
 }).strict();
 
 const goalSwitchEvent = z.object({
@@ -185,6 +188,15 @@ const suggestionEvent = z.object({
   outcome_at: z.object({ day: dayField, time: timeField }).strict().optional(),
 }).strict();
 
+const checkinEvent = z.object({
+  kind: z.literal("checkin"),
+  day: dayField,
+  time: timeField,
+  goal: z.string(),
+  answer: z.enum(CHECKIN_ANSWERS as unknown as [string, ...string[]]).optional(),
+  answered_at: z.object({ day: dayField, time: timeField }).optional(),
+}).strict();
+
 const wentQuietEvent = z.object({
   kind: z.literal("went_quiet"),
   day: dayField,
@@ -202,6 +214,7 @@ const eventSchema = z.discriminatedUnion("kind", [
   stepDayEvent,
   takeawayEvent,
   suggestionEvent,
+  checkinEvent,
   wentQuietEvent,
 ]);
 
@@ -341,8 +354,9 @@ export async function loadScenario(
       timeline.push({ tag: "message", message: msg, day: msg.day, time: msg.time });
     }
   }
-  // Sort by (day, time) for chronological processing
-  timeline.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
+  // Sort by (day, time) for chronological processing; messages before events at the same time,
+  // so events that look up a message (checkin → messageId) find it already inserted.
+  timeline.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time) || (a.tag === "message" ? -1 : 1));
 
   // Read timezone and first-text info from the first fixture's tester object
   const testerInfo = sorted[0]!.tester;
@@ -446,9 +460,16 @@ export async function loadScenario(
       }
 
       case "goal_role": {
+        const patch: Record<string, unknown> = { role: event.role };
+        if (event.checkins_per_week !== undefined) patch.checkinsPerWeek = event.checkins_per_week;
+        if (event.role === "maintenance") {
+          patch.nudges = false;
+          patch.proof = false;
+          if (event.checkins_per_week === undefined) patch.checkinsPerWeek = 2;
+        }
         await db
           .update(testerGoals)
-          .set({ role: event.role })
+          .set(patch)
           .where(and(eq(testerGoals.testerId, tester.id), eq(testerGoals.goalSlug, event.goal)));
         break;
       }
@@ -568,6 +589,33 @@ export async function loadScenario(
           createdAt: at,
         });
         inc("suggestions");
+        break;
+      }
+
+      case "checkin": {
+        const dateStr = resolveDate(startDate, event.day);
+        const at = resolveTime(startDate, event.day, event.time, tester.timeZone);
+        // Link to the ZOH message at the same day+time, if one was loaded (1-second window for rounding)
+        const [matchingMsg] = await db
+          .select({ id: messages.id })
+          .from(messages)
+          .where(and(
+            eq(messages.contactNumber, phone),
+            eq(messages.direction, "outbound"),
+            gte(messages.sentAt, new Date(at.getTime() - 1000)),
+            lte(messages.sentAt, new Date(at.getTime() + 1000)),
+          ))
+          .limit(1);
+        await db.insert(maintenanceCheckins).values({
+          testerId: tester.id,
+          goalSlug: event.goal,
+          date: dateStr,
+          messageId: matchingMsg?.id ?? null,
+          answer: (event.answer as "kept_up" | "mostly" | "stopped" | undefined) ?? null,
+          answeredAt: event.answered_at ? resolveTime(startDate, event.answered_at.day, event.answered_at.time, tester.timeZone) : null,
+          createdAt: at,
+        });
+        inc("maintenance_checkins");
         break;
       }
 

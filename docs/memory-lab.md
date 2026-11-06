@@ -61,9 +61,11 @@ reinserts.
 - `from`: `tester` (inbound) or `zoh` (outbound). Media carries the stored description or transcript; no
   files.
 - Event kinds: `tester_update`, `phase`, `goal_chosen` (with role), `goal_role` (focus / maintenance /
-  dropped), `goal_switch` (writes the same goal-switch flag the app writes; memory builds goal pages from
-  it), `plan_locked` (any version, change kind deepen / upgrade / other, optional end date),
-  `step_day`, `takeaway`, `suggestion` (raised by, `suggestion_kind` for the suggestion's own
+  dropped; optional `checkins_per_week` when becoming maintenance), `goal_switch` (writes the same
+  goal-switch flag the app writes; memory builds goal pages from it), `plan_locked` (any version,
+  change kind deepen / upgrade / other, optional end date), `step_day`, `takeaway`, `checkin`
+  (maintenance check-in: goal, optional answer and answered_at; links to the ZOH message at that
+  day+time when one matches), `suggestion` (raised by, `suggestion_kind` for the suggestion's own
   kind — `suggestion_kind` not `kind`, because `kind` is the event discriminator — proposal,
   founders' decision, outcome), `went_quiet` (auto-texts paused + founder alert via `saveFlag`).
   Unknown kinds are rejected.

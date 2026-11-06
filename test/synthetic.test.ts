@@ -10,6 +10,7 @@ import type { Db } from "../src/db/client.js";
 import {
   consoleMessages,
   flags,
+  maintenanceCheckins,
   messages,
   plans,
   stepDays,
@@ -364,6 +365,61 @@ describe("loader", () => {
     const [tester] = await db.select().from(testers).where(eq(testers.phone, "+12125550105"));
     expect(tester!.isTestUser).toBe(false);
     expect(tester!.scenario).toBe("multi");
+  });
+
+  it("checkin events write maintenance_checkins rows with message linking", async () => {
+    const fixture = parseFixture(JSON.stringify({
+      scenario: "ck",
+      week: 1,
+      format: 1,
+      tester: { phone: "+12125550106", time_zone: "America/New_York", time_zone_status: "assumed_eastern", first_text: { day: 1, time: "10:00" } },
+      events: [
+        { kind: "goal_chosen", day: 1, time: "10:05", goal: "exercise", role: "focus" },
+        { kind: "goal_chosen", day: 1, time: "10:06", goal: "reading", role: "maintenance", checkins_per_week: 2 },
+        { kind: "phase", day: 1, time: "10:10", to: "active" },
+        // Answered check-in: ZOH asks at 09:00 on day 3, answer comes later
+        { kind: "checkin", day: 3, time: "09:00", goal: "reading", answer: "kept_up", answered_at: { day: 3, time: "11:30" } },
+        // Unanswered check-in on day 5
+        { kind: "checkin", day: 5, time: "09:00", goal: "reading" },
+      ],
+      messages: [
+        { day: 1, time: "10:00", from: "tester", text: "hi" },
+        { day: 1, time: "10:01", from: "zoh", text: "hey" },
+        // ZOH text at the exact same time as the day 3 check-in
+        { day: 3, time: "09:00", from: "zoh", text: "Still keeping up with reading?" },
+      ],
+    }), "checkin.json");
+
+    const result = await loadScenario(db, [fixture], START);
+    expect(result.tables.maintenance_checkins).toBe(2);
+
+    const [tester] = await db.select().from(testers).where(eq(testers.phone, "+12125550106"));
+    const checkins = await db.select().from(maintenanceCheckins).where(eq(maintenanceCheckins.testerId, tester!.id));
+    expect(checkins.length).toBe(2);
+
+    // Answered check-in on day 3
+    const answered = checkins.find((c) => c.answer !== null)!;
+    expect(answered).toBeDefined();
+    expect(answered.goalSlug).toBe("reading");
+    expect(answered.answer).toBe("kept_up");
+    expect(answered.answeredAt).not.toBeNull();
+    expect(answered.date).toBe("2026-11-04"); // day 3 = START + 2
+
+    // Its messageId should link to the ZOH text at day 3 09:00
+    expect(answered.messageId).not.toBeNull();
+
+    // Unanswered check-in on day 5
+    const unanswered = checkins.find((c) => c.answer === null)!;
+    expect(unanswered).toBeDefined();
+    expect(unanswered.goalSlug).toBe("reading");
+    expect(unanswered.answeredAt).toBeNull();
+    expect(unanswered.date).toBe("2026-11-06"); // day 5 = START + 4
+
+    // goal_role: reading maintenance goal should have checkins_per_week = 2
+    const goals = await db.select().from(testerGoals).where(eq(testerGoals.testerId, tester!.id));
+    const reading = goals.find((g) => g.goalSlug === "reading")!;
+    expect(reading.role).toBe("maintenance");
+    expect(reading.checkinsPerWeek).toBe(2);
   });
 });
 
