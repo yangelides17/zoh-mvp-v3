@@ -40,6 +40,8 @@ export interface CheckpointScore {
   mustHoldScore: number;
   mustNotHoldScore: number;
   probeScore: number;
+  /** If grading this checkpoint failed, the error message. */
+  error?: string;
 }
 
 export interface GradeResult {
@@ -102,7 +104,7 @@ function evidenceFoundInMemory(evidence: string, memoryJson: string): boolean {
   return normalizeForMatch(memoryJson).includes(normalizeForMatch(evidence));
 }
 
-/** Grade all checkpoint nights for one run. */
+/** Grade all checkpoint nights for one run. Each checkpoint is graded independently — if one fails, the rest still run. */
 export async function gradeRun(
   model: ClaudeModel,
   answerKey: AnswerKey,
@@ -115,15 +117,30 @@ export async function gradeRun(
     const entry = snapshots.get(cp.after_day);
     if (!entry) continue;
 
-    const stripped = stripForGrader(entry.snapshot);
-    const memoryJson = JSON.stringify({
-      pages: stripped.pages.map((p) => ({ id: p.id, kind: p.kind, title: p.title, summary: p.summary, body: p.body, goalSlug: p.goalSlug, status: p.status, date: p.date })),
-      facts: stripped.facts.map((f) => ({ id: f.id, pageId: f.pageId, section: f.section, label: f.label, text: f.text, day: f.day })),
-      links: stripped.links.map((l) => ({ fromPageId: l.fromPageId, toPageId: l.toPageId, kind: l.kind })),
-    }, null, 2);
+    try {
+      const stripped = stripForGrader(entry.snapshot);
+      const memoryJson = JSON.stringify({
+        pages: stripped.pages.map((p) => ({ id: p.id, kind: p.kind, title: p.title, summary: p.summary, body: p.body, goalSlug: p.goalSlug, status: p.status, date: p.date })),
+        facts: stripped.facts.map((f) => ({ id: f.id, pageId: f.pageId, section: f.section, label: f.label, text: f.text, day: f.day })),
+        links: stripped.links.map((l) => ({ fromPageId: l.fromPageId, toPageId: l.toPageId, kind: l.kind })),
+      }, null, 2);
 
-    const score = await gradeCheckpoint(model, cp, memoryJson, entry.rendered, totalUsage);
-    checkpoints.push(score);
+      const score = await gradeCheckpoint(model, cp, memoryJson, entry.rendered, totalUsage);
+      checkpoints.push(score);
+    } catch (err) {
+      // Record the error for this checkpoint and continue with the rest
+      checkpoints.push({
+        afterDay: cp.after_day,
+        mustHold: cp.must_hold.map((s) => ({ ...s, present: "no" as const, evidence: "none", reasoning: "Checkpoint grading failed", contradicted: false })),
+        mustNotHold: cp.must_not_hold.map((s) => ({ ...s, present: "yes" as const, evidence: "none", reasoning: "Checkpoint grading failed", contradicted: false })),
+        probes: cp.probes.map((p) => ({ ...p, answer: "(grading failed)", correct: false, reasoning: "Checkpoint grading failed" })),
+        nearDuplicates: [],
+        mustHoldScore: 0,
+        mustNotHoldScore: 0,
+        probeScore: 0,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   return { scenario: answerKey.scenario, checkpoints, usage: totalUsage };
@@ -175,6 +192,10 @@ Respond with JSON only, no other text:
     if (response.usage) {
       usage.input += response.usage.input;
       usage.output += response.usage.output;
+    }
+
+    if (response.stopReason === "max_tokens") {
+      throw new Error(`Grader response truncated (max_tokens) for day ${cp.after_day} statements batch`);
     }
 
     const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
@@ -235,6 +256,10 @@ Respond with JSON only:
     if (response.usage) {
       usage.input += response.usage.input;
       usage.output += response.usage.output;
+    }
+
+    if (response.stopReason === "max_tokens") {
+      throw new Error(`Grader response truncated (max_tokens) for day ${cp.after_day} probes batch`);
     }
 
     const text = response.content.find((b) => b.type === "text")?.text ?? "{}";

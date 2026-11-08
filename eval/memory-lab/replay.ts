@@ -83,6 +83,7 @@ export interface ReplayResult {
   scenario: string;
   nights: NightResult[];
   grading?: GradeResult;
+  gradingError?: string;
   unresolvedForgets: UnresolvedForget[];
   spend: RunSpend;
   estimate: CostEstimate;
@@ -347,6 +348,7 @@ ${fullMemory}`;
     // Grade checkpoint nights
     let grading: GradeResult | undefined;
     let gradingSpend = 0;
+    let gradingError: string | undefined;
     try {
       const answerKey = loadAnswerKey(opts.scenario);
       const snapshotMap = new Map<number, { snapshot: MemorySnapshot; rendered: string }>();
@@ -355,8 +357,8 @@ ${fullMemory}`;
       }
       grading = await gradeRun(opts.graderModel, answerKey, snapshotMap);
       gradingSpend = dollarsFor(grading.usage, opts.graderModelName);
-    } catch {
-      // No answer key or grading failed; continue without
+    } catch (err) {
+      gradingError = err instanceof Error ? err.message : String(err);
     }
 
     const totalNightSpend = nightSpends.reduce((sum, n) => sum + n.dollars, 0);
@@ -389,11 +391,13 @@ ${fullMemory}`;
           mustNotHoldScore: c.mustNotHoldScore,
           probeScore: c.probeScore,
           nearDuplicates: c.nearDuplicates,
+          error: c.error,
           mustHold: c.mustHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, contradicted: v.contradicted, reasoning: v.reasoning })),
           mustNotHold: c.mustNotHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, contradicted: v.contradicted, reasoning: v.reasoning })),
           probes: c.probes.map((v) => ({ id: v.id, correct: v.correct, reasoning: v.reasoning })),
         })),
       } : undefined,
+      gradingError,
       unresolvedForgets,
       spend,
       estimate,
@@ -401,7 +405,7 @@ ${fullMemory}`;
     fs.mkdirSync(opts.outputDir, { recursive: true });
     fs.writeFileSync(path.join(opts.outputDir, "report.json"), JSON.stringify(report, null, 2));
 
-    return { scenario: opts.scenario, nights, grading, unresolvedForgets, spend, estimate };
+    return { scenario: opts.scenario, nights, grading, gradingError, unresolvedForgets, spend, estimate };
   } finally {
     await client.close();
   }

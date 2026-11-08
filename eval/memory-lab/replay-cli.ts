@@ -66,7 +66,7 @@ function makeModel(client: Anthropic, modelId: string): ClaudeModel {
     async create(req: ModelRequest): Promise<ModelResponse> {
       const response = await client.messages.create({
         model: modelId,
-        max_tokens: 8192,
+        max_tokens: 16384,
         system: req.system,
         messages: req.messages,
         tools: req.tools ?? [],
@@ -187,9 +187,16 @@ async function main() {
     if (failed.length > 0) {
       console.log(`Failed nights: ${failed.map((n) => n.day).join(", ")}`);
     }
+    if (result.gradingError) {
+      console.log(`\nGrading error: ${result.gradingError}`);
+    }
     if (result.grading) {
       console.log("\nGrading:");
       for (const cp of result.grading.checkpoints) {
+        if (cp.error) {
+          console.log(`  Day ${cp.afterDay}: ERROR — ${cp.error}`);
+          continue;
+        }
         const contradictions = [...cp.mustHold, ...cp.mustNotHold].filter((v) => v.contradicted).length;
         const suffix = contradictions > 0 ? ` (${contradictions} contradicted)` : "";
         console.log(`  Day ${cp.afterDay}: must_hold=${cp.mustHoldScore.toFixed(2)} must_not_hold=${cp.mustNotHoldScore.toFixed(2)} probes=${cp.probeScore.toFixed(2)}${suffix}`);

@@ -921,6 +921,128 @@ describe("grader evidence-based verdicts (#152)", () => {
   });
 });
 
+// ---- Grader: per-checkpoint error isolation ----
+
+describe("grader per-checkpoint error isolation", () => {
+  /** Build a minimal answer key with two checkpoints. */
+  function makeAnswerKey(): AnswerKey {
+    return {
+      scenario: "test",
+      format: 1,
+      checkpoints: [
+        {
+          after_day: 7,
+          must_hold: [{ id: "mh-1", statement: "Tester likes running" }],
+          must_not_hold: [],
+          probes: [],
+        },
+        {
+          after_day: 14,
+          must_hold: [{ id: "mh-2", statement: "Tester has a dog" }],
+          must_not_hold: [],
+          probes: [],
+        },
+      ],
+    };
+  }
+
+  function makeSnapshot(factTexts: string[]) {
+    const now = new Date();
+    return {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: factTexts.map((text, i) => ({
+          id: `f${i + 1}`, pageId: "p1", testerId: "t1", section: "", label: null,
+          text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+        })),
+        links: [],
+        forgotten: [],
+      },
+      rendered: factTexts.join("\n"),
+    };
+  }
+
+  it("one checkpoint throws, the other still grades and the error is recorded", async () => {
+    const model = new FakeClaudeModel();
+    // First checkpoint: throw
+    model.script(new Error("API overloaded"));
+    // Second checkpoint: normal response
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-2", reasoning: "found", present: "yes", evidence: "has a dog" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey();
+    const snaps = new Map([
+      [7, makeSnapshot(["likes running"])],
+      [14, makeSnapshot(["has a dog"])],
+    ]);
+
+    const result = await gradeRun(model, key, snaps);
+
+    // Both checkpoints should be present in the result
+    expect(result.checkpoints).toHaveLength(2);
+
+    // First checkpoint: should have the error recorded
+    const cp1 = result.checkpoints[0]!;
+    expect(cp1.afterDay).toBe(7);
+    expect(cp1.error).toBe("API overloaded");
+    expect(cp1.mustHoldScore).toBe(0);
+
+    // Second checkpoint: should have graded successfully
+    const cp2 = result.checkpoints[1]!;
+    expect(cp2.afterDay).toBe(14);
+    expect(cp2.error).toBeUndefined();
+    expect(cp2.mustHoldScore).toBe(1);
+    expect(cp2.mustHold[0]!.present).toBe("yes");
+  });
+
+  it("max_tokens stop reason is recorded as a truncation error", async () => {
+    const model = new FakeClaudeModel();
+    // Override create to return max_tokens stop reason
+    const originalCreate = model.create.bind(model);
+    let callCount = 0;
+    model.create = async (req) => {
+      callCount++;
+      if (callCount === 1) {
+        // Simulate a max_tokens truncation for the first checkpoint
+        return {
+          content: [{ type: "text" as const, text: '{ "verdicts": [' }],
+          stopReason: "max_tokens",
+          usage: { input: 1000, cacheRead: 0, cacheWrite: 0, output: 8192 },
+        };
+      }
+      return originalCreate(req);
+    };
+
+    // Script the second checkpoint's response
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-2", reasoning: "found", present: "yes", evidence: "has a dog" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey();
+    const snaps = new Map([
+      [7, makeSnapshot(["likes running"])],
+      [14, makeSnapshot(["has a dog"])],
+    ]);
+
+    const result = await gradeRun(model, key, snaps);
+
+    expect(result.checkpoints).toHaveLength(2);
+
+    // First checkpoint: truncation error
+    const cp1 = result.checkpoints[0]!;
+    expect(cp1.error).toContain("max_tokens");
+    expect(cp1.error).toContain("truncated");
+
+    // Second checkpoint: graded normally
+    const cp2 = result.checkpoints[1]!;
+    expect(cp2.error).toBeUndefined();
+    expect(cp2.mustHoldScore).toBe(1);
+  });
+});
+
 // ---- Snapshot: sourceText (#152) ----
 
 describe("snapshot sourceText (#152)", () => {

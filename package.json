@@ -20,7 +20,8 @@
     "eval": "tsx eval/run.ts",
     "memory": "tsx src/memory/show-cli.ts",
     "load-scenario": "tsx src/synthetic/load-cli.ts",
-    "lab:replay": "tsx eval/memory-lab/replay-cli.ts"
+    "lab:replay": "tsx eval/memory-lab/replay-cli.ts",
+    "lab:grade": "tsx eval/memory-lab/grade-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
