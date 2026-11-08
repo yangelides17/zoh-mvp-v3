@@ -190,7 +190,9 @@ async function main() {
     if (result.grading) {
       console.log("\nGrading:");
       for (const cp of result.grading.checkpoints) {
-        console.log(`  Day ${cp.afterDay}: must_hold=${cp.mustHoldScore.toFixed(2)} must_not_hold=${cp.mustNotHoldScore.toFixed(2)} probes=${cp.probeScore.toFixed(2)}`);
+        const contradictions = [...cp.mustHold, ...cp.mustNotHold].filter((v) => v.contradicted).length;
+        const suffix = contradictions > 0 ? ` (${contradictions} contradicted)` : "";
+        console.log(`  Day ${cp.afterDay}: must_hold=${cp.mustHoldScore.toFixed(2)} must_not_hold=${cp.mustNotHoldScore.toFixed(2)} probes=${cp.probeScore.toFixed(2)}${suffix}`);
       }
     }
     console.log(`\nSpend: $${result.spend.total.toFixed(2)}`);

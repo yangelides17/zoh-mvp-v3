@@ -15,8 +15,11 @@ import { stripForGrader } from "./snapshot.js";
 export interface StatementVerdict {
   id: string;
   statement: string;
-  holds: boolean;
+  present: "yes" | "no";
+  evidence: string;
   reasoning: string;
+  /** True when the code-decided answer (from evidence matching) differs from the model's `present`. */
+  contradicted: boolean;
 }
 
 export interface ProbeVerdict {
@@ -59,8 +62,9 @@ export function loadAnswerKey(scenario: string): AnswerKey {
 
 const statementVerdictSchema = z.array(z.object({
   id: z.string(),
-  holds: z.boolean(),
   reasoning: z.string(),
+  present: z.enum(["yes", "no"]),
+  evidence: z.string(),
 }));
 
 const probeVerdictSchema = z.array(z.object({
@@ -71,6 +75,32 @@ const probeVerdictSchema = z.array(z.object({
 }));
 
 const duplicateSchema = z.array(z.string());
+
+/** Minimum evidence quote length to attempt matching. */
+const MIN_QUOTE_LENGTH = 4;
+
+/**
+ * Collapse whitespace, straighten curly quotes and apostrophes, and lowercase
+ * so that a model-returned evidence quote can be fuzzy-matched against memory text.
+ */
+export function normalizeForMatch(text: string): string {
+  return text
+    .replace(/\\"/g, '"')           // JSON-escaped double quotes → straight
+    .replace(/\u201C|\u201D/g, '"') // curly double quotes → straight
+    .replace(/\u2018|\u2019/g, "'") // curly single quotes / apostrophes → straight
+    .replace(/\s+/g, " ")           // collapse whitespace
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Decide whether the evidence quote is genuinely found in the memory text.
+ * Returns true when the normalized quote appears inside the normalized memory.
+ */
+function evidenceFoundInMemory(evidence: string, memoryJson: string): boolean {
+  if (!evidence || evidence.toLowerCase() === "none" || evidence.length < MIN_QUOTE_LENGTH) return false;
+  return normalizeForMatch(memoryJson).includes(normalizeForMatch(evidence));
+}
 
 /** Grade all checkpoint nights for one run. */
 export async function gradeRun(
@@ -113,11 +143,11 @@ async function gradeCheckpoint(
   // Batch 1: must_hold + must_not_hold + near-duplicate scan
   if (cp.must_hold.length > 0 || cp.must_not_hold.length > 0) {
     const statementsBlock = [
-      ...cp.must_hold.map((s) => `MUST HOLD: [${s.id}] "${s.statement}"`),
-      ...cp.must_not_hold.map((s) => `MUST NOT HOLD: [${s.id}] "${s.statement}"`),
+      ...cp.must_hold.map((s) => `[${s.id}] "${s.statement}"`),
+      ...cp.must_not_hold.map((s) => `[${s.id}] "${s.statement}"`),
     ].join("\n");
 
-    const prompt = `You are grading a coaching app's memory system. Below is the structured memory (JSON) for a tester after day ${cp.after_day}.
+    const prompt = `You are checking a coaching app's memory system. Below is the structured memory (JSON) for a tester after day ${cp.after_day}.
 
 MEMORY (JSON):
 ${memoryJson}
@@ -125,13 +155,15 @@ ${memoryJson}
 STATEMENTS TO CHECK:
 ${statementsBlock}
 
-For each statement, decide whether the memory HOLDS it (the information is present and consistent with the statement) or does NOT HOLD it.
+For each statement, decide whether the information described is present in the memory above.
+- If present, set "present" to "yes" and "evidence" to an exact quote from the memory JSON that supports it.
+- If not present, set "present" to "no" and "evidence" to "none".
 
 Also scan the facts for near-duplicates: facts with the same meaning but different wording on the same page.
 
 Respond with JSON only, no other text:
 {
-  "verdicts": [{ "id": "<statement id>", "holds": true/false, "reasoning": "<one sentence>" }],
+  "verdicts": [{ "id": "<statement id>", "reasoning": "<one sentence>", "present": "yes" or "no", "evidence": "<exact quote from memory or none>" }],
   "near_duplicates": ["<description of duplicate pair>"]
 }`;
 
@@ -154,15 +186,26 @@ Respond with JSON only, no other text:
       nearDuplicates = duplicateSchema.parse(parsed.near_duplicates ?? []);
 
       for (const v of verdicts) {
+        // Code-decided presence: does the evidence quote actually appear in memory?
+        const codePresent = evidenceFoundInMemory(v.evidence, memoryJson);
+        const contradicted = (v.present === "yes") !== codePresent;
+
+        const verdict: Omit<StatementVerdict, "statement"> = {
+          id: v.id,
+          present: codePresent ? "yes" : "no",
+          evidence: v.evidence,
+          reasoning: v.reasoning,
+          contradicted,
+        };
         const mh = cp.must_hold.find((s) => s.id === v.id);
-        if (mh) mustHold.push({ ...mh, holds: v.holds, reasoning: v.reasoning });
+        if (mh) mustHold.push({ ...mh, ...verdict });
         const mnh = cp.must_not_hold.find((s) => s.id === v.id);
-        if (mnh) mustNotHold.push({ ...mnh, holds: v.holds, reasoning: v.reasoning });
+        if (mnh) mustNotHold.push({ ...mnh, ...verdict });
       }
     } catch {
       // If parsing fails, mark all as unknown
-      for (const s of cp.must_hold) mustHold.push({ ...s, holds: false, reasoning: "Grader response parsing failed" });
-      for (const s of cp.must_not_hold) mustNotHold.push({ ...s, holds: true, reasoning: "Grader response parsing failed" });
+      for (const s of cp.must_hold) mustHold.push({ ...s, present: "no", evidence: "none", reasoning: "Grader response parsing failed", contradicted: false });
+      for (const s of cp.must_not_hold) mustNotHold.push({ ...s, present: "yes", evidence: "none", reasoning: "Grader response parsing failed", contradicted: false });
     }
   }
 
@@ -208,9 +251,9 @@ Respond with JSON only:
     }
   }
 
-  // Scores: must_hold = fraction correct (holds = true), must_not_hold = fraction correct (holds = false)
-  const mustHoldScore = mustHold.length > 0 ? mustHold.filter((v) => v.holds).length / mustHold.length : 1;
-  const mustNotHoldScore = mustNotHold.length > 0 ? mustNotHold.filter((v) => !v.holds).length / mustNotHold.length : 1;
+  // Scores: must_hold passes when code-decided present, must_not_hold passes when code-decided absent
+  const mustHoldScore = mustHold.length > 0 ? mustHold.filter((v) => v.present === "yes").length / mustHold.length : 1;
+  const mustNotHoldScore = mustNotHold.length > 0 ? mustNotHold.filter((v) => v.present === "no").length / mustNotHold.length : 1;
   const probeScore = probes.length > 0 ? probes.filter((v) => v.correct).length / probes.length : 1;
 
   return {
