@@ -22,6 +22,8 @@ import { takeSnapshot, stripForGrader, saveSnapshot } from "../eval/memory-lab/s
 import { runChecks } from "../eval/memory-lab/checks.js";
 import { estimateRunCost, saveSpend, PER_RUN_CAP, COMMAND_CAP, type RunSpend } from "../eval/memory-lab/cost.js";
 import { answerKeySchema } from "../eval/memory-lab/keys/schema.js";
+import { gradeRun, normalizeForMatch, type CheckpointScore } from "../eval/memory-lab/grader.js";
+import type { AnswerKey } from "../eval/memory-lab/keys/schema.js";
 import { FakeClaudeModel, makeDb } from "./helpers.js";
 import { writeDay } from "../src/memory/keeper.js";
 import { updateTester } from "../src/testers/testers.js";
@@ -200,8 +202,8 @@ describe("structure checks", () => {
     const snap = {
       pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: new Date(), updatedAt: new Date() }],
       facts: [
-        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "I like running", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
-        { id: "f2", pageId: "p1", testerId: "t1", section: "", label: null, text: "I like running", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "I like running", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f2", pageId: "p1", testerId: "t1", section: "", label: null, text: "I like running", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
       ],
       links: [],
       forgotten: [],
@@ -214,7 +216,7 @@ describe("structure checks", () => {
     const snap = {
       pages: [],
       facts: [
-        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "secret", sourceMessageId: "msg1", day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "secret", sourceMessageId: "msg1", sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
       ],
       links: [],
       forgotten: [{ id: "fg1", testerId: "t1", messageId: "msg1", createdAt: new Date() }],
@@ -227,8 +229,8 @@ describe("structure checks", () => {
     const prev = {
       pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: new Date(), updatedAt: new Date() }],
       facts: [
-        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "old text", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
-        { id: "f2", pageId: "p1", testerId: "t1", section: "", label: null, text: "removed", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "old text", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f2", pageId: "p1", testerId: "t1", section: "", label: null, text: "removed", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
       ],
       links: [],
       forgotten: [],
@@ -239,8 +241,8 @@ describe("structure checks", () => {
         { id: "p2", testerId: "t1", kind: "person" as const, title: "Ana", summary: "Sister", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: new Date(), updatedAt: new Date() },
       ],
       facts: [
-        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "updated text", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
-        { id: "f3", pageId: "p2", testerId: "t1", section: "", label: null, text: "new fact", sourceMessageId: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "updated text", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
+        { id: "f3", pageId: "p2", testerId: "t1", section: "", label: null, text: "new fact", sourceMessageId: null, sourceText: null, day: null, createdAt: new Date(), updatedAt: new Date() },
       ],
       links: [],
       forgotten: [],
@@ -623,7 +625,7 @@ describe("incremental loading (#150)", () => {
 // ---- Report assertion details (#150) ----
 
 describe("report assertion details (#150)", () => {
-  it("report checkpoints include mustHold/mustNotHold/probes with id, verdict, reasoning", async () => {
+  it("report checkpoints include mustHold/mustNotHold/probes with id, present, evidence, contradicted, reasoning", async () => {
     // We simulate a graded run by constructing a report directly from grader types,
     // matching the format the replay now writes.
     const checkpoint = {
@@ -632,8 +634,8 @@ describe("report assertion details (#150)", () => {
       mustNotHoldScore: 1,
       probeScore: 0.5,
       nearDuplicates: [] as string[],
-      mustHold: [{ id: "mh-1", holds: true, reasoning: "Fact is present" }],
-      mustNotHold: [{ id: "mnh-1", holds: false, reasoning: "Not in memory" }],
+      mustHold: [{ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" }],
+      mustNotHold: [{ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" }],
       probes: [{ id: "p-1", correct: true, reasoning: "Answer matches" }],
     };
 
@@ -658,13 +660,13 @@ describe("report assertion details (#150)", () => {
     expect(read.grading!.checkpoints).toHaveLength(1);
     const cp = read.grading!.checkpoints[0]!;
 
-    // mustHold array with id, holds, reasoning
+    // mustHold array with id, present, evidence, contradicted, reasoning
     expect(cp.mustHold).toHaveLength(1);
-    expect(cp.mustHold[0]).toEqual({ id: "mh-1", holds: true, reasoning: "Fact is present" });
+    expect(cp.mustHold[0]).toEqual({ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" });
 
-    // mustNotHold array with id, holds, reasoning
+    // mustNotHold array with id, present, evidence, contradicted, reasoning
     expect(cp.mustNotHold).toHaveLength(1);
-    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", holds: false, reasoning: "Not in memory" });
+    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" });
 
     // probes array with id, correct, reasoning
     expect(cp.probes).toHaveLength(1);
@@ -763,5 +765,189 @@ describe("unresolved forgets (#149)", () => {
     expect(read.unresolvedForgets).toHaveLength(1);
     expect(read.unresolvedForgets[0]!.request).toBe("forget my dog");
     expect(read.unresolvedForgets[0]!.reason).toContain("No fact");
+  });
+});
+
+// ---- Grader: evidence-based verdicts (#152) ----
+
+describe("grader evidence-based verdicts (#152)", () => {
+  /** Build a minimal answer key with one checkpoint at day 7. */
+  function makeAnswerKey(
+    mustHold: Array<{ id: string; statement: string }>,
+    mustNotHold: Array<{ id: string; statement: string }>,
+  ): AnswerKey {
+    return {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: mustHold,
+        must_not_hold: mustNotHold,
+        probes: [],
+      }],
+    };
+  }
+
+  /** Build a minimal snapshot containing the given fact texts. */
+  function makeSnapshot(factTexts: string[]) {
+    const now = new Date();
+    return {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: factTexts.map((text, i) => ({
+          id: `f${i + 1}`, pageId: "p1", testerId: "t1", section: "", label: null,
+          text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+        })),
+        links: [],
+        forgotten: [],
+      },
+      rendered: factTexts.join("\n"),
+    };
+  }
+
+  it("prompt asks 'present: yes/no', not 'holds' or 'true/false'", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    await gradeRun(model, key, snaps);
+
+    expect(model.requests.length).toBeGreaterThan(0);
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).toContain("present");
+    expect(prompt).toContain('"yes"');
+    expect(prompt).toContain('"no"');
+    expect(prompt).not.toContain('"holds"');
+    expect(prompt).not.toContain("true/false");
+  });
+
+  it("must_hold 'yes' with valid quote passes (mustHoldScore = 1.0)", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found it", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustHoldScore).toBe(1.0);
+    expect(cp.mustHold[0]!.present).toBe("yes");
+    expect(cp.mustHold[0]!.contradicted).toBe(false);
+  });
+
+  it("must_not_hold 'no' with evidence 'none' passes (mustNotHoldScore = 1.0)", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-1", reasoning: "not found", present: "no", evidence: "none" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-1", statement: "Tester has a cat" }]);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHoldScore).toBe(1.0);
+    expect(cp.mustNotHold[0]!.present).toBe("no");
+    expect(cp.mustNotHold[0]!.contradicted).toBe(false);
+  });
+
+  it("'yes' with made-up quote is contradicted and treated as absent", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "I think so", present: "yes", evidence: "this text is not in memory at all" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes cats" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustHold[0]!.contradicted).toBe(true);
+    expect(cp.mustHold[0]!.present).toBe("no"); // code overrides to absent
+    expect(cp.mustHoldScore).toBe(0); // must_hold fails because absent
+  });
+
+  it("'no' with real quote is contradicted, treated as present; must_not_hold FAILS", async () => {
+    const dogFact = "neighbor has a large golden retriever named Buddy";
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-dog", reasoning: "not there", present: "no", evidence: dogFact }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-dog", statement: "Memory mentions neighbor's dog" }]);
+    const snaps = new Map([[7, makeSnapshot([dogFact])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.contradicted).toBe(true);
+    expect(cp.mustNotHold[0]!.present).toBe("yes"); // code overrides to present
+    expect(cp.mustNotHoldScore).toBe(0); // must_not_hold fails because present
+  });
+
+  it("quote with curly apostrophe + curly double quotes matches via normalization", async () => {
+    const memoryText = `Sam said "big day" for his sister's wedding`;
+    const curlyQuote = `Sam said \u201Cbig day\u201D for his sister\u2019s wedding`;
+
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found it", present: "yes", evidence: curlyQuote }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Sam mentioned his sister's wedding" }], []);
+    const snaps = new Map([[7, makeSnapshot([memoryText])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustHold[0]!.contradicted).toBe(false);
+    expect(cp.mustHold[0]!.present).toBe("yes");
+    expect(cp.mustHoldScore).toBe(1.0);
+  });
+
+  it("normalizeForMatch straightens curly quotes and collapses whitespace", () => {
+    expect(normalizeForMatch("\u201CHello\u201D")).toBe('"hello"');
+    expect(normalizeForMatch("it\u2019s  a   test")).toBe("it's a test");
+    expect(normalizeForMatch("  UPPER  case  ")).toBe("upper case");
+  });
+});
+
+// ---- Snapshot: sourceText (#152) ----
+
+describe("snapshot sourceText (#152)", () => {
+  it("takeSnapshot includes sourceText from the messages table", async () => {
+    const tester = await createTester(db);
+    const msg = await say(db, tester, "inbound", at("2026-11-02", "21:40"), "I love hiking in the mountains");
+    const { self } = await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+    await addFact(db, self, { text: "loves hiking", sourceMessageId: msg.id, day: "2026-11-02" }, at("2026-11-02", "21:40"));
+
+    const snap = await takeSnapshot(db, tester.id);
+    const fact = snap.facts.find((f) => f.text === "loves hiking");
+    expect(fact).toBeDefined();
+    expect(fact!.sourceText).toBe("I love hiking in the mountains");
+  });
+
+  it("stripForGrader removes sourceText (sets to null)", async () => {
+    const tester = await createTester(db);
+    const msg = await say(db, tester, "inbound", at("2026-11-02", "21:40"), "I love hiking");
+    const { self } = await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+    await addFact(db, self, { text: "loves hiking", sourceMessageId: msg.id, day: "2026-11-02" }, at("2026-11-02", "21:40"));
+
+    const snap = await takeSnapshot(db, tester.id);
+    expect(snap.facts[0]!.sourceText).toBe("I love hiking");
+
+    const stripped = stripForGrader(snap);
+    for (const f of stripped.facts) {
+      expect(f.sourceText).toBeNull();
+    }
   });
 });
