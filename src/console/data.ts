@@ -6,6 +6,7 @@ import {
   goals,
   maintenanceCheckins,
   messages,
+  pauses,
   planInputs,
   plans,
   stepDays,
@@ -318,6 +319,10 @@ export interface ProgressTab {
   suggestions: Suggestion[];
   /** Every lesson (a reset deletes them): understood (applied or recalled) and only explained (#78). */
   learnings: Learnings;
+  /** #107: every break they asked for, oldest first, shown between step days (never counted as one). */
+  pauses: Pause[];
+  /** Their zone, for the pauses' days and times. */
+  timeZone: string;
 }
 
 export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> {
@@ -342,6 +347,8 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
     stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [], learned: lessons.filter((l) => l.day === day.date).map((l) => l.text) })),
     suggestions: await listSuggestions(db, tester.id),
     learnings: learnings(lessons),
+    pauses: await db.select().from(pauses).where(eq(pauses.testerId, tester.id)).orderBy(asc(pauses.startedAt)),
+    timeZone: tester.timeZone,
   };
 }
 

@@ -602,6 +602,54 @@ describe("#106: compact header and side tab rail", () => {
   });
 });
 
+describe("#107: pauses in the step log", () => {
+  const progressOf = async (id: string) => (await get(`/console/testers/${id}?tab=progress`, cookieFor("Yanni"))).body;
+  const goalNumbers = (page: string) => page.slice(page.indexOf('id="goals"'), page.indexOf('id="learnings"')).match(/<b>[^<]*<\/b>/g);
+
+  it("shows a pause between the step days around it, with start, return date, actual end, how it ended and why", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", reason: "family trip", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    const progress = await progressOf(s.tester.id);
+    const card = progress.slice(progress.indexOf('class="card pause-row"'));
+    expect(card).toContain("Paused Wed, Oct 28");
+    expect(card).toContain("said back Sun, Nov 1");
+    expect(card).toContain("ended Sun, Nov 1, 9:00 AM (their return date)");
+    expect(card).toContain("“family trip”");
+    // Newest first: Nov 2, the pause, then Oct 26.
+    const order = [`id="day-${MON}"`, 'class="card pause-row"', 'id="day-2026-10-26"'].map((x) => progress.indexOf(x));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    // The dot strip, oldest first: Oct 26, the ⏸ marker, Nov 2; still five step days.
+    const strip = [`href="#day-2026-10-26"`, 'class="dot pause"', `href="#day-${MON}"`].map((x) => progress.indexOf(x));
+    expect(strip).toEqual([...strip].sort((a, b) => a - b));
+    expect(progress).toContain("Last 5 step days");
+  });
+
+  it("says ongoing for a pause still on, and has no reason line without a reason", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-08", "10:00"), until: "2026-11-16" });
+    const card = (await progressOf(s.tester.id)).split('class="card pause-row"')[1]!.split("</div></div>")[0]!;
+    expect(card).toContain("Paused Sun, Nov 8");
+    expect(card).toContain("said back Mon, Nov 16");
+    expect(card).toContain("ongoing");
+    expect(card).not.toContain("“");
+  });
+
+  it("says in plain words when they came back early", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), endedAt: at("2026-10-30", "12:00"), endedBy: "tester" });
+    expect(await progressOf(s.tester.id)).toContain("ended Fri, Oct 30, 12:00 PM (they came back)");
+  });
+
+  it("never changes the streak or hit rate", async () => {
+    const s = await seed();
+    const before = goalNumbers(await progressOf(s.tester.id));
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    expect(goalNumbers(await progressOf(s.tester.id))).toEqual(before);
+    expect(before?.length).toBeGreaterThan(0);
+  });
+});
+
 describe("#181: their own goal as Focus, the menu choice as Category", () => {
   const READING = "Read &amp; learn more (books, ideas, any topic)";
   const page = async (id: string, tab = "progress") => (await get(`/console/testers/${id}?tab=${tab}`, cookieFor("Yanni"))).body;

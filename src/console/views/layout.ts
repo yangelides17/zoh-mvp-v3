@@ -131,6 +131,8 @@ ul.facts { margin: 8px 0; padding-left: 20px; } ul.facts li { margin: 4px 0; }
 .dot.done { background: var(--done); } .dot.done_reduced { background: var(--half); } .dot.missed { background: var(--miss); } .dot.proof { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--done); }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
 .legend .dot { width: 14px; height: 14px; font-size: 0; display: inline-block; vertical-align: -2px; margin-right: 4px; }
+.dot.pause { background: transparent; color: var(--muted); border: 2px dashed var(--open); font-size: 10px; }
+.pause-row { background: var(--soft); box-shadow: none; scroll-margin-top: 64px; } .pause-row:target { outline: 2px solid var(--accent); }
 .day-row { scroll-margin-top: 64px; } .day-row:target { outline: 2px solid var(--accent); }
 .day-log { margin-top: 6px; font-size: .9em; display: grid; gap: 2px; }
 `;
