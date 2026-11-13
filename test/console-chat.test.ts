@@ -825,6 +825,29 @@ describe("#155: the console chat drafts, a founder confirms", () => {
     expect((await post(`/console/testers/${tester.id}/requests/${two.id}/cancel`, {}, cookieFor("Yanni"))).statusCode).toBe(409);
   });
 
+  it("the scheduler claims a request before it sends, so a Cancel clicked mid-send is refused (word for word or carried)", async () => {
+    const tester = await seed();
+    const exact = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "One", exact: true, sendNow: false, at: now });
+    const carried = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share https://example.com/sleep", exact: false, sendNow: false, at: now });
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    await t.db.insert(stepDays).values({ testerId: tester.id, date: TUE, planId: plan!.id, status: "done" });
+    const midSend: number[] = [];
+    const send = t.sendblue.sendMessage.bind(t.sendblue);
+    t.sendblue.sendMessage = async (input) => {
+      const open = await t.db.select().from(consoleMessages).where(eq(consoleMessages.requestStatus, "sending"));
+      for (const r of open) midSend.push((await post(`/console/testers/${tester.id}/requests/${r.id}/cancel`, {}, cookieFor("Yanni"))).statusCode);
+      return send(input);
+    };
+    await scheduler.tick(at(TUE, "12:05"));
+    const coachModel = new FakeClaudeModel("Kalimera Sam! Saw this and thought of you: https://example.com/sleep");
+    const real = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: createCoach({ db: t.db, model: coachModel, voice: "v" }), allowedNumbers: [ME], lineNumber: LINE });
+    await real.tick(at(WED, "09:00"));
+    await real.stop();
+    expect(midSend).toEqual([409, 409]);
+    const status = async (id: string) => (await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, id)))[0]!.requestStatus;
+    expect([await status(exact.id), await status(carried.id)]).toEqual(["sent", "done"]);
+  });
+
   it("a plan change ZOH already raised is taken back with a note ZOH carries, not cancelled silently", async () => {
     const tester = await seed();
     const s = await addFounderSuggestion(t.db, { testerId: tester.id, goalSlug: "reading", kind: "adjust", proposal: "Step at 7:30 am", planChanges: { stepTime: "07:30" }, by: "Yanni", at: now });
