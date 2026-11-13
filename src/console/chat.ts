@@ -58,7 +58,7 @@ export const CONSOLE_INSTRUCTIONS = `You are ZOH, the texting coach, in the foun
 Answering the founders:
 - Plain and short: a line or two (a few for a real question). No markdown.
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess. Count misses and streaks from the state, never estimate them.
-- Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so. They want it different: a new draft with replaces = the old one's id.
+- Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so, and don't ask whether to go ahead: the card's buttons ask. They want it different: a new draft with replaces = the old one's id.
 - Context for how to coach them ("traveling next week, go easy"): save_note.
 - Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
 - Their own words sent as written ("send her exactly…", "text him: …"): send_text, copied exactly, never reworded or judged; even_in_quiet_hours only if they say to send it now anyway.
@@ -737,7 +737,8 @@ async function recordBlock(db: Db, tester: Tester, now: Date, goalCap?: number):
     `RECENT TEXTS (oldest first, their local time)\n${texts.map((m) => textLine(m, tester)).join("\n") || "(none yet)"}`,
     ...(state.plan ? [`STEP LOG (their focus goal, one line per local day; count from this, never work dates out yourself)\n${await stepLog(db, tester, state.plan, state.today)}`] : []),
     `OPEN REQUESTS\n${requests.join("\n") || "(none)"}`,
-    `YOUR OPEN DRAFTS (waiting for a founder's Do it or yes; newest last)\n${(await openDrafts(db, tester.id)).map((d) => `- [${draftRef(d.id)}] for ${d.author ?? "the team"}: ${d.body}`).join("\n") || "(none)"}`,
+    `YOUR OPEN DRAFTS (waiting for a founder's Do it or yes; newest last)\n${(await openDrafts(db, tester.id)).map((d) => `- [${draftRef(d.id)}] ${d.createdAt.getTime() === now.getTime() ? "you just drafted it in this answer" : `for ${d.author ?? "the team"}`}: ${d.body}`).join("\n") || "(none)"}`,
+    `NEXT STEPS WAITING FOR THE FOUNDERS' DECISION (decide_suggestion)\n${(await listSuggestions(db, tester.id)).filter((x) => x.decision === "waiting").map((x) => `- [${suggestionRef(x.id)}] ${x.kind.replace("_", " ")}${x.newGoalSlug ? ` to ${x.newGoalSlug}` : ""}, raised by ${x.raisedBy === "tester" ? "them" : x.raisedBy}: ${x.proposal}${x.reasoning ? ` (${x.reasoning})` : ""}`).join("\n") || "(none)"}`,
     `NEXT CHANCE to reach them: ${await nextChance(db, tester, now)}`,
     `Now: ${founderTime(now)} Eastern (founders), ${localTime(now, tester.timeZone)} their time.`,
   ].join("\n\n");

@@ -462,6 +462,8 @@ describe("the texting coach and the team", () => {
   it("the carried request is written by the real coach from its THIS TEXT ALSO line", async () => {
     const tester = await seed();
     const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share https://example.com/sleep", exact: false, sendNow: false, at: now });
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    await t.db.insert(stepDays).values({ testerId: tester.id, date: TUE, planId: plan!.id, status: "done" });
     const coachModel = new FakeClaudeModel("Kalimera Sam! Saw this and thought of you: https://example.com/sleep");
     const coach = createCoach({ db: t.db, model: coachModel, voice: "v" });
     await coach.nudge!({ tester, turns: [{ role: "user", text: "hi" }], now: at(WED, "09:00"), moment: "kickoff", carry: { requestId: request.id } });
@@ -751,6 +753,16 @@ describe("#155: the console chat drafts, a founder confirms", () => {
     expect(html.slice(html.indexOf('id="needs-you"'))).not.toContain("Learn the cube");
   });
 
+  it("the console coach sees next steps waiting for the founders, and knows a draft it just made is its own", async () => {
+    const tester = await seed();
+    const [waiting] = await t.db.insert(suggestions).values({ testerId: tester.id, goalSlug: "reading", kind: "new_focus", newGoalSlug: "exercise", raisedBy: "tester", proposal: "Learn the cube" }).returning();
+    model.script({ tools: [{ name: "save_note", input: { note: "Busy week" } }] }, "Drafted.");
+    await chat(tester, "she's busy this week");
+    const first = model.requests[0]!.system.at(-1)!.text;
+    expect(first).toContain(`[${waiting!.id.slice(0, 8)}] new focus to exercise, raised by them: Learn the cube`);
+    expect(model.requests[1]!.system.at(-1)!.text).toContain("you just drafted it in this answer");
+  });
+
   it("can't confirm its own draft in the answer that made it: only after the founder says so", async () => {
     const tester = await seed();
     model.script({ tools: [{ name: "save_note", input: { note: "Traveling next week, go easy" } }, { name: "confirm_draft", input: {} }] }, "Saved.");
@@ -787,6 +799,19 @@ describe("#155: the console chat drafts, a founder confirms", () => {
     await confirm(tester, draft!);
     expect((await drafts(tester.id))[0]).toMatchObject({ draftStatus: "failed", draftResult: expect.stringContaining("stop") });
     expect((await thread(tester.id)).some((r) => r.kind === "request")).toBe(false);
+  });
+
+  it("a request a kickoff carries stays in the coach's state while it's claimed for that text", async () => {
+    const tester = await seed();
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share https://example.com/sleep", exact: false, sendNow: false, at: now });
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    await t.db.insert(stepDays).values({ testerId: tester.id, date: TUE, planId: plan!.id, status: "done" });
+    const coachModel = new FakeClaudeModel("Kalimera Sam! Saw this and thought of you: https://example.com/sleep");
+    const real = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: createCoach({ db: t.db, model: coachModel, voice: "v" }), allowedNumbers: [ME], lineNumber: LINE });
+    await real.tick(at(WED, "09:00"));
+    await real.stop();
+    expect(coachModel.stateOf()).toContain(`THIS TEXT ALSO CARRIES the team's request [${requestRef(request.id)}]`);
+    expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request.id)))[0]!.requestStatus).toBe("done");
   });
 
   it("cancelling a live text before it goes means it never reaches them; once it's going out, cancel is refused", async () => {

@@ -536,6 +536,8 @@ describe("#155: a founder's plan change, raised by ZOH and made on the tester's 
     // Raised, but nothing from them since.
     expect(await tool(tester, "record_next_step", { suggestion: ref, outcome: "delivered" }, at(MON, "20:00"))).toMatchObject({ ok: true });
     expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "20:00"))).toMatchObject({ ok: false, error: expect.stringContaining("their answer") });
+    // Raised in this very reply to an unrelated text: still not their answer to it.
+    expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "20:00"), "how's it going?")).toMatchObject({ ok: false, error: expect.stringContaining("their answer") });
     expect(await allPlans()).toHaveLength(1);
   });
 

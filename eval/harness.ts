@@ -23,6 +23,7 @@ import { loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { COACH_AUTHOR } from "../src/console/requests.js";
+import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EvalClock, evalDay, zonedDate } from "./clock.js";
@@ -392,7 +393,9 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   const { timeZone, status } = guessTimeZone(app.phone);
   // Seeded memory reaches further back: start their context before the oldest of it.
   const oldest = memoryDays(seed);
-  const contextStart = oldest ? new Date(Math.min(storedStart.getTime(), now.getTime() - (oldest + 1) * DAY_MS)) : storedStart;
+  // The earlier of the real and the eval clock's start: rows the run stamps on the eval clock (a founder's next
+  // step confirmed in the console, #155) must count as after it, as they would in production.
+  const contextStart = new Date(Math.min(storedStart.getTime(), startedAt.getTime(), oldest ? now.getTime() - (oldest + 1) * DAY_MS : Infinity));
   const [tester] = await app.db
     .insert(schema.testers)
     .values({
@@ -462,6 +465,9 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       // locked" and seeded step days count toward the slip ladder.
       lockedAt: new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000),
     }).returning();
+    if (seed.plan_review_alert) {
+      await raiseAlert(app.db, { testerId: tester!.id, topic: "plan_review", key: `plan_review:${plan!.id}`, body: `Plan version ${plan!.version} to review`, planId: plan!.id, at: plan!.lockedAt ?? now });
+    }
     for (const d of seed.step_days) {
       await app.db
         .insert(schema.stepDays)
@@ -583,6 +589,8 @@ async function seedNextSteps(app: EvalApp, tester: schema.Tester, seed: Seed, ve
       decidedKind: s.decided_kind,
       decidedProposal: s.decided_proposal,
       outcome: s.outcome,
+      planChanges: s.plan_changes,
+      deliveredAt: s.delivered_hours_ago !== undefined ? new Date(app.clock.now().getTime() - s.delivered_hours_ago * 3_600_000) : null,
     });
   }
 }

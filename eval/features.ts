@@ -298,6 +298,11 @@ export const FEATURES: Record<string, FeatureDef> = {
     scenarios: [],
     rubric: [
       { id: "own-idea", scope: "text", label: "An approved step sounds like ZOH's own idea, specific to them" },
+      {
+        id: "founder-proposal",
+        scope: "conversation",
+        label: "ZOH raises a founder's proposal as its own suggestion, asking for the tester's OK, never \"the team changed your plan\"",
+      },
       { id: "think-on-it", scope: "text", label: "\"Let me think on it\" is warm and promises nothing" },
       {
         id: "maintenance-light",
@@ -322,10 +327,16 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "own-idea", scope: "text", label: "Our suggestions reach the tester in ZOH's voice, at a natural moment, as its own idea" },
       { id: "confirms", scope: "text", label: "Confirmations back to us say what and when, in a line or two" },
       { id: "pushback", scope: "text", label: "It pushes back on requests that break the voice rules" },
+      { id: "drafts", scope: "conversation", label: "Console chat's drafts say exactly what will happen; its replies never claim something happened that didn't" },
+      {
+        id: "alert-accurate",
+        scope: "conversation",
+        label: "Console chat explains the alert accurately from saved state and never says a plan \"needs approval\" when it's already active",
+      },
       {
         id: "files-step",
         scope: "conversation",
-        label: "Asked to suggest a next step, ZOH files it and confirms in a line (what, which goal); asks first if the goal or kind is unclear",
+        label: "Asked to suggest a next step, ZOH drafts it and says in a line what and which goal; asks first if the goal or kind is unclear",
       },
     ],
   },

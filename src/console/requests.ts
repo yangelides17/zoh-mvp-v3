@@ -115,6 +115,21 @@ export async function claimRequest(db: Db, requestId: string): Promise<boolean> 
   return rows.length > 0;
 }
 
+/** The request a text being written now carries: pending or claimed for it, this tester's only. */
+export async function claimedRequest(db: Db, testerId: string, requestId: string): Promise<ConsoleMessage[]> {
+  return db
+    .select()
+    .from(consoleMessages)
+    .where(
+      and(
+        eq(consoleMessages.id, requestId),
+        eq(consoleMessages.testerId, testerId),
+        eq(consoleMessages.kind, "request"),
+        inArray(consoleMessages.requestStatus, ["pending", "sending"]),
+      ),
+    );
+}
+
 /** Hands a claimed request back when its text didn't go out after all (skipped, held, a retry). */
 export async function releaseRequest(db: Db, requestId: string): Promise<void> {
   await db

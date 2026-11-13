@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { and, asc, eq, lte, max, sql } from "drizzle-orm";
+import { and, asc, eq, max, sql } from "drizzle-orm";
 import { giveOwedRecap } from "./week.js";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
@@ -7,7 +7,6 @@ import {
   CHANGE_KINDS,
   CHECKIN_ANSWERS,
   maintenanceCheckins,
-  messages,
   MIN_DAYS_PER_WEEK,
   nudges,
   pauses,
@@ -693,8 +692,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         if (approvedAs === PLAN_ADJUST) {
           // #155: the founders' change to their plan is made only on their answer, after it was raised.
           if (!awaitingAnswer(approved)) return { ok: false, error: `That plan change isn't raised yet: raise it first (record_next_step delivered), then wait for their answer.` };
-          const answeredAt = await lastInboundAt(db, tester, at);
-          if (!answeredAt || !approved.deliveredAt || answeredAt <= approved.deliveredAt) {
+          // Raised before this reply began (a reply's rounds share one `at`), and this is a reply to their text.
+          if (state.nudgeMoment || !state.lastTesterText || !approved.deliveredAt || approved.deliveredAt >= at) {
             return { ok: false, error: "Wait for their answer to the plan change: only their yes (after you raised it) makes it." };
           }
           if (given !== undefined && given !== "other") return { ok: false, error: "A plan change is kind other." };
@@ -772,7 +771,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
       const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
       const quiet = merged.stepTime !== state.plan.stepTime ? quietNote(tester, merged.stepTime, merged.minutes) : "";
-      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}`);
+      // #155: the founders' plan change they just agreed to is news to confirm, not the plan as it was.
+      const agreed = approved && approvedKind(approved) === PLAN_ADJUST ? " New as of their answer: confirm the change to them in a line (what's different, from when), no more questions." : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}${agreed}`);
     }
 
     case "switch_goal": {
@@ -1310,13 +1311,4 @@ function changedFrom(proposed: PlanChanges, saved: PlanValues): string | undefin
     .filter((k) => JSON.stringify(proposed[k]) !== JSON.stringify(saved[k]))
     .map((k) => `${CHANGE_LABELS[k]} ${show(saved[k])}, not ${show(proposed[k])}`);
   return diffs.length ? diffs.join("; ") : undefined;
-}
-
-/** Their latest text up to `at`, on their clock. */
-async function lastInboundAt(db: Db, tester: Tester, at: Date): Promise<Date | undefined> {
-  const [row] = await db
-    .select({ at: max(messages.createdAt) })
-    .from(messages)
-    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "inbound"), lte(messages.createdAt, at)));
-  return row?.at ?? undefined;
 }

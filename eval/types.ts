@@ -98,12 +98,20 @@ export const seedSchema = z.object({
       }),
     )
     .default([]),
+  /** #69: the seeded plan's "Plan version N to review" alert, unseen, as locking it raises in production. */
+  plan_review_alert: z.boolean().default(false),
   /** Next steps on the seeded goal as the founders left them (next-step feature). */
   suggestions: z
     .array(
       z.object({
-        kind: z.enum(["deepen", "upgrade", "new_focus"]),
+        kind: z.enum(["deepen", "upgrade", "new_focus", "adjust"]),
         raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
+        /** adjust only (#155): the plan fields the founders proposed, as stored (stepTime "HH:MM", place, days...). */
+        plan_changes: z
+          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(["photo", "screenshot", "voice"]).optional() })
+          .optional(),
+        /** How long ago ZOH raised it, for one waiting on their answer. */
+        delivered_hours_ago: z.number().optional(),
         proposal: z.string(),
         reasoning: z.string().optional(),
         new_goal: z.string().optional(),
