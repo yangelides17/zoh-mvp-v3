@@ -132,8 +132,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.
-- Eval: $1 per issue on the branch, up to $3 for a group (Oct 29; was $1 per branch), targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
-  against the checks Yanni approves in each spec, judged reasonably.
+- Eval: $0.50 per issue on the branch, up to $1.50 for a group (Nov 13, #174; was $1 / $3), targeted runs (`--case`)
+  by default, full runs only with Yanni's OK; graded against the checks Yanni approves in each spec, judged
+  reasonably. Haiku grades while iterating and the coach's model grades the `--final` run: in an 8-case calibration
+  Haiku caught 8/8 known mistakes and agreed with Sonnet on 97% of checks, but named fewer secondary problems.
 - Coach memory (#8) is a small wiki per tester in Postgres (no outside search service): pages of
   facts that each cite the text they came from, written by one pass per tester at 3 am their time
   (first run reads back up to 14 days). Photos get a one-line description as they arrive. Search

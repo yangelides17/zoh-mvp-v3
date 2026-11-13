@@ -6,7 +6,7 @@ import type { NudgeRequest, Replier, ReplyInput } from "../src/claude/replier.js
 import { createSendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import type { Completer, CompletionRequest } from "../eval/claude.js";
-import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
+import { HAIKU, UsageError, graderModel, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
 import { evalDay, zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
@@ -586,6 +586,7 @@ describe("eval: command line and cost", () => {
       runs: 1,
       maxTurns: 20,
       concurrency: 3,
+      final: false,
       dryRun: false,
       overBudget: false,
       persona: undefined,
@@ -597,6 +598,7 @@ describe("eval: command line and cost", () => {
     expect(parseEvalArgs(["onboarding", "--case", "a", "--case", "b"]).cases).toEqual(["a", "b"]);
     expect(() => parseEvalArgs(["onboarding", "--case", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--over-budget"]).overBudget).toBe(true);
+    expect(parseEvalArgs(["onboarding", "--final"]).final).toBe(true);
     expect(parseEvalArgs(["onboarding", "--persona", "terse", "--runs", "3"])).toMatchObject({ persona: "terse", runs: 3 });
     expect(() => parseEvalArgs([])).toThrow(UsageError);
     expect(() => parseEvalArgs(["checkins"])).toThrow(/Unknown feature/);
@@ -651,17 +653,23 @@ describe("eval: command line and cost", () => {
     expect(ledger["feature/x"]).toEqual({ spentUsd: 1.25, runs: 2 });
   });
 
-  it("budgets $1 per issue a branch builds, up to $3", () => {
+  it("grades with Haiku while iterating and with the coach's model on a --final run", () => {
+    expect(graderModel({}, "claude-sonnet-5-5", false)).toBe(HAIKU);
+    expect(graderModel({}, "claude-sonnet-5-5", true)).toBe("claude-sonnet-5-5");
+    expect(graderModel({ EVAL_MODEL: "claude-opus-5-5" }, "claude-sonnet-5-5", false)).toBe("claude-opus-5-5");
+  });
+
+  it("budgets $0.50 per issue a branch builds, up to $1.50", () => {
     expect(issueCount("feature/12-commands")).toBe(1);
     expect(issueCount("feature/41-42-48-nudge-fixes")).toBe(3);
     expect(issueCount("feature/41-3am-pass")).toBe(1);
     expect(issueCount("feature/7")).toBe(1);
     expect(issueCount("main")).toBe(1);
-    expect(budgetFor({}, "feature/12-commands")).toBe(1);
-    expect(budgetFor({}, "feature/41-42-nudge-fixes")).toBe(2);
-    expect(budgetFor({}, "feature/1-2-3-4-5-small-fixes")).toBe(3);
+    expect(budgetFor({}, "feature/12-commands")).toBe(0.5);
+    expect(budgetFor({}, "feature/41-42-nudge-fixes")).toBe(1);
+    expect(budgetFor({}, "feature/1-2-3-4-5-small-fixes")).toBe(1.5);
     expect(budgetFor({ EVAL_BUDGET_USD: "5" }, "feature/12-commands")).toBe(5);
-    expect(budgetFor({ EVAL_BUDGET_USD: "nope" }, "main")).toBe(1);
+    expect(budgetFor({ EVAL_BUDGET_USD: "nope" }, "main")).toBe(0.5);
   });
 
   it("cleans up what the simulator writes", () => {

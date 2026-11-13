@@ -18,7 +18,8 @@ One feature, one flow, using the commands in `.claude/commands/`:
 1. `/spec <idea>`: shape it with Yanni; the approved spec becomes the issue. **Gate 1.**
 2. `/plan <n>`: read the code, propose the build; the approved plan is posted on the issue. **Gate 2.**
 3. `/build <n>`: build on `feature/<n>-<slug>` from `dev`, tests first, draft PR into `dev` early, eval if ZOH's words change.
-4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges into `dev` (staging) when Yanni says so.
+4. `/review <n>`: a fresh session checks the PR against the spec and plan and that the design held up; merges into
+   `dev` (staging) when Yanni says so.
 5. Live checks on staging from Yanni's phone (from the issue's "Live checks" comment); problems become `bug` issues.
 6. `/release`: notes, a "Worth a look" list and the `dev` → `main` PR; on Yanni's "ship" it merges, tags the version
    and checks production. `/status` shows the board anytime; `/idea` files a new idea or bug to spec later; `/quick`
@@ -45,6 +46,13 @@ never lecture, never skip the tests.
 title or a few words saying what it is, e.g. "#21 (note a possible non-Eastern time zone)" or
 "plan agreement (#5)". Nobody memorizes the numbers.
 
+**Picking an issue** (for `/plan`, `/build`, `/review`). `$ARGUMENTS` may be a number, a description ("the nudges
+one") or empty. If it isn't a number, list open issues with the step's label and match it; if it's empty or matches
+more than one, show them as a short numbered list and ask Yanni. Use the chosen number for `$ARGUMENTS` throughout.
+
+**Reading `dev`.** Plan and spec against the newest code: `git fetch origin`; if this folder is a clean `dev` that's
+behind, `git pull --ff-only`; if it's on another branch, read files with `git show origin/dev:<path>`, never by switching.
+
 **Branches and PRs.** `dev` is the default branch and deploys to staging; `main` deploys to production and
 changes only through a release (`/release`, a `dev` → `main` PR, tagged `v<version>`) or a hotfix. Feature work
 (anything from an issue, anything testers would notice, any database change) branches from `dev` and goes
@@ -59,10 +67,11 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `npm run build`: compile to `dist/`.
 - `npm run db:generate`: after editing `src/db/schema.ts`, generate a migration in `drizzle/`. Commit both.
 - `npm run dev`: run locally with `tsx` (needs a `.env`, see `.env.example`).
-- `npm run eval -- <feature> --case <id>`: replays only the regression cases a change touches against the
-  real coach, graded by a separate Claude (about $0.10–0.20 a case). Costs money: **$1 per issue on the branch, up to $3**, enforced
-  (see `eval/README.md`). A full run (no `--case`, $1.30–1.90) only for changes that affect every
-  conversation, and only with Yanni's OK. `npm run check` is free: tests never call Claude.
+- `npm run eval -- <feature> --case <id>`: replays only the regression cases a change touches against the real
+  coach, graded by Haiku while iterating (about $0.015 a short case); add `--final` once at the end to grade with the
+  coach's model (about $0.04). Costs money: **$0.50 per issue on the branch, up to $1.50**, enforced (see
+  `eval/README.md`). A full run (no `--case`) only for changes that affect every conversation, with Yanni's OK.
+  `npm run check` is free: tests never call Claude.
 
 ## Layout
 - `src/index.ts`: startup. `src/wiring.ts`: builds every dependency (production and the eval share it).
@@ -98,6 +107,11 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
   `docs/reference.md` in the same commit or PR.
 - Keep changes to the issue's spec and plan. Product questions go to Yanni; ideas beyond scope
   become `idea` issues, not code.
+- **Simplicity.** Write the least code that meets the spec. Add an abstraction only when something needs it today: a
+  second real use, or the test fake an outside service needs (above). Remove what your change leaves unused (imports,
+  functions, branches), but don't reshape or "tidy" code the issue didn't ask about.
+- **Say so when it's wrong.** If the spec, the plan or a request looks mistaken, say so plainly, with the reason, even
+  after it was approved. Don't build something you think won't work without flagging it first.
 
 ## Changing what ZOH says
 - Two files are live prompts, so edit them with care: **`docs/coach-voice.md`** is read word for word by

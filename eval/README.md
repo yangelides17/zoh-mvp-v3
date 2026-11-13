@@ -7,7 +7,8 @@ separate Claude grade every ZOH text against the feature's approved checks and t
 # once: put your key in .env (gitignored)
 ANTHROPIC_API_KEY=sk-ant-...
 
-npm run eval -- onboarding --case recap-invents-details   # only that case: the usual, cheap run
+npm run eval -- onboarding --case recap-invents-details   # only that case: the usual, cheap run (Haiku grades)
+npm run eval -- onboarding --case recap-invents-details --final   # once at the end: graded by the coach's model
 npm run eval -- onboarding                    # every scenario once + every regression case
 npm run eval -- onboarding --persona terse    # only terse scenarios (cases still run)
 npm run eval -- plan --scenario bedtime-late  # only that scenario: cheap while iterating
@@ -21,14 +22,18 @@ eval -- onboarding` so calls go to the Anthropic API rather than the session's o
 
 Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, default 20),
 `--concurrency <n>` (conversations at once, default 3), `--over-budget` (only with Yanni's OK).
-`EVAL_MODEL` sets the grader model (default: the coach's `CLAUDE_MODEL`); `EVAL_SIM_MODEL` the
-simulated tester (default `claude-haiku-5-5`).
+The grader runs on Haiku (`claude-haiku-5-5`) while a build iterates and on the coach's `CLAUDE_MODEL`
+with `--final`; `EVAL_MODEL` overrides both. `EVAL_SIM_MODEL` sets the simulated tester (default Haiku).
+Why the split: in an 8-case calibration (#174) Haiku caught every planted past mistake and agreed with
+Sonnet on 97% of checks at about 1/14 of the grading cost, but named fewer secondary problems, so the
+results in the PR come from one `--final` run.
 
-**Budget:** $1 of eval spend per issue the branch builds, counted from its name
-(`feature/41-42-48-...` is $3), up to $3 (`EVAL_BUDGET_USD` overrides), tracked in `eval/reports/spend.json`.
+**Budget:** $0.50 of eval spend per issue the branch builds, counted from its name
+(`feature/41-42-48-...` is $1.50), up to $1.50 (`EVAL_BUDGET_USD` overrides), tracked in `eval/reports/spend.json`.
 A run that would likely go past it refuses to start. Run only the cases a change touches (`--case <id>`,
-repeatable, about $0.10–0.20 each); a full onboarding run is about $1.30–$1.90, so it's only for changes
-that affect every conversation, with Yanni's OK. Not part of `npm run check`: tests never
+repeatable). Measured Nov 13 on short cases: about $0.015 a case graded by Haiku and $0.04 with `--final`
+(longer cases and memory cases cost more). A full run is only for changes that affect every conversation,
+with Yanni's OK. Not part of `npm run check`: tests never
 call Claude.
 
 ## What happens

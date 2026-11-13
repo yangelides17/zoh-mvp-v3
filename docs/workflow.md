@@ -40,10 +40,10 @@ version). Each app keeps its own texts, memory and console; the staging console 
 
 | Step | Command | Who | Result |
 | --- | --- | --- | --- |
-| 1. Spec | `/spec` | You and Claude | You shape the feature together; when you approve, it becomes an issue labeled `spec-approved`. |
-| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code on `dev` and proposes how to build it; the approved plan is posted on the issue (`plan-approved`). |
-| 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Ends `in-review` with a summary. |
-| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan and tells you merge or fix. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the Watch list as a "Live checks" comment (checkboxes) on the issue. |
+| 1. Spec | `/spec` | You and Claude | Claude first says what it thinks you mean and sketches it; once you agree, you shape the rest together, including "Done means": it drafts the core scenarios and asks what would make you say it's broken and what case is missing. When you approve, it's an issue labeled `spec-approved`. |
+| 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code on `dev` and gives you a two-minute briefing: how it works in plain words, where it could break (including what changes in existing code), where it disagrees or is least sure, and questions for you. A technical appendix for the build sits below it. The approved plan is posted on the issue (`plan-approved`). |
+| 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Stops to ask only if the spec, the design or something hard to undo is in question. Ends `in-review` with one line. |
+| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan, that the design held up and the code stays lean, and tells you merge or fix, with what differed from the plan, an eval summary (detail only on what fell short), what ZOH will say differently, and the live checks ranked by importance. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the ranked live checks as a "Live checks" comment (checkboxes) on the issue. |
 | Live check | | You, on staging | Text `env staging`, then try the issue's "Live checks" and tick them. Not good: Claude files a `bug`. Best done before the next release. |
 | Release | `/release` | Claude, then you | Collects everything on `dev` since the last release, writes plain-language notes, opens the `dev` → `main` PR and lists anything "Worth a look" (important unticked live checks, concerns from the PRs). Suggestions only. You say "ship"; it merges, tags the version (v0.3, v0.4…), production deploys and Claude checks it's healthy. |
 
@@ -89,7 +89,10 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 ## Good habits
 
 - **Approve carefully at steps 1 and 2.** That's where you control what gets built and how strict the
-  tests are. Keep the "Done means" list to what you actually care about.
+  tests are. Keep the "Done means" list to core functionality you actually care about.
+- **Read the plan briefing to understand, not just approve.** If something in "How it works" isn't clear, ask
+  Claude to walk you through it; you'll direct the next build better. Claude says so when it thinks the spec or
+  plan is wrong, even after you've approved it. For big, risky features it can offer a separate critic first.
 - **Review in a fresh session**, not the one that built it, so it checks the work with fresh eyes.
 - **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session. Each
   build works in its own copy of the repo (a git worktree in `../zoh-worktrees/`), so parallel builds never
@@ -101,9 +104,10 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
-- **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself. Each change runs only the cases it touches
-  (about $0.10–0.20 each); a full run ($1.30–1.90) only for changes to every conversation, with your OK. The
-  tests in `npm run check` are free. Live testing and the beta catch the rest.
+- **Eval budget: $0.50 per issue on the branch, up to $1.50 for a group**, enforced by the eval itself. Each change
+  runs only the cases it touches, graded by Haiku while the build iterates (about $0.015 a short case) and once by the
+  coach's model at the end (about $0.04), so the results you read are full quality. A full run only for changes to
+  every conversation, with your OK. The tests in `npm run check` are free. Live testing and the beta catch the rest.
 
 ## Quick fixes and changes outside the flow
 
@@ -146,12 +150,12 @@ notes are published on the repo's **Releases** page, and in the release PR. Ther
 
 1. `/status` shows "Plan agreement" as an idea. `/spec plan agreement`: a 15-minute conversation, you
    trim one check that's too strict, approve, and it's issue #12.
-2. `/plan`: Claude proposes a plan (a new tool for the coach, one migration, six tests, a $1.50 eval).
-   You ask one question, then approve.
-3. `/build`: you walk away. An hour later: "Ready: all tests pass, 88% on the judgment checks, $1.62
-   spent, one decision noted."
-4. New session, `/review`: "Merge; worth trying 'yeah sure but later' on your phone." You say merge:
-   it's on staging and `done`.
+2. `/plan`: a two-minute briefing. It explains how the agreement step fits between the plan and day 1, flags that
+   changing the plan tool could affect the nudges, and says it's least sure how "yeah sure but later" should count.
+   You answer that, then approve.
+3. `/build`: you walk away. An hour later: "Ready for review: `/review 12` in a fresh session."
+4. New session, `/review`: "Merge. As planned; all 6 Must tests pass; eval 88%, one check below target (ZOH
+   repeats the plan back); most important live check: 'yeah sure but later'." You say merge: it's on staging and `done`.
 5. On your phone: text `env staging`, then "reset", and go through onboarding to a plan. The plan is a bit
    long: Claude files a bug. Otherwise good: tick the live checks. To see days of nudges in a minute, a dev
    number texts `jump next`, `jump 3h`, `jump 2d` or `jump 7:30am` (the clock moves forward, a ⏩ line says

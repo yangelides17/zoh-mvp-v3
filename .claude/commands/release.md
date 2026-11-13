@@ -30,9 +30,9 @@ then nothing reaches testers.
    (end the body with the attribution lines the session asks for). Not a draft: CI runs on it.
 5. **Worth a look** (suggestions, never blockers). Before asking for "ship", give Yanni a short list, also added to
    the PR as a comment, one line each on what and why. Use judgment, not a checklist dump:
-   - **Live checks** still unticked (`- [ ]` in an issue's "Live checks" comment) that matter: ones that touch
-     what testers see or say, risky paths (sending, stop, pauses, scheduling, the database), or that a review flagged.
-     Skip trivial or cosmetic ones.
+   - **Live checks** still unticked (`- [ ]` in an issue's "Live checks" comment) that the review marked
+     **(most important)**, with its reason. Others only if they touch a risky path (sending, stop, pauses, scheduling,
+     the database).
    - **Concerns** found in the PRs, reviews, `Decision:` comments and issue threads: known gaps or "follow-up"
      notes left open, an eval that was skipped, below target or over budget, a migration (irreversible on
      production), a new Railway variable production doesn't have yet, a fix that landed on staging only hours ago
