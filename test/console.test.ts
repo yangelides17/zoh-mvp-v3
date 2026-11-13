@@ -650,6 +650,69 @@ describe("#107: pauses in the step log", () => {
   });
 });
 
+describe("#98: all their media in Memory", () => {
+  const memoryOf = async (id: string) => (await get(`/console/testers/${id}?tab=memory`, cookieFor("Yanni"))).body;
+  const mediaOf = (page: string) => page.slice(page.indexOf('<section class="mem-media"'), page.indexOf("</section>", page.indexOf('<section class="mem-media"')));
+
+  async function sendAll(id: string) {
+    const ins = async (v: Partial<typeof messages.$inferInsert> & { createdAt: Date }) =>
+      (await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, ...v }).returning())[0]!;
+    const voice = await ins({ mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "ran three miles by the river", createdAt: at("2026-11-03", "08:00") });
+    const video = await ins({ mediaUrl: "https://cdn.example/c.mp4", mediaKey: `media/${id}/c.mp4`, mediaContentType: "video/mp4", createdAt: at("2026-11-04", "08:00") });
+    const file = await ins({ mediaUrl: "https://cdn.example/n.pdf", mediaKey: `media/${id}/n.pdf`, mediaContentType: "application/pdf", createdAt: at("2026-11-05", "08:00") });
+    const old = await ins({ mediaUrl: "https://cdn.example/o.caf", mediaKey: `media/${id}/o.caf`, mediaContentType: "audio/x-caf", transcript: "an old voice note", mediaDeletedAt: at("2026-11-06", "00:00"), createdAt: at("2026-10-01", "08:00") });
+    // ZOH's own texts and plain texts are never media.
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "just words", createdAt: at("2026-11-05", "09:00") });
+    return { voice, video, file, old };
+  }
+
+  it("has a Media chip counting everything they sent, newest first, each kind shown", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const page = await memoryOf(s.tester.id);
+    expect(page).toContain('data-chip="media">Media <span class="muted">5</span>');
+    const media = mediaOf(page);
+    const order = [m.file.id, m.video.id, m.voice.id, s.photoId, m.old.id].map((id) => media.indexOf(`data-id="${id}"`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(media).toContain(`<img class="proof" src="/console/media/${s.photoId}"`);
+    expect(media).toContain(`<audio controls preload="none" src="/console/media/${m.voice.id}"`);
+    expect(media).toContain(`<video controls preload="none" src="/console/media/${m.video.id}"`);
+    expect(media).toContain(`<a href="/console/media/${m.file.id}">other file</a>`);
+    expect(media).toContain("A paperback open at page 40");
+    expect(media).toContain("Mon, Nov 2, 7:30 PM");
+    expect(media).not.toContain("just words");
+  });
+
+  it("keeps the transcript of a voice note whose audio is gone", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const item = mediaOf(await memoryOf(s.tester.id)).split(`data-id="${m.old.id}"`)[1]!;
+    expect(item).toContain("audio deleted after 30 days");
+    expect(item).toContain("an old voice note");
+  });
+
+  it("links each one to that moment in the chat, and to that day's step when there is one", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const media = mediaOf(await memoryOf(s.tester.id));
+    const item = (id: string) => media.split(`data-id="${id}"`)[1]!.split('data-id="')[0]!;
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=texts&amp;day=${MON}"`);
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=progress#day-${MON}"`);
+    expect(item(m.voice.id)).toContain(`?tab=texts&amp;day=2026-11-03"`);
+    expect(item(m.voice.id)).not.toContain("tab=progress");
+  });
+
+  it("shows their media even with no memory pages yet, and finds it by what was said or seen", async () => {
+    const s = await seed();
+    await sendAll(s.tester.id);
+    await t.db.delete(memoryPages).where(eq(memoryPages.testerId, s.tester.id));
+    const page = await memoryOf(s.tester.id);
+    expect(page).not.toContain("Nothing in memory yet.");
+    expect(mediaOf(page)).toContain('data-search="ran three miles by the river"');
+  });
+});
+
 describe("#181: their own goal as Focus, the menu choice as Category", () => {
   const READING = "Read &amp; learn more (books, ideas, any topic)";
   const page = async (id: string, tab = "progress") => (await get(`/console/testers/${id}?tab=${tab}`, cookieFor("Yanni"))).body;

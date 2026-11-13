@@ -107,6 +107,8 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 .options { margin: 6px 4px 0; font-size: 13px; color: var(--muted); }
 img.proof { max-width: 220px; max-height: 220px; border-radius: 14px; display: block; }
 a.media-download { display: block; font-size: 13px; margin-top: 2px; }
+video { display: block; max-width: 100%; max-height: 260px; border-radius: 14px; }
+.media-item { display: grid; gap: 6px; margin: 0; align-content: start; } .media-item audio { width: 100%; }
 .empty { text-align: center; color: var(--muted); padding: 28px 12px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .memory .mem-search { width: 100%; border-radius: 999px; padding: 10px 16px; margin: 6px 0 10px; }
@@ -171,6 +173,10 @@ const SCRIPT = `(function () {
       try { localStorage.setItem("zoh-rail", open ? "open" : "closed"); } catch (e) {}
     });
   }
+  // A link to a day or a pause (a dot, or Media's "that day's step") opens the folded day list first.
+  var landed = location.hash && document.getElementById(location.hash.slice(1));
+  var landedFold = landed && landed.closest("details");
+  if (landedFold) { landedFold.open = true; landed.scrollIntoView(); }
   // A day dot opens the folded day list before jumping to its day.
   document.querySelectorAll("a.dot[href^='#']").forEach(function (a) {
     a.addEventListener("click", function () {
@@ -183,17 +189,24 @@ const SCRIPT = `(function () {
   if (memory) {
     var chip = "all", search = memory.querySelector(".mem-search");
     var grid = memory.querySelector(".mem-grid"), line = memory.querySelector(".mem-timeline"), none = memory.querySelector(".mem-none");
+    // #98: Media shows on its own chip; without this script it simply sits below the cards.
+    var media = document.querySelector(".mem-media");
     function filter() {
       var q = search.value.trim().toLowerCase(), shown = 0;
-      grid.hidden = chip === "timeline";
+      grid.hidden = chip === "timeline" || chip === "media";
       line.hidden = chip !== "timeline";
+      if (media) {
+        media.hidden = chip !== "media";
+        media.querySelectorAll(".media-item").forEach(function (m) { m.hidden = !!q && m.dataset.search.indexOf(q) < 0; });
+      }
       memory.querySelectorAll("a.mem").forEach(function (c) {
         var ok = (chip === "all" || chip === "timeline" || c.dataset.group === chip) && (!q || c.dataset.search.indexOf(q) >= 0);
         c.hidden = !ok;
         if (ok && grid.contains(c)) shown++;
       });
-      none.hidden = chip === "timeline" || shown > 0;
+      none.hidden = chip === "timeline" || chip === "media" || shown > 0;
     }
+    filter();
     memory.querySelectorAll("[data-chip]").forEach(function (b) {
       b.addEventListener("click", function () {
         chip = b.dataset.chip;

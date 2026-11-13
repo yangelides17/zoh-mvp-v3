@@ -3,7 +3,7 @@ import { localDate } from "../../coach/state.js";
 import type { Goal, MaintenanceCheckin, Pause, PauseEndReason, Plan, StepDay } from "../../db/schema.js";
 import { evidenceText, type Learning } from "../../coach/week.js";
 import type { GoalView, ProgressTab, StepDayView } from "../data.js";
-import { esc, hitRatePct, hitRateText, proofHtml, streakText, suggestionCard, when } from "./shared.js";
+import { dayAndTime, esc, hitRatePct, hitRateText, proofHtml, streakText, suggestionCard, when } from "./shared.js";
 
 /**
  * The Progress tab (#63): each goal with big numbers, the step log as a strip of day dots that jump
@@ -27,10 +27,6 @@ function shortDay(date: string): string {
 /** #107: how a pause ended, in plain words. */
 const PAUSE_ENDS: Record<PauseEndReason, string> = { tester: "they came back", end_date: "their return date", stop: "stopped", reset: "reset", restart: "restarted" };
 const pauseAnchor = (p: Pause) => `pause-${p.id}`;
-
-function dayAndTime(at: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
-}
 
 /** "Paused Wed, Oct 28 · said back Sun, Nov 1 · ended Sun, Nov 1, 9:00 AM (their return date) · “family trip”", in their zone. */
 function pauseText(p: Pause, timeZone: string): string {

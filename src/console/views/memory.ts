@@ -1,7 +1,7 @@
 import type { MemoryPage, MemoryPageKind } from "../../db/schema.js";
 import { addDays } from "../../nudges/schedule.js";
-import type { MemoryCard, MemoryPageView, MemoryTabData } from "../memory-view.js";
-import { esc, when } from "./shared.js";
+import type { MediaItem, MemoryCard, MemoryPageView, MemoryTabData } from "../memory-view.js";
+import { dayAndTime, esc, proofHtml, when } from "./shared.js";
 
 /**
  * The Memory tab (#63), Sentience-style: a search box, filter chips, a grid of tinted cards and a
@@ -54,11 +54,22 @@ function timeline(cards: MemoryCard[], testerId: string, today: string): string 
   return html || `<p class="empty">No daily pages yet: the 3 am pass writes one for each day they text.</p>`;
 }
 
+/** #98: what they sent, with links to that moment in the chat and that day's step. It shows what came in, not whether it counted. */
+function mediaItem(item: MediaItem, testerId: string, timeZone: string): string {
+  const base = `/console/testers/${esc(testerId)}`;
+  const links = [
+    `<a href="${base}?tab=texts&amp;day=${esc(item.day)}">see in chat</a>`,
+    item.stepDay && `<a href="${base}?tab=progress#day-${esc(item.day)}">that day's step</a>`,
+  ].filter(Boolean);
+  return `<div class="card media-item" data-id="${esc(item.message.id)}" data-search="${esc(item.search)}"><div class="muted">${esc(dayAndTime(item.at, timeZone))}</div>${proofHtml(item.message)}<div class="row muted">${links.join(" · ")}</div></div>`;
+}
+
 export function memoryTabHtml(data: MemoryTabData, testerId: string): string {
-  if (!data.cards.length) return `<p class="empty">Nothing in memory yet.</p>`;
+  if (!data.cards.length && !data.media.length) return `<p class="empty">Nothing in memory yet.</p>`;
   const counts = (kinds: MemoryPageKind[]) => data.cards.filter((c) => !kinds.length || kinds.includes(c.page.kind)).length;
   const chips = [
     ...CHIPS.map(([id, label, kinds], i) => `<button type="button" class="chip-btn${i === 0 ? " on" : ""}" data-chip="${id}">${esc(label)} <span class="muted">${counts(kinds)}</span></button>`),
+    `<button type="button" class="chip-btn" data-chip="media">Media <span class="muted">${data.media.length}</span></button>`,
     `<button type="button" class="chip-btn" data-chip="timeline">Timeline</button>`,
   ].join("");
   return `<section id="memory" class="memory">
@@ -66,7 +77,8 @@ export function memoryTabHtml(data: MemoryTabData, testerId: string): string {
 <div class="row chips">${chips}</div>
 <div class="grid mem-grid">${data.cards.map((c) => card(c, testerId)).join("")}</div>
 <p class="empty mem-none" hidden>Nothing matches.</p>
-<div class="mem-timeline" hidden>${timeline(data.cards, testerId, data.today)}</div></section>`;
+<div class="mem-timeline" hidden>${timeline(data.cards, testerId, data.today)}</div></section>
+<section class="mem-media"><h3>Media</h3>${data.media.length ? `<div class="grid">${data.media.map((m) => mediaItem(m, testerId, data.timeZone)).join("")}</div>` : `<p class="empty">Nothing sent yet.</p>`}</section>`;
 }
 
 function pageLink(p: MemoryPage, testerId: string): string {
