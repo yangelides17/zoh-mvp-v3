@@ -3,12 +3,13 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 /**
- * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $1 per issue
- * the branch builds, up to $3 for a group (Yanni, Oct 29; $1 per branch since Oct 27): run only
- * the cases a change touches (--case); bugs beyond that get found live and in the beta.
+ * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $0.50 per issue
+ * the branch builds, up to $1.50 for a group (Yanni, Nov 13, #174; was $1 / $3): run only the cases a
+ * change touches (--case), graded by Haiku while iterating and once with --final; bugs beyond that get
+ * found live and in the beta.
  */
-export const BUDGET_PER_ISSUE_USD = 1;
-export const MAX_BUDGET_USD = 3;
+export const BUDGET_PER_ISSUE_USD = 0.5;
+export const MAX_BUDGET_USD = 1.5;
 
 export type Ledger = Record<string, { spentUsd: number; runs: number }>;
 
@@ -18,7 +19,7 @@ export function issueCount(branch: string): number {
   return numbers ? numbers.split("-").length : 1;
 }
 
-/** EVAL_BUDGET_USD overrides; otherwise $1 per issue on the branch, at most $3. */
+/** EVAL_BUDGET_USD overrides; otherwise $0.50 per issue on the branch, at most $1.50. */
 export function budgetFor(env: NodeJS.ProcessEnv, branch: string): number {
   const n = Number(env.EVAL_BUDGET_USD);
   if (Number.isFinite(n) && n > 0) return n;

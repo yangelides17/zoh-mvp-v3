@@ -5,23 +5,18 @@ argument-hint: [issue number(s) or description; leave empty to pick]
 
 Build issue **#$ARGUMENTS** on your own, following its approved plan.
 
-**Which issue?** `$ARGUMENTS` may be an issue number, a description ("the nudges one") or empty. If it isn't a
-number, run `gh issue list --state open --label plan-approved` and match the description to an issue; if it's empty or
-matches more than one, show those issues as a short numbered list and ask Yanni which one. Call the chosen
-number N and use it everywhere below in place of `$ARGUMENTS`. If nothing has the `plan-approved` label, say what building
-needs first and stop.
+**Which issue?** See "Picking an issue" in `CLAUDE.md` (label `plan-approved`). If none has it, say `/plan` comes first.
 
 **A group (when the plan says so).** If `$ARGUMENTS` names several issues, or the plan is a group plan (the lead issue
 has it; the others point to it), build them as the plan says. On one branch: name it
-`feature/<a>-<b>-<c>-<short-slug>` (the eval budget counts the numbers: $1 each, up to $3), build in the plan's order
-with at least one commit per issue (message ends `(#n)`), and put a `Closes #n` line for each in the PR. Labels move
-for every issue together. If one issue gets stuck or turns out bigger than planned, take it out rather than hold up
-the rest: revert or leave out its commits, drop its `Closes` line, move it back to `plan-approved` and post a
-`Decision:` comment saying why. Tell Yanni.
+`feature/<a>-<b>-<c>-<short-slug>` (the eval budget counts the numbers), build in the plan's order with at least one
+commit per issue (message ends `(#n)`), and put a `Closes #n` line for each in the PR. Labels move for every issue
+together. If one issue gets stuck or turns out bigger than planned, take it out rather than hold up the rest: revert or
+leave out its commits, drop its `Closes` line, move it back to `plan-approved`, post a `Decision:` comment saying why,
+and tell Yanni.
 
 **Parallel build agents (optional).** When the plan has separate branches, you may build them at the same time with
-one background agent per branch, at most 3, each in its own worktree. It's your call in the moment: do it only when
-it's clearly safe and saves real time, and if you have concerns, say so and build them one after another instead.
+one background agent per branch, at most 3, each in its own worktree, only when it's clearly safe and saves real time.
 Never in parallel:
 - two branches that change the database (`src/db/schema.ts`, `drizzle/`): their migrations would collide;
 - two branches that touch `src/coach/prompt.ts`, `docs/coach-voice.md` or `src/pipeline/inbound.ts`;
@@ -29,68 +24,53 @@ Never in parallel:
 
 **Rules for build agents.** The orchestrator creates one worktree per branch from `origin/dev`
 (`git worktree add ../zoh-worktrees/<slug> -b <branch> origin/dev`) and passes each agent the **absolute worktree
-path**. **Never use `isolation: "worktree"`** — it creates an uncontrolled worktree that may be based on `main`, not
-`dev`. At most **one agent per worktree** at a time. The agent **never pushes** — only the orchestrating session
-pushes, after it has verified the work (`npm run check`, base-branch check, drizzle check). The agent prompt must
-include the issue number, the full plan text, branch name, and worktree path.
-
-This session coordinates: it starts the agents with the issue, plan and branch name, keeps the labels and PRs
-straight, and reports to Yanni once they're all done. They're reviewed and merged one at a time: after each merge,
-the next branch rebases on `dev` and runs `npm run check` again. If two branches changed what ZOH says, rerun the
-touched eval cases once both are on `dev`.
+path**. **Never use `isolation: "worktree"`**: it may base the worktree on `main`, not `dev`. At most one agent per
+worktree. The agent **never pushes**; only the orchestrating session pushes, after verifying the work (step 7). The
+agent prompt includes the issue number, the full plan text, branch name and worktree path. The orchestrator keeps
+labels and PRs straight and reports once all are done. They're reviewed and merged one at a time: after each merge,
+the next branch rebases on `dev` and reruns `npm run check`; if two changed what ZOH says, rerun the touched eval
+cases once both are on `dev`.
 
 1. `gh issue view $ARGUMENTS --comments`. It must be labeled `plan-approved` and have a `## Plan (approved by Yanni...)`
    comment; if not, stop and say `/plan` comes first. The spec and plan are the contract.
-2. **Work in your own worktree,** so other sessions in this repo aren't disturbed (never switch branches in the
-   main folder). Feature work always starts from `dev` (staging), never `main` (production: only releases and
-   hotfixes go there). If this session already runs in a worktree (the desktop app can create one per session), use
-   it, but check its base first: `git fetch origin && git merge-base --is-ancestor origin/dev HEAD`. If that fails (it
-   was made from `main` or an old `dev`), start the feature branch there from `dev`:
-   `git switch -c feature/$ARGUMENTS-<short-slug> origin/dev` (if it has uncommitted changes, stop and ask Yanni).
-   Otherwise: `git fetch origin`, then
-   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`,
-   `cd` into it and run `npm install`. Do everything below from there.
-   `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
-   **Check the plan is still current** (it may be days old): list what merged into `dev` since the plan was
-   posted (`git log --since=<plan date> --name-only origin/dev`) and read any change to the files the plan touches.
-   If it changes the approach (a function the plan relies on moved or works differently), tell Yanni and propose the
-   adjustment before writing code; a small fit-up is a `Decision:` comment.
-   **Check for overlap again:** for each other open PR, compare `gh pr diff <pr> --name-only` with the files the
-   plan touches, and read the plans of `plan-approved` issues that have no PR yet
-   (`gh issue list --label plan-approved`). If both change the database, `src/coach/prompt.ts`,
-   `docs/coach-voice.md` or `src/pipeline/inbound.ts`, tell Yanni and post a `Decision:` comment on which lands first
-   (two migrations collide: the later one regenerates its migration after the first merges). Note smaller overlaps
-   under the PR's risks.
-3. Open a **draft PR** into `dev` early (`gh pr create --draft --base dev`, body from `.github/pull_request_template.md`, first line
-   `Closes #$ARGUMENTS`) and push as you go, so Yanni can watch progress.
-4. Write the **Must** tests first or alongside the code. Follow `CLAUDE.md`. Stay inside the plan.
-5. **Decisions:** if you have to deviate from the approved plan, it must go on the issue as a comment starting
-   `Decision:` (what and why) — never only in the PR summary.
-   - **Stop and ask the founders** if it changes what the tester experiences or the spec's intent.
-   - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format, or what
-     gets written to the DB: post the `Decision:` comment and add `needs-signoff`
-     (`gh issue edit $ARGUMENTS --add-label needs-signoff`). Don't block — keep building.
+2. **Work in your own worktree,** never by switching branches in the main folder, and always from `dev`, never `main`.
+   If this session already runs in a worktree, check its base (`git fetch origin && git merge-base --is-ancestor
+   origin/dev HEAD`); if that fails, `git switch -c feature/$ARGUMENTS-<short-slug> origin/dev` there (with uncommitted
+   changes, stop and ask). Otherwise `git fetch origin`, then
+   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`, `cd`
+   into it and `npm install`. Then `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
+   **Is the plan still current?** Read what merged into `dev` since the plan (`git log --since=<plan date>
+   --name-only origin/dev`) in the files it touches. **Overlap:** compare each open PR's `gh pr diff <pr> --name-only`
+   and the plans of `plan-approved` issues with no PR. If both change the database, `src/coach/prompt.ts`,
+   `docs/coach-voice.md` or `src/pipeline/inbound.ts`, post a `Decision:` on which lands first (a later migration is
+   regenerated after the first merges). Note smaller overlaps under the PR's risks.
+3. Open a **draft PR** into `dev` early (`gh pr create --draft --base dev`, body from `.github/pull_request_template.md`,
+   first line `Closes #$ARGUMENTS`) and push as you go.
+4. Write the **Must** tests first, and make sure each one would fail if the feature were broken. Follow `CLAUDE.md`,
+   including the simplicity rules. Stay inside the plan.
+5. **When something doesn't fit the plan,** post a `Decision:` comment on the issue (never only in the PR).
+   - **Stop and ask the founders** only if the tester would experience something different from the spec, the
+     approved design turns out not to work (the plan assumed something about the code that isn't true), or a choice is
+     hard to undo (dropping or rewriting data, who gets texted). Keep building other parts meanwhile if you can, and
+     ask everything at once.
+   - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format or what gets
+     written to the DB: add `needs-signoff` (`gh issue edit $ARGUMENTS --add-label needs-signoff`).
    - Purely internal choices (a variable name, a loop vs. map) need neither.
 6. **Eval** (only if ZOH's words change): run only the cases this change touches, adding a regression case in
-   `eval/cases/<feature>/` when none covers it: `npm run eval -- <feature> --case <id> [--case <id>]` (check the
-   cost first with `--dry-run`; it's free). A full run (no `--case`) only for changes that affect every
-   conversation, and only with Yanni's OK. The budget is $1 per issue on the branch, up to $3, and the eval enforces
-   it; never use `--over-budget` without Yanni's OK. In a group, run every issue's cases together once the prompt
-   changes are all in. Fix causes in the coach's instructions, not
-   one-off cases (see "Changing what ZOH says" in `CLAUDE.md`). If the budget runs out before the target, stop and
-   report honestly; live testing and the beta will catch the rest.
-7. **Before pushing or opening the PR, run these checks:**
-   - `npm run check` green, rebased on the latest `dev`.
-   - **Base-branch check:** `git merge-base --is-ancestor origin/dev HEAD` must pass. If it fails, stop — the branch
-     is not based on `dev`.
-   - **Protected files:** run `git diff origin/dev -- eval/memory-lab/fixtures/ docs/memory-*.md docs/coach-voice.md`
-     and stop if it shows changes the plan didn't call for. Hand-authored fixtures and docs are read-only to builders
-     unless the plan explicitly says to change them.
-   - **Drizzle migrations:** if the build generated a migration, confirm `drizzle/meta/NNNN_snapshot.json` exists for
-     it, and run `npx drizzle-kit generate` to verify it reports "No schema changes, nothing to migrate." If the
-     snapshot is missing or drizzle sees pending changes, regenerate it before pushing.
-8. Fill in the PR description (template sections; for a group, a short section per issue, and the Watch list
-   grouped by issue), mark it ready (`gh pr ready`), and
-   `gh issue edit $ARGUMENTS --add-label in-review --remove-label building`.
-9. Finish with a short summary for Yanni: what changed for the tester, Must and Should results, eval spend,
-   decisions made (and any issue taken out of the group), and "next: `/review $ARGUMENTS` in a fresh session".
+   `eval/cases/<feature>/` when none covers it. While iterating, `npm run eval -- <feature> --case <id>` (graded by
+   Haiku, cheap); when done, one `--final` run of those cases (graded by the coach's model) for the results in the PR.
+   Check cost first with `--dry-run` (free). A full run (no `--case`) only for changes that affect every conversation,
+   and only with Yanni's OK; never `--over-budget` without it. In a group, run every issue's cases together once the
+   prompt changes are in. Fix causes in the coach's instructions, not one-off cases. If the budget runs out before the
+   target, stop and report honestly.
+7. **Before pushing or opening the PR:**
+   - `npm run check` green, rebased on the latest `dev`, and `git merge-base --is-ancestor origin/dev HEAD` passes
+     (if not, stop: the branch isn't based on `dev`).
+   - **Protected files:** `git diff origin/dev -- eval/memory-lab/fixtures/ docs/memory-*.md docs/coach-voice.md`
+     shows nothing the plan didn't call for (hand-authored fixtures and docs are read-only to builders).
+   - **Migrations:** a generated migration has its `drizzle/meta/NNNN_snapshot.json`, and `npx drizzle-kit generate`
+     reports "No schema changes, nothing to migrate"; otherwise regenerate before pushing.
+8. Fill in the PR description from the template (for a group, a short section per issue), mark it ready
+   (`gh pr ready`), and `gh issue edit $ARGUMENTS --add-label in-review --remove-label building`.
+9. Finish with one line for Yanni, plus anything he should know now (a stop, an over-budget eval, an issue taken out
+   of the group): "Ready for review: `/review $ARGUMENTS` in a fresh session."

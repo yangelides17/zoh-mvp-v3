@@ -9,7 +9,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "../src/config.js";
 import { addUsage, createCompleter } from "./claude.js";
-import { USAGE, UsageError, evalApiKey, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
+import { HAIKU, USAGE, UsageError, evalApiKey, graderModel, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
 import { budgetFor, currentBranch, overBudgetMessage, readLedger, recordSpend } from "./budget.js";
 import { COACH, dollarsFor, estimateCost, KEEPER } from "./cost.js";
 import { REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor } from "./features.js";
@@ -50,8 +50,8 @@ async function main(): Promise<number> {
 
   const feature = getFeature(args.feature)!;
   const coachModel = loadConfig({ DATABASE_URL: "unused", CLAUDE_MODEL: env.CLAUDE_MODEL }).claude.model;
-  const evalModel = env.EVAL_MODEL?.trim() || coachModel;
-  const simModel = env.EVAL_SIM_MODEL?.trim() || "claude-haiku-5-5";
+  const evalModel = graderModel(env, coachModel, args.final);
+  const simModel = env.EVAL_SIM_MODEL?.trim() || HAIKU;
   const rubric = rubricFor(feature);
   const pages = await readPages(feature);
   const scenarios = loadScenarios(feature);
@@ -80,7 +80,7 @@ async function main(): Promise<number> {
   console.log(
     [
       `Eval: ${feature.name}. ${est.conversations} conversations (${scenarioCount} simulated, ${plans.length - scenarioCount} regression cases), up to ${est.maxTurns} tester texts.`,
-      `Models: coach ${coachModel}, simulator ${simModel}, grader ${evalModel}.`,
+      `Models: coach ${coachModel}, simulator ${simModel}, grader ${evalModel}${args.final ? " (final run)" : " (iterating; add --final for the PR results)"}.`,
       `Rough cost: ${fmtTokens(est.tokens.low)}–${fmtTokens(est.tokens.high)} tokens, about $${est.dollars.low.toFixed(2)}–$${est.dollars.high.toFixed(2)}.`,
     ].join("\n"),
   );

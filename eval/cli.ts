@@ -3,7 +3,7 @@ import { FEATURES } from "./features.js";
 import { PERSONAS } from "./types.js";
 
 export const USAGE = [
-  "Usage: npm run eval -- <feature> [--case <id>]... [--scenario <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--dry-run] [--over-budget]",
+  "Usage: npm run eval -- <feature> [--case <id>]... [--scenario <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--final] [--dry-run] [--over-budget]",
   "",
   `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}`,
   "  --case           only this regression case (repeatable), no simulated conversations: the cheap targeted run",
@@ -12,12 +12,13 @@ export const USAGE = [
   "  --runs           times to play each scenario (default 1)",
   "  --max-turns      tester texts before a conversation is cut off (default 20)",
   "  --concurrency    conversations at once (default 3)",
+  "  --final          grade with the coach's model instead of Haiku: once, at the end, for the results in the PR",
   "  --dry-run        print what would run and the cost estimate, then stop",
   "  --over-budget    run even past this branch's eval budget (only with Yanni's OK)",
   "",
   "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
-  "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL sets the grader model (default: CLAUDE_MODEL); EVAL_SIM_MODEL the",
-  "simulated tester (default: claude-haiku-5-5). EVAL_BUDGET_USD caps spend per branch (default: $1 per issue in the branch name, up to $3).",
+  "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL overrides the grader model (default: Haiku, or CLAUDE_MODEL with --final);",
+  "EVAL_SIM_MODEL the simulated tester (default: Haiku). EVAL_BUDGET_USD caps spend per branch (default: $0.50 per issue in the branch name, up to $1.50).",
 ].join("\n");
 
 export interface EvalArgs {
@@ -30,6 +31,8 @@ export interface EvalArgs {
   runs: number;
   maxTurns: number;
   concurrency: number;
+  /** Grade with the coach's model rather than Haiku. */
+  final: boolean;
   dryRun: boolean;
   overBudget: boolean;
 }
@@ -49,6 +52,7 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
         runs: { type: "string" },
         "max-turns": { type: "string" },
         concurrency: { type: "string" },
+        final: { type: "boolean" },
         "dry-run": { type: "boolean" },
         "over-budget": { type: "boolean" },
         help: { type: "boolean", short: "h" },
@@ -75,9 +79,22 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
     runs: positiveInt(values.runs, "--runs", 1),
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),
     concurrency: positiveInt(values.concurrency, "--concurrency", 3),
+    final: values.final ?? false,
     dryRun: values["dry-run"] ?? false,
     overBudget: values["over-budget"] ?? false,
   };
+}
+
+/** Haiku, the default for the eval's cheap roles: the simulated tester and the grader while iterating. */
+export const HAIKU = "claude-haiku-5-5";
+
+/**
+ * The grader's model: EVAL_MODEL if set; otherwise the coach's model for a --final run, Haiku while iterating.
+ * Haiku caught every known mistake in an 8-case calibration (#174) but names fewer secondary problems,
+ * so the results Yanni reads come from a --final run.
+ */
+export function graderModel(env: NodeJS.ProcessEnv, coachModel: string, final: boolean): string {
+  return env.EVAL_MODEL?.trim() || (final ? coachModel : HAIKU);
 }
 
 function positiveInt(raw: string | undefined, name: string, fallback: number): number {

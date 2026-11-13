@@ -1,16 +1,18 @@
 Closes #
 
-## What changed, from the tester's side
-<!-- Two or three sentences Yanni can read without opening the code. -->
+## Different from the plan
+<!-- Only what changed from the plan's "How it works" and why. "As planned" if nothing did. -->
 
 ## Must (automated tests)
 <!-- The spec's Must list, ticked. -->
 
 ## Should (eval), if ZOH's words changed
-<!-- Pass rate per check vs the target, the three worst replies, instruction changes before/after, eval spend of the $1. -->
+<!-- From the --final run: pass rate per check vs the target, what's below target and why, the instruction change
+in plain words with one or two real exchanges, and eval spend against the budget. -->
 
-## Watch (live checks for Yanni)
-<!-- The spec's Watch list, plus anything the build showed is worth trying. -->
+## Watch (live checks), ranked
+<!-- The spec's Watch list plus anything the build showed is worth trying, ordered by where the build is least sure;
+give the top one or two a reason. -->
 
 ## Decisions made while building
 <!-- Anything not in the plan, with the reason (also posted on the issue as "Decision:"). -->
