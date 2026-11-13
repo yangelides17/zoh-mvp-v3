@@ -1,4 +1,38 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(npm run check*)",
+      "Bash(npm run build*)",
+      "Bash(npm run db:generate*)",
+      "Bash(npm install*)",
+      "Bash(npm ci*)",
+      "Bash(npm run eval -- * --case *)",
+      "Bash(git fetch*)",
+      "Bash(git merge-base*)",
+      "Bash(git switch -c feature/*)",
+      "Bash(git push origin feature/*)",
+      "Bash(git push -u origin feature/*)",
+      "Bash(git push origin hotfix/*)",
+      "Bash(git push -u origin hotfix/*)",
+      "Bash(git worktree add ../zoh-worktrees/*)",
+      "Bash(git worktree list*)",
+      "Bash(git worktree prune*)",
+      "Bash(git worktree remove --force ../zoh-worktrees/*)",
+      "Bash(gh issue list*)",
+      "Bash(gh issue view*)",
+      "Bash(gh issue create*)",
+      "Bash(gh issue edit*)",
+      "Bash(gh issue comment*)",
+      "Bash(gh issue close*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr diff*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr ready*)",
+      "Bash(gh pr comment*)"
+    ]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
