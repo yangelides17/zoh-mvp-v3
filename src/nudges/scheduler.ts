@@ -13,7 +13,7 @@ import { coachHistory } from "../memory/context.js";
 import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
-import { addThreadLine, APP_AUTHOR, cancelRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, pendingExact, pendingRequests } from "../console/requests.js";
+import { addThreadLine, APP_AUTHOR, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
 import { withDaySteps } from "./quiet.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
@@ -233,7 +233,7 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
   // While paused ZOH starts nothing: not its own texts, not the founders' (spec "Commands and safety", rule 1).
   if (pause) return { action: "none", reason: "paused" };
 
-  // The founders' "send exactly this": one per tick, and that tick sends nothing else.
+  // The founders' word-for-word texts (send_text): one per tick, and that tick sends nothing else.
   if (await sendExact(deps, tester, { now, date, lastInboundAt, lastOutboundAt, unanswered })) {
     return { action: "none", reason: "sent the team's text" };
   }
@@ -411,6 +411,8 @@ async function sendExact(
   const quiet = quietNow(now, tester);
   const request = (await pendingExact(db, tester.id, now)).find((r) => r.sendNow || !quiet);
   if (!request) return false;
+  // #155: claimed first, so a Cancel clicked from here on is refused rather than lost.
+  if (!(await claimRequest(db, request.id))) return false;
 
   // The slot counts toward the unanswered cap like any text ZOH starts, and claiming it means one send.
   const [claim] = await db
@@ -418,7 +420,10 @@ async function sendExact(
     .values({ testerId: tester.id, date: ctx.date, kind: `exact:${request.id}`, moment: EXACT_MOMENT, status: "claimed", createdAt: now })
     .onConflictDoNothing()
     .returning();
-  if (!claim) return false;
+  if (!claim) {
+    await releaseRequest(db, request.id);
+    return false;
+  }
   const logCtx = { contact: maskNumber(tester.phone), kind: EXACT_MOMENT };
   try {
     const sent = await deps.sendblue.sendMessage({ number: tester.phone, content: request.body });
@@ -439,7 +444,8 @@ async function sendExact(
   } catch (err) {
     // No retry: a text that may have gone out must not go twice. The founders can send it again.
     await db.update(nudges).set({ status: "failed" }).where(eq(nudges.id, claim.id));
-    await cancelRequest(db, { testerId: tester.id, requestId: request.id, at: now });
+    await db.update(consoleMessages).set({ requestStatus: "cancelled", doneAt: now }).where(eq(consoleMessages.id, request.id));
+    await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_sent:${request.id}`, body: `Your text didn't send: ${request.body.slice(0, 100)}`, at: now });
     await addThreadLine(db, {
       testerId: tester.id,
       kind: "coach",
@@ -514,6 +520,14 @@ async function send(
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
     carry = given ?? (await carryFor(db, tester, nudge, now));
+    // #155: a founder's request this text carries is claimed, so a Cancel can't race it.
+    if (carry && "requestId" in carry && !(await claimRequest(db, carry.requestId))) {
+      if (given) {
+        await db.delete(nudges).where(eq(nudges.id, claim.id));
+        return;
+      }
+      carry = undefined;
+    }
     // A kickoff that carries something has its own job, so it always goes.
     const textedToday = lastInboundAt !== undefined && lastInboundAt >= zonedTime(nudge.date, "00:00", tester.timeZone);
     // #110: a recap owed from Sunday rides on Monday's morning text, so that text can't be skipped.
@@ -531,10 +545,13 @@ async function send(
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.
     await db.delete(nudges).where(eq(nudges.id, claim.id));
+    if (carry && "requestId" in carry) await releaseRequest(db, carry.requestId);
     log.error({ ...ctx, err: safeError(err) }, "Writing a nudge failed; will retry next tick");
     return;
   }
   // Today's conversation already said it: the slot is used up, nothing goes out.
+  // A request it would have carried waits for the next text.
+  if ((text === null || typeof text !== "string") && carry && "requestId" in carry) await releaseRequest(db, carry.requestId);
   if (text === null) {
     await db.update(nudges).set({ status: "skipped" }).where(eq(nudges.id, claim.id));
     log.info(ctx, "Nudge skipped: today's conversation already covered it");
@@ -583,6 +600,7 @@ async function send(
       createdAt: onTesterClock(tester, now),
     });
     await db.update(nudges).set({ status: "failed", messageId: message.id }).where(eq(nudges.id, claim.id));
+    if (carry && "requestId" in carry) await releaseRequest(db, carry.requestId);
     log.error({ ...ctx, err: safeError(err) }, "Sending a nudge failed");
     await alertFailure(db, tester.id, `A ${nudge.moment} text didn't send (${(err instanceof Error ? err.message : String(err)).slice(0, 120)})`, now);
   }

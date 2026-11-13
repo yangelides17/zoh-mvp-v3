@@ -98,12 +98,20 @@ export const seedSchema = z.object({
       }),
     )
     .default([]),
+  /** #69: the seeded plan's "Plan version N to review" alert, unseen, as locking it raises in production. */
+  plan_review_alert: z.boolean().default(false),
   /** Next steps on the seeded goal as the founders left them (next-step feature). */
   suggestions: z
     .array(
       z.object({
-        kind: z.enum(["deepen", "upgrade", "new_focus"]),
+        kind: z.enum(["deepen", "upgrade", "new_focus", "adjust"]),
         raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
+        /** adjust only (#155): the plan fields the founders proposed, as stored (stepTime "HH:MM", place, days...). */
+        plan_changes: z
+          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(["photo", "screenshot", "voice"]).optional() })
+          .optional(),
+        /** How long ago ZOH raised it, for one waiting on their answer. */
+        delivered_hours_ago: z.number().optional(),
         proposal: z.string(),
         reasoning: z.string().optional(),
         new_goal: z.string().optional(),
@@ -179,9 +187,9 @@ export const caseSchema = z.object({
   /**
    * The tester's texts, in order. A line "advance to HH:MM" is not a text: the clock moves to that local
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
-   * A line "console Yanni: ..." is a founder's message in the console chat (add "(exact)" or
-   * "(exact, now)" after the name for "send exactly this" and "send now"); ZOH's console answer joins
-   * the transcript, marked as console.
+   * A line "console Yanni: ..." is a founder's message in the console chat; ZOH's console answer and
+   * any draft card it makes join the transcript, marked as console. "console Yanni (do it)" clicks Do it
+   * on the newest open draft (#155).
    */
   testerLines: z.array(z.string().min(1)).min(1),
   whatWentWrong: z.string(),

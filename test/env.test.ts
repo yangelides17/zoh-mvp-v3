@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { addRequest } from "../src/console/requests.js";
+import { createDraft } from "../src/console/drafts.js";
 import { consoleMessages, messages, plans, testers, type Tester } from "../src/db/schema.js";
 import { createMemoryKeeper } from "../src/memory/keeper.js";
 import { zonedTime } from "../src/nudges/schedule.js";
@@ -304,13 +305,20 @@ describe("the console", () => {
       method: "POST",
       url: `/console/testers/${dev.id}/chat`,
       headers: { "content-type": "application/x-www-form-urlencoded", cookie: cookie() },
-      payload: new URLSearchParams({ text: "Hey from Yanni", exact: "on", sendNow: "on" }).toString(),
+      payload: new URLSearchParams({ text: "Hey from Yanni" }).toString(),
     });
     expect(res.statusCode).toBeLessThan(400);
     await t.queue.idle();
     const thread = await t.db.select().from(consoleMessages).where(eq(consoleMessages.testerId, dev.id));
-    expect(thread.find((m) => m.kind === "request")).toMatchObject({ body: "Hey from Yanni", requestStatus: "cancelled" });
+    expect(thread.find((m) => m.kind === "founder")).toMatchObject({ body: "Hey from Yanni" });
+    expect(thread.some((m) => m.kind === "request")).toBe(false);
     expect(thread.some((m) => m.body.includes("This number is on staging right now"))).toBe(true);
+    // #155: a draft for a number the other app owns can't be confirmed here either.
+    const draft = await createDraft(t.db, { testerId: dev.id, author: "Yanni", action: "send_text", input: { words: "Hey from Yanni" }, summary: "Text them", at: new Date() });
+    const confirm = await t.app.inject({ method: "POST", url: `/console/testers/${dev.id}/drafts/${draft.id}/confirm`, headers: { cookie: cookie() } });
+    expect(confirm.statusCode).toBe(409);
+    const [still] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, draft.id));
+    expect(still!.draftStatus).toBe("draft");
     await createNudgeScheduler({
       db: t.db,
       log: silent,

@@ -27,7 +27,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
-import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
+import { claimedRequest, notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind } from "../media/storage.js";
 import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
@@ -241,7 +241,11 @@ export async function loadCoachState(
     pause: await activePause(db, tester.id),
     stopped: tester.stoppedAt ? { since: tester.stoppedAt, asked: await repliedSinceStop(db, tester, tester.stoppedAt) } : undefined,
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
-    teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
+    // #155: a request a nudge carries is claimed ("sending") while that text is written, so it's loaded by its id.
+    teamRequests:
+      opts.carry && "requestId" in opts.carry
+        ? await claimedRequest(db, tester.id, opts.carry.requestId)
+        : await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
     isFirstText: opts.isFirstText,

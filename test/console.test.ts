@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { createConsoleJobs, summaryDate, summaryKey, weekNumbers } from "../src/console/jobs.js";
+import { addRequest, closeRequest, doneLine } from "../src/console/requests.js";
 import { suggestionsForCoach } from "../src/console/suggestions.js";
 import {
   consoleMessages,
@@ -285,7 +286,7 @@ describe("tester list and page", () => {
     expect(chat).toContain("20 pages a night");
     expect(chat).toContain('value="approved"');
     // …and under Pending; the alerts only below the chat.
-    expect(below).toContain("Pending suggestions");
+    expect(below).toContain("Needs you");
     expect(below).toContain("20 pages a night");
     expect(below).toContain("Plan version 3 to review");
     expect(chat).not.toContain("Plan version 3 to review");
@@ -883,6 +884,74 @@ describe("alerts", () => {
   });
 });
 
+describe("#105: one record, the same everywhere, kept live", () => {
+  type Card = { id: string; sig: string; html: string };
+  type Live = { cards: Card[]; side: { sig: string; html: string } };
+  const live = async (testerId: string, ids: string[]) =>
+    (await get(`/console/testers/${testerId}/updates?thread=${now.getTime()}&live=${ids.join(",")}`, cookieFor("Yanni"))).json() as Live;
+  const section = (html: string, from: string, to?: string) => html.slice(html.indexOf(from), to ? html.indexOf(to) : undefined);
+
+  it("approving from the chat card updates that card, Pending and its alert, live and after a refresh", async () => {
+    const s = await seed();
+    const before = await live(s.tester.id, [s.suggestionId]);
+    expect(before.cards).toHaveLength(1);
+    expect(before.cards[0]!.html).toContain('value="approved"');
+    expect(section(before.side.html, 'id="needs-you"', 'id="waiting-on-tester"')).toContain("20 pages a night");
+
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Stamati"));
+    const after = await live(s.tester.id, [s.suggestionId]);
+    expect(after.cards[0]!.sig).not.toBe(before.cards[0]!.sig);
+    expect(after.cards[0]!.html).toContain("approved by Stamati");
+    expect(after.cards[0]!.html).not.toContain('value="approved"');
+    // Approved, not raised yet: it waits on the tester now, and its alert is no longer unseen.
+    expect(section(after.side.html, 'id="needs-you"', 'id="waiting-on-tester"')).not.toContain("20 pages a night");
+    expect(section(after.side.html, 'id="waiting-on-tester"')).toContain("20 pages a night");
+    expect(section(after.side.html, 'id="alerts"', "<details")).not.toContain("A next step is waiting");
+
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    expect(section(page, '<section id="chat">', '<div id="side"')).not.toContain('value="approved"');
+    expect(section(page, 'id="waiting-on-tester"')).toContain("20 pages a night");
+  });
+
+  it("deciding from Pending leaves no live buttons on the chat card", async () => {
+    const s = await seed();
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "rejected" }, cookieFor("Yanni"));
+    const { cards } = await live(s.tester.id, [s.suggestionId]);
+    expect(cards[0]!.html).toContain("rejected by Yanni");
+    expect(cards[0]!.html).not.toMatch(/value="(approved|rejected)"/);
+    // Settled: the card is no longer live, so the page stops asking for it.
+    expect(cards[0]!.html).not.toContain("data-live");
+  });
+
+  it("a request carried or sent updates its card in place and leaves Waiting on the tester", async () => {
+    const s = await seed();
+    const request = await addRequest(t.db, { testerId: s.tester.id, author: "Yanni", body: "Ask how the trip went", exact: false, sendNow: false, at: now });
+    const before = await live(s.tester.id, [request.id]);
+    expect(before.cards[0]!.html).toContain("data-live");
+    expect(section(before.side.html, 'id="waiting-on-tester"')).toContain("Ask how the trip went");
+
+    await closeRequest(t.db, { request, status: "done", at: now, line: doneLine(request.body, "in a reply", now) });
+    const after = await live(s.tester.id, [request.id]);
+    expect(after.cards[0]!.html).toContain("done");
+    expect(after.cards[0]!.html).not.toContain(">Cancel<");
+    expect(section(after.side.html, 'id="waiting-on-tester"')).not.toContain("Ask how the trip went");
+  });
+
+  it("returns only this tester's cards", async () => {
+    const s = await seed();
+    const other = await seed(WESTERN, "Alex");
+    expect((await live(s.tester.id, [other.suggestionId])).cards).toEqual([]);
+  });
+
+  it("marking an alert seen never decides its suggestion", async () => {
+    const s = await seed();
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.suggestionId, s.suggestionId));
+    await post(`/console/testers/${s.tester.id}/alerts/${alert!.id}/seen`, {}, cookieFor("Yanni"));
+    const [row] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
+    expect(row!.decision).toBe("waiting");
+  });
+});
+
 describe("weekly summary", () => {
   it("is due from 8 am Eastern on Sundays only", () => {
     expect(summaryDate(at(SUN, "07:59"))).toBeUndefined();
@@ -1034,5 +1103,65 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(page).toContain("Train reading works");
     expect(page).toContain("Steady, proof clear.");
     expect(page.indexOf("Dune open at page 40")).toBeLessThan(page.indexOf("Train reading works"));
+  });
+});
+
+describe("#69: alert buttons say what they do, and Discuss in chat", () => {
+  const side = async (testerId: string) => {
+    const page = (await get(`/console/testers/${testerId}`, cookieFor("Yanni"))).body;
+    return page.slice(page.indexOf('<h2 id="alerts"'), page.indexOf('<h2 id="pending"'));
+  };
+  const card = (html: string, text: string) => {
+    const at = html.indexOf(text);
+    return html.slice(html.lastIndexOf('<div class="card"', at), html.indexOf('<div class="card"', at + 1) === -1 ? undefined : html.indexOf('<div class="card"', at + 1));
+  };
+
+  it("a plan to review says Mark reviewed, says the plan is already active, and clears only that version", async () => {
+    const s = await seed();
+    const [other] = await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "locked", version: 4, step: "x", stepTime: "19:00", days: ["mon", "tue", "wed"], proof: "photo", reason: "r", needsReview: true, lockedAt: now }).returning();
+    const plan = card(await side(s.tester.id), "Plan version 3 to review");
+    expect(plan).toContain("Mark reviewed");
+    expect(plan).toContain("already active");
+    expect(plan).not.toContain(">Seen<");
+    await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/seen`, {}, cookieFor("Yanni"));
+    const rows = await t.db.select().from(plans).where(eq(plans.testerId, s.tester.id));
+    expect(rows.find((p) => p.id === s.reviewPlan.id)!.needsReview).toBe(false);
+    expect(rows.find((p) => p.id === other!.id)!.needsReview).toBe(true);
+  });
+
+  it("an alert about a next step waiting for you points to its decision, with no Seen; deciding it clears the alert", async () => {
+    const s = await seed();
+    const waiting = card(await side(s.tester.id), "A next step is waiting");
+    expect(waiting).not.toContain(">Seen<");
+    expect(waiting).toContain('href="#needs-you"');
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Yanni"));
+    const after = await side(s.tester.id);
+    // It's seen now: under Earlier, not with the unseen alerts.
+    expect(after.slice(0, after.indexOf("<details"))).not.toContain("A next step is waiting");
+    expect(card(after, "A next step is waiting")).toContain("seen by Yanni");
+  });
+
+  it("a plain notice keeps Seen", async () => {
+    const s = await seed();
+    await raiseAlert(t.db, { testerId: s.tester.id, topic: "went_quiet", key: "quiet:1", body: "Quiet for 2 days", at: now });
+    expect(card(await side(s.tester.id), "Quiet for 2 days")).toContain(">Seen<");
+  });
+
+  it("every alert has Discuss in chat: it asks ZOH about it, and marks, decides and sends nothing", async () => {
+    const s = await seed();
+    expect(card(await side(s.tester.id), "Plan version 3 to review")).toContain("Discuss in chat");
+    const res = await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/discuss`, {}, cookieFor("Stamati"));
+    expect(res.statusCode).toBe(303);
+    expect(res.headers.location).toBe(`/console/testers/${s.tester.id}?tab=console#chat`);
+    const lines = await t.db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, s.tester.id), eq(consoleMessages.kind, "founder")));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ author: "Stamati" });
+    expect(lines[0]!.body).toContain("Plan version 3 to review");
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, s.alertId));
+    expect(alert!.seenAt).toBeNull();
+    const [plan] = await t.db.select().from(plans).where(eq(plans.id, s.reviewPlan.id));
+    expect(plan!.needsReview).toBe(true);
+    expect((await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId)))[0]!.decision).toBe("waiting");
+    expect(t.sendblue.sends).toEqual([]);
   });
 });

@@ -11,6 +11,7 @@ import {
   nudges,
   pauses,
   planInputs,
+  PLAN_ADJUST,
   plans,
   PROOF_METHODS,
   stepDays,
@@ -21,6 +22,7 @@ import {
   WEEKDAYS,
   type NewStepDay,
   type Plan,
+  type PlanChanges,
   type PlanInput,
   type StepDay,
   type Suggestion,
@@ -29,6 +31,7 @@ import {
 import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
 import { closeRequest, doneLine, findRequest } from "../console/requests.js";
+import { alertAnswer } from "../console/suggestions.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
 import {
@@ -686,14 +689,36 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         }
         const approvedAs = approvedKind(approved);
         if (approvedAs === "new_focus") return { ok: false, error: "That's a new focus: use switch_goal with it." };
-        if (given !== undefined && given !== approvedAs) return { ok: false, error: `It was approved as ${approvedAs}.` };
-        kind = approvedAs;
-      } else if (kind !== "other" && (!asked || !saidIt(asked, state.lastTesterText))) {
-        return {
-          ok: false,
-          error:
-            "A deepen or upgrade of the plan is made right away only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
-        };
+        if (approvedAs === PLAN_ADJUST) {
+          // #155: the founders' change to their plan is made only on their answer, after it was raised.
+          if (!awaitingAnswer(approved)) return { ok: false, error: `That plan change isn't raised yet: raise it first (record_next_step delivered), then wait for their answer.` };
+          // Raised before this reply began (a reply's rounds share one `at`), and this is a reply to their text.
+          if (state.nudgeMoment || !state.lastTesterText || !approved.deliveredAt || approved.deliveredAt >= at) {
+            return { ok: false, error: "Wait for their answer to the plan change: only their yes (after you raised it) makes it." };
+          }
+          if (given !== undefined && given !== "other") return { ok: false, error: "A plan change is kind other." };
+          // What the founders proposed, with whatever they changed in their answer on top.
+          Object.assign(fields, { ...changeInputs(approved.planChanges ?? {}), ...fields });
+          kind = "other";
+        } else {
+          if (given !== undefined && given !== approvedAs) return { ok: false, error: `It was approved as ${approvedAs}.` };
+          kind = approvedAs;
+        }
+      } else {
+        const waiting = state.suggestions.find((x) => approvedKind(x) === PLAN_ADJUST && awaitingAnswer(x));
+        if (waiting) {
+          return {
+            ok: false,
+            error: `The team's plan change [${suggestionRef(waiting.id)}] is waiting on their answer: if this is it, change_plan with suggestion ${suggestionRef(waiting.id)} (and only what they changed); if they said no, record_next_step declined first.`,
+          };
+        }
+        if (kind !== "other" && (!asked || !saidIt(asked, state.lastTesterText))) {
+          return {
+            ok: false,
+            error:
+              "A deepen or upgrade of the plan is made right away only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
+          };
+        }
       }
       if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
       if (until !== undefined && kind !== "other") return { ok: false, error: "A temporary lighter plan is kind other." };
@@ -701,6 +726,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (typeof merged === "string") return { ok: false, error: merged };
       const version = await nextVersion(db, tester.id);
       const { startDate, commitment } = state.plan;
+      // #155: a change the founders proposed and the tester agreed to needs no founder review.
+      const review = approved?.raisedBy !== "founder";
       const [changed] = await db.insert(plans).values({
         testerId: tester.id,
         goalSlug: state.plan.goalSlug,
@@ -711,15 +738,17 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         commitment,
         endsOn: until ?? null,
         changeKind: kind,
-        needsReview: true,
+        needsReview: review,
         lockedAt: at,
       }).returning({ id: plans.id });
-      await alertPlanReview(db, tester, changed!.id, version, at);
+      if (review) await alertPlanReview(db, tester, changed!.id, version, at);
       if (approved) {
+        const outcomeNote = approved.planChanges ? changedFrom(approved.planChanges, merged) : undefined;
         await db
           .update(suggestions)
-          .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, planId: changed!.id, updatedAt: at })
+          .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, planId: changed!.id, outcomeNote: outcomeNote ?? null, updatedAt: at })
           .where(eq(suggestions.id, approved.id));
+        await alertAnswer(db, { suggestion: approved, name: tester.name, answer: "agreed", note: outcomeNote, at });
       } else if (kind !== "other") {
         // Their own ask, made right away (spec case 5): recorded like every next step, for the team.
         await db.insert(suggestions).values({
@@ -742,7 +771,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
       const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
       const quiet = merged.stepTime !== state.plan.stepTime ? quietNote(tester, merged.stepTime, merged.minutes) : "";
-      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}`);
+      // #155: the founders' plan change they just agreed to is news to confirm, not the plan as it was.
+      const agreed = approved && approvedKind(approved) === PLAN_ADJUST ? " New as of their answer: confirm the change to them in a line (what's different, from when), no more questions." : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}${agreed}`);
     }
 
     case "switch_goal": {
@@ -770,6 +801,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           .update(suggestions)
           .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, updatedAt: at })
           .where(eq(suggestions.id, approved.id));
+        await alertAnswer(db, { suggestion: approved, name: tester.name, answer: "agreed", at });
         const updated = await updateTester(db, tester.id, { goalSlug: slug, phase: "planning" });
         const old = state.goal?.title ?? tester.goalSlug;
         return saved(updated, `${goal.title} is their focus now; ${old} carries on as maintenance (no nudges or proof, a light check-in now and then). Now agree its plan.`);
@@ -838,6 +870,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .update(suggestions)
         .set({ outcome: "declined", deliveredAt: found.deliveredAt ?? at, outcomeAt: at, updatedAt: at })
         .where(eq(suggestions.id, found.id));
+      await alertAnswer(db, { suggestion: found, name: tester.name, answer: "declined", at });
       return saved(tester, "Declined: nothing changes, and it isn't raised again for at least a week. Take it lightly.");
     }
 
@@ -1261,4 +1294,21 @@ function isTimeZone(zone: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** #155: a founder's proposed plan fields, as change_plan's inputs. */
+function changeInputs(c: PlanChanges): Record<string, unknown> {
+  const { stepTime, proofNote, ...same } = c;
+  return { ...same, ...(stepTime !== undefined ? { time: stepTime } : {}), ...(proofNote !== undefined ? { proof_note: proofNote } : {}) };
+}
+
+const CHANGE_LABELS: Record<keyof PlanChanges, string> = { stepTime: "time", place: "place", days: "days", proof: "proof", proofNote: "proof note", minutes: "minutes" };
+
+/** #155: what the tester changed from the founders' proposal, in plain words; undefined when they took it as is. */
+function changedFrom(proposed: PlanChanges, saved: PlanValues): string | undefined {
+  const show = (v: unknown) => (Array.isArray(v) ? v.join(", ") : String(v));
+  const diffs = (Object.keys(proposed) as (keyof PlanChanges)[])
+    .filter((k) => JSON.stringify(proposed[k]) !== JSON.stringify(saved[k]))
+    .map((k) => `${CHANGE_LABELS[k]} ${show(saved[k])}, not ${show(proposed[k])}`);
+  return diffs.length ? diffs.join("; ") : undefined;
 }

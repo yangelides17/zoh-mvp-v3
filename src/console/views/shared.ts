@@ -96,12 +96,23 @@ export function proofHtml(m: Message): string {
   return `<div>${media}${words ? `<div class="muted">${words}</div>` : ""}</div>`;
 }
 
-export function alertCard(a: ConsoleMessage, testerId: string, testerName?: string): string {
-  const seen = a.seenAt
-    ? `<span class="muted">seen by ${esc(a.seenBy)} ${esc(when(a.seenAt))}</span>`
-    : `<form class="inline" method="post" action="/console/testers/${esc(testerId)}/alerts/${esc(a.id)}/seen"><button class="small">Seen</button></form>`;
-  return `<div class="card"><div class="row spread"><div class="row"><span class="chip${a.seenAt ? "" : " warn"}">${esc((a.topic ?? "alert").replaceAll("_", " "))}</span>${testerName ? `<a href="/console/testers/${esc(testerId)}?tab=console">${esc(testerName)}</a>` : ""}<span class="muted">${esc(when(a.createdAt))}</span></div>${seen}</div>
-<div style="margin-top:6px">${esc(a.body)}</div>${a.why ? `<div class="muted">Why: ${esc(a.why)}</div>` : ""}</div>`;
+/**
+ * An alert, with a button that says what it does (#69): Mark reviewed on a plan to review (it's already
+ * active), a pointer to the decision for a next step waiting on the founders, Seen on anything else;
+ * and Discuss in chat on every one. `decisionWaiting`: its next step still waits for a decision.
+ */
+export function alertCard(a: ConsoleMessage, testerId: string, opts: { testerName?: string; decisionWaiting?: boolean } = {}): string {
+  const base = `/console/testers/${esc(testerId)}/alerts/${esc(a.id)}`;
+  const review = a.topic === "plan_review";
+  const button = a.seenAt
+    ? `<span class="muted">${review ? "reviewed" : "seen"} by ${esc(a.seenBy)} ${esc(when(a.seenAt))}</span>`
+    : opts.decisionWaiting
+      ? `<a class="small" href="${opts.testerName ? `/console/testers/${esc(testerId)}?tab=console` : ""}#needs-you">Decide it under Needs you</a>`
+      : `<form class="inline" method="post" action="${base}/seen"><button class="small">${review ? "Mark reviewed" : "Seen"}</button></form>`;
+  const note = review && !a.seenAt ? `<div class="muted">Their plan is already active (they committed to it); marking it reviewed records that you've looked.</div>` : "";
+  const discuss = `<form class="inline" method="post" action="${base}/discuss"><button class="small">Discuss in chat</button></form>`;
+  return `<div class="card"><div class="row spread"><div class="row"><span class="chip${a.seenAt ? "" : " warn"}">${esc((a.topic ?? "alert").replaceAll("_", " "))}</span>${opts.testerName ? `<a href="/console/testers/${esc(testerId)}?tab=console">${esc(opts.testerName)}</a>` : ""}<span class="muted">${esc(when(a.createdAt))}</span></div><div class="row">${discuss}${button}</div></div>
+<div style="margin-top:6px">${esc(a.body)}</div>${a.why ? `<div class="muted">Why: ${esc(a.why)}</div>` : ""}${note}</div>`;
 }
 
 /** A next step, with Approve / Change / Reject while it waits. The same card sits in the chat and under Pending. */

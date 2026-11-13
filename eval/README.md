@@ -81,8 +81,9 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
   earlier (e.g. the evening before); its plan's `started_days_ago` and `minutes` set day 1 and how
   long the step takes. See `eval/cases/nudges/`.
 - **Console** (founders' chat): a case line `console Yanni: ...` goes through the real console chat as
-  that founder (`console Yanni (exact): ...` or `(exact, now)` for "send exactly this"); ZOH's console answer
-  joins the transcript marked as console, and an exact text goes out on the next minute's tick. The
+  that founder; ZOH's console answer and any draft card it makes join the transcript marked as console.
+  `console Yanni (do it)` clicks Do it on the newest draft (#155), and a text it queues goes out on the next
+  minute's tick. The
   estimate counts the coach's console calls loosely. See `eval/cases/console/`.
 - **Texts sent together** (#16): a case line with ` +++ ` between texts posts them a second apart
   without waiting for ZOH in between (`[photo x.jpg: …] +++ Not bad!`); the grader reads the line as

@@ -1,6 +1,8 @@
+import { createHash } from "node:crypto";
 import type { ConsoleMessage, Goal, Message, Tester } from "../../db/schema.js";
+import { stillOpen } from "../../coach/next-steps.js";
 import { messageTime } from "../../memory/store.js";
-import type { ConsoleTab, ThreadItem } from "../data.js";
+import type { ConsoleTab, SideSection, ThreadItem } from "../data.js";
 import { APP_AUTHOR, awaitingAnswer } from "../requests.js";
 import { alertCard, clock, dayLabel, esc, founderDay, proofHtml, suggestionCard, when } from "./shared.js";
 
@@ -16,7 +18,8 @@ export interface ThreadContext {
   now: Date;
 }
 
-const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sent: "sent", done: "done", cancelled: "cancelled" };
+const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sending: "going out now", sent: "sent", done: "done", cancelled: "cancelled" };
+const DRAFT_STATUS_LABELS: Record<string, string> = { draft: "draft: nothing happens until you confirm", confirmed: "done", cancelled: "cancelled", failed: "not done" };
 
 /** Day dividers in front of the first item and wherever the day changes; the page drops repeats at chunk edges. */
 function withDividers<T>(list: T[], at: (item: T) => Date, render: (item: T) => string, now: Date): string {
@@ -48,11 +51,23 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
         status === "pending"
           ? `<form class="inline" method="post" action="/console/testers/${esc(ctx.testerId)}/requests/${esc(m.id)}/cancel"><button class="small">Cancel</button></form>`
           : "";
-      const how = m.exact ? "send exactly this" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
-      const chips = [how, m.sendNow && "send now", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      const how = m.exact ? "word for word" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
+      const chips = [how, m.sendNow && "even in quiet hours", REQUEST_STATUS_LABELS[status]].filter(Boolean);
       const timing = [m.dueAt && `${m.delivery === "own_text" ? "at" : "not before"} ${when(m.dueAt)}`, m.expiresAt && `dropped if not out by ${when(m.expiresAt)}`].filter(Boolean);
       return `<div class="event" ${id}><div class="head">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)} · ${time}</span></div>
 <div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
+    }
+    case "draft": {
+      // #155: what the console chat would do, until a founder confirms it.
+      const status = m.draftStatus ?? "draft";
+      const base = `/console/testers/${esc(ctx.testerId)}/drafts/${esc(m.id)}`;
+      const actions =
+        status === "draft"
+          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form></div>`
+          : "";
+      const result = m.draftResult && status !== "draft" ? `<div class="muted">${esc(m.draftResult)}</div>` : "";
+      return `<div class="event draft" ${id}><div class="head"><span class="chip${status === "draft" ? " warn" : ""}">${esc(DRAFT_STATUS_LABELS[status] ?? status)}</span><span class="muted">for ${esc(m.author)} · ${time}</span></div>
+<div>${esc(m.body)}</div>${result}${actions}</div>`;
     }
     case "summary":
       return `<div class="event" ${id}><div class="head"><span class="chip">Weekly summary</span><span class="muted">${time}</span></div><pre>${esc(m.body)}</pre></div>`;
@@ -62,13 +77,27 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
   }
 }
 
+/** Whether a chat card can still change (#105): the page asks for these again on every poll. */
+function isLive(i: ThreadItem): boolean {
+  if (i.type === "suggestion") return stillOpen(i.suggestion);
+  if (i.line.kind === "draft") return i.line.draftStatus === "draft";
+  return i.line.kind === "request" && (i.line.requestStatus === "pending" || i.line.requestStatus === "sending");
+}
+
+/**
+ * One chat item. Cards that can change carry a signature of how they look now, and the live ones
+ * say so: the page swaps a card in place when its signature changes (#105).
+ */
+export function itemHtml(i: ThreadItem, ctx: ThreadContext): string {
+  const html = i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true });
+  if (i.type === "line" && i.line.kind !== "request" && i.line.kind !== "draft") return html;
+  return html.replace("<div ", `<div data-sig="${cardSig(html)}"${isLive(i) ? " data-live" : ""} `);
+}
+
+export const cardSig = (html: string) => createHash("sha256").update(html).digest("hex").slice(0, 16);
+
 export function threadItemsHtml(items: ThreadItem[], ctx: ThreadContext): string {
-  return withDividers(
-    items,
-    (i) => i.at,
-    (i) => (i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true })),
-    ctx.now,
-  );
+  return withDividers(items, (i) => i.at, (i) => itemHtml(i, ctx), ctx.now);
 }
 
 export function textItemsHtml(texts: Message[], now: Date): string {
@@ -109,16 +138,25 @@ export const thinkingLabel = (thinking: boolean) => (thinking ? "ZOH is thinking
 /** How long the page shows "thinking" for an unanswered line. */
 const THINKING_FOR_MS = 2 * 60_000;
 
-/** Under the chat: alerts (unseen first, older folded away) and next steps waiting for a decision. */
-export function sideHtml(side: Pick<ConsoleTab, "alerts" | "pending">, ctx: ThreadContext, sig: string): string {
+/** Under the chat: alerts (unseen first, older folded away), then Pending: what needs you and what waits on the tester (#105). */
+export function sideHtml(side: SideSection, ctx: ThreadContext, sig: string): string {
   const { unseen, earlier } = side.alerts;
-  const alerts = unseen.map((a) => alertCard(a, ctx.testerId)).join("") || `<p class="muted">Nothing waiting.</p>`;
-  const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map((a) => alertCard(a, ctx.testerId)).join("")}</details>` : "";
+  const waitingIds = new Set(side.pending.map((s) => s.id));
+  const card = (a: ConsoleMessage) => alertCard(a, ctx.testerId, { decisionWaiting: Boolean(a.suggestionId && waitingIds.has(a.suggestionId)) });
+  const alerts = unseen.map(card).join("") || `<p class="muted">Nothing waiting.</p>`;
+  const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map(card).join("")}</details>` : "";
   const pending = side.pending.length
     ? side.pending.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)).join("")
-    : `<p class="muted">None waiting. To suggest one, tell ZOH in the chat.</p>`;
+    : `<p class="muted">Nothing needs you. To suggest a next step, tell ZOH in the chat.</p>`;
+  const { requests, suggestions } = side.waiting;
+  const waiting =
+    [...suggestions.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)), ...requests.map((r) => lineHtml(r, ctx))].join("") ||
+    `<p class="muted">Nothing waiting on them.</p>`;
+  const waitingCount = requests.length + suggestions.length;
   return `<div id="side" data-sig="${esc(sig)}"><h2 id="alerts">Alerts${unseen.length ? ` <span class="badge">${unseen.length}</span>` : ""}</h2>${alerts}${older}
-<h2 id="pending">Pending suggestions${side.pending.length ? ` <span class="badge">${side.pending.length}</span>` : ""}</h2>${pending}</div>`;
+<h2 id="pending">Pending</h2>
+<h3 id="needs-you">Needs you${side.pending.length ? ` <span class="badge">${side.pending.length}</span>` : ""}</h3>${pending}
+<h3 id="waiting-on-tester">Waiting on the tester${waitingCount ? ` <span class="chip">${waitingCount}</span>` : ""}</h3>${waiting}</div>`;
 }
 
 /** `side`: the signed Alerts and Pending section from `sideHtml`. */
@@ -130,9 +168,7 @@ export function consoleTabHtml(tab: ConsoleTab, tester: Tester, ctx: ThreadConte
   return `<section id="chat">${scroller("thread", threadItemsHtml(tab.items, ctx), { before, after, empty: "Nothing yet: ask ZOH about them below." })}
 <div class="typing" id="thinking">${thinkingLabel(thinking)}</div>
 <form method="post" action="/console/testers/${esc(tester.id)}/chat">${stopped}
-<div class="composer"><textarea id="chat-text" name="text" maxlength="2000" rows="1" required placeholder="Ask ZOH, give context, or ask it to bring something up"></textarea><button class="primary">Send</button></div>
-<details class="options"><summary>Send options</summary><div class="row" style="margin-top:6px"><label><input type="checkbox" name="exact"> Send exactly this</label><label><input type="checkbox" name="sendNow"> Send now (skip quiet hours)</label></div>
-<p class="muted">Exact texts go out word for word, as ZOH: never after a stop or past 3 unanswered; "send now" skips only quiet hours.</p></details></form></section>
+<div class="composer"><textarea id="chat-text" name="text" maxlength="2000" rows="1" required placeholder="Ask ZOH, give context, or tell it what to do: it drafts, you confirm"></textarea><button class="primary">Send</button></div></form></section>
 ${side}`;
 }
 

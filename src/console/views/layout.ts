@@ -280,6 +280,9 @@ const SCRIPT = `(function () {
   function poll() {
     if (document.hidden) return;
     var q = boxes.map(function (b) { return b.dataset.kind + "=" + b.dataset.after; });
+    // #105: chat cards that can still change, asked for again each time.
+    var live = Array.prototype.map.call(document.querySelectorAll(".scroller [data-live]"), function (el) { return el.dataset.id; });
+    if (live.length) q.push("live=" + live.join(","));
     json(base + "/updates?" + q.join("&")).then(function (j) {
       if (!j) return;
       boxes.forEach(function (box) {
@@ -291,6 +294,11 @@ const SCRIPT = `(function () {
         box.querySelector(".items").insertAdjacentHTML("beforeend", u.html);
         tidy(box);
         if (near) box.scrollTop = box.scrollHeight;
+      });
+      (j.cards || []).forEach(function (c) {
+        var el = document.querySelector('.scroller [data-id="' + c.id + '"]');
+        // A card being typed in or opened is left alone; it's asked for again next time.
+        if (el && el.dataset.sig !== c.sig && !el.contains(document.activeElement) && !el.querySelector("details[open]")) el.outerHTML = c.html;
       });
       var t = document.getElementById("thinking");
       if (t && "thinking" in j) t.textContent = j.thinking;

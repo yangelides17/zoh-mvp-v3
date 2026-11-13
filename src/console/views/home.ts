@@ -6,7 +6,8 @@ import { layout } from "./layout.js";
 import { ago, alertCard, esc, hitRateText, initials, streakText } from "./shared.js";
 
 /** The home page (#63): a card per tester, the ones needing a look first, then alerts across everyone. */
-export function listPage(rows: TesterRow[], alerts: ConsoleMessage[], name: string, now = new Date()): string {
+/** `waiting`: ids of next steps still waiting for a decision (#69: their alerts point to it instead of Seen). */
+export function listPage(rows: TesterRow[], alerts: ConsoleMessage[], name: string, now = new Date(), waiting: Set<string> = new Set()): string {
   const byId = new Map(rows.map((r) => [r.tester.id, r.tester]));
   const testersHtml = rows
     .map((r) => {
@@ -27,7 +28,7 @@ ${maint ? `<div class="row" style="margin:4px 0">${maint}</div>` : ""}<div class
     })
     .join("");
   const alertsHtml = alerts.length
-    ? alerts.map((a) => alertCard(a, a.testerId, byId.get(a.testerId)?.name ?? "Unnamed")).join("")
+    ? alerts.map((a) => alertCard(a, a.testerId, { testerName: byId.get(a.testerId)?.name ?? "Unnamed", decisionWaiting: Boolean(a.suggestionId && waiting.has(a.suggestionId)) })).join("")
     : `<p class="empty">Nothing waiting.</p>`;
   return layout(
     "ZOH console",
