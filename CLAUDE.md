@@ -97,6 +97,8 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - TypeScript strict. No `any` without a comment saying why.
 - Every outside service sits behind an interface with a fake in `test/helpers.ts`. Tests never call
   Sendblue, Claude, the bucket or Speaches.
+- A test sets up only what comes before the change, never the state the change is meant to produce: run the
+  real code path, so removing the change makes the test fail.
 - Schema changes only through `src/db/schema.ts` + a generated migration. Never edit applied migrations.
 - Never log or commit secrets, API keys or full phone numbers (use `maskNumber`).
 - Webhook handler stays fast: store, answer 2xx, then do slow work in the `TaskQueue`.
