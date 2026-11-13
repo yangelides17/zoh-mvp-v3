@@ -394,6 +394,12 @@ export async function mediaMessage(db: Db, messageId: string): Promise<Message |
 }
 
 /** Unseen alerts across every tester, newest first. */
+/** #69: ids of next steps still waiting for the founders' decision, across everyone. */
+export async function waitingSuggestionIds(db: Db): Promise<Set<string>> {
+  const rows = await db.select({ id: suggestions.id }).from(suggestions).where(eq(suggestions.decision, "waiting"));
+  return new Set(rows.map((r) => r.id));
+}
+
 export async function waitingAlerts(db: Db, testerIds?: string[]): Promise<ConsoleMessage[]> {
   return db
     .select()

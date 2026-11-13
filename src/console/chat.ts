@@ -37,6 +37,7 @@ import { withDaySteps } from "../nudges/quiet.js";
 import { activePause } from "../testers/pauses.js";
 import { goalTitles } from "./data.js";
 import { addRequest, addThreadLine, APP_AUTHOR, awaitingAnswer, cancelRequest, COACH_AUTHOR, findRequest, founderTime, openRequests, requestRef } from "./requests.js";
+import { markAlertSeen, PLAN_REVIEW_TOPIC } from "./alerts.js";
 import { cancelDraft, createDraft, draftRef, findDraft, openDrafts } from "./drafts.js";
 import { addFounderSuggestion, decideSuggestion, listSuggestions, SuggestionError, withdrawSuggestion, type Decision } from "./suggestions.js";
 
@@ -66,6 +67,7 @@ Answering the founders:
 - A next step they want (deepen, upgrade, a new focus): suggest_next_step once the goal and kind are clear (ask in a line if not).
 - Deciding a next step waiting for them ("reject it", "approve that"): decide_suggestion.
 - "Cancel that": cancel. Already raised with the tester: take_back.
+- An alert: explain it from the record (a plan to review is already active: they committed; reviewing it only records that a founder looked). Marking one handled: mark_alert.
 - They've stopped: answer questions, but nothing can be sent.`;
 
 /** What one capability gets: the tester, who's asking, and the clock. */
@@ -440,6 +442,29 @@ export const CAPABILITIES: Record<string, Capability> = {
       };
     },
   },
+  mark_alert: {
+    tool: {
+      name: "mark_alert",
+      description: "Draft marking an alert (by its id) as handled: a plan to review becomes reviewed (the plan is already active; this records that a founder looked), anything else seen. One about a next step waiting for the founders clears when they decide it (decide_suggestion), not here.",
+      input_schema: { type: "object", properties: { alert: { type: "string" } }, required: ["alert"] },
+    },
+    async prepare(ctx, input) {
+      const { alert: ref } = parse(z.object({ alert: text(40) }).strict(), input);
+      const wanted = ref.trim().toLowerCase().replace(/^\[|\]$/g, "");
+      const rows = wanted.length >= 8 ? await ctx.db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, ctx.tester.id), eq(consoleMessages.kind, "alert"))) : [];
+      const alert = rows.find((r) => r.id.startsWith(wanted));
+      if (!alert) throw new CapabilityError(`No alert ${ref} for this tester.`);
+      if (alert.seenAt) throw new CapabilityError(`Already ${alert.topic === PLAN_REVIEW_TOPIC ? "reviewed" : "seen"} by ${alert.seenBy}.`);
+      const review = alert.topic === PLAN_REVIEW_TOPIC;
+      return {
+        summary: `${review ? "Mark reviewed" : "Mark seen"}: ${alert.body}.${review ? " Their plan is already active; this records that you've looked." : ""}`,
+        apply: async () => {
+          await markAlertSeen(ctx.db, { testerId: ctx.tester.id, alertId: alert.id, by: ctx.founder, at: ctx.now });
+          return review ? "Marked reviewed." : "Marked seen.";
+        },
+      };
+    },
+  },
 };
 
 /** A founder's plan change in plain words: "step at 7:30 am at the gym, on mon, wed, fri, proof by screenshot". */
@@ -689,7 +714,7 @@ function threadTurn(m: ConsoleMessage): Turn {
     case "request":
       return { role: "user", text: `[${at}, request ${requestRef(m.id)} from ${m.author ?? "the team"}${m.exact ? ", word for word" : ""}, ${m.requestStatus}] ${m.body}` };
     case "alert":
-      return { role: "user", text: `[${at}, alert: ${m.topic ?? "alert"}] ${m.body}${m.why ? ` (why: ${m.why})` : ""}` };
+      return { role: "user", text: `[${at}, alert ${m.id.slice(0, 8)}: ${m.topic ?? "alert"}${m.seenAt ? `, ${m.topic === PLAN_REVIEW_TOPIC ? "reviewed" : "seen"} by ${m.seenBy}` : ""}] ${m.body}${m.why ? ` (why: ${m.why})` : ""}` };
     case "summary":
       return { role: "user", text: `[${at}, weekly summary] ${m.body}` };
     case "draft":

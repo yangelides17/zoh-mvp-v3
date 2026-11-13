@@ -141,8 +141,10 @@ const THINKING_FOR_MS = 2 * 60_000;
 /** Under the chat: alerts (unseen first, older folded away), then Pending: what needs you and what waits on the tester (#105). */
 export function sideHtml(side: SideSection, ctx: ThreadContext, sig: string): string {
   const { unseen, earlier } = side.alerts;
-  const alerts = unseen.map((a) => alertCard(a, ctx.testerId)).join("") || `<p class="muted">Nothing waiting.</p>`;
-  const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map((a) => alertCard(a, ctx.testerId)).join("")}</details>` : "";
+  const waitingIds = new Set(side.pending.map((s) => s.id));
+  const card = (a: ConsoleMessage) => alertCard(a, ctx.testerId, { decisionWaiting: Boolean(a.suggestionId && waitingIds.has(a.suggestionId)) });
+  const alerts = unseen.map(card).join("") || `<p class="muted">Nothing waiting.</p>`;
+  const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map(card).join("")}</details>` : "";
   const pending = side.pending.length
     ? side.pending.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)).join("")
     : `<p class="muted">Nothing needs you. To suggest a next step, tell ZOH in the chat.</p>`;

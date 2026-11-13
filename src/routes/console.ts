@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import sharp from "sharp";
 import type { ConsoleConfig } from "../config.js";
@@ -18,6 +18,7 @@ import {
   threadChunk,
   waitingAlerts,
   liveItems,
+  waitingSuggestionIds,
   type SideSection,
 } from "../console/data.js";
 import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
@@ -35,7 +36,7 @@ import { cancelDraft } from "../console/drafts.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
-import { SUGGESTION_KINDS, testers } from "../db/schema.js";
+import { consoleMessages, SUGGESTION_KINDS, testers, type Tester } from "../db/schema.js";
 import { testerNow } from "../testers/clock.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
@@ -126,11 +127,40 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return { sig, html: unsigned.replace('data-sig=""', `data-sig="${sig}"`) };
   };
 
+  /** A founder's line in the console chat, answered by the console coach in the background (spec 4). */
+  const chatLine = async (request: FastifyRequest, reply: FastifyReply, tester: Tester, name: string, body: string) => {
+    const id = tester.id;
+    const now = testerNow(tester, clock());
+    const { needsAnswer } = await postFounderMessage(opts.db, {
+      tester,
+      founder: name,
+      body,
+      now,
+      elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
+    });
+    if (needsAnswer) {
+      const answer = async () => {
+        try {
+          if (!opts.chat) throw new Error("The console coach isn't set up (no Claude key).");
+          await opts.chat.answer(id, await nowFor(id));
+        } catch (err) {
+          request.log.error({ err: safeError(err) }, "Console coach failed");
+          const why = err instanceof Error && err.message.startsWith("The console coach") ? err.message : "Sorry, I couldn't answer that just now. Try again?";
+          // ZOH's line, so it counts as the answer and the page stops waiting.
+          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: await nowFor(id) });
+        }
+      };
+      if (opts.queue) opts.queue.run(answer);
+      else await answer();
+    }
+    return back(reply, id, "chat");
+  };
+
   const query = (request: FastifyRequest) => request.query as Record<string, unknown>;
 
   app.get("/console", page(async (_request, reply, name) => {
     const now = clock();
-    return html(reply, listPage(await testerRows(opts.db, now), await waitingAlerts(opts.db), name, now));
+    return html(reply, listPage(await testerRows(opts.db, now), await waitingAlerts(opts.db), name, now, await waitingSuggestionIds(opts.db)));
   }));
 
   app.get("/console/metrics", page(async (request, reply, name) => {
@@ -259,6 +289,20 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return back(reply, id, "console");
   }));
 
+  // #69: asks ZOH about an alert in the chat. It marks, decides and sends nothing.
+  app.post("/console/testers/:id/alerts/:aid/discuss", action(async (request, reply, name) => {
+    const { id, aid } = request.params;
+    if (!isUuid(id) || !isUuid(aid)) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    const [alert] = await opts.db
+      .select()
+      .from(consoleMessages)
+      .where(and(eq(consoleMessages.id, aid), eq(consoleMessages.testerId, id), eq(consoleMessages.kind, "alert")));
+    if (!tester || !alert) return reply.code(404).send({ error: "not found" });
+    const body = `About the alert [${alert.id.slice(0, 8)}] "${alert.body}" (${(alert.topic ?? "alert").replaceAll("_", " ")}): what happened, why does it matter, and where does it stand now?`;
+    return chatLine(request, reply, tester, name, body);
+  }));
+
   app.post("/console/testers/:id/suggestions/:sid/decide", action(async (request, reply, name) => {
     const { id, sid } = request.params;
     if (!isUuid(id) || !isUuid(sid)) return reply.code(404).send({ error: "not found" });
@@ -282,30 +326,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!body || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters is needed` });
     const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
     if (!tester) return reply.code(404).send({ error: "not found" });
-    const now = testerNow(tester, clock());
-    const { needsAnswer } = await postFounderMessage(opts.db, {
-      tester,
-      founder: name,
-      body,
-      now,
-      elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
-    });
-    if (needsAnswer) {
-      const answer = async () => {
-        try {
-          if (!opts.chat) throw new Error("The console coach isn't set up (no Claude key).");
-          await opts.chat.answer(id, await nowFor(id));
-        } catch (err) {
-          request.log.error({ err: safeError(err) }, "Console coach failed");
-          const why = err instanceof Error && err.message.startsWith("The console coach") ? err.message : "Sorry, I couldn't answer that just now. Try again?";
-          // ZOH's line, so it counts as the answer and the page stops waiting.
-          await addThreadLine(opts.db, { testerId: id, kind: "coach", author: COACH_AUTHOR, body: why, at: await nowFor(id) });
-        }
-      };
-      if (opts.queue) opts.queue.run(answer);
-      else await answer();
-    }
-    return back(reply, id, "chat");
+    return chatLine(request, reply, tester, name, body);
   }));
 
   // #155: a founder confirms what the console chat drafted. It happens once, re-checked as things stand now.

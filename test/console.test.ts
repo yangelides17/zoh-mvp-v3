@@ -1105,3 +1105,63 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(page.indexOf("Dune open at page 40")).toBeLessThan(page.indexOf("Train reading works"));
   });
 });
+
+describe("#69: alert buttons say what they do, and Discuss in chat", () => {
+  const side = async (testerId: string) => {
+    const page = (await get(`/console/testers/${testerId}`, cookieFor("Yanni"))).body;
+    return page.slice(page.indexOf('<h2 id="alerts"'), page.indexOf('<h2 id="pending"'));
+  };
+  const card = (html: string, text: string) => {
+    const at = html.indexOf(text);
+    return html.slice(html.lastIndexOf('<div class="card"', at), html.indexOf('<div class="card"', at + 1) === -1 ? undefined : html.indexOf('<div class="card"', at + 1));
+  };
+
+  it("a plan to review says Mark reviewed, says the plan is already active, and clears only that version", async () => {
+    const s = await seed();
+    const [other] = await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "locked", version: 4, step: "x", stepTime: "19:00", days: ["mon", "tue", "wed"], proof: "photo", reason: "r", needsReview: true, lockedAt: now }).returning();
+    const plan = card(await side(s.tester.id), "Plan version 3 to review");
+    expect(plan).toContain("Mark reviewed");
+    expect(plan).toContain("already active");
+    expect(plan).not.toContain(">Seen<");
+    await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/seen`, {}, cookieFor("Yanni"));
+    const rows = await t.db.select().from(plans).where(eq(plans.testerId, s.tester.id));
+    expect(rows.find((p) => p.id === s.reviewPlan.id)!.needsReview).toBe(false);
+    expect(rows.find((p) => p.id === other!.id)!.needsReview).toBe(true);
+  });
+
+  it("an alert about a next step waiting for you points to its decision, with no Seen; deciding it clears the alert", async () => {
+    const s = await seed();
+    const waiting = card(await side(s.tester.id), "A next step is waiting");
+    expect(waiting).not.toContain(">Seen<");
+    expect(waiting).toContain('href="#needs-you"');
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Yanni"));
+    const after = await side(s.tester.id);
+    // It's seen now: under Earlier, not with the unseen alerts.
+    expect(after.slice(0, after.indexOf("<details"))).not.toContain("A next step is waiting");
+    expect(card(after, "A next step is waiting")).toContain("seen by Yanni");
+  });
+
+  it("a plain notice keeps Seen", async () => {
+    const s = await seed();
+    await raiseAlert(t.db, { testerId: s.tester.id, topic: "went_quiet", key: "quiet:1", body: "Quiet for 2 days", at: now });
+    expect(card(await side(s.tester.id), "Quiet for 2 days")).toContain(">Seen<");
+  });
+
+  it("every alert has Discuss in chat: it asks ZOH about it, and marks, decides and sends nothing", async () => {
+    const s = await seed();
+    expect(card(await side(s.tester.id), "Plan version 3 to review")).toContain("Discuss in chat");
+    const res = await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/discuss`, {}, cookieFor("Stamati"));
+    expect(res.statusCode).toBe(303);
+    expect(res.headers.location).toBe(`/console/testers/${s.tester.id}?tab=console#chat`);
+    const lines = await t.db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, s.tester.id), eq(consoleMessages.kind, "founder")));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ author: "Stamati" });
+    expect(lines[0]!.body).toContain("Plan version 3 to review");
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, s.alertId));
+    expect(alert!.seenAt).toBeNull();
+    const [plan] = await t.db.select().from(plans).where(eq(plans.id, s.reviewPlan.id));
+    expect(plan!.needsReview).toBe(true);
+    expect((await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId)))[0]!.decision).toBe("waiting");
+    expect(t.sendblue.sends).toEqual([]);
+  });
+});

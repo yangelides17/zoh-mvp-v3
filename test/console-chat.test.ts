@@ -238,7 +238,7 @@ describe("console chat route", () => {
 
 describe("console coach capabilities", () => {
   it("is a list of capabilities, each drafted for a founder to confirm (#155)", () => {
-    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "send_text", "suggest_next_step", "propose_plan_change", "decide_suggestion", "cancel", "take_back"]);
+    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "send_text", "suggest_next_step", "propose_plan_change", "decide_suggestion", "cancel", "take_back", "mark_alert"]);
   });
 
   it("suggest_next_step files the founder's next step as approved by them, shown in the chat as a card (#63)", async () => {
@@ -832,5 +832,28 @@ describe("#155: the console chat drafts, a founder confirms", () => {
     const html = await page(tester);
     expect(html).not.toContain("Send exactly this");
     expect(html).not.toContain('name="sendNow"');
+  });
+});
+
+describe("#69: marking an alert from the chat", () => {
+  it("\"mark it reviewed\" is a draft; confirmed, it does what the button does", async () => {
+    const tester = await seed();
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    await t.db.update(plans).set({ needsReview: true }).where(eq(plans.id, plan!.id));
+    await t.db.insert(consoleMessages).values({ testerId: tester.id, kind: "alert", topic: "plan_review", eventKey: `plan_review:${plan!.id}`, body: "Plan version 1 to review", planId: plan!.id, createdAt: at(TUE, "10:00") });
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.kind, "alert"));
+    // The console coach sees the alert with its id.
+    model.script("It's her first plan, already active since she committed.");
+    await chat(tester, "what's this plan review about?");
+    expect(JSON.stringify(model.requests.at(-1)!.messages)).toContain(`alert ${alert!.id.slice(0, 8)}: plan_review`);
+
+    model.script({ tools: [{ name: "mark_alert", input: { alert: alert!.id.slice(0, 8) } }] }, "Draft's up.");
+    await chat(tester, "mark it reviewed");
+    expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, alert!.id)))[0]!.seenAt).toBeNull();
+    const draft = (await thread(tester.id)).find((r) => r.kind === "draft");
+    expect(draft!.body).toContain("Mark reviewed");
+    await confirmNewest(tester);
+    expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, alert!.id)))[0]).toMatchObject({ seenBy: "Yanni" });
+    expect((await t.db.select().from(plans).where(eq(plans.id, plan!.id)))[0]!.needsReview).toBe(false);
   });
 });
