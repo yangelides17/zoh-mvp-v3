@@ -512,6 +512,55 @@ describe("tester list and page", () => {
     expect((await get(`/console/media/${stranger!.id}`, cookieFor("Yanni"))).statusCode).toBe(404);
     expect((await get("/console/media/not-a-uuid", cookieFor("Yanni"))).statusCode).toBe(404);
   });
+
+  it("#97: serves a voice note in pieces when the browser asks (Safari), with the same guards", async () => {
+    const s = await seed();
+    const [voice] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "did my pages", createdAt: at(MON, "20:00") })
+      .returning();
+    await t.media.put(`media/${s.tester.id}/v.caf`, new Uint8Array([1, 2, 3, 4, 5, 6]), "audio/x-caf");
+    const ranged = (range: string, id = voice!.id) => t.app.inject({ method: "GET", url: `/console/media/${id}`, headers: { cookie: cookieFor("Yanni"), range } });
+    const part = await ranged("bytes=0-1");
+    expect(part.statusCode).toBe(206);
+    expect(part.headers["content-range"]).toBe("bytes 0-1/6");
+    expect(part.headers["accept-ranges"]).toBe("bytes");
+    expect(part.headers["content-security-policy"]).toBe("sandbox");
+    expect(part.headers["x-content-type-options"]).toBe("nosniff");
+    expect([...part.rawPayload]).toEqual([1, 2]);
+    expect([...(await ranged("bytes=4-")).rawPayload]).toEqual([5, 6]);
+    expect([...(await ranged("bytes=-2")).rawPayload]).toEqual([5, 6]);
+    expect((await ranged("bytes=9-12")).statusCode).toBe(416);
+    // A plain request still gets the whole file.
+    const whole = await get(`/console/media/${voice!.id}`, cookieFor("Yanni"));
+    expect(whole.statusCode).toBe(200);
+    expect(whole.headers["accept-ranges"]).toBe("bytes");
+    expect([...whole.rawPayload]).toEqual([1, 2, 3, 4, 5, 6]);
+    // Never someone else's file, range or not, and never without a login.
+    const [stranger] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: "+15555550199", mediaUrl: "https://cdn.example/s.caf", mediaKey: "media/s.caf" })
+      .returning();
+    await t.media.put("media/s.caf", new Uint8Array([1, 2]), "audio/x-caf");
+    expect((await ranged("bytes=0-1", stranger!.id)).statusCode).toBe(404);
+    expect((await t.app.inject({ method: "GET", url: `/console/media/${voice!.id}`, headers: { range: "bytes=0-1" } })).statusCode).not.toBe(206);
+  });
+
+  it("#97: a voice note Chrome can't play offers a download; one it can play doesn't", async () => {
+    const s = await seed();
+    const [caf] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "caf note", createdAt: at(MON, "20:00") })
+      .returning();
+    const [m4a] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.m4a", mediaKey: `media/${s.tester.id}/v.m4a`, mediaContentType: "audio/mp4", transcript: "m4a note", createdAt: at(MON, "20:05") })
+      .returning();
+    const texts = (await get(`/console/testers/${s.tester.id}?tab=texts`, cookieFor("Yanni"))).body;
+    expect(texts).toContain(`<audio controls preload="none" src="/console/media/${caf!.id}"`);
+    expect(texts).toContain(`<a class="media-download" href="/console/media/${caf!.id}" download hidden>`);
+    expect(texts).not.toContain(`href="/console/media/${m4a!.id}" download`);
+  });
 });
 
 describe("deciding next steps", () => {

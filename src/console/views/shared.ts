@@ -71,6 +71,9 @@ export function hitRatePct(v: GoalView): string {
   return closed ? `${Math.round((done / closed) * 100)}%` : "–";
 }
 
+/** iPhone voice notes (Core Audio files): Safari plays them, Chrome can't (#97). */
+const isCaf = (m: Message) => /x-caf/i.test(m.mediaContentType ?? "") || /\.caf$/i.test(m.mediaKey ?? "");
+
 export function proofHtml(m: Message): string {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
   const src = `/console/media/${esc(m.id)}`;
@@ -80,7 +83,7 @@ export function proofHtml(m: Message): string {
     : kind === "image"
       ? `<a href="${src}"><img class="proof" src="${src}" alt="proof photo" loading="lazy"></a>`
       : kind === "audio"
-        ? `<audio controls preload="none" src="${src}"></audio>`
+        ? `<audio controls preload="none" src="${src}"></audio>${isCaf(m) ? `<a class="media-download" href="${src}" download hidden>Download (Chrome can't play iPhone voice notes; Safari can)</a>` : ""}`
         : `<a href="${src}">${esc(kind)} file</a>`;
   const words = [m.description, m.transcript && `"${m.transcript}"`, m.content].filter(Boolean).map(esc).join(" · ");
   return `<div>${media}${words ? `<div class="muted">${words}</div>` : ""}</div>`;

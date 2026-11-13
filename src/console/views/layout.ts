@@ -77,6 +77,7 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 .composer button { border-radius: 20px; }
 .options { margin: 6px 4px 0; font-size: 13px; color: var(--muted); }
 img.proof { max-width: 220px; max-height: 220px; border-radius: 14px; display: block; }
+a.media-download { display: block; font-size: 13px; margin-top: 2px; }
 .empty { text-align: center; color: var(--muted); padding: 28px 12px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .memory .mem-search { width: 100%; border-radius: 999px; padding: 10px 16px; margin: 6px 0 10px; }
@@ -154,8 +155,13 @@ const SCRIPT = `(function () {
     });
     search.addEventListener("input", filter);
   }
+  // #97: where iPhone voice notes can't play (Chrome), show their download link.
+  var cafPlays = !!document.createElement("audio").canPlayType("audio/x-caf");
+  function reveal(el) { if (!cafPlays) el.querySelectorAll("a.media-download").forEach(function (a) { a.hidden = false; }); }
+  reveal(document);
   var boxes = Array.prototype.slice.call(document.querySelectorAll(".scroller"));
   function tidy(box) {
+    reveal(box);
     var ids = {};
     box.querySelectorAll("[data-id]").forEach(function (el) { if (ids[el.dataset.id]) el.remove(); else ids[el.dataset.id] = 1; });
     var day = null;
