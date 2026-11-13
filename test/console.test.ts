@@ -138,7 +138,7 @@ async function seed(phone = ME, name = "Sam"): Promise<Seeded> {
   await t.db.insert(memoryFacts).values({ pageId: self!.id, testerId: id, text: "Has a dog named Max" });
   const [s] = await t.db
     .insert(suggestions)
-    .values({ testerId: id, goalSlug: "reading", kind: "deepen", raisedBy: "coach", proposal: "20 pages a night", reasoning: "Two weeks without a miss" })
+    .values({ testerId: id, goalSlug: "reading", kind: "deepen", raisedBy: "coach", proposal: "20 pages a night", reasoning: "Two weeks without a miss", createdAt: at("2026-11-09", "09:00") })
     .returning();
   await raiseAlert(t.db, { testerId: id, topic: "suggestion_waiting", key: `suggestion:${s!.id}`, body: "A next step is waiting", suggestionId: s!.id, at: at("2026-11-09", "09:00") });
   await raiseAlert(t.db, { testerId: id, topic: "plan_review", key: `plan_review:${v3!.id}`, body: "Plan version 3 to review", planId: v3!.id, at: at("2026-11-08", "12:00") });
