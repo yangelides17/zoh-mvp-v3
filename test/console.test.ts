@@ -11,6 +11,7 @@ import {
   memoryLinks,
   memoryPages,
   messages,
+  pauses,
   planInputs,
   plans,
   stepDays,
@@ -273,7 +274,8 @@ describe("tester list and page", () => {
     const page = res.body;
     for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
     // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
-    expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
+    expect(page).toContain('aria-current="page" title="Console">');
+    expect(page).toContain('<span class="tlabel">Console</span> <span class="badge">2</span>');
     expect(page).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
     expect(page).toContain("🔥 2</b>");
     const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
@@ -298,7 +300,7 @@ describe("tester list and page", () => {
     const tab = async (name: string) => {
       const res = await get(`/console/testers/${s.tester.id}?tab=${name}`, cookieFor("Yanni"));
       expect(res.statusCode).toBe(200);
-      expect(res.body).toContain(`aria-current="page">${name[0]!.toUpperCase()}${name.slice(1)}`);
+      expect(res.body).toContain(`aria-current="page" title="${name[0]!.toUpperCase()}${name.slice(1)}"`);
       expect(res.body).not.toContain(ME);
       return res.body;
     };
@@ -329,7 +331,7 @@ describe("tester list and page", () => {
     expect(progress).toContain(`${MON} · done · kind: harder`);
     expect(progress).toContain("2026-10-26 · done · kind: –");
     // An unknown tab is the console.
-    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
+    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page" title="Console"');
   });
 
   it("shows memory as cards with kind filters and search text, each opening its own page whose links resolve (#63)", async () => {
@@ -559,6 +561,44 @@ describe("tester list and page", () => {
     expect(texts).toContain(`<audio controls preload="none" src="/console/media/${caf!.id}"`);
     expect(texts).toContain(`<a class="media-download" href="/console/media/${caf!.id}" download hidden>`);
     expect(texts).not.toContain(`href="/console/media/${m4a!.id}" download`);
+  });
+});
+
+describe("#106: compact header and side tab rail", () => {
+  const header = (page: string) => page.slice(page.indexOf('<details class="card hdr"'), page.indexOf("</details>", page.indexOf('<details class="card hdr"')));
+
+  it("puts name, status, number, streak and hit rate on one line, and focus and settings only under More", async () => {
+    const s = await seed();
+    await t.db.update(testers).set({ clockOffsetMs: 2 * 24 * 60 * 60_000 }).where(eq(testers.id, s.tester.id));
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    const h = header(page);
+    const line = h.slice(0, h.indexOf("</summary>"));
+    const more = h.slice(h.indexOf("</summary>"));
+    for (const x of ["Sam", '<span class="chip">active</span>', "⏩ test clock +2d", ME.slice(-4), "🔥 2", "100%", "More"]) expect(line).toContain(x);
+    for (const x of ["Focus: <strong>finish Dune by Dec 1</strong>", "Category: Read &amp; learn more", "America/New_York", "quiet 22:00 to 09:00", "(maintenance)"]) {
+      expect(more).toContain(x);
+      expect(line).not.toContain(x);
+    }
+  });
+
+  it("keeps a pause on the main line", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-09", "10:00"), until: "2026-11-16" });
+    const line = header((await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body).split("</summary>")[0]!;
+    expect(line).toContain("paused until 2026-11-16");
+  });
+
+  it("starts with the tab rail closed, every tab a plain link, the Console badge on its icon", async () => {
+    const s = await seed();
+    const page = (await get(`/console/testers/${s.tester.id}?tab=memory`, cookieFor("Yanni"))).body;
+    const start = page.indexOf('<nav class="rail closed"');
+    expect(start).toBeGreaterThan(0);
+    const rail = page.slice(start, page.indexOf("</nav>", start));
+    for (const tab of ["console", "texts", "memory", "progress"]) expect(rail).toContain(`href="/console/testers/${s.tester.id}?tab=${tab}"`);
+    expect(rail).toContain('<span class="badge">2</span>');
+    expect(rail).toContain('aria-current="page" title="Memory"');
+    // The old tab bar is gone.
+    expect(page).not.toContain('<nav class="tabs">');
   });
 });
 
