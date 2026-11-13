@@ -12,6 +12,8 @@ does the building, testing, git and GitHub work. Agents follow the same rules fr
    `npm install`. Your main folder stays on `dev`, where all work starts.
 4. Only if you'll run the eval: create `.env` in the repo with `ANTHROPIC_API_KEY=...` (use a separate key
    with a low spending limit; `.env` is never committed).
+5. So builds don't ask before making worktrees, create `.claude/settings.local.json` yourself (Claude can't):
+   `{"permissions": {"additionalDirectories": ["<full path to the zoh-worktrees folder next to the repo>"]}}`.
 
 Start Claude Code in the repo folder. Everything below happens there.
 
