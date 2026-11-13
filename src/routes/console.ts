@@ -312,13 +312,23 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     const message = await mediaMessage(opts.db, mid);
     const object = message?.mediaKey ? await opts.media.get(message.mediaKey) : undefined;
     if (!object) return reply.code(404).send({ error: "not found" });
-    return reply
+    reply
       .header("cache-control", "private, max-age=3600")
       .header("x-content-type-options", "nosniff")
       // A tester's file (an SVG, an HTML attachment) opened on its own never runs script as a logged-in founder.
       .header("content-security-policy", "sandbox")
-      .type(message!.mediaContentType ?? object.contentType)
-      .send(Buffer.from(object.bytes));
+      .header("accept-ranges", "bytes")
+      .type(message!.mediaContentType ?? object.contentType);
+    const bytes = Buffer.from(object.bytes);
+    // #97: Safari won't play audio unless it can ask for pieces of it.
+    const wanted = request.headers.range;
+    if (!wanted) return reply.send(bytes);
+    const range = byteRange(wanted, bytes.length);
+    if (!range) return reply.code(416).header("content-range", `bytes */${bytes.length}`).send();
+    return reply
+      .code(206)
+      .header("content-range", `bytes ${range.start}-${range.end}/${bytes.length}`)
+      .send(bytes.subarray(range.start, range.end + 1));
   }));
 
   // For "Add to Home Screen": nothing about testers here.
@@ -329,6 +339,15 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     png ??= sharp(Buffer.from(ICON_SVG)).resize(180, 180).png().toBuffer();
     return reply.header("cache-control", "public, max-age=86400").type("image/png").send(await png);
   });
+}
+
+/** One "bytes=a-b", "bytes=a-" or "bytes=-n" range within `size`; undefined when it can't be served. */
+export function byteRange(header: string, size: number): { start: number; end: number } | undefined {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
+  if (!m || (!m[1] && !m[2]) || size === 0) return undefined;
+  const start = m[1] ? Number(m[1]) : Math.max(0, size - Number(m[2]));
+  const end = m[1] && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+  return start <= end && start < size ? { start, end } : undefined;
 }
 
 function asKind(value: string | undefined): SuggestionKind | undefined {

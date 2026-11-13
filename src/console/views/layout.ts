@@ -49,12 +49,41 @@ table { border-collapse: collapse; width: 100%; } td, th { text-align: left; pad
 .avatar { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--chip); color: var(--accent); font-family: var(--serif); font-weight: 600; font-size: 17px; }
 .avatar.big { width: 56px; height: 56px; font-size: 21px; }
 .badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--warn); color: #fff; font-size: 12px; font-weight: 700; }
-.stats { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; }
 .stat b { display: block; font-family: var(--serif); font-size: 26px; line-height: 1.1; } .stat span { font-size: 12px; color: var(--muted); }
-.tabs { position: sticky; top: 49px; z-index: 4; display: flex; gap: 4px; padding: 4px; margin: 14px 0 6px; background: var(--soft); border-radius: 12px; overflow-x: auto; }
-.tabs a { flex: 1; text-align: center; padding: 7px 10px; border-radius: 9px; color: var(--muted); font-weight: 500; white-space: nowrap; }
-.tabs a.on { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
-.tabs a:hover { text-decoration: none; color: var(--fg); }
+main.wide { max-width: none; padding: 0; }
+.tester-page { display: flex; align-items: flex-start; }
+.tester-main { flex: 1; min-width: 0; max-width: 1080px; margin: 0 auto; padding: 12px 16px 48px; }
+.rail { position: sticky; top: 49px; height: calc(100vh - 49px); flex: none; width: 168px; display: flex; flex-direction: column; gap: 2px; padding: 12px 8px; border-right: 1px solid var(--line); background: var(--soft); }
+.rail a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; color: var(--muted); font-weight: 500; position: relative; white-space: nowrap; }
+.rail a:hover { color: var(--fg); text-decoration: none; }
+.rail a.on { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
+.rail svg { flex: none; width: 18px; height: 18px; }
+.rail .badge { margin-left: auto; }
+.rail-toggle { align-self: flex-end; padding: 2px 8px; font-size: 13px; margin-bottom: 6px; }
+.rail.closed { width: 60px; align-items: center; }
+.rail.closed .rail-toggle { align-self: center; }
+.rail.closed a { padding: 9px; }
+.rail.closed .tlabel { display: none; }
+.rail.closed .badge { position: absolute; top: -2px; right: -6px; margin: 0; }
+.hdr { padding: 8px 14px; margin: 0 0 10px; }
+.hdr > summary { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; cursor: pointer; }
+.hdr > summary::-webkit-details-marker { display: none; }
+.hdr h1 { font-size: 20px; }
+.hdr .avatar { width: 34px; height: 34px; font-size: 14px; }
+.minis { display: flex; gap: 14px; margin-left: auto; font-size: 13px; color: var(--muted); }
+.mini b { font-family: var(--serif); font-size: 18px; color: var(--fg); }
+.more-label::after { content: " ▾"; } .hdr[open] .more-label::after { content: " ▴"; }
+.hdr-more { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; display: grid; gap: 2px; }
+@media (max-width: 700px) {
+  .tester-page { display: block; }
+  .tester-main { padding-bottom: 84px; }
+  .rail, .rail.closed { position: fixed; top: auto; bottom: 0; left: 0; right: 0; z-index: 6; height: auto; width: auto; flex-direction: row; justify-content: space-around; border-right: none; border-top: 1px solid var(--line); padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--soft) 92%, transparent); backdrop-filter: blur(10px); }
+  .rail .rail-toggle { display: none; }
+  .rail a, .rail.closed a { flex-direction: column; gap: 1px; font-size: 11px; padding: 4px 10px; }
+  .rail .tlabel, .rail.closed .tlabel { display: inline; }
+  .rail .badge, .rail.closed .badge { position: absolute; top: 0; right: 2px; margin: 0; }
+  .minis { margin-left: 0; }
+}
 a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: none; } a.tester .card:hover { border-color: var(--muted); }
 .preview { color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scroller { height: min(68vh, 660px); overflow-y: auto; overscroll-behavior: contain; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px 12px; }
@@ -77,6 +106,9 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 .composer button { border-radius: 20px; }
 .options { margin: 6px 4px 0; font-size: 13px; color: var(--muted); }
 img.proof { max-width: 220px; max-height: 220px; border-radius: 14px; display: block; }
+a.media-download { display: block; font-size: 13px; margin-top: 2px; }
+video { display: block; max-width: 100%; max-height: 260px; border-radius: 14px; }
+.media-item { display: grid; gap: 6px; margin: 0; align-content: start; } .media-item audio { width: 100%; }
 .empty { text-align: center; color: var(--muted); padding: 28px 12px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .memory .mem-search { width: 100%; border-radius: 999px; padding: 10px 16px; margin: 6px 0 10px; }
@@ -101,7 +133,9 @@ ul.facts { margin: 8px 0; padding-left: 20px; } ul.facts li { margin: 4px 0; }
 .dot.done { background: var(--done); } .dot.done_reduced { background: var(--half); } .dot.missed { background: var(--miss); } .dot.proof { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--done); }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
 .legend .dot { width: 14px; height: 14px; font-size: 0; display: inline-block; vertical-align: -2px; margin-right: 4px; }
-.day-row { scroll-margin-top: 110px; } .day-row:target { outline: 2px solid var(--accent); }
+.dot.pause { background: transparent; color: var(--muted); border: 2px dashed var(--open); font-size: 10px; }
+.pause-row { background: var(--soft); box-shadow: none; scroll-margin-top: 64px; } .pause-row:target { outline: 2px solid var(--accent); }
+.day-row { scroll-margin-top: 64px; } .day-row:target { outline: 2px solid var(--accent); }
 .day-log { margin-top: 6px; font-size: .9em; display: grid; gap: 2px; }
 `;
 
@@ -122,6 +156,27 @@ const SCRIPT = `(function () {
     }
     localStorage.setItem("zoh-tab", tab);
   } catch (e) {}
+  // #106: the tab rail opens to show names when a founder asks, remembered per device.
+  var rail = document.querySelector(".rail"), toggle = rail && rail.querySelector(".rail-toggle");
+  function railOpen(open) {
+    rail.classList.toggle("closed", !open);
+    toggle.textContent = open ? "\u00AB" : "\u00BB";
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Hide tab names" : "Show tab names");
+  }
+  if (toggle) {
+    toggle.hidden = false;
+    try { railOpen(localStorage.getItem("zoh-rail") === "open"); } catch (e) {}
+    toggle.addEventListener("click", function () {
+      var open = rail.classList.contains("closed");
+      railOpen(open);
+      try { localStorage.setItem("zoh-rail", open ? "open" : "closed"); } catch (e) {}
+    });
+  }
+  // A link to a day or a pause (a dot, or Media's "that day's step") opens the folded day list first.
+  var landed = location.hash && document.getElementById(location.hash.slice(1));
+  var landedFold = landed && landed.closest("details");
+  if (landedFold) { landedFold.open = true; landed.scrollIntoView(); }
   // A day dot opens the folded day list before jumping to its day.
   document.querySelectorAll("a.dot[href^='#']").forEach(function (a) {
     a.addEventListener("click", function () {
@@ -134,17 +189,24 @@ const SCRIPT = `(function () {
   if (memory) {
     var chip = "all", search = memory.querySelector(".mem-search");
     var grid = memory.querySelector(".mem-grid"), line = memory.querySelector(".mem-timeline"), none = memory.querySelector(".mem-none");
+    // #98: Media shows on its own chip; without this script it simply sits below the cards.
+    var media = document.querySelector(".mem-media");
     function filter() {
       var q = search.value.trim().toLowerCase(), shown = 0;
-      grid.hidden = chip === "timeline";
+      grid.hidden = chip === "timeline" || chip === "media";
       line.hidden = chip !== "timeline";
+      if (media) {
+        media.hidden = chip !== "media";
+        media.querySelectorAll(".media-item").forEach(function (m) { m.hidden = !!q && m.dataset.search.indexOf(q) < 0; });
+      }
       memory.querySelectorAll("a.mem").forEach(function (c) {
         var ok = (chip === "all" || chip === "timeline" || c.dataset.group === chip) && (!q || c.dataset.search.indexOf(q) >= 0);
         c.hidden = !ok;
         if (ok && grid.contains(c)) shown++;
       });
-      none.hidden = chip === "timeline" || shown > 0;
+      none.hidden = chip === "timeline" || chip === "media" || shown > 0;
     }
+    filter();
     memory.querySelectorAll("[data-chip]").forEach(function (b) {
       b.addEventListener("click", function () {
         chip = b.dataset.chip;
@@ -154,8 +216,13 @@ const SCRIPT = `(function () {
     });
     search.addEventListener("input", filter);
   }
+  // #97: where iPhone voice notes can't play (Chrome), show their download link.
+  var cafPlays = !!document.createElement("audio").canPlayType("audio/x-caf");
+  function reveal(el) { if (!cafPlays) el.querySelectorAll("a.media-download").forEach(function (a) { a.hidden = false; }); }
+  reveal(document);
   var boxes = Array.prototype.slice.call(document.querySelectorAll(".scroller"));
   function tidy(box) {
+    reveal(box);
     var ids = {};
     box.querySelectorAll("[data-id]").forEach(function (el) { if (ids[el.dataset.id]) el.remove(); else ids[el.dataset.id] = 1; });
     var day = null;
@@ -166,7 +233,9 @@ const SCRIPT = `(function () {
   function fit(box) {
     var under = box.parentElement.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom;
     var top = box.getBoundingClientRect().top + window.scrollY;
-    box.style.height = Math.max(240, window.innerHeight - top - under - 16) + "px";
+    // On a phone the tab rail is a bar along the bottom: keep the thread above it.
+    var bar = rail && getComputedStyle(rail).position === "fixed" ? rail.offsetHeight : 0;
+    box.style.height = Math.max(240, window.innerHeight - top - under - bar - 16) + "px";
   }
   boxes.forEach(function (box) {
     var items = box.querySelector(".items");
@@ -232,7 +301,7 @@ const SCRIPT = `(function () {
   setInterval(poll, 4000);
 })();`;
 
-export function layout(title: string, body: string, opts: { name?: string } = {}): string {
+export function layout(title: string, body: string, opts: { name?: string; wide?: boolean } = {}): string {
   const top = opts.name
     ? `<nav class="top"><a class="brand" href="/console">ZOH</a><div class="row"><a href="/console/metrics">Metrics</a><span class="muted">${esc(opts.name)}</span><form class="inline" method="post" action="/console/logout"><button class="small">Log out</button></form></div></nav>`
     : "";
@@ -244,7 +313,7 @@ export function layout(title: string, body: string, opts: { name?: string } = {}
 <meta name="apple-mobile-web-app-title" content="ZOH Console"><meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/console/manifest.webmanifest"><link rel="icon" href="/console/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/console/icon.png">
 <style>${STYLE}</style></head>
-<body>${top}<main>${body}</main><script>${SCRIPT}</script></body></html>`;
+<body>${top}<main${opts.wide ? ` class="wide"` : ""}>${body}</main><script>${SCRIPT}</script></body></html>`;
 }
 
 /**

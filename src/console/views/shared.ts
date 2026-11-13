@@ -24,6 +24,11 @@ export function when(at: Date | null | undefined): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: FOUNDER_ZONE, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
 }
 
+/** "Mon, Nov 2, 7:30 PM" in a tester's zone. */
+export function dayAndTime(at: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
+}
+
 /** Just the time of day, under a bubble (the day is in the divider above). */
 export function clock(at: Date): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: FOUNDER_ZONE, hour: "numeric", minute: "2-digit" }).format(at);
@@ -71,6 +76,9 @@ export function hitRatePct(v: GoalView): string {
   return closed ? `${Math.round((done / closed) * 100)}%` : "–";
 }
 
+/** iPhone voice notes (Core Audio files): Safari plays them, Chrome can't (#97). */
+const isCaf = (m: Message) => /x-caf/i.test(m.mediaContentType ?? "") || /\.caf$/i.test(m.mediaKey ?? "");
+
 export function proofHtml(m: Message): string {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
   const src = `/console/media/${esc(m.id)}`;
@@ -80,8 +88,10 @@ export function proofHtml(m: Message): string {
     : kind === "image"
       ? `<a href="${src}"><img class="proof" src="${src}" alt="proof photo" loading="lazy"></a>`
       : kind === "audio"
-        ? `<audio controls preload="none" src="${src}"></audio>`
-        : `<a href="${src}">${esc(kind)} file</a>`;
+        ? `<audio controls preload="none" src="${src}"></audio>${isCaf(m) ? `<a class="media-download" href="${src}" download hidden>Download (Chrome can't play iPhone voice notes; Safari can)</a>` : ""}`
+        : kind === "video"
+          ? `<video controls preload="none" src="${src}"></video>`
+          : `<a href="${src}">${esc(kind)} file</a>`;
   const words = [m.description, m.transcript && `"${m.transcript}"`, m.content].filter(Boolean).map(esc).join(" · ");
   return `<div>${media}${words ? `<div class="muted">${words}</div>` : ""}</div>`;
 }

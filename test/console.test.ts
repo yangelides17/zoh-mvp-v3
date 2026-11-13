@@ -11,6 +11,8 @@ import {
   memoryLinks,
   memoryPages,
   messages,
+  pauses,
+  planInputs,
   plans,
   stepDays,
   suggestions,
@@ -233,10 +235,10 @@ describe("tester list and page", () => {
   it("lists each tester with goals, streak, hit rate, last text and alerts waiting", async () => {
     await seed();
     const res = await get("/console", cookieFor("Yanni"));
-    expect(res.body).toContain("Read &amp; learn more (books, ideas, any topic) · 🔥 2");
+    expect(res.body).toContain('finish Dune by Dec 1 <span class="muted">· Read &amp; learn more (books, ideas, any topic)</span> · 🔥 2');
     expect(res.body).toContain("streak 2 (since 2026-10-26)");
     expect(res.body).toContain("hit rate 100% (2/2)");
-    expect(res.body).toContain("Get fitter");
+    expect(res.body).toContain('figuring it out <span class="muted">· Get fitter</span> · 7');
     expect(res.body).toContain("Page 40, nice.");
     expect(res.body).toContain("2 alerts");
   });
@@ -272,8 +274,9 @@ describe("tester list and page", () => {
     const page = res.body;
     for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
     // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
-    expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
-    expect(page).toContain("Focus: <strong>Read &amp; learn more (books, ideas, any topic)</strong>");
+    expect(page).toContain('aria-current="page" title="Console">');
+    expect(page).toContain('<span class="tlabel">Console</span> <span class="badge">2</span>');
+    expect(page).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
     expect(page).toContain("🔥 2</b>");
     const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
     const below = page.slice(page.indexOf('<div id="side"'));
@@ -297,7 +300,7 @@ describe("tester list and page", () => {
     const tab = async (name: string) => {
       const res = await get(`/console/testers/${s.tester.id}?tab=${name}`, cookieFor("Yanni"));
       expect(res.statusCode).toBe(200);
-      expect(res.body).toContain(`aria-current="page">${name[0]!.toUpperCase()}${name.slice(1)}`);
+      expect(res.body).toContain(`aria-current="page" title="${name[0]!.toUpperCase()}${name.slice(1)}"`);
       expect(res.body).not.toContain(ME);
       return res.body;
     };
@@ -323,12 +326,12 @@ describe("tester list and page", () => {
     // Each day's own step and the plan's destination (#76)
     expect(progress).toContain("Step: chapter 3 of Dune on the train, about 20 min");
     expect(progress).toContain("25 min");
-    expect(progress).toContain("Headed for: finish Dune by Dec 1");
+    expect(progress).toContain("Destination: finish Dune by Dec 1");
     // Each day's kind of step (#88); days from before kinds were recorded show a dash.
     expect(progress).toContain(`${MON} · done · kind: harder`);
     expect(progress).toContain("2026-10-26 · done · kind: –");
     // An unknown tab is the console.
-    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
+    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page" title="Console"');
   });
 
   it("shows memory as cards with kind filters and search text, each opening its own page whose links resolve (#63)", async () => {
@@ -388,7 +391,7 @@ describe("tester list and page", () => {
     expect(progress).toContain("<b>🔥 2</b><span>current streak</span>");
   });
 
-  it("#78: the destination at the top, then learnings: understood with evidence, then explained only", async () => {
+  it("#78: learnings: understood with evidence, then explained only", async () => {
     const s = await seed();
     const empty = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
     expect(empty).toContain("No lessons yet.");
@@ -398,8 +401,6 @@ describe("tester list and page", () => {
       { testerId: s.tester.id, goalSlug: "reading", day: "2026-11-05", text: "One line per chapter", evidence: "explained", createdAt: at("2026-11-05", "20:00") },
     ]);
     const progress = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
-    expect(progress).toContain("<strong>Headed for:</strong> finish Dune by Dec 1");
-    expect(progress.indexOf("Headed for:")).toBeLessThan(progress.indexOf('id="goals"'));
     expect(progress).toContain("Phone in the other room<div class=\"muted\">explained Mon 2026-11-02, applied Wed 2026-11-04</div>");
     expect(progress).toContain("One line per chapter<div class=\"muted\">explained Thu 2026-11-05</div>");
     const order = ["Understood (applied or recalled)", "Phone in the other room", "Explained only, starting to click", "One line per chapter"].map((x) => progress.indexOf(x));
@@ -511,6 +512,249 @@ describe("tester list and page", () => {
     await t.media.put("media/s.jpg", new Uint8Array([1]), "image/jpeg");
     expect((await get(`/console/media/${stranger!.id}`, cookieFor("Yanni"))).statusCode).toBe(404);
     expect((await get("/console/media/not-a-uuid", cookieFor("Yanni"))).statusCode).toBe(404);
+  });
+
+  it("#97: serves a voice note in pieces when the browser asks (Safari), with the same guards", async () => {
+    const s = await seed();
+    const [voice] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "did my pages", createdAt: at(MON, "20:00") })
+      .returning();
+    await t.media.put(`media/${s.tester.id}/v.caf`, new Uint8Array([1, 2, 3, 4, 5, 6]), "audio/x-caf");
+    const ranged = (range: string, id = voice!.id) => t.app.inject({ method: "GET", url: `/console/media/${id}`, headers: { cookie: cookieFor("Yanni"), range } });
+    const part = await ranged("bytes=0-1");
+    expect(part.statusCode).toBe(206);
+    expect(part.headers["content-range"]).toBe("bytes 0-1/6");
+    expect(part.headers["accept-ranges"]).toBe("bytes");
+    expect(part.headers["content-security-policy"]).toBe("sandbox");
+    expect(part.headers["x-content-type-options"]).toBe("nosniff");
+    expect([...part.rawPayload]).toEqual([1, 2]);
+    expect([...(await ranged("bytes=4-")).rawPayload]).toEqual([5, 6]);
+    expect([...(await ranged("bytes=-2")).rawPayload]).toEqual([5, 6]);
+    expect((await ranged("bytes=9-12")).statusCode).toBe(416);
+    // A plain request still gets the whole file.
+    const whole = await get(`/console/media/${voice!.id}`, cookieFor("Yanni"));
+    expect(whole.statusCode).toBe(200);
+    expect(whole.headers["accept-ranges"]).toBe("bytes");
+    expect([...whole.rawPayload]).toEqual([1, 2, 3, 4, 5, 6]);
+    // Never someone else's file, range or not, and never without a login.
+    const [stranger] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: "+15555550199", mediaUrl: "https://cdn.example/s.caf", mediaKey: "media/s.caf" })
+      .returning();
+    await t.media.put("media/s.caf", new Uint8Array([1, 2]), "audio/x-caf");
+    expect((await ranged("bytes=0-1", stranger!.id)).statusCode).toBe(404);
+    expect((await t.app.inject({ method: "GET", url: `/console/media/${voice!.id}`, headers: { range: "bytes=0-1" } })).statusCode).not.toBe(206);
+  });
+
+  it("#97: a voice note Chrome can't play offers a download; one it can play doesn't", async () => {
+    const s = await seed();
+    const [caf] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "caf note", createdAt: at(MON, "20:00") })
+      .returning();
+    const [m4a] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.m4a", mediaKey: `media/${s.tester.id}/v.m4a`, mediaContentType: "audio/mp4", transcript: "m4a note", createdAt: at(MON, "20:05") })
+      .returning();
+    const texts = (await get(`/console/testers/${s.tester.id}?tab=texts`, cookieFor("Yanni"))).body;
+    expect(texts).toContain(`<audio controls preload="none" src="/console/media/${caf!.id}"`);
+    expect(texts).toContain(`<a class="media-download" href="/console/media/${caf!.id}" download hidden>`);
+    expect(texts).not.toContain(`href="/console/media/${m4a!.id}" download`);
+  });
+});
+
+describe("#106: compact header and side tab rail", () => {
+  const header = (page: string) => page.slice(page.indexOf('<details class="card hdr"'), page.indexOf("</details>", page.indexOf('<details class="card hdr"')));
+
+  it("puts name, status, number, streak and hit rate on one line, and focus and settings only under More", async () => {
+    const s = await seed();
+    await t.db.update(testers).set({ clockOffsetMs: 2 * 24 * 60 * 60_000 }).where(eq(testers.id, s.tester.id));
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    const h = header(page);
+    const line = h.slice(0, h.indexOf("</summary>"));
+    const more = h.slice(h.indexOf("</summary>"));
+    for (const x of ["Sam", '<span class="chip">active</span>', "⏩ test clock +2d", ME.slice(-4), "🔥 2", "100%", "More"]) expect(line).toContain(x);
+    for (const x of ["Focus: <strong>finish Dune by Dec 1</strong>", "Category: Read &amp; learn more", "America/New_York", "quiet 22:00 to 09:00", "(maintenance)"]) {
+      expect(more).toContain(x);
+      expect(line).not.toContain(x);
+    }
+  });
+
+  it("keeps a pause on the main line", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-09", "10:00"), until: "2026-11-16" });
+    const line = header((await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body).split("</summary>")[0]!;
+    expect(line).toContain("paused until 2026-11-16");
+  });
+
+  it("starts with the tab rail closed, every tab a plain link, the Console badge on its icon", async () => {
+    const s = await seed();
+    const page = (await get(`/console/testers/${s.tester.id}?tab=memory`, cookieFor("Yanni"))).body;
+    const start = page.indexOf('<nav class="rail closed"');
+    expect(start).toBeGreaterThan(0);
+    const rail = page.slice(start, page.indexOf("</nav>", start));
+    for (const tab of ["console", "texts", "memory", "progress"]) expect(rail).toContain(`href="/console/testers/${s.tester.id}?tab=${tab}"`);
+    expect(rail).toContain('<span class="badge">2</span>');
+    expect(rail).toContain('aria-current="page" title="Memory"');
+    // The old tab bar is gone.
+    expect(page).not.toContain('<nav class="tabs">');
+  });
+});
+
+describe("#107: pauses in the step log", () => {
+  const progressOf = async (id: string) => (await get(`/console/testers/${id}?tab=progress`, cookieFor("Yanni"))).body;
+  const goalNumbers = (page: string) => page.slice(page.indexOf('id="goals"'), page.indexOf('id="learnings"')).match(/<b>[^<]*<\/b>/g);
+
+  it("shows a pause between the step days around it, with start, return date, actual end, how it ended and why", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", reason: "family trip", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    const progress = await progressOf(s.tester.id);
+    const card = progress.slice(progress.indexOf('class="card pause-row"'));
+    expect(card).toContain("Paused Wed, Oct 28");
+    expect(card).toContain("said back Sun, Nov 1");
+    expect(card).toContain("ended Sun, Nov 1, 9:00 AM (their return date)");
+    expect(card).toContain("“family trip”");
+    // Newest first: Nov 2, the pause, then Oct 26.
+    const order = [`id="day-${MON}"`, 'class="card pause-row"', 'id="day-2026-10-26"'].map((x) => progress.indexOf(x));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    // The dot strip, oldest first: Oct 26, the ⏸ marker, Nov 2; still five step days.
+    const strip = [`href="#day-2026-10-26"`, 'class="dot pause"', `href="#day-${MON}"`].map((x) => progress.indexOf(x));
+    expect(strip).toEqual([...strip].sort((a, b) => a - b));
+    expect(progress).toContain("Last 5 step days");
+  });
+
+  it("says ongoing for a pause still on, and has no reason line without a reason", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-08", "10:00"), until: "2026-11-16" });
+    const card = (await progressOf(s.tester.id)).split('class="card pause-row"')[1]!.split("</div></div>")[0]!;
+    expect(card).toContain("Paused Sun, Nov 8");
+    expect(card).toContain("said back Mon, Nov 16");
+    expect(card).toContain("ongoing");
+    expect(card).not.toContain("“");
+  });
+
+  it("says in plain words when they came back early", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), endedAt: at("2026-10-30", "12:00"), endedBy: "tester" });
+    expect(await progressOf(s.tester.id)).toContain("ended Fri, Oct 30, 12:00 PM (they came back)");
+  });
+
+  it("never changes the streak or hit rate", async () => {
+    const s = await seed();
+    const before = goalNumbers(await progressOf(s.tester.id));
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    expect(goalNumbers(await progressOf(s.tester.id))).toEqual(before);
+    expect(before?.length).toBeGreaterThan(0);
+  });
+});
+
+describe("#98: all their media in Memory", () => {
+  const memoryOf = async (id: string) => (await get(`/console/testers/${id}?tab=memory`, cookieFor("Yanni"))).body;
+  const mediaOf = (page: string) => page.slice(page.indexOf('<section class="mem-media"'), page.indexOf("</section>", page.indexOf('<section class="mem-media"')));
+
+  async function sendAll(id: string) {
+    const ins = async (v: Partial<typeof messages.$inferInsert> & { createdAt: Date }) =>
+      (await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, ...v }).returning())[0]!;
+    const voice = await ins({ mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "ran three miles by the river", createdAt: at("2026-11-03", "08:00") });
+    const video = await ins({ mediaUrl: "https://cdn.example/c.mp4", mediaKey: `media/${id}/c.mp4`, mediaContentType: "video/mp4", createdAt: at("2026-11-04", "08:00") });
+    const file = await ins({ mediaUrl: "https://cdn.example/n.pdf", mediaKey: `media/${id}/n.pdf`, mediaContentType: "application/pdf", createdAt: at("2026-11-05", "08:00") });
+    const old = await ins({ mediaUrl: "https://cdn.example/o.caf", mediaKey: `media/${id}/o.caf`, mediaContentType: "audio/x-caf", transcript: "an old voice note", mediaDeletedAt: at("2026-11-06", "00:00"), createdAt: at("2026-10-01", "08:00") });
+    // ZOH's own texts and plain texts are never media.
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "just words", createdAt: at("2026-11-05", "09:00") });
+    return { voice, video, file, old };
+  }
+
+  it("has a Media chip counting everything they sent, newest first, each kind shown", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const page = await memoryOf(s.tester.id);
+    expect(page).toContain('data-chip="media">Media <span class="muted">5</span>');
+    const media = mediaOf(page);
+    const order = [m.file.id, m.video.id, m.voice.id, s.photoId, m.old.id].map((id) => media.indexOf(`data-id="${id}"`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(media).toContain(`<img class="proof" src="/console/media/${s.photoId}"`);
+    expect(media).toContain(`<audio controls preload="none" src="/console/media/${m.voice.id}"`);
+    expect(media).toContain(`<video controls preload="none" src="/console/media/${m.video.id}"`);
+    expect(media).toContain(`<a href="/console/media/${m.file.id}">other file</a>`);
+    expect(media).toContain("A paperback open at page 40");
+    expect(media).toContain("Mon, Nov 2, 7:30 PM");
+    expect(media).not.toContain("just words");
+  });
+
+  it("keeps the transcript of a voice note whose audio is gone", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const item = mediaOf(await memoryOf(s.tester.id)).split(`data-id="${m.old.id}"`)[1]!;
+    expect(item).toContain("audio deleted after 30 days");
+    expect(item).toContain("an old voice note");
+  });
+
+  it("links each one to that moment in the chat, and to that day's step when there is one", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const media = mediaOf(await memoryOf(s.tester.id));
+    const item = (id: string) => media.split(`data-id="${id}"`)[1]!.split('data-id="')[0]!;
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=texts&amp;day=${MON}"`);
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=progress#day-${MON}"`);
+    expect(item(m.voice.id)).toContain(`?tab=texts&amp;day=2026-11-03"`);
+    expect(item(m.voice.id)).not.toContain("tab=progress");
+  });
+
+  it("shows their media even with no memory pages yet, and finds it by what was said or seen", async () => {
+    const s = await seed();
+    await sendAll(s.tester.id);
+    await t.db.delete(memoryPages).where(eq(memoryPages.testerId, s.tester.id));
+    const page = await memoryOf(s.tester.id);
+    expect(page).not.toContain("Nothing in memory yet.");
+    expect(mediaOf(page)).toContain('data-search="ran three miles by the river"');
+  });
+});
+
+describe("#181: their own goal as Focus, the menu choice as Category", () => {
+  const READING = "Read &amp; learn more (books, ideas, any topic)";
+  const page = async (id: string, tab = "progress") => (await get(`/console/testers/${id}?tab=${tab}`, cookieFor("Yanni"))).body;
+
+  it("shows the plan's destination as Focus and the menu choice as Category, in the header and on the goal card", async () => {
+    const s = await seed();
+    const progress = await page(s.tester.id);
+    expect(progress).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+    expect(progress).toContain(`Category: ${READING}`);
+    expect(progress).toContain(`<h3 style="margin:0">finish Dune by Dec 1</h3><span class="chip">focus</span>`);
+    expect(progress).not.toContain(`Focus: <strong>${READING}`);
+    // The separate "Headed for" card is gone: the focus card says it.
+    expect(progress).not.toContain("Headed for:");
+  });
+
+  it("falls back to what they said in onboarding, then to \"figuring it out\", always keeping the category", async () => {
+    const s = await seed();
+    // Exercise (maintenance) has no destination: its onboarding answer is the focus.
+    await t.db.insert(planInputs).values({ testerId: s.tester.id, goalSlug: "exercise", what: "push-ups before work" });
+    // A dropped goal with nothing at all.
+    await t.db.insert(testerGoals).values({ testerId: s.tester.id, goalSlug: "bedtime", role: "dropped", roleSince: at("2026-10-20", "12:00") });
+    const progress = await page(s.tester.id);
+    expect(progress).toContain(`<h3 style="margin:0">push-ups before work</h3><span class="chip">maintenance</span>`);
+    expect(progress).toMatch(/<h3 style="margin:0">figuring it out<\/h3><span class="chip">dropped<\/span>/);
+    expect(progress).toContain("Category: Get fitter");
+    // The focus with no destination and no answer: "figuring it out", never the category.
+    await t.db.update(plans).set({ destination: null }).where(eq(plans.testerId, s.tester.id));
+    const header = await page(s.tester.id, "console");
+    expect(header).toContain("Focus: <strong>figuring it out</strong>");
+    expect(header).toContain(`Category: ${READING}`);
+  });
+
+  it("uses the newest locked plan's destination, not a draft's", async () => {
+    const s = await seed();
+    await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "draft", step: "x", destination: "a draft idea", stepTime: "19:00", days: ["mon"], proof: "photo", reason: "r" });
+    expect(await page(s.tester.id)).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+  });
+
+  it("shows the same Focus and Category on the home list", async () => {
+    await seed();
+    const home = (await get("/console", cookieFor("Yanni"))).body;
+    expect(home).toContain(`finish Dune by Dec 1 <span class="muted">· ${READING}</span> · 🔥 2`);
   });
 });
 

@@ -12,7 +12,7 @@ export function listPage(rows: TesterRow[], alerts: ConsoleMessage[], name: stri
     .map((r) => {
       const t = r.tester;
       const badge = r.alertsWaiting + r.suggestionsWaiting;
-      const maint = r.maintenance.map((m) => `<span class="chip">${esc(m.title)} · ${m.current?.length ?? 0}</span>`).join(" ");
+      const maint = r.maintenance.map((m) => `<span class="chip">${esc(m.focus)} <span class="muted">· ${esc(m.category)}</span> · ${m.current?.length ?? 0}</span>`).join(" ");
       const last = r.lastText
         ? `<span>${r.lastText.direction === "inbound" ? "" : "ZOH: "}${esc((r.lastText.content || "(photo or voice note)").slice(0, 120))}</span>`
         : `<span>No texts yet</span>`;
@@ -21,7 +21,7 @@ export function listPage(rows: TesterRow[], alerts: ConsoleMessage[], name: stri
 <div class="avatar">${esc(initials(t.name))}</div>
 <div style="flex:1;min-width:0">
 <div class="row spread"><div class="row"><strong style="font-size:16px">${esc(t.name ?? "Unnamed")}</strong><span class="chip">${esc(t.phase)}</span>${status}</div><div class="row">${r.lastText ? `<span class="muted">${esc(ago(messageTime(r.lastText), now))}</span>` : ""}${badge ? `<span class="badge" title="${r.alertsWaiting} alert${r.alertsWaiting === 1 ? "" : "s"}, ${r.suggestionsWaiting} more next step${r.suggestionsWaiting === 1 ? "" : "s"} waiting">${badge}</span>` : ""}</div></div>
-<div style="margin:2px 0">${r.focus ? `${esc(r.focus.title)} · 🔥 ${r.focus.current?.length ?? 0} · <span class="muted">streak ${esc(streakText(r.focus.current))} · hit rate ${esc(hitRateText(r.focus))}</span>` : `<span class="muted">No focus goal yet</span>`}</div>
+<div style="margin:2px 0">${r.focus ? `${esc(r.focus.focus)} <span class="muted">· ${esc(r.focus.category)}</span> · 🔥 ${r.focus.current?.length ?? 0} · <span class="muted">streak ${esc(streakText(r.focus.current))} · hit rate ${esc(hitRateText(r.focus))}</span>` : `<span class="muted">No focus goal yet</span>`}</div>
 ${maint ? `<div class="row" style="margin:4px 0">${maint}</div>` : ""}<div class="preview">${last}</div>
 <div class="muted">${esc(maskNumber(t.phone))}${r.alertsWaiting ? ` · ${r.alertsWaiting} alert${r.alertsWaiting === 1 ? "" : "s"}` : ""}</div></div></div></div></a>`;
     })
