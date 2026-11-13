@@ -11,6 +11,7 @@ import {
   memoryLinks,
   memoryPages,
   messages,
+  planInputs,
   plans,
   stepDays,
   suggestions,
@@ -233,10 +234,10 @@ describe("tester list and page", () => {
   it("lists each tester with goals, streak, hit rate, last text and alerts waiting", async () => {
     await seed();
     const res = await get("/console", cookieFor("Yanni"));
-    expect(res.body).toContain("Read &amp; learn more (books, ideas, any topic) · 🔥 2");
+    expect(res.body).toContain('finish Dune by Dec 1 <span class="muted">· Read &amp; learn more (books, ideas, any topic)</span> · 🔥 2');
     expect(res.body).toContain("streak 2 (since 2026-10-26)");
     expect(res.body).toContain("hit rate 100% (2/2)");
-    expect(res.body).toContain("Get fitter");
+    expect(res.body).toContain('figuring it out <span class="muted">· Get fitter</span> · 7');
     expect(res.body).toContain("Page 40, nice.");
     expect(res.body).toContain("2 alerts");
   });
@@ -273,7 +274,7 @@ describe("tester list and page", () => {
     for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
     // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
     expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
-    expect(page).toContain("Focus: <strong>Read &amp; learn more (books, ideas, any topic)</strong>");
+    expect(page).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
     expect(page).toContain("🔥 2</b>");
     const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
     const below = page.slice(page.indexOf('<div id="side"'));
@@ -323,7 +324,7 @@ describe("tester list and page", () => {
     // Each day's own step and the plan's destination (#76)
     expect(progress).toContain("Step: chapter 3 of Dune on the train, about 20 min");
     expect(progress).toContain("25 min");
-    expect(progress).toContain("Headed for: finish Dune by Dec 1");
+    expect(progress).toContain("Destination: finish Dune by Dec 1");
     // Each day's kind of step (#88); days from before kinds were recorded show a dash.
     expect(progress).toContain(`${MON} · done · kind: harder`);
     expect(progress).toContain("2026-10-26 · done · kind: –");
@@ -388,7 +389,7 @@ describe("tester list and page", () => {
     expect(progress).toContain("<b>🔥 2</b><span>current streak</span>");
   });
 
-  it("#78: the destination at the top, then learnings: understood with evidence, then explained only", async () => {
+  it("#78: learnings: understood with evidence, then explained only", async () => {
     const s = await seed();
     const empty = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
     expect(empty).toContain("No lessons yet.");
@@ -398,8 +399,6 @@ describe("tester list and page", () => {
       { testerId: s.tester.id, goalSlug: "reading", day: "2026-11-05", text: "One line per chapter", evidence: "explained", createdAt: at("2026-11-05", "20:00") },
     ]);
     const progress = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
-    expect(progress).toContain("<strong>Headed for:</strong> finish Dune by Dec 1");
-    expect(progress.indexOf("Headed for:")).toBeLessThan(progress.indexOf('id="goals"'));
     expect(progress).toContain("Phone in the other room<div class=\"muted\">explained Mon 2026-11-02, applied Wed 2026-11-04</div>");
     expect(progress).toContain("One line per chapter<div class=\"muted\">explained Thu 2026-11-05</div>");
     const order = ["Understood (applied or recalled)", "Phone in the other room", "Explained only, starting to click", "One line per chapter"].map((x) => progress.indexOf(x));
@@ -560,6 +559,51 @@ describe("tester list and page", () => {
     expect(texts).toContain(`<audio controls preload="none" src="/console/media/${caf!.id}"`);
     expect(texts).toContain(`<a class="media-download" href="/console/media/${caf!.id}" download hidden>`);
     expect(texts).not.toContain(`href="/console/media/${m4a!.id}" download`);
+  });
+});
+
+describe("#181: their own goal as Focus, the menu choice as Category", () => {
+  const READING = "Read &amp; learn more (books, ideas, any topic)";
+  const page = async (id: string, tab = "progress") => (await get(`/console/testers/${id}?tab=${tab}`, cookieFor("Yanni"))).body;
+
+  it("shows the plan's destination as Focus and the menu choice as Category, in the header and on the goal card", async () => {
+    const s = await seed();
+    const progress = await page(s.tester.id);
+    expect(progress).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+    expect(progress).toContain(`Category: ${READING}`);
+    expect(progress).toContain(`<h3 style="margin:0">finish Dune by Dec 1</h3><span class="chip">focus</span>`);
+    expect(progress).not.toContain(`Focus: <strong>${READING}`);
+    // The separate "Headed for" card is gone: the focus card says it.
+    expect(progress).not.toContain("Headed for:");
+  });
+
+  it("falls back to what they said in onboarding, then to \"figuring it out\", always keeping the category", async () => {
+    const s = await seed();
+    // Exercise (maintenance) has no destination: its onboarding answer is the focus.
+    await t.db.insert(planInputs).values({ testerId: s.tester.id, goalSlug: "exercise", what: "push-ups before work" });
+    // A dropped goal with nothing at all.
+    await t.db.insert(testerGoals).values({ testerId: s.tester.id, goalSlug: "bedtime", role: "dropped", roleSince: at("2026-10-20", "12:00") });
+    const progress = await page(s.tester.id);
+    expect(progress).toContain(`<h3 style="margin:0">push-ups before work</h3><span class="chip">maintenance</span>`);
+    expect(progress).toMatch(/<h3 style="margin:0">figuring it out<\/h3><span class="chip">dropped<\/span>/);
+    expect(progress).toContain("Category: Get fitter");
+    // The focus with no destination and no answer: "figuring it out", never the category.
+    await t.db.update(plans).set({ destination: null }).where(eq(plans.testerId, s.tester.id));
+    const header = await page(s.tester.id, "console");
+    expect(header).toContain("Focus: <strong>figuring it out</strong>");
+    expect(header).toContain(`Category: ${READING}`);
+  });
+
+  it("uses the newest locked plan's destination, not a draft's", async () => {
+    const s = await seed();
+    await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "draft", step: "x", destination: "a draft idea", stepTime: "19:00", days: ["mon"], proof: "photo", reason: "r" });
+    expect(await page(s.tester.id)).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+  });
+
+  it("shows the same Focus and Category on the home list", async () => {
+    await seed();
+    const home = (await get("/console", cookieFor("Yanni"))).body;
+    expect(home).toContain(`finish Dune by Dec 1 <span class="muted">· ${READING}</span> · 🔥 2`);
   });
 });
 

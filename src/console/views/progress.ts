@@ -42,7 +42,8 @@ function goalCard(v: GoalView, checkins: MaintenanceCheckin[]): string {
             .join(", ") || "none yet"
         }</div>`
       : "";
-  return `<div class="card"><div class="row"><h3 style="margin:0">${esc(v.title)}</h3><span class="chip">${esc(g.role)}</span><span class="muted">since ${esc(when(g.roleSince))}</span></div>
+  return `<div class="card"><div class="row"><h3 style="margin:0">${esc(v.focus)}</h3><span class="chip">${esc(g.role)}</span><span class="muted">since ${esc(when(g.roleSince))}</span></div>
+<div class="muted">Category: ${esc(v.category)}</div>
 <div class="big-goal"><div class="stat"><b>🔥 ${v.current?.length ?? 0}</b><span>current streak</span></div><div class="stat"><b>${best}</b><span>best</span></div><div class="stat"><b>${esc(hitRatePct(v))}</b><span>hit rate${v.hitRate.closed ? ` (${v.hitRate.done}/${v.hitRate.closed})` : ""}</span></div></div>
 <div class="muted">Streak ${esc(streakText(v.current))} · hit rate ${esc(hitRateText(v))}</div>${maintenance}${past}<div class="muted">${esc(settings)}</div></div>`;
 }
@@ -51,7 +52,7 @@ function planCard(p: Plan, titles: Map<string, Goal>): string {
   const review = p.needsReview ? `<span class="chip warn">needs review</span>` : p.status === "locked" ? `<span class="chip">reviewed</span>` : "";
   const label = p.status === "draft" ? "Draft" : `v${p.version}`;
   return `<div class="card"><div class="row"><strong>${esc(label)}</strong><span class="chip">${esc(titles.get(p.goalSlug)?.title ?? p.goalSlug)}</span>${p.changeKind ? `<span class="chip">${esc(p.changeKind)}</span>` : ""}${review}<span class="muted">${esc(when(p.lockedAt ?? p.createdAt))}</span></div>
-${p.destination ? `<div>Headed for: ${esc(p.destination)}</div>` : ""}<div>${esc(p.step)}${p.place ? ` · ${esc(p.place)}` : ""} · ${esc(p.stepTime)}, ${esc(describeDays(p.days))}${p.minutes ? ` · ${p.minutes} min` : ""}</div>
+${p.destination ? `<div>Destination: ${esc(p.destination)}</div>` : ""}<div>${esc(p.step)}${p.place ? ` · ${esc(p.place)}` : ""} · ${esc(p.stepTime)}, ${esc(describeDays(p.days))}${p.minutes ? ` · ${p.minutes} min` : ""}</div>
 <div class="muted">Proof: ${esc(p.proof)}${p.proofNote ? ` (${esc(p.proofNote)})` : ""}${p.setupStep ? ` · setup: ${esc(p.setupStep)}` : ""}${p.startDate ? ` · from ${esc(p.startDate)}` : ""}${p.endsOn ? ` · lighter, through ${esc(p.endsOn)}` : ""}</div>
 <div class="muted">Why: ${esc(p.reason)}${p.commitment ? ` · They said: "${esc(p.commitment)}"` : ""}</div></div>`;
 }
@@ -131,8 +132,7 @@ ${step}${day.note ? `<div>${esc(day.note)}</div>` : ""}${verdict}${proofs.length
     })
     .join("");
   const decided = tab.suggestions.filter((s) => s.decision !== "waiting");
-  const destination = `<div class="card"><strong>Headed for:</strong> ${tab.destination ? esc(tab.destination) : `<span class="muted">no destination yet</span>`}</div>`;
-  return `${destination}<h2 id="goals">Goals</h2>${goalsHtml}${switches}
+  return `<h2 id="goals">Goals</h2>${goalsHtml}${switches}
 <h2 id="learnings">Learnings</h2>${learningsHtml(tab)}
 <h2 id="steps">Step log</h2>${tab.stepDays.length ? `${dotStrip(tab.stepDays)}<details><summary class="muted">Every day (${tab.stepDays.length})</summary>${dayRows}</details>` : `<p class="empty">No step days yet.</p>`}
 <h2 id="plans">Plan versions</h2>${tab.plans.map((p) => planCard(p, titles)).join("") || `<p class="empty">No plan yet.</p>`}

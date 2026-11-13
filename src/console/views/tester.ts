@@ -28,13 +28,13 @@ function headerHtml(h: TesterHeader): string {
   ].filter(Boolean);
   const stats = focus
     ? `<div class="stats"><div class="stat"><b>🔥 ${focus.current?.length ?? 0}</b><span>day streak</span></div><div class="stat"><b>${esc(hitRatePct(focus))}</b><span>hit rate${focus.hitRate.closed ? ` (${focus.hitRate.done}/${focus.hitRate.closed})` : ""}</span></div>${maintenance
-        .map((m) => `<div class="stat"><b>${m.current?.length ?? 0}</b><span>${esc(m.title)} (maintenance)</span></div>`)
+        .map((m) => `<div class="stat"><b>${m.current?.length ?? 0}</b><span>${esc(m.focus)} (maintenance)</span></div>`)
         .join("")}</div>`
     : "";
   return `<div class="card"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;gap:14px"><div class="avatar big">${esc(initials(t.name))}</div><div style="flex:1;min-width:0">
 <h1>${esc(t.name ?? "Unnamed")}</h1>
 <div class="row" style="margin-top:6px"><span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip${s === "synthetic" ? "" : " warn"}">${esc(s)}</span>`).join("")}<span class="muted">${esc(maskNumber(t.phone))}</span></div>
-<div style="margin-top:6px">${focus ? `Focus: <strong>${esc(focus.title)}</strong>` : `<span class="muted">No focus goal yet</span>`}</div>
+<div style="margin-top:6px">${focus ? `Focus: <strong>${esc(focus.focus)}</strong> · <span class="muted">Category: ${esc(focus.category)}</span>` : `<span class="muted">No focus goal yet</span>`}</div>
 <div class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)} · ${esc(t.pushiness)}</div></div></div>${stats}</div>`;
 }
 

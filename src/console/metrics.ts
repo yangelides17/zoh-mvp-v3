@@ -183,7 +183,7 @@ export async function testerMetrics(db: Db, tester: Tester, now: Date, titles?: 
 
   const out: TesterMetrics = {
     tester,
-    focusTitle: focus?.title,
+    focusTitle: focus?.category,
     streak: focus?.current,
     hitRate: focus?.hitRate,
     reflections: { thisWeek: reflectionShare(days.filter((d) => d.date >= monday)), overall: reflectionShare(days) },

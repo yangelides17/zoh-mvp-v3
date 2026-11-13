@@ -6,6 +6,7 @@ import {
   goals,
   maintenanceCheckins,
   messages,
+  planInputs,
   plans,
   stepDays,
   suggestions,
@@ -35,7 +36,10 @@ import { listSuggestions } from "./suggestions.js";
 
 export interface GoalView {
   goal: TesterGoal;
-  title: string;
+  /** #181: their own goal (the plan's destination, else their onboarding answer, else FIGURING_IT_OUT). Never the category. */
+  focus: string;
+  /** The menu choice it falls under. Never stands in for the focus. */
+  category: string;
   current?: StreakRun;
   past: StreakRun[];
   hitRate: HitRate;
@@ -59,6 +63,28 @@ export async function goalTitles(db: Db): Promise<Map<string, Goal>> {
   return new Map(rows.map((g) => [g.slug, g]));
 }
 
+/** What Focus says when there's no destination and no onboarding answer (#181). */
+export const FIGURING_IT_OUT = "figuring it out";
+
+/** Each goal's own wording (#181): the newest locked plan's destination, else what they said in onboarding. */
+async function ownGoals(db: Db, testerId: string): Promise<Map<string, string>> {
+  const locked = await db
+    .select({ goalSlug: plans.goalSlug, destination: plans.destination })
+    .from(plans)
+    .where(and(eq(plans.testerId, testerId), eq(plans.status, "locked")))
+    .orderBy(desc(plans.version));
+  const inputs = await db.select({ goalSlug: planInputs.goalSlug, what: planInputs.what }).from(planInputs).where(eq(planInputs.testerId, testerId));
+  const own = new Map<string, string>();
+  for (const i of inputs) if (i.what?.trim()) own.set(i.goalSlug, i.what.trim());
+  const newest = new Set<string>();
+  for (const p of locked) {
+    if (newest.has(p.goalSlug)) continue;
+    newest.add(p.goalSlug);
+    if (p.destination?.trim()) own.set(p.goalSlug, p.destination.trim());
+  }
+  return own;
+}
+
 /** Each goal's streaks and hit rate, through today in their zone. */
 export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<string, Goal>, checkins?: MaintenanceCheckin[]): Promise<GoalView[]> {
   const today = localDate(now, tester.timeZone);
@@ -66,12 +92,14 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
   const answers =
     checkins ??
     (await db.select().from(maintenanceCheckins).where(eq(maintenanceCheckins.testerId, tester.id)).orderBy(asc(maintenanceCheckins.date)));
+  const own = await ownGoals(db, tester.id);
   const views: GoalView[] = [];
   for (const goal of rows) {
-    const title = titles.get(goal.goalSlug)?.title ?? goal.goalSlug;
+    const category = titles.get(goal.goalSlug)?.title ?? goal.goalSlug;
+    const focus = own.get(goal.goalSlug) ?? FIGURING_IT_OUT;
     const focusEra = await goalMetrics(db, tester.id, goal.goalSlug, today);
     if (goal.role !== "maintenance") {
-      views.push({ goal, title, current: focusEra.current, past: focusEra.past, hitRate: focusEra.hitRate });
+      views.push({ goal, focus, category, current: focusEra.current, past: focusEra.past, hitRate: focusEra.hitRate });
       continue;
     }
     // Proof-backed days run until it became maintenance; after that the streak is self-reported.
@@ -90,7 +118,8 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
     const confirmed = mine.filter((c) => c.answer === "kept_up" || c.answer === "mostly").at(-1);
     views.push({
       goal,
-      title,
+      focus,
+      category,
       current: streak.current,
       past: [...proven.past, ...streak.past],
       hitRate: focusEra.hitRate,
@@ -287,8 +316,6 @@ export interface ProgressTab {
   /** Newest first. */
   stepDays: StepDayView[];
   suggestions: Suggestion[];
-  /** Where their focus goal's current plan is headed, if anywhere (#78). */
-  destination?: string;
   /** Every lesson (a reset deletes them): understood (applied or recalled) and only explained (#78). */
   learnings: Learnings;
 }
@@ -308,14 +335,12 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
   const days = await db.select().from(stepDays).where(eq(stepDays.testerId, tester.id)).orderBy(desc(stepDays.date));
   const testerPlans = await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version));
   const lessons = await db.select().from(takeaways).where(eq(takeaways.testerId, tester.id));
-  const current = testerPlans.find((p) => p.status === "locked" && p.goalSlug === tester.goalSlug);
   return {
     switches: [...(await switchReasons(db, tester)).entries()].map(([pair, s]) => ({ pair, ...s })),
     checkins,
     plans: testerPlans,
     stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [], learned: lessons.filter((l) => l.day === day.date).map((l) => l.text) })),
     suggestions: await listSuggestions(db, tester.id),
-    ...(current?.destination ? { destination: current.destination } : {}),
     learnings: learnings(lessons),
   };
 }
