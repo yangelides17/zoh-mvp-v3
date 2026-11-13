@@ -33,7 +33,9 @@ branches, whether you'd build them as parallel agents (see `/build`) and why it'
    For a big build, add how it splits into pieces that can each be tried on staging. For a large or risky feature (a
    database change, how the coach thinks, several parts of the system at once), offer in one line to have a separate
    agent critique the spec and design first; run it only if Yanni says yes, and fold its findings into section 3.
-4. **Write the appendix** for `/build` and `/review` (Yanni may skip it): the modules and files; any database change
+4. **Write the appendix** for `/build` and `/review` (Yanni may skip it): the modules and files; **patterns to copy**
+   (for each kind of code the build adds, such as a scheduled text, a coach tool or a test, one existing file that
+   already does it the way this repo does); any database change
    (one migration at most, for a group too); one line per **Must** saying how it's tested; the eval (only with
    **Should** items): rubric entries copied close to word for word from the spec, the cases to run and the spend (see
    the eval budget in `CLAUDE.md`; in a group, one run at the end covers every issue); overlaps with work in flight;

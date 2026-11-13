@@ -22,7 +22,19 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
 2. **Check it:**
    - Base is `dev` and the branch is up to date (`git merge-base --is-ancestor origin/dev origin/<branch>`); if not,
      rebase on `origin/dev` and push (`--force-with-lease`) first.
-   - Every **Must** has a real test that would fail if the feature were broken, and `npm run check` passes.
+   - Every **Must** has a real test, and `npm run check` passes. **Prove the tests catch a broken feature:** in the
+     review worktree, put the source back to `dev` while keeping the PR's tests
+     (`git restore --source=origin/dev --worktree -- src/`), run the new and changed test files
+     (`npx vitest run <files>`) and confirm the Must tests fail; then `git restore --source=HEAD --worktree -- src/`.
+     A Must test that still passes doesn't test the change: list it. Skip when the PR changes no code in `src/`.
+   - **Extra review (trial, risky PRs only).** If the diff touches anything that starts a text or decides who gets one
+     (`src/sendblue/`, `src/nudges/`, `owns`/`ALLOWED_NUMBERS`), the database (`src/db/schema.ts`, `drizzle/`),
+     `src/pipeline/` or `src/memory/`, start one background agent (model `sonnet`) as soon as you have the diff, so it
+     runs while you check the rest. Give it the diff and the files it touches, and ask it only for silent failures:
+     errors caught and dropped, a send or memory write that can fail with nothing logged or alerted, a fallback that
+     hides a failure. Each finding: the line, and what a tester would experience. Fold the real ones into your review.
+     On a risky PR, before you say **fix first** over a problem you found (not failing tests or `needs-signoff`), have
+     a second agent check that finding on its own, told to refute it when unsure; drop what it refutes.
    - **The design held up:** it still works the way the plan's "How it works" says, and each risk in "Where it could
      break" got its guard. If the plan or spec now looks wrong, say so plainly.
    - **Simplicity:** nothing is more complicated than the spec needs (the rules in `CLAUDE.md`); unrelated code wasn't
@@ -43,6 +55,12 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
    - **What ZOH will say differently:** the instruction change in a sentence or two, and one or two real exchanges
      from the eval.
    - **Live checks:** the Watch list ranked by where the build is least sure, each of the top one or two with a reason.
+   - **Extra review** (risky PRs only): "Extra review (trial n/5): <what it found that was real> / nothing real". Count
+     n from earlier reviews (`gh search prs --repo yangelides17/zoh-mvp-v3 "Extra review (trial" in:comments`). At
+     5/5, add the tally across the five and recommend keeping or dropping it; Yanni decides, and `/quick` updates this
+     command.
+   - **A rule that would have caught it** (only when the review found a real problem): the `CLAUDE.md` line to sharpen,
+     or one new line, that would have stopped it during the build. Yanni decides; `/quick` adds it.
 5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`; remove this issue's worktrees
    (`git worktree list`, `git worktree remove --force <path>`, `git worktree prune`); bring the main folder up to date
    (`git -C <main folder> pull --ff-only`, or say why not); `gh issue edit $ARGUMENTS --add-label done --remove-label

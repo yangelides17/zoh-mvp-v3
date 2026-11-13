@@ -45,7 +45,7 @@ version). Each app keeps its own texts, memory and console; the staging console 
 | 1. Spec | `/spec` | You and Claude | Claude first says what it thinks you mean and sketches it; once you agree, you shape the rest together, including "Done means": it drafts the core scenarios and asks what would make you say it's broken and what case is missing. When you approve, it's an issue labeled `spec-approved`. |
 | 2. Plan | `/plan` | Claude proposes, you approve | Claude reads the code on `dev` and gives you a two-minute briefing: how it works in plain words, where it could break (including what changes in existing code), where it disagrees or is least sure, and questions for you. A technical appendix for the build sits below it. The approved plan is posted on the issue (`plan-approved`). |
 | 3. Build | `/build` | Claude, on its own | Its own branch, tests first, a draft PR you can watch, the eval if ZOH's words change. Stops to ask only if the spec, the design or something hard to undo is in question. Ends `in-review` with one line. |
-| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan, that the design held up and the code stays lean, and tells you merge or fix, with what differed from the plan, an eval summary (detail only on what fell short), what ZOH will say differently, and the live checks ranked by importance. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the ranked live checks as a "Live checks" comment (checkboxes) on the issue. |
+| 4. Review | `/review` | A fresh session, then you | Checks the PR against the spec and plan, that the design held up and the code stays lean, and that the tests fail when the feature is taken out. PRs touching sending, the database, the pipeline or memory also get a quick extra check for silent failures (a trial, see Good habits). It tells you merge or fix, with what differed from the plan, an eval summary (detail only on what fell short), what ZOH will say differently, and the live checks ranked by importance. You say "merge"; it lands on `dev`, staging redeploys in about 2 minutes and the issue is `done`. Claude cleans up the branch and worktrees, updates your main folder and leaves the ranked live checks as a "Live checks" comment (checkboxes) on the issue. |
 | Live check | | You, on staging | Text `env staging`, then try the issue's "Live checks" and tick them. Not good: Claude files a `bug`. Best done before the next release. |
 | Release | `/release` | Claude, then you | Collects everything on `dev` since the last release, writes plain-language notes, opens the `dev` → `main` PR and lists anything "Worth a look" (important unticked live checks, concerns from the PRs). Suggestions only. You say "ship"; it merges, tags the version (v0.3, v0.4…), production deploys and Claude checks it's healthy. |
 
@@ -96,6 +96,12 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   Claude to walk you through it; you'll direct the next build better. Claude says so when it thinks the spec or
   plan is wrong, even after you've approved it. For big, risky features it can offer a separate critic first.
 - **Review in a fresh session**, not the one that built it, so it checks the work with fresh eyes.
+- **Extra review on risky PRs is a trial.** PRs touching anything that texts testers or decides who gets a text,
+  the database, the pipeline or memory get a background agent hunting for silent failures (a tester gets no reply and
+  nothing is logged), and a second opinion before any "fix first". Its result is a line in the review. After five
+  such PRs, `/review` shows what it found and you decide whether to keep it. When a review finds a real problem, it
+  also suggests a `CLAUDE.md` rule that would have caught it; you decide.
+- **Bugs start with a failing test.** `/build` and `/quick` first write a test that shows the bug, see it fail, then fix.
 - **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session. Each
   build works in its own copy of the repo (a git worktree in `../zoh-worktrees/`), so parallel builds never
   trip over each other; Claude creates and removes these, you don't need to do anything.
@@ -130,6 +136,8 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
      staging first.
   4. `/status` lists commits from the last week that didn't come through an issue or PR, flags risky ones, and
      offers to record them.
+- **Guard hooks** (`.claude/hooks/guard.mjs`) stop three costly mistakes in any session, before they happen: editing a
+  migration that's already applied, pushing straight to `main`, and switching branches in your main folder.
 - **Never outside a PR:** database changes (`src/db/schema.ts`, `drizzle/`). A bad migration runs at startup and can
   take the app down.
 - **Something broke live?** Tell Claude "roll back the last deploy" (Railway keeps every deploy), then fix it properly.

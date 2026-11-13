@@ -47,7 +47,8 @@ cases once both are on `dev`.
 3. Open a **draft PR** into `dev` early (`gh pr create --draft --base dev`, body from `.github/pull_request_template.md`,
    first line `Closes #$ARGUMENTS`) and push as you go.
 4. Write the **Must** tests first, and make sure each one would fail if the feature were broken. Follow `CLAUDE.md`,
-   including the simplicity rules. Stay inside the plan.
+   including the simplicity rules and the plan's patterns to copy. Stay inside the plan. For a `bug` issue, start with a
+   test that reproduces it and run it on the unchanged code to see it fail before fixing.
 5. **When something doesn't fit the plan,** post a `Decision:` comment on the issue (never only in the PR).
    - **Stop and ask the founders** only if the tester would experience something different from the spec, the
      approved design turns out not to work (the plan assumed something about the code that isn't true), or a choice is
