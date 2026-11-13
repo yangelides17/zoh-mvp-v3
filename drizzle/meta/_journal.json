@@ -148,6 +148,13 @@
       "when": 1793906271187,
       "tag": "0020_fine_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794605748476,
+      "tag": "0021_empty_excalibur",
+      "breakpoints": true
     }
   ]
 }

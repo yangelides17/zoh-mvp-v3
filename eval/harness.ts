@@ -260,43 +260,47 @@ export async function advanceTo(app: EvalApp, hhmm: string, timeZone: string): P
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true }));
 }
 
-/** A case line from a founder in the console chat: "console Yanni: ...", "console Yanni (exact, now): ...". */
-export const CONSOLE_LINE = /^console (\w+)(?: \((exact(?:, now)?)\))?: ([\s\S]+)$/i;
+/** A case line from a founder in the console chat: "console Yanni: ...", or "console Yanni (do it)" for clicking Do it on the newest draft (#155). */
+export const CONSOLE_LINE = /^console (\w+)(?: \((do it)\))?(?:: ([\s\S]+))?$/i;
 
 /**
- * Sends a founder's line through the real console chat route, as that founder, and returns it
- * with ZOH's console answer. A "send exactly this" line gets one nudge tick a minute later, as
- * production would, so the text it sends joins the transcript.
+ * Sends a founder's line through the real console chat route, as that founder, and returns it with
+ * ZOH's console answer and any draft card it made (#155). "(do it)" clicks Do it on the newest open
+ * draft instead, then runs one nudge tick a minute later, as production would, so a text it sends
+ * joins the transcript.
  */
 export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<TranscriptLine[]> {
-  const [, name, flags, text] = line as unknown as [string, string, string | undefined, string];
+  const [, name, doIt, text] = line as unknown as [string, string, string | undefined, string | undefined];
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) throw new Error("A console line needs a tester: seed one first");
   const at = app.clock.now();
-  const before = await app.db.select({ id: schema.consoleMessages.id }).from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id));
+  const thread = () => app.db.select().from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id));
+  const before = new Set((await thread()).map((r) => r.id));
   const cookie = `${SESSION_COOKIE}=${encodeURIComponent(encodeSession(newSession(at, name), CONSOLE_SECRET))}`;
-  const form = new URLSearchParams({ text, ...(flags ? { exact: "on" } : {}), ...(flags?.endsWith("now") ? { sendNow: "on" } : {}) });
-  const res = await app.built.app.inject({
-    method: "POST",
-    url: `/console/testers/${tester.id}/chat`,
-    headers: { "content-type": "application/x-www-form-urlencoded", cookie },
-    payload: form.toString(),
-  });
-  if (res.statusCode !== 303) throw new Error(`Console chat answered ${res.statusCode}: ${res.body.slice(0, 200)}`);
-  await app.built.queue.idle();
-  const seen = new Set(before.map((r) => r.id));
-  const answers = (await app.db.select().from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id)))
-    .filter((m) => !seen.has(m.id) && m.kind === "coach" && m.author === COACH_AUTHOR)
-    .map((m) => ({ from: "zoh" as const, text: m.body, at: m.createdAt.toISOString(), console: true }));
-  const out: TranscriptLine[] = [{ from: "founder", text: `${name}${flags ? ` (${flags})` : ""}: ${text}`, at: at.toISOString() }, ...answers];
-  app.clock.advance(30_000);
-  if (flags) {
+  const post = (url: string, form: Record<string, string>) =>
+    app.built.app.inject({ method: "POST", url, headers: { "content-type": "application/x-www-form-urlencoded", cookie }, payload: new URLSearchParams(form).toString() });
+  if (doIt) {
+    const draft = (await thread()).filter((m) => m.kind === "draft" && m.draftStatus === "draft").sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()).at(-1);
+    if (!draft) throw new Error("(do it) needs an open draft from ZOH first");
+    await post(`/console/testers/${tester.id}/drafts/${draft.id}/confirm`, {});
+    const out: TranscriptLine[] = [{ from: "founder", text: `${name} clicks Do it on: ${draft.body}`, at: at.toISOString() }];
     const sendsBefore = app.sendblue.sent.length;
     app.clock.advance(60_000);
     await app.nudger.tick(app.clock.now());
     out.push(...app.sendblue.sent.slice(sendsBefore).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true })));
+    app.clock.advance(30_000);
+    return out;
   }
-  return out;
+  if (!text) throw new Error(`A console line needs words: ${line[0]}`);
+  const res = await post(`/console/testers/${tester.id}/chat`, { text });
+  if (res.statusCode !== 303) throw new Error(`Console chat answered ${res.statusCode}: ${res.body.slice(0, 200)}`);
+  await app.built.queue.idle();
+  const answers = (await thread())
+    .filter((m) => !before.has(m.id) && ((m.kind === "coach" && m.author === COACH_AUTHOR) || m.kind === "draft"))
+    .sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime())
+    .map((m) => ({ from: "zoh" as const, text: m.kind === "draft" ? `[draft card: Do it / Change / Cancel] ${m.body}` : m.body, at: m.createdAt.toISOString(), console: true }));
+  app.clock.advance(30_000);
+  return [{ from: "founder", text: `${name}: ${text}`, at: at.toISOString() }, ...answers];
 }
 
 /**
@@ -367,6 +371,8 @@ export interface RunOptions {
   saved?: boolean;
   /** Show the grader the step log, lessons included, read at the end (console lines get it at the start). */
   record?: boolean;
+  /** Tests only: the app once it's up (a fake console coach writes its drafts to its database). */
+  onApp?: (app: EvalApp) => void;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -634,6 +640,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const phone = fakeNumber(plan.areaCode, opts.index);
   const clock = new EvalClock(zonedDate(evalDay(plan.startDay), plan.startTime, plan.timeZone));
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
+  opts.onApp?.(app);
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;

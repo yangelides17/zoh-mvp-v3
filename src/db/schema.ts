@@ -209,6 +209,15 @@ export type ChangeKind = (typeof CHANGE_KINDS)[number];
 export const PROOF_METHODS = ["photo", "screenshot", "voice"] as const;
 export const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
+/** #155: the plan fields a founder's adjust proposes (the plans table's names). */
+export interface PlanChanges {
+  stepTime?: string;
+  place?: string;
+  days?: Weekday[];
+  proof?: (typeof PROOF_METHODS)[number];
+  proofNote?: string;
+  minutes?: number;
+}
 /** A plan can't lock with fewer step days than this (spec: "Plan agreement"). */
 export const MIN_DAYS_PER_WEEK = 3;
 
@@ -298,8 +307,16 @@ export const maintenanceCheckins = pgTable(
 );
 
 export const SUGGESTION_KINDS = ["deepen", "upgrade", "new_focus"] as const;
+/**
+ * #155: a founder's change to the tester's own plan (time, place, days, proof, length), raised by
+ * ZOH and made only on the tester's yes. Only founders file it, from the console chat: never a kind
+ * the coach or a Change form offers.
+ */
+export const PLAN_ADJUST = "adjust";
+export const SUGGESTION_ROW_KINDS = [...SUGGESTION_KINDS, PLAN_ADJUST] as const;
 export const SUGGESTION_SOURCES = ["coach", "tester", "founder"] as const;
-export const SUGGESTION_DECISIONS = ["waiting", "approved", "changed", "rejected"] as const;
+/** withdrawn (#155): the founders took it back, or the tester texted stop, before it played out. */
+export const SUGGESTION_DECISIONS = ["waiting", "approved", "changed", "rejected", "withdrawn"] as const;
 export const SUGGESTION_OUTCOMES = ["delivered", "agreed", "declined"] as const;
 
 /**
@@ -317,7 +334,7 @@ export const suggestions = pgTable(
     goalSlug: text("goal_slug")
       .notNull()
       .references(() => goals.slug),
-    kind: text("kind", { enum: SUGGESTION_KINDS }).notNull(),
+    kind: text("kind", { enum: SUGGESTION_ROW_KINDS }).notNull(),
     raisedBy: text("raised_by", { enum: SUGGESTION_SOURCES }).notNull(),
     /** A founder's name, when a founder raised it. */
     raisedByName: text("raised_by_name"),
@@ -338,22 +355,30 @@ export const suggestions = pgTable(
     outcomeAt: timestamp("outcome_at", { withTimezone: true }),
     /** The plan version it made. */
     planId: uuid("plan_id").references(() => plans.id, { onDelete: "set null" }),
+    /** adjust only (#155): the plan fields the founders proposed. */
+    planChanges: jsonb("plan_changes").$type<PlanChanges>(),
+    /** adjust only: what the tester changed from the proposal, in plain words ("time 08:00, not 07:30"). */
+    outcomeNote: text("outcome_note"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index("suggestions_tester_idx").on(t.testerId, t.createdAt),
-    check("suggestions_kind_check", sql`${t.kind} in ('deepen', 'upgrade', 'new_focus')`),
+    check("suggestions_kind_check", sql`${t.kind} in ('deepen', 'upgrade', 'new_focus', 'adjust')`),
     check("suggestions_raised_by_check", sql`${t.raisedBy} in ('coach', 'tester', 'founder')`),
-    check("suggestions_decision_check", sql`${t.decision} in ('waiting', 'approved', 'changed', 'rejected')`),
+    check("suggestions_decision_check", sql`${t.decision} in ('waiting', 'approved', 'changed', 'rejected', 'withdrawn')`),
     check("suggestions_decided_kind_check", sql`${t.decidedKind} in ('deepen', 'upgrade', 'new_focus')`),
     check("suggestions_outcome_check", sql`${t.outcome} in ('delivered', 'agreed', 'declined')`),
   ],
 );
 
-export const CONSOLE_KINDS = ["founder", "coach", "alert", "summary", "note", "request"] as const;
+export const CONSOLE_KINDS = ["founder", "coach", "alert", "summary", "note", "request", "draft"] as const;
 export type ConsoleKind = (typeof CONSOLE_KINDS)[number];
-export const REQUEST_STATUSES = ["pending", "sent", "done", "cancelled"] as const;
+/** sending (#155): claimed by the text going out now, so a cancel can't race it. */
+export const REQUEST_STATUSES = ["pending", "sending", "sent", "done", "cancelled"] as const;
+/** #155: what the console chat proposes to do for a founder, until one confirms it. */
+export const DRAFT_STATUSES = ["draft", "confirmed", "cancelled", "failed"] as const;
+export type DraftStatus = (typeof DRAFT_STATUSES)[number];
 /**
  * When a request in ZOH's words reaches the tester: naturally (the morning text or ZOH's next reply),
  * only with the morning text, or as its own text at a set time (a manual nudge).
@@ -401,12 +426,19 @@ export const consoleMessages = pgTable(
     messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
     seenAt: timestamp("seen_at", { withTimezone: true }),
     seenBy: text("seen_by"),
+    /** Drafts (#155): the console chat's capability, its input, and where the draft stands. */
+    draftAction: text("draft_action"),
+    draftInput: jsonb("draft_input"),
+    draftStatus: text("draft_status", { enum: DRAFT_STATUSES }),
+    /** Drafts: what doing it did, or why it couldn't. */
+    draftResult: text("draft_result"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index("console_messages_tester_created_idx").on(t.testerId, t.createdAt),
-    check("console_messages_kind_check", sql`${t.kind} in ('founder', 'coach', 'alert', 'summary', 'note', 'request')`),
-    check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sent', 'done', 'cancelled')`),
+    check("console_messages_kind_check", sql`${t.kind} in ('founder', 'coach', 'alert', 'summary', 'note', 'request', 'draft')`),
+    check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sending', 'sent', 'done', 'cancelled')`),
+    check("console_messages_draft_status_check", sql`${t.draftStatus} in ('draft', 'confirmed', 'cancelled', 'failed')`),
     check("console_messages_delivery_check", sql`${t.delivery} in ('natural', 'morning', 'own_text')`),
   ],
 );

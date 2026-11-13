@@ -1,5 +1,6 @@
+import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import type { Tester } from "../db/schema.js";
+import { consoleMessages, suggestions, type Tester } from "../db/schema.js";
 import { alertStop } from "../console/alerts.js";
 import { endPause } from "./pauses.js";
 import { updateTester } from "./testers.js";
@@ -38,6 +39,21 @@ export async function optOut(db: Db, tester: Tester, at: Date, how = "texted sto
   if (tester.stoppedAt) return tester;
   const stopped = await updateTester(db, tester.id, { stoppedAt: at });
   await endPause(db, tester.id, { at, by: "stop" });
+  // #155: nothing the founders queued goes out after a restart: their texts are cancelled, their open next steps withdrawn.
+  await db
+    .update(consoleMessages)
+    .set({ requestStatus: "cancelled", doneAt: at })
+    .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "pending")));
+  await db
+    .update(suggestions)
+    .set({ decision: "withdrawn", decisionReason: "They texted stop.", decidedAt: at, updatedAt: at })
+    .where(
+      and(
+        eq(suggestions.testerId, tester.id),
+        inArray(suggestions.decision, ["approved", "changed"]),
+        or(isNull(suggestions.outcome), eq(suggestions.outcome, "delivered")),
+      ),
+    );
   await alertStop(db, tester.id, at, how);
   return stopped;
 }

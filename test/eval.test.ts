@@ -1,3 +1,5 @@
+import { createDraft } from "../src/console/drafts.js";
+import type { Db } from "../src/db/client.js";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -680,28 +682,32 @@ describe("eval: command line and cost", () => {
 });
 
 describe("eval: console lines (console feature)", () => {
-  it("sends founder lines through the real console chat and an exact one out on the next tick", async () => {
+  it("sends founder lines through the real console chat, shows its drafts, and a Do it sends the text on the next tick (#155)", async () => {
     const [c] = (await loadCases("console")).filter((x) => x.id === "rude-request");
     const plan = planConversations([], [c!], { runs: 1 })[0]!;
     const asked: string[] = [];
+    let db: Db | undefined;
     const consoleCoach = {
-      answer: async (testerId: string) => {
+      answer: async (testerId: string, now: Date) => {
         asked.push(testerId);
+        // Stands in for the real console coach drafting a word-for-word text.
+        if (db && asked.length === 2) await createDraft(db, { testerId, author: "Stamati", action: "send_text", input: { words: "Hey Jordan, word for word" }, summary: 'Text Jordan word for word: "Hey Jordan, word for word"', at: now });
         return undefined;
       },
     };
-    const lines = ["console Yanni: how's he doing?", "console Stamati (exact, now): Hey Jordan, word for word", "hi"];
-    const result = await runConversation(plan, scriptedTester(lines), { maxTurns: 4, index: 5, env: {}, replier: new EchoReplier(), consoleCoach });
+    const lines = ["console Yanni: how's he doing?", "console Stamati: send him exactly: Hey Jordan, word for word", "console Stamati (do it)", "hi"];
+    const result = await runConversation(plan, scriptedTester(lines), { maxTurns: 5, index: 5, env: {}, replier: new EchoReplier(), consoleCoach, onApp: (app) => (db = app.db) });
     expect(result.error).toBeUndefined();
     expect(result.transcript.map((l) => `${l.from}${l.console ? " (console)" : ""}${l.started ? " (started)" : ""}: ${l.text}`)).toEqual([
       "founder: Yanni: how's he doing?",
-      "founder: Stamati (exact, now): Hey Jordan, word for word",
+      "founder: Stamati: send him exactly: Hey Jordan, word for word",
+      'zoh (console): [draft card: Do it / Change / Cancel] Text Jordan word for word: "Hey Jordan, word for word"',
+      'founder: Stamati clicks Do it on: Text Jordan word for word: "Hey Jordan, word for word"',
       "zoh (started): Hey Jordan, word for word",
       "tester: hi",
       "zoh: got: hi",
     ]);
-    // Only the plain line asks the console coach; an exact one goes out as written.
-    expect(asked).toHaveLength(1);
+    expect(asked).toHaveLength(2);
     // The grader gets the step log ZOH saw, so true facts about his days aren't marked made up.
     expect(result.record).toContain("Sat, Oct 31: missed");
     expect(result.record).toContain("Mon, Nov 2 (today): step day, not done yet at 18:00");

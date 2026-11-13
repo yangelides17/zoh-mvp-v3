@@ -93,7 +93,14 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   went quiet) and each locked plan version to review are saved as console alerts, one per event
   (`raiseAlert`), which the founder console (#10) shows. Since #12 alerts also cover a stop, a
   stopped tester texting again, pause and back from pause, feedback (word for word) and failures (the
-  system-down reply or a text that didn't send; at most one per tester per hour).
+  system-down reply or a text that didn't send; at most one per tester per hour). Since #155 they also
+  cover the tester's answer to a next step or plan change the founders approved (agreed, changed,
+  declined) and a founder text or request that couldn't go out; a sent text only updates its card.
+- Console chat (#155): ZOH is the founders' go-between, and everything it would do for them (a note, a
+  text, a plan change, a decision) is a draft card until a founder clicks Do it or types a yes. The
+  "Send exactly this" and "Send now" boxes are gone: word-for-word texts go through a draft too. A
+  founder's change to the tester's plan is only a proposal ZOH raises; the plan changes on the tester's
+  yes (with their tweak), with no plan-review alert. A stop cancels queued texts and open proposals.
 - Pause (#12): a break the tester asks for, kept in `pauses` (separate from the automatic pause after
   3 silent days). The coach asks why and pushes back once on a weak reason. While one is open ZOH starts
   no texts (founder requests included) but always replies; a step day that ends inside it is never a

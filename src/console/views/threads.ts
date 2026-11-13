@@ -18,7 +18,8 @@ export interface ThreadContext {
   now: Date;
 }
 
-const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sent: "sent", done: "done", cancelled: "cancelled" };
+const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sending: "going out now", sent: "sent", done: "done", cancelled: "cancelled" };
+const DRAFT_STATUS_LABELS: Record<string, string> = { draft: "draft: nothing happens until you confirm", confirmed: "done", cancelled: "cancelled", failed: "not done" };
 
 /** Day dividers in front of the first item and wherever the day changes; the page drops repeats at chunk edges. */
 function withDividers<T>(list: T[], at: (item: T) => Date, render: (item: T) => string, now: Date): string {
@@ -50,11 +51,23 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
         status === "pending"
           ? `<form class="inline" method="post" action="/console/testers/${esc(ctx.testerId)}/requests/${esc(m.id)}/cancel"><button class="small">Cancel</button></form>`
           : "";
-      const how = m.exact ? "send exactly this" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
-      const chips = [how, m.sendNow && "send now", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      const how = m.exact ? "word for word" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
+      const chips = [how, m.sendNow && "even in quiet hours", REQUEST_STATUS_LABELS[status]].filter(Boolean);
       const timing = [m.dueAt && `${m.delivery === "own_text" ? "at" : "not before"} ${when(m.dueAt)}`, m.expiresAt && `dropped if not out by ${when(m.expiresAt)}`].filter(Boolean);
       return `<div class="event" ${id}><div class="head">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)} · ${time}</span></div>
 <div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
+    }
+    case "draft": {
+      // #155: what the console chat would do, until a founder confirms it.
+      const status = m.draftStatus ?? "draft";
+      const base = `/console/testers/${esc(ctx.testerId)}/drafts/${esc(m.id)}`;
+      const actions =
+        status === "draft"
+          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form></div>`
+          : "";
+      const result = m.draftResult && status !== "draft" ? `<div class="muted">${esc(m.draftResult)}</div>` : "";
+      return `<div class="event draft" ${id}><div class="head"><span class="chip${status === "draft" ? " warn" : ""}">${esc(DRAFT_STATUS_LABELS[status] ?? status)}</span><span class="muted">for ${esc(m.author)} · ${time}</span></div>
+<div>${esc(m.body)}</div>${result}${actions}</div>`;
     }
     case "summary":
       return `<div class="event" ${id}><div class="head"><span class="chip">Weekly summary</span><span class="muted">${time}</span></div><pre>${esc(m.body)}</pre></div>`;
@@ -67,7 +80,8 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
 /** Whether a chat card can still change (#105): the page asks for these again on every poll. */
 function isLive(i: ThreadItem): boolean {
   if (i.type === "suggestion") return stillOpen(i.suggestion);
-  return i.line.kind === "request" && i.line.requestStatus === "pending";
+  if (i.line.kind === "draft") return i.line.draftStatus === "draft";
+  return i.line.kind === "request" && (i.line.requestStatus === "pending" || i.line.requestStatus === "sending");
 }
 
 /**
@@ -76,7 +90,7 @@ function isLive(i: ThreadItem): boolean {
  */
 export function itemHtml(i: ThreadItem, ctx: ThreadContext): string {
   const html = i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true });
-  if (i.type === "line" && i.line.kind !== "request") return html;
+  if (i.type === "line" && i.line.kind !== "request" && i.line.kind !== "draft") return html;
   return html.replace("<div ", `<div data-sig="${cardSig(html)}"${isLive(i) ? " data-live" : ""} `);
 }
 
@@ -152,9 +166,7 @@ export function consoleTabHtml(tab: ConsoleTab, tester: Tester, ctx: ThreadConte
   return `<section id="chat">${scroller("thread", threadItemsHtml(tab.items, ctx), { before, after, empty: "Nothing yet: ask ZOH about them below." })}
 <div class="typing" id="thinking">${thinkingLabel(thinking)}</div>
 <form method="post" action="/console/testers/${esc(tester.id)}/chat">${stopped}
-<div class="composer"><textarea id="chat-text" name="text" maxlength="2000" rows="1" required placeholder="Ask ZOH, give context, or ask it to bring something up"></textarea><button class="primary">Send</button></div>
-<details class="options"><summary>Send options</summary><div class="row" style="margin-top:6px"><label><input type="checkbox" name="exact"> Send exactly this</label><label><input type="checkbox" name="sendNow"> Send now (skip quiet hours)</label></div>
-<p class="muted">Exact texts go out word for word, as ZOH: never after a stop or past 3 unanswered; "send now" skips only quiet hours.</p></details></form></section>
+<div class="composer"><textarea id="chat-text" name="text" maxlength="2000" rows="1" required placeholder="Ask ZOH, give context, or tell it what to do: it drafts, you confirm"></textarea><button class="primary">Send</button></div></form></section>
 ${side}`;
 }
 

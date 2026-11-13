@@ -314,7 +314,7 @@ export async function sideSection(db: Db, testerId: string): Promise<SideSection
   const requests = await db
     .select()
     .from(consoleMessages)
-    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "pending")))
+    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), inArray(consoleMessages.requestStatus, ["pending", "sending"])))
     .orderBy(asc(consoleMessages.createdAt));
   const approved = await db
     .select()

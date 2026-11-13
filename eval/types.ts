@@ -179,9 +179,9 @@ export const caseSchema = z.object({
   /**
    * The tester's texts, in order. A line "advance to HH:MM" is not a text: the clock moves to that local
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
-   * A line "console Yanni: ..." is a founder's message in the console chat (add "(exact)" or
-   * "(exact, now)" after the name for "send exactly this" and "send now"); ZOH's console answer joins
-   * the transcript, marked as console.
+   * A line "console Yanni: ..." is a founder's message in the console chat; ZOH's console answer and
+   * any draft card it makes join the transcript, marked as console. "console Yanni (do it)" clicks Do it
+   * on the newest open draft (#155).
    */
   testerLines: z.array(z.string().min(1)).min(1),
   whatWentWrong: z.string(),

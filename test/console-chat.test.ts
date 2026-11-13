@@ -9,7 +9,8 @@ import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { loadVoiceDoc } from "../src/coach/voice.js";
 import { consoleMessages, messages, nudges, plans, stepDays, suggestions, testers, type ConsoleMessage, type Tester } from "../src/db/schema.js";
-import { suggestionsForCoach } from "../src/console/suggestions.js";
+import { addFounderSuggestion, suggestionsForCoach } from "../src/console/suggestions.js";
+import { optOut } from "../src/testers/commands.js";
 import { zonedTime } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, MAX_UNANSWERED, EXACT_MOMENT, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
@@ -113,6 +114,14 @@ async function chat(tester: Tester, text: string, opts: { as?: string; exact?: b
   return res;
 }
 
+/** A founder clicks Do it on the newest open draft (#155). */
+async function confirmNewest(tester: Tester, as = "Yanni") {
+  const draft = (await thread(tester.id)).filter((r) => r.kind === "draft" && r.draftStatus === "draft").at(-1);
+  expect(draft).toBeDefined();
+  now = new Date(now.getTime() + 60_000);
+  return post(`/console/testers/${tester.id}/drafts/${draft!.id}/confirm`, {}, cookieFor(as));
+}
+
 describe("console chat route", () => {
   it("needs the login: no or wrong cookie, or no name, gets 401 and stores nothing", async () => {
     const tester = await seed();
@@ -190,35 +199,17 @@ describe("console chat route", () => {
     expect(page.body).not.toContain("ZOH is thinking");
   });
 
-  it("send exactly this: queued word for word with the app's confirmation, no Claude call", async () => {
-    const tester = await seed();
-    await chat(tester, "Hey Sam, Yanni here: proud of you!", { exact: true });
-    expect(model.requests).toHaveLength(0);
-    const rows = await thread(tester.id);
-    expect(rows[0]).toMatchObject({ kind: "request", author: "Yanni", body: "Hey Sam, Yanni here: proud of you!", exact: true, sendNow: false, requestStatus: "pending" });
-    expect(rows[1]).toMatchObject({ kind: "coach", author: APP_AUTHOR });
-    expect(rows[1]!.body).toContain("within a minute");
-  });
-
-  it("send exactly this in quiet hours says when it goes; to a stopped tester, that it won't", async () => {
+  it("a word-for-word text drafted in quiet hours says it waits for them; to a stopped tester, it can't be drafted", async () => {
     now = at(TUE, "23:00");
     const tester = await seed();
-    await chat(tester, "Night!", { exact: true });
-    expect((await thread(tester.id)).at(-1)!.body).toContain("when their quiet hours end (09:00 their time)");
-
+    model.script({ tools: [{ name: "send_text", input: { words: "Night!" } }] }, "Ready.");
+    await chat(tester, "send her exactly: Night!");
+    expect((await thread(tester.id)).find((r) => r.kind === "draft")!.body).toContain("when their quiet hours end, at Wed 9:00 AM their time");
     await t.db.update(testers).set({ stoppedAt: now }).where(eq(testers.id, tester.id));
-    await chat(tester, "Come back!", { exact: true, sendNow: true });
-    const rows = await thread(tester.id);
-    expect(rows.find((r) => r.body === "Come back!")).toMatchObject({ requestStatus: "cancelled" });
-    expect(rows.at(-1)!.body).toBe("They texted stop, so this won't be sent.");
-  });
-
-  it("send now only counts with send exactly this", async () => {
-    const tester = await seed();
-    model.script({ tools: [{ name: "plan_request", input: { what: "Ask how Dune is going" } }] }, "Will do.");
-    await chat(tester, "ask her how Dune is going", { sendNow: true });
-    const [request] = (await thread(tester.id)).filter((r) => r.kind === "request");
-    expect(request).toMatchObject({ exact: false, sendNow: false });
+    model.script({ tools: [{ name: "send_text", input: { words: "Come back!", even_in_quiet_hours: true } }] }, "They've stopped.");
+    await chat(tester, "send him now: Come back!");
+    expect(JSON.stringify(model.requests.at(-1)!.messages.at(-1))).toContain("They texted stop");
+    expect((await thread(tester.id)).filter((r) => r.kind === "draft")).toHaveLength(1);
   });
 
   it("the Cancel button cancels a pending request once", async () => {
@@ -241,13 +232,13 @@ describe("console chat route", () => {
     expect(page.body).toContain("for the coach to bring up");
     expect(page.body).toContain("Cancel</button>");
     expect(page.body).toContain("ZOH is thinking");
-    expect(page.body).toContain('name="exact"');
+    expect(page.body).not.toContain('name="exact"');
   });
 });
 
 describe("console coach capabilities", () => {
-  it("is a list of capabilities: note, request, next step, cancel", () => {
-    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "suggest_next_step", "cancel_request"]);
+  it("is a list of capabilities, each drafted for a founder to confirm (#155)", () => {
+    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "send_text", "suggest_next_step", "propose_plan_change", "decide_suggestion", "cancel", "take_back"]);
   });
 
   it("suggest_next_step files the founder's next step as approved by them, shown in the chat as a card (#63)", async () => {
@@ -257,10 +248,12 @@ describe("console coach capabilities", () => {
       "Filed: a deepen on Read & learn more (books, ideas, any topic), 15 pages a night.",
     );
     await chat(tester, "let's bump her reading to 15 pages", { as: "Stamati" });
+    expect(await t.db.select().from(suggestions)).toEqual([]);
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("File a next step for Sam (deepen on Read & learn more (books, ideas, any topic))");
+    await confirmNewest(tester, "Stamati");
     const [row] = await t.db.select().from(suggestions).where(eq(suggestions.testerId, tester.id));
     expect(row).toMatchObject({ raisedBy: "founder", raisedByName: "Stamati", decision: "approved", decidedBy: "Stamati", goalSlug: "reading", kind: "deepen", proposal: "15 pages a night", reasoning: "Two clean weeks" });
     expect(await suggestionsForCoach(t.db, tester.id)).toHaveLength(1);
-    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("Filed as approved by Stamati: deepen on Read & learn more (books, ideas, any topic)");
     const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } });
     const chatHtml = page.body.slice(page.body.indexOf('<section id="chat">'), page.body.indexOf('<div id="side"'));
     expect(chatHtml).toContain("15 pages a night");
@@ -287,29 +280,31 @@ describe("console coach capabilities", () => {
     const tester = await seed();
     model.script({ tools: [{ name: "save_note", input: { note: "Traveling next week; go easy" } }] }, "Got it: I'll go easy on her next week.");
     await chat(tester, "she's traveling next week, go easy", { as: "Stamati" });
-    const rows = await thread(tester.id);
-    expect(rows.map((r) => [r.kind, r.author, r.body])).toEqual([
-      ["founder", "Stamati", "she's traveling next week, go easy"],
-      ["note", "Stamati", "Traveling next week; go easy"],
-      ["coach", COACH_AUTHOR, "Got it: I'll go easy on her next week."],
+    expect((await thread(tester.id)).map((r) => [r.kind, r.author])).toEqual([
+      ["founder", "Stamati"],
+      ["draft", "Stamati"],
+      ["coach", COACH_AUTHOR],
     ]);
+    await confirmNewest(tester, "Yanni");
+    const [note] = (await thread(tester.id)).filter((r) => r.kind === "note");
+    expect(note).toMatchObject({ author: "Yanni", body: "Traveling next week; go easy" });
   });
 
   it("plan_request queues a request (with a not-before time in their zone); cancel_request cancels it", async () => {
     const tester = await seed();
     model.script({ tools: [{ name: "plan_request", input: { what: "Suggest a protein target", at: "2026-11-05 09:00" } }] }, "Got it. Thursday morning.");
     await chat(tester, "propose a protein target after Wednesday");
+    expect((await thread(tester.id)).filter((r) => r.kind === "request")).toEqual([]);
+    await confirmNewest(tester);
     const [request] = (await thread(tester.id)).filter((r) => r.kind === "request");
     expect(request).toMatchObject({ author: "Yanni", body: "Suggest a protein target", exact: false, requestStatus: "pending" });
     expect(request!.dueAt).toEqual(at("2026-11-05", "09:00"));
-    // The tool result tells the coach when it goes.
-    const toolResult = JSON.stringify(model.requests[1]!.messages.at(-1));
-    expect(toolResult).toContain(`Queued [${requestRef(request!.id)}]`);
-    // The next round's record names it as just queued, not as an earlier request (eval: rude-request).
-    expect(model.requests[1]!.system.at(-1)!.text).toContain(`[${requestRef(request!.id)}] you just queued it in this answer, naturally, not before`);
+    // The draft told the coach when it goes.
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("not before Thu");
 
-    model.script({ tools: [{ name: "cancel_request", input: { request: requestRef(request!.id) } }] }, "Cancelled.");
+    model.script({ tools: [{ name: "cancel", input: { id: requestRef(request!.id) } }] }, "Cancelled.");
     await chat(tester, "actually cancel that");
+    await confirmNewest(tester);
     expect((await thread(tester.id)).find((r) => r.id === request!.id)).toMatchObject({ requestStatus: "cancelled" });
   });
 
@@ -579,6 +574,9 @@ describe("when a request goes: agreed in the console chat", () => {
   async function queue(tester: Tester, input: Record<string, unknown>): Promise<ConsoleMessage | undefined> {
     model.script({ tools: [{ name: "plan_request", input: { what: "Ask how the new shoes feel", ...input } }] }, "Got it.");
     await chat(tester, "text him about the shoes");
+    const draft = (await thread(tester.id)).find((r) => r.kind === "draft" && r.draftStatus === "draft");
+    // Confirmed right away, at the time it was drafted.
+    if (draft) await post(`/console/testers/${tester.id}/drafts/${draft.id}/confirm`, {}, cookieFor("Yanni"));
     return (await thread(tester.id)).find((r) => r.kind === "request");
   }
   const toolResult = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
@@ -642,7 +640,9 @@ describe("when a request goes: agreed in the console chat", () => {
     await scheduler.tick(at(TUE, "12:01"));
     expect(nudgeMoments()).toEqual([]);
     await scheduler.tick(at(TUE, "22:00"));
-    expect((await thread(stopped.id)).at(-1)!.body).toBe("Didn't go out in time (they texted stop), so I dropped it: Hi");
+    expect((await thread(stopped.id)).findLast((r) => r.kind === "coach")!.body).toBe("Didn't go out in time (they texted stop), so I dropped it: Hi");
+    // #155: the founders get an alert for what couldn't go out.
+    expect((await thread(stopped.id)).findLast((r) => r.kind === "alert")).toMatchObject({ topic: "not_sent" });
   });
 
   it("past 3 unanswered texts it waits, and is dropped (not sent tomorrow) when their day ends", async () => {
@@ -657,7 +657,7 @@ describe("when a request goes: agreed in the console chat", () => {
     await scheduler.tick(at(TUE, "22:00"));
     const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request.id));
     expect(row!.requestStatus).toBe("cancelled");
-    expect((await thread(tester.id)).at(-1)!.body).toContain("Didn't go out in time (3 texts from ZOH unanswered)");
+    expect((await thread(tester.id)).findLast((r) => r.kind === "coach")!.body).toContain("Didn't go out in time (3 texts from ZOH unanswered)");
     await scheduler.tick(at(WED, "09:00"));
     expect(nudgeMoments()).not.toContain("team");
   });
@@ -693,5 +693,144 @@ describe("when a request goes: agreed in the console chat", () => {
     expect(page.body).toContain("at Nov 3, 5:00 PM");
     expect(page.body).toContain("dropped if not out by Nov 3, 10:00 PM");
     expect(page.body).toContain("with the morning text");
+  });
+});
+
+describe("#155: the console chat drafts, a founder confirms", () => {
+  const drafts = async (testerId: string) => (await thread(testerId)).filter((r) => r.kind === "draft");
+  const confirm = (tester: Tester, draft: ConsoleMessage, as = "Yanni") => post(`/console/testers/${tester.id}/drafts/${draft.id}/confirm`, {}, cookieFor(as));
+  const toolResults = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
+  const page = async (tester: Tester) => (await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } })).body;
+
+  it("a plan change in chat is only a draft: nothing changes and nothing is pending until a founder confirms", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "propose_plan_change", input: { time: "07:30", place: "the gym" } }] }, "Here's the draft.");
+    await chat(tester, "let's get her on mornings, 7:30 at the gym");
+    const [draft] = await drafts(tester.id);
+    expect(draft).toMatchObject({ draftStatus: "draft", draftAction: "propose_plan_change", author: "Yanni" });
+    expect(draft!.body).toContain("Propose to Sam");
+    expect(draft!.body).toContain("7:30 am");
+    expect(draft!.body).toContain("asks them first");
+    expect(await t.db.select().from(suggestions)).toEqual([]);
+    const html = await page(tester);
+    expect(html).toContain("Do it");
+    expect(html.slice(html.indexOf('id="waiting-on-tester"'))).not.toContain("7:30");
+
+    // Do it: a founder-approved plan change, waiting on the tester; the plan is untouched.
+    expect((await confirm(tester, draft!)).statusCode).toBe(303);
+    const [s] = await t.db.select().from(suggestions);
+    expect(s).toMatchObject({ kind: "adjust", raisedBy: "founder", decision: "approved", decidedBy: "Yanni", planChanges: { stepTime: "07:30", place: "the gym" } });
+    expect((await drafts(tester.id))[0]).toMatchObject({ draftStatus: "confirmed" });
+    const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
+    expect(plan!.stepTime).toBe("19:00");
+    const after = await page(tester);
+    expect(after.slice(after.indexOf('id="waiting-on-tester"'))).toContain("7:30");
+
+    // A second click (or the other founder's) does nothing more.
+    expect((await confirm(tester, draft!, "Stamati")).statusCode).toBe(409);
+    expect(await t.db.select().from(suggestions)).toHaveLength(1);
+  });
+
+  it("\"reject it\" in chat: a draft, then a typed yes rejects it exactly as the button would", async () => {
+    const tester = await seed();
+    const [waiting] = await t.db.insert(suggestions).values({ testerId: tester.id, goalSlug: "reading", kind: "new_focus", newGoalSlug: "exercise", raisedBy: "tester", proposal: "Learn the cube" }).returning();
+    await t.db.insert(consoleMessages).values({ testerId: tester.id, kind: "alert", topic: "new_goal_request", eventKey: `suggestion:${waiting!.id}`, body: "They asked", suggestionId: waiting!.id });
+    const ref = waiting!.id.slice(0, 8);
+    model.script({ tools: [{ name: "decide_suggestion", input: { suggestion: ref, decision: "reject", reason: "stick with interviews for now" } }] }, "Draft's up.");
+    await chat(tester, "reject it, he should stick with the interviews for now");
+    expect((await t.db.select().from(suggestions))[0]!.decision).toBe("waiting");
+    expect((await drafts(tester.id))[0]!.body).toContain("Reject");
+
+    model.script({ tools: [{ name: "confirm_draft", input: {} }] }, "Done: rejected.");
+    await chat(tester, "yes, do it");
+    expect((await t.db.select().from(suggestions))[0]).toMatchObject({ decision: "rejected", decidedBy: "Yanni", decisionReason: "stick with interviews for now" });
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.kind, "alert"));
+    expect(alert!.seenBy).toBe("Yanni");
+    const html = await page(tester);
+    expect(html).not.toContain('value="approved"');
+    expect(html.slice(html.indexOf('id="needs-you"'))).not.toContain("Learn the cube");
+  });
+
+  it("can't confirm its own draft in the answer that made it: only after the founder says so", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "save_note", input: { note: "Traveling next week, go easy" } }, { name: "confirm_draft", input: {} }] }, "Saved.");
+    await chat(tester, "she's traveling next week, go easy");
+    expect(toolResults()).toContain("only once they say so");
+    expect((await drafts(tester.id))[0]).toMatchObject({ draftStatus: "draft" });
+    expect((await thread(tester.id)).some((r) => r.kind === "note")).toBe(false);
+  });
+
+  it("a text drafted and confirmed goes out word for word, exactly once", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "send_text", input: { words: "Proud of you Sam!" } }] }, "Ready when you are.");
+    await chat(tester, "send her exactly: Proud of you Sam!");
+    const [draft] = await drafts(tester.id);
+    expect(draft!.body).toContain('"Proud of you Sam!"');
+    const clicks = await Promise.all([confirm(tester, draft!), confirm(tester, draft!, "Stamati")]);
+    expect(clicks.map((r) => r.statusCode).sort()).toEqual([303, 409]);
+    const requests = (await thread(tester.id)).filter((r) => r.kind === "request");
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({ exact: true, body: "Proud of you Sam!", requestStatus: "pending" });
+    // Dropped at the end of their day if it couldn't go out by then.
+    expect(requests[0]!.expiresAt).toEqual(at(TUE, "22:00"));
+    await scheduler.tick(at(TUE, "12:05"));
+    await scheduler.tick(at(TUE, "12:06"));
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Proud of you Sam!"]);
+  });
+
+  it("confirming for a tester who has since stopped does nothing and says why", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "send_text", input: { words: "Hey!" } }] }, "Ready.");
+    await chat(tester, "send him: Hey!");
+    const [draft] = await drafts(tester.id);
+    await t.db.update(testers).set({ stoppedAt: now }).where(eq(testers.id, tester.id));
+    await confirm(tester, draft!);
+    expect((await drafts(tester.id))[0]).toMatchObject({ draftStatus: "failed", draftResult: expect.stringContaining("stop") });
+    expect((await thread(tester.id)).some((r) => r.kind === "request")).toBe(false);
+  });
+
+  it("cancelling a live text before it goes means it never reaches them; once it's going out, cancel is refused", async () => {
+    const tester = await seed();
+    const one = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "One", exact: true, sendNow: false, at: now });
+    expect((await post(`/console/testers/${tester.id}/requests/${one.id}/cancel`, {}, cookieFor("Yanni"))).statusCode).toBe(303);
+    await scheduler.tick(at(TUE, "12:05"));
+    expect(t.sendblue.sends).toEqual([]);
+    const two = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Two", exact: true, sendNow: false, at: now });
+    await t.db.update(consoleMessages).set({ requestStatus: "sending" }).where(eq(consoleMessages.id, two.id));
+    expect((await post(`/console/testers/${tester.id}/requests/${two.id}/cancel`, {}, cookieFor("Yanni"))).statusCode).toBe(409);
+  });
+
+  it("a plan change ZOH already raised is taken back with a note ZOH carries, not cancelled silently", async () => {
+    const tester = await seed();
+    const s = await addFounderSuggestion(t.db, { testerId: tester.id, goalSlug: "reading", kind: "adjust", proposal: "Step at 7:30 am", planChanges: { stepTime: "07:30" }, by: "Yanni", at: now });
+    await t.db.update(suggestions).set({ outcome: "delivered", deliveredAt: now }).where(eq(suggestions.id, s.id));
+    model.script({ tools: [{ name: "cancel", input: { id: s.id.slice(0, 8) } }] }, "It's already been raised.");
+    await chat(tester, "cancel the morning idea");
+    expect(toolResults()).toContain("take_back");
+    model.script({ tools: [{ name: "take_back", input: { suggestion: s.id.slice(0, 8), say: "let's keep your evenings as they are" } }] }, "Draft's up.");
+    await chat(tester, "ok take it back");
+    const [draft] = (await drafts(tester.id)).filter((d) => d.draftStatus === "draft");
+    await confirm(tester, draft!);
+    expect((await t.db.select().from(suggestions))[0]!.decision).toBe("withdrawn");
+    const [note] = (await thread(tester.id)).filter((r) => r.kind === "request");
+    expect(note).toMatchObject({ exact: false, requestStatus: "pending" });
+    expect(note!.body).toContain("let's keep your evenings as they are");
+  });
+
+  it("texting stop clears what's queued for them", async () => {
+    const tester = await seed();
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Ask about the trip", exact: false, sendNow: false, at: now });
+    const s = await addFounderSuggestion(t.db, { testerId: tester.id, goalSlug: "reading", kind: "adjust", proposal: "Step at 7:30 am", planChanges: { stepTime: "07:30" }, by: "Yanni", at: now });
+    await optOut(t.db, tester, now);
+    const [row] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request.id));
+    expect(row!.requestStatus).toBe("cancelled");
+    expect((await t.db.select().from(suggestions).where(eq(suggestions.id, s.id)))[0]!.decision).toBe("withdrawn");
+  });
+
+  it("the chat box has no send-options checkboxes any more: everything goes through the chat", async () => {
+    const tester = await seed();
+    const html = await page(tester);
+    expect(html).not.toContain("Send exactly this");
+    expect(html).not.toContain('name="sendNow"');
   });
 });

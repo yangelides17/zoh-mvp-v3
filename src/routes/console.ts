@@ -18,7 +18,6 @@ import {
   threadChunk,
   waitingAlerts,
   liveItems,
-  type ConsoleTab,
   type SideSection,
 } from "../console/data.js";
 import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
@@ -31,7 +30,8 @@ import { metricsView } from "../console/views/metrics.js";
 import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
 import { coachThinking, consoleTabHtml, itemHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
-import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { confirmDraft, postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { cancelDraft } from "../console/drafts.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
@@ -68,7 +68,7 @@ const LIVE_MAX = 200;
 const LIVE_CARDS = 100;
 
 type Form = Record<string, string | undefined>;
-type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string };
+type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string; did: string };
 
 export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOptions): Promise<void> {
   const clock = opts.now ?? (() => new Date());
@@ -283,13 +283,10 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
     if (!tester) return reply.code(404).send({ error: "not found" });
     const now = testerNow(tester, clock());
-    const exact = request.body?.exact === "on";
     const { needsAnswer } = await postFounderMessage(opts.db, {
       tester,
       founder: name,
       body,
-      exact,
-      sendNow: exact && request.body?.sendNow === "on",
       now,
       elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
     });
@@ -308,6 +305,29 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       if (opts.queue) opts.queue.run(answer);
       else await answer();
     }
+    return back(reply, id, "chat");
+  }));
+
+  // #155: a founder confirms what the console chat drafted. It happens once, re-checked as things stand now.
+  app.post("/console/testers/:id/drafts/:did/confirm", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    if (!owns(routing, tester.phone, tester.route)) {
+      const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't act for them.`;
+      return (await testerHtml(reply, id, "console", name, `Not done: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+    }
+    const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()) });
+    if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not done: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
+    return back(reply, id, "chat");
+  }));
+
+  app.post("/console/testers/:id/drafts/:did/cancel", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const row = await cancelDraft(opts.db, { testerId: id, draftId: did, by: name });
+    if (!row) return reply.code(409).send({ error: "not a draft any more" });
     return back(reply, id, "chat");
   }));
 
