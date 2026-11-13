@@ -28,6 +28,7 @@ import { messageTime, switchReasons } from "../memory/store.js";
 import { addDays } from "../nudges/schedule.js";
 import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/streak.js";
 import { testerNow } from "../testers/clock.js";
+import { stillOpen } from "../coach/next-steps.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
 import { activePause } from "../testers/pauses.js";
 import { learnings, type Learnings } from "../coach/week.js";
@@ -286,15 +287,18 @@ export interface ConsoleTab {
   recent: ConsoleMessage[];
   /** Unseen first (newest first), then the latest seen ones. */
   alerts: { unseen: ConsoleMessage[]; earlier: ConsoleMessage[] };
+  /** Needs you: next steps waiting for a founder's decision. */
   pending: Suggestion[];
+  /** Waiting on the tester (#105): what the founders settled that hasn't played out yet. */
+  waiting: { requests: ConsoleMessage[]; suggestions: Suggestion[] };
 }
 
 export async function consoleTab(db: Db, testerId: string): Promise<ConsoleTab> {
   return { items: await threadChunk(db, testerId), recent: await recentLines(db, testerId), ...(await sideSection(db, testerId)) };
 }
 
-/** What sits under the chat: alerts and next steps waiting for a decision. */
-export async function sideSection(db: Db, testerId: string): Promise<Pick<ConsoleTab, "alerts" | "pending">> {
+/** What sits under the chat: alerts, what needs a founder, and what waits on the tester. */
+export async function sideSection(db: Db, testerId: string): Promise<SideSection> {
   const alerts = (seen: boolean) =>
     db
       .select()
@@ -307,7 +311,34 @@ export async function sideSection(db: Db, testerId: string): Promise<Pick<Consol
     .from(suggestions)
     .where(and(eq(suggestions.testerId, testerId), eq(suggestions.decision, "waiting")))
     .orderBy(asc(suggestions.createdAt));
-  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending };
+  const requests = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "pending")))
+    .orderBy(asc(consoleMessages.createdAt));
+  const approved = await db
+    .select()
+    .from(suggestions)
+    .where(and(eq(suggestions.testerId, testerId), inArray(suggestions.decision, ["approved", "changed"])))
+    .orderBy(asc(suggestions.createdAt));
+  const waiting = { requests, suggestions: approved.filter(stillOpen) };
+  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending, waiting };
+}
+
+export type SideSection = Pick<ConsoleTab, "alerts" | "pending" | "waiting">;
+
+/** The chat cards the page still shows as live (#105), as they stand now: this tester's only. */
+export async function liveItems(db: Db, testerId: string, ids: string[]): Promise<ThreadItem[]> {
+  if (!ids.length) return [];
+  const lines = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.testerId, testerId), inArray(consoleMessages.id, ids), ne(consoleMessages.kind, "alert")));
+  const ideas = await db.select().from(suggestions).where(and(eq(suggestions.testerId, testerId), inArray(suggestions.id, ids)));
+  return [
+    ...lines.map((line) => ({ type: "line" as const, id: line.id, at: line.createdAt, line })),
+    ...ideas.map((suggestion) => ({ type: "suggestion" as const, id: suggestion.id, at: suggestion.createdAt, suggestion })),
+  ];
 }
 
 export interface ProgressTab {

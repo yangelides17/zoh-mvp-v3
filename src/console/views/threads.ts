@@ -1,6 +1,8 @@
+import { createHash } from "node:crypto";
 import type { ConsoleMessage, Goal, Message, Tester } from "../../db/schema.js";
+import { stillOpen } from "../../coach/next-steps.js";
 import { messageTime } from "../../memory/store.js";
-import type { ConsoleTab, ThreadItem } from "../data.js";
+import type { ConsoleTab, SideSection, ThreadItem } from "../data.js";
 import { APP_AUTHOR, awaitingAnswer } from "../requests.js";
 import { alertCard, clock, dayLabel, esc, founderDay, proofHtml, suggestionCard, when } from "./shared.js";
 
@@ -62,13 +64,26 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
   }
 }
 
+/** Whether a chat card can still change (#105): the page asks for these again on every poll. */
+function isLive(i: ThreadItem): boolean {
+  if (i.type === "suggestion") return stillOpen(i.suggestion);
+  return i.line.kind === "request" && i.line.requestStatus === "pending";
+}
+
+/**
+ * One chat item. Cards that can change carry a signature of how they look now, and the live ones
+ * say so: the page swaps a card in place when its signature changes (#105).
+ */
+export function itemHtml(i: ThreadItem, ctx: ThreadContext): string {
+  const html = i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true });
+  if (i.type === "line" && i.line.kind !== "request") return html;
+  return html.replace("<div ", `<div data-sig="${cardSig(html)}"${isLive(i) ? " data-live" : ""} `);
+}
+
+export const cardSig = (html: string) => createHash("sha256").update(html).digest("hex").slice(0, 16);
+
 export function threadItemsHtml(items: ThreadItem[], ctx: ThreadContext): string {
-  return withDividers(
-    items,
-    (i) => i.at,
-    (i) => (i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true })),
-    ctx.now,
-  );
+  return withDividers(items, (i) => i.at, (i) => itemHtml(i, ctx), ctx.now);
 }
 
 export function textItemsHtml(texts: Message[], now: Date): string {
@@ -109,16 +124,23 @@ export const thinkingLabel = (thinking: boolean) => (thinking ? "ZOH is thinking
 /** How long the page shows "thinking" for an unanswered line. */
 const THINKING_FOR_MS = 2 * 60_000;
 
-/** Under the chat: alerts (unseen first, older folded away) and next steps waiting for a decision. */
-export function sideHtml(side: Pick<ConsoleTab, "alerts" | "pending">, ctx: ThreadContext, sig: string): string {
+/** Under the chat: alerts (unseen first, older folded away), then Pending: what needs you and what waits on the tester (#105). */
+export function sideHtml(side: SideSection, ctx: ThreadContext, sig: string): string {
   const { unseen, earlier } = side.alerts;
   const alerts = unseen.map((a) => alertCard(a, ctx.testerId)).join("") || `<p class="muted">Nothing waiting.</p>`;
   const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map((a) => alertCard(a, ctx.testerId)).join("")}</details>` : "";
   const pending = side.pending.length
     ? side.pending.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)).join("")
-    : `<p class="muted">None waiting. To suggest one, tell ZOH in the chat.</p>`;
+    : `<p class="muted">Nothing needs you. To suggest a next step, tell ZOH in the chat.</p>`;
+  const { requests, suggestions } = side.waiting;
+  const waiting =
+    [...suggestions.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)), ...requests.map((r) => lineHtml(r, ctx))].join("") ||
+    `<p class="muted">Nothing waiting on them.</p>`;
+  const waitingCount = requests.length + suggestions.length;
   return `<div id="side" data-sig="${esc(sig)}"><h2 id="alerts">Alerts${unseen.length ? ` <span class="badge">${unseen.length}</span>` : ""}</h2>${alerts}${older}
-<h2 id="pending">Pending suggestions${side.pending.length ? ` <span class="badge">${side.pending.length}</span>` : ""}</h2>${pending}</div>`;
+<h2 id="pending">Pending</h2>
+<h3 id="needs-you">Needs you${side.pending.length ? ` <span class="badge">${side.pending.length}</span>` : ""}</h3>${pending}
+<h3 id="waiting-on-tester">Waiting on the tester${waitingCount ? ` <span class="chip">${waitingCount}</span>` : ""}</h3>${waiting}</div>`;
 }
 
 /** `side`: the signed Alerts and Pending section from `sideHtml`. */

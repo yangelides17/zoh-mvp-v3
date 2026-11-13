@@ -17,7 +17,9 @@ import {
   textsChunk,
   threadChunk,
   waitingAlerts,
+  liveItems,
   type ConsoleTab,
+  type SideSection,
 } from "../console/data.js";
 import { decideSuggestion, SuggestionError, type Decision, type SuggestionKind } from "../console/suggestions.js";
 import { metricsPage } from "../console/metrics.js";
@@ -28,7 +30,7 @@ import { memoryPageHtml, memoryTabHtml } from "../console/views/memory.js";
 import { metricsView } from "../console/views/metrics.js";
 import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
-import { coachThinking, consoleTabHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
+import { coachThinking, consoleTabHtml, itemHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
 import { postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
@@ -62,6 +64,8 @@ export interface ConsoleRouteOptions extends ConsoleConfig {
 export const MAX_CHAT_CHARS = 2000;
 /** Most new items one live update carries; the rest come on the next. */
 const LIVE_MAX = 200;
+/** Most live chat cards one update re-checks (#105). */
+const LIVE_CARDS = 100;
 
 type Form = Record<string, string | undefined>;
 type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string };
@@ -116,7 +120,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   const back = (reply: FastifyReply, testerId: string, hash: string) => reply.redirect(`/console/testers/${encodeURIComponent(testerId)}?tab=console#${hash}`, 303);
 
   /** Alerts and pending next steps, signed so the page swaps them only when they change. */
-  const side = (data: Pick<ConsoleTab, "alerts" | "pending">, ctx: ThreadContext) => {
+  const side = (data: SideSection, ctx: ThreadContext) => {
     const unsigned = sideHtml(data, ctx, "");
     const sig = createHash("sha256").update(unsigned).digest("hex").slice(0, 16);
     return { sig, html: unsigned.replace('data-sig=""', `data-sig="${sig}"`) };
@@ -207,6 +211,16 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       out.thread = { html: threadItemsHtml(items, ctx), after: String(newest(items.map((i) => i.at), threadAfter).getTime()) };
       out.thinking = thinkingLabel(coachThinking(await recentLines(opts.db, id), now));
       out.side = side(await sideSection(opts.db, id), ctx);
+    }
+    // #105: the chat cards the page still shows as live, as they stand now (it swaps any whose signature changed).
+    const ids = String(query(request).live ?? "").split(",").filter(isUuid).slice(0, LIVE_CARDS);
+    if (ids.length) {
+      const header = await testerHeader(opts.db, id, now);
+      const ctx: ThreadContext = { testerId: id, titles: header!.titles, now };
+      out.cards = (await liveItems(opts.db, id, ids)).map((item) => {
+        const html = itemHtml(item, ctx);
+        return { id: item.id, sig: /data-sig="([^"]+)"/.exec(html)?.[1] ?? "", html };
+      });
     }
     const textsAfter = cursor(query(request).texts);
     if (textsAfter) {
