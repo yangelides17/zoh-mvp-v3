@@ -18,7 +18,8 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
 
 1. `gh issue view $ARGUMENTS --comments` (spec, plan, decisions); find the PR (`gh pr list --search "$ARGUMENTS"`),
    then `gh pr view <pr>` and `gh pr diff <pr>`. Run the tests in its own worktree
-   (`git fetch origin && git worktree add ../zoh-worktrees/review-$ARGUMENTS origin/<branch>`, `npm install`).
+   (from the main folder: `git fetch origin && git worktree add .claude/worktrees/review-$ARGUMENTS origin/<branch>`,
+   then `EnterWorktree` with its absolute `path`, `npm install`).
 2. **Check it:**
    - Base is `dev` and the branch is up to date (`git merge-base --is-ancestor origin/dev origin/<branch>`); if not,
      rebase on `origin/dev` and push (`--force-with-lease`) first.
@@ -61,8 +62,9 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
      command.
    - **A rule that would have caught it** (only when the review found a real problem): the `CLAUDE.md` line to sharpen,
      or one new line, that would have stopped it during the build. Yanni decides; `/quick` adds it.
-5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`; remove this issue's worktrees
-   (`git worktree list`, `git worktree remove --force <path>`, `git worktree prune`); bring the main folder up to date
+5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`; `ExitWorktree` (`keep`) to get back to
+   the main folder, then remove this issue's worktrees (`git worktree list`, `git worktree remove --force <path>` with
+   the path as listed, relative: `.claude/worktrees/<name>`, or `../zoh-worktrees/<name>` for older ones, `git worktree prune`); bring the main folder up to date
    (`git -C <main folder> pull --ff-only`, or say why not); `gh issue edit $ARGUMENTS --add-label done --remove-label
    in-review`. It's **done**: staging redeploys in a couple of minutes; production waits for `/release`. Warn open PRs
    that share files with this one ("`dev` changed files this PR touches (#<pr>, <title>): rebase and rerun

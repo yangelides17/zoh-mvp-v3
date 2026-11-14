@@ -83,7 +83,7 @@ describe.skipIf(!hasGit)("guard hook: git", () => {
     expect(bash("git checkout a.ts", main).blocked).toBe(false);
     expect(bash("git checkout .", main).blocked).toBe(false);
     expect(bash("git switch dev", main).blocked).toBe(false);
-    expect(bash("git worktree add ../zoh-worktrees/4-w -b feature/4-w origin/dev", main).blocked).toBe(false);
+    expect(bash("git worktree add .claude/worktrees/4-w -b feature/4-w origin/dev", main).blocked).toBe(false);
   });
 
   it("ignores other tools and commands", () => {

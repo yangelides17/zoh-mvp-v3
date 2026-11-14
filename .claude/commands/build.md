@@ -23,8 +23,8 @@ Never in parallel:
 - anything whose spec or plan still has an open question (an agent can't stop to ask Yanni mid-build).
 
 **Rules for build agents.** The orchestrator creates one worktree per branch from `origin/dev`
-(`git worktree add ../zoh-worktrees/<slug> -b <branch> origin/dev`) and passes each agent the **absolute worktree
-path**. **Never use `isolation: "worktree"`**: it may base the worktree on `main`, not `dev`. At most one agent per
+(`git worktree add .claude/worktrees/<slug> -b <branch> origin/dev`, from the main folder) and passes each agent the
+**absolute worktree path**; the agent's first step is `EnterWorktree` with that `path`. **Never use `isolation: "worktree"`**: it may base the worktree on `main`, not `dev`. At most one agent per
 worktree. The agent **never pushes**; only the orchestrating session pushes, after verifying the work (step 7). The
 agent prompt includes the issue number, the full plan text, branch name and worktree path. The orchestrator keeps
 labels and PRs straight and reports once all are done. They're reviewed and merged one at a time: after each merge,
@@ -36,9 +36,9 @@ cases once both are on `dev`.
 2. **Work in your own worktree,** never by switching branches in the main folder, and always from `dev`, never `main`.
    If this session already runs in a worktree, check its base (`git fetch origin && git merge-base --is-ancestor
    origin/dev HEAD`); if that fails, `git switch -c feature/$ARGUMENTS-<short-slug> origin/dev` there (with uncommitted
-   changes, stop and ask). Otherwise `git fetch origin`, then
-   `git worktree add ../zoh-worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`, `cd`
-   into it and `npm install`. Then `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
+   changes, stop and ask). Otherwise, from the main folder, `git fetch origin`, then
+   `git worktree add .claude/worktrees/$ARGUMENTS-<short-slug> -b feature/$ARGUMENTS-<short-slug> origin/dev`, enter
+   it with `EnterWorktree` (`path`: its absolute path) and `npm install`. Then `gh issue edit $ARGUMENTS --add-label building --remove-label plan-approved`.
    **Is the plan still current?** Read what merged into `dev` since the plan (`git log --since=<plan date>
    --name-only origin/dev`) in the files it touches. **Overlap:** compare each open PR's `gh pr diff <pr> --name-only`
    and the plans of `plan-approved` issues with no PR. If both change the database, `src/coach/prompt.ts`,

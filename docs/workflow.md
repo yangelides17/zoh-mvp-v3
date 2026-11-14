@@ -12,10 +12,9 @@ does the building, testing, git and GitHub work. Agents follow the same rules fr
    `npm install`. Your main folder stays on `dev`, where all work starts.
 4. Only if you'll run the eval: create `.env` in the repo with `ANTHROPIC_API_KEY=...` (use a separate key
    with a low spending limit; `.env` is never committed).
-5. So builds don't ask before making worktrees, create `.claude/settings.local.json` yourself (Claude can't):
-   `{"permissions": {"additionalDirectories": ["<full path to the zoh-worktrees folder next to the repo>"]}}`.
-   Background sessions then work in that folder directly, with no prompt; they skip Claude Code's own
-   "enter worktree" step, which always asks for a folder outside `.claude/worktrees/`.
+5. Nothing to set up for worktrees: builds make them in `.claude/worktrees/` (ignored by git), where Claude Code
+   enters them without asking. Builds started before Nov 14 used `../zoh-worktrees/`; once that folder is empty,
+   delete it and the `additionalDirectories` entry for it in `.claude/settings.local.json`.
 
 Start Claude Code in the repo folder. Everything below happens there.
 
@@ -105,7 +104,7 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   also suggests a `CLAUDE.md` rule that would have caught it; you decide.
 - **Bugs start with a failing test.** `/build` and `/quick` first write a test that shows the bug, see it fail, then fix.
 - **At most 2 or 3 builds at once.** While one builds, spec and plan the next in another session. Each
-  build works in its own copy of the repo (a git worktree in `../zoh-worktrees/`), so parallel builds never
+  build works in its own copy of the repo (a git worktree in `.claude/worktrees/`), so parallel builds never
   trip over each other; Claude creates and removes these, you don't need to do anything.
 - **Overlapping work is checked at every step.** `/spec` flags a feature in progress that changes the same moment
   for testers, `/plan` and `/build` name open work that touches the same files (a database or coach-prompt overlap

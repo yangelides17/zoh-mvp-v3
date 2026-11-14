@@ -8,3 +8,4 @@ dist/
 coverage/
 eval/reports/
 eval/memory-lab/runs/
+.claude/worktrees/

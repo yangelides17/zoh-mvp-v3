@@ -4,7 +4,7 @@
 // stays silent and lets the call through.
 //   1. Never edit applied migrations (`drizzle/`): change src/db/schema.ts and run npm run db:generate instead.
 //   2. Never push straight to `main`: production changes only through a release or hotfix PR.
-//   3. Never switch branches in the main folder (it stays on `dev`): work in a worktree under ../zoh-worktrees/.
+//   3. Never switch branches in the main folder (it stays on `dev`): work in a worktree under .claude/worktrees/.
 
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -101,7 +101,7 @@ function checkSwitch(sub, rest, dir) {
   const creates = rest.some((w) => ["-c", "-C", "-b", "-B", "--create", "--orphan", "--detach"].includes(w));
   if (!creates && target.length === 1 && target[0] === currentBranch(dir)) return null;
   return "The main folder stays on `dev` (other sessions build from it). Work in a worktree instead: " +
-    "`git worktree add ../zoh-worktrees/<slug> -b <branch> origin/dev`, or read files with `git show origin/dev:<path>`.";
+    "`git worktree add .claude/worktrees/<slug> -b <branch> origin/dev`, or read files with `git show origin/dev:<path>`.";
 }
 
 function runGit(dir, args) {
