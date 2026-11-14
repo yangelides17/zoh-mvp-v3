@@ -4,7 +4,7 @@
   "origin": "#157 spec: \"idk, what should I do?\" is the cue for options; Yanni: options based on what the person said",
   "seed": {
     "name": "Lena",
-    "goal": "speaking",
+    "goal": "speak_connect",
     "phase": "active",
     "history_hours_ago": 3,
     "answers": { "what": "speaking up in meetings", "where": "at work", "when": "10 am standup", "how_long": "15 min" },

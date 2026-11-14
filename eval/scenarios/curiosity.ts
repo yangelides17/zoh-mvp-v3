@@ -12,7 +12,7 @@ export const curiosityScenarios: ScenarioInput[] = [
     title: "Too fast: a vague goal in onboarding gets dug into before the plan",
     source: "#157 spec: Watch (\"I just want to be less of a mess\")",
     persona: "terse",
-    goal: "focus",
+    goal: "deep_work",
     intent: "Feel less scattered day to day; doesn't have words for it at first.",
     opening: "hey",
     areaCode: "212",

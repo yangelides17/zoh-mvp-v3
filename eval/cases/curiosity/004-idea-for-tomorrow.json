@@ -4,7 +4,7 @@
   "origin": "#157 spec: an idea for tomorrow; #131 reflection-engaged proposed in the same text",
   "seed": {
     "name": "Lena",
-    "goal": "speaking",
+    "goal": "speak_connect",
     "phase": "active",
     "history_hours_ago": 3,
     "answers": { "what": "speaking up in meetings", "where": "at work", "when": "10 am standup", "how_long": "15 min" },

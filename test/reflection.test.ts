@@ -430,7 +430,8 @@ describe("the next step, agreed at the wrap-up", () => {
 
 describe("the next step waits once in the reflection: a soft hold with a way through (#131)", () => {
   const EARLY = "Not saved, and early:";
-  const propose = (now: Date, extra: object = {}, start?: ReplyStart) => tool("set_today_step", { step: NEXT, kind: "same", day: "next", ...extra }, now, "", start);
+  const propose = (now: Date, extra: object = {}, start?: ReplyStart, lastTesterText = "") =>
+    tool("set_today_step", { step: NEXT, kind: "same", day: "next", ...extra }, now, lastTesterText, start);
   const thin = (when: Date) => tool("save_reflection", { summary: 'Said it felt "okay"', how_it_went: false, take: "Thin so far." }, when);
   const real = (when: Date) => tool("save_reflection", { summary: "Asking for his time feels like bothering him", how_it_went: true, take: "A worry about outreach." }, when);
 
@@ -442,7 +443,10 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
     expect(early).toMatchObject({ error: expect.stringContaining("Don't give the next step in this text") });
     expect(await row(WED)).toBeUndefined();
     // Risk: a tester who's rushed or asks "what's tomorrow?" is never held up for a question.
-    expect(await propose(at(MON, "19:30"), { ready: 'Rushed: "done, gotta run"' })).toMatchObject({ ok: true });
+    // #157: the reason is their own words: the coach's paraphrase or guess doesn't get through.
+    const rushed = "done, gotta run";
+    expect(await propose(at(MON, "19:30"), { ready: "they're rushed" }, undefined, rushed)).toMatchObject({ ok: false });
+    expect(await propose(at(MON, "19:30"), { ready: rushed }, undefined, rushed)).toMatchObject({ ok: true });
     expect(await row(WED)).toMatchObject({ step: NEXT, agreedAt: null });
   });
 
@@ -535,7 +539,7 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
     await say("inbound", at(MON, "19:34"), "fine");
     expect(await propose(at(MON, "19:34"))).toMatchObject({ ok: false });
     // "skip": let go at once.
-    expect(await propose(at(MON, "19:34"), { ready: 'Said "skip"' })).toMatchObject({ ok: true });
+    expect(await propose(at(MON, "19:34"), { ready: "skip" }, undefined, "skip")).toMatchObject({ ok: true });
     await t.db.delete(stepDays).where(eq(stepDays.date, WED));
     await say("outbound", at(MON, "19:35"), "Anything that surprised you?");
     await say("inbound", at(MON, "19:36"), "dunno");

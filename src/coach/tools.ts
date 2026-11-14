@@ -425,7 +425,11 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         agreed: { type: "boolean" },
         asked: { type: "string" },
         reason: { type: "string", description: "Why this step, in a line: what they said that shaped it (#93)" },
-        ready: { type: "string", description: "Only when told it's early: why the next step goes now (they asked for it, rushed, said skip)" },
+        ready: {
+          type: "string",
+          description:
+            "Only when told it's early: their words from their latest text, exactly, that show they're rushed (\"gotta run\"), said skip, or asked what's next (\"what's tomorrow?\"). Wanting more, harder, or an idea for tomorrow isn't asking: ask about it.",
+        },
       },
       required: ["step", "kind"],
     },
@@ -433,7 +437,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. went_deeper: you asked about something they said and their reply added something real to it (an idea for tomorrow or a yes doesn't). open_thread: they're mid-way through telling you something (a story, \"and then…\", a new detail worth following); false once it's told. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. went_deeper: you asked about something they said and their reply added something real to it (an idea for tomorrow or a yes doesn't). open_thread: something in their latest text is still open: a story mid-way (\"and then…\"), or something they just named that you haven't asked about yet (a worry, a difficulty, a surprise); false once you've followed it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
       properties: {
@@ -523,7 +527,7 @@ export function earlyProposal(state: CoachState, start?: ReplyStart): string | u
         : !(start?.howItWentSaid ?? said)
           ? "they just gave you their first real answer: ask about it first (an idea for tomorrow is something to ask about, not the plan)"
           : notReadyYet(row);
-  return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. If they asked for it, are rushed or said skip, call again with ready: why.`;
+  return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. Only if they're rushed, said skip or asked what's next: call again with ready = those words of theirs, exactly.`;
 }
 
 /**
@@ -1068,7 +1072,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         };
       }
       // #131 (soft hold): proposing it too early in today's reflection gets one push back; a reason lets it through.
-      const early = day === "next" && !agreed && !ready ? earlyProposal(state, start) : undefined;
+      // #157: a reason to go early is their own words from their latest text, so it can't be the coach's guess.
+      const early = day === "next" && !agreed && !(ready && saidIt(ready, state.lastTesterText)) ? earlyProposal(state, start) : undefined;
       if (early) return { ok: false, error: early };
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
