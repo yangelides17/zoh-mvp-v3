@@ -238,8 +238,14 @@ describe("reflection probes thin answers and waits before the next step (#131)",
     const real = await block(at(MON, "19:37"));
     expect(real).toContain("They've said how it went.");
     expect(real).toContain(
-      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (how it felt, how hard, room for more). What they want for tomorrow is noted, not the end. Move on only once a reply gives you nothing new to follow, or they've run out; then the next step (PROOF)",
+      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (what went well, what got in the way, how hard, room for more). An idea for tomorrow: ask about it. Move on to the next step once it's ready (above) or they've run out (PROOF)",
     );
+    // #157: the state shows what's covered, so the coach sees what's still open.
+    expect(real).toContain(
+      "Covered so far: how it went yes; what went well not yet; what got in the way or they'd do differently not yet; gone deeper not yet. Not ready for the next step yet",
+    );
+    await tool("save_reflection", { summary: "Hill brutal; slowing on the flats worked", how_it_went: true, went_well: "Slowing on the flats", went_deeper: true, take: "Pacing." }, at(MON, "19:37"));
+    expect(await block(at(MON, "19:37"))).toContain("gone deeper yes. Ready for the next step.");
     // Rushed and "skip" are the coach's call from their words: the not-said line names them as the way out.
     await t.db.update(stepDays).set({ howItWentSaid: false }).where(eq(stepDays.date, MON));
     expect(await block(at(MON, "19:37"))).toContain("find out before any next step, unless they're rushed or say skip.");
