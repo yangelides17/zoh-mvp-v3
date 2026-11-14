@@ -184,6 +184,12 @@ describe("eval: proof cases send photos and voice notes", () => {
     const voice = parseMediaLine("[voice: ten pages done]")!;
     expect(voice.caption).toBe("");
     expect(await evalTranscriber.transcribe((await evalMediaFetcher(voice.mediaUrl)).bytes, "v.caf", "audio/x-caf")).toBe("ten pages done");
+    // #163: a document line is served as a real file of its type.
+    const doc = parseMediaLine("[document essay.pdf: The keeper woke early.] draft done")!;
+    expect(doc.caption).toBe("draft done");
+    const served = await evalMediaFetcher(doc.mediaUrl);
+    expect([served.contentType, Buffer.from(served.bytes.subarray(0, 4)).toString()]).toEqual(["application/pdf", "%PDF"]);
+    expect(doc.mediaUrl.endsWith("/essay.pdf")).toBe(true);
     expect(parseMediaLine("just text")).toBeUndefined();
     await expect(evalMediaFetcher("https://eval.media/photo/missing.jpg")).rejects.toThrow();
   });

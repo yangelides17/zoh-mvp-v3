@@ -295,7 +295,8 @@ async function writeDailyDoc(db: Db, tester: Tester, date: string, doc: { title:
 /** One text as the pass reads it: time, ref, who, and what it held. */
 export function transcriptLine(m: Message, tester: Tester): string {
   const who = m.direction === "inbound" ? "Tester" : "ZOH";
-  const media = m.mediaUrl ? `[${mediaLabel(m)}: ${m.description ?? m.transcript ?? "not described"}] ` : "";
+  // #163: a document's words can run to pages; its summary (or their start) is enough to file the day.
+  const media = m.mediaUrl ? `[${mediaLabel(m)}: ${m.description ?? m.transcript?.slice(0, 1000) ?? "not described"}] ` : "";
   return `[${localClock(messageTime(m), tester.timeZone)}] ${messageRef(m.id)} ${who}: ${media}${m.content ?? ""}`.trimEnd();
 }
 

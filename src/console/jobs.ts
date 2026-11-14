@@ -283,7 +283,7 @@ async function testerContext(db: Db, tester: Tester, now: Date): Promise<string>
     .limit(12);
   const texts = recent
     .reverse()
-    .map((m) => `${m.direction === "inbound" ? "Them" : "ZOH"} (${m.createdAt.toISOString().slice(0, 16)}): ${m.content ?? m.transcript ?? m.description ?? "(media)"}`);
+    .map((m) => `${m.direction === "inbound" ? "Them" : "ZOH"} (${m.createdAt.toISOString().slice(0, 16)}): ${m.content ?? m.transcript?.slice(0, 300) ?? m.description ?? "(media)"}`); // #163: a document's words can run to pages
   return [
     `Tester: ${tester.name ?? "unnamed"}, ${tester.phase}${tester.stoppedAt ? ", stopped" : ""}`,
     plan ? `Plan v${plan.version}: ${describePlan(plan)}` : "No locked plan",

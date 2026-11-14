@@ -35,9 +35,9 @@ export const messages = pgTable(
     /** Our private copy in the bucket. */
     mediaKey: text("media_key"),
     mediaContentType: text("media_content_type"),
-    /** Voice-note transcript from Speaches. */
+    /** Voice-note transcript from Speaches, or a document's words (#163). */
     transcript: text("transcript"),
-    /** When our bucket copy was deleted (voice-note audio after 30 days); the transcript stays. */
+    /** When our bucket copy was deleted (voice-note audio after 30 days, until #163 kept every file); the transcript stays. */
     mediaDeletedAt: timestamp("media_deleted_at", { withTimezone: true }),
     /** One line on what a photo or video shows, written as it arrives (coach memory). */
     description: text("description"),
