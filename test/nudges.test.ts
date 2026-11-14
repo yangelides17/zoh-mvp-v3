@@ -901,15 +901,14 @@ describe("a temporary lighter plan (rule 7)", () => {
 describe("proof (spec: Photo and voice verification)", () => {
   const seen = { proof: "plausible", seen: "dark selfie, lights off" } as const;
 
-  it("done needs a photo or voice note from today, and saves the verdict and what was seen", async () => {
+  it("done needs proof from today (a video counts since #163), and saves the verdict and what was seen", async () => {
     const tester = await setup();
     const words = await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"));
     expect(words).toMatchObject({ ok: false, error: expect.stringContaining("words alone don't mark it done") });
-    // Yesterday's photo and a video don't count for today.
+    // Yesterday's photo doesn't count for today.
     await photo(at(SUN, "21:00"));
-    await photo(at(MON, "19:40"), "video");
     expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"))).toMatchObject({ ok: false });
-    await photo(at(MON, "20:01"), "voice");
+    await photo(at(MON, "20:01"), "video");
     expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:02"))).toMatchObject({ ok: true });
     expect(await stepDay(tester, MON)).toMatchObject({ status: "done", proofVerdict: "plausible", proofSeen: "dark selfie, lights off" });
   });
@@ -939,7 +938,7 @@ describe("proof (spec: Photo and voice verification)", () => {
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);
-    expect(await block()).toContain("No photo, screenshot, voice note or document from them today.");
+    expect(await block()).toContain("No photo, screenshot, voice note, video or document from them today.");
     await photo(at(MON, "19:50"));
     await tool("proof_unclear", { verdict: "doesnt_match", seen: "bright hallway, lights on" }, at(MON, "19:51"));
     expect(await block()).toContain("Proof sent today: 1. Your read: doesnt match (bright hallway, lights on). Still sorting it out with them.");
