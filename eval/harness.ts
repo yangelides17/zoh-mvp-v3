@@ -149,6 +149,8 @@ export async function startEvalApp(opts: {
       fetchMedia: evalMediaFetcher,
       // Photo descriptions are for memory's search, not the reply being graded: skip the extra Claude call.
       describer: undefined,
+      // #185: the eval's voice notes aren't real audio; nothing to rewrap.
+      rewrapper: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
       // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would

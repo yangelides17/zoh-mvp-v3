@@ -9,7 +9,9 @@ import { coachHistory } from "../memory/context.js";
 import { messages, type Message, type Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
-import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
+import { MAX_DOCUMENT_PAGES, readDocument, type ReadDocument } from "../media/documents.js";
+import type { AudioRewrapper } from "../media/rewrap.js";
+import { extensionOf, MAX_MEDIA_BYTES, MediaTooBigError, mediaKind, type DownloadedMedia, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { isAllowed } from "../config.js";
@@ -50,6 +52,8 @@ export interface PipelineDeps {
   replier?: Replier;
   media?: MediaStore;
   transcriber?: Transcriber;
+  /** #185: rewraps iPhone voice notes so Chrome plays them; missing: kept as .caf. */
+  rewrapper?: AudioRewrapper;
   fetchMedia: MediaFetcher;
   /** Describes photos as they arrive, for coach memory; missing when Claude isn't configured. */
   describer?: MediaDescriber;
@@ -443,7 +447,7 @@ async function sendReply(
 
   // 5. Media into memory right away, after the reply so it never adds to the wait.
   for (const [i, p] of batch.entries()) {
-    if (p.inbound.mediaUrl) await describeMedia(deps, p.inbound, media[i]?.image, p.timings);
+    if (p.inbound.mediaUrl) await describeMedia(deps, p.inbound, media[i], p.timings);
   }
 
   for (const p of batch) {
@@ -459,22 +463,27 @@ async function sendReply(
 }
 
 /**
- * Saves a one-line description of a photo (from Claude) or a video (its caption) so memory can
- * search it at once. Voice notes already have their transcript. Failures are logged, never sent.
+ * Saves a one-line description of a photo or document (from Claude) or a video (its caption) so memory
+ * can search it at once. Voice notes already have their transcript. Failures are logged, never sent.
  */
 async function describeMedia(
   deps: PipelineDeps,
   inbound: Message,
-  image: ClaudeImage | undefined,
+  prepared: PreparedMedia | undefined,
   timings: Record<string, string | number>,
 ): Promise<void> {
   const kind = mediaKind(inbound.mediaContentType ?? undefined, inbound.mediaUrl ?? "");
   const caption = inbound.content?.trim();
+  const image = prepared?.image;
+  const doc = prepared?.document;
   try {
     let description: string | undefined;
+    const t0 = Date.now();
     if (image && deps.describer) {
-      const t0 = Date.now();
       description = await deps.describer.describe(image, caption);
+      timings.describe_ms = Date.now() - t0;
+    } else if (doc && doc.kind !== "unsupported" && deps.describer) {
+      description = await deps.describer.describeDocument(doc.kind === "pdf" ? { pdf: doc.pdf } : { text: doc.text }, caption);
       timings.describe_ms = Date.now() - t0;
     } else if (kind === "video") {
       description = caption ? `A video: ${caption}` : "A video (not watchable here)";
@@ -627,21 +636,40 @@ async function handleMedia(
   deps: PipelineDeps,
   inbound: Message,
   timings: Record<string, string | number>,
-): Promise<{ transcript?: string; image?: ClaudeImage }> {
+): Promise<PreparedMedia> {
   const url = inbound.mediaUrl!;
-  const downloaded = await deps.fetchMedia(url);
+  let downloaded: DownloadedMedia;
+  try {
+    downloaded = await deps.fetchMedia(url);
+  } catch (err) {
+    if (!(err instanceof MediaTooBigError)) throw err;
+    timings.media_too_big = 1;
+    return { tooBig: true };
+  }
   const kind = mediaKind(downloaded.contentType, url);
   const ext = extensionOf(url) || "bin";
-  const key = `media/${inbound.contactNumber.replace(/\D/g, "")}/${inbound.id}.${ext}`;
   timings.media_kind = kind;
   timings.media_bytes = downloaded.bytes.byteLength;
 
+  // #185: an iPhone voice note (.caf) is kept in a box Chrome plays too; Speaches still gets the original.
+  let stored = { bytes: downloaded.bytes, ext, contentType: downloaded.contentType };
+  if (kind === "audio" && isCaf(ext, downloaded.contentType) && deps.rewrapper) {
+    try {
+      const t0 = Date.now();
+      stored = await deps.rewrapper.rewrap(downloaded.bytes);
+      timings.rewrap_ms = Date.now() - t0;
+    } catch (err) {
+      timings.rewrap_error = errorMessage(err).slice(0, 200);
+      deps.log.warn({ messageId: inbound.id, err: safeError(err) }, "Rewrapping a voice note failed; keeping the .caf");
+    }
+  }
+  const key = `media/${inbound.contactNumber.replace(/\D/g, "")}/${inbound.id}.${stored.ext}`;
   if (deps.media) {
-    await deps.media.put(key, downloaded.bytes, downloaded.contentType);
-    await updateMessage(deps.db, inbound.id, { mediaKey: key, mediaContentType: downloaded.contentType });
+    await deps.media.put(key, stored.bytes, stored.contentType);
+    await updateMessage(deps.db, inbound.id, { mediaKey: key, mediaContentType: stored.contentType });
     timings.media_stored_at = new Date().toISOString();
   } else {
-    await updateMessage(deps.db, inbound.id, { mediaContentType: downloaded.contentType });
+    await updateMessage(deps.db, inbound.id, { mediaContentType: stored.contentType });
   }
 
   if (kind === "audio" && deps.transcriber) {
@@ -652,15 +680,41 @@ async function handleMedia(
     return { transcript };
   }
   if (kind === "audio" || kind === "video") return {};
+  if (kind === "document") return { document: await prepareDocument(deps, inbound, downloaded, ext, timings) };
 
   // Anything else may be a photo, whatever the CDN labels it: check the bytes.
   const t0 = Date.now();
   const image = await prepareImageForClaude(downloaded.bytes);
-  if (!image) return {};
+  if (!image) {
+    // Or a document with no telling name (a PDF says so in its first bytes); otherwise one it can't open.
+    return { document: await prepareDocument(deps, inbound, downloaded, ext, timings) };
+  }
   timings.image_format = image.format;
   timings.image_prep_ms = Date.now() - t0;
   if (kind !== "image") await updateMessage(deps.db, inbound.id, { mediaContentType: `image/${image.format}` });
   return { image };
+}
+
+const isCaf = (ext: string, contentType: string) => ext === "caf" || /x-caf/i.test(contentType);
+
+/** #163: reads a document and keeps its words (memory search, later replies) where a transcript goes. */
+async function prepareDocument(
+  deps: PipelineDeps,
+  inbound: Message,
+  downloaded: DownloadedMedia,
+  ext: string,
+  timings: Record<string, string | number>,
+): Promise<ReadDocument> {
+  const t0 = Date.now();
+  const doc = await readDocument(downloaded.bytes, ext, downloaded.contentType);
+  timings.document_ms = Date.now() - t0;
+  timings.document_read = doc.kind;
+  if (doc.kind === "unsupported") return doc;
+  if (doc.pages) timings.document_pages = doc.pages;
+  // A PDF that arrived unlabeled is labeled now, so later replies and the console know what it is.
+  const contentType = doc.kind === "pdf" && mediaKind(downloaded.contentType, inbound.mediaUrl!) !== "document" ? "application/pdf" : undefined;
+  await updateMessage(deps.db, inbound.id, { ...(doc.text ? { transcript: doc.text } : {}), ...(contentType ? { mediaContentType: contentType } : {}) });
+  return doc;
 }
 
 /**
@@ -680,13 +734,48 @@ export function toTurns(history: Message[], current: ReadonlyMap<string, Prepare
       else if (now?.image) parts.push("[Sent a photo]");
       else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
       else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
+      else if (now?.tooBig) parts.push(`[Sent a ${kind === "other" ? "file" : kind} too big to open (over ${MAX_MEDIA_BYTES / 1024 / 1024} MB)]`);
+      else if (now?.document || kind === "document" || (kind === "other" && !isCurrent)) parts.push(documentLine(m, now?.document));
       else parts.push(`[Sent a ${kind} attachment]`);
     }
     if (m.content?.trim()) parts.push(m.content.trim());
     const turn: Turn = { role, text: parts.join("\n") };
     if (now?.image) turn.image = { mediaType: now.image.mediaType, data: now.image.data };
+    if (now?.document?.kind === "pdf") turn.pdf = now.document.pdf;
     return turn;
   });
+}
+
+/**
+ * A document within the conversation's window stays readable, like a pasted text (#163, Yanni): the one
+ * being answered in full (a PDF also as the file itself), earlier ones up to this many characters.
+ */
+export const HISTORY_DOCUMENT_CHARS = 40_000;
+
+/** #163: a document as the coach reads it. `read` is set for the texts being answered. */
+function documentLine(m: Message, read: ReadDocument | undefined): string {
+  const name = fileName(m.mediaUrl ?? "");
+  if (read?.kind === "unsupported") return `[Sent ${read.reason}${name ? ` (${name})` : ""}, which couldn't be opened]`;
+  const pages = read?.pages ? `, ${read.pages} page${read.pages === 1 ? "" : "s"}` : "";
+  if (read?.kind === "pdf") return `[Sent a document: ${name || "a PDF"}${pages}; the file is attached]`;
+  if (read?.kind === "text") {
+    const clipped = read.clipped ? `\n(Only the first ${read.pages ? `${MAX_DOCUMENT_PAGES} pages` : "part"} was read: it's longer than that.)` : "";
+    return `[Sent a document: ${name || "a file"}${pages}]\n<document>\n${read.text}\n</document>${clipped}`;
+  }
+  // An earlier one: its words, kept when it arrived, or what it was.
+  if (!m.transcript) return m.description ? `[Sent a document earlier: ${m.description}]` : "[Sent a file earlier that couldn't be opened]";
+  const text = m.transcript.length > HISTORY_DOCUMENT_CHARS ? `${m.transcript.slice(0, HISTORY_DOCUMENT_CHARS)}\n(…the rest: open_file reads all of it)` : m.transcript;
+  return `[Sent a document earlier: ${name || m.description || "a file"}]\n<document>\n${text}\n</document>`;
+}
+
+/** The file's name from its link, when it has a telling one. */
+function fileName(url: string): string {
+  try {
+    const last = decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "");
+    return /\.[a-z0-9]{2,8}$/i.test(last) ? last : "";
+  } catch {
+    return "";
+  }
 }
 
 export function maskNumber(n: string): string {

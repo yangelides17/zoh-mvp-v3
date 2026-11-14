@@ -79,6 +79,12 @@ export function hitRatePct(v: GoalView): string {
 /** iPhone voice notes (Core Audio files): Safari plays them, Chrome can't (#97). */
 const isCaf = (m: Message) => /x-caf/i.test(m.mediaContentType ?? "") || /\.caf$/i.test(m.mediaKey ?? "");
 
+/** #163: a document's name from its link, else "document". */
+function fileLabel(m: Message): string {
+  const last = (m.mediaUrl ?? "").split("?")[0]!.split("/").pop() ?? "";
+  return /\.[a-z0-9]{2,8}$/i.test(last) ? decodeURIComponent(last) : "document";
+}
+
 export function proofHtml(m: Message): string {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
   const src = `/console/media/${esc(m.id)}`;
@@ -91,8 +97,12 @@ export function proofHtml(m: Message): string {
         ? `<audio controls preload="none" src="${src}"></audio>${isCaf(m) ? `<a class="media-download" href="${src}" download hidden>Download (Chrome can't play iPhone voice notes; Safari can)</a>` : ""}`
         : kind === "video"
           ? `<video controls preload="none" src="${src}"></video>`
-          : `<a href="${src}">${esc(kind)} file</a>`;
-  const words = [m.description, m.transcript && `"${m.transcript}"`, m.content].filter(Boolean).map(esc).join(" · ");
+          : kind === "document"
+            ? `<a href="${src}" target="_blank" rel="noopener">📄 ${esc(fileLabel(m))}</a>`
+            : `<a href="${src}">${esc(kind)} file</a>`;
+  // A document's text can run to pages: its summary is shown, and the file is a click away.
+  const transcript = kind === "document" ? undefined : m.transcript && `"${m.transcript}"`;
+  const words = [m.description, transcript, m.content].filter(Boolean).map(esc).join(" · ");
   return `<div>${media}${words ? `<div class="muted">${words}</div>` : ""}</div>`;
 }
 

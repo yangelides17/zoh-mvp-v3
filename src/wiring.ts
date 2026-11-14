@@ -7,6 +7,7 @@ import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
 import { createMediaRetention, type MediaRetention } from "./media/retention.js";
+import { createFfmpegRewrapper } from "./media/rewrap.js";
 import { createS3MediaStore, fetchMedia } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
@@ -51,6 +52,7 @@ export function appDeps(
       media: pick("media", () => makeMedia(config)),
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
+      rewrapper: pick("rewrapper", () => createFfmpegRewrapper()),
       describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,

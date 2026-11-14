@@ -369,6 +369,11 @@ describe("media goes into memory as it arrives", () => {
       this.calls.push({ caption, at: performance.now() });
       return "Dune open at page 112";
     }
+    documents: unknown[] = [];
+    async describeDocument(doc: unknown) {
+      this.documents.push(doc);
+      return "An essay draft about a lighthouse keeper";
+    }
   }
 
   it("describes a photo right after the reply is sent, and search finds it at once", async () => {
@@ -398,7 +403,8 @@ describe("media goes into memory as it arrives", () => {
 
   it("never lets a failed description touch the reply", async () => {
     await t.close();
-    t = await makeApp({ describer: { describe: async () => { throw new Error("Claude down"); } } });
+    const down = async () => { throw new Error("Claude down"); };
+    t = await makeApp({ describer: { describe: down, describeDocument: down } });
     await postWebhook(t, inboundEvent({ media_url: "https://cdn.example/photo.jpg" }));
     await t.queue.idle();
     expect(t.sendblue.sends).toHaveLength(1);

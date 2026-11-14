@@ -49,11 +49,19 @@ export function createS3MediaStore(opts: S3MediaStoreOptions): MediaStore {
   };
 }
 
-export type MediaKind = "image" | "audio" | "video" | "other";
+export type MediaKind = "image" | "audio" | "video" | "document" | "other";
 
-export const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm"]);
+export const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm", "aiff", "aif", "3ga"]);
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif", "heic", "heif", "webp"]);
-const VIDEO_EXT = new Set(["mov", "mp4", "m4v"]);
+const VIDEO_EXT = new Set(["mov", "mp4", "m4v", "avi", "mkv", "3gp"]);
+/** #163: files the coach reads (src/media/documents.ts), plus the ones it says it can't open (iWork, old Office). */
+const DOCUMENT_EXT = new Set([
+  "pdf", "docx", "doc", "xlsx", "xls", "csv", "tsv", "pptx", "ppt", "pages", "numbers", "key",
+  "txt", "md", "markdown", "rtf", "html", "htm", "json", "xml", "yaml", "yml",
+  "js", "ts", "jsx", "tsx", "py", "java", "c", "h", "cpp", "cs", "go", "rb", "rs", "swift", "kt", "php", "sql", "sh", "css",
+]);
+/** Document types a CDN may label: PDFs, Office, iWork, text. */
+const DOCUMENT_TYPE = /^(application\/(pdf|msword|rtf|json|xml|vnd\.openxmlformats|vnd\.ms-|vnd\.apple\.|x-iwork)|text\/)/;
 
 export function extensionOf(url: string): string {
   try {
@@ -70,10 +78,12 @@ export function mediaKind(contentType: string | undefined, url: string): MediaKi
   if (ct.startsWith("image/")) return "image";
   if (ct.startsWith("audio/")) return "audio";
   if (ct.startsWith("video/")) return "video";
+  if (DOCUMENT_TYPE.test(ct)) return "document";
   const ext = extensionOf(url);
   if (IMAGE_EXT.has(ext)) return "image";
   if (AUDIO_EXT.has(ext)) return "audio";
   if (VIDEO_EXT.has(ext)) return "video";
+  if (DOCUMENT_EXT.has(ext)) return "document";
   return "other";
 }
 
@@ -84,9 +94,19 @@ export interface DownloadedMedia {
 
 export type MediaFetcher = (url: string) => Promise<DownloadedMedia>;
 
+/** #163: bigger than this isn't downloaded (a long video); the coach is told it was too big to open. */
+export const MAX_MEDIA_BYTES = 500 * 1024 * 1024;
+
+export class MediaTooBigError extends Error {
+  override name = "MediaTooBigError";
+}
+
 export const fetchMedia: MediaFetcher = async (url) => {
-  const res = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+  // Two minutes: a video or document can be far bigger than a photo.
+  const res = await fetch(url, { signal: AbortSignal.timeout(120_000) });
   if (!res.ok) throw new Error(`Media download failed (HTTP ${res.status})`);
+  if (Number(res.headers.get("content-length") ?? 0) > MAX_MEDIA_BYTES) throw new MediaTooBigError("Media is over the size cap");
   const bytes = new Uint8Array(await res.arrayBuffer());
+  if (bytes.byteLength > MAX_MEDIA_BYTES) throw new MediaTooBigError("Media is over the size cap");
   return { bytes, contentType: res.headers.get("content-type") ?? "application/octet-stream" };
 };
