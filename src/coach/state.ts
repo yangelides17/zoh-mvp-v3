@@ -30,8 +30,8 @@ import {
 import { claimedRequest, notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
 import { mediaKind, type MediaKind } from "../media/storage.js";
 
-/** What counts as proof: photos and voice notes, and documents since #163 (video joins with Gemini). */
-const PROOF_KINDS: MediaKind[] = ["image", "audio", "document"];
+/** What counts as proof: photos and voice notes, and documents and videos since #163. */
+const PROOF_KINDS: MediaKind[] = ["image", "audio", "document", "video"];
 import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
@@ -329,6 +329,16 @@ export async function loadRecentDays(db: Db, tester: Tester, date: string): Prom
     .orderBy(desc(stepDays.date))
     .limit(14);
   return rows;
+}
+
+/** #163: today's step in a line, for watching a video against it; undefined before a plan. */
+export async function todaysStepLine(db: Db, tester: Tester, now: Date): Promise<string | undefined> {
+  const today = serviceDate(now, await withDaySteps(db, tester, now));
+  const plan = await loadCurrentPlan(db, tester, today);
+  if (!plan) return undefined;
+  const [row] = await db.select().from(stepDays).where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today))).limit(1);
+  const { step, minutes, proof } = dayStep(plan, row);
+  return `${step}${minutes ? ` (${minutes} min)` : ""}; proof: ${proof}`;
 }
 
 /** A day's step (#76): its own when the coach set one, otherwise the plan's step, length and proof. */

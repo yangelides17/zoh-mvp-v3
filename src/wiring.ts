@@ -7,6 +7,7 @@ import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
 import { createFfmpegRewrapper } from "./media/rewrap.js";
+import { createGeminiWatcher, type VideoWatcher } from "./video/gemini.js";
 import { createS3MediaStore, fetchMedia, type MediaStore } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
@@ -37,6 +38,8 @@ export function appDeps(
 
   // One bucket client: the pipeline keeps files in it, the coach opens them again (#163).
   const media = pick("media", () => makeMedia(config));
+  // One video watcher: the pipeline watches new videos, the coach re-watches one with a question (#163).
+  const watcher = pick("watcher", () => (config.gemini.apiKey ? createGeminiWatcher({ apiKey: config.gemini.apiKey, model: config.gemini.model }) : undefined));
   const deps: AppDeps = {
     pipeline: {
       ...overrides,
@@ -49,8 +52,9 @@ export function appDeps(
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       lines: pick("lines", () => new ReplyLines({ holdMs: config.typingHoldSeconds * 1000, graceMs: Math.round(config.replyGraceSeconds * 1000) })),
       sendblue: pick("sendblue", () => makeSendblue(config)),
-      replier: pick("replier", () => makeCoach(config, db, media)),
+      replier: pick("replier", () => makeCoach(config, db, media, watcher)),
       media,
+      watcher,
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
       rewrapper: pick("rewrapper", () => createFfmpegRewrapper()),
@@ -160,11 +164,12 @@ function makeSendblue(config: Config) {
     : undefined;
 }
 
-function makeCoach(config: Config, db: Db, media: MediaStore | undefined) {
+function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watcher: VideoWatcher | undefined) {
   return config.claude.apiKey
     ? createCoach({
         db,
         media,
+        watcher,
         goalCap: config.goalCap,
         model: createClaudeModel({
           apiKey: config.claude.apiKey,

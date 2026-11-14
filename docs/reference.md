@@ -29,6 +29,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   allowed, `0` turns it off). `RAILPACK_DEPLOY_APT_PACKAGES` includes `ffmpeg` on both apps (#185:
   iPhone .caf voice notes are rewrapped, same audio, into .m4a or .ogg so the console plays them in
   Chrome; `/health` reports `ffmpeg`; without it voice notes stay .caf and nothing else breaks).
+  `GEMINI_API_KEY` (#163: Gemini watches videos; a separate key per app, prepaid credits with
+  auto-reload and a monthly limit in Google AI Studio; without it the coach is told it can't watch
+  videos) and optional `GEMINI_MODEL` (default `gemini-3.8-flash`). `/health?deep=1` pings Gemini.
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only (with `*`, staging
@@ -156,7 +159,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Photo and voice verification (#7): the coach judges proof in its reply (no second Claude call)
   and saves a verdict and a line on what it saw on the day. No proof, no done. Proof-gaming flags
   are saved only.
-- More ways to send proof (#163): documents count as proof. PDFs reach the coach as the file itself
+- More ways to send proof (#163): videos count as proof, watched by Gemini (Yanni, Nov 14: about
+  $0.01–0.05 a video, against $0.10–0.25 for frames plus Whisper plus Claude, and it hears the audio
+  with the picture). Gemini watches up to the first 20 minutes against today's step and writes an
+  account plus a one-line summary; the coach judges from the account and never sees the video.
+  Under 18 MB the video goes inline, above it through Gemini's Files API (deleted right after). A
+  key or credit problem raises a console alert; any failure tells the coach it couldn't watch it.
+  `open_file` re-watches a video with the tester's question. Documents count as proof too. PDFs reach the coach as the file itself
   (Claude reads layout and scans); Word, Excel/CSV, PowerPoint, text, markdown and code files as their
   words; Pages, Numbers, Keynote and old .doc/.ppt are named as files it can't open. Read in full up
   to 100 pages, past that the first 100. A document's words are kept like a transcript (memory search;

@@ -20,6 +20,7 @@ import * as schema from "../src/db/schema.js";
 import type { MediaFetcher, MediaStore } from "../src/media/storage.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
+import type { VideoWatchError, VideoWatcher, WatchRequest } from "../src/video/gemini.js";
 import { createNudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { createJumper } from "../src/testers/jump.js";
@@ -225,6 +226,20 @@ export class FakeTranscriber implements Transcriber {
   async transcribe() {
     this.calls += 1;
     return "I went for a run this morning";
+  }
+  async check() {}
+}
+
+/** #163: stands in for Gemini; records what it was asked, and can fail the way Gemini does. */
+export class FakeWatcher implements VideoWatcher {
+  requests: WatchRequest[] = [];
+  fail?: VideoWatchError;
+  clipped = false;
+  account = "Three squats; the last goes to parallel, knees tracking over toes (0:40).";
+  async watch(req: WatchRequest) {
+    this.requests.push(req);
+    if (this.fail) throw this.fail;
+    return { account: this.account, summary: "Three squats in a garage", clipped: this.clipped };
   }
   async check() {}
 }

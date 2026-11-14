@@ -1,6 +1,7 @@
 import type { Message } from "../db/schema.js";
 import type { ReadDocument } from "../media/documents.js";
 import type { ClaudeImage } from "../media/images.js";
+import type { Watched } from "../video/gemini.js";
 
 /**
  * #16: one reply at a time per tester. Each tester has a line: the texts waiting for a reply,
@@ -21,6 +22,8 @@ export interface PreparedMedia {
   image?: ClaudeImage;
   /** #163: a document, read (or why it couldn't be). */
   document?: ReadDocument;
+  /** #163: a video as Gemini watched it, or that it couldn't be watched. */
+  video?: Watched | { unwatched: true };
   /** #163: the file never reached us (over the size cap), so the coach says so. */
   tooBig?: boolean;
 }

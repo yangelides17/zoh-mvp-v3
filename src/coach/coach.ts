@@ -14,6 +14,7 @@ import {
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
 import type { MediaStore } from "../media/storage.js";
+import type { VideoWatcher } from "../video/gemini.js";
 import {
   ALWAYS_MEMORY_TOOLS,
   MEMORY_TOOL_DEFINITIONS,
@@ -139,6 +140,8 @@ export interface CoachOptions {
   goalCap?: number;
   /** #163: our copies of their files, for open_file; without it, only what was read when they arrived. */
   media?: MediaStore;
+  /** #163: re-watches a video for open_file, with their question. */
+  watcher?: VideoWatcher;
 }
 
 /**
@@ -259,7 +262,7 @@ export function createCoach(opts: CoachOptions): Replier {
         for (const call of calls) {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
-            ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media })
+            ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media, watcher: opts.watcher })
             : await runTool(db, state, call.name, call.input, now, start);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {

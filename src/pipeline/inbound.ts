@@ -11,6 +11,8 @@ import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
 import { MAX_DOCUMENT_PAGES, readDocument, type ReadDocument } from "../media/documents.js";
 import type { AudioRewrapper } from "../media/rewrap.js";
+import { todaysStepLine } from "../coach/state.js";
+import { MAX_WATCH_SECONDS, VideoWatchError, type VideoWatcher, type Watched } from "../video/gemini.js";
 import { extensionOf, MAX_MEDIA_BYTES, MediaTooBigError, mediaKind, type DownloadedMedia, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
@@ -54,6 +56,8 @@ export interface PipelineDeps {
   transcriber?: Transcriber;
   /** #185: rewraps iPhone voice notes so Chrome plays them; missing: kept as .caf. */
   rewrapper?: AudioRewrapper;
+  /** #163: watches videos (Gemini); missing when GEMINI_API_KEY isn't set: the coach is told it can't watch them. */
+  watcher?: VideoWatcher;
   fetchMedia: MediaFetcher;
   /** Describes photos as they arrive, for coach memory; missing when Claude isn't configured. */
   describer?: MediaDescriber;
@@ -164,7 +168,7 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
 
   // 2. Media: keep a private copy; transcribe voice notes. Started now, so a draft waits for it rather than starting without it.
   const handled: Promise<PreparedMedia | undefined> = inbound.mediaUrl
-    ? handleMedia(deps, inbound, timings).catch((err: unknown) => {
+    ? handleMedia(deps, tester, inbound, timings).catch((err: unknown) => {
         errors.push(`media: ${errorMessage(err)}`);
         log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
         return undefined;
@@ -538,6 +542,9 @@ async function describeMedia(
     } else if (doc && doc.kind !== "unsupported" && deps.describer) {
       description = await deps.describer.describeDocument(doc.kind === "pdf" ? { pdf: doc.pdf } : { text: doc.text }, caption);
       timings.describe_ms = Date.now() - t0;
+    } else if (prepared?.video && "summary" in prepared.video && prepared.video.summary) {
+      // #163: Gemini's one line, written while it watched.
+      description = prepared.video.summary;
     } else if (kind === "video") {
       description = caption ? `A video: ${caption}` : "A video (not watchable here)";
     }
@@ -687,6 +694,7 @@ async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: s
 
 async function handleMedia(
   deps: PipelineDeps,
+  tester: Tester,
   inbound: Message,
   timings: Record<string, string | number>,
 ): Promise<PreparedMedia> {
@@ -732,7 +740,8 @@ async function handleMedia(
     await updateMessage(deps.db, inbound.id, { transcript });
     return { transcript };
   }
-  if (kind === "audio" || kind === "video") return {};
+  if (kind === "video") return { video: await watchVideo(deps, tester, inbound, stored, timings) };
+  if (kind === "audio") return {};
   if (kind === "document") return { document: await prepareDocument(deps, inbound, downloaded, ext, timings) };
 
   // Anything else may be a photo, whatever the CDN labels it: check the bytes.
@@ -749,6 +758,42 @@ async function handleMedia(
 }
 
 const isCaf = (ext: string, contentType: string) => ext === "caf" || /x-caf/i.test(contentType);
+
+/**
+ * #163: Gemini watches the video against today's step; its account is kept where a transcript goes (memory
+ * search, later replies). Can't be watched: the coach is told so; a key or credit problem also alerts the founders.
+ */
+async function watchVideo(
+  deps: PipelineDeps,
+  tester: Tester,
+  inbound: Message,
+  file: { bytes: Uint8Array; contentType: string },
+  timings: Record<string, string | number>,
+): Promise<Watched | { unwatched: true }> {
+  if (!deps.watcher) return { unwatched: true };
+  const now = (deps.now ?? (() => new Date()))();
+  const t0 = Date.now();
+  try {
+    const step = await todaysStepLine(deps.db, tester, testerNow(tester, now));
+    const watched = await deps.watcher.watch({
+      video: file.bytes,
+      contentType: file.contentType,
+      ...(step ? { step } : {}),
+      ...(inbound.content?.trim() ? { caption: inbound.content.trim() } : {}),
+    });
+    timings.watch_ms = Date.now() - t0;
+    if (watched.clipped) timings.watch_clipped = 1;
+    await updateMessage(deps.db, inbound.id, { transcript: watched.account });
+    return watched;
+  } catch (err) {
+    timings.watch_error = errorMessage(err).slice(0, 200);
+    deps.log.error({ messageId: inbound.id, contact: maskNumber(inbound.contactNumber), err: safeError(err) }, "Watching a video failed");
+    if (err instanceof VideoWatchError && err.reason === "key_or_credit") {
+      await alertFailure(deps.db, tester.id, "A video couldn't be watched: check the Gemini key and credits (GEMINI_API_KEY)", now);
+    }
+    return { unwatched: true };
+  }
+}
 
 /** #163: reads a document and keeps its words (memory search, later replies) where a transcript goes. */
 async function prepareDocument(
@@ -788,6 +833,7 @@ export function toTurns(history: Message[], current: ReadonlyMap<string, Prepare
       else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
       else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
       else if (now?.tooBig) parts.push(`[Sent a ${kind === "other" ? "file" : kind} too big to open (over ${MAX_MEDIA_BYTES / 1024 / 1024} MB): a shorter or smaller one would work]`);
+      else if (kind === "video") parts.push(videoLine(m, now?.video));
       else if (now?.document || kind === "document" || (kind === "other" && !isCurrent)) parts.push(documentLine(m, now?.document));
       else parts.push(`[Sent a ${kind} attachment]`);
     }
@@ -819,6 +865,17 @@ function documentLine(m: Message, read: ReadDocument | undefined): string {
   if (!m.transcript) return m.description ? `[Sent a document earlier: ${m.description}]` : "[Sent a file earlier that couldn't be opened]";
   const text = m.transcript.length > HISTORY_DOCUMENT_CHARS ? `${m.transcript.slice(0, HISTORY_DOCUMENT_CHARS)}\n(…the rest: open_file reads all of it)` : m.transcript;
   return `[Sent a document earlier: ${name || m.description || "a file"}]\n<document>\n${text}\n</document>`;
+}
+
+/** #163: a video as the coach reads it: Gemini's account of it (the one being answered, or an earlier one), or that it couldn't be watched. */
+function videoLine(m: Message, watched: PreparedMedia["video"]): string {
+  if (watched && "unwatched" in watched) return "[Sent a video that couldn't be watched: a photo or voice note would work]";
+  if (watched) {
+    const clipped = watched.clipped ? ` (over ${MAX_WATCH_SECONDS / 60} minutes: the first ${MAX_WATCH_SECONDS / 60} were watched)` : "";
+    return `[Sent a video${clipped}. Watched for you, what it shows:]\n${watched.account}`;
+  }
+  if (!m.transcript) return m.description ? `[Sent a video earlier: ${m.description}]` : "[Sent a video earlier that couldn't be watched]";
+  return `[Sent a video earlier. What it showed:]\n${m.transcript.slice(0, HISTORY_DOCUMENT_CHARS)}`;
 }
 
 /** The file's name from its link, when it has a telling one. */
