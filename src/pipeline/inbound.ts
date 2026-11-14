@@ -787,7 +787,7 @@ export function toTurns(history: Message[], current: ReadonlyMap<string, Prepare
       else if (now?.image) parts.push("[Sent a photo]");
       else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
       else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
-      else if (now?.tooBig) parts.push(`[Sent a ${kind === "other" ? "file" : kind} too big to open (over ${MAX_MEDIA_BYTES / 1024 / 1024} MB)]`);
+      else if (now?.tooBig) parts.push(`[Sent a ${kind === "other" ? "file" : kind} too big to open (over ${MAX_MEDIA_BYTES / 1024 / 1024} MB): a shorter or smaller one would work]`);
       else if (now?.document || kind === "document" || (kind === "other" && !isCurrent)) parts.push(documentLine(m, now?.document));
       else parts.push(`[Sent a ${kind} attachment]`);
     }
@@ -808,7 +808,7 @@ export const HISTORY_DOCUMENT_CHARS = 40_000;
 /** #163: a document as the coach reads it. `read` is set for the texts being answered. */
 function documentLine(m: Message, read: ReadDocument | undefined): string {
   const name = fileName(m.mediaUrl ?? "");
-  if (read?.kind === "unsupported") return `[Sent ${read.reason}${name ? ` (${name})` : ""}, which couldn't be opened]`;
+  if (read?.kind === "unsupported") return `[Sent ${read.reason}${name ? ` (${name})` : ""}, which couldn't be opened: a PDF, screenshot or voice note would work]`;
   const pages = read?.pages ? `, ${read.pages} page${read.pages === 1 ? "" : "s"}` : "";
   if (read?.kind === "pdf") return `[Sent a document: ${name || "a PDF"}${pages}; the file is attached]`;
   if (read?.kind === "text") {

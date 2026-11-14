@@ -939,7 +939,7 @@ describe("proof (spec: Photo and voice verification)", () => {
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);
-    expect(await block()).toContain("No photo, screenshot or voice note from them today.");
+    expect(await block()).toContain("No photo, screenshot, voice note or document from them today.");
     await photo(at(MON, "19:50"));
     await tool("proof_unclear", { verdict: "doesnt_match", seen: "bright hallway, lights on" }, at(MON, "19:51"));
     expect(await block()).toContain("Proof sent today: 1. Your read: doesnt match (bright hallway, lights on). Still sorting it out with them.");

@@ -128,7 +128,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "plan-shape",
         scope: "conversation",
         label:
-          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a proof method (photo, screenshot or voice note) that fits what they use",
+          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a proof method (photo, screenshot, voice note or document) that fits what they use",
       },
       {
         id: "first-plan",
@@ -464,7 +464,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "plan-proof",
         scope: "conversation",
-        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: a screenshot plus the paste for feedback), with a reason and an alternative, and is only ever a photo, screenshot or voice note, never typed text",
+        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: the document, which also gets feedback), with a reason and an alternative, and is only ever a photo, screenshot, voice note or document, never typed text",
       },
       { id: "recall", scope: "text", label: "Recall feels natural and purposeful: in a check-in or conversation, never a quiz, never a separate text" },
       { id: "lesson-reused", scope: "conversation", label: "A later step builds an earlier lesson in when it fits" },
@@ -541,17 +541,27 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "forgot-pic", scope: "conversation", label: "\"Forgot the pic\" leads to an ask for other proof first, then a warm miss" },
       { id: "change-method", scope: "conversation", label: "After repeated proof trouble, ZOH offers to change the proof method" },
       // #94: one proof rule, the same everywhere.
-      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot or voice note, never typed text" },
+      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot, voice note or document, never typed text" },
       {
         id: "typed-not-proof",
         scope: "conversation",
-        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot or voice note",
+        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot, voice note or document",
       },
       {
         id: "writing-proof",
         scope: "conversation",
         label: "A writing step: a screenshot of where they wrote it is the proof plus a request for the full text pasted, for feedback; a screenshot alone is checked off, then the paste is asked for",
       },
+      // #163 (spec "Should"): documents as proof.
+      { id: "file-specific", scope: "text", label: "ZOH reacts to something specific in the video or document" },
+      {
+        id: "document-no-paste",
+        scope: "conversation",
+        label: "A document of their writing counts as proof and gets feedback from it, without asking for a paste",
+      },
+      { id: "file-cant-open", scope: "text", label: "A file it can't open: plain, no pretending, offers a PDF, screenshot or voice note" },
+      { id: "file-mismatch", scope: "conversation", label: "A video or document that isn't the step is handled like a mismatched photo" },
+      { id: "file-recall", scope: "conversation", label: "A question about an earlier file is answered from the file itself, never guessed" },
       // #96: a smaller version is spelled out in full.
       { id: "smaller-in-full", scope: "text", label: "A smaller version is confirmed in one text with what, how much, when and proof, never just \"it's set\"" },
       { id: "smaller-pushback", scope: "conversation", label: "Asked for a smaller version with no real reason: one warm pushback; with a reason, or asked again, it's set at once" },

@@ -117,8 +117,8 @@ describe("#163: a document reaches the coach", () => {
     await postWebhook(t, inboundEvent({ content: "", media_url: "https://cdn.sendblue.test/files/blob" }));
     await t.queue.idle();
     const said = t.replier.received.flat().map((x) => x.text).join("\n");
-    expect(said).toContain("[Sent an Apple Pages file (essay.pages), which couldn't be opened]");
-    expect(said).toContain("[Sent a kind of file I can't open, which couldn't be opened]");
+    expect(said).toContain("[Sent an Apple Pages file (essay.pages), which couldn't be opened: a PDF, screenshot or voice note would work]");
+    expect(said).toContain("[Sent a kind of file I can't open, which couldn't be opened: a PDF, screenshot or voice note would work]");
     expect(t.sendblue.sends.length).toBeGreaterThan(0);
   });
 
@@ -126,7 +126,7 @@ describe("#163: a document reaches the coach", () => {
     t = await makeApp({ fetchMedia: async () => { throw new MediaTooBigError("big"); } });
     await postWebhook(t, inboundEvent({ content: "my set", media_url: "https://cdn.sendblue.test/v/clip.mov" }));
     await t.queue.idle();
-    expect(t.replier.received[0]!.at(-1)!.text).toBe("[Sent a video too big to open (over 500 MB)]\nmy set");
+    expect(t.replier.received[0]!.at(-1)!.text).toBe("[Sent a video too big to open (over 500 MB): a shorter or smaller one would work]\nmy set");
   });
 });
 

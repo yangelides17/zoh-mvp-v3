@@ -34,7 +34,16 @@ export const seedSchema = z.object({
     how_long: z.string().optional(),
     tracks_with: z.string().optional(),
   }),
-  history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  history: z
+    .array(
+      z.object({
+        from: z.enum(["tester", "zoh"]),
+        text: z.string().min(1),
+        /** #163: a document they sent with this text, kept as the pipeline keeps one (its words as the transcript). */
+        document: z.object({ name: z.string().regex(/^[\w.-]+\.\w+$/), text: z.string().min(1) }).optional(),
+      }),
+    )
+    .min(1),
   /** #48: quiet hours they chose themselves (local "HH:MM"); without it, the default ones, which fit around the step. */
   quiet_hours: z.object({ start: z.string().regex(/^\d{2}:\d{2}$/), end: z.string().regex(/^\d{2}:\d{2}$/) }).optional(),
   /** How long before the run's first line the seeded conversation ended (default: a minute before). */
