@@ -26,7 +26,9 @@ One feature, one flow, using the commands in `.claude/commands/`:
    makes a small change with a record, always asking first: dev (staging) or a hotfix on production.
 
 Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch
-branches in the main folder, which stays on `dev`; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
+branches in the main folder, which stays on `dev`; `/build` and `/review` set this up and `/review` cleans up after merging). In a background session, create the
+worktree with `git worktree add` as the command says and `cd` into it by its absolute path; don't use the
+`EnterWorktree` tool, which asks for permission for any folder outside `.claude/worktrees/` (Nov 14). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
 **Groups and parallel builds are optional.** The commands can take several issues at once (related, dependent, or

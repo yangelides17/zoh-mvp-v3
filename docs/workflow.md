@@ -14,6 +14,8 @@ does the building, testing, git and GitHub work. Agents follow the same rules fr
    with a low spending limit; `.env` is never committed).
 5. So builds don't ask before making worktrees, create `.claude/settings.local.json` yourself (Claude can't):
    `{"permissions": {"additionalDirectories": ["<full path to the zoh-worktrees folder next to the repo>"]}}`.
+   Background sessions then work in that folder directly, with no prompt; they skip Claude Code's own
+   "enter worktree" step, which always asks for a folder outside `.claude/worktrees/`.
 
 Start Claude Code in the repo folder. Everything below happens there.
 
