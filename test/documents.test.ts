@@ -130,6 +130,52 @@ describe("#163: a document reaches the coach", () => {
   });
 });
 
+describe("#163: the holding text", () => {
+  let t: TestApp;
+  afterEach(async () => {
+    await t.close();
+  });
+
+  /** A fetcher that takes `ms` to download, as a big file does. */
+  const slow = (ms: number, file: { bytes: Uint8Array; contentType: string }): MediaFetcher => async () => {
+    await new Promise((r) => setTimeout(r, ms));
+    return file;
+  };
+
+  it("sends one 'reading it now' when a document takes long, then the reply; it isn't one of ZOH's texts since the proof", async () => {
+    t = await makeApp({ holdingAfterMs: 20, fetchMedia: slow(120, { bytes: await makeDocx(ESSAY), contentType: WORD }) });
+    await postWebhook(t, inboundEvent({ content: "", media_url: "https://cdn.sendblue.test/files/essay.docx" }));
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["reading it now 📖", t.replier.replyText]);
+    const out = await t.db.select().from(messages).where(eq(messages.direction, "outbound"));
+    expect(out.find((m) => m.content === "reading it now 📖")?.timings).toMatchObject({ holding: 1 });
+
+    const tester = (await t.db.select().from(testers))[0]!;
+    const now = new Date(Date.now() + 1000);
+    expect(await loadProof(t.db, tester, serviceDate(now, tester), now)).toMatchObject({ today: 1, zohTextsSince: 1 });
+  });
+
+  it("says 'watching it now' for a slow video", async () => {
+    t = await makeApp({ holdingAfterMs: 20, fetchMedia: slow(120, { bytes: new Uint8Array([0, 0, 0]), contentType: "video/quicktime" }) });
+    await postWebhook(t, inboundEvent({ content: "", media_url: "https://cdn.sendblue.test/v/set.mov" }));
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["watching it now 👀", t.replier.replyText]);
+  });
+
+  it("sends nothing extra when the file is read quickly, or for a photo", async () => {
+    t = await makeApp({ holdingAfterMs: 200, fetchMedia: slow(5, { bytes: await makeDocx(ESSAY), contentType: WORD }) });
+    await postWebhook(t, inboundEvent({ content: "", media_url: "https://cdn.sendblue.test/files/essay.docx" }));
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual([t.replier.replyText]);
+    await t.close();
+
+    t = await makeApp({ holdingAfterMs: 20, fetchMedia: async (url) => { await new Promise((r) => setTimeout(r, 120)); return fakeFetchMedia(url); } });
+    await postWebhook(t, inboundEvent({ content: "", media_url: "https://cdn.sendblue.test/photos/IMG_1.jpg" }));
+    await t.queue.idle();
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual([t.replier.replyText]);
+  });
+});
+
 describe("#185: voice notes play in Chrome", () => {
   let t: TestApp;
   afterEach(async () => {

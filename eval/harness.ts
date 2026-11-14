@@ -151,6 +151,8 @@ export async function startEvalApp(opts: {
       describer: undefined,
       // #185: the eval's voice notes aren't real audio; nothing to rewrap.
       rewrapper: undefined,
+      // #163: no "watching it now" here; it never changes the reply being graded.
+      holdingAfterMs: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
       // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would

@@ -11,7 +11,7 @@ import { createS3MediaStore, fetchMedia, type MediaStore } from "./media/storage
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
-import { routingOf, type Logger } from "./pipeline/inbound.js";
+import { HOLDING_AFTER_MS, routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
@@ -54,6 +54,7 @@ export function appDeps(
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
       rewrapper: pick("rewrapper", () => createFfmpegRewrapper()),
+      holdingAfterMs: pick("holdingAfterMs", () => HOLDING_AFTER_MS),
       describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,

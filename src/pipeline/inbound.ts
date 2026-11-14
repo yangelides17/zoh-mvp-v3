@@ -62,6 +62,44 @@ export interface PipelineDeps {
   retryDelaysMs?: number[];
   /** #16: every tester's reply line (one draft at a time, typing holds); the app makes one. */
   lines?: ReplyLines;
+  /** #163: a video or document still being read this long after it arrived gets a holding text; off when missing (tests, the eval). */
+  holdingAfterMs?: number;
+}
+
+/** #163 (spec): the holding text goes once a file has taken longer than this. */
+export const HOLDING_AFTER_MS = 15_000;
+
+/** #163: what ZOH says while it watches or reads; fixed, so it goes at once with no Claude call. */
+export const HOLDING_TEXTS = { video: "watching it now 👀", document: "reading it now 📖" } as const;
+
+/**
+ * Sends the holding text for a video or document still being read, unless "stop" or "reset" came in
+ * meanwhile. Recorded with `holding` in its timings, so it's never counted as one of ZOH's texts since the proof.
+ */
+async function sendHolding(deps: PipelineDeps, sendblue: SendblueClient, tester: Tester, inbound: Message, timings: Record<string, string | number>): Promise<void> {
+  const line = linesOf(deps).line(inbound.contactNumber);
+  if (line.cancelled || line.cancelledPending.some((p) => p.inbound.id === inbound.id)) return;
+  // Known once it's downloaded; before that, from the link (a slow download is a big file).
+  const kind = String(timings.media_kind ?? mediaKind(undefined, inbound.mediaUrl ?? ""));
+  if (kind === "image" || kind === "audio") return;
+  const content = kind === "video" ? HOLDING_TEXTS.video : HOLDING_TEXTS.document;
+  const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content });
+  const at = (deps.now ?? (() => new Date()))();
+  timings.holding_sent_at = at.toISOString();
+  await insertOutbound(deps.db, {
+    contactNumber: inbound.contactNumber,
+    lineNumber: inbound.lineNumber,
+    content,
+    sendblueHandle: sent.messageHandle ?? null,
+    status: sent.status ?? null,
+    inReplyTo: inbound.id,
+    sentAt: testerNow(tester, at),
+    createdAt: onTesterClock(tester, testerNow(tester, at)),
+    timings: { holding: 1 },
+    raw: sent.raw as object,
+  });
+  // A sent text ends the typing bubble: show it again while the real reply is written.
+  if (deps.typingIndicator) await sendblue.sendTypingIndicator(inbound.contactNumber, "start");
 }
 
 /** Lines for pipelines built without one (direct callers in tests): one per pipeline object. */
@@ -125,13 +163,28 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   }
 
   // 2. Media: keep a private copy; transcribe voice notes. Started now, so a draft waits for it rather than starting without it.
-  const prepared: Promise<PreparedMedia | undefined> = inbound.mediaUrl
+  const handled: Promise<PreparedMedia | undefined> = inbound.mediaUrl
     ? handleMedia(deps, inbound, timings).catch((err: unknown) => {
         errors.push(`media: ${errorMessage(err)}`);
         log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
         return undefined;
       })
     : Promise.resolve(undefined);
+  // #163: a video or document still being read after a while gets one "watching it now" first.
+  let holding: Promise<void> = Promise.resolve();
+  const timer =
+    inbound.mediaUrl && deps.holdingAfterMs !== undefined
+      ? setTimeout(() => {
+          holding = sendHolding(deps, sendblue, tester, inbound, timings).catch((err: unknown) => {
+            log.error({ ...ctx, err: safeError(err) }, "Sending the holding text failed");
+          });
+        }, deps.holdingAfterMs)
+      : undefined;
+  const prepared = handled.then(async (media) => {
+    clearTimeout(timer);
+    await holding;
+    return media;
+  });
 
   // 3. #16: one reply at a time per tester. A draft already running for them is interrupted and answers this text too.
   const line = linesOf(deps).line(inbound.contactNumber);
