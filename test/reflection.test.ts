@@ -93,11 +93,21 @@ async function doneMonday() {
 
 const NEXT = "2 min jog, 1 min walk, 4 rounds on your block at 6:30 pm";
 
-/** #131: a real reflection in an earlier reply (asked 7:31, answered and saved 7:32), so a proposal after it isn't early. */
+/**
+ * #131, #157: a reflection that's run its course in earlier replies, so a proposal after it isn't early: how it went
+ * and what went well (7:32), then one question deeper on something they said, answered (7:34).
+ */
 async function reflected() {
   await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
-  await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3");
-  await tool("save_reflection", { summary: "Harder than expected: the hill in round 3", how_it_went: true, take: "Full step, hill was hard." }, at(MON, "19:32"));
+  await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3. but slowing down on the flat parts worked");
+  await tool(
+    "save_reflection",
+    { summary: "Hill in round 3 was hard; slowing on the flats worked", how_it_went: true, went_well: "Slowing down on the flats kept them going", take: "Full step, hill was hard." },
+    at(MON, "19:32"),
+  );
+  await say("outbound", at(MON, "19:33"), "What happened on the hill?");
+  await say("inbound", at(MON, "19:34"), "I sprinted the start of it and ran out of gas halfway");
+  await tool("save_reflection", { summary: "Sprinted the hill's start, gassed halfway; slowing on the flats worked", how_it_went: true, went_deeper: true, take: "Pacing on hills is the gap." }, at(MON, "19:34"));
 }
 
 describe("takeaways", () => {
@@ -437,17 +447,53 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
     expect(await row(WED)).toBeUndefined();
   });
 
-  it("risk: a reflection that was already real when the reply began gets no forced extra question", async () => {
+  it("#157: a rich voice note and one deeper answer is enough: no forced extra question, no text count", async () => {
     await setup();
     await doneMonday();
-    // A rich voice note: saved as real with ZOH's 1st text, which asked its one question.
-    await real(at(MON, "19:31"));
+    // A rich voice note covers two things (how it went, what went well), saved with ZOH's 1st text and its one question.
+    await tool(
+      "save_reflection",
+      { summary: "Asking felt like bothering him; the opener he wrote landed", how_it_went: true, went_well: "The opener landed: he replied in an hour", take: "A worry about outreach." },
+      at(MON, "19:31"),
+    );
     await say("outbound", at(MON, "19:31"), "That's real. What made the asking feel like bothering him?");
     await say("inbound", at(MON, "19:33"), "he's busy, but he did offer to help");
+    // Two things covered, but nothing deeper yet: held, with the reason.
+    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({ ok: false, error: expect.stringContaining("go deeper on one thing") });
+    // Their answer added something real to it: saved as gone deeper, and ZOH's 2nd text can carry the step.
+    await tool("save_reflection", { summary: "Feels like bothering him, though he offered to help", how_it_went: true, went_deeper: true, take: "Worry eased." }, at(MON, "19:33"));
     expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
   });
 
-  it("the reply with their first real answer is pushed back once; the next reply goes, so at most one more exchange", async () => {
+  it("#157: an idea for tomorrow doesn't make it ready, even when the reflection was real when the reply began", async () => {
+    await setup();
+    await doneMonday();
+    // The voice note said how it went (saved with ZOH's 1st text); their reply is an idea for tomorrow.
+    await real(at(MON, "19:31"));
+    await say("outbound", at(MON, "19:31"), "Love that you sent it anyway. What did he say back?");
+    await say("inbound", at(MON, "19:33"), "nothing yet. after I do the dishes tomorrow I could just message two more people");
+    // The coach saves what it heard: an idea for tomorrow is none of the points, and nothing deeper came back.
+    await tool("save_reflection", { summary: "Feels like bothering him; no answer yet; thinking of messaging two more after the dishes", how_it_went: true, take: "Idea for tomorrow." }, at(MON, "19:33"));
+    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({
+      ok: false,
+      error: expect.stringContaining("an idea for tomorrow isn't that"),
+    });
+    expect(await row(WED)).toBeUndefined();
+  });
+
+  it("#157: held while they're mid-thought, and goes once the thread is told", async () => {
+    await setup();
+    await doneMonday();
+    await reflected();
+    await say("inbound", at(MON, "19:36"), "oh and then on the way back something weird happened");
+    await tool("save_reflection", { summary: "Hill pacing; something on the way back", how_it_went: true, open_thread: true, take: "Mid-story." }, at(MON, "19:36"));
+    expect(await propose(at(MON, "19:36"), {}, { howItWentSaid: true })).toMatchObject({ ok: false, error: expect.stringContaining("still telling you something") });
+    await say("inbound", at(MON, "19:38"), "my knee clicked a bit but it was fine after a minute");
+    await tool("save_reflection", { summary: "Hill pacing; knee clicked on the way back, fine after", how_it_went: true, take: "Knee clicked, fine." }, at(MON, "19:38"));
+    expect(await propose(at(MON, "19:38"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
+  });
+
+  it("the reply with their first real answer is pushed back; a later reply goes once it's ready", async () => {
     await setup();
     await doneMonday();
     await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
@@ -462,7 +508,13 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
       error: expect.stringContaining(`${EARLY} they just gave you their first real answer`),
     });
     await say("outbound", at(MON, "19:35"), "What about it feels like bothering him?");
-    await say("inbound", at(MON, "19:36"), "he's busy");
+    await say("inbound", at(MON, "19:36"), "he's busy. honestly writing the message was easier than I thought, took 2 min");
+    // A thin follow-up would still be held (one side, nothing deeper); this one goes deeper and adds what went well.
+    await tool(
+      "save_reflection",
+      { summary: "Worries he's busy; writing it was easy, 2 min", how_it_went: true, went_well: "Writing the message took 2 minutes", went_deeper: true, take: "Worry, but the asking is easy." },
+      at(MON, "19:36"),
+    );
     expect(await propose(at(MON, "19:36"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
   });
 

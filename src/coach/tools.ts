@@ -109,6 +109,7 @@ const schemas = {
       kind: z.enum(CHANGE_KINDS).optional(),
       until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional(),
       asked: text(300).optional(),
+      shown: text(400).optional(),
       suggestion: text(40).optional(),
     })
     .strict(),
@@ -159,6 +160,10 @@ const schemas = {
       summary: text(300),
       how_it_went: z.boolean(),
       in_the_way: text(200).optional(),
+      went_well: text(200).optional(),
+      differently: text(200).optional(),
+      went_deeper: z.boolean().optional(),
+      open_thread: z.boolean().optional(),
       take: text(300),
       day: z.enum(["today", "yesterday"]).optional(),
     })
@@ -296,6 +301,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         },
         until: { type: "string", description: 'Last day, "YYYY-MM-DD"' },
         asked: { type: "string", description: "deepen or upgrade they asked for: their words from their latest text, exactly" },
+        shown: { type: "string", description: "deepen or upgrade: the new version as your last text gave it, exactly (they've seen it and said yes)" },
         suggestion: { type: "string", description: "An approved next step they just agreed to: its id from the state (its kind applies)" },
       },
     },
@@ -427,13 +433,17 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them, with something behind it (how it felt and why, how hard, effort or time, room for more, what to change); a lesson alone, or a thin word with nothing behind it (\"okay\", \"fine\", \"a little awkward\"), is false: ask what's behind it. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. went_deeper: you asked about something they said and their reply added something real to it (an idea for tomorrow or a yes doesn't). open_thread: they're mid-way through telling you something (a story, \"and then…\", a new detail worth following); false once it's told. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
       properties: {
         summary: { type: "string" },
         how_it_went: { type: "boolean" },
         in_the_way: { type: "string" },
+        went_well: { type: "string" },
+        differently: { type: "string" },
+        went_deeper: { type: "boolean" },
+        open_thread: { type: "boolean" },
         take: { type: "string" },
         day: { type: "string", enum: ["today", "yesterday"] },
       },
@@ -492,27 +502,44 @@ export interface ReplyStart {
 /**
  * #131 (soft hold): why proposing the next step day's step now is early in today's reflection, or undefined
  * when it isn't. Early: the text that celebrates their proof, the reply where their first real answer came in,
- * or a thin reflection before they've given little back twice. The coach can go ahead with a reason (`ready`),
- * so it pushes back once, never forces a question. The safety net and texts ZOH starts are never early.
+ * a thin reflection before they've given little back twice, or (#157) one that isn't ready yet. The coach can go
+ * ahead with a reason (`ready`), so it pushes back, never forces a question. The safety net and texts ZOH starts
+ * are never early.
  */
 export function earlyProposal(state: CoachState, start?: ReplyStart): string | undefined {
   const row = state.todayRow;
   const done = row?.status === "done" || row?.status === "done_reduced";
-  if (!done || state.nudgeMoment || state.proof.today === 0) return undefined;
+  if (!row || !done || state.nudgeMoment || state.proof.today === 0) return undefined;
   const n = state.proof.zohTextsSince + 1;
   if (n >= REFLECTION_SAFETY_NET) return undefined;
-  const said = !!row?.howItWentSaid;
+  const said = !!row.howItWentSaid;
   const why =
     n === 1
       ? "this text celebrates their proof: ask your one question about it first"
-      : (start?.howItWentSaid ?? said)
-        ? undefined
-        : said
-          ? "they just gave you their first real answer: ask one question about it first (a worry, a difficulty, what clicked, or their idea for tomorrow)"
-          : n < REFLECTION_LITTLE_BACK
-            ? "nothing real on how it went yet: ask what's behind their answer first"
-            : undefined;
+      : !said
+        ? n < REFLECTION_LITTLE_BACK
+          ? "nothing real on how it went yet: ask what's behind their answer first"
+          : undefined
+        : !(start?.howItWentSaid ?? said)
+          ? "they just gave you their first real answer: ask about it first (an idea for tomorrow is something to ask about, not the plan)"
+          : notReadyYet(row);
   return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. If they asked for it, are rushed or said skip, call again with ready: why.`;
+}
+
+/**
+ * #157: a reflection is ready for the next step once they've covered two things with something behind them (how it
+ * went, what went well, what got in the way or they'd do differently), you've gone deeper on one thing they said,
+ * and they aren't mid-thought. What the coach saved says which; no text count.
+ */
+function notReadyYet(row: StepDay): string | undefined {
+  if (row.openThread) return "they're still telling you something: let them finish, and follow it";
+  const covered = [row.howItWentSaid, !!row.wentWell, !!(row.differently || row.inTheWay)].filter(Boolean).length;
+  if (covered < 2) {
+    const missing = !row.wentWell ? "what went well" : "what got in the way or what they'd do differently";
+    return `you have one side of it so far: ask about ${missing}, with something behind it (an idea for tomorrow isn't that)`;
+  }
+  if (!row.wentDeeper) return "go deeper on one thing they said first, in their words";
+  return undefined;
 }
 
 export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date, start?: ReplyStart): Promise<ToolResult> {
@@ -678,7 +705,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "change_plan": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet: use propose_plan." };
-      const { until, asked, suggestion: ref, ...rest } = input as z.infer<typeof schemas.change_plan>;
+      const { until, asked, shown, suggestion: ref, ...rest } = input as z.infer<typeof schemas.change_plan>;
       const { kind: given, ...fields } = rest;
       let kind = given ?? "other";
       let approved: Suggestion | undefined;
@@ -716,12 +743,20 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           return {
             ok: false,
             error:
-              "A deepen or upgrade of the plan is made right away only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
+              "A deepen or upgrade of the plan is made only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
           };
         }
       }
       if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
       if (until !== undefined && kind !== "other") return { ok: false, error: "A temporary lighter plan is kind other." };
+      // #157: their ask is the start, not the change: it's saved only after they've seen the new version and said yes.
+      if (!approved && kind !== "other" && !shownBefore(shown, state.lastZohText)) {
+        return {
+          ok: false,
+          error:
+            "Not saved yet: a deepen or upgrade is made only once they've seen it. If what they want isn't clear (\"harder\" how?), ask about it first. Then give the new version in full in your text and ask if it works; on their yes, call again with shown = the new version as your last text said it, exactly.",
+        };
+      }
       const merged = mergePlan(state.plan, fields);
       if (typeof merged === "string") return { ok: false, error: merged };
       const version = await nextVersion(db, tester.id);
@@ -750,7 +785,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           .where(eq(suggestions.id, approved.id));
         await alertAnswer(db, { suggestion: approved, name: tester.name, answer: "agreed", note: outcomeNote, at });
       } else if (kind !== "other") {
-        // Their own ask, made right away (spec case 5): recorded like every next step, for the team.
+        // Their own ask, made once they've seen it and said yes (#157): recorded like every next step, for the team.
         await db.insert(suggestions).values({
           testerId: tester.id,
           goalSlug: state.plan.goalSlug,
@@ -760,7 +795,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           reasoning: asked,
           decision: "approved",
           decidedBy: "zoh",
-          decisionReason: "They asked; made right away, the new version flagged for review.",
+          decisionReason: "They asked and agreed to it once shown; the new version flagged for review.",
           decidedAt: at,
           outcome: "agreed",
           outcomeAt: at,
@@ -826,7 +861,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         // #76: day-to-day steps are the coach's call; only a new focus goes to the team.
         return { ok: false, error: "A harder or different step is yours to give: set it as a day's step with set_today_step. Only a new focus goal goes to the team." };
       } else if (asked_by === "tester" && !unsure) {
-        return { ok: false, error: "They asked to deepen or upgrade: make it right away with change_plan (that kind, asked = their words)." };
+        return {
+          ok: false,
+          error: "They asked to deepen or upgrade: ask what they mean if it isn't clear, show the new version and ask if it works; on their yes, change_plan (that kind, asked = their words, shown = your version).",
+        };
       }
       const goalSlug = state.plan.goalSlug;
       const same = (s: Suggestion) => s.goalSlug === goalSlug && s.kind === kind && (s.newGoalSlug ?? undefined) === new_goal;
@@ -1055,7 +1093,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "save_reflection": {
-      const { summary, how_it_went, in_the_way, take, day } = input as z.infer<typeof schemas.save_reflection>;
+      const { summary, how_it_went, in_the_way, went_well, differently, went_deeper, open_thread, take, day } = input as z.infer<typeof schemas.save_reflection>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
       // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
@@ -1064,12 +1102,30 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         reflection: summary,
         howItWentSaid: how_it_went ? true : sql`coalesce(${stepDays.howItWentSaid}, false)`,
         ...(in_the_way ? { inTheWay: in_the_way } : {}),
+        // #157: what they covered stays covered, and going deeper stays done; mid-thought is as of this save.
+        ...(went_well ? { wentWell: went_well } : {}),
+        ...(differently ? { differently } : {}),
+        ...(went_deeper ? { wentDeeper: true } : {}),
+        openThread: !!open_thread,
         coachTake: take,
         updatedAt: at,
       };
       await db
         .insert(stepDays)
-        .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, howItWentSaid: how_it_went, inTheWay: in_the_way ?? null, coachTake: take, updatedAt: at })
+        .values({
+          testerId: tester.id,
+          date,
+          planId: state.plan.id,
+          reflection: summary,
+          howItWentSaid: how_it_went,
+          inTheWay: in_the_way ?? null,
+          wentWell: went_well ?? null,
+          differently: differently ?? null,
+          wentDeeper: !!went_deeper,
+          openThread: !!open_thread,
+          coachTake: take,
+          updatedAt: at,
+        })
         .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
       return saved(tester, quietly(`reflection for ${date}`));
     }
@@ -1237,6 +1293,11 @@ function saidIt(words: string, latest: string): boolean {
       .trim();
   const said = norm(words);
   return said.length > 0 && norm(latest).includes(said);
+}
+
+/** #157: the new version was in ZOH's last text (a few words at least, so a bare "harder" doesn't count). */
+function shownBefore(shown: string | undefined, lastZohText: string): boolean {
+  return !!shown && shown.trim().split(/\s+/).length >= 3 && saidIt(shown, lastZohText);
 }
 
 async function nextVersion(db: Db, testerId: string): Promise<number> {

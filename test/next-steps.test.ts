@@ -95,9 +95,12 @@ async function say(tester: Tester, direction: "inbound" | "outbound", when: Date
   await t.db.insert(messages).values({ direction, contactNumber: tester.phone, content, createdAt: when, sentAt: when });
 }
 
-async function state(tester: Tester, now: Date, lastTesterText = "", goalCap?: number) {
-  return loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now, isFirstText: false, lastTesterText, goalCap });
+async function state(tester: Tester, now: Date, lastTesterText = "", goalCap?: number, lastZohText = "") {
+  return loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now, isFirstText: false, lastTesterText, lastZohText, goalCap });
 }
+/** #157: a reply to their latest text, after ZOH's last one. */
+const replyTool = async (tester: Tester, name: string, input: unknown, now: Date, lastZohText: string, lastTesterText: string) =>
+  runTool(t.db, await state(tester, now, lastTesterText, undefined, lastZohText), name, input, now);
 const block = async (tester: Tester, now: Date, goalCap?: number) => buildStateBlock(await state(tester, now, "", goalCap));
 const tool = async (tester: Tester, name: string, input: unknown, now: Date, lastTesterText = "", goalCap?: number) =>
   runTool(t.db, await state(tester, now, lastTesterText, goalCap), name, input, now);
@@ -185,15 +188,26 @@ describe("rule 1: no next step reaches a tester before the team approves it", ()
 });
 
 describe("what testers ask for (spec cases 4 to 6)", () => {
-  it("a deepen or upgrade they ask for is made right away, flagged for review, and recorded as their own next step", async () => {
+  it("#157: a deepen or upgrade they ask for is made only once they've seen it and said yes; then flagged for review and recorded as their own", async () => {
     const tester = await setup();
-    const asked = "can we bump it to 15 pages?";
-    const deepen = await tool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: "bump it to 15 pages" }, at(MON, "20:00"), asked);
+    const kickoff = "Yo Sam! 10 pages of Dune at 9 tonight. You in?";
+    // The reply that first hears it: not saved, whatever ZOH passes as shown (it wasn't in its last text).
+    const ask = "I want it harder";
+    for (const shown of [undefined, "harder", "15 pages of Dune every night"]) {
+      const first = await replyTool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: ask, ...(shown ? { shown } : {}) }, at(MON, "20:00"), kickoff, ask);
+      expect(first).toMatchObject({ ok: false, error: expect.stringContaining("only once they've seen it") });
+    }
+    expect(await allPlans()).toHaveLength(1);
+    expect(await allSuggestions()).toHaveLength(0);
+    // ZOH asked what harder means, then showed the new version; their yes makes it.
+    const offer = "Love it. How about 15 pages of Dune every night at 9, same couch? Work for you?";
+    const yes = "yes let's do 15";
+    const deepen = await replyTool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: yes, shown: "15 pages of Dune every night at 9" }, at(MON, "20:10"), offer, yes);
     expect(deepen).toMatchObject({ ok: true });
     const [, v2] = await allPlans();
     expect(v2).toMatchObject({ version: 2, changeKind: "deepen", needsReview: true, step: "15 pages of Dune" });
     expect(await allSuggestions()).toMatchObject([
-      { kind: "deepen", raisedBy: "tester", reasoning: "bump it to 15 pages", decision: "approved", decidedBy: "zoh", outcome: "agreed", planId: v2!.id },
+      { kind: "deepen", raisedBy: "tester", reasoning: yes, decision: "approved", decidedBy: "zoh", outcome: "agreed", planId: v2!.id },
     ]);
     // suggest_next_step points their own deepen back to change_plan.
     expect(

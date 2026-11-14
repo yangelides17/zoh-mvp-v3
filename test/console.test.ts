@@ -1061,6 +1061,10 @@ describe("the Step log card's reflection sections (#93)", () => {
     reflection: null,
     howItWentSaid: false,
     inTheWay: null,
+    wentWell: null,
+    differently: null,
+    wentDeeper: false,
+    openThread: false,
     coachTake: null,
     nextReason: null,
     createdAt: new Date(0),
@@ -1082,6 +1086,11 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(html).toContain('href="/console/testers/t1?tab=texts&amp;day=2026-11-02"');
     // A done day in full doesn't show what got in the way.
     expect(html).not.toContain("What got in the way");
+    // #157: what went well and what they'd do differently show only when said.
+    expect(html).not.toContain("What went well");
+    const both = stepLogSections(view({ wentWell: "Phone in the other room", differently: "Start before dinner" }), [], "t1");
+    expect(both).toContain("What went well:</span> Phone in the other room");
+    expect(both).toContain("Would do differently:</span> Start before dinner");
   });
 
   it('says "None" when empty, "not recorded" for days from before, and shows what got in the way on a missed day', () => {

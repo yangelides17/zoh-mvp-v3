@@ -178,10 +178,12 @@ export function createCoach(opts: CoachOptions): Replier {
         .slice(turns.findLastIndex((t) => t.role === "assistant") + 1)
         .map((t) => t.text)
         .join("\n");
+      // #157: what ZOH last said, so a deepen or upgrade is saved only once it was shown to them.
+      const lastZohText = turns.findLast((t) => t.role === "assistant")?.text ?? "";
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
       // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
       const start = { howItWentSaid: !!state.todayRow?.howItWentSaid };
       let fallbackText = "";
@@ -264,11 +266,11 @@ export function createCoach(opts: CoachOptions): Replier {
             done.push(action);
             onAction?.(action);
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             }
           }
           results.push({

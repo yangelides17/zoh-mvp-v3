@@ -131,7 +131,8 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   before; Metrics' "Progressed" counts harder days (untagged older days aren't counted).
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
-  upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade
+  upgrade the tester asks for is made once they've seen the new version and said yes (#157, Nov 14;
+  was "right away"), and recorded too. An approved deepen or upgrade
   rides on the next step-day kickoff (or a reply); a new focus is raised in a reply, within the goal
   cap, and keeps the old focus as maintenance. Maintenance goals get a one-line check-in in the
   kickoff twice a week; alerts cover milestones (focus only), a second miss, 2 quiet days, two
