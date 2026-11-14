@@ -51,7 +51,7 @@ export function createS3MediaStore(opts: S3MediaStoreOptions): MediaStore {
 
 export type MediaKind = "image" | "audio" | "video" | "document" | "other";
 
-export const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm", "aiff", "aif", "3ga"]);
+const AUDIO_EXT = new Set(["caf", "m4a", "mp3", "wav", "aac", "amr", "ogg", "oga", "opus", "flac", "webm", "aiff", "aif", "3ga"]);
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif", "heic", "heif", "webp"]);
 const VIDEO_EXT = new Set(["mov", "mp4", "m4v", "avi", "mkv", "3gp"]);
 /** #163: files the coach reads (src/media/documents.ts), plus the ones it says it can't open (iWork, old Office). */

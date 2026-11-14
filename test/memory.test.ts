@@ -23,7 +23,8 @@ import {
 import { zonedTime } from "../src/nudges/schedule.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { getTester, resetTester } from "../src/testers/testers.js";
-import { DEV, FakeClaudeModel, inboundEvent, makeApp, ME, postWebhook, STRANGER, WESTERN, type TestApp } from "./helpers.js";
+import { DEV, FakeClaudeModel, inboundEvent, makeApp, ME, postWebhook, STRANGER, testPhoto, WESTERN, type TestApp } from "./helpers.js";
+import { makeDocx, makePdf } from "../eval/media.js";
 import { runMemoryTool } from "../src/memory/coach-tools.js";
 
 const TZ = "America/New_York";
@@ -638,5 +639,72 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     const photo = await say(mike, "inbound", at(MON, "19:30"), "done", { mediaUrl: "https://cdn/x.jpg", mediaContentType: "image/jpeg", description: "Dune open at page 112" });
     const now = await say(mike, "inbound", at(MON, "19:40"), "next");
     expect(toTurns([photo, now], new Map([[now.id, {}]]))[0]!.text).toBe("[Sent a photo earlier: Dune open at page 112]\ndone");
+  });
+});
+
+describe("#163: open_file reopens a file they sent", () => {
+  const WORD = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  const ESSAY = "The lighthouse keeper woke before dawn and counted the ships.";
+  const ctx = () => ({ at: at(THU, "09:00"), budget: { lookups: 0, searches: 0 }, media: t.media });
+
+  /** A file they sent, kept in the bucket the way the pipeline keeps it. */
+  async function sent(who: Tester, name: string, bytes: Uint8Array, type: string, extra: Partial<Message> = {}) {
+    const key = `media/${who.id}/${name}`;
+    await t.media.put(key, bytes, type);
+    return say(who, "inbound", at(MON, "20:00"), "", { mediaUrl: `https://cdn.example/${name}`, mediaKey: key, mediaContentType: type, ...extra });
+  }
+
+  it("reads a document again from our copy, in full", async () => {
+    const mike = await tester();
+    const m = await sent(mike, "essay.docx", await makeDocx(ESSAY), WORD);
+    const result = await runMemoryTool(t.db, mike, "open_file", { ref: messageRef(m.id) }, ctx());
+    expect(result).toMatchObject({ ok: true });
+    if (!result.ok) return;
+    expect(result.message).toContain("The document they sent 2026-11-02");
+    expect(result.message).toContain(`<document>\n${ESSAY}\n</document>`);
+  });
+
+  it("hands back a PDF or a photo as the file itself, and a voice note as its words", async () => {
+    const mike = await tester();
+    const pdf = await sent(mike, "essay.pdf", makePdf([ESSAY]), "application/pdf");
+    const photo = await sent(mike, "squat.jpg", await testPhoto(), "image/jpeg");
+    const voice = await sent(mike, "note.m4a", new Uint8Array([1]), "audio/mp4", { transcript: "ran three miles" });
+    const open = async (m: Message) => {
+      const r = await runMemoryTool(t.db, mike, "open_file", { ref: messageRef(m.id) }, ctx());
+      if (!r.ok) throw new Error(r.error);
+      return r;
+    };
+    expect((await open(pdf)).blocks?.[0]).toMatchObject({ type: "document", source: { media_type: "application/pdf" } });
+    expect((await open(photo)).blocks?.[0]).toMatchObject({ type: "image", source: { media_type: "image/jpeg" } });
+    expect((await open(voice)).message).toContain('Its words: "ran three miles"');
+  });
+
+  it("never opens another tester's file, and counts toward the lookup limit", async () => {
+    const mike = await tester();
+    const ana = await tester(WESTERN, { name: "Ana" });
+    const hers = await sent(ana, "diary.txt", new TextEncoder().encode("private"), "text/plain");
+    expect(await runMemoryTool(t.db, mike, "open_file", { ref: messageRef(hers.id) }, ctx())).toMatchObject({ ok: false });
+    const mine = await sent(mike, "notes.txt", new TextEncoder().encode("mine"), "text/plain");
+    const spent = { ...ctx(), budget: { lookups: 5, searches: 0 } };
+    expect(await runMemoryTool(t.db, mike, "open_file", { ref: messageRef(mine.id) }, spent)).toMatchObject({ ok: false, error: expect.stringContaining("Lookup limit") });
+  });
+
+  it("puts the reopened file in the coach's tool result", async () => {
+    const mike = await tester();
+    await t.db.insert(plans).values({
+      testerId: mike.id, goalSlug: "reading", status: "locked", version: 1, step: "10 pages", stepTime: "21:00",
+      days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], proof: "photo", reason: "Habit.", startDate: MON, lockedAt: at(MON, "08:00"),
+    });
+    const pdf = await sent(mike, "essay.pdf", makePdf([ESSAY]), "application/pdf");
+    const model = new FakeClaudeModel().script({ tools: [{ name: "open_file", input: { ref: messageRef(pdf.id) } }] }, "Your ending lands.");
+    const coach = createCoach({ db: t.db, model, voice: "VOICE", media: t.media });
+    await coach.reply({ tester: mike, turns: [{ role: "user", text: "what did you think of my ending on Monday?" }], now: at(THU, "09:00") });
+    expect(model.requests[0]!.tools.map((x) => x.name)).toContain("open_file");
+    const results = model.requests[1]!.messages.at(-1)!.content as { type: string; content?: unknown }[];
+    const toolResult = results.find((b) => b.type === "tool_result")!;
+    expect(toolResult.content).toEqual([
+      { type: "text", text: expect.stringContaining("The document they sent 2026-11-02, attached (1 page).") },
+      expect.objectContaining({ type: "document" }),
+    ]);
   });
 });
