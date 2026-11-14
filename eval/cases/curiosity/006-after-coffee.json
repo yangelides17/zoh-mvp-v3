@@ -1,0 +1,38 @@
+{
+  "id": "after-coffee",
+  "title": "Too slow: a tester who says what they'll do gets backed, not questioned",
+  "origin": "#157 spec: \"ok I'll do it after coffee\"",
+  "seed": {
+    "name": "Ben",
+    "goal": "focus",
+    "phase": "active",
+    "history_hours_ago": 0,
+    "answers": { "what": "one deep-work block, phone in a drawer", "where": "at my desk", "when": "9 am", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Ben! 25 minutes of deep work at 9, phone in the drawer. You in?" }
+    ],
+    "plan": {
+      "step": "25 minutes of deep work at my desk, phone in a drawer",
+      "place": "at my desk",
+      "time": "09:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "screenshot",
+      "proof_note": "a screenshot of the timer at the end",
+      "reason": "The timer screenshot shows the block actually happened.",
+      "minutes": 25,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "25 minutes of deep work at my desk, phone in a drawer" }
+    ],
+    "today_step": { "step": "25 minutes of deep work at your desk at 9 am, phone in a drawer" }
+  },
+  "testerLines": [
+    "ok I'll do it after coffee, so like 9:15",
+    "👍"
+  ],
+  "whatWentWrong": "New case: curiosity must not turn a clear yes into a round of questions.",
+  "shouldHaveHappened": "ZOH takes the yes and the new time (9:15) and backs them in a line, with no question about why or anything else. After the thumbs up it says nothing more, or one short line with no question.",
+  "startTime": "08:40",
+  "timeZone": "America/New_York"
+}

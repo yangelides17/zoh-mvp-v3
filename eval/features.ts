@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { onboardingScenarios } from "./scenarios/onboarding.js";
 import { nudgeScenarios } from "./scenarios/nudges.js";
 import { planScenarios } from "./scenarios/plan.js";
+import { curiosityScenarios } from "./scenarios/curiosity.js";
 import type { ScenarioInput } from "./types.js";
 
 export const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -96,7 +97,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "conversation",
         label: "Only once every plan question is answered, carries straight on into the plan (asks what it still needs, or shows it), with no recap or plan-is-coming line",
       },
-      { id: "length", scope: "conversation", label: "No longer than about 12 ZOH texts and five minutes; fewer is fine when the tester gives several answers at once" },
+      { id: "length", scope: "conversation", label: "No longer than about 15 ZOH texts and five minutes (#157); fewer is fine when the tester gives several answers at once" },
     ],
   },
   plan: {
@@ -475,6 +476,49 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "text",
         label: "Pushy-level energy, warm and sincere; not overfamiliar or affectionate; emoji as punctuation, never a row",
       },
+    ],
+  },
+  /**
+   * Curious by default (#157): how ZOH asks, across onboarding, kickoff replies and the reflection. Too fast and too
+   * slow are graded together, so a fix for one can't quietly break the other.
+   */
+  curiosity: {
+    name: "curiosity",
+    doneWhen: "ZOH has proposed a plan or a next step and you've answered it, or you've said everything you wanted to say and ZOH has answered.",
+    scenarios: curiosityScenarios,
+    saved: true,
+    rubric: [
+      { id: "real-moment", scope: "conversation", label: "A vague or generic answer gets a question about a real moment (onboarding, a kickoff reply, the reflection)" },
+      { id: "not-leading", scope: "text", label: "No leading questions, no menus of guesses about the tester's own experience, no \"why\" about a lapse" },
+      { id: "feelings-first", scope: "conversation", label: "An emotional text gets understanding and no step or plan in that same text" },
+      {
+        id: "options-tied",
+        scope: "conversation",
+        label: "Options or recommendations are about what to do, each tied to something the tester said or ZOH knows about them, with a reason; when ZOH doesn't know enough, it asks instead",
+      },
+      { id: "playback", scope: "conversation", label: "Playbacks are occasional and open-ended, with no parroting openers (never opens a text by restating their last one)" },
+      {
+        id: "warm-not-hollow",
+        scope: "text",
+        label: "A warm, human acknowledgement is fine; no empty generic praise (\"amazing\", \"great idea\") and never acting on an idea without asking about it first. Feedback on their work starts with their take and is specific",
+      },
+      {
+        id: "went-well",
+        scope: "conversation",
+        label: "After proof, what went well gets drawn out and doubled down on in the next step, along with anything they'd do differently",
+      },
+      {
+        id: "not-rushing",
+        scope: "conversation",
+        label: "Never moves on while they're mid-thought: a story told over several texts, an \"and then…\", or a new detail that opens something",
+      },
+      {
+        id: "not-dragging",
+        scope: "conversation",
+        label:
+          "Reads as a conversation with someone who cares, not an interrogation: a routine day with clear, complete answers gets a question or two, not five; once they're done or say what they'll do, it moves to the step; rushed, done or flat twice gets let go",
+      },
+      { id: "short", scope: "text", label: "Short: one to three sentences, at most one question, at the end; a text that shows a plan or a step can run to about 8 short lines" },
     ],
   },
   /** The Sunday look-back (#78): regression cases only, each starting on a Sunday (`startDay`). */

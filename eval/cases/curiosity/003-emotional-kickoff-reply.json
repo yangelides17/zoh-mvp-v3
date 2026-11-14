@@ -1,0 +1,40 @@
+{
+  "id": "emotional-kickoff-reply",
+  "title": "Too fast: an emotional reply to the kickoff gets understanding first, with no step in that text",
+  "origin": "#157 spec: an emotional text in reply to a kickoff; voice page \"They're struggling\" example put a step in it",
+  "seed": {
+    "name": "Sam",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 0,
+    "answers": { "what": "Dune", "where": "in bed", "when": "9:30 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Sam! 20 pages of Dune tonight at 9:30, in bed. You in?" }
+    ],
+    "plan": {
+      "step": "Read 20 pages of Dune in bed",
+      "place": "in bed",
+      "time": "21:30",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a photo of the page you stopped on",
+      "reason": "A page photo is quick and shows where you got to.",
+      "minutes": 20,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "Read 20 pages of Dune in bed" },
+      { "days_ago": 1, "status": "done", "step": "Read 20 pages of Dune in bed" }
+    ],
+    "today_step": { "step": "20 pages of Dune in bed at 9:30 pm (about 20 min)" }
+  },
+  "testerLines": [
+    "ugh honestly rough day. my boss tore into me in front of the whole team over something that wasn't even my fault",
+    "yeah. I just feel kind of flat, I don't know if I've got it in me tonight",
+    "ok maybe a few pages"
+  ],
+  "whatWentWrong": "New case: ZOH tends to answer a rough day with a smaller step straight away.",
+  "shouldHaveHappened": "The first reply is understanding, specific to what happened, with no step, no smaller version and no push in that text (a question about it is fine). Only after \"I don't know if I've got it in me\" does ZOH turn to tonight, warmly: a smaller version spelled out (what, how much, when, proof) with \"work for you?\", or a gentle hold of the line. After \"ok maybe a few pages\" it's set and confirmed in a line.",
+  "startTime": "18:10",
+  "timeZone": "America/New_York"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "idk-options",
+  "title": "Options asked for: directions tied to what the tester said, with a reason, not generic ideas",
+  "origin": "#157 spec: \"idk, what should I do?\" is the cue for options; Yanni: options based on what the person said",
+  "seed": {
+    "name": "Lena",
+    "goal": "speaking",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "what": "speaking up in meetings", "where": "at work", "when": "10 am standup", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Standup at 10, Lena: one question to a teammate about their update. Voice note after on how it went." },
+      { "from": "tester", "text": "ok" }
+    ],
+    "plan": {
+      "step": "Say one thing in the first two minutes of standup",
+      "place": "at work",
+      "time": "10:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "voice",
+      "proof_note": "a voice note right after on what you said and how it went",
+      "reason": "Saying it out loud right after is how you notice what's changing.",
+      "minutes": 15,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "Say one thing in the first two minutes of standup" },
+      { "days_ago": 1, "status": "done", "step": "Say one thing in the first two minutes of standup" }
+    ],
+    "today_step": { "step": "Ask one teammate a question about their update at the 10 am standup", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "[voice: Asked Dev a question about his launch. He gave a long answer and I didn't really know what to say after, so it just kind of hung there. Awkward.]",
+    "I guess I froze because I was already thinking about my own update",
+    "idk, what should I do tomorrow?",
+    "the second one"
+  ],
+  "whatWentWrong": "New case: when the tester asks for direction, ZOH should bring expertise tied to them, not generic tips or a question back.",
+  "shouldHaveHappened": "ZOH counts it and asks about the awkward moment (open, no guesses), then about freezing if useful. Once they ask \"what should I do tomorrow?\", ZOH offers 2 or 3 concrete directions, each tied to what they said (the pause after Dev's answer, already thinking about their own update), each with a few words on why, or one clear recommendation with the reason. After \"the second one\" it sets that as the next step day's step, fully defined, and asks if it works or confirms.",
+  "startTime": "10:25",
+  "timeZone": "America/New_York"
+}
