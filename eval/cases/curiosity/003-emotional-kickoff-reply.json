@@ -34,7 +34,7 @@
     "ok maybe a few pages"
   ],
   "whatWentWrong": "New case: ZOH tends to answer a rough day with a smaller step straight away.",
-  "shouldHaveHappened": "The first reply is understanding, specific to what happened, with no step, no smaller version and no push in that text (a question about it is fine). Only after \"I don't know if I've got it in me\" does ZOH turn to tonight, warmly: a smaller version spelled out (what, how much, when, proof) with \"work for you?\", or a gentle hold of the line. After \"ok maybe a few pages\" it's set and confirmed in a line.",
+  "shouldHaveHappened": "The first reply is understanding, specific to what happened, with no step, no smaller version and no push in that text (a question about it is fine). Only after \"I don't know if I've got it in me\" does ZOH turn to tonight, warmly: a smaller version it suggests (asking if it works), or a gentle hold of the line. \"ok maybe a few pages\" is their own ask for less, with a reason: it's set at once and spelled out (how many pages, when, proof), with no check-back needed.",
   "startTime": "18:10",
   "timeZone": "America/New_York"
 }

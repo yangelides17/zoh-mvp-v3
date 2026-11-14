@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createCoach, NOT_SENT_NOTE } from "../src/coach/coach.js";
+import { createCoach, NOT_SENT_NOTE, sinceProof } from "../src/coach/coach.js";
+import type { Turn } from "../src/claude/replier.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { loadCoachState, loadDaySummary } from "../src/coach/state.js";
 import { runTool, type ReplyStart } from "../src/coach/tools.js";
@@ -10,7 +11,7 @@ import { setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
 import { createNudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
-import { FakeClaudeModel, LINE, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
+import { FakeClaudeModel, FakeThreadCheck, LINE, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
 
 const silent: Logger = { info() {}, warn() {}, error() {}, debug() {} } as unknown as Logger;
 
@@ -110,6 +111,7 @@ async function reflected() {
   await tool("save_reflection", { summary: "Sprinted the hill's start, gassed halfway; slowing on the flats worked", how_it_went: true, went_deeper: true, take: "Pacing on hills is the gap." }, at(MON, "19:34"));
 }
 
+
 describe("takeaways", () => {
   it("saves with its evidence and day, and shows on the following days with its age", async () => {
     await setup();
@@ -168,7 +170,7 @@ describe("reflection", () => {
     await doneMonday();
     expect(await block(at(MON, "19:31"))).toContain("Today's reflection: none yet.");
     expect(await block(at(MON, "19:31"))).toContain(
-      'They haven\'t said how it went for them yet (how it felt, how hard, room for more; a lesson, what got in the way or a thin "okay" isn\'t that): find out before any next step, unless they\'re rushed or say skip.',
+      'They haven\'t said how it went for them yet (a lesson, what got in the way or a thin "okay" isn\'t that): find out before any next step, unless they\'re rushed, say skip or say they\'re done.',
     );
     await tool("save_reflection", { summary: "Easier when slower", how_it_went: true, take: "Slowed down, felt good." }, at(MON, "19:40"));
     expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went.');
@@ -185,7 +187,7 @@ describe("reflection", () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text, even when they've said what they want next, unless they're rushed or done talking.");
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one open question (how it went; or, if their proof already says, deeper on something they said); the next step waits for a later text, even when they've said what they want next, unless they're rushed or done talking.");
     // They said how it went early, so the talk runs on its content, not a count.
     await tool("save_reflection", { summary: "Felt easy, slower pace helped", how_it_went: true, take: "Easy, wants more." }, at(MON, "19:30"));
     const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
@@ -212,7 +214,7 @@ describe("reflection probes thin answers and waits before the next step (#131)",
       if (i < replies - 1) await say("outbound", at(MON, `19:3${3 + i * 2}`), "What made it okay?");
     }
   }
-  const FIND_OUT = "find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; the next step waits, unless they're rushed or say skip: then the next step";
+  const FIND_OUT = "find out first: a thin answer is an opening, so ask what's behind it, open and tied to their proof, never guessing what it means; the next step waits, unless they're rushed, say skip or say they're done: then the next step";
 
   it("a thin answer keeps the guard: saved, not said, and the next step waits at texts 2 and 3", async () => {
     await setup();
@@ -238,17 +240,14 @@ describe("reflection probes thin answers and waits before the next step (#131)",
     const real = await block(at(MON, "19:37"));
     expect(real).toContain("They've said how it went.");
     expect(real).toContain(
-      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (what went well, what got in the way, how hard, room for more). An idea for tomorrow: ask about it. Move on to the next step once it's ready (above) or they've run out (PROOF)",
+      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one open question, before any reassurance or proposal. An idea for tomorrow: ask about it. Never fish: done or giving little, wrap up warmly and move on to the next step; otherwise the next step once nothing they just said is still open (PROOF)",
     );
-    // #157: the state shows what's covered, so the coach sees what's still open.
-    expect(real).toContain(
-      "Covered so far: how it went yes; what went well not yet; what got in the way or they'd do differently not yet; gone deeper not yet. Not ready for the next step yet",
-    );
-    await tool("save_reflection", { summary: "Hill brutal; slowing on the flats worked", how_it_went: true, went_well: "Slowing on the flats", went_deeper: true, take: "Pacing." }, at(MON, "19:37"));
-    expect(await block(at(MON, "19:37"))).toContain("gone deeper yes. Ready for the next step.");
-    // Rushed and "skip" are the coach's call from their words: the not-said line names them as the way out.
+    // #157: no checklist of topics in the state to fish for.
+    expect(real).not.toContain("Covered so far");
+    expect(real).not.toContain("Before the next step:");
+    // Rushed, "skip" and done are the coach's call from their words: the not-said line names them as the way out.
     await t.db.update(stepDays).set({ howItWentSaid: false }).where(eq(stepDays.date, MON));
-    expect(await block(at(MON, "19:37"))).toContain("find out before any next step, unless they're rushed or say skip.");
+    expect(await block(at(MON, "19:37"))).toContain("find out before any next step, unless they're rushed, say skip or say they're done.");
   });
 
   it("a next step is agreed only after it's been shown: never in the reply that first saves it", async () => {
@@ -440,7 +439,7 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
     await doneMonday();
     const early = await propose(at(MON, "19:30"));
     expect(early).toMatchObject({ ok: false, error: expect.stringContaining(`${EARLY} this text celebrates their proof`) });
-    expect(early).toMatchObject({ error: expect.stringContaining("Don't give the next step in this text") });
+    expect(early).toMatchObject({ error: expect.stringContaining("The next step comes once they've answered") });
     expect(await row(WED)).toBeUndefined();
     // Risk: a tester who's rushed or asks "what's tomorrow?" is never held up for a question.
     // #157: the reason is their own words: the coach's paraphrase or guess doesn't get through.
@@ -457,50 +456,91 @@ describe("the next step waits once in the reflection: a soft hold with a way thr
     expect(await row(WED)).toBeUndefined();
   });
 
-  it("#157: a rich voice note and one deeper answer is enough: no forced extra question, no text count", async () => {
-    await setup();
+  /** #157: the outside read, as the coach hands it the conversation since their proof. */
+  const read = (check: FakeThreadCheck): ReplyStart => ({ howItWentSaid: true, openThread: () => check.open("ZOH: ...\nThem: ...") });
+  /** A real reflection, with ZOH's follow-up answered: nothing of the coach's own holds the step any more. */
+  async function talked() {
     await doneMonday();
-    // A rich voice note covers two things (how it went, what went well), saved with ZOH's 1st text and its one question.
-    await tool(
-      "save_reflection",
-      { summary: "Asking felt like bothering him; the opener he wrote landed", how_it_went: true, went_well: "The opener landed: he replied in an hour", take: "A worry about outreach." },
-      at(MON, "19:31"),
-    );
-    await say("outbound", at(MON, "19:31"), "That's real. What made the asking feel like bothering him?");
-    await say("inbound", at(MON, "19:33"), "he's busy, but he did offer to help");
-    // Two things covered, but nothing deeper yet: held, with the reason.
-    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({ ok: false, error: expect.stringContaining("go deeper on one thing") });
-    // Their answer added something real to it: saved as gone deeper, and ZOH's 2nd text can carry the step.
-    await tool("save_reflection", { summary: "Feels like bothering him, though he offered to help", how_it_went: true, went_deeper: true, take: "Worry eased." }, at(MON, "19:33"));
-    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
-  });
-
-  it("#157: an idea for tomorrow doesn't make it ready, even when the reflection was real when the reply began", async () => {
-    await setup();
-    await doneMonday();
-    // The voice note said how it went (saved with ZOH's 1st text); their reply is an idea for tomorrow.
     await real(at(MON, "19:31"));
-    await say("outbound", at(MON, "19:31"), "Love that you sent it anyway. What did he say back?");
-    await say("inbound", at(MON, "19:33"), "nothing yet. after I do the dishes tomorrow I could just message two more people");
-    // The coach saves what it heard: an idea for tomorrow is none of the points, and nothing deeper came back.
-    await tool("save_reflection", { summary: "Feels like bothering him; no answer yet; thinking of messaging two more after the dishes", how_it_went: true, take: "Idea for tomorrow." }, at(MON, "19:33"));
-    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({
-      ok: false,
-      error: expect.stringContaining("an idea for tomorrow isn't that"),
-    });
+    await say("outbound", at(MON, "19:31"), "That's real. What made the asking feel like bothering him?");
+    await say("inbound", at(MON, "19:33"), "he's busy. but reaching out at all still feels kind of intimidating");
+  }
+
+  it("#157: the outside read holds the step while something they just said is still open, and names it", async () => {
+    await setup();
+    await talked();
+    const check = new FakeThreadCheck("reaching out feels intimidating");
+    const held = await propose(at(MON, "19:33"), {}, read(check));
+    expect(held).toMatchObject({ ok: false, error: expect.stringContaining("they just said something worth following up (reaching out feels intimidating)") });
+    expect(held).toMatchObject({ error: expect.stringContaining("never mention the step waiting") });
+    expect(check.seen).toHaveLength(1);
     expect(await row(WED)).toBeUndefined();
+    // Followed up, and the read says close: the step goes, with no text count.
+    check.answer = undefined;
+    expect(await propose(at(MON, "19:35"), {}, read(check))).toMatchObject({ ok: true });
   });
 
-  it("#157: held while they're mid-thought, and goes once the thread is told", async () => {
+  it("#157: their own words still win: rushed, skip, done or asking what's next goes without the outside read", async () => {
+    await setup();
+    await talked();
+    const check = new FakeThreadCheck("reaching out feels intimidating");
+    const done = "nah that's about it";
+    expect(await propose(at(MON, "19:33"), { ready: done }, read(check), done)).toMatchObject({ ok: true });
+    expect(check.seen).toHaveLength(0);
+  });
+
+  it("#157: the outside read only runs once a real reflection is under way, and a failed read never holds the step", async () => {
+    await setup();
+    await doneMonday();
+    const check = new FakeThreadCheck("something");
+    // The text that celebrates their proof is the coach's own hold; the read isn't asked.
+    expect(await propose(at(MON, "19:30"), {}, read(check))).toMatchObject({ ok: false, error: expect.stringContaining("celebrates their proof") });
+    // Thin after little back twice: the thin exit, not the read.
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    await say("inbound", at(MON, "19:32"), "okay");
+    await thin(at(MON, "19:32"));
+    for (const hhmm of ["19:33", "19:35"]) {
+      await say("outbound", at(MON, hhmm), "What made it okay?");
+      await say("inbound", at(MON, hhmm.replace(/.$/, "4")), "fine");
+    }
+    expect(await propose(at(MON, "19:36"), {}, { howItWentSaid: false, openThread: () => check.open("") })).toMatchObject({ ok: true });
+    expect(check.seen).toHaveLength(0);
+    // A read that fails lets the step go: a reply never waits on it.
+    await t.db.delete(stepDays).where(eq(stepDays.date, WED));
+    await real(at(MON, "19:37"));
+    const failing: ReplyStart = { howItWentSaid: true, openThread: () => Promise.reject(new Error("timeout")) };
+    expect(await propose(at(MON, "19:37"), {}, failing)).toMatchObject({ ok: true });
+  });
+
+  it("#157: the conversation the read sees starts with their proof", () => {
+    const turns: Turn[] = [
+      { role: "assistant", text: "Starts in 10, Sam!" },
+      { role: "user", text: "[Sent a photo]" },
+      { role: "assistant", text: "Day 3! How did it feel?" },
+      { role: "user", text: "harder than I thought" },
+    ];
+    expect(sinceProof(turns, 1)).toBe("Them: [Sent a photo]\nZOH: Day 3! How did it feel?\nThem: harder than I thought");
+  });
+
+  it("#157: an empty optional line doesn't fail the save (it would leave the state behind and hold the step)", async () => {
+    await setup();
+    await doneMonday();
+    const saved = await tool("save_reflection", { summary: "20 min, about right", how_it_went: true, in_the_way: "", went_well: " ", take: "Short answers." }, at(MON, "19:33"));
+    expect(saved).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ howItWentSaid: true, inTheWay: null, wentWell: null });
+  });
+
+  it("#157: only the first proposal is held: once a step for that day is out, adjusting it isn't early", async () => {
     await setup();
     await doneMonday();
     await reflected();
-    await say("inbound", at(MON, "19:36"), "oh and then on the way back something weird happened");
-    await tool("save_reflection", { summary: "Hill pacing; something on the way back", how_it_went: true, open_thread: true, take: "Mid-story." }, at(MON, "19:36"));
-    expect(await propose(at(MON, "19:36"), {}, { howItWentSaid: true })).toMatchObject({ ok: false, error: expect.stringContaining("still telling you something") });
-    await say("inbound", at(MON, "19:38"), "my knee clicked a bit but it was fine after a minute");
-    await tool("save_reflection", { summary: "Hill pacing; knee clicked on the way back, fine after", how_it_went: true, take: "Knee clicked, fine." }, at(MON, "19:38"));
-    expect(await propose(at(MON, "19:38"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
+    expect(await propose(at(MON, "19:40"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
+    // A later reply, with the read saying something is open: a changed version they asked for still goes.
+    const asked = "can we do 3 rounds?";
+    const adjusted = "2 min jog, 1 min walk, 3 rounds on your block at 6:30 pm";
+    const check = new FakeThreadCheck("their knee");
+    expect(await tool("set_today_step", { step: adjusted, kind: "same", day: "next", asked }, at(MON, "19:45"), asked, read(check))).toMatchObject({ ok: true });
+    expect(check.seen).toHaveLength(0);
   });
 
   it("the reply with their first real answer is pushed back; a later reply goes once it's ready", async () => {

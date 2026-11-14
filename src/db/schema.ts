@@ -548,10 +548,6 @@ export const stepDays = pgTable(
     wentWell: text("went_well"),
     /** #157: what they'd do differently next time, in a line, if they said. */
     differently: text("differently"),
-    /** #157: ZOH asked about something they said and their reply added something real to it (stays true). */
-    wentDeeper: boolean("went_deeper").notNull().default(false),
-    /** #157: they're still in the middle of telling something (as of the latest reflection save). */
-    openThread: boolean("open_thread").notNull().default(false),
     /** ZOH's candid take on the day, 1 to 2 sentences, for the founders only: never in the coach's state or a text (#93). */
     coachTake: text("coach_take"),
     /** Why this day's step, in a line, as the coach set it (#93): the step log's "Next step" reason. */

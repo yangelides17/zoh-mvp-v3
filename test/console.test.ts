@@ -1063,8 +1063,6 @@ describe("the Step log card's reflection sections (#93)", () => {
     inTheWay: null,
     wentWell: null,
     differently: null,
-    wentDeeper: false,
-    openThread: false,
     coachTake: null,
     nextReason: null,
     createdAt: new Date(0),

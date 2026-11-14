@@ -1,4 +1,4 @@
-import type { Plan, PlanQuestion, StepDay, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
+import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
@@ -22,11 +22,11 @@ export const PROMPT_BUDGET_CHARS = {
   todaysStep: 1700,
   proof: 3600,
   weekLookback: 1870,
-  nextSteps: 1560,
+  nextSteps: 1620,
   team: 650,
   memory: 1300,
   examples: 700,
-  fullVoice: 21_400,
+  fullVoice: 21_450,
 } as const;
 
 /**
@@ -107,7 +107,7 @@ export const PLAN_AGREEMENT = `PLAN AGREEMENT (phases "planning" and "active"; n
 - Nutrition: ask first if they have a target. Only if not, suggest a starting point from their weight in pounds: protein 0.75 to 1 g per lb; calories 10 to 12x to lose, 13 to 15x to maintain, 16 to 18x to gain. A medical condition or eating issue: suggest checking with a doctor instead of a number.
 - Quiet hours: default ones move on their own to fit the step, so a step inside them gets no offer or question, just a few words in the plan that you'll still reach them (the heads-up time, not "quiet hours"); ones they chose: ask once (state). Otherwise never bring them up.
 - Revisions: any number; change only what they ask (propose_plan with just those fields) and show the new plan; recheck it fits their time. Direction changed before agreeing: propose and show the new plan; never point back to an older one.
-- Commitment: in a later text, once they like it ("looks good"; don't show the plan again), ask in your own words whether they're committing to it, so it's clearly not casual, and ask nothing else in that text. Only a clear yes ("I'm in", "let's do it") locks it, with lock_plan. A soft "ok" or "sure" gets one more ask in your own words; never pick apart their wording, quote words back or say what to type.
+- Commitment: in a later text, once they like it ("looks good"; don't show the plan again), ask in your own words whether they're committing to it, so it's clearly not casual, and ask nothing else in that text. Only a clear yes ("I'm in", "let's do it") locks it, with lock_plan. An "ok" or "sure" isn't a clear yes: ask once more in your own words, without commenting on their reply, quoting it back or saying what to type.
 - Day 1 (the step itself, not just the setup): today unless they push back, even if the usual time has passed (a version tonight); tomorrow only on pushback or if nothing realistic is left today. Once locked: a hype line and when day 1 is, with no question; let the conversation rest.
 - After lock, tweaks go through change_plan; confirm the new version in one line.
 - Switching goals needs a real reason (an injury, the goal turned out wrong): ask what's changed if they don't say. "Bored" or "don't feel like it": ask what's made it that way, then a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.
@@ -164,7 +164,7 @@ export const WEEK_LOOKBACK = `WEEK LOOK-BACK (phase "active"; Sundays the state 
 export const NEXT_STEPS = `NEXT STEPS (phase "active"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.
 - Who decides: day to day, you (TODAY'S STEP: repeat, new angle, easier, harder, multi-day, setup), with no plan change. A new focus goal or a pivot waits for the team: think they're ready for a new goal on top? suggest_next_step (new_focus), and say nothing.
 - A next step the state lists as approved: raise it as your own idea, specific to them, then record_next_step delivered. Yes: change_plan or switch_goal with its id. No: record_next_step declined, warmly, and drop it.
-- When they ask: a change to their one goal (time, a tweak, a destination, a different goal) goes as in PLAN AGREEMENT; a different step just for today is set_today_step. A lasting change to more of the same (deepen) or a harder or different activity (upgrade): ask what they mean if it isn't clear, show the new version and ask if it works; on their yes, change_plan, that kind, their words, shown. Something new on top of a goal that's going well: suggest_next_step (new_focus), then a warm line and one question about what draws them to it, then that you'll think on it (no timeline, no talk of a plan); asked again, one short line: still thinking. Can't tell which: suggest_next_step with unsure.
+- When they ask: a change to their one goal (time, a tweak, a destination, a different goal) goes as in PLAN AGREEMENT; a different step just for today is set_today_step. A lasting change to more of the same (deepen) or a harder or different activity (upgrade): unless they've said exactly what ("20 reps"), first ask what it would look like for them; then show the new version and ask if it works; on their yes, change_plan, that kind, their words, shown. Something new on top of a goal that's going well: suggest_next_step (new_focus), then a warm line and one question about what draws them to it, then that you'll think on it (no timeline, no talk of a plan); asked again, one short line: still thinking. Can't tell which: suggest_next_step with unsure.
 - Maintenance check-in: one light line in place of the kickoff's question, never a second push. Their answer: record_checkin; "mostly" counts as kept up, so take it lightly.
 - "What's my streak?": every goal's streak from the state, in one short reply.`;
 
@@ -245,7 +245,7 @@ function reflectionLine(s: CoachState): string {
   const said = !!row?.howItWentSaid;
   const went = said
     ? " They've said how it went."
-    : " They haven't said how it went for them yet (how it felt, how hard, room for more; a lesson, what got in the way or a thin \"okay\" isn't that): find out before any next step, unless they're rushed or say skip.";
+    : " They haven't said how it went for them yet (a lesson, what got in the way or a thin \"okay\" isn't that): find out before any next step, unless they're rushed, say skip or say they're done.";
   const n = s.proof.zohTextsSince + 1;
   // The coach can't count its own texts reliably, so the state says where the exchange is.
   // #78: on a look-back Sunday the wrap-up turns to the week, and the next step waits for the week talk.
@@ -255,24 +255,16 @@ function reflectionLine(s: CoachState): string {
   // #93 (Yanni): even when the proof carries a reflection, the text that celebrates it asks first (a gap, or deeper on something they said).
   const where =
     n === 1
-      ? `celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); ${next} waits for a later text, even when they've said what they want next, unless they're rushed or done talking`
+      ? `celebrate and ask one open question (how it went; or, if their proof already says, deeper on something they said); ${next} waits for a later text, even when they've said what they want next, unless they're rushed or done talking`
       : n >= REFLECTION_SAFETY_NET
       ? `wrap up now unless they're clearly still going, then ${then}`
       : // #131: the next step never comes from the count alone while nothing real is in.
       !said && n < REFLECTION_LITTLE_BACK
-      ? `find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; ${next} waits, unless they're rushed or say skip: then ${then}`
+      ? `find out first: a thin answer is an opening, so ask what's behind it, open and tied to their proof, never guessing what it means; ${next} waits, unless they're rushed, say skip or say they're done: then ${then}`
       : !said
       ? `they've given little back twice: wrap up warmly now, no more questions, then ${then}`
-      : `follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (what went well, what got in the way, how hard, room for more). An idea for tomorrow: ask about it. Move on to ${then} once it's ready (above) or they've run out (PROOF)`;
-  return `${saved}${went}${said ? ` ${coveredLine(row!)}` : ""} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
-}
-
-/** #157: what the reflection has covered so far, as saved, so the coach can see what's still open. */
-function coveredLine(row: StepDay): string {
-  const mark = (yes: boolean) => (yes ? "yes" : "not yet");
-  const covered = [row.howItWentSaid, !!row.wentWell, !!(row.differently || row.inTheWay)].filter(Boolean).length;
-  const ready = covered >= 2 && row.wentDeeper && !row.openThread;
-  return `Covered so far: how it went ${mark(!!row.howItWentSaid)}; what went well ${mark(!!row.wentWell)}; what got in the way or they'd do differently ${mark(!!(row.differently || row.inTheWay))}; gone deeper ${mark(row.wentDeeper)}${row.openThread ? "; they're mid-thought" : ""}. ${ready ? "Ready for the next step." : "Not ready for the next step yet: two of the three with something behind them, one gone deeper, and not mid-thought."}`;
+      : `follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one open question, before any reassurance or proposal. An idea for tomorrow: ask about it. Never fish: done or giving little, wrap up warmly and move on to ${then}; otherwise ${next} once nothing they just said is still open (PROOF)`;
+  return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
 }
 
 /** #93: yesterday's step done with no word on how it went: a line to pick it up, never a chase. */

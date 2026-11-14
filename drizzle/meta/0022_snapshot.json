@@ -1,5 +1,5 @@
 {
-  "id": "764c9443-1529-4453-9bc4-7f57c5deaced",
+  "id": "ca448ad5-f876-45d4-92b4-8f1206d1261f",
   "prevId": "a0898612-db76-4b42-bfd6-6ffca5f11d7a",
   "version": "7",
   "dialect": "postgresql",
@@ -2032,20 +2032,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "went_deeper": {
-          "name": "went_deeper",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "open_thread": {
-          "name": "open_thread",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "coach_take": {
           "name": "coach_take",

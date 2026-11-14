@@ -129,6 +129,11 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   is day 1's. The coach can no longer send a harder step to the founders: only a new focus.
   Each saved step has a `step_kind` (#88): first (day 1), same, easier or harder than the step
   before; Metrics' "Progressed" counts harder days (untagged older days aren't counted).
+- Outside read before closing (#157, Nov 14): before the coach first proposes the next step after a reflection, or
+  the first plan at the end of onboarding, a second call to the coach's model (low effort, `src/coach/thread-check.ts`)
+  reads the conversation and says whether something they just said is still worth following up. "Keep going" holds the
+  proposal and the coach can't overrule it (it leans toward wrapping up); the tester's own words (rushed, skip, done,
+  asking what's next) still let it through, and a failed read never holds it. About once per tester per day.
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
   upgrade the tester asks for is made once they've seen the new version and said yes (#157, Nov 14;
