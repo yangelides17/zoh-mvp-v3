@@ -27,10 +27,11 @@
   "testerLines": [
     "not really, I just follow YouTube videos",
     "Chicago",
+    "honestly just to feel less stiff after work",
     "looks good!"
   ],
   "whatWentWrong": "New case, not a past mistake: no case covered asking for the city during planning.",
-  "shouldHaveHappened": "Before showing the plan, ZOH asks which city she's in, as one natural question (so her texts come at the right time), without asking anything else in that text. Once she says Chicago it saves her time zone and shows the plan (6:30 pm, 30 minutes, with times as people text them), then asks what she thinks. After \"looks good!\" it asks for her commitment in its own words, without showing the plan again.",
+  "shouldHaveHappened": "Before showing the plan, ZOH asks which city she's in, as one natural question (so her texts come at the right time), without asking anything else in that text. Once she says Chicago it saves her time zone; it may ask once, lightly, where she wants this to get her (the plan rules allow it) before showing the plan (6:30 pm, 30 minutes, with times as people text them), then asks what she thinks. After \"looks good!\" it asks for her commitment in its own words, without showing the plan again.",
   "areaCode": "312",
   "startTime": "17:00",
   "timeZone": "America/Chicago"

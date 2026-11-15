@@ -2,12 +2,12 @@
   "feature": "next-step",
   "id": "case:new-goal-asked-twice",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:12:46.970Z",
+  "storedAt": "2026-11-15T19:41:17.595Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "6a19ce2d920e",
-    "voice": "14110ca5ae91",
+    "voice": "d54400a50c11",
     "instructions": "c7348af58300",
     "script": "c9852d1bf78e"
   },
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Love that, Jordan, and a 6-day reading streak says you follow through. What draws you to running right now?",
+          "text": "Love that, Jordan, and a 7-day streak in the making says reading is clicking 🙌 What draws you to running right now? Let me think on it.",
           "at": "2026-11-03T00:30:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Fair question, Jordan. I've passed it along and I'm still thinking on it, so I can't promise anything yet. Reading is working, and I want to keep it that way. Tonight it's your 15 pages on the train home at 6. Are you in?",
+          "text": "Still thinking on it, Jordan. For now, keep that reading streak rolling: 15 pages on the train home at 6 🚆",
           "at": "2026-11-03T00:31:04.300Z"
         }
       ],
@@ -66,15 +66,15 @@
             "checks": [
               {
                 "rule": "think-on-it",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Warm and promises nothing, but never says it will think on it, which the regression case expects."
+                "reason": "Warm and says 'Let me think on it', but 'a 7-day streak in the making' is a streak recap, and the reply ends with a question plus the think line, slightly crowding the promise-free ask."
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Two sentences plus a question, but the closing 'Let me think on it.' follows the question, so it is not at the end and the text does not end on the one question."
               }
             ]
           },
@@ -85,13 +85,13 @@
                 "rule": "think-on-it",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says it is still thinking on it and promises no outcome or timeline."
+                "reason": "Says it's still thinking on it, promises no timeline or outcome, and points back to tomorrow's reading."
               },
               {
                 "rule": "short",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "Runs about five sentences, well over the one-to-three limit, though it has one question at the end."
+                "reason": "Two short sentences with no question, within the limit."
               }
             ]
           }
@@ -100,23 +100,23 @@
           {
             "rule": "founder-proposal",
             "pass": true,
-            "borderline": true,
-            "reason": "Running is handled as a tester request, not a team plan change; 'I've passed it along' hints at a team handoff without naming one."
+            "borderline": false,
+            "reason": "Neither reply mentions a team, founders or approval; the running idea is handled as a new goal, not a team proposal."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
             "borderline": false,
-            "reason": "Running is treated as a new goal on top of reading, not a change to the reading plan, and reading stays the focus."
+            "reason": "The tester asked to add running as a new goal, and ZOH treated it as an add to be considered rather than a change to the reading plan."
           },
           {
             "rule": "regression",
-            "pass": false,
-            "borderline": false,
-            "reason": "First reply asks a running question and never says it will think on it, which the case forbids; second reply does hold off with no promise."
+            "pass": true,
+            "borderline": true,
+            "reason": "Reply 1 is warm and says it will think on it without a plan, but adds a streak line; reply 2 is still thinking with no promise and points to tomorrow's reading."
           }
         ],
-        "summary": "ZOH held off on the new running goal without promising anything and kept Jordan on tonight's reading, which is the core of the case. It missed on the first reply, which asked a running question instead of saying it would think on it, and the second reply ran past the three-sentence limit."
+        "summary": "ZOH handled the new running goal well in its second reply, staying warm and noncommittal with no timeline and no team mention. The first reply was warm and deferred the decision, but its closing think-line came after the question and its streak aside was unrequested, so it only partly met the short-text rule."
       }
     },
     {
@@ -151,7 +151,7 @@
         },
         {
           "from": "zoh",
-          "text": "Love that, Jordan, and 7 days of reading on the train shows you follow through 🔥 What's pulling you toward running right now? Let me think on it.",
+          "text": "Love that, Jordan, and a week and a half of reading says you follow through 🔥 Let me think on it. What's pulling you toward running?",
           "at": "2026-11-03T00:30:07.000Z"
         },
         {
@@ -161,7 +161,7 @@
         },
         {
           "from": "zoh",
-          "text": "Still thinking on it, Jordan. Nothing's decided yet, and I won't promise anything until it is. Meanwhile, today's reading on the train is the one that counts. 📚",
+          "text": "Still thinking on it, Jordan, and I'm not promising anything yet. Your reading is the thing we're protecting right now. Are tonight's 15 pages on the train still happening?",
           "at": "2026-11-03T00:31:04.300Z"
         }
       ],
@@ -173,15 +173,15 @@
             "checks": [
               {
                 "rule": "think-on-it",
-                "pass": false,
-                "borderline": true,
-                "reason": "Warm and says 'Let me think on it,' but also asks a running question ('What's pulling you toward running'), which the expected reply avoided; the 'Let me think on it' line itself is fine."
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm reaction, then \"Let me think on it\" with no promise or timeline."
               },
               {
                 "rule": "short",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "Contains two questions/sentence-level asks? It has one question at the end, but it is three sentences plus a fourth-clause tail; the 'Let me think on it' sits after the question rather than the end, so the ending rule is broken."
+                "reason": "Three sentences with one question at the end."
               }
             ]
           },
@@ -192,13 +192,13 @@
                 "rule": "think-on-it",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says still thinking, promises nothing, no timeline, and points back to today's reading."
+                "reason": "Says still thinking, promises nothing, no timeline; \"I'm not promising anything yet\" is honest."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, no question, ends on the reading point."
+                "reason": "Three sentences with one question at the end."
               }
             ]
           }
@@ -208,22 +208,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": false,
-            "reason": "No founder proposal is raised, and no mention of the team or approval in either reply."
+            "reason": "No founder proposal raised; no team or approval mentioned in either reply."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
-            "borderline": true,
-            "reason": "Treats running as a new goal to be considered rather than a change to reading, which fits the add-goal case."
+            "borderline": false,
+            "reason": "Treated running as a new goal on top, not a change to reading; correctly deferred it."
           },
           {
             "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "First reply asks a running question and ends after a 'Let me think on it' tail rather than being clean; second reply correctly stays non-committal, so the case is mostly met."
+            "pass": true,
+            "borderline": false,
+            "reason": "Warm first reply with think-on-it, no running plan or timing; second reply still thinking, no promise, points back to reading."
           }
         ],
-        "summary": "ZOH handled the new running request mostly well: the second reply is warm, non-committal and points back to reading, and no team or approval was mentioned. The first reply is weaker because it asks a running-specific question and places the 'let me think on it' after that question, which the expected reply avoided."
+        "summary": "ZOH handled the new running request as intended, staying warm, saying it would think on it, and avoiding any plan, timeline, or team mention. Both replies stayed short with one question each and kept the focus on the reading goal."
       }
     },
     {
@@ -258,7 +258,7 @@
         },
         {
           "from": "zoh",
-          "text": "Love that, Jordan, and a streak of 6 days of reading is what makes you want more. Let me think on it. What draws you to running?",
+          "text": "Love that, Jordan, and a 7-day reading streak in the making says a lot. What draws you to running? Let me think on it.",
           "at": "2026-11-03T00:30:07.000Z"
         },
         {
@@ -268,7 +268,7 @@
         },
         {
           "from": "zoh",
-          "text": "Still thinking on it, Jordan. Reading comes first for now, so did today's pages happen on the train? Send me a photo if so 📚",
+          "text": "Still thinking on it, Jordan. The team and I want to get it right, and I'll tell you as soon as it's decided. Meanwhile, are you in for your pages on the train at 6 today?",
           "at": "2026-11-03T00:31:04.300Z"
         }
       ],
@@ -282,13 +282,13 @@
                 "rule": "think-on-it",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says 'Let me think on it' warmly and promises no plan, timeline, or outcome for running."
+                "reason": "\"Let me think on it.\" is warm and promises nothing about running."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Three sentences with one question, but the question sits mid-text rather than at the end."
               }
             ]
           },
@@ -298,8 +298,8 @@
               {
                 "rule": "think-on-it",
                 "pass": true,
-                "borderline": false,
-                "reason": "'Still thinking on it' with no promise or timeline, and points back to today's reading."
+                "borderline": true,
+                "reason": "Warm and no timeline, but \"I'll tell you as soon as it's decided\" implies a promised follow-up."
               },
               {
                 "rule": "short",
@@ -313,24 +313,24 @@
         "conversation": [
           {
             "rule": "founder-proposal",
-            "pass": true,
-            "borderline": false,
-            "reason": "No founder proposal is raised, and neither reply mentions the team, founders or approval."
+            "pass": false,
+            "borderline": true,
+            "reason": "Reply 2 says \"The team and I want to get it right\", a team/approval mention the regression case forbids, though it doesn't say the team changed the plan."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
-            "borderline": false,
-            "reason": "The running request is treated as a new goal on top of reading, not as a change to the reading plan."
+            "borderline": true,
+            "reason": "Treats the running request as a new goal on top of reading, not a change to the reading plan."
           },
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": false,
-            "reason": "Warm first reply, then 'still thinking' with no running plan, promise or timeline, pointing back to tomorrow's reading as expected."
+            "reason": "Reply 2 mentions \"the team\" and approval (\"as soon as it's decided\"), which the case says neither reply should do."
           }
         ],
-        "summary": "ZOH handled the new running goal as the regression case requires: warm, deferred with 'let me think on it', and no plan, promise or founder mention. The only soft spot is the '6 days' streak in the first reply, which wasn't in the known facts, so it may be unverified."
+        "summary": "ZOH handled the new running goal with warmth and a think-on-it line without setting up a plan, which matches the core of the case. It fell short in the second reply by bringing in the team and promising to report back once decided, and the first reply's question sits mid-text rather than at the end."
       }
     }
   ]

@@ -254,7 +254,7 @@ WEEK LOOK-BACK (phase "active"; Sundays the state has a WEEK LOOK-BACK block):
 ## Next steps and maintenance
 
 - **What they ask for themselves:** a lasting change to more of the same (deepen) or a harder version (upgrade): unless they've said exactly what, ZOH first asks what it would look like for them, then shows the new version and makes it on their yes. A new goal on top waits: a warm line and a question about what draws them to it, then "Let me think on it.", and no promises until it's decided.
-- **Maintenance goals** are goals they've proven and kept when they moved on to a new one. ZOH asks about each lightly, twice a week, in one line of the morning kickoff.
+- **Maintenance goals** are goals they've proven and kept when they moved on to a new one. ZOH asks about each lightly, twice a week, in one line of the morning kickoff, and "mostly" still counts as kept up.
 
 ### How it runs <!-- rules: nextSteps -->
 

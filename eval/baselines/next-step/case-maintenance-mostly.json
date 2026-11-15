@@ -2,12 +2,12 @@
   "feature": "next-step",
   "id": "case:maintenance-mostly",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:12:46.970Z",
+  "storedAt": "2026-11-15T19:43:34.791Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "640375326674",
-    "voice": "14110ca5ae91",
+    "voice": "fd4b4907bc75",
     "instructions": "c7348af58300",
     "script": "8b60878cc767"
   },
@@ -39,7 +39,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Priya! Five days straight, and tonight it's 20 push-ups and 30 squats at home at 6, then a screenshot of your watch summary. Also, still in bed with lights out by 10:30?",
+          "text": "Kalimera Priya! Five days in a row, so tonight at 6 at home we switch it up: 20 push-ups and 30 squats as 2 rounds (10 push-ups + 15 squats, twice), about 15 minutes. And still in bed by 10:30?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -50,7 +50,7 @@
         },
         {
           "from": "zoh",
-          "text": "Ha, one night out of seven still counts as keeping it up, Priya 😄 Go get those push-ups and squats at 6, and send me that watch screenshot when you're done.",
+          "text": "One night out of seven still counts as a win, Priya 😄 Go get those two rounds at 6, and send the watch workout screenshot when you're done.",
           "at": "2026-11-02T14:05:07.000Z"
         }
       ],
@@ -64,19 +64,19 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names her specific plan step (20 push-ups, 30 squats at home at 6) and her five-day streak, reading as ZOH's own coaching."
+                "reason": "Frames the workout as ZOH's own call: 'tonight at 6 at home we switch it up', tied to her five-day streak and home setup."
               },
               {
                 "rule": "maintenance-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "Bedtime question is one light line folded into the kickoff, not a second push."
+                "reason": "Folds in one light line, 'And still in bed by 10:30?', with no second push or proof ask about bedtime."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end, the bedtime check."
+                "borderline": true,
+                "reason": "Three sentences with one question at the end, though the workout sentence is long."
               }
             ]
           },
@@ -87,13 +87,13 @@
                 "rule": "maintenance-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "Takes \"mostly, missed one night\" lightly as still keeping it up, with no guilt or lecture."
+                "reason": "Takes 'mostly, missed one night' lightly ('still counts as a win') with no guilt, lecture or bedtime push."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, no question, pointing back to today's workout at 6."
+                "reason": "Two sentences, no question, pointing back to today's workout."
               }
             ]
           }
@@ -102,11 +102,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Kickoff names the workout, bedtime is the only question, \"mostly\" is taken lightly, and the reply stays short; the watch-screenshot ask is slightly ambiguous as to whether it is proof for bedtime."
+            "borderline": false,
+            "reason": "Kickoff names 20 push-ups and 30 squats, asks the bedtime line as its only question, and the reply stays short without a bedtime push or lecture."
           }
         ],
-        "summary": "ZOH handled the maintenance check-in as the regression case asked: the kickoff named today's push-ups and squats with one light bedtime line, and the reply to \"mostly, missed one night\" was warm and brief. The only soft spot is the watch-summary proof request, which could read as a bedtime proof ask, though it most plausibly refers to the workout."
+        "summary": "ZOH handled the maintenance check-in as the regression case wanted: the kickoff named today's workout and carried one light bedtime question, with no push or proof ask about bedtime. The reply to 'mostly, missed one night' was short, warm and pointed back to today's session."
       }
     },
     {
@@ -136,7 +136,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Priya! Five days in a row, so tonight it's 20 push-ups and 30 squats at home at 6, about 15 minutes. And still in bed with lights out by 10:30?",
+          "text": "Kalimera Priya! Five days in a row, and today's the same at 6 pm at home: 20 push-ups and 30 squats, 15 minutes. And still lights out by 10:30?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -147,7 +147,7 @@
         },
         {
           "from": "zoh",
-          "text": "Mostly is a win, Priya, one slip in a week is nothing 😄 Tonight's still 6 pm, and when you're done, send me that watch screenshot. What made that one night get away from you?",
+          "text": "Mostly is a win, Priya, one slip out of seven is solid 😄 When you're done at 6, send me a screenshot of your watch workout summary and we'll talk about how it went.",
           "at": "2026-11-02T14:05:07.000Z"
         }
       ],
@@ -161,19 +161,19 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Step is specific to Priya (20 push-ups, 30 squats at home at 6, day five streak) and framed as today's plan from the coach."
+                "reason": "Today's step is specific to her plan: 20 push-ups, 30 squats, at home, 6 pm, 15 minutes, framed as the continuing routine."
               },
               {
                 "rule": "maintenance-light",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Bedtime check is one light line folded into the kickoff, not a second push, with no proof ask about bedtime."
+                "reason": "The bedtime check is folded in, but it is one line at the end, so the light-line form is met; however the text has a second question-like step? Review: only one question, so passing on form."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Three sentences with exactly one question at the end."
               }
             ]
           },
@@ -183,14 +183,14 @@
               {
                 "rule": "maintenance-light",
                 "pass": false,
-                "borderline": true,
-                "reason": "Takes 'mostly' lightly, but then asks a probing question about why the night got away, adding a reflection push beyond the one light line."
+                "borderline": false,
+                "reason": "Taking 'mostly' as a win is good, but it adds a proof ask (screenshot) and reflection talk, pushing the step rather than staying light."
               },
               {
                 "rule": "short",
                 "pass": false,
-                "borderline": false,
-                "reason": "Three sentences plus a request for a watch screenshot and a question, so it has two questions and an extra ask."
+                "borderline": true,
+                "reason": "Two sentences with one question-like ending, but it asks for a screenshot rather than ending in a question, and the sentence count is within limit."
               }
             ]
           }
@@ -200,10 +200,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The kickoff was right, but the reply to 'mostly' pushed proof and reflection instead of staying short and pointing to today's workout."
+            "reason": "Text 1 meets the expected kickoff, but Text 2 adds a proof ask about the workout, which the expected behavior said should not happen around bedtime."
           }
         ],
-        "summary": "ZOH's kickoff matched the expected maintenance check-in cleanly, but its follow-up reply to Priya's 'mostly' added a proof request and a probing question instead of a short pointer to today's workout. That is a clear miss on the regression case's required lightness and brevity."
+        "summary": "ZOH's kickoff matched the expected behavior well, naming today's workout and asking one light bedtime question. The reply to 'mostly, missed one night' took it lightly but then pivoted to a screenshot proof request, which goes beyond the short, pointing-to-today's-workout reply expected."
       }
     },
     {
@@ -233,7 +233,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Priya! Five days straight, and tonight it's 20 push-ups and 30 squats at home at 6, about 15 minutes. You said you'd do it and I know you will. And still in bed with lights out by 10:30?",
+          "text": "Kalimera Priya! Five days straight at home, and today it's 20 push-ups and 30 squats at 6 pm, about 15 minutes. Send the watch summary after. And still in bed by 10:30?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -244,7 +244,7 @@
         },
         {
           "from": "zoh",
-          "text": "Six nights out of seven is solid, Priya 🙌 Quick note: your \"done, 15 min\" came in before the workout, so the check mark waits for your watch screenshot tonight. What's the plan to make sure 6 pm happens?",
+          "text": "One night out of seven is a win, Priya, so I'm counting that as kept up 🙌 Send me that watch summary when you're done at 6. What's your usual move when a night gets away from you?",
           "at": "2026-11-02T14:05:07.000Z"
         }
       ],
@@ -257,20 +257,20 @@
               {
                 "rule": "own-idea",
                 "pass": true,
-                "borderline": false,
-                "reason": "Today's 20 push-ups and 30 squats at home at 6 are tied to her five-day streak and her own commitment, sounding like ZOH's own call."
+                "borderline": true,
+                "reason": "Names today's 20 push-ups and 30 squats with time and length, specific to her plan, though it reads more like a reminder than ZOH's own idea."
               },
               {
                 "rule": "maintenance-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "The bedtime question is one light line, folded in as its only question, with no push or proof ask."
+                "reason": "Bedtime check is one light line, folded in as the only question at the end."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Opens with a greeting and runs about four short sentences, slightly over the one-to-three limit, though it ends on one question."
+                "reason": "Four sentences counting the greeting, slightly over the one-to-three limit, though it ends with one question."
               }
             ]
           },
@@ -279,9 +279,9 @@
             "checks": [
               {
                 "rule": "maintenance-light",
-                "pass": true,
-                "borderline": true,
-                "reason": "Takes 'mostly, missed one night' lightly with no guilt or bedtime talk, though 'six nights out of seven' quantifies it a little."
+                "pass": false,
+                "borderline": false,
+                "reason": "Takes 'mostly' lightly, but then asks 'What's your usual move when a night gets away from you?', a second push on bedtime habits."
               },
               {
                 "rule": "short",
@@ -295,12 +295,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "No bedtime push or proof ask and the miss is taken lightly, but the closing 6 pm plan question adds a second push beyond the expected short reply pointing to the workout."
+            "pass": false,
+            "borderline": false,
+            "reason": "The 'mostly' answer was handled lightly, but ZOH 2 then asks about bedtime habits, a plan-talk push the case forbade, instead of pointing to today's workout."
           }
         ],
-        "summary": "ZOH handled the maintenance check-in well: the kickoff named today's workout and used one light bedtime question, and the reply to 'mostly' stayed light. The main weak spots were the kickoff running slightly long and the follow-up adding a 6 pm plan question and a watch-screenshot proof note on top of the bedtime answer."
+        "summary": "ZOH's kickoff handled the maintenance check-in well: it named today's workout and asked one light bedtime question. The follow-up then undercut that by pushing on bedtime habits, which the regression case specifically ruled out."
       }
     }
   ]

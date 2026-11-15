@@ -5568,11 +5568,11 @@
    "change": "unchanged"
   },
   {
-   "text": "- **Maintenance goals** are goals they've proven and kept when they moved on to a new one. ZOH asks about each lightly, twice a week, in one line of the morning kickoff.",
+   "text": "- **Maintenance goals** are goals they've proven and kept when they moved on to a new one. ZOH asks about each lightly, twice a week, in one line of the morning kickoff, and \"mostly\" still counts as kept up.",
    "file": "docs/coach-voice.md",
    "where": "Next steps and maintenance",
    "kind": "voice",
-   "change": "merged: \"mostly\" counting as kept up is said once, in Next steps (rules: nextSteps)"
+   "change": "unchanged"
   },
   {
    "text": "NEXT STEPS (phase \"active\"): the focus goal gets nudges and proof; maintenance goals only a light check-in now and then.",
@@ -5973,12 +5973,6 @@
    "why": "Same steps; \"at a natural moment\" moved into the kept line, and the tester deciding is the Yes/No."
   },
   {
-   "removed": ", and \"mostly\" still counts as kept up.",
-   "from": "docs/coach-voice.md (Next steps and maintenance, Maintenance goals)",
-   "keptIn": "docs/coach-voice.md (Next steps, rules: nextSteps): 'Their answer: record_checkin; \"mostly\" counts as kept up, so take it lightly.'",
-   "why": "Same rule."
-  },
-  {
    "removed": "- **Every goal has its own streak,** and \"what's my streak?\" gets all of them in one short reply.",
    "from": "docs/coach-voice.md (Next steps and maintenance)",
    "keptIn": "docs/coach-voice.md (Next steps, rules: nextSteps): '- \"What\\'s my streak?\": every goal\\'s streak from the state, in one short reply.'",
@@ -6017,6 +6011,10 @@
   {
    "where": "docs/coach-voice.md (Proof, No proof, no check mark) and (Proof, rules: proof) \"No photo, screenshot, voice note, video or document\"",
    "why": "Merged at first, then restored: the comparison showed ZOH refusing a voice note in place of the plan's screenshot (dev 3/3 accepted it, the merge 1/3) once the voice lost its line saying any of these kinds is proof. Kept as on dev."
+  },
+  {
+   "where": "docs/coach-voice.md (Next steps and maintenance, Maintenance goals) and (Next steps, rules: nextSteps) \"mostly\" counts as kept up",
+   "why": "Merged at first, then restored: without it, ZOH pushed on the missed night or asked for proof after \"mostly\" (next-step/maintenance-mostly: dev 2/3, the merge 0/4). Kept as on dev."
   }
  ]
 }
