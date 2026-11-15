@@ -174,8 +174,6 @@ function makeCoach(config: Config, db: Db) {
           maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
           effort: "medium",
         }),
-        // #157: the outside read before the next step after a reflection: one short answer, about once a day per tester.
-        threadCheck: createThreadCheck(createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: 1000, effort: "low" })),
       })
     : undefined;
 }

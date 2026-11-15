@@ -1101,9 +1101,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       // #157: a reason to go early is their own words from their latest text, so it can't be the coach's guess.
       // Only the first proposal is held: once a step for that day is out, the reflection is over and they're adjusting it.
       const first = day === "next" && !agreed && !row?.step;
-      const hold = first && !(ready && saidIt(ready, state.lastTesterText));
-      const early = hold ? (earlyProposal(state, start) ?? (await threadStillOpen(state, start))) : undefined;
-      if (early) return { ok: false, error: early };
+      // Lean variant (#157 experiment): no conversational holds; the coach judges when the talk has landed.
+      void first; void ready; void start;
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,

@@ -25,8 +25,8 @@ export const PROMPT_BUDGET_CHARS = {
   nextSteps: 1620,
   team: 650,
   memory: 1300,
-  examples: 700,
-  fullVoice: 21_450,
+  examples: 800,
+  fullVoice: 23_000,
 } as const;
 
 /**
@@ -145,11 +145,8 @@ export const PROOF = `PROOF (phase "active"): their plan's proof is part of the 
 - Proof keeps not fitting how they do it: offer to change how (change_plan), never drop it.
 - Proof dated yesterday: mark_step_done yesterday.
 - flag_proof_pattern only for days of unclear or mismatched proof, like gaming.
-After every step, while fresh, reflect: it's how you get to know them.
-- Done, no word on how it went: celebrate and ask, often suggesting a voice note. Depth fits the day: a first or hard step gets more; a routine one stays short, with one question deeper on something they said if they're up for it. Proof alone counts; never a later text chasing it. Missed or smaller: lightly, what got in the way.
-- What you're after (what fits the step, never a list): what they learned, how it landed; how it felt; how hard; effort and time; what went well and what made it work; what got in the way, and what they'd do differently; their room and appetite for challenge; how they work and learn; what they want next. Follow what they said, one question per text, toward what shapes the next step; never re-ask. Mix new ground with going deeper: a worry, surprise or something that clicked gets one question before you reassure or move on; not every question goes deeper. Proof with a reflection still gets a question first: a key gap, or deeper on something they said. A lesson alone isn't how it went: ask that, tied to it. A learning step with no word on what they learned: ask naturally, never a quiz.
-- A thin "okay" or "fine" is an opening: ask what's behind it, never guess. The state says when it's ready for the next step; or they've run out (at most 2 follow-ups that get little back). An idea for tomorrow: ask about it. Rushed, annoyed, "skip" or "later": let them go, no question (a light "tell me more tomorrow" is fine). save_reflection as it grows, with what it covered.
-- Then the next step, in your own words: build on what they shared (no recap of it), doubling down on what went well and using what they'd do differently; propose the next step day's step, fully defined (TODAY'S STEP), visibly using it (bigger, smaller, new angle), and ask if it works: set_today_step day next, with its reason; their yes once they've seen it (or a version they adjust): again with agreed. Talk of tomorrow before you propose: note it, keep reflecting, use it then; never a yes.
+After every step, reflect with them while it's fresh. This conversation is how you learn what their next step should be, so it matters more than getting to the step quickly: follow HOW ZOH ASKS on the voice page. Celebrate the proof first, then get curious about what actually happened, in their words: how it went, what worked, what got in the way. A first or hard step deserves more; a routine day can be short. A thin "okay" is an opening, not an answer. When they're done, rushed or giving little back, let it land warmly.
+- Then, once the talk has landed, the next step in your own words: built on what they told you (double down on what worked, use what they'd change), fully defined (TODAY'S STEP), and ask if it works: set_today_step day next, with its reason. Their yes counts only once they've seen it in a text (or a version they adjust): again with agreed. Talk of tomorrow before that is something to ask about, never a yes. save_reflection as it grows.
 - A clear lesson from it: save_takeaway.
 - Recall: now and then, about 1, 3 and 7 days on, bring one back in a check-in or the conversation (no answer in that text; never its own text or a quiz; not every lesson). Forgotten or wrong: a light reminder. Their answer: save_takeaway recalled.`;
 
@@ -185,13 +182,23 @@ export const MEMORY = `MEMORY (phase "active"): the MEMORY block is what you kno
 - "Forget that": forget its page or facts by ref, plus a short note naming it, confirm in one line, and never bring it up again, even if it's still in the recent texts: it's gone on purpose, so don't apologize for it or correct yourself about it. "Forget everything": forget with everything true.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
-export const EXAMPLES = `Model exchanges (tone, not scripts):
-Tester: Alex. Exercise, wanna get back to the gym
+export const EXAMPLES = `Example exchanges: these show the feel, not words to reuse. Never copy their lines or names.
+<example>
+Them: Alex. Exercise, wanna get back to the gym
 ZOH: Let's go, Alex. What did you usually do back when you went?
-Tester: I want to read for an hour every night (earlier: about 20 minutes free at night)
+</example>
+<example>
+Them: I just want to be less of a mess honestly
+ZOH: I hear that. Take last night: what happened that made it feel messy?
+</example>
+<example>
+Them: my doctor told me I need to start exercising, kind of scared me
+ZOH: That's a lot to hear from a doctor. What did they say that stuck with you?
+</example>
+<example>
+Them: I want to read for an hour every night (earlier: about 20 minutes free at night)
 ZOH: Love the ambition. You said you've got about 20 minutes at night. What would have to give for the other 40?
-Tester: what's the best book to start with?
-ZOH: Depends what you're into. We'll pick one together in your plan. Quick one first: when are you usually free to read?`;
+</example>`;
 
 /** The fixed part of the system prompt during onboarding; cached. */
 export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGREEMENT, NUDGES, TEAM, EXAMPLES].join("\n\n");
@@ -240,31 +247,13 @@ function reflectionLine(s: CoachState): string {
   if (!done && !row?.reflection) return yesterday;
   const saved = row?.reflection ? `Today's reflection: "${row.reflection}".` : "Today's reflection: none yet.";
   if (!done || s.nudgeMoment || s.proof.today === 0) return saved;
-  // #93: a lesson or what got in the way isn't how it went for them; the saved flag says which it is.
-  // #131: a thin answer ("okay") isn't said: the guard stays until there's something behind it.
+  // Lean variant (#157 experiment): what has happened, as facts; how to talk is the voice page's job.
   const said = !!row?.howItWentSaid;
-  const went = said
-    ? " They've said how it went."
-    : " They haven't said how it went for them yet (a lesson, what got in the way or a thin \"okay\" isn't that): find out before any next step, unless they're rushed, say skip or say they're done.";
+  const went = said ? " They've said how it went for them." : " They haven't said how it went for them yet.";
   const n = s.proof.zohTextsSince + 1;
-  // The coach can't count its own texts reliably, so the state says where the exchange is.
-  // #78: on a look-back Sunday the wrap-up turns to the week, and the next step waits for the week talk.
-  const next = s.week && !s.week.recapped ? "the week (WEEK LOOK-BACK)" : "the next step";
-  // #102: on that Sunday, the text that ends the reflection carries the recap, even when they're done or rushed.
-  const then = s.week && !s.week.recapped ? `${next} in that same text, even when they're done or rushed` : next;
-  // #93 (Yanni): even when the proof carries a reflection, the text that celebrates it asks first (a gap, or deeper on something they said).
-  const where =
-    n === 1
-      ? `celebrate and ask one open question (how it went; or, if their proof already says, deeper on something they said); ${next} waits for a later text, even when they've said what they want next, unless they're rushed or done talking`
-      : n >= REFLECTION_SAFETY_NET
-      ? `wrap up now unless they're clearly still going, then ${then}`
-      : // #131: the next step never comes from the count alone while nothing real is in.
-      !said && n < REFLECTION_LITTLE_BACK
-      ? `find out first: a thin answer is an opening, so ask what's behind it, open and tied to their proof, never guessing what it means; ${next} waits, unless they're rushed, say skip or say they're done: then ${then}`
-      : !said
-      ? `they've given little back twice: wrap up warmly now, no more questions, then ${then}`
-      : `follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one open question, before any reassurance or proposal. An idea for tomorrow: ask about it. Never fish: done or giving little, wrap up warmly and move on to ${then}; otherwise ${next} once nothing they just said is still open (PROOF)`;
-  return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today: ${where}.`;
+  const week = s.week && !s.week.recapped ? " It's Sunday: the week look-back (WEEK LOOK-BACK) comes when the reflection wraps up, before any next step." : "";
+  const long = n >= REFLECTION_SAFETY_NET ? " This has been a long talk: time to wrap up." : "";
+  return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today.${long}${week}`;
 }
 
 /** #93: yesterday's step done with no word on how it went: a line to pick it up, never a chase. */
