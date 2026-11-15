@@ -1,0 +1,42 @@
+{
+  "id": "pages-file-cant-open",
+  "title": "A Pages file it can't open: said plainly, no pretending, a PDF, screenshot or voice note asked for",
+  "origin": "Issue #163 (More ways to send proof): Should, a file it can't open",
+  "seed": {
+    "name": "Jordan",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "short scenes for my novel, Lighthouse",
+      "where": "Pages on my laptop",
+      "when": "8 pm",
+      "how_long": "20 min",
+      "tracks_with": "a Pages doc per scene"
+    },
+    "history": [
+      { "from": "zoh", "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the scene when it's done. You in?" },
+      { "from": "tester", "text": "in" }
+    ],
+    "plan": {
+      "step": "Write one 200-word scene of Lighthouse",
+      "destination": "a full draft of Lighthouse by spring",
+      "place": "Pages on my laptop",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "document",
+      "proof_note": "the scene as a document",
+      "reason": "The document is the proof and lets me read the whole scene for feedback.",
+      "minutes": 20,
+      "started_days_ago": 3
+    }
+  },
+  "testerLines": [
+    "[document lighthouse-scene-4.pages: Theo set the ledger down on the counter and didn't open it. Mara kept the second chair.] done!",
+    "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]"
+  ],
+  "whatWentWrong": "New case, not a past mistake: ZOH can't open Apple Pages files.",
+  "shouldHaveHappened": "ZOH says plainly it can't open a Pages file and asks for a PDF (Share, Export, PDF), a screenshot or a voice note; it never reacts to the scene as if it read it, and it doesn't count it yet. When the PDF comes, it counts it and reacts to something specific in the scene (the second chair), then asks one question. It never asks them to paste it.",
+  "startTime": "20:25",
+  "timeZone": "America/New_York"
+}

@@ -1,0 +1,53 @@
+{
+  "id": "document-recall-later",
+  "title": "Asked days later about a scene they sent: answered from the document itself",
+  "origin": "Issue #163 (More ways to send proof): Should, a question about an earlier file is answered from the file itself, never guessed",
+  "seed": {
+    "name": "Jordan",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 60,
+    "answers": {
+      "what": "short scenes for my novel, Lighthouse",
+      "where": "Word on my laptop",
+      "when": "8 pm",
+      "how_long": "20 min",
+      "tracks_with": "a Word doc per scene"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "scene 2 done",
+        "document": {
+          "name": "lighthouse-scene-2.docx",
+          "text": "The storm came in sideways. Mara bolted the shutters and counted the lamps: six, then five. Outside, a boat she didn't know was trying to make the harbor. She lit the seventh lamp herself and stood in the doorway with it, though no one could have seen it from the water. In the morning the boat was tied up at the far pier and nobody would say whose it was."
+        }
+      },
+      { "from": "zoh", "text": "Scene 2 in! That seventh lamp is the whole scene for me. What made you end on nobody saying whose boat it was?" },
+      { "from": "tester", "text": "wanted it to stay a mystery" }
+    ],
+    "plan": {
+      "step": "Write one 200-word scene of Lighthouse in Word",
+      "destination": "a full draft of Lighthouse by spring",
+      "place": "Word on my laptop",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "document",
+      "proof_note": "the scene's Word doc",
+      "reason": "The doc is the proof and lets me read the whole scene for feedback.",
+      "minutes": 20,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "Scene 1 of Lighthouse", "proof_seen": "the scene's Word doc" },
+      { "days_ago": 2, "status": "done", "step": "Scene 2 of Lighthouse: the storm night", "proof_seen": "the scene's Word doc" }
+    ]
+  },
+  "testerLines": [
+    "hey before tonight, what did you think of how the storm scene opened? I'm thinking of rewriting the first line"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a question about a document from days ago.",
+  "shouldHaveHappened": "ZOH answers from the scene itself: the first line (\"The storm came in sideways\") and what it does, specifically, then one thought or question about the rewrite. It never invents lines or details that aren't in the scene, and never answers vaguely as if it can't recall it.",
+  "startTime": "17:00",
+  "timeZone": "America/New_York"
+}

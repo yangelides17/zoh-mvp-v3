@@ -1,0 +1,38 @@
+{
+  "id": "video-counts",
+  "title": "A squat video counts, with a reaction to something specific in it",
+  "origin": "Issue #163 (More ways to send proof): videos count as proof",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "goblet squats with a kettlebell", "where": "my garage", "when": "7 am", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Sam! 3 sets of 10 goblet squats in the garage at 7. Film your last set, a minute or two is perfect. You in?" },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "3 sets of 10 goblet squats",
+      "place": "my garage",
+      "time": "07:00",
+      "days": ["mon", "wed", "fri"],
+      "proof": "video",
+      "proof_note": "a 1-2 minute video of the last set",
+      "reason": "A clip of the last set shows the work and lets me see your depth.",
+      "minutes": 15,
+      "started_days_ago": 7
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "3 sets of 10 goblet squats", "proof_seen": "video of the last set" },
+      { "days_ago": 5, "status": "done", "step": "3 sets of 10 goblet squats", "proof_seen": "video of the last set" }
+    ]
+  },
+  "testerLines": [
+    "[video last-set.mov: A garage, one person with a kettlebell held at the chest. Ten goblet squats from 0:05 to 0:58. The first eight go to about parallel; reps 9 and 10 are shallower, a few inches above parallel, and the heels lift slightly on rep 10 (0:55). They set the bell down and say \"that's three\" at 1:02.] last set done, legs are cooked"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a video is proof, and ZOH only knows what's in it from Gemini's account.",
+  "shouldHaveHappened": "ZOH counts it and celebrates with something specific from the video (the depth on the first eight, or that the last two got shallower as they tired), never inventing anything the account doesn't say, then asks one reflection question (how the legs felt, or the last two reps). It never asks for other proof.",
+  "startTime": "07:25",
+  "timeZone": "America/New_York"
+}

@@ -210,8 +210,12 @@ describe("eval: proof cases send photos and voice notes", () => {
       "smaller-asked-with-reason",
       "smaller-no-reason",
       "zoh-suggests-smaller",
-      // #163: documents as proof.
+      // #163: documents and videos as proof.
       "document-writing-counts",
+      "video-counts",
+      "video-off-topic",
+      "pages-file-cant-open",
+      "document-recall-later",
     ]);
     const doc = cases.find((c) => c.id === "document-writing-counts")!;
     const docEcho = new EchoReplier();
