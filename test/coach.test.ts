@@ -6,7 +6,6 @@ import {
   CORE_VOICE,
   EXAMPLES,
   FIXED_INSTRUCTIONS,
-  MEMORY,
   NEXT_STEPS,
   fullVoiceInstructions,
   NUDGES,
@@ -14,12 +13,10 @@ import {
   PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
   WEEK_LOOKBACK,
-  TEAM,
-  PROOF,
   TODAYS_STEP,
   TOOL_RULES,
 } from "../src/coach/prompt.js";
-import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
+import { loadVoiceDoc, RULE_KEYS, splitVoicePage, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
 import { readFileSync } from "node:fs";
 import { loadCoachState, onboardingComplete } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
@@ -583,15 +580,10 @@ describe("instructions", () => {
     expect(CORE_VOICE.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.core);
     expect(ONBOARDING.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.onboarding);
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
-    expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
-    expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
-    expect(MEMORY.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.memory);
-    expect(PROOF.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.proof);
-    expect(NEXT_STEPS.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nextSteps);
-    expect(TEAM.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.team);
-    expect(TODAYS_STEP.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.todaysStep);
-    expect(WEEK_LOOKBACK.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.weekLookback);
-    expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
+    // #196: the voice page's own sections, one budget each.
+    const page = splitVoicePage(loadVoiceDoc());
+    expect(page.voice.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.voice);
+    for (const key of RULE_KEYS) expect(page.rules[key].length, key).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS[key]);
   });
 
   it("keep follow-ups, the commitment ask and the quiet-hours offer natural", () => {
@@ -677,6 +669,19 @@ describe("the voice page", () => {
     expect(voiceForCoach("a\n<!-- people only -->\nsecret\n<!-- /people only -->\n\n\nb")).toBe("a\n\nb");
   });
 
+  it("splits into the voice and its rule sections, and refuses a page with one missing, unknown or twice (#196)", () => {
+    const all = RULE_KEYS.map((k) => `## ${k} heading <!-- rules: ${k} -->\n\n${k} rule.`).join("\n\n");
+    const page = `# Voice\n\nIntro.\n\n## Proof\n\nProof voice.\n\n### How it runs <!-- rules: proof -->\n\nPROOF rule.\n- a line\n\n## Breaks\n\nBreak voice.\n\n${all.replace("## proof heading <!-- rules: proof -->\n\nproof rule.\n\n", "")}`;
+    const split = splitVoicePage(page);
+    expect(split.voice).toBe("# Voice\n\nIntro.\n\n## Proof\n\nProof voice.\n\n## Breaks\n\nBreak voice.");
+    expect(split.rules.proof).toBe("PROOF rule.\n- a line");
+    expect(split.rules.team).toBe("team rule.");
+    expect(() => splitVoicePage(page.replace("<!-- rules: team -->", ""))).toThrow(/missing the rule sections: team/);
+    expect(() => splitVoicePage(`${page}\n\n## X <!-- rules: extra -->\n\nx`)).toThrow(/unknown rule section "extra"/);
+    expect(() => splitVoicePage(`${page}\n\n## Y <!-- rules: team -->\n\ny`)).toThrow(/"team" twice/);
+    expect(() => loadVoiceDoc(VOICE_DOC_PATH)).not.toThrow();
+  });
+
   it("onboarding uses the condensed prompt; after onboarding the coach reads the whole page", async () => {
     model.script("Yo! I'm ZOH…");
     await text(ME, "Start");
@@ -686,7 +691,7 @@ describe("the voice page", () => {
     model.script("On its way!");
     await text(ME, "when's my plan coming?");
     const fixed = model.requests.at(-1)!.system[0]!;
-    expect(fixed).toMatchObject({ text: fullVoiceInstructions(loadVoiceDoc()), cache_control: { type: "ephemeral" } });
+    expect(fixed).toMatchObject({ text: fullVoiceInstructions(), cache_control: { type: "ephemeral" } });
     expect(fixed.text).toContain("## When they start to slip");
     expect(fixed.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
     expect(fixed.text).toContain(TOOL_RULES);

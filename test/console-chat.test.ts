@@ -393,7 +393,7 @@ describe("console coach capabilities", () => {
 describe("the texting coach and the team", () => {
   it("TEAM rules are in both prompts and within budget", () => {
     expect(FIXED_INSTRUCTIONS).toContain(TEAM);
-    expect(fullVoiceInstructions(loadVoiceDoc())).toContain(TEAM);
+    expect(fullVoiceInstructions()).toContain(TEAM);
     expect(TEAM).toContain("never quote it");
     expect(TEAM).toContain("Never deny it");
     expect(loadVoiceDoc()).toContain('Asked "did someone tell you to say that?"');

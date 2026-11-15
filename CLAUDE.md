@@ -124,11 +124,13 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 
 ## Changing what ZOH says
 - Two files are live prompts, so edit them with care: **`docs/coach-voice.md`** is read word for word by
-  the coach after onboarding (minus `<!-- people only -->` parts, loaded at startup), and
-  **`src/coach/prompt.ts`** holds the condensed voice and rules for onboarding plus the rules for every
-  phase. Any edit to either changes the live coach: flag it for Yanni, keep the condensed voice in sync
+  the coach after onboarding (minus `<!-- people only -->` parts, loaded at startup), including the rule
+  sections under headings marked `<!-- rules: <key> -->` (#196; four of them are read during onboarding
+  too), and **`src/coach/prompt.ts`** holds the condensed voice and rules for onboarding plus the state
+  block. Any edit to either changes the live coach: flag it for Yanni, keep the condensed voice in sync
   with the page, stay within the prompt budgets, and run the eval cases it touches. Mark sections for
-  features that aren't built yet "Not active yet" (the coach is told not to act on them).
+  features that aren't built yet "Not active yet" (the coach is told not to act on them). Every line ZOH
+  reads is listed in `docs/prompt-inventory.json`: after changing one, `npm run inventory -- --write`.
 - Keep instructions lean: sharpen an existing line before adding one, fix the cause rather than the
   instance, keep examples in `eval/cases/` rather than the prompt, and stay within the prompt budgets.
 - When the coach gets something wrong (eval, live or beta): save the exchange as a regression case in

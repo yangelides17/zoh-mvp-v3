@@ -126,15 +126,19 @@ export function extractFromCode(file: string, src: string): Found[] {
   return found;
 }
 
-/** The voice page as the coach reads it (people-only parts left out), line by line under its heading. */
+/**
+ * The voice page as the coach reads it (people-only parts left out), line by line under its heading.
+ * A rule section's lines are marked with its key; its marked heading isn't read by the coach, so it isn't listed.
+ */
 export function extractFromPage(file: string, markdown: string): Found[] {
   const found: Found[] = [];
   let heading = "(top)";
   for (const line of voiceForCoach(markdown).split("\n")) {
     const t = line.trim();
     if (!t) continue;
-    const h = /^#+\s+(.*?)(\s*<!--.*-->)?$/.exec(t);
-    if (h) heading = h[1]!;
+    const h = /^#+\s+(.*?)(\s*<!-- rules: (\w+) -->)?$/.exec(t);
+    if (h) heading = h[3] ? `${h[1]} (rules: ${h[3]})` : h[1]!;
+    if (h?.[3]) continue;
     found.push({ text: t, file, where: heading });
   }
   return found;
@@ -177,7 +181,7 @@ const RULE_CONSTANTS = ["TOOL_RULES", "PLAN_AGREEMENT", "NUDGES", "TODAYS_STEP",
 export function kindOf(f: Found): string {
   const [top = "", ...rest] = f.where.split(" > ");
   const last = rest.at(-1) ?? top;
-  if (f.file === VOICE_PAGE) return /^rules:/.test(f.where) || /\(rules\)$/.test(f.where) ? "rule" : "voice";
+  if (f.file === VOICE_PAGE) return /\(rules: \w+\)$/.test(f.where) ? "rule" : "voice";
   switch (f.file) {
     case "src/coach/prompt.ts":
       if (RULE_CONSTANTS.includes(top)) return "rule";

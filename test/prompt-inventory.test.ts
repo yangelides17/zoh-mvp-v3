@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { compare, extractFromCode, extractFromPage, kindOf, readInventory, scan } from "../scripts/prompt-inventory.js";
 import { FIXED_INSTRUCTIONS, fullVoiceInstructions } from "../src/coach/prompt.js";
-import { loadVoiceDoc } from "../src/coach/voice.js";
 
 // #196: every line ZOH reads is listed in docs/prompt-inventory.json, and rearranging changed none of them.
 describe("the prompt inventory", () => {
@@ -43,6 +42,6 @@ describe("the assembled instructions", () => {
   // Snapshots taken on dev before #196 touched anything. A change to what ZOH reads shows up as a diff here.
   it("are the same as before, during onboarding and after", () => {
     expect(FIXED_INSTRUCTIONS).toBe(readFileSync("test/snapshots/instructions-onboarding.txt", "utf8"));
-    expect(fullVoiceInstructions(loadVoiceDoc())).toBe(readFileSync("test/snapshots/instructions-after-onboarding.txt", "utf8"));
+    expect(fullVoiceInstructions()).toBe(readFileSync("test/snapshots/instructions-after-onboarding.txt", "utf8"));
   });
 });

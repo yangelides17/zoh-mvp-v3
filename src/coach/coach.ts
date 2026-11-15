@@ -29,7 +29,6 @@ import { updateTester } from "../testers/testers.js";
 import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions } from "./prompt.js";
 import { loadCoachState, localTime, onboardingComplete, type CoachState } from "./state.js";
 import { runTool, TOOL_DEFINITIONS } from "./tools.js";
-import { loadVoiceDoc } from "./voice.js";
 
 /**
  * Claude calls per reply. The last one can't use tools, so it always ends in text. Five, so a
@@ -134,7 +133,7 @@ export const COACH_MAX_TOKENS = 2000;
 export interface CoachOptions {
   db: Db;
   model: ClaudeModel;
-  /** The voice page as the coach reads it; defaults to docs/coach-voice.md, read once here. */
+  /** The voice, in place of the voice page's (tests); the rule sections always come from docs/coach-voice.md. */
   voice?: string;
   /** Focus plus maintenance goals a tester can have (`GOAL_CAP`); defaults to 3. */
   goalCap?: number;
@@ -151,8 +150,8 @@ export interface CoachOptions {
  */
 export function createCoach(opts: CoachOptions): Replier {
   const { db, model, goalCap } = opts;
-  // Read at startup (wiring builds the coach then), so a missing page stops the app, not a reply.
-  const afterOnboarding = fullVoiceInstructions(opts.voice ?? loadVoiceDoc());
+  // The page is read when prompt.ts loads at startup, so a missing page stops the app, not a reply.
+  const afterOnboarding = fullVoiceInstructions(opts.voice);
   return {
     async reply({ tester: initial, turns, now, messageId, onUsage, onAction, interrupted, signal, dropped }: ReplyInput) {
       const messages = toClaudeMessages(turns);
