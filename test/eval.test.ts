@@ -184,6 +184,12 @@ describe("eval: proof cases send photos and voice notes", () => {
     const voice = parseMediaLine("[voice: ten pages done]")!;
     expect(voice.caption).toBe("");
     expect(await evalTranscriber.transcribe((await evalMediaFetcher(voice.mediaUrl)).bytes, "v.caf", "audio/x-caf")).toBe("ten pages done");
+    // #163: a document line is served as a real file of its type.
+    const doc = parseMediaLine("[document essay.pdf: The keeper woke early.] draft done")!;
+    expect(doc.caption).toBe("draft done");
+    const served = await evalMediaFetcher(doc.mediaUrl);
+    expect([served.contentType, Buffer.from(served.bytes.subarray(0, 4)).toString()]).toEqual(["application/pdf", "%PDF"]);
+    expect(doc.mediaUrl.endsWith("/essay.pdf")).toBe(true);
     expect(parseMediaLine("just text")).toBeUndefined();
     await expect(evalMediaFetcher("https://eval.media/photo/missing.jpg")).rejects.toThrow();
   });
@@ -204,7 +210,13 @@ describe("eval: proof cases send photos and voice notes", () => {
       "smaller-asked-with-reason",
       "smaller-no-reason",
       "zoh-suggests-smaller",
+      // #163: documents as proof.
+      "document-writing-counts",
     ]);
+    const doc = cases.find((c) => c.id === "document-writing-counts")!;
+    const docEcho = new EchoReplier();
+    await runConversation(planConversations([], [doc], { runs: 1 })[0]!, scriptedTester(doc.testerLines), { maxTurns: 2, index: 3, env: {}, replier: docEcho });
+    expect(docEcho.received[0]!.at(-1)!.text).toContain("[Sent a document: lighthouse-scene-4.docx]\n<document>\nTheo set the ledger down");
     for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic" || c.id === "writing-screenshot-only")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();

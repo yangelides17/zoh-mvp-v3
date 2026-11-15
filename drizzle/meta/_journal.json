@@ -162,6 +162,13 @@
       "when": 1794686955884,
       "tag": "0022_low_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794716091482,
+      "tag": "0023_tough_bloodscream",
+      "breakpoints": true
     }
   ]
 }

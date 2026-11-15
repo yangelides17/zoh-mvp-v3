@@ -679,7 +679,8 @@ describe("#98: all their media in Memory", () => {
     expect(media).toContain(`<img class="proof" src="/console/media/${s.photoId}"`);
     expect(media).toContain(`<audio controls preload="none" src="/console/media/${m.voice.id}"`);
     expect(media).toContain(`<video controls preload="none" src="/console/media/${m.video.id}"`);
-    expect(media).toContain(`<a href="/console/media/${m.file.id}">other file</a>`);
+    // #163: a PDF is a document, shown by its name.
+    expect(media).toContain(`<a href="/console/media/${m.file.id}" target="_blank" rel="noopener">📄 n.pdf</a>`);
     expect(media).toContain("A paperback open at page 40");
     expect(media).toContain("Mon, Nov 2, 7:30 PM");
     expect(media).not.toContain("just words");

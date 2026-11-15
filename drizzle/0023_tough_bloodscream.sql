@@ -1,0 +1,2 @@
+ALTER TABLE "plans" DROP CONSTRAINT "plans_proof_check";--> statement-breakpoint
+ALTER TABLE "plans" ADD CONSTRAINT "plans_proof_check" CHECK ("plans"."proof" in ('photo', 'screenshot', 'voice', 'document', 'video'));

@@ -35,9 +35,9 @@ export const messages = pgTable(
     /** Our private copy in the bucket. */
     mediaKey: text("media_key"),
     mediaContentType: text("media_content_type"),
-    /** Voice-note transcript from Speaches. */
+    /** Voice-note transcript from Speaches, or a document's words (#163). */
     transcript: text("transcript"),
-    /** When our bucket copy was deleted (voice-note audio after 30 days); the transcript stays. */
+    /** When our bucket copy was deleted (voice-note audio after 30 days, until #163 kept every file); the transcript stays. */
     mediaDeletedAt: timestamp("media_deleted_at", { withTimezone: true }),
     /** One line on what a photo or video shows, written as it arrives (coach memory). */
     description: text("description"),
@@ -206,7 +206,10 @@ export const PLAN_STATUSES = ["draft", "locked"] as const;
 /** How a version after lock differs: deepen keeps the streak, upgrade starts a new one, other keeps it. */
 export const CHANGE_KINDS = ["deepen", "upgrade", "other"] as const;
 export type ChangeKind = (typeof CHANGE_KINDS)[number];
-export const PROOF_METHODS = ["photo", "screenshot", "voice"] as const;
+/** How a plan's proof is shown, as the coach and founders can choose it (#163: a document too). */
+export const PROOF_METHODS = ["photo", "screenshot", "voice", "document"] as const;
+/** What the database takes: #163's one migration also allows video, offered once Gemini watches videos. */
+const STORED_PROOF_METHODS = [...PROOF_METHODS, "video"] as const;
 export const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 /** #155: the plan fields a founder's adjust proposes (the plans table's names). */
@@ -248,7 +251,7 @@ export const plans = pgTable(
     /** Local "HH:MM". */
     stepTime: text("step_time").notNull(),
     days: jsonb("days").$type<Weekday[]>().notNull(),
-    proof: text("proof", { enum: PROOF_METHODS }).notNull(),
+    proof: text("proof", { enum: STORED_PROOF_METHODS }).notNull(),
     /** Which photo, screenshot or voice note ("Whoop strain screenshot"). */
     proofNote: text("proof_note"),
     reason: text("reason").notNull(),
@@ -272,7 +275,7 @@ export const plans = pgTable(
     unique("plans_tester_version_unique").on(t.testerId, t.version),
     index("plans_tester_idx").on(t.testerId),
     check("plans_status_check", sql`${t.status} in ('draft', 'locked')`),
-    check("plans_proof_check", sql`${t.proof} in ('photo', 'screenshot', 'voice')`),
+    check("plans_proof_check", sql`${t.proof} in ('photo', 'screenshot', 'voice', 'document', 'video')`),
     check("plans_change_kind_check", sql`${t.changeKind} in ('deepen', 'upgrade', 'other')`),
   ],
 );

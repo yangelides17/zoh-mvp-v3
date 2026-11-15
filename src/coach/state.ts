@@ -28,7 +28,10 @@ import {
   type Weekday,
 } from "../db/schema.js";
 import { claimedRequest, notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
-import { mediaKind } from "../media/storage.js";
+import { mediaKind, type MediaKind } from "../media/storage.js";
+
+/** What counts as proof: photos and voice notes, and documents since #163 (video joins with Gemini). */
+const PROOF_KINDS: MediaKind[] = ["image", "audio", "document"];
 import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
@@ -383,9 +386,10 @@ export async function loadProof(db: Db, tester: Tester, today: string, now: Date
   const outbound = await db
     .select({ at: sentTime })
     .from(messages)
-    .where(and(window, eq(messages.direction, "outbound")))
+    // #163: a "watching it now" holding text isn't one of ZOH's texts since the proof.
+    .where(and(window, eq(messages.direction, "outbound"), sql`${messages.timings}->>'holding' is null`))
     .orderBy(desc(sentTime));
-  const proof = inbound.filter((m) => ["image", "audio"].includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
+  const proof = inbound.filter((m) => PROOF_KINDS.includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
   const outTimes = outbound.map((o) => new Date(o.at).getTime());
   const lastOutAt = outTimes[0];
   const todays = proof.filter((m) => serviceDate(messageTime(m), tester) === today);

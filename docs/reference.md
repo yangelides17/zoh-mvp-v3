@@ -26,7 +26,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   waits while the tester is typing; default 30, `0` turns the hold off without a code change).
   Optional `REPLY_GRACE_SECONDS` (#132: how long a ready reply waits for a late typing signal or
   another text before it goes out, and again after a hold ends on "stopped"; default 2.5, decimals
-  allowed, `0` turns it off).
+  allowed, `0` turns it off). `RAILPACK_DEPLOY_APT_PACKAGES` includes `ffmpeg` on both apps (#185:
+  iPhone .caf voice notes are rewrapped, same audio, into .m4a or .ogg so the console plays them in
+  Chrome; `/health` reports `ffmpeg`; without it voice notes stay .caf and nothing else breaks).
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only (with `*`, staging
@@ -159,9 +161,18 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   yesterday's texts (at least 30), instead of the last 200; up to 5 lookups a reply (2 searches).
   Each reply's tokens are logged in the message's `timings`.
 - Photo and voice verification (#7): the coach judges proof in its reply (no second Claude call)
-  and saves a verdict and a line on what it saw on the day. No proof, no done. Photos stay in the
-  bucket; voice-note audio is deleted 30 days after it arrived (hourly job), transcripts stay.
-  Proof-gaming flags are saved only.
+  and saves a verdict and a line on what it saw on the day. No proof, no done. Proof-gaming flags
+  are saved only.
+- More ways to send proof (#163): documents count as proof. PDFs reach the coach as the file itself
+  (Claude reads layout and scans); Word, Excel/CSV, PowerPoint, text, markdown and code files as their
+  words; Pages, Numbers, Keynote and old .doc/.ppt are named as files it can't open. Read in full up
+  to 100 pages, past that the first 100. A document's words are kept like a transcript (memory search;
+  later replies within the two-day window show them like a paste), plus a one-line summary.
+  `open_file` reopens any file a tester sent from our copy and reads it afresh. **Every file is kept
+  for good** (Yanni, Nov 14), reversing the old 30-day delete of voice-note audio; audio deleted
+  before then stays gone (`media_deleted_at`). A file still being read 10 s after it arrived gets one
+  fixed holding text ("reading it now 📖" / "watching it now 👀"), recorded with `holding` in its
+  timings and not counted as one of ZOH's texts since the proof.
 - Test mode (#14): a dev number texts `jump 3h`, `jump 2d`, `jump 7:30am` or `jump next`, and that
   tester's own clock (`testers.clock_offset_ms`) walks forward in 5-minute steps, running their
   nudges, day closes, memory pass and Sunday summary on the way; then one ⏩ log line. The jump
@@ -175,7 +186,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 ## Outside limits
 - **Sendblue:** replies within 24 hours of a tester's last text are unlimited; after that the coach
   can still text first, up to 200 contacts per line per day; 150 outbound texts in a row with no
-  reply is the only other cap. Photo links expire after 30 days (we keep our own copy).
+  reply is the only other cap. Photo links expire after 30 days (we keep our own copy). Its largest
+  inbound file isn't documented (its upload API caps at 100 MB); we download up to 500 MB, with two
+  minutes to do it (#163), and tell the coach when a file was too big.
 - **Sendblue opt-out:** Sendblue keeps its own opt-out list (STOP, QUIT, END, REVOKE, OPT OUT,
   CANCEL, UNSUBSCRIBE; START opts back in) and refuses every send to a number on it, the stop
   confirmation included. When a stopped tester texts us again, the app calls

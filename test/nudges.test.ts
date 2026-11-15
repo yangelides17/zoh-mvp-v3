@@ -19,7 +19,6 @@ import {
   type Plan,
   type Tester,
 } from "../src/db/schema.js";
-import { createMediaRetention } from "../src/media/retention.js";
 import { dueNudge, serviceDate, zonedTime, type NudgeInput } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import { summarizeDays } from "../src/nudges/streak.js";
@@ -940,7 +939,7 @@ describe("proof (spec: Photo and voice verification)", () => {
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);
-    expect(await block()).toContain("No photo, screenshot or voice note from them today.");
+    expect(await block()).toContain("No photo, screenshot, voice note or document from them today.");
     await photo(at(MON, "19:50"));
     await tool("proof_unclear", { verdict: "doesnt_match", seen: "bright hallway, lights on" }, at(MON, "19:51"));
     expect(await block()).toContain("Proof sent today: 1. Your read: doesnt match (bright hallway, lights on). Still sorting it out with them.");
@@ -1000,42 +999,6 @@ describe("proof (spec: Photo and voice verification)", () => {
       { kind: "proof_pattern", detail: "Third day of blurry photos, never the book" },
     ]);
     expect(t.sendblue.sends.length).toBe(sends);
-  });
-});
-
-describe("voice-note audio retention", () => {
-  it("deletes audio 30 days after it arrived, keeps newer audio and every photo, and records it", async () => {
-    const now = at(MON, "12:00");
-    const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000);
-    const rows = [
-      { key: "media/1/old.caf", type: "audio/x-caf", when: daysAgo(31) },
-      { key: "media/1/old-unlabeled.m4a", type: "application/octet-stream", when: daysAgo(40) },
-      { key: "media/1/new.caf", type: "audio/x-caf", when: daysAgo(29) },
-      { key: "media/1/old.jpg", type: "image/jpeg", when: daysAgo(60) },
-    ];
-    for (const r of rows) {
-      await t.media.put(r.key, new Uint8Array([1]), r.type);
-      await t.db.insert(messages).values({
-        direction: "inbound",
-        contactNumber: ME,
-        mediaUrl: `https://cdn.example/${r.key}`,
-        mediaKey: r.key,
-        mediaContentType: r.type,
-        transcript: r.type === "image/jpeg" ? null : "did my ten pages",
-        createdAt: r.when,
-      });
-    }
-    const retention = createMediaRetention({ db: t.db, log: silent, media: t.media });
-    expect(await retention.tick(now)).toBe(2);
-    expect([...t.media.objects.keys()].sort()).toEqual(["media/1/new.caf", "media/1/old.jpg"]);
-    const saved = await t.db.select().from(messages).orderBy(asc(messages.createdAt));
-    expect(saved.map((m) => [m.mediaKey, m.mediaDeletedAt !== null, m.transcript])).toEqual([
-      ["media/1/old.jpg", false, null],
-      ["media/1/old-unlabeled.m4a", true, "did my ten pages"],
-      ["media/1/old.caf", true, "did my ten pages"],
-      ["media/1/new.caf", false, "did my ten pages"],
-    ]);
-    expect(await retention.tick(now)).toBe(0);
   });
 });
 

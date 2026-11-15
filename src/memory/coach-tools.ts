@@ -2,11 +2,14 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
-import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, type MemoryFact, type Tester } from "../db/schema.js";
+import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, type MemoryFact, type Message, type Tester } from "../db/schema.js";
 import { localDate } from "../coach/state.js";
+import { readDocument } from "../media/documents.js";
+import { prepareImageForClaude } from "../media/images.js";
+import { extensionOf, mediaKind, type MediaStore } from "../media/storage.js";
 import { updateTester } from "../testers/testers.js";
 import { renderPage } from "./render.js";
-import { addFact, ensureCorePages, factsOf, findFact, findPage, removeFact, searchMemory } from "./store.js";
+import { addFact, ensureCorePages, factsOf, findFact, findMessage, findPage, mediaLabel, messageTime, removeFact, searchMemory } from "./store.js";
 
 /**
  * The coach's memory tools (spec: GitHub issue "Coach memory"): saving a stated preference the
@@ -24,6 +27,7 @@ const schemas = {
   save_preference: z.object({ preference: text(160), replaces: z.array(text(40)).max(5).optional() }).strict(),
   open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS) }).strict(),
   search_memory: z.object({ query: text(120) }).strict(),
+  open_file: z.object({ ref: text(40) }).strict(),
   forget: z
     .object({
       facts: z.array(text(40)).max(10).optional(),
@@ -57,8 +61,13 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "search_memory",
-    description: `Word search over everything you remember and every older text, photo and voice note. Quoted phrases and OR work. At most ${MAX_SEARCHES} a reply.`,
+    description: `Word search over everything you remember and every older text, photo, voice note and document (by its words). Quoted phrases and OR work. At most ${MAX_SEARCHES} a reply.`,
     input_schema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
+  },
+  {
+    name: "open_file",
+    description: `Open a file they sent before (an m: ref from search_memory or the timeline): a document in full, a photo to look at again, a voice note's words. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.`,
+    input_schema: { type: "object", properties: { ref: { type: "string" } }, required: ["ref"] },
   },
   {
     name: "forget",
@@ -80,7 +89,12 @@ export interface LookupBudget {
   searches: number;
 }
 
-export type MemoryToolResult = { ok: true; message: string; tester: Tester; memoryChanged?: boolean } | { ok: false; error: string };
+/** #163: what open_file shows Claude beyond words: a photo or a PDF. */
+export type FileBlock = Anthropic.ImageBlockParam | Anthropic.DocumentBlockParam;
+
+export type MemoryToolResult =
+  | { ok: true; message: string; tester: Tester; memoryChanged?: boolean; blocks?: FileBlock[] }
+  | { ok: false; error: string };
 
 /**
  * Runs one memory tool for the coach. `sourceMessageId` is the text being answered (what a stated
@@ -91,7 +105,7 @@ export async function runMemoryTool(
   tester: Tester,
   name: string,
   rawInput: unknown,
-  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string },
+  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string; media?: MediaStore },
 ): Promise<MemoryToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as MemoryToolName].safeParse(rawInput ?? {});
@@ -145,6 +159,16 @@ export async function runMemoryTool(
       return { ok: true, message: lines.join("\n"), tester };
     }
 
+    case "open_file": {
+      const { ref } = parsed.data as z.infer<typeof schemas.open_file>;
+      if (budget.lookups + 1 > MAX_LOOKUPS) return { ok: false, error: spent };
+      budget.lookups += 1;
+      // Only this tester's own texts: a guessed ref never opens anyone else's file.
+      const m = await findMessage(db, tester, ref);
+      if (!m?.mediaUrl || m.direction !== "inbound") return { ok: false, error: `${ref}: no file they sent has that ref.` };
+      return { ok: true, tester, ...(await openFile(m, tester, ctx.media)) };
+    }
+
     case "forget": {
       const { facts, pages, note, everything } = parsed.data as z.infer<typeof schemas.forget>;
       if (everything) {
@@ -192,4 +216,33 @@ export async function runMemoryTool(
       return { ok: true, message: `Forgotten${removed.length ? `: ${removed.join("; ")}` : ""}${forgetNote ? ` (won't keep: ${forgetNote})` : ""}.`, tester, memoryChanged: true };
     }
   }
+}
+
+/**
+ * #163: a file they sent, opened again from our copy and read afresh: a document in full (a PDF as the
+ * file itself), a photo to look at, a voice note's words. Gone or unreadable: says so, with what's known.
+ */
+async function openFile(m: Message, tester: Tester, media: MediaStore | undefined): Promise<{ message: string; blocks?: FileBlock[] }> {
+  const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!);
+  const said = m.content?.trim() ? ` (their words with it: "${m.content.trim()}")` : "";
+  const head = `The ${mediaLabel(m)} they sent ${localDate(messageTime(m), tester.timeZone)}${said}`;
+  const known = m.description ? ` When it arrived: ${m.description}.` : "";
+  if (kind === "audio") return { message: m.transcript ? `${head}. Its words: "${m.transcript}"` : `${head} has no transcript.${known}` };
+  const stored = m.mediaKey && !m.mediaDeletedAt && media ? await media.get(m.mediaKey) : undefined;
+  if (kind === "image") {
+    const image = stored ? await prepareImageForClaude(stored.bytes) : undefined;
+    if (!image) return { message: `${head} can't be opened again.${known}` };
+    return { message: `${head}, attached.`, blocks: [{ type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } }] };
+  }
+  if (kind === "document" || kind === "other") {
+    const doc = stored ? await readDocument(stored.bytes, extensionOf(m.mediaUrl!), stored.contentType) : undefined;
+    if (doc?.kind === "pdf") {
+      const pages = `${doc.pages} page${doc.pages === 1 ? "" : "s"}`;
+      return { message: `${head}, attached (${pages}).`, blocks: [{ type: "document", source: { type: "base64", media_type: "application/pdf", data: doc.pdf } }] };
+    }
+    if (doc?.kind === "text") return { message: `${head}${doc.clipped ? " (only the first part: it's longer)" : ""}:\n<document>\n${doc.text}\n</document>` };
+    if (m.transcript) return { message: `${head}:\n<document>\n${m.transcript}\n</document>` };
+    return { message: `${head} couldn't be opened${doc?.kind === "unsupported" ? ` (${doc.reason})` : ""}.${known}` };
+  }
+  return { message: `${head} can't be opened here.${known}` };
 }

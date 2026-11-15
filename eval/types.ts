@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Weekday } from "../src/db/schema.js";
+import { PROOF_METHODS, type Weekday } from "../src/db/schema.js";
 
 export const PERSONAS = ["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
 export type Persona = (typeof PERSONAS)[number];
@@ -34,7 +34,16 @@ export const seedSchema = z.object({
     how_long: z.string().optional(),
     tracks_with: z.string().optional(),
   }),
-  history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  history: z
+    .array(
+      z.object({
+        from: z.enum(["tester", "zoh"]),
+        text: z.string().min(1),
+        /** #163: a document they sent with this text, kept as the pipeline keeps one (its words as the transcript). */
+        document: z.object({ name: z.string().regex(/^[\w.-]+\.\w+$/), text: z.string().min(1) }).optional(),
+      }),
+    )
+    .min(1),
   /** #48: quiet hours they chose themselves (local "HH:MM"); without it, the default ones, which fit around the step. */
   quiet_hours: z.object({ start: z.string().regex(/^\d{2}:\d{2}$/), end: z.string().regex(/^\d{2}:\d{2}$/) }).optional(),
   /** How long before the run's first line the seeded conversation ended (default: a minute before). */
@@ -48,7 +57,7 @@ export const seedSchema = z.object({
       place: z.string().optional(),
       time: z.string().regex(/^\d{2}:\d{2}$/),
       days: z.array(z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"])).min(3),
-      proof: z.enum(["photo", "screenshot", "voice"]),
+      proof: z.enum(PROOF_METHODS),
       proof_note: z.string().optional(),
       reason: z.string(),
       /** How long the step takes, in minutes. */
@@ -108,7 +117,7 @@ export const seedSchema = z.object({
         raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
         /** adjust only (#155): the plan fields the founders proposed, as stored (stepTime "HH:MM", place, days...). */
         plan_changes: z
-          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(["photo", "screenshot", "voice"]).optional() })
+          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(PROOF_METHODS).optional() })
           .optional(),
         /** How long ago ZOH raised it, for one waiting on their answer. */
         delivered_hours_ago: z.number().optional(),

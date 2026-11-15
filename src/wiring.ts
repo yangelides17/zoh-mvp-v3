@@ -6,12 +6,12 @@ import { missingSettings, type Config } from "./config.js";
 import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
-import { createMediaRetention, type MediaRetention } from "./media/retention.js";
-import { createS3MediaStore, fetchMedia } from "./media/storage.js";
+import { createFfmpegRewrapper } from "./media/rewrap.js";
+import { createS3MediaStore, fetchMedia, type MediaStore } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
-import { routingOf, type Logger } from "./pipeline/inbound.js";
+import { HOLDING_AFTER_MS, routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
@@ -35,6 +35,8 @@ export function appDeps(
   const pick = <K extends keyof AppDeps["pipeline"]>(key: K, make: () => AppDeps["pipeline"][K]): AppDeps["pipeline"][K] =>
     key in overrides ? (overrides[key] as AppDeps["pipeline"][K]) : make();
 
+  // One bucket client: the pipeline keeps files in it, the coach opens them again (#163).
+  const media = pick("media", () => makeMedia(config));
   const deps: AppDeps = {
     pipeline: {
       ...overrides,
@@ -47,10 +49,12 @@ export function appDeps(
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       lines: pick("lines", () => new ReplyLines({ holdMs: config.typingHoldSeconds * 1000, graceMs: Math.round(config.replyGraceSeconds * 1000) })),
       sendblue: pick("sendblue", () => makeSendblue(config)),
-      replier: pick("replier", () => makeCoach(config, db)),
-      media: pick("media", () => makeMedia(config)),
+      replier: pick("replier", () => makeCoach(config, db, media)),
+      media,
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
+      rewrapper: pick("rewrapper", () => createFfmpegRewrapper()),
+      holdingAfterMs: pick("holdingAfterMs", () => HOLDING_AFTER_MS),
       describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,
@@ -108,12 +112,6 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
   });
 }
 
-/** The hourly cleanup of old voice-note audio in the app's bucket. */
-export function mediaRetentionFor(deps: AppDeps, log: Logger): MediaRetention {
-  const p = deps.pipeline;
-  return createMediaRetention({ db: p.db, log, media: p.media, now: p.now });
-}
-
 /** The overnight memory pass over the same database, allowed numbers and clock as the app, on the coach's model. */
 export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): MemoryKeeper {
   const p = deps.pipeline;
@@ -162,10 +160,11 @@ function makeSendblue(config: Config) {
     : undefined;
 }
 
-function makeCoach(config: Config, db: Db) {
+function makeCoach(config: Config, db: Db, media: MediaStore | undefined) {
   return config.claude.apiKey
     ? createCoach({
         db,
+        media,
         goalCap: config.goalCap,
         model: createClaudeModel({
           apiKey: config.claude.apiKey,

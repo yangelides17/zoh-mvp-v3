@@ -8,6 +8,8 @@ export interface Turn {
   text: string;
   /** Image to show Claude (only for the latest inbound photo), already converted to JPEG. */
   image?: { mediaType: "image/jpeg"; data: string };
+  /** #163: a PDF to show Claude (only for a document in the texts being answered), base64. */
+  pdf?: string;
 }
 
 export interface ReplyInput {
@@ -104,7 +106,8 @@ export interface Replier {
 
 type ContentBlock =
   | { type: "text"; text: string }
-  | { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } };
+  | { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } }
+  | { type: "document"; source: { type: "base64"; media_type: "application/pdf"; data: string } };
 
 /**
  * Turns into Claude messages: starts with a user turn, merges consecutive
@@ -117,6 +120,7 @@ export function toClaudeMessages(turns: Turn[]): Anthropic.MessageParam[] {
     if (turn.image) {
       blocks.push({ type: "image", source: { type: "base64", media_type: turn.image.mediaType, data: turn.image.data } });
     }
+    if (turn.pdf) blocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: turn.pdf } });
     if (turn.text.trim()) blocks.push({ type: "text", text: turn.text });
     if (blocks.length === 0) continue;
     const last = out[out.length - 1];

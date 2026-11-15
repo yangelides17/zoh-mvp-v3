@@ -149,6 +149,10 @@ export async function startEvalApp(opts: {
       fetchMedia: evalMediaFetcher,
       // Photo descriptions are for memory's search, not the reply being graded: skip the extra Claude call.
       describer: undefined,
+      // #185: the eval's voice notes aren't real audio; nothing to rewrap.
+      rewrapper: undefined,
+      // #163: no "watching it now" here; it never changes the reply being graded.
+      holdingAfterMs: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
       // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would
@@ -513,11 +517,20 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       contactNumber: app.phone,
       lineNumber: LINE,
       content: line.text,
+      ...(line.document
+        ? {
+            mediaUrl: parseMediaLine(`[document ${line.document.name}: ${line.document.text}]`)!.mediaUrl,
+            mediaContentType: line.document.name.endsWith(".pdf") ? "application/pdf" : "text/plain",
+            transcript: line.document.text,
+          }
+        : {}),
       createdAt: new Date(storedStart.getTime() + i * SEED_STEP_MS),
       // What the nudge tick reads as the text's time, on the eval clock.
       sentAt: at,
     });
-    context.push({ from: line.from, text: line.text, at: at.toISOString() });
+    // The grader sees what the document said, as it does for a case's own media lines.
+    const shown = line.document ? `[document ${line.document.name}: ${line.document.text}] ${line.text}` : line.text;
+    context.push({ from: line.from, text: shown, at: at.toISOString() });
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
   return context;

@@ -13,6 +13,7 @@ import {
 } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
+import type { MediaStore } from "../media/storage.js";
 import {
   ALWAYS_MEMORY_TOOLS,
   MEMORY_TOOL_DEFINITIONS,
@@ -136,6 +137,8 @@ export interface CoachOptions {
   voice?: string;
   /** Focus plus maintenance goals a tester can have (`GOAL_CAP`); defaults to 3. */
   goalCap?: number;
+  /** #163: our copies of their files, for open_file; without it, only what was read when they arrived. */
+  media?: MediaStore;
 }
 
 /**
@@ -256,7 +259,7 @@ export function createCoach(opts: CoachOptions): Replier {
         for (const call of calls) {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
-            ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
+            ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media })
             : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
@@ -271,10 +274,15 @@ export function createCoach(opts: CoachOptions): Replier {
               state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             }
           }
+          // #163: open_file hands back the file itself (a photo, a PDF) after its words.
+          const files = result.ok && "blocks" in result ? (result.blocks ?? []) : [];
+          const words = result.ok ? `${result.message}${progress(state)}` : "";
           results.push({
             type: "tool_result",
             tool_use_id: call.id,
-            ...(result.ok ? { content: `${result.message}${progress(state)}` } : { content: result.error, is_error: true }),
+            ...(result.ok
+              ? { content: files.length ? [{ type: "text" as const, text: words }, ...files] : words }
+              : { content: result.error, is_error: true }),
           });
         }
 
