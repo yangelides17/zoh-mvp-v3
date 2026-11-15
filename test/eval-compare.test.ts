@@ -170,12 +170,12 @@ describe("eval: the comparison in the report (#197)", () => {
     const current = scoreCases([...runs("x", "regression", 0, 3), ...runs("y", "regression", 3, 3), ...runs("cap", "regression", 3, 3, "capability"), ...runs("new", "natural", 1, 3)], rubric);
     const lines = comparisonLines({ main: compareScores(current, baseline), rescripted: [] }).join("\n");
     expect(lines).toContain("⚠ **1 thing got worse beyond noise** (1 regression case)");
-    expect(lines).toContain("The case's own goal: 100% → 67% on the same 3 cases (−33 points, ±143), within noise.");
+    expect(lines).toContain("The case's own goal: 100% → 67% on the same 3 cases (−33 points, too few cases for a margin), within noise.");
     expect(lines).toContain("`case:x` (case:x#1): The case's own goal passed 3/3 runs before, 0/3 now; failed regression.");
     expect(lines).toContain("Ready to graduate");
     expect(lines).toContain("No baseline yet, so not compared: `case:new`.");
     // One case: no margin to show. Groups that never applied get no row.
-    expect(groupTable(groupScores(current))).toEqual(["| Group | Score | Cases passing every run |", "| --- | --- | --- |", "| Conversation | 33% | 0/1 |", "| The case's own goal | 67% ±143 | 2/3 |"]);
+    expect(groupTable(groupScores(current))).toEqual(["| Group | Score | Cases passing every run |", "| --- | --- | --- |", "| Conversation | 33% (one case, no margin) | 0/1 |", "| The case's own goal | 67% (too few cases for a margin) | 2/3 |"]);
     expect(comparisonLines({ main: compareScores(baseline, baseline), rescripted: [] })[0]).toBe("**Nothing got worse beyond noise.**");
   });
 });

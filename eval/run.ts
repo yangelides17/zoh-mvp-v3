@@ -120,7 +120,7 @@ async function main(): Promise<number> {
       const regrade = await regradeEstimate(j, ids, { coachModel, evalModel });
       console.error(
         [
-          `The stored baseline for ${ids.length} ${j.feature.name} case(s) was graded with different ${what}, so a comparison would show false differences: ${ids.join(", ")}.`,
+          `The stored baseline for ${ids.length} ${j.feature.name} case(s) was graded differently (${what} changed since), so a comparison would show false differences: ${ids.join(", ")}.`,
           `Re-grade it with the current checks first (grader only, about $${regrade.toFixed(2)}; no conversation runs again):`,
           `  npm run eval -- ${j.feature.name} --regrade-baseline${ids.filter((id) => id.startsWith("case:")).map((id) => ` --case ${id.slice(5)}`).join("")}${args.final ? " --final" : ""}`,
         ].join("\n"),

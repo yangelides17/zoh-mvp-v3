@@ -240,8 +240,16 @@ function points(x: number): string {
   return `${Math.round(x * 100)}`;
 }
 
+/** "±12", or a plain note with under 3 cases or a margin spanning the whole scale (two alike cases would show a false ±0). */
+function marginText(margin: number | null, cases: number): string {
+  if (margin === null) return "one case, no margin";
+  return cases < 3 || margin >= 1 ? "too few cases for a margin" : `±${points(margin)}`;
+}
+
 function scoreCell(s: GroupScore): string {
-  return s.rate === null ? "n/a" : `${pct(s.rate)}${s.margin === null ? "" : ` ±${points(s.margin)}`}`;
+  if (s.rate === null) return "n/a";
+  const m = marginText(s.margin, s.cases);
+  return m.startsWith("±") ? `${pct(s.rate)} ${m}` : `${pct(s.rate)} (${m})`;
 }
 
 /** The group table (#197): one row per group that applied. */
@@ -258,7 +266,7 @@ export function groupTable(groups: Record<Group, GroupScore>): string[] {
 function changeLine(c: GroupChange): string {
   const name = GROUP_LABELS[c.group];
   const style = DECIDING.includes(c.group) ? "" : " Style doesn't decide.";
-  const moved = c.diff === null ? "" : `${c.diff >= 0 ? "+" : "−"}${points(Math.abs(c.diff))} points${c.margin === null ? "" : `, ±${points(c.margin)}`}`;
+  const moved = c.diff === null ? "" : `${c.diff >= 0 ? "+" : "−"}${points(Math.abs(c.diff))} points, ${marginText(c.margin, c.cases)}`;
   const span = `${pct(c.before)} → ${pct(c.after)} on the same ${c.cases === 1 ? "case" : `${c.cases} cases`} (${moved})`;
   if (c.verdict === "worse") return `${style ? "" : "⚠ "}**${name} got worse beyond noise:** ${span}.${style}`;
   if (c.verdict === "better") return `**${name} got better beyond noise:** ${span}.${style}`;
