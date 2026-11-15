@@ -9,7 +9,7 @@ export const USAGE = [
   "  --case           only this case (repeatable), no simulated conversations: the cheap targeted run",
   "  --scenario       only this simulated conversation (repeatable), no cases unless --case is given too",
   `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); cases always run`,
-  "  --runs           times to play each scenario and case (default 1; 3 for a comparison)",
+  "  --runs           times to play each scenario and case (default 1; 3 with --compare)",
   "  --compare        compare with the stored baseline, case by case (checks it matches before spending anything)",
   "  --store-baseline store this run's results as the baseline for its cases (eval/baselines/, committed)",
   "  --regrade        re-grade a saved report with the current checks instead of running conversations",
@@ -102,7 +102,8 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
     cases: values.case,
     scenarios: values.scenario,
     persona: values.persona,
-    runs: positiveInt(values.runs, "--runs", 1),
+    // A comparison is 3 runs a case unless told otherwise (#197).
+    runs: positiveInt(values.runs, "--runs", values.compare ? 3 : 1),
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),
     concurrency: positiveInt(values.concurrency, "--concurrency", 3),
     final: values.final ?? false,
