@@ -28,6 +28,7 @@ import { getTesterByPhone } from "../src/testers/testers.js";
 import { startPause } from "../src/testers/pauses.js";
 import { evalApiKey } from "./cli.js";
 import { EvalClock, evalDay, zonedDate } from "./clock.js";
+import { billedDollars, type BilledUsage } from "./cost.js";
 import { evalMediaFetcher, evalTranscriber, evalWatcher, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
@@ -84,12 +85,43 @@ export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
 }
 
 /** Blocks any request to Sendblue from this process, as a second lock behind the fake client. */
-export function guardFetch(): () => void {
+/** What a run's Claude calls really cost (the app's coach and memory pass, the grader, the simulator), as billed. */
+export interface Meter {
+  dollars: number;
+  byModel: Record<string, BilledUsage>;
+}
+
+export function createMeter(): Meter {
+  return { dollars: 0, byModel: {} };
+}
+
+/**
+ * Blocks Sendblue for the run. With a meter, every Claude response is billed from the usage it reports: the
+ * coach runs inside the app, so this is the only place its real cost (cache writes included) can be seen.
+ */
+export function guardFetch(meter?: Meter): () => void {
   const real = globalThis.fetch;
   globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (/sendblue/i.test(new URL(url).hostname)) throw new Error("The eval must never call Sendblue");
-    return real(input, init);
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+    if (/sendblue/i.test(url.hostname)) throw new Error("The eval must never call Sendblue");
+    const res = await real(input, init);
+    if (meter && res.ok && url.hostname === "api.anthropic.com" && url.pathname === "/v1/messages") {
+      const body = (await res.clone().json().catch(() => undefined)) as
+        | { model?: string; usage?: { input_tokens?: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null; output_tokens?: number } }
+        | undefined;
+      if (body?.model && body.usage) {
+        const u: BilledUsage = {
+          input: body.usage.input_tokens ?? 0,
+          cacheRead: body.usage.cache_read_input_tokens ?? 0,
+          cacheWrite: body.usage.cache_creation_input_tokens ?? 0,
+          output: body.usage.output_tokens ?? 0,
+        };
+        const m = (meter.byModel[body.model] ??= { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 });
+        for (const k of ["input", "cacheRead", "cacheWrite", "output"] as const) m[k] += u[k];
+        meter.dollars += billedDollars(u, body.model);
+      }
+    }
+    return res;
   }) as typeof fetch;
   return () => {
     globalThis.fetch = real;

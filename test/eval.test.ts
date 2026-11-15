@@ -16,7 +16,7 @@ import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
-import { evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
+import { createMeter, evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
@@ -445,6 +445,28 @@ describe("eval: running a conversation through the real app", () => {
   });
 });
 
+describe("eval: what a run really costs", () => {
+  it("bills every Claude response from the usage it reports, cache tokens included, and leaves the body readable", async () => {
+    const real = globalThis.fetch;
+    const usage = { input_tokens: 1000, cache_read_input_tokens: 10_000, cache_creation_input_tokens: 4000, output_tokens: 500 };
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ model: "claude-sonnet-5-5", usage }), { status: 200, headers: { "content-type": "application/json" } })) as typeof fetch;
+    const meter = createMeter();
+    const restore = guardFetch(meter);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", body: "{}" });
+      expect(((await res.json()) as { model: string }).model).toBe("claude-sonnet-5-5");
+      await fetch("https://example.com/v1/messages");
+    } finally {
+      restore();
+      globalThis.fetch = real;
+    }
+    expect(meter.byModel["claude-sonnet-5-5"]).toEqual({ input: 1000, cacheRead: 10_000, cacheWrite: 4000, output: 500 });
+    // Sonnet: $2 in, $10 out per million; cache reads at 0.1x the input price, writes at 1.25x.
+    expect(meter.dollars).toBeCloseTo(((1000 + 1000 + 5000) * 2 + 500 * 10) / 1e6, 10);
+  });
+});
+
 describe("eval: grader", () => {
   it("shows a seeded conversation as context, separate from the graded texts", () => {
     const at = "2026-11-02T23:00:00Z";
@@ -680,7 +702,11 @@ describe("eval: command line and cost", () => {
     expect(parseEvalArgs(["curiosity", "--case", "a", "--runs", "3", "--compare", "--store-baseline"])).toMatchObject({ compare: true, storeBaseline: true, runs: 3 });
     expect(parseEvalArgs(["curiosity", "--regrade", "eval/reports/x.json", "--compare"])).toMatchObject({ regrade: "eval/reports/x.json", compare: true });
     expect(parseEvalArgs(["all", "--runs", "3", "--compare", "--store-baseline"]).feature).toBe("all");
-    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(3);
+    // Nov 15 (Yanni, cost): a comparison runs each case once; cases that did worse are rerun with --runs 3.
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(1);
+    // A baseline is stored from 3 runs or more.
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--compare", "--store-baseline"])).toThrow(/stored from 3 runs/);
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--runs", "2", "--store-baseline"])).toThrow(/stored from 3 runs/);
     expect(() => parseEvalArgs(["all", "--case", "a"])).toThrow(/pick one feature/);
     expect(() => parseEvalArgs(["curiosity", "--regrade", "x.json", "--runs", "3"])).toThrow(/runs no conversations/);
     expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);
@@ -730,6 +756,18 @@ describe("eval: command line and cost", () => {
     expect(estimateCost(plans, { ...base, simModel: "claude-haiku-5-5" }).dollars.high).toBeLessThan(est.dollars.high);
     // #197: re-grading pays only the grader.
     expect(estimateCost(plans, { ...base, gradeOnly: true }).dollars.high).toBeLessThan(est.dollars.high / 2);
+  });
+
+  it("estimates the coach near what it was billed (Nov 15: $0.041 for 1 reply, $0.157 for 7)", async () => {
+    const cases = await loadCases("onboarding");
+    const plan = (id: string) => planConversations([], cases, { cases: [id], runs: 1 });
+    const opts = { maxTurns: 20, pagesChars: 20_000, coachModel: "claude-sonnet-5-5", evalModel: "claude-haiku-5-5" };
+    const one = estimateCost(plan("goal-in-first-text"), opts).dollars.low;
+    const seven = estimateCost(plan("voice-after-onboarding"), opts).dollars.low;
+    expect(one).toBeGreaterThan(0.041 * 0.8);
+    expect(one).toBeLessThan(0.041 * 1.3);
+    expect(seven).toBeGreaterThan(0.157 * 0.8);
+    expect(seven).toBeLessThan(0.157 * 1.3);
   });
 
   it("keeps each branch within its eval budget", async () => {

@@ -113,11 +113,12 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
-- **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself, plus about $4.50
-  for the full run at each release. A full run between releases only for changes to every conversation, with your
+- **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself from what the API
+  actually billed. The full run at each release is estimated at about $34 (Nov 15), so it waits for your OK each time. A full run between releases only for changes to every conversation, with your
   OK. The tests in `npm run check` are free. Live testing and the beta catch the rest.
 - **How a change to ZOH's words is tested** (#197). The build runs only the cases the change touches: once while
-  iterating, then 3 times each, compared with the stored baseline case by case. The report scores four groups:
+  iterating, then once more each, compared with the stored baseline case by case; only the cases that did worse
+  are run 3 more times to tell real from noise (Nov 15: more cases beat more runs, and it costs far less). The report scores four groups:
   conversation, the case's own goal, flow and facts, and style. Style is shown but never decides. In plain words it
   says what got worse beyond noise; a move within noise is neither a regression nor a win. Cases are regression
   (should keep passing; a drop is flagged), capability (the new feature's own; they graduate once they pass every

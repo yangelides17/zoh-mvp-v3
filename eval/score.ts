@@ -75,6 +75,8 @@ export interface Comparison {
   groups: GroupChange[];
   /** Regression cases worse beyond noise in a deciding group. */
   drops: CaseDrop[];
+  /** Nov 15: cases that passed a deciding group less often than the baseline, not beyond noise: rerun them 3 times. */
+  slipped: string[];
   /** Capability cases that passed every run in the baseline and again now. */
   ready: string[];
   /** Cases with no baseline yet. */
@@ -156,6 +158,7 @@ export function compareScores(current: CaseScore[], baseline: CaseScore[]): Comp
     return { group, cases: pairs.length, before: b, after: a, diff, margin, verdict };
   });
   const drops: CaseDrop[] = [];
+  const slipped: string[] = [];
   const ready: string[] = [];
   const unmatched: string[] = [];
   for (const c of current) {
@@ -171,9 +174,16 @@ export function compareScores(current: CaseScore[], baseline: CaseScore[]): Comp
         if (x?.runs && y?.runs && fisherLower(x.passes, x.runs, y.passes, y.runs) <= ALPHA) drops.push({ id: c.id, title: c.title, group, before: x, after: y });
       }
     }
+    const share = (g: GroupRuns) => g.passes / g.runs;
+    const fell = DECIDING.some((group) => {
+      const x = was.groups[group];
+      const y = c.groups[group];
+      return !!x?.runs && !!y?.runs && share(y) < share(x);
+    });
+    if (fell && c.suite !== "replay" && !drops.some((d) => d.id === c.id)) slipped.push(c.id);
     if (c.suite === "capability" && passedEveryRun(c) && passedEveryRun(was)) ready.push(c.id);
   }
-  return { groups, drops, ready, unmatched };
+  return { groups, drops, slipped, ready, unmatched };
 }
 
 // ---- Statistics ----

@@ -5,7 +5,7 @@ import { dirname } from "node:path";
 /**
  * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $1 per issue the
  * branch builds, up to $3 for a group (Yanni, Nov 14, #197; was $0.50 / $1.50): enough to run the cases a
- * change touches 3 times each and compare them with the stored baseline.
+ * change touches once each against the stored baseline, then rerun the ones that did worse 3 times.
  */
 export const BUDGET_PER_ISSUE_USD = 1;
 export const MAX_BUDGET_USD = 3;
