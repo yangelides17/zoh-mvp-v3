@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { PROOF_METHODS, type Weekday } from "../src/db/schema.js";
 
-export const PERSONAS = ["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
+/**
+ * Which suite a case belongs to (#197). "regression": established behavior that should pass almost every
+ * run; a drop gets flagged. "capability": a new feature's own cases; they start low and graduate into
+ * regression once they pass every run. "replay": a real tester conversation, reported apart, never tuned against.
+ */
+export const SUITES = ["regression", "capability", "replay"] as const;
+export type Suite = (typeof SUITES)[number];
+
+export const PERSONAS =["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
 export type Persona = (typeof PERSONAS)[number];
 
 /** Facts the simulated tester answers from. Never shown to ZOH or the grader. */
@@ -210,6 +218,7 @@ export const caseSchema = z.object({
   timeZone: z.string().default("America/New_York"),
   persona: z.enum(PERSONAS).optional(),
   seed: seedSchema.optional(),
+  suite: z.enum(SUITES).default("regression"),
 });
 export type RegressionCase = z.infer<typeof caseSchema>;
 
@@ -231,6 +240,8 @@ export interface ConversationPlan {
   key: string;
   kind: "scenario" | "case";
   id: string;
+  /** A case's suite; simulated scenarios, and reports from before #197, count as regression. */
+  suite?: Suite;
   title: string;
   persona: Persona | "scripted";
   areaCode: string;

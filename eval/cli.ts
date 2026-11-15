@@ -3,13 +3,17 @@ import { FEATURES } from "./features.js";
 import { PERSONAS } from "./types.js";
 
 export const USAGE = [
-  "Usage: npm run eval -- <feature> [--case <id>]... [--scenario <id>]... [--persona <name>] [--runs <n>] [--max-turns <n>] [--concurrency <n>] [--final] [--dry-run] [--over-budget]",
+  "Usage: npm run eval -- <feature> [--case <id>]... [--scenario <id>]... [--persona <name>] [--runs <n>] [--compare] [--store-baseline] [--regrade <report.json> | --regrade-baseline] [--max-turns <n>] [--concurrency <n>] [--final] [--dry-run] [--over-budget]",
   "",
-  `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}`,
-  "  --case           only this regression case (repeatable), no simulated conversations: the cheap targeted run",
-  "  --scenario       only this simulated conversation (repeatable), no regression cases unless --case is given too",
-  `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); regression cases always run`,
-  "  --runs           times to play each scenario (default 1)",
+  `  <feature>        one of: ${Object.keys(FEATURES).join(", ")}; or "all": every feature's cases (the release's full run)`,
+  "  --case           only this case (repeatable), no simulated conversations: the cheap targeted run",
+  "  --scenario       only this simulated conversation (repeatable), no cases unless --case is given too",
+  `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); cases always run`,
+  "  --runs           times to play each scenario and case (default 1; 3 for a comparison)",
+  "  --compare        compare with the stored baseline, case by case (checks it matches before spending anything)",
+  "  --store-baseline store this run's results as the baseline for its cases (eval/baselines/, committed)",
+  "  --regrade        re-grade a saved report with the current checks instead of running conversations",
+  "  --regrade-baseline  re-grade the stored baseline (its cases, or those given with --case) with the current checks",
   "  --max-turns      tester texts before a conversation is cut off (default 20)",
   "  --concurrency    conversations at once (default 3)",
   "  --final          grade with the coach's model instead of Haiku: once, at the end, for the results in the PR",
@@ -18,11 +22,17 @@ export const USAGE = [
   "",
   "Needs ANTHROPIC_API_KEY in .env (or EVAL_ANTHROPIC_API_KEY, e.g. in a cloud environment where",
   "Claude Code owns ANTHROPIC_API_KEY). EVAL_MODEL overrides the grader model (default: Haiku, or CLAUDE_MODEL with --final);",
-  "EVAL_SIM_MODEL the simulated tester (default: Haiku). EVAL_BUDGET_USD caps spend per branch (default: $0.50 per issue in the branch name, up to $1.50).",
+  "EVAL_SIM_MODEL the simulated tester (default: Haiku). EVAL_BUDGET_USD caps spend per branch (default: $1 per issue in the branch name, up to $3; $4.50 for \"all\").",
 ].join("\n");
 
 export interface EvalArgs {
+  /** A feature name, or "all" (every feature's cases). */
   feature: string;
+  compare: boolean;
+  storeBaseline: boolean;
+  /** A saved report to re-grade instead of running conversations. */
+  regrade?: string;
+  regradeBaseline: boolean;
   /** Only these regression case ids, and no scenarios. */
   cases?: string[];
   /** Only these scenario ids. */
@@ -52,6 +62,10 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
         runs: { type: "string" },
         "max-turns": { type: "string" },
         concurrency: { type: "string" },
+        compare: { type: "boolean" },
+        "store-baseline": { type: "boolean" },
+        regrade: { type: "string" },
+        "regrade-baseline": { type: "boolean" },
         final: { type: "boolean" },
         "dry-run": { type: "boolean" },
         "over-budget": { type: "boolean" },
@@ -66,13 +80,25 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
   const feature = positionals[0];
   if (!feature) throw new UsageError("Which feature? e.g. npm run eval -- onboarding");
   if (positionals.length > 1) throw new UsageError(`Unexpected argument: ${positionals[1]}`);
-  if (!Object.hasOwn(FEATURES, feature)) throw new UsageError(`Unknown feature "${feature}"`);
+  if (feature !== "all" && !Object.hasOwn(FEATURES, feature)) throw new UsageError(`Unknown feature "${feature}"`);
   if ((values.case || values.scenario) && values.persona) throw new UsageError("--case and --scenario pick exactly what runs; drop --persona");
   if (values.persona && !(PERSONAS as readonly string[]).includes(values.persona)) {
     throw new UsageError(`Unknown persona "${values.persona}"`);
   }
+  if (feature === "all" && (values.case || values.scenario || values.persona || values.regrade)) {
+    throw new UsageError('"all" runs every feature\'s cases; pick one feature for --case, --scenario, --persona or --regrade');
+  }
+  if (values.regrade && values["regrade-baseline"]) throw new UsageError("--regrade re-grades a report and --regrade-baseline the baseline; pick one");
+  if ((values.regrade || values["regrade-baseline"]) && (values.scenario || values.persona || values.runs)) {
+    throw new UsageError("Re-grading runs no conversations; drop --scenario, --persona and --runs");
+  }
+  if (values.regrade && values.case) throw new UsageError("--regrade re-grades the whole report; drop --case");
   return {
     feature,
+    compare: values.compare ?? false,
+    storeBaseline: values["store-baseline"] ?? false,
+    regrade: values.regrade,
+    regradeBaseline: values["regrade-baseline"] ?? false,
     cases: values.case,
     scenarios: values.scenario,
     persona: values.persona,

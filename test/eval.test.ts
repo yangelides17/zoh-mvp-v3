@@ -96,7 +96,12 @@ describe("eval: scenarios and cases", () => {
     const plans = planConversations(loadScenarios(onboarding), cases, { persona: "joking", runs: 2 });
     expect(plans.filter((p) => p.kind === "scenario").every((p) => p.persona === "joking")).toBe(true);
     expect(plans.map((p) => p.key).slice(0, 2)).toEqual([expect.stringMatching(/#1$/), expect.stringMatching(/#2$/)]);
-    expect(plans.slice(-2).map((p) => p.key)).toEqual(["case:first", "case:second"]);
+    expect(plans.slice(-4).map((p) => p.key)).toEqual(["case:first#1", "case:first#2", "case:second#1", "case:second#2"]);
+
+    // #197: --runs repeats scripted cases too, each run under its own key, with the case's suite.
+    const repeated = planConversations([], cases, { runs: 3 });
+    expect(repeated.map((p) => p.key)).toEqual(["case:first#1", "case:first#2", "case:first#3", "case:second#1", "case:second#2", "case:second#3"]);
+    expect(repeated.every((p) => p.suite === "regression")).toBe(true);
 
     await writeFile(join(dir, "003-broken.json"), "{ nope");
     await expect(loadCases("x", `${dir}/`)).rejects.toThrow(/003-broken.json/);
@@ -422,7 +427,7 @@ describe("eval: grader", () => {
   });
 
   it("labels ZOH texts and shows local time and the regression expectation", () => {
-    const prompt = graderUserPrompt({ plan: { ...plan, regression: { id: "r", title: "t", origin: "o", testerLines: ["Start"], whatWentWrong: "W", shouldHaveHappened: "S", areaCode: "212", startTime: "23:05", timeZone: "America/New_York" } }, transcript });
+    const prompt = graderUserPrompt({ plan: { ...plan, regression: { id: "r", title: "t", origin: "o", testerLines: ["Start"], whatWentWrong: "W", shouldHaveHappened: "S", areaCode: "212", startTime: "23:05", timeZone: "America/New_York", suite: "regression" } }, transcript });
     expect(prompt).toContain("[ZOH 1] (11:05 pm) Welcome!");
     expect(prompt).toContain("(Eastern)");
     expect(prompt).toContain("What should happen: S");
@@ -601,6 +606,10 @@ describe("eval: command line and cost", () => {
   it("parses arguments and explains mistakes", () => {
     expect(parseEvalArgs(["onboarding"])).toEqual({
       feature: "onboarding",
+      compare: false,
+      storeBaseline: false,
+      regrade: undefined,
+      regradeBaseline: false,
       runs: 1,
       maxTurns: 20,
       concurrency: 3,
@@ -611,6 +620,12 @@ describe("eval: command line and cost", () => {
       cases: undefined,
       scenarios: undefined,
     });
+    // #197: comparing, storing and re-grading; "all" for the release's full run.
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--runs", "3", "--compare", "--store-baseline"])).toMatchObject({ compare: true, storeBaseline: true, runs: 3 });
+    expect(parseEvalArgs(["curiosity", "--regrade", "eval/reports/x.json", "--compare"])).toMatchObject({ regrade: "eval/reports/x.json", compare: true });
+    expect(parseEvalArgs(["all", "--runs", "3", "--compare", "--store-baseline"]).feature).toBe("all");
+    expect(() => parseEvalArgs(["all", "--case", "a"])).toThrow(/pick one feature/);
+    expect(() => parseEvalArgs(["curiosity", "--regrade", "x.json", "--runs", "3"])).toThrow(/runs no conversations/);
     expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);
     expect(() => parseEvalArgs(["plan", "--scenario", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--case", "a", "--case", "b"]).cases).toEqual(["a", "b"]);
@@ -656,6 +671,8 @@ describe("eval: command line and cost", () => {
     expect(estimateCost(plans, { ...base, evalModel: "claude-opus-5-5" }).dollars.high).toBeGreaterThan(est.dollars.high);
     expect(estimateCost(plans, { ...base, maxTurns: 5 }).tokens.high).toBeLessThan(est.tokens.high);
     expect(estimateCost(plans, { ...base, simModel: "claude-haiku-5-5" }).dollars.high).toBeLessThan(est.dollars.high);
+    // #197: re-grading pays only the grader.
+    expect(estimateCost(plans, { ...base, gradeOnly: true }).dollars.high).toBeLessThan(est.dollars.high / 2);
   });
 
   it("keeps each branch within its eval budget", async () => {
@@ -677,17 +694,17 @@ describe("eval: command line and cost", () => {
     expect(graderModel({ EVAL_MODEL: "claude-opus-5-5" }, "claude-sonnet-5-5", false)).toBe("claude-opus-5-5");
   });
 
-  it("budgets $0.50 per issue a branch builds, up to $1.50", () => {
+  it("budgets $1 per issue a branch builds, up to $3 (#197)", () => {
     expect(issueCount("feature/12-commands")).toBe(1);
     expect(issueCount("feature/41-42-48-nudge-fixes")).toBe(3);
     expect(issueCount("feature/41-3am-pass")).toBe(1);
     expect(issueCount("feature/7")).toBe(1);
     expect(issueCount("main")).toBe(1);
-    expect(budgetFor({}, "feature/12-commands")).toBe(0.5);
-    expect(budgetFor({}, "feature/41-42-nudge-fixes")).toBe(1);
-    expect(budgetFor({}, "feature/1-2-3-4-5-small-fixes")).toBe(1.5);
+    expect(budgetFor({}, "feature/12-commands")).toBe(1);
+    expect(budgetFor({}, "feature/41-42-nudge-fixes")).toBe(2);
+    expect(budgetFor({}, "feature/1-2-3-4-5-small-fixes")).toBe(3);
     expect(budgetFor({ EVAL_BUDGET_USD: "5" }, "feature/12-commands")).toBe(5);
-    expect(budgetFor({ EVAL_BUDGET_USD: "nope" }, "main")).toBe(0.5);
+    expect(budgetFor({ EVAL_BUDGET_USD: "nope" }, "main")).toBe(1);
   });
 
   it("cleans up what the simulator writes", () => {
