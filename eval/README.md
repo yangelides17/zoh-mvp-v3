@@ -8,7 +8,7 @@ separate Claude grade every ZOH text against the feature's approved checks and t
 ANTHROPIC_API_KEY=sk-ant-...
 
 npm run eval -- onboarding --case recap-invents-details   # only that case: the usual, cheap run (Haiku grades)
-npm run eval -- onboarding --case recap-invents-details --runs 3 --compare   # 3 runs, compared with the stored baseline
+npm run eval -- onboarding --case recap-invents-details --compare   # one run, compared with the stored baseline
 npm run eval -- onboarding                    # every scenario once + every regression case
 npm run eval -- onboarding --persona terse    # only terse scenarios (cases still run)
 npm run eval -- plan --scenario bedtime-late  # only that scenario: cheap while iterating
@@ -23,13 +23,18 @@ npm run eval -- all --runs 3 --compare --store-baseline        # the release's f
 1. **Pick the cases it touches** (`--case <id>`, repeatable). Add one in `eval/cases/<feature>/` when none covers
    it. A new behavior's cases are `"suite": "capability"`; they start low and that's expected.
 2. **Iterate cheaply:** one run, `npm run eval -- <feature> --case <id>`, reading the transcripts.
-3. **Compare once it looks right:** `npm run eval -- <feature> --case <id>... --runs 3 --compare --store-baseline`.
-   The cases run 3 times, the report is compared with the stored baseline case by case, and their runs become
-   the branch's baseline for them (commit `eval/baselines/` with the branch; it replaces those cases on merge).
-4. **Read the report's "Compared with the baseline":** it names any group or regression case that got worse
+3. **Compare once it looks right:** `npm run eval -- <feature> --case <id>... --compare`. Each case runs once and
+   is compared with the stored baseline case by case. More cases beat more runs: cases differ far more than runs
+   of one case do (Yanni, Nov 15, to keep costs down).
+4. **Rerun only what did worse:** one run can't put a single case beyond noise, so the report lists the cases that
+   did worse than their baseline with the command to rerun them: `--case <id>... --runs 3 --compare
+   --store-baseline`. Those 3 runs settle it, and become the branch's baseline for them (commit `eval/baselines/`
+   with the branch; it replaces those cases on merge). A baseline is only ever stored from 3 runs or more; the
+   release refreshes every case's.
+5. **Read the report's "Compared with the baseline":** it names any group or regression case that got worse
    beyond noise, in plain words. A change within noise isn't a regression, and isn't proof of a win either.
    Read the transcripts too: numbers that look good on something that feels off don't ship.
-5. **If it stops before running** because the baseline was graded with different checks, voice page or grader
+6. **If it stops before running** because the baseline was graded with different checks, voice page or grader
    (your change edited them), run the `--regrade-baseline` command it prints first (grader only, a few cents).
 
 **Scores by group.** Every check in `eval/features.ts` has a group: `conversation` (how ZOH talks with them),
@@ -40,8 +45,9 @@ pieces of evidence. Style is shown but never decides.
 
 **Beyond noise.** A group got worse only when the per-case differences' 95% range is wholly below zero *and* a
 Fisher test on the pooled runs agrees (5%), which keeps a few identical cases from looking certain. A regression
-case is flagged on a one-sided Fisher test at 5%: 3/3 → 0/3 runs is flagged, 3/3 → 1/3 isn't. With 1 or 2 cases
-there's no useful margin, and the report says so.
+case is flagged on a one-sided Fisher test at 5%: 3/3 → 0/3 runs is flagged, 3/3 → 1/3 isn't, and one run (3/3 →
+0/1) never is, which is why step 4 reruns those cases 3 times. With 1 or 2 cases there's no useful margin, and the
+report says so.
 
 **Suites.** Each case has a `suite`: `regression` (the default: established behavior; a drop is flagged),
 `capability` (a new feature's cases: listed "ready to graduate" once they pass every run in the baseline and

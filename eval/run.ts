@@ -4,7 +4,7 @@
  * the run against the stored baseline case by case (#197); --regrade grades saved conversations again.
  *
  *   npm run eval -- onboarding [--persona terse] [--runs 2]
- *   npm run eval -- curiosity --case brief-done --runs 3 --compare
+ *   npm run eval -- curiosity --case brief-done --compare
  */
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";

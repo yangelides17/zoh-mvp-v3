@@ -181,6 +181,17 @@ describe("eval: the comparison in the report (#197)", () => {
     expect(groupTable(groupScores(current))).toEqual(["| Group | Score | Cases passing every run |", "| --- | --- | --- |", "| Conversation | 33% (one case, no margin) | 0/1 |", "| The case's own goal | 67% (too few cases for a margin) | 2/3 |"]);
     expect(comparisonLines({ main: compareScores(baseline, baseline), rescripted: [] })[0]).toBe("**Nothing got worse beyond noise.**");
   });
+
+  it("names the cases that did worse in a one-run comparison, with the command to rerun them 3 times (Nov 15)", () => {
+    // 3/3 → 0/1 can't be beyond noise on one run (p 0.25), so it's listed to rerun, not flagged.
+    const baseline = scoreCases([...runs("x", "regression", 3, 3), ...runs("y", "regression", 3, 3), ...runs("z", "regression", 2, 3)], rubric);
+    const current = scoreCases([...runs("x", "regression", 0, 1), ...runs("y", "regression", 1, 1), ...runs("z", "regression", 1, 1)], rubric);
+    const cmp = compareScores(current, baseline);
+    expect(cmp.drops).toEqual([]);
+    expect(cmp.slipped).toEqual(["case:x"]);
+    const lines = comparisonLines({ main: cmp, rescripted: [] }, (id) => id, "proof").join("\n");
+    expect(lines).toContain("Did worse than the baseline, not beyond noise: case:x. Rerun them 3 times to tell: npm run eval -- proof --case x --runs 3 --compare");
+  });
 });
 
 describe("eval: re-grading saved conversations (#197)", () => {

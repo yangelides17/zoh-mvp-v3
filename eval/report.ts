@@ -274,7 +274,7 @@ function changeLine(c: GroupChange): string {
 }
 
 /** The comparison in plain words, for the report and the console (#197). */
-export function comparisonLines(cmp: NonNullable<ReportData["comparison"]>, label: (id: string) => string = (id) => id): string[] {
+export function comparisonLines(cmp: NonNullable<ReportData["comparison"]>, label: (id: string) => string = (id) => id, feature?: string): string[] {
   const { main } = cmp;
   const worse = main.groups.filter((g) => g.verdict === "worse" && DECIDING.includes(g.group));
   const problems = worse.length + main.drops.length;
@@ -293,6 +293,11 @@ export function comparisonLines(cmp: NonNullable<ReportData["comparison"]>, labe
       out.push(`- ⚠ \`${d.id}\` (${d.title}): ${GROUP_LABELS[d.group]} passed ${d.before.passes}/${d.before.runs} runs before, ${d.after.passes}/${d.after.runs} now${d.after.failed.length ? `; failed ${d.after.failed.map(label).join(", ")}` : ""}.`);
     }
   } else out.push("No regression case got worse beyond noise.");
+  // Nov 15: a comparison runs each case once, so a single case can't be beyond noise; these get rerun 3 times.
+  if (main.slipped.length) {
+    const flags = main.slipped.map((id) => id.replace(/^(case|scenario):/, (_, kind: string) => `--${kind} `)).join(" ");
+    out.push("", `Did worse than the baseline, not beyond noise: ${main.slipped.map(label).join(", ")}. Rerun them 3 times to tell: npm run eval -- ${feature ?? "<feature>"} ${flags} --runs 3 --compare`);
+  }
   if (main.ready.length) {
     out.push("", `Ready to graduate (capability cases that passed every run in the baseline and again now): ${main.ready.map((id) => `\`${id}\``).join(", ")}. Set \`"suite": "regression"\` in their case files.`);
   }
@@ -321,7 +326,7 @@ export function renderMarkdown(r: ReportData): string {
     );
     if (r.replayGroups && GROUPS.some((g) => r.replayGroups![g].cases > 0)) lines.push("Real replays, apart (never tuned against):", "", ...groupTable(r.replayGroups), "");
   }
-  if (r.comparison) lines.push("## Compared with the baseline", "", ...comparisonLines(r.comparison, (id) => `\`${id}\``), "");
+  if (r.comparison) lines.push("## Compared with the baseline", "", ...comparisonLines(r.comparison, (id) => `\`${id}\``, r.feature), "");
   lines.push(
     `Run ${r.startedAt} → ${r.finishedAt}. Coach model \`${r.models.coach}\`, simulator \`${r.models.sim ?? r.models.eval}\`, grader \`${r.models.eval}\`.${r.costUsd !== undefined ? ` Cost about $${r.costUsd.toFixed(2)}.` : ""}`,
     `${r.conversations.length} conversations (runs per scenario: ${r.options.runs}, turn cap: ${r.options.maxTurns}${r.options.persona ? `, persona: ${r.options.persona}` : ""}${r.options.cases?.length ? `, cases: ${r.options.cases.join(", ")}` : ""}). Tokens used by the simulator and grader: ${r.usage.input.toLocaleString("en-US")} in, ${r.usage.output.toLocaleString("en-US")} out.`,
@@ -428,7 +433,7 @@ export function summaryLines(r: ReportData, files: { md: string; json: string })
           .join(", "),
     );
   }
-  if (r.comparison) out.push("", ...comparisonLines(r.comparison).filter((l) => l !== "").map((l) => l.replace(/\*\*/g, "")), "");
+  if (r.comparison) out.push("", ...comparisonLines(r.comparison, (id) => id, r.feature).filter((l) => l !== "").map((l) => l.replace(/\*\*/g, "")), "");
   const weakest = Object.entries(r.summary.rules)
     .sort((a, b) => (a[1].rate ?? 1) - (b[1].rate ?? 1))
     .slice(0, 5)

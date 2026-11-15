@@ -648,7 +648,11 @@ describe("eval: command line and cost", () => {
     expect(parseEvalArgs(["curiosity", "--case", "a", "--runs", "3", "--compare", "--store-baseline"])).toMatchObject({ compare: true, storeBaseline: true, runs: 3 });
     expect(parseEvalArgs(["curiosity", "--regrade", "eval/reports/x.json", "--compare"])).toMatchObject({ regrade: "eval/reports/x.json", compare: true });
     expect(parseEvalArgs(["all", "--runs", "3", "--compare", "--store-baseline"]).feature).toBe("all");
-    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(3);
+    // Nov 15 (Yanni, cost): a comparison runs each case once; cases that did worse are rerun with --runs 3.
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(1);
+    // A baseline is stored from 3 runs or more.
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--compare", "--store-baseline"])).toThrow(/stored from 3 runs/);
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--runs", "2", "--store-baseline"])).toThrow(/stored from 3 runs/);
     expect(() => parseEvalArgs(["all", "--case", "a"])).toThrow(/pick one feature/);
     expect(() => parseEvalArgs(["curiosity", "--regrade", "x.json", "--runs", "3"])).toThrow(/runs no conversations/);
     expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);

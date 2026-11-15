@@ -9,7 +9,7 @@ export const USAGE = [
   "  --case           only this case (repeatable), no simulated conversations: the cheap targeted run",
   "  --scenario       only this simulated conversation (repeatable), no cases unless --case is given too",
   `  --persona        only scenarios with this persona (${PERSONAS.join(", ")}); cases always run`,
-  "  --runs           times to play each scenario and case (default 1; 3 with --compare)",
+  "  --runs           times to play each scenario and case (default 1; a baseline is stored from 3)",
   "  --compare        compare with the stored baseline, case by case (checks it matches before spending anything)",
   "  --store-baseline store this run's results as the baseline for its cases (eval/baselines/, committed)",
   "  --regrade        re-grade a saved report with the current checks instead of running conversations",
@@ -93,6 +93,10 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
     throw new UsageError("Re-grading runs no conversations; drop --scenario, --persona and --runs");
   }
   if (values.regrade && values.case) throw new UsageError("--regrade re-grades the whole report; drop --case");
+  // Nov 15: a baseline is what every later comparison leans on, so it's stored from 3 runs or more.
+  if (values["store-baseline"] && !values.regrade && !values["regrade-baseline"] && Number(values.runs ?? 1) < 3) {
+    throw new UsageError("A baseline is stored from 3 runs: add --runs 3 (the release, or the cases a comparison said to rerun)");
+  }
   return {
     feature,
     compare: values.compare ?? false,
@@ -102,8 +106,8 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
     cases: values.case,
     scenarios: values.scenario,
     persona: values.persona,
-    // A comparison is 3 runs a case unless told otherwise (#197).
-    runs: positiveInt(values.runs, "--runs", values.compare ? 3 : 1),
+    // Nov 15 (Yanni, cost): one run a case, comparisons included; cases that did worse are rerun with --runs 3.
+    runs: positiveInt(values.runs, "--runs", 1),
     maxTurns: positiveInt(values["max-turns"], "--max-turns", 20),
     concurrency: positiveInt(values.concurrency, "--concurrency", 3),
     final: values.final ?? false,
