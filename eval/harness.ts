@@ -27,7 +27,7 @@ import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { evalApiKey } from "./cli.js";
 import { EvalClock, evalDay, zonedDate } from "./clock.js";
-import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "./media.js";
+import { evalMediaFetcher, evalTranscriber, evalWatcher, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
 import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
@@ -151,6 +151,8 @@ export async function startEvalApp(opts: {
       describer: undefined,
       // #185: the eval's voice notes aren't real audio; nothing to rewrap.
       rewrapper: undefined,
+      // #163: case videos carry what they show; never Gemini.
+      watcher: evalWatcher,
       // #163: no "watching it now" here; it never changes the reply being graded.
       holdingAfterMs: undefined,
       allowedNumbers: [opts.phone],

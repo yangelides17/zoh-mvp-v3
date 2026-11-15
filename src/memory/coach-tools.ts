@@ -8,6 +8,7 @@ import { readDocument } from "../media/documents.js";
 import { prepareImageForClaude } from "../media/images.js";
 import { extensionOf, mediaKind, type MediaStore } from "../media/storage.js";
 import { updateTester } from "../testers/testers.js";
+import type { VideoWatcher } from "../video/gemini.js";
 import { renderPage } from "./render.js";
 import { addFact, ensureCorePages, factsOf, findFact, findMessage, findPage, mediaLabel, messageTime, removeFact, searchMemory } from "./store.js";
 
@@ -27,7 +28,7 @@ const schemas = {
   save_preference: z.object({ preference: text(160), replaces: z.array(text(40)).max(5).optional() }).strict(),
   open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS) }).strict(),
   search_memory: z.object({ query: text(120) }).strict(),
-  open_file: z.object({ ref: text(40) }).strict(),
+  open_file: z.object({ ref: text(40), question: text(300).optional() }).strict(),
   forget: z
     .object({
       facts: z.array(text(40)).max(10).optional(),
@@ -66,8 +67,12 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "open_file",
-    description: `Open a file they sent before (an m: ref from search_memory or the timeline): a document in full, a photo to look at again, a voice note's words. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.`,
-    input_schema: { type: "object", properties: { ref: { type: "string" } }, required: ["ref"] },
+    description: `Open a file they sent before (an m: ref from search_memory or the timeline): a document in full, a photo to look at again, a voice note's words, a video watched again with your question. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.`,
+    input_schema: {
+      type: "object",
+      properties: { ref: { type: "string" }, question: { type: "string", description: "For a video: what to look for (their question)" } },
+      required: ["ref"],
+    },
   },
   {
     name: "forget",
@@ -105,7 +110,7 @@ export async function runMemoryTool(
   tester: Tester,
   name: string,
   rawInput: unknown,
-  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string; media?: MediaStore },
+  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string; media?: MediaStore; watcher?: VideoWatcher },
 ): Promise<MemoryToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as MemoryToolName].safeParse(rawInput ?? {});
@@ -160,13 +165,13 @@ export async function runMemoryTool(
     }
 
     case "open_file": {
-      const { ref } = parsed.data as z.infer<typeof schemas.open_file>;
+      const { ref, question } = parsed.data as z.infer<typeof schemas.open_file>;
       if (budget.lookups + 1 > MAX_LOOKUPS) return { ok: false, error: spent };
       budget.lookups += 1;
       // Only this tester's own texts: a guessed ref never opens anyone else's file.
       const m = await findMessage(db, tester, ref);
       if (!m?.mediaUrl || m.direction !== "inbound") return { ok: false, error: `${ref}: no file they sent has that ref.` };
-      return { ok: true, tester, ...(await openFile(m, tester, ctx.media)) };
+      return { ok: true, tester, ...(await openFile(m, tester, ctx.media, ctx.watcher, question)) };
     }
 
     case "forget": {
@@ -222,7 +227,13 @@ export async function runMemoryTool(
  * #163: a file they sent, opened again from our copy and read afresh: a document in full (a PDF as the
  * file itself), a photo to look at, a voice note's words. Gone or unreadable: says so, with what's known.
  */
-async function openFile(m: Message, tester: Tester, media: MediaStore | undefined): Promise<{ message: string; blocks?: FileBlock[] }> {
+async function openFile(
+  m: Message,
+  tester: Tester,
+  media: MediaStore | undefined,
+  watcher: VideoWatcher | undefined,
+  question: string | undefined,
+): Promise<{ message: string; blocks?: FileBlock[] }> {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!);
   const said = m.content?.trim() ? ` (their words with it: "${m.content.trim()}")` : "";
   const head = `The ${mediaLabel(m)} they sent ${localDate(messageTime(m), tester.timeZone)}${said}`;
@@ -243,6 +254,18 @@ async function openFile(m: Message, tester: Tester, media: MediaStore | undefine
     if (doc?.kind === "text") return { message: `${head}${doc.clipped ? " (only the first part: it's longer)" : ""}:\n<document>\n${doc.text}\n</document>` };
     if (m.transcript) return { message: `${head}:\n<document>\n${m.transcript}\n</document>` };
     return { message: `${head} couldn't be opened${doc?.kind === "unsupported" ? ` (${doc.reason})` : ""}.${known}` };
+  }
+  if (kind === "video") {
+    // Watched again from our copy, with their question; else what was seen when it arrived.
+    if (stored && watcher) {
+      try {
+        const watched = await watcher.watch({ video: stored.bytes, contentType: stored.contentType, ...(question ? { question } : {}) });
+        return { message: `${head}, watched again${question ? " for your question" : ""}:\n${watched.account}` };
+      } catch {
+        // Falls through to what was seen when it arrived.
+      }
+    }
+    return { message: m.transcript ? `${head} (as seen when it arrived):\n${m.transcript}` : `${head} can't be watched again.${known}` };
   }
   return { message: `${head} can't be opened here.${known}` };
 }

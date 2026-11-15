@@ -206,10 +206,8 @@ export const PLAN_STATUSES = ["draft", "locked"] as const;
 /** How a version after lock differs: deepen keeps the streak, upgrade starts a new one, other keeps it. */
 export const CHANGE_KINDS = ["deepen", "upgrade", "other"] as const;
 export type ChangeKind = (typeof CHANGE_KINDS)[number];
-/** How a plan's proof is shown, as the coach and founders can choose it (#163: a document too). */
-export const PROOF_METHODS = ["photo", "screenshot", "voice", "document"] as const;
-/** What the database takes: #163's one migration also allows video, offered once Gemini watches videos. */
-const STORED_PROOF_METHODS = [...PROOF_METHODS, "video"] as const;
+/** How a plan's proof is shown, as the coach and founders can choose it (#163: a document or a video too). */
+export const PROOF_METHODS = ["photo", "screenshot", "voice", "document", "video"] as const;
 export const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 /** #155: the plan fields a founder's adjust proposes (the plans table's names). */
@@ -251,7 +249,7 @@ export const plans = pgTable(
     /** Local "HH:MM". */
     stepTime: text("step_time").notNull(),
     days: jsonb("days").$type<Weekday[]>().notNull(),
-    proof: text("proof", { enum: STORED_PROOF_METHODS }).notNull(),
+    proof: text("proof", { enum: PROOF_METHODS }).notNull(),
     /** Which photo, screenshot or voice note ("Whoop strain screenshot"). */
     proofNote: text("proof_note"),
     reason: text("reason").notNull(),

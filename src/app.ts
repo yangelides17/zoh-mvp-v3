@@ -52,6 +52,7 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
     media: pipeline.media,
     transcriber: pipeline.transcriber,
     rewrapper: pipeline.rewrapper,
+    watcher: pipeline.watcher,
     replier: pipeline.replier,
     missingSettings: deps.missingSettings,
     version: deps.version,

@@ -129,7 +129,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "plan-shape",
         scope: "conversation",
         label:
-          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a proof method (photo, screenshot, voice note or document) that fits what they use",
+          "The plan is concrete enough to follow (what, how much, where, when, which days), at most about 8 lines, with a proof method (photo, screenshot, voice note, video or document) that fits what they use",
       },
       {
         id: "first-plan",
@@ -465,7 +465,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       {
         id: "plan-proof",
         scope: "conversation",
-        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: the document, which also gets feedback), with a reason and an alternative, and is only ever a photo, screenshot, voice note or document, never typed text",
+        label: "The plan's proof suggestion fits the goal (voice recap for reading or learning; writing: the document, which also gets feedback), with a reason and an alternative, and is only ever a photo, screenshot, voice note, video or document, never typed text; a video comes with a length that fits the step",
       },
       { id: "recall", scope: "text", label: "Recall feels natural and purposeful: in a check-in or conversation, never a quiz, never a separate text" },
       { id: "lesson-reused", scope: "conversation", label: "A later step builds an earlier lesson in when it fits" },
@@ -595,11 +595,11 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "forgot-pic", scope: "conversation", label: "\"Forgot the pic\" leads to an ask for other proof first, then a warm miss" },
       { id: "change-method", scope: "conversation", label: "After repeated proof trouble, ZOH offers to change the proof method" },
       // #94: one proof rule, the same everywhere.
-      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot, voice note or document, never typed text" },
+      { id: "proof-kinds", scope: "text", label: "Whenever ZOH says how to prove a step (today's step, a smaller version), it names only a photo, screenshot, voice note, video or document, never typed text" },
       {
         id: "typed-not-proof",
         scope: "conversation",
-        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot, voice note or document",
+        label: "Typed text alone (an explanation or pasted writing) gets no check mark, a warm why-real-proof explanation and a request for a photo, screenshot, voice note, video or document",
       },
       {
         id: "writing-proof",

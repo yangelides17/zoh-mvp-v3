@@ -355,7 +355,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_step_done",
     description:
-      "The step is done and their photo, screenshot, voice note or document shows it: never on their word alone. how: full, or reduced for a smaller version. proof: clear, or plausible (fits, can't be 100% sure). seen: what the proof shows, in a line. note: what they did, in a few words. day: yesterday only for proof clearly dated yesterday (dated: the date you see on it). Your texts stop for today.",
+      "The step is done and their photo, screenshot, voice note, video or document shows it: never on their word alone. how: full, or reduced for a smaller version. proof: clear, or plausible (fits, can't be 100% sure). seen: what the proof shows, in a line. note: what they did, in a few words. day: yesterday only for proof clearly dated yesterday (dated: the date you see on it). Your texts stop for today.",
     input_schema: {
       type: "object",
       properties: {
@@ -908,7 +908,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (day === "yesterday") {
         const yesterday = addDays(state.today, -1);
         if (!dated) return { ok: false, error: "Yesterday needs dated: the date you can see on the proof." };
-        if (state.proof.latest === 0) return { ok: false, error: "No photo, screenshot, voice note or document in their latest texts: nothing proves yesterday." };
+        if (state.proof.latest === 0) return { ok: false, error: "No photo, screenshot, voice note, video or document in their latest texts: nothing proves yesterday." };
         if (!isStepDay(plan, yesterday)) return { ok: false, error: "Yesterday wasn't a step day." };
         const [row] = await db
           .select()
@@ -920,7 +920,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return saved(tester, `Yesterday (${yesterday}) marked ${marked}. Today is unchanged. ${await streakNow(db, state)}`);
       }
       if (state.proof.today === 0) {
-        return { ok: false, error: "No photo, screenshot, voice note or document from them today: words alone don't mark it done. Ask for the proof." };
+        return { ok: false, error: "No photo, screenshot, voice note, video or document from them today: words alone don't mark it done. Ask for the proof." };
       }
       await saveDay(db, state, state.today, values, at);
       await alertMilestone(db, state, state.today, at);

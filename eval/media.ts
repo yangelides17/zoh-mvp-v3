@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
 import type { MediaFetcher } from "../src/media/storage.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
+import type { VideoWatcher } from "../src/video/gemini.js";
 
 /** Photos a case can send: small JPEGs with their metadata (location, camera) stripped. */
 export const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
@@ -15,11 +16,12 @@ const HOST = "https://eval.media";
  *   "[photo dark-selfie.jpg: a dark, flash-lit selfie, shirt off] phone's down"
  *   "[voice: I made my bed and did the dishes]"
  *   "[document essay.pdf: The lighthouse keeper woke before dawn…]" (#163; .pdf, .docx, any text type, or .pages)
+ *   "[video squat.mov: three squats; the last one goes to parallel…]" (#163: the bracket is Gemini's account, via `evalWatcher`)
  * The bracket is for the grader (what the photo shows, what the voice note or document says); ZOH gets the real
  * photo, transcript or document through the normal pipeline, and the text after it as the caption.
  */
 export const MEDIA_LINE =
-  /^\[(photo) ([\w.-]+\.jpe?g): ([^\]]+)\]\s*(.*)$|^\[(voice): ([^\]]+)\]\s*(.*)$|^\[(document) ([\w.-]+\.\w+): ([^\]]+)\]\s*(.*)$/i;
+  /^\[(photo) ([\w.-]+\.jpe?g): ([^\]]+)\]\s*(.*)$|^\[(voice): ([^\]]+)\]\s*(.*)$|^\[(document) ([\w.-]+\.\w+): ([^\]]+)\]\s*(.*)$|^\[(video) ([\w.-]+\.(?:mov|mp4)): ([^\]]+)\]\s*(.*)$/i;
 
 export interface MediaText {
   /** What the tester typed alongside it (may be empty). */
@@ -33,8 +35,18 @@ export function parseMediaLine(line: string): MediaText | undefined {
   if (!m) return undefined;
   if (m[1]) return { caption: m[4]!.trim(), mediaUrl: `${HOST}/photo/${basename(m[2]!)}` };
   if (m[5]) return { caption: m[7]!.trim(), mediaUrl: `${HOST}/voice/${Buffer.from(m[6]!.trim()).toString("base64url")}.caf` };
-  return { caption: m[11]!.trim(), mediaUrl: `${HOST}/document/${Buffer.from(m[10]!.trim()).toString("base64url")}/${basename(m[9]!)}` };
+  if (m[8]) return { caption: m[11]!.trim(), mediaUrl: `${HOST}/document/${Buffer.from(m[10]!.trim()).toString("base64url")}/${basename(m[9]!)}` };
+  return { caption: m[15]!.trim(), mediaUrl: `${HOST}/video/${Buffer.from(m[14]!.trim()).toString("base64url")}/${basename(m[13]!)}` };
 }
+
+/** Stands in for Gemini: the eval's videos carry what they show as their bytes. */
+export const evalWatcher: VideoWatcher = {
+  async watch(req) {
+    const account = Buffer.from(req.video).toString("utf8");
+    return { account, summary: account.slice(0, 120), clipped: false };
+  },
+  async check() {},
+};
 
 /**
  * Serves fixture photos, voice notes whose "audio" is their transcript (for `evalTranscriber`), and
@@ -45,6 +57,8 @@ export const evalMediaFetcher: MediaFetcher = async (url) => {
   if (photo) return { bytes: new Uint8Array(await readFile(join(FIXTURES_DIR, photo[1]!))), contentType: "image/jpeg" };
   const voice = url.match(/^https:\/\/eval\.media\/voice\/([\w-]+)\.caf$/);
   if (voice) return { bytes: new Uint8Array(Buffer.from(voice[1]!, "base64url")), contentType: "audio/x-caf" };
+  const video = url.match(/^https:\/\/eval\.media\/video\/([\w-]+)\/[\w.-]+$/);
+  if (video) return { bytes: new Uint8Array(Buffer.from(video[1]!, "base64url")), contentType: "video/quicktime" };
   const doc = url.match(/^https:\/\/eval\.media\/document\/([\w-]+)\/[\w.-]+\.(\w+)$/);
   if (doc) {
     const text = Buffer.from(doc[1]!, "base64url").toString("utf8");

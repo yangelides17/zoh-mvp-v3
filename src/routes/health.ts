@@ -5,12 +5,14 @@ import type { Db } from "../db/client.js";
 import type { AudioRewrapper } from "../media/rewrap.js";
 import type { MediaStore } from "../media/storage.js";
 import type { Transcriber } from "../transcription/speaches.js";
+import type { VideoWatcher } from "../video/gemini.js";
 
 export interface HealthRouteOptions {
   db: Db;
   media?: MediaStore;
   transcriber?: Transcriber;
   rewrapper?: AudioRewrapper;
+  watcher?: VideoWatcher;
   replier?: Replier;
   /** Names of settings still missing; never values. */
   missingSettings: () => string[];
@@ -40,20 +42,22 @@ async function runCheck(fn: (() => Promise<unknown>) | undefined, timeoutMs = 5_
 export async function healthRoutes(app: FastifyInstance, opts: HealthRouteOptions): Promise<void> {
   app.get<{ Querystring: { deep?: string } }>("/health", async (request, reply) => {
     const deep = request.query.deep === "1";
-    const [database, bucket, transcription, claude, ffmpeg] = await Promise.all([
+    const [database, bucket, transcription, claude, ffmpeg, gemini] = await Promise.all([
       runCheck(() => opts.db.execute(sql`select 1`)),
       runCheck(opts.media ? () => opts.media!.check() : undefined),
       runCheck(opts.transcriber ? () => opts.transcriber!.check() : undefined),
       deep ? runCheck(opts.replier ? () => opts.replier!.check() : undefined, 10_000) : Promise.resolve(opts.replier ? "configured" : "not_configured"),
       // #185: without ffmpeg, voice notes stay .caf (Safari only); nothing else breaks.
       runCheck(opts.rewrapper ? () => opts.rewrapper!.check() : undefined),
+      // #163: videos; pinged only on ?deep=1, like Claude.
+      deep ? runCheck(opts.watcher ? () => opts.watcher!.check() : undefined, 10_000) : Promise.resolve(opts.watcher ? "configured" : "not_configured"),
     ]);
     const missing = opts.missingSettings();
     const healthy = database === "ok";
     return reply.code(healthy ? 200 : 503).send({
       status: healthy ? (missing.length ? "degraded" : "ok") : "down",
       version: opts.version,
-      checks: { database, bucket, transcription, claude, ffmpeg },
+      checks: { database, bucket, transcription, claude, ffmpeg, gemini },
       missingSettings: missing,
     });
   });

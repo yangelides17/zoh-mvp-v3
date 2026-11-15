@@ -1,0 +1,27 @@
+{
+  "id": "video-plan-length",
+  "title": "A plan whose proof is a video suggests a length that fits the step",
+  "origin": "Issue #163 (More ways to send proof): Should, when the proof is a video, the plan suggests a length that fits the step",
+  "seed": {
+    "name": "Riley",
+    "goal": "fun_skill",
+    "phase": "planning",
+    "answers": {
+      "what": "juggling three balls",
+      "where": "my living room",
+      "when": "6 pm",
+      "how_long": "15 min",
+      "tracks_with": "nothing yet, I'd just film myself"
+    },
+    "history": [
+      { "from": "tester", "text": "I'd probably just film myself on my phone" },
+      { "from": "zoh", "text": "Filming works great for juggling. Is there a point you want to get to?" }
+    ]
+  },
+  "testerLines": ["a clean cascade for a full minute would be amazing. weekdays work", "looks good", "I'm in"],
+  "whatWentWrong": "New case, not a past mistake: video proof needs a length, or people send nothing or ten minutes.",
+  "shouldHaveHappened": "The plan's proof is a short video of the practice with a length that fits (about a minute or two, for example their best run), with a one-line why and an easy alternative; never typed text. After 'looks good' it asks for the commitment naturally; after 'I'm in' it locks with a hype line and when day 1 is.",
+  "areaCode": "212",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

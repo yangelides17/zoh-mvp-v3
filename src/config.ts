@@ -103,6 +103,10 @@ const envSchema = z.object({
   SPEACHES_API_KEY: optionalString,
   SPEACHES_MODEL: withDefault("Systran/faster-distil-whisper-small.en"),
 
+  /** #163: Gemini watches videos testers send; without it the coach is told it can't watch them. */
+  GEMINI_API_KEY: optionalString,
+  GEMINI_MODEL: withDefault("gemini-3.8-flash"),
+
   /** The founder console's one shared password; without it (and the secret) the console stays shut. */
   CONSOLE_PASSWORD: optionalString,
   /** Signs console session cookies. */
@@ -156,6 +160,10 @@ export interface Config {
   };
   speaches: {
     url?: string;
+    apiKey?: string;
+    model: string;
+  };
+  gemini: {
     apiKey?: string;
     model: string;
   };
@@ -217,6 +225,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       apiKey: e.SPEACHES_API_KEY,
       model: e.SPEACHES_MODEL,
     },
+    gemini: { apiKey: e.GEMINI_API_KEY, model: e.GEMINI_MODEL },
     console: {
       password: e.CONSOLE_PASSWORD,
       sessionSecret: e.CONSOLE_SESSION_SECRET,
@@ -261,6 +270,7 @@ export function missingSettings(config: Config): string[] {
     missing.push("BUCKET_*");
   }
   if (!config.speaches.url) missing.push("SPEACHES_URL");
+  if (!config.gemini.apiKey) missing.push("GEMINI_API_KEY");
   if (!config.console.password || !config.console.sessionSecret) missing.push("CONSOLE_*");
   return missing;
 }
