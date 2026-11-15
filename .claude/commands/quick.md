@@ -13,12 +13,15 @@ Make this small change: **$ARGUMENTS**
    fixes something broken for testers right now), and wait for the answer. Never guess and never assume a default,
    even when the change looks harmless. Say which one in the record (step 6).
 3. **Dev (staging):** work in the main folder on `dev` (`git pull` first). If other builds are running, that's fine:
-   they work in their own worktrees. Make the change (if it fixes behavior, first write a test that reproduces
+   they work in their own worktrees. A background session can't edit the main folder: it makes
+   `.claude/worktrees/quick-<slug>` from `origin/dev`, enters it (`EnterWorktree`, `path`), pushes with
+   `git push origin HEAD:dev`, then leaves (`ExitWorktree`, `keep`), removes it and pulls the main folder. Make the change (if it fixes behavior, first write a test that reproduces
    the problem and see it fail, then fix it),
    `npm run check` must pass, then commit (message says what and why) and push to `dev`. Railway redeploys
    staging in a couple of minutes; it reaches testers with the next `/release`.
 4. **Hotfix (production):** `git fetch origin`, then
-   `git worktree add ../zoh-worktrees/hotfix-<slug> -b hotfix/<slug> origin/main` and work there (never switch the
+   `git worktree add .claude/worktrees/hotfix-<slug> -b hotfix/<slug> origin/main`, enter it (`EnterWorktree`, `path`)
+   and work there (never switch the
    main folder to `main`). Make the change with a test (failing first, as in step 3), `npm run check` must pass, then open a PR into `main`
    (`gh pr create --base main`, titled "Hotfix: ..."). When Yanni says "ship" (or already did, for a live breakage):
    merge it, tag the next patch version and publish its GitHub Release (see `/release`, step 6; the notes are short:
