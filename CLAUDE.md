@@ -72,7 +72,7 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `npm run db:generate`: after editing `src/db/schema.ts`, generate a migration in `drizzle/`. Commit both.
 - `npm run dev`: run locally with `tsx` (needs a `.env`, see `.env.example`).
 - `npm run eval -- <feature> --case <id>`: replays only the cases a change touches against the real coach, graded
-  by Haiku (about $0.015 a short case); when done, `--runs 3 --compare --store-baseline` compares them case by case
+  by Haiku (billed about $0.02 a case plus $0.02 a ZOH reply, nearly all the coach); when done, `--runs 3 --compare --store-baseline` compares them case by case
   with the stored baseline and commits their runs as the new one (see "How to test a change to ZOH's words" in
   `eval/README.md`). Costs money: **$1 per issue on the branch, up to $3**, enforced. A full run (no `--case`) only
   for changes that affect every conversation, with Yanni's OK; `/release` does one at each release.

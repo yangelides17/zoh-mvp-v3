@@ -160,7 +160,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   approves in each spec, judged reasonably. A change is judged by comparing its cases, 3 runs each, with the stored
   baseline (`eval/baselines/`, committed, one file per case), scored by group with margins across cases; a single
   averaged score hid every difference on #157. Haiku grades both sides (in an 8-case calibration it caught 8/8 known
-  mistakes and agreed with Sonnet on 97% of checks); `--final` grades with the coach's model.
+  mistakes and agreed with Sonnet on 97% of checks); `--final` grades with the coach's model. Spend is what the API
+  billed, the coach inside the app included (Nov 15): it had been estimated at a fifth of its cost, which hid most
+  of the $25 to $32 days of Nov 14 and 15 on the dev key. The release's full run (about $34 estimated) waits for
+  Yanni's OK every time rather than raising its $4.50 cap (Yanni, Nov 15).
 - Coach memory (#8) is a small wiki per tester in Postgres (no outside search service): pages of
   facts that each cite the text they came from, written by one pass per tester at 3 am their time
   (first run reads back up to 14 days). Photos get a one-line description as they arrive. Search

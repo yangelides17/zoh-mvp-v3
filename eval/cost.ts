@@ -29,7 +29,13 @@ export interface Estimate {
  * the coach sees up to its history window; the simulator rereads the whole conversation;
  * the grader reads both pages plus the transcript once per conversation.
  */
-export const COACH = { input: 900, output: 250 };
+/**
+ * The coach, in input-price tokens (cache reads and writes folded in), fitted to two billed runs on Nov 15: about
+ * $0.022 to start a conversation (its 8k to 14k token instructions written to the cache) and $0.019 a reply (each
+ * re-reads them, often over several tool rounds). It was 900 in / 250 out, which counted about a fifth of it.
+ */
+export const COACH = { input: 7_400, output: 450 };
+export const COACH_START = { input: 11_000, output: 0 };
 /** One overnight memory pass (several tool rounds over the day's texts and pages); memory feature only. */
 export const KEEPER = { input: 25_000, output: 3_000 };
 const SIM = { inputBase: 600, perTurn: 120, output: 150 };
@@ -53,7 +59,7 @@ export function estimateCost(
   const calls = opts.graderCalls ?? 1;
   const pagesTokens = Math.ceil(opts.pagesChars / 4);
   const run = (turns: number, simulated: boolean) => {
-    const coach = opts.gradeOnly ? { input: 0, output: 0 } : { input: COACH.input * turns, output: COACH.output * turns };
+    const coach = opts.gradeOnly ? { input: 0, output: 0 } : { input: COACH_START.input + COACH.input * turns, output: COACH.output * turns };
     let sim = { input: 0, output: 0 };
     if (simulated && !opts.gradeOnly) {
       // The k-th simulator call rereads k-1 earlier exchanges.
@@ -100,6 +106,19 @@ export function estimateCost(
 }
 
 /** Dollars for measured token usage at one model's prices. */
+/** Tokens as the API bills them: cache reads cost 0.1x the input price, cache writes (5 minutes) 1.25x. */
+export interface BilledUsage {
+  input: number;
+  cacheRead: number;
+  cacheWrite: number;
+  output: number;
+}
+
+export function billedDollars(usage: BilledUsage, model: string): number {
+  const p = priceOf(model);
+  return ((usage.input + 0.1 * usage.cacheRead + 1.25 * usage.cacheWrite) * p.input + usage.output * p.output) / 1_000_000;
+}
+
 export function dollarsFor(usage: { input: number; output: number }, model: string): number {
   const p = priceOf(model);
   return (usage.input * p.input + usage.output * p.output) / 1_000_000;

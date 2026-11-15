@@ -71,7 +71,7 @@ never targets to optimize, and replays are never tuned against.
 **Baselines** are committed, one file per case in `eval/baselines/<feature>/`: its graded runs and what produced
 them (grader model, checks, voice page, grader instructions, the case's script). A comparison needs the same
 grader, checks and voice page on both sides; a mismatch is caught before anything is spent. A case whose script
-changed counts as new. The release refreshes every case (`all`, cases only, about $8 estimated for 3 runs).
+changed counts as new. The release refreshes every case (`all`, cases only, about $34 estimated for 3 runs as of Nov 15, so it always asks Yanni first).
 
 In a Claude Code cloud environment, add the key as `EVAL_ANTHROPIC_API_KEY` instead (Claude Code
 reserves `ANTHROPIC_API_KEY` for its own login there), and run with `env -u ANTHROPIC_BASE_URL npm run
@@ -88,9 +88,11 @@ at about 1/14 of the grading cost, but named fewer secondary problems.
 **Budget:** $1 of eval spend per issue the branch builds, counted from its name
 (`feature/41-42-48-...` is $3), up to $3 (`EVAL_BUDGET_USD` overrides), tracked in `eval/reports/spend.json`;
 the release's full run (`all`) has its own $4.50 (#197). A run that would likely go past it refuses to start.
-Run only the cases a change touches (`--case <id>`, repeatable). Measured Nov 13 on short cases: about $0.015 a
-case run graded by Haiku (so about $0.05 for 3 runs) and $0.04 with `--final`; longer cases and memory cases cost
-more. A full run is only for changes that affect every conversation, with Yanni's OK. Not part of
+Run only the cases a change touches (`--case <id>`, repeatable). What a run costs is what the API billed: every
+Claude response's usage (cache reads and writes included) is added up, the coach inside the app too, with a line
+per model at the end. Billed Nov 15, graded by Haiku: about $0.022 to start a case plus $0.019 a ZOH reply, nearly
+all of it the coach (Sonnet) writing and re-reading its instructions in the cache: $0.04 for a one-reply case,
+$0.16 for seven. (Until then the coach was estimated at about a fifth of that, so earlier ledgers read low.) A full run is only for changes that affect every conversation, with Yanni's OK. Not part of
 `npm run check`: tests never call Claude.
 
 ## What happens

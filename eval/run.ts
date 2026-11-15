@@ -14,10 +14,10 @@ import { fromStored, loadBaseline, producerChanges, producerFor, PRODUCER_LABELS
 import { addUsage, createCompleter } from "./claude.js";
 import { HAIKU, USAGE, UsageError, evalApiKey, graderModel, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
 import { budgetFor, currentBranch, overBudgetMessage, readLedger, recordSpend, RELEASE_BUDGET_USD } from "./budget.js";
-import { COACH, dollarsFor, estimateCost, KEEPER, type Estimate } from "./cost.js";
+import { billedDollars, estimateCost, type Estimate } from "./cost.js";
 import { FEATURES, REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor, type FeatureDef, type RubricRule } from "./features.js";
 import { gradeConversation, mapLimit, regradeConversations } from "./grader.js";
-import { guardFetch, runConversation, scriptedTester } from "./harness.js";
+import { createMeter, guardFetch, runConversation, scriptedTester } from "./harness.js";
 import { loadCases, loadScenarios, planConversations } from "./load.js";
 import {
   aggregate,
@@ -149,25 +149,22 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  const restoreFetch = guardFetch();
+  // Every Claude call the run makes (the coach inside the app included) is billed from what the API reports.
+  const meter = createMeter();
+  const restoreFetch = guardFetch(meter);
   const complete = createCompleter({ apiKey: evalApiKey(env)!, model: evalModel });
   const simulate = createCompleter({ apiKey: evalApiKey(env)!, model: simModel });
-  let costUsd = 0;
   for (const job of runnable) {
     const startedAt = new Date();
-    const spentBefore = costUsd;
+    const spentBefore = meter.dollars;
     let graded: GradedConversation[];
     if (job.saved) {
-      const res = await regradeConversations(job.saved, { rubric: job.rubric, pages: job.pages, complete, concurrency: args.concurrency });
-      graded = res.convs;
-      costUsd += dollarsFor(res.usage, evalModel);
+      graded = (await regradeConversations(job.saved, { rubric: job.rubric, pages: job.pages, complete, concurrency: args.concurrency })).convs;
       console.log(`  ${job.feature.name}: re-graded ${graded.filter((c) => c.grade).length} of ${graded.length} conversations`);
     } else {
-      const res = await play(job, args, { env, complete, simulate, coachModel, evalModel, simModel });
-      graded = res.graded;
-      costUsd += res.costUsd;
+      graded = await play(job, args, { env, complete, simulate });
     }
-    await writeReport(job, graded, args, { startedAt, coachModel, evalModel, simModel, costUsd: costUsd - spentBefore });
+    await writeReport(job, graded, args, { startedAt, coachModel, evalModel, simModel, costUsd: meter.dollars - spentBefore });
     if (args.storeBaseline || args.regradeBaseline) {
       const producerOf = (plan: ConversationPlan) => producerFor(job.current.get(caseIdOf(plan.key)) ?? plan, { model: evalModel, rubric: job.rubric, pages: job.pages });
       const res = await storeBaseline(job.feature.name, graded, producerOf, { branch, storedAt: startedAt.toISOString() });
@@ -177,8 +174,14 @@ async function main(): Promise<number> {
   }
   restoreFetch();
 
+  const costUsd = meter.dollars;
   const ledger = await recordSpend(ledgerPath, branch, costUsd);
-  console.log(`Cost about $${costUsd.toFixed(2)}${all ? "" : `; $${ledger[branch]!.spentUsd.toFixed(2)} of $${budgetUsd.toFixed(2)} spent on ${branch}`}.`);
+  for (const [model, u] of Object.entries(meter.byModel)) {
+    console.log(
+      `  ${model}: $${billedDollars(u, model).toFixed(2)} (input ${fmtTokens(u.input)}, cache writes ${fmtTokens(u.cacheWrite)}, cache reads ${fmtTokens(u.cacheRead)}, output ${fmtTokens(u.output)})`,
+    );
+  }
+  console.log(`Cost $${costUsd.toFixed(2)} as billed (estimated $${total.low.toFixed(2)}–$${total.high.toFixed(2)})${all ? "" : `; $${ledger[branch]!.spentUsd.toFixed(2)} of $${budgetUsd.toFixed(2)} spent on ${branch}`}.`);
   return 0;
 }
 
@@ -261,10 +264,9 @@ async function regradeEstimate(job: Job, ids: string[], models: { coachModel: st
 async function play(
   job: Job,
   args: EvalArgs,
-  deps: { env: NodeJS.ProcessEnv; complete: ReturnType<typeof createCompleter>; simulate: ReturnType<typeof createCompleter>; coachModel: string; evalModel: string; simModel: string },
-): Promise<{ graded: GradedConversation[]; costUsd: number }> {
+  deps: { env: NodeJS.ProcessEnv; complete: ReturnType<typeof createCompleter>; simulate: ReturnType<typeof createCompleter> },
+): Promise<GradedConversation[]> {
   const { feature, plans, rubric, pages } = job;
-  let costUsd = 0;
   let done = 0;
   const graded = await mapLimit(plans, args.concurrency, async (plan, index): Promise<GradedConversation> => {
     const tester = plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
@@ -272,10 +274,7 @@ async function play(
     const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
     const result = await runConversation(plan, tester, { maxTurns, index, env: deps.env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const out: GradedConversation = { ...result };
-    // Simulator measured; the coach runs inside the app, so its share is estimated per ZOH text.
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
-    costUsd += dollarsFor(result.usage, deps.simModel) + dollarsFor({ input: COACH.input * zohCount, output: COACH.output * zohCount }, deps.coachModel);
-    if (feature.memory) costUsd += dollarsFor(KEEPER, deps.coachModel);
     if (!result.error || result.transcript.length > 0) {
       try {
         const g = await gradeConversation(
@@ -285,7 +284,6 @@ async function play(
         out.grade = g.grade;
         out.gradeError = g.error;
         out.usage = addUsage(out.usage, g.usage);
-        costUsd += dollarsFor(g.usage, deps.evalModel);
       } catch (err) {
         out.gradeError = errorText(err);
       }
@@ -295,7 +293,7 @@ async function play(
     console.log(`  [${done}/${plans.length}] ${feature.name} ${plan.key}: ${zohCount} ZOH texts, ended by ${result.endedBy}, ${status}`);
     return out;
   });
-  return { graded, costUsd };
+  return graded;
 }
 
 async function writeReport(
