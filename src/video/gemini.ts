@@ -122,7 +122,9 @@ function asWatchError(err: unknown): VideoWatchError {
   if (err instanceof VideoWatchError) return err;
   const message = err instanceof Error ? err.message : String(err);
   const status = err instanceof ApiError ? err.status : undefined;
-  const keyOrCredit = status === 401 || status === 402 || status === 403 || (status === 429 && /quota|billing|credit|spend/i.test(message));
+  // A wrong or revoked key comes back as 400 INVALID_ARGUMENT, "API key not valid".
+  const keyOrCredit =
+    status === 401 || status === 402 || status === 403 || (status === 400 && /api key/i.test(message)) || (status === 429 && /quota|billing|credit|spend/i.test(message));
   return new VideoWatchError(keyOrCredit ? "key_or_credit" : "failed", message.slice(0, 300));
 }
 

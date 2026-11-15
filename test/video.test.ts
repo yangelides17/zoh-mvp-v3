@@ -115,6 +115,8 @@ describe("#163: the Gemini client", () => {
       createGeminiWatcher({ apiKey: "k", model: "m", client: client(async () => { throw new ApiError({ status, message }); }) }).watch(req);
     await expect(fail(402, "payment required")).rejects.toMatchObject({ reason: "key_or_credit" });
     await expect(fail(403, "API key not valid")).rejects.toMatchObject({ reason: "key_or_credit" });
+    await expect(fail(400, "API key not valid. Please pass a valid API key.")).rejects.toMatchObject({ reason: "key_or_credit" });
+    await expect(fail(400, "Request contains an invalid argument.")).rejects.toMatchObject({ reason: "failed" });
     await expect(fail(500, "internal")).rejects.toMatchObject({ reason: "failed" });
   });
 
