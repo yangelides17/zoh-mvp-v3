@@ -624,6 +624,7 @@ describe("eval: command line and cost", () => {
     expect(parseEvalArgs(["curiosity", "--case", "a", "--runs", "3", "--compare", "--store-baseline"])).toMatchObject({ compare: true, storeBaseline: true, runs: 3 });
     expect(parseEvalArgs(["curiosity", "--regrade", "eval/reports/x.json", "--compare"])).toMatchObject({ regrade: "eval/reports/x.json", compare: true });
     expect(parseEvalArgs(["all", "--runs", "3", "--compare", "--store-baseline"]).feature).toBe("all");
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(3);
     expect(() => parseEvalArgs(["all", "--case", "a"])).toThrow(/pick one feature/);
     expect(() => parseEvalArgs(["curiosity", "--regrade", "x.json", "--runs", "3"])).toThrow(/runs no conversations/);
     expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);
