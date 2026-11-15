@@ -67,6 +67,9 @@ cases once both are on `dev`.
    group, compare every issue's cases together once the prompt changes are in. Fix causes in the coach's
    instructions, not one-off cases; never tune against `replay` cases. A group or regression case flagged worse
    beyond noise is fixed or explained in the PR. If the budget runs out before the target, stop and report honestly.
+   **Real replays** (free, read-only; skip if `DATABASE_URL` for production isn't available): `npm run real -- list`
+   for real conversations in the feature's moment, and `npm run real -- replay <last 4> <ZOH text id> <feature>` for
+   one or two worth keeping; read each case before committing it, and include them in the comparison (reported apart).
 7. **Before pushing or opening the PR:**
    - `npm run check` green, rebased on the latest `dev`, and `git merge-base --is-ancestor origin/dev HEAD` passes
      (if not, stop: the branch isn't based on `dev`).

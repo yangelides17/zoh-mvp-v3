@@ -22,8 +22,10 @@ then nothing reaches testers.
    `--over-budget` only on his OK. If it stops because a feature's baseline was graded differently, run the
    `--regrade-baseline` command it prints, then the full run again. Then run it without `--dry-run`
    (`--concurrency 6`; it takes a while). It compares every case with the stored baseline and stores the fresh runs.
-   Commit `eval/baselines/` as "Release v<v>: eval baseline" and push `dev`. Anything worse beyond noise goes
-   on the "Worth a look" list (step 5).
+   Commit `eval/baselines/` as "Release v<v>: eval baseline" and push `dev`. Then check the grader:
+   `npm run grader-check -- all --runs 3 --report <the curiosity report the full run just wrote> --sample 2`
+   (about $0.70). Anything worse beyond noise, and any rule whose catch or pass rate is below 80% or where the
+   grader and the stronger model disagree, goes on the "Worth a look" list (step 5).
 3. **Release notes**, in plain words for Yanni (what testers will notice, not code). Save them to a file: they go in
    the release PR now and on the GitHub Release at ship (step 6), so every version's page says what it included. The shape:
    ```

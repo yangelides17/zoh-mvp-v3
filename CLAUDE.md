@@ -91,7 +91,9 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `src/db/`: Drizzle schema, queries, migration runner.
 - `src/sendblue/`, `src/claude/`, `src/media/`, `src/transcription/`: one small client each.
 - `test/`: Vitest with an in-memory Postgres (PGlite) and fakes for every outside service.
-- `eval/`: the judgment harness. `docs/coach-voice.md`: how ZOH talks (applies to every feature).
+- `eval/`: the judgment harness, its stored baselines (`eval/baselines/`), the grader check (`npm run grader-check`,
+  known answers in `eval/known/`) and real replays (`npm run real`, read-only). `docs/coach-voice.md`: how ZOH talks
+  (applies to every feature).
 - `docs/reference.md`: infrastructure, decisions to carry forward and outside limits (read once). Where things
   stand is the issue board (`/status`).
 - Memory work: read `docs/memory-design.md` first; the memory lab and synthetic testers: `docs/memory-lab.md`.

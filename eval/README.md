@@ -48,6 +48,26 @@ there's no useful margin, and the report says so.
 again in a comparison; then set `"suite": "regression"`) or `replay` (a real tester conversation: reported apart,
 never tuned against). Simulated scenarios count as regression.
 
+**Checking the grader** (`npm run grader-check -- <feature | all> [--runs 3] [--report <report.json> --sample 4]`):
+- *Rules, against known answers:* each file in `eval/known/<feature>/` is a short conversation written to
+  follow or break one rule (`expect: pass | fail`). Graded as usual, they give each rule's catch rate (breaks
+  failed) and pass rate (follows passed). There are two per key rule to start; add one whenever the grader and a
+  person disagree on a real conversation. About $0.09 for all of them × 3 runs.
+- *Feel, against a stronger model:* with `--report`, a stronger, separate model (Opus; `EVAL_STRONG_MODEL`
+  overrides) grades the conversation checks on a spread-out sample of that report, and the report shows how often
+  the regular grader failed what it failed and passed what it passed. About $0.30 a conversation, so keep the
+  sample small. It's a stand-in for a person's judgment, not the real thing.
+- `not-leading` and `not-dragging` (the checks that misfired most) are graded in their own call (`alone` in
+  `eval/features.ts`); one question per text is counted in code (`code`), never asked of the grader.
+
+**Real replays** (`npm run real -- ...`, read-only against production with `DATABASE_URL`, Railway's public
+Postgres URL): `list [--days 14]` shows real conversations worth a look, picked by signals ("stop", silence after a
+question, a correction like "I already said", a sudden short reply), with numbers masked; possibly sensitive ones
+(health, personal crises) are left out. `replay <last 4> <ZOH text id> <feature>` turns one moment into a
+`replay` case, cut just before ZOH's text, with names (theirs and the people they mention) and numbers masked;
+it's refused if anything number-like is left. Read the case before using it. Signals choose what to look at,
+never targets to optimize, and replays are never tuned against.
+
 **Baselines** are committed, one file per case in `eval/baselines/<feature>/`: its graded runs and what produced
 them (grader model, checks, voice page, grader instructions, the case's script). A comparison needs the same
 grader, checks and voice page on both sides; a mismatch is caught before anything is spent. A case whose script
@@ -110,7 +130,7 @@ reads Sendblue settings, and any `fetch` to a Sendblue host is blocked for the w
   never graded. Cases take a `seed` too.
 - **A rule:** the grader applies the page text, but pass rates are tracked by the ids in
   `eval/features.ts`. Add an id there, with its `group`, when a page gains a rule that none of the ids covers.
-  Changing a label changes the checks, so the next comparison asks for `--regrade-baseline` first.
+  Changing a label (or `alone` / `code`) changes the checks, so the next comparison asks for `--regrade-baseline` first.
 - **A regression case:** see `eval/cases/README.md`.
 - **Memory** (`memory` feature only): when an `advance to` line passes 3 am, the real overnight memory
   pass runs (about $0.08 a day, in the estimate), and the grader sees the tester's memory at the start and at
