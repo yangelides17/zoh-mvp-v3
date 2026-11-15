@@ -12,7 +12,8 @@
   "coach note": "notes the app adds to the conversation (a dropped draft, text not sent, the nudge note, progress)",
   "media note": "what a photo, voice note, document or video becomes in the conversation",
   "memory block": "the memory block's headers and lines, after the plan is locked",
-  "not read by ZOH": "texts the app sends itself and founder alerts: listed so nothing is missed"
+  "app text in history": "texts the app sends itself (a fallback, a holding text, a command's reply): ZOH reads them later as its own earlier texts",
+  "not read by ZOH": "founder alerts and the like: listed so nothing is missed"
  },
  "entries": [
   {
@@ -1678,7 +1679,7 @@
    "text": "use 24-hour \"HH:MM\"",
    "file": "src/coach/tools.ts",
    "where": "clock",
-   "kind": "tool result",
+   "kind": "tool error",
    "change": "unchanged"
   },
   {
@@ -3127,14 +3128,14 @@
    "text": "Missing: ${missing.map((k) => (k === \"stepTime\" ? \"time\" : k)).join(\", \")}",
    "file": "src/coach/tools.ts",
    "where": "mergePlan",
-   "kind": "tool result",
+   "kind": "tool error",
    "change": "unchanged"
   },
   {
    "text": "A plan needs at least ${MIN_DAYS_PER_WEEK} days a week; tell them, and agree on ${MIN_DAYS_PER_WEEK} or more.",
    "file": "src/coach/tools.ts",
    "where": "mergePlan",
-   "kind": "tool result",
+   "kind": "tool error",
    "change": "unchanged"
   },
   {
@@ -3785,28 +3786,28 @@
    "text": "Got it",
    "file": "src/pipeline/inbound.ts",
    "where": "FALLBACK_REPLY",
-   "kind": "not read by ZOH",
+   "kind": "app text in history",
    "change": "unchanged"
   },
   {
    "text": "We're very sorry, the system is down at the moment and our team is on it. Please give us some time to fix it and come back later.",
    "file": "src/pipeline/inbound.ts",
    "where": "SYSTEM_DOWN_REPLY",
-   "kind": "not read by ZOH",
+   "kind": "app text in history",
    "change": "unchanged"
   },
   {
    "text": "watching it now 👀",
    "file": "src/pipeline/inbound.ts",
    "where": "HOLDING_TEXTS > video",
-   "kind": "not read by ZOH",
+   "kind": "app text in history",
    "change": "unchanged"
   },
   {
    "text": "reading it now 📖",
    "file": "src/pipeline/inbound.ts",
    "where": "HOLDING_TEXTS > document",
-   "kind": "not read by ZOH",
+   "kind": "app text in history",
    "change": "unchanged"
   },
   {
@@ -4073,6 +4074,265 @@
    "file": "src/pipeline/inbound.ts",
    "where": "videoLine",
    "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an Apple Pages file",
+   "file": "src/media/documents.ts",
+   "where": "CANT_OPEN > pages",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an Apple Numbers file",
+   "file": "src/media/documents.ts",
+   "where": "CANT_OPEN > numbers",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an Apple Keynote file",
+   "file": "src/media/documents.ts",
+   "where": "CANT_OPEN > key",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an old-style Word file (.doc)",
+   "file": "src/media/documents.ts",
+   "where": "CANT_OPEN > doc",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an old-style PowerPoint file (.ppt)",
+   "file": "src/media/documents.ts",
+   "where": "CANT_OPEN > ppt",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "an Apple Pages, Numbers or Keynote file",
+   "file": "src/media/documents.ts",
+   "where": "formatOf > cant",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "a kind of file I can't open",
+   "file": "src/media/documents.ts",
+   "where": "formatOf > cant",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "a file with no readable text",
+   "file": "src/media/documents.ts",
+   "where": "readDocument > reason",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "a file that couldn't be read (it may be damaged)",
+   "file": "src/media/documents.ts",
+   "where": "readDocument > reason",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "Sheet \"${name}\":",
+   "file": "src/media/documents.ts",
+   "where": "readAs > sheets",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "Slide ${s.n}: ${words}",
+   "file": "src/media/documents.ts",
+   "where": "slidesText",
+   "kind": "media note",
+   "change": "unchanged"
+  },
+  {
+   "text": "${tester.name} (the tester)",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > title",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "The tester",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > title",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "Who they are: life, values, likes and how they text.",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > summary",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "The tester",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "${tester.name} (the tester)",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > title",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "How they like to be coached",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > title",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "Stated and learned preferences: nudging, tone, proof, timing.",
+   "file": "src/memory/store.ts",
+   "where": "ensureCorePages > summary",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "Goal: ${goal.title}",
+   "file": "src/memory/store.ts",
+   "where": "ensureGoalPages > title",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "voice note",
+   "file": "src/memory/store.ts",
+   "where": "mediaLabel",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "(not described yet)",
+   "file": "src/memory/store.ts",
+   "where": "mediaText",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "${pageRef(r.pageId)} ${r.title}",
+   "file": "src/memory/store.ts",
+   "where": "searchMemory > hits > where",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "their ${mediaLabel(r.message)}",
+   "file": "src/memory/store.ts",
+   "where": "searchMemory > hits > where",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "their text",
+   "file": "src/memory/store.ts",
+   "where": "searchMemory > hits > where",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "ZOH's text",
+   "file": "src/memory/store.ts",
+   "where": "searchMemory > hits > where",
+   "kind": "memory block",
+   "change": "unchanged"
+  },
+  {
+   "text": "Thank you very much. Noted. We will stop sending you messages.",
+   "file": "src/testers/commands.ts",
+   "where": "OPT_OUT_CONFIRMATION",
+   "kind": "app text in history",
+   "change": "unchanged"
+  },
+  {
+   "text": "stop all",
+   "file": "src/testers/commands.ts",
+   "where": "OPT_OUT_WORDS",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "opt out",
+   "file": "src/testers/commands.ts",
+   "where": "OPT_OUT_WORDS",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "texted stop",
+   "file": "src/testers/commands.ts",
+   "where": "optOut",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "They texted stop.",
+   "file": "src/testers/commands.ts",
+   "where": "optOut > decisionReason",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "Text \"env staging\" to use it there.",
+   "file": "src/testers/commands.ts",
+   "where": "devCommandOffReply > there",
+   "kind": "app text in history",
+   "change": "unchanged"
+  },
+  {
+   "text": "\"${command}\" is off on ${appEnv}, so nothing changed.${there}",
+   "file": "src/testers/commands.ts",
+   "where": "devCommandOffReply",
+   "kind": "app text in history",
+   "change": "unchanged"
+  },
+  {
+   "text": "⏩ Try: jump 3h, jump 2d, jump 7:30am or jump next (up to 14 days).",
+   "file": "src/testers/commands.ts",
+   "where": "JUMP_USAGE",
+   "kind": "app text in history",
+   "change": "unchanged"
+  },
+  {
+   "text": "env staging",
+   "file": "src/testers/env.ts",
+   "where": "parseEnv",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "env production",
+   "file": "src/testers/env.ts",
+   "where": "parseEnv",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "env prod",
+   "file": "src/testers/env.ts",
+   "where": "parseEnv",
+   "kind": "not read by ZOH",
+   "change": "unchanged"
+  },
+  {
+   "text": "You're on ${appEnv}${version ? ` (${version})` : \"\"}.",
+   "file": "src/testers/env.ts",
+   "where": "envReply",
+   "kind": "app text in history",
    "change": "unchanged"
   },
   {
@@ -5133,11 +5393,18 @@
    "change": "unchanged"
   },
   {
-   "text": "- **Proof opens a reflection, after every step.** It's how ZOH gets to know them, as in \"How ZOH asks\": what went well as much as what didn't. Proof alone counts, never chased.",
+   "text": "- **No proof, no check mark,** said lightly: \"I believe you, but no proof, no check mark. Get me that pic tomorrow.\"",
    "file": "docs/coach-voice.md",
    "where": "Proof",
    "kind": "voice",
-   "change": "merged: what the talk covers and how the next step uses it is said once, in Proof (rules: proof)"
+   "change": "merged: kept from the voice's \"No proof, no check mark\" bullet, as the tone for a miss; the rest of that bullet is said once, in Proof (rules: proof)"
+  },
+  {
+   "text": "- **Proof opens a reflection, after every step.** It's how ZOH gets to know them, as in \"How ZOH asks\": what went well as much as what didn't, and what they'd do differently when something got in the way. Proof alone counts, never chased.",
+   "file": "docs/coach-voice.md",
+   "where": "Proof",
+   "kind": "voice",
+   "change": "merged: how the next step uses the talk is said once, in Proof (rules: proof)"
   },
   {
    "text": "- **Lessons come back.** What they learn is kept with how they showed it: explained in their own words, applied in a step, or recalled later.",
@@ -5161,18 +5428,18 @@
    "change": "merged: carries the voice's example (a dark, flash-lit selfie)"
   },
   {
-   "text": "- Unclear (can't make it out, never mentions the step, a file that won't open or a video that couldn't be watched) or something else (a \"bedtime\" photo in a bright hallway): proof_unclear, then talk it through (what it shows, a better one; kindly push back on something else); it counts once cleared up. If it never is, lightly: the right proof tomorrow.",
+   "text": "- Unclear (can't make it out, never mentions the step, a file that won't open or a video that couldn't be watched) or something else (a \"bedtime\" photo in a bright hallway): proof_unclear, then talk it through (what it shows, a better one; kindly push back on something else); it counts once cleared up. Unclear proof never cleared up: lightly, the right proof tomorrow.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: proof)",
    "kind": "rule",
-   "change": "merged: carries the voice's example (a bright hallway) and \"If it never is, lightly: the right proof tomorrow.\""
+   "change": "merged: carries the voice's example (a bright hallway) and its \"if it never is, lightly: the right proof tomorrow\", for unclear proof only"
   },
   {
-   "text": "- No photo, screenshot, voice note, video or document (\"forgot the pic\"; typed text alone, even pasted writing): no check mark yet; warmly say why in your words (real proof keeps it honest; words alone are easy to game; words alongside are welcome) and ask for one they can send today. Can't (or \"just trust me\"): stop, mark_missed, warmly (\"I believe you, but no proof, no check mark. Get me that pic tomorrow.\"). Never accuse, never cave.",
+   "text": "- No photo, screenshot, voice note, video or document (\"forgot the pic\"; typed text alone, even pasted writing): no check mark yet; warmly say why in your words (real proof keeps it honest; words alone are easy to game) and ask for one they can send today. Words alongside proof are welcome. Can't (or \"just trust me\"): stop, mark_missed, warmly. Never accuse, never cave.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: proof)",
    "kind": "rule",
-   "change": "merged: carries the voice's \"words alongside are welcome\" and its line for a miss"
+   "change": "merged: carries the voice's \"words alongside are welcome\""
   },
   {
    "text": "- Writing: a screenshot or photo of where they wrote it (part is fine) is proof; once counted, ask for it all pasted, for feedback, as the only ask (reflection waits). A document of it is proof and already the whole text, so the feedback comes straight from it, with no paste ask.",
@@ -5245,11 +5512,11 @@
    "change": "unchanged"
   },
   {
-   "text": "Once a week ZOH looks back with them. When they aren't talking on Sunday, the recap comes as its own text at 6 pm, or after a late Sunday step, done or not, quiet hours too.",
+   "text": "Once a week ZOH looks back with them. When they aren't talking on Sunday, the recap comes as its own text at 6 pm, or after a late Sunday step, done or not, quiet hours too. In the week talk, the destination can be set or adjusted, lightly.",
    "file": "docs/coach-voice.md",
    "where": "Sunday look-back",
    "kind": "voice",
-   "change": "merged: what the recap and the week talk hold is said once, in Sunday look-back (rules: weekLookback)"
+   "change": "merged: what the recap and the week talk hold is said once, in Sunday look-back (rules: weekLookback); the destination line stays here"
   },
   {
    "text": "WEEK LOOK-BACK (phase \"active\"; Sundays the state has a WEEK LOOK-BACK block):",
@@ -5288,6 +5555,13 @@
   },
   {
    "text": "## Next steps and maintenance",
+   "file": "docs/coach-voice.md",
+   "where": "Next steps and maintenance",
+   "kind": "voice",
+   "change": "unchanged"
+  },
+  {
+   "text": "- **What they ask for themselves:** a lasting change to more of the same (deepen) or a harder version (upgrade): unless they've said exactly what, ZOH first asks what it would look like for them, then shows the new version and makes it on their yes. A new goal on top waits: a warm line and a question about what draws them to it, then \"Let me think on it.\", and no promises until it's decided.",
    "file": "docs/coach-voice.md",
    "where": "Next steps and maintenance",
    "kind": "voice",
@@ -5636,7 +5910,7 @@
    "removed": "- **Unclear gets a conversation.** Blurry, can't see anything, or a voice note that never mentions the step: ask what it shows or for a better one until it's cleared up. If it never is, lightly: the right proof tomorrow.",
    "from": "docs/coach-voice.md (Proof)",
    "keptIn": "docs/coach-voice.md (Proof, rules: proof): \"- Unclear (can't make it out, never mentions the step, …): proof_unclear, then talk it through (what it shows, a better one; …); it counts once cleared up. If it never is, lightly: the right proof tomorrow.\"",
-   "why": "Same cases and the same conversation; its last sentence moved into the kept line word for word."
+   "why": "Same cases and the same conversation; its last sentence moved into the kept line, still for unclear proof only."
   },
   {
    "removed": "- **Something else gets kind pushback.** A \"bedtime\" photo in a bright hallway doesn't count until real proof comes in.",
@@ -5645,10 +5919,10 @@
    "why": "Same rule; its example moved into the kept line."
   },
   {
-   "removed": "- **No proof, no check mark.** Proof is a photo, screenshot, voice note, video or document, never typed words alone, even pasted writing: real proof keeps it honest, and words alongside are welcome. \"Did it, forgot the pic\" gets a quick ask for anything they can still send; if not, today's a miss, said lightly: \"I believe you, but no proof, no check mark. Get me that pic tomorrow.\"",
+   "removed": "Proof is a photo, screenshot, voice note, video or document, never typed words alone, even pasted writing: real proof keeps it honest, and words alongside are welcome. \"Did it, forgot the pic\" gets a quick ask for anything they can still send; if not, today's a miss",
    "from": "docs/coach-voice.md (Proof)",
-   "keptIn": "docs/coach-voice.md (Proof, rules: proof): '- No photo, … (\"forgot the pic\"; typed text alone, even pasted writing): no check mark yet; warmly say why … (real proof keeps it honest; …; words alongside are welcome) and ask for one they can send today. Can't …: stop, mark_missed, warmly (\"I believe you, but no proof, no check mark. Get me that pic tomorrow.\").'",
-   "why": "Same rule; \"words alongside are welcome\" and its line for a miss moved into the kept line word for word."
+   "keptIn": "docs/coach-voice.md (Proof, rules: proof): '- No photo, … (\"forgot the pic\"; typed text alone, even pasted writing): no check mark yet; warmly say why … (real proof keeps it honest; …) and ask for one they can send today. Words alongside proof are welcome. Can't …: stop, mark_missed, warmly.'",
+   "why": "Same rule; \"words alongside are welcome\" moved into the kept line. The line said for a miss stays in the voice (a quoted line inside a rule reads more like a script)."
   },
   {
    "removed": "- **The proof should fit their life.** If what they agreed to keeps not working, offer to change how they prove it. They can change how, never skip it. Writing: the document, or a screenshot plus it all pasted, for feedback.",
@@ -5657,10 +5931,10 @@
    "why": "Both sentences are in the proof rules with the same specifics."
   },
   {
-   "removed": "and what they'd do differently when something got in the way. The next step doubles down on what worked and uses the rest.",
+   "removed": "The next step doubles down on what worked and uses the rest.",
    "from": "docs/coach-voice.md (Proof, Proof opens a reflection)",
-   "keptIn": "docs/coach-voice.md (Proof, rules: proof): \"how it went, what worked, what got in the way\" and \"the next step … built on what they told you (double down on what worked, use what they'd change)\"",
-   "why": "The same two points; \"what went well as much as what didn't\" and \"Proof alone counts, never chased\" stay in the voice."
+   "keptIn": "docs/coach-voice.md (Proof, rules: proof): \"the next step … built on what they told you (double down on what worked, use what they'd change)\"",
+   "why": "Same point. Asking what they'd do differently stays in the voice: the rule doesn't say to ask it."
   },
   {
    "removed": "Now and then ZOH brings one back in a check-in or the conversation, or builds it into a step, about a day, three days and a week later. Never a quiz, never its own text, not every lesson.",
@@ -5681,10 +5955,10 @@
    "why": "Word for word the same, and the voice's version covers all their work, writing included."
   },
   {
-   "removed": "Talking on Sunday, once the day's reflection has run its course, it turns naturally to the week; … It names 2 to 4 pieces of progress they made, each backed by what happened, nothing filled in: a lesson applied or brought back counts as understood, one only explained is still starting to click. Then where they stand against their destination, if they have one, and one question. Progress made, never \"what you couldn't do before\"; the streak isn't the headline. The week talk lands on the next step, and the destination can be set or adjusted there, lightly.",
+   "removed": "Talking on Sunday, once the day's reflection has run its course, it turns naturally to the week; … It names 2 to 4 pieces of progress they made, each backed by what happened, nothing filled in: a lesson applied or brought back counts as understood, one only explained is still starting to click. Then where they stand against their destination, if they have one, and one question. Progress made, never \"what you couldn't do before\"; the streak isn't the headline. The week talk lands on the next step.",
    "from": "docs/coach-voice.md (Sunday look-back)",
    "keptIn": "docs/coach-voice.md (Sunday look-back, rules: weekLookback): \"When: talking on Sunday after a step … first the day's reflection … then turns to the week …\", \"The recap: … 2 to 4 pieces of progress … each backed by the state … never guessed; … destination …; then one question … Progress made, never what they couldn't do before. Only learnings the block lists as understood count …; explained ones are starting to click. … The streak and counts never headline.\" and \"The week talk: … A destination they name: agree lightly … Wrap up with only the next step day's step\"",
-   "why": "Every clause is in the look-back rules with the same specifics. When the recap goes out on its own (6 pm, after a late step, quiet hours too) stays in the voice."
+   "why": "Every clause is in the look-back rules with the same specifics. When the recap goes out on its own (6 pm, after a late step, quiet hours too) stays in the voice. The destination line stays in the voice: the rule only covers one they name."
   },
   {
    "removed": "once a week.",
@@ -5703,12 +5977,6 @@
    "from": "docs/coach-voice.md (Next steps and maintenance)",
    "keptIn": "docs/coach-voice.md (Next steps, rules: nextSteps): \"think they're ready for a new goal on top? suggest_next_step (new_focus), and say nothing.\" and \"A next step the state lists as approved: raise it at a natural moment as your own idea, specific to them, … Yes: … No: …\"",
    "why": "Same steps; \"at a natural moment\" moved into the kept line, and the tester deciding is the Yes/No."
-  },
-  {
-   "removed": "- **What they ask for themselves:** a lasting change to more of the same (deepen) or a harder version (upgrade): unless they've said exactly what, ZOH first asks what it would look like for them, then shows the new version and makes it on their yes. A new goal on top waits: a warm line and a question about what draws them to it, then \"Let me think on it.\", and no promises until it's decided.",
-   "from": "docs/coach-voice.md (Next steps and maintenance)",
-   "keptIn": "docs/coach-voice.md (Next steps, rules: nextSteps): \"A lasting change to more of the same (deepen) or a harder or different activity (upgrade): unless they've said exactly what (…), first ask what it would look like for them; then show the new version and ask if it works; on their yes, change_plan … Something new on top …: suggest_next_step (new_focus), then a warm line and one question about what draws them to it, then that you'll think on it (no timeline, no talk of a plan)\"",
-   "why": "Same steps in the same order. The quoted \"Let me think on it.\" was the one wording #157 moved away from; \"no promises\" is \"no timeline, no talk of a plan\"."
   },
   {
    "removed": ", and \"mostly\" still counts as kept up.",
@@ -5742,11 +6010,15 @@
   },
   {
    "where": "docs/coach-voice.md (How it texts, Short) and the 8-line limits in (Plan agreement) and (Today's step)",
-   "why": "The voice lists all three longer texts together with one limit; each rule repeats only its own."
+   "why": "The voice lists all three longer texts together with one limit; each rule repeats only its own. They also disagree (the voice: 8 to 10 short lines; plan: at most 8; a teaching step: about 8): for #199."
   },
   {
    "where": "docs/coach-voice.md (How hard it pushes) \"ZOH confirms in one line\" and (Saving, style and requests) \"confirm in one short line\"",
    "why": "A few words inside different points (the levels, and style requests in general); merging would mean rewriting both."
+  },
+  {
+   "where": "docs/coach-voice.md (Next steps and maintenance, What they ask for themselves) and (Next steps, rules: nextSteps) \"When they ask\"",
+   "why": "Nearly the same, but the voice quotes \"Let me think on it.\" where #157 moved the rule away from that wording. Dropping it is a content call for Yanni (#199), not a merge."
   }
  ]
 }

@@ -29,6 +29,11 @@ export const SCANNED_FILES = [
   "src/memory/context.ts",
   "src/memory/render.ts",
   "src/pipeline/inbound.ts",
+  // Found by the #196 check: reasons a file can't open, memory page titles and search lines, command replies.
+  "src/media/documents.ts",
+  "src/memory/store.ts",
+  "src/testers/commands.ts",
+  "src/testers/env.ts",
 ] as const;
 
 export const VOICE_PAGE = "docs/coach-voice.md";
@@ -174,12 +179,13 @@ export const KINDS: Record<string, string> = {
   "coach note": "notes the app adds to the conversation (a dropped draft, text not sent, the nudge note, progress)",
   "media note": "what a photo, voice note, document or video becomes in the conversation",
   "memory block": "the memory block's headers and lines, after the plan is locked",
-  "not read by ZOH": "texts the app sends itself and founder alerts: listed so nothing is missed",
+  "app text in history": "texts the app sends itself (a fallback, a holding text, a command's reply): ZOH reads them later as its own earlier texts",
+  "not read by ZOH": "founder alerts and the like: listed so nothing is missed",
 };
 
 const RULE_CONSTANTS = ["TOOL_RULES", "PLAN_AGREEMENT", "NUDGES", "TODAYS_STEP", "PROOF", "WEEK_LOOKBACK", "NEXT_STEPS", "TEAM", "MEMORY"];
 
-/** The kind a line has from where it lives; `override` is for the few the rules can't tell. */
+/** The kind a line has from where it lives. */
 export function kindOf(f: Found): string {
   const [top = "", ...rest] = f.where.split(" > ");
   const last = rest.at(-1) ?? top;
@@ -198,14 +204,23 @@ export function kindOf(f: Found): string {
     case "src/memory/coach-tools.ts":
       if (/^alert/.test(top)) return "not read by ZOH";
       if (/DEFINITIONS$|^planProperties$|^schemas$/.test(top)) return "tool description";
-      if (last === "error") return "tool error";
+      // Refusals built in helpers and returned as the tool's error.
+      if (last === "error" || ["clock", "mergePlan"].includes(top)) return "tool error";
       return "tool result";
     case "src/memory/context.ts":
     case "src/memory/render.ts":
+    case "src/memory/store.ts":
       return "memory block";
+    case "src/media/documents.ts":
+      return "media note";
+    case "src/testers/commands.ts":
+    case "src/testers/env.ts":
+      // The words a command is recognized by, and why an opt-out was recorded, aren't texts.
+      return ["OPT_OUT_WORDS", "optOut", "parseEnv"].includes(top) ? "not read by ZOH" : "app text in history";
     case "src/pipeline/inbound.ts":
       // describeMedia's line is kept as the file's description, which later media notes show.
       if (["toTurns", "documentLine", "videoLine"].includes(top) || (top === "describeMedia" && f.text.startsWith("A video"))) return "media note";
+      if (["FALLBACK_REPLY", "SYSTEM_DOWN_REPLY", "HOLDING_TEXTS"].includes(top)) return "app text in history";
       return "not read by ZOH";
     default:
       return "status sheet";
