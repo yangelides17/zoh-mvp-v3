@@ -1,0 +1,370 @@
+{
+  "feature": "next-step",
+  "id": "case:injury-switch-vs-also-add",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:12:46.970Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "cc3709f805b1",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "eb0d9beab53e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:injury-switch-vs-also-add#1",
+        "kind": "case",
+        "id": "injury-switch-vs-also-add",
+        "suite": "regression",
+        "title": "An injury is a change to their one goal; \"also want\" on top is an add that waits",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:15",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Leo! 2 miles around the park at 6:30. You in?",
+          "at": "2026-11-01T19:12:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "always",
+          "at": "2026-11-01T19:13:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
+          "at": "2026-11-02T17:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ugh, Leo, I'm really sorry. Six weeks is a long stretch, especially after four solid step days in a row. How are you feeling about it?",
+          "at": "2026-11-02T17:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "could we do upper body stuff at home instead while it heals?",
+          "at": "2026-11-02T17:15:51.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, absolutely. Keeping you moving while the ankle heals is exactly the right call, Leo 💪 What do you have at home to work with: dumbbells, bands, or just bodyweight?",
+          "at": "2026-11-02T17:15:58.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "and separately I've been wanting to get my protein up too, like on top of the workouts",
+          "at": "2026-11-02T17:16:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Leo, protein pairs well with rebuilding while you heal. What's pulling you toward it right now? Let me think on it, and we'll get the upper body plan sorted in the meantime.",
+          "at": "2026-11-02T17:16:43.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, as required."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end; starts the upper body plan right away."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says 'Let me think on it' warmly with no promise, but then asks a protein question about what's pulling him toward it."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Three sentences, and the one question ('What's pulling you toward it right now?') sits mid-text, not at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": false,
+            "reason": "The ankle was treated as a change to the running goal and the upper body plan started right away; protein was treated as an add and deferred with 'let me think on it'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Ankle handled immediately as a change with sympathy and no medical advice; protein deferred. The protein question in the last text edges toward the nutrition questions the case forbids."
+          }
+        ],
+        "summary": "ZOH handled the ankle injury correctly as an immediate change to Leo's plan, with sympathy, no medical advice, and an upper body plan started right away, and deferred the protein request as an add. The main miss is the last text, which runs three sentences and places its one question mid-text, with a protein question that edges toward what the case said to avoid."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:injury-switch-vs-also-add#2",
+        "kind": "case",
+        "id": "injury-switch-vs-also-add",
+        "suite": "regression",
+        "title": "An injury is a change to their one goal; \"also want\" on top is an add that waits",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:15",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Leo! 2 miles around the park at 6:30. You in?",
+          "at": "2026-11-01T19:12:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "always",
+          "at": "2026-11-01T19:13:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
+          "at": "2026-11-02T17:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ugh, Leo, I'm sorry. Six weeks is a long time, especially when you'd just built four straight runs. How are you feeling about it?",
+          "at": "2026-11-02T17:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "could we do upper body stuff at home instead while it heals?",
+          "at": "2026-11-02T17:15:51.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, we can do that, and I like that you're already thinking about how to keep going. Upper body at home keeps the habit alive while the ankle heals. What equipment do you have at home, if any? Dumbbells, bands, a pull-up bar, or just your bodyweight?",
+          "at": "2026-11-02T17:15:58.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "and separately I've been wanting to get my protein up too, like on top of the workouts",
+          "at": "2026-11-02T17:16:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Leo. Let me think on it. What's pulling you toward getting your protein up?\n\nAnd for the upper body plan, what equipment do you have at home? Dumbbells, bands, a pull-up bar, or just bodyweight?",
+          "at": "2026-11-02T17:16:43.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Two questions in one text ('How are you feeling' is one, but ZOH1 has only one question; fine). Sentences: 3, one question, at end. Actually passes; marking pass."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Three sentences with one question at end, but the equipment question lists options; acceptable, borderline on length."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": false,
+                "borderline": false,
+                "reason": "Says 'Let me think on it' warmly, but then asks a second question about protein plus equipment, violating one-question rule and nutrition-question prohibition."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Contains two questions, and the second block repeats the equipment question, breaking the at-most-one-question rule."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "change-vs-add",
+            "pass": false,
+            "borderline": false,
+            "reason": "Protein is an add, which got a think-on-it, but ZOH3 then asked a protein-motive question and kept the upper-body plan entirely in one text, muddling the distinction."
+          },
+          {
+            "rule": "founder-proposal",
+            "pass": true,
+            "borderline": false,
+            "reason": "No mention of team, founders or approval anywhere in the transcript."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Ankle handled as change, but ZOH3 asked nutrition-motivation question and repeated equipment question instead of a clean promise-free think-on-it; did not clearly move the upper-body plan forward with a specific step."
+          }
+        ],
+        "summary": "ZOH handled the ankle injury with sympathy and started the upper-body change promptly, but it did not give an adjusted step and asked for equipment in multiple texts. On the protein add it said 'Let me think on it' but then broke the one-question rule and asked nutrition-motivation questions, failing the regression case."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:injury-switch-vs-also-add#3",
+        "kind": "case",
+        "id": "injury-switch-vs-also-add",
+        "suite": "regression",
+        "title": "An injury is a change to their one goal; \"also want\" on top is an add that waits",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:15",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Leo! 2 miles around the park at 6:30. You in?",
+          "at": "2026-11-01T19:12:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "always",
+          "at": "2026-11-01T19:13:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
+          "at": "2026-11-02T17:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah man, Leo, that's rough, especially with four solid runs in a row. I'm really sorry. How are you feeling about it, and how's the ankle doing today?",
+          "at": "2026-11-02T17:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "could we do upper body stuff at home instead while it heals?",
+          "at": "2026-11-02T17:15:51.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, and I like that you're keeping the habit going instead of waiting out six weeks. Upper body at home works, and we'll keep everything off the ankle. What do you have at home to work with: dumbbells, bands, a pull-up bar, or just your bodyweight?",
+          "at": "2026-11-02T17:15:58.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "and separately I've been wanting to get my protein up too, like on top of the workouts",
+          "at": "2026-11-02T17:16:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Leo. Let me think on it while we get your upper body plan locked in first. What's drawing you to more protein?",
+          "at": "2026-11-02T17:16:43.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences with a compound two-part question, and 'four solid runs in a row' is not in the known facts."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, starting the upper body change right away."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": true,
+                "borderline": false,
+                "reason": "'Let me think on it' is warm and promises nothing about the protein add."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": false,
+            "reason": "The ankle change to the running goal starts right away as an upper body plan, while the protein request is deferred as an add."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The change is handled right away and the add is deferred, but 'What's drawing you to more protein?' asks a nutrition-related question the add should not get."
+          }
+        ],
+        "summary": "ZOH handled the injury change well: it gave sympathy without medical advice, started the upper body plan right away, and deferred the protein add with 'let me think on it' without mentioning a team. It missed on brevity in its first text, which ran four sentences with two questions and invented a detail about four runs, and its protein follow-up question edges toward the nutrition questions the add should not get."
+      }
+    }
+  ]
+}

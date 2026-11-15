@@ -1,0 +1,355 @@
+{
+  "feature": "proof",
+  "id": "case:typed-only",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "93e09ae68503",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "fe5c278466a1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:typed-only#1",
+        "kind": "case",
+        "id": "typed-only",
+        "suite": "regression",
+        "title": "Done, said in words only: no check mark yet, a warm why, a request for real proof; a voice note then counts",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Sam! Tonight at 7 around your block: 2 min jog, 1 min walk, 3 rounds, about 15 minutes. Strava screenshot after. You in?",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "done! 3 rounds around the block, 2 min jog 1 min walk each. legs felt great",
+          "at": "2026-11-03T00:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work, Sam, and great to hear the legs felt good 🔥 Send me the Strava screenshot of the run and I'll get it logged. Real proof keeps it honest.",
+          "at": "2026-11-03T00:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there",
+          "at": "2026-11-03T00:30:49.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Logged, Sam, and that's a step up from the 1-minute jogs, so keeping the full two minutes going in a rough round two is a real win 🔥 What got you through that second round when it got hard?",
+          "at": "2026-11-03T00:30:56.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a Strava screenshot as proof and never offers typed lines."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with one emoji as punctuation and no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Counts the voice note as proof, celebrates it, and doesn't question it."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and specific, with one emoji and no row."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Typed 'done' gets no check, asks for a Strava screenshot, and a voice note then counts with one reflection question; the why-real-proof line is brief, though."
+          }
+        ],
+        "summary": "ZOH avoided the old bug: it never offered typed text as proof, asked for a Strava screenshot after the typed 'done', and counted the voice note with celebration and one reflection question. The only soft spot is that its explanation of why real proof matters is a single short clause rather than a warmer, fuller reason."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:typed-only#2",
+        "kind": "case",
+        "id": "typed-only",
+        "suite": "regression",
+        "title": "Done, said in words only: no check mark yet, a warm why, a request for real proof; a voice note then counts",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Sam! Tonight at 7 around your block: 2 min jog, 1 min walk, 3 rounds, about 15 minutes. Strava screenshot after. You in?",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "done! 3 rounds around the block, 2 min jog 1 min walk each. legs felt great",
+          "at": "2026-11-03T00:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that the legs felt great, Sam, and going from 1 min jogs to 2 is real progress 🔥 Send me the Strava screenshot of the run and I'll get it checked off.",
+          "at": "2026-11-03T00:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there",
+          "at": "2026-11-03T00:30:49.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done and counted, Sam. Pushing through a rough second round and still jogging the full two minutes is exactly how this gets built 💪 What made that second round rough, and what got you through it?",
+          "at": "2026-11-03T00:30:56.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a Strava screenshot as proof and never offers typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, not suspicious, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The voice note counts as proof and the day is celebrated as done."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the rough second round and the full two-minute jog from the voice note."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences plus one closing question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with one emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "typed-not-proof",
+            "pass": false,
+            "borderline": true,
+            "reason": "The typed 'done' got no check mark and a Strava request, but ZOH never explained why real proof matters."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH no longer offers typed lines, but after the typed message it skipped the warm why-real-proof explanation the case requires; the voice note was counted and reflected on correctly."
+          }
+        ],
+        "summary": "ZOH avoided the old bug: it never offered typed text as proof, and it counted the voice note and asked one specific reflection question. It did miss the required warm explanation of why real proof matters after the typed 'done', so the regression case is at best partly fixed."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:typed-only#3",
+        "kind": "case",
+        "id": "typed-only",
+        "suite": "regression",
+        "title": "Done, said in words only: no check mark yet, a warm why, a request for real proof; a voice note then counts",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Sam! Tonight at 7 around your block: 2 min jog, 1 min walk, 3 rounds, about 15 minutes. Strava screenshot after. You in?",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "done! 3 rounds around the block, 2 min jog 1 min walk each. legs felt great",
+          "at": "2026-11-03T00:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work getting out there, Sam, and legs feeling great is a good sign 🔥 I just need the Strava screenshot of the run before I can give you the check mark. Can you send it over?",
+          "at": "2026-11-03T00:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there",
+          "at": "2026-11-03T00:30:49.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, that counts, Sam! Jogging the full two minutes on a rough round two is exactly how you build toward that mile 💪 What was going on in round two, and what got you through it?",
+          "at": "2026-11-03T00:30:56.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a Strava screenshot as the proof, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a fire emoji as punctuation, not suspicious."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Voice note is accepted and celebrated as counting, with no questioning of it."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one reflection question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with a flexed-arm emoji as punctuation, warm and sincere."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "typed-not-proof",
+            "pass": false,
+            "borderline": true,
+            "reason": "Typed 'done' got no check mark and a screenshot request, but ZOH never explained in its own words why real proof matters."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH never offers typed text as proof and counts the voice note, but skips the warm why-real-proof explanation."
+          }
+        ],
+        "summary": "ZOH avoided the old failure: it never offered typed text as proof, withheld the check mark, asked for a Strava screenshot, and counted the voice note with a celebration and one reflection question. The main gap is that after the typed 'done' it asked for proof without explaining why real proof matters, which the expected behavior calls for."
+      }
+    }
+  ]
+}

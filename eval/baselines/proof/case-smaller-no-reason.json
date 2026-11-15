@@ -1,0 +1,349 @@
+{
+  "feature": "proof",
+  "id": "case:smaller-no-reason",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5a8ba6fee195",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "3c91055ee0d9"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:smaller-no-reason#1",
+        "kind": "case",
+        "id": "smaller-no-reason",
+        "suite": "regression",
+        "title": "Asked for a smaller version with no reason: one warm push, then set at once and spelled out",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-02T21:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T21:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can we do a smaller version today? like 5 min",
+          "at": "2026-11-02T22:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! You've got three scenes down in three days, and tonight's Theo returning to Mara's bar is a good one to keep rolling. What's making today feel tight? If it's just the clock, I'd rather you start the full 20 and see how far you get.",
+          "at": "2026-11-02T22:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I really just want the short one today",
+          "at": "2026-11-02T22:10:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, Jordan. Today's the short one: the opening lines of Scene 4, Theo walking back into Mara's bar, about 70 words in Notes at 8 pm. It should take around 5 minutes. Send me a screenshot of it when you're done, and tomorrow we're back to the full 20. 💪",
+          "at": "2026-11-02T22:10:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Three sentences, and the one question sits mid-text before a further sentence rather than at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, encouraging and not suspicious; the push is gentle and has no guilt."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms what (opening lines of Scene 4), how much (about 70 words), when (8 pm) and proof (screenshot) in one text."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a screenshot as proof, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, and a single emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts graciously with energy, a single emoji as punctuation, and no shaming."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": false,
+            "reason": "One warm pushback on the first request, then accepted once the tester repeated they wanted the short one."
+          }
+        ],
+        "summary": "ZOH pushed once warmly for the full 20 minutes, then accepted the tester's repeat request and spelled out the smaller version in a single text, with what, how much, when and screenshot proof. The only slip is that the push text runs three sentences with its question mid-text rather than at the end."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:smaller-no-reason#2",
+        "kind": "case",
+        "id": "smaller-no-reason",
+        "suite": "regression",
+        "title": "Asked for a smaller version with no reason: one warm push, then set at once and spelled out",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-02T21:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T21:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can we do a smaller version today? like 5 min",
+          "at": "2026-11-02T22:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three scenes down, and Theo walking back into Mara's bar is a good one to keep going on 🔥 I'd really like to see the full 20 minutes at 8 tonight. What's making today feel tight?",
+          "at": "2026-11-02T22:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I really just want the short one today",
+          "at": "2026-11-02T22:10:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, 5 minutes it is. Tonight at 8, open Scene 4 in Notes and write the opening of Theo coming back to Mara's bar, about 80 to 100 words. Send me a screenshot of it when you're done. Tomorrow we're back to the full 20 🔥",
+          "at": "2026-11-02T22:10:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation, not suspicious or pushy in a bad way."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms what (Scene 4 opening), how much (80 to 100 words, 5 minutes), when (tonight at 8) and proof (screenshot)."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a screenshot as proof, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences of instructions, slightly over the one-to-three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, confident, one emoji at the end, no pressure or accusation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH gave one warm push for the full 20 minutes, then accepted the short version and spelled out what, how much, when and proof in the same text, with no second push."
+          },
+          {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pushed back once warmly on the tester's first request, then set the smaller version at once after they repeated it."
+          }
+        ],
+        "summary": "ZOH handled the regression case as intended: one warm push, then a graceful acceptance that fully spelled out the smaller scene with a screenshot as proof. The only soft spot is that the confirmation text runs a bit long for the short-text limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:smaller-no-reason#3",
+        "kind": "case",
+        "id": "smaller-no-reason",
+        "suite": "regression",
+        "title": "Asked for a smaller version with no reason: one warm push, then set at once and spelled out",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-02T21:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T21:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can we do a smaller version today? like 5 min",
+          "at": "2026-11-02T22:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three scenes in a row, Jordan, and Theo's about to walk back into Mara's bar. You've got until 8 to get there. What's making today feel like a 5-minute day?",
+          "at": "2026-11-02T22:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I really just want the short one today",
+          "at": "2026-11-02T22:10:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, short version it is. Tonight at 8: write just the opening of scene 4, Theo walking back into Mara's bar, about 60-80 words in Notes, 5 minutes. Send me a screenshot of it when you're done, and let's keep that streak alive 💪",
+          "at": "2026-11-02T22:10:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm with no guilt or suspicion, though the energy is a bit softer than full Pushy."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a screenshot as the proof, not typed text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (opening of scene 4), how much (60-80 words, 5 min), when (tonight at 8) and proof (screenshot) in one text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and encouraging with an emoji at the end; the streak line is a mild extra nudge but not suspicious."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH pushed once with 'Three scenes in a row' and a question, then accepted the short version when asked again."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "One warm pushback then graceful acceptance with full details in one text; the push asks a question rather than explicitly naming the 20-minute full scene."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it gave one warm, non-guilty pushback, then accepted the shorter version once the tester repeated the request. The accepting text spelled out the what, how much, when and screenshot proof without a second push, with the initial pushback being the only borderline point."
+      }
+    }
+  ]
+}

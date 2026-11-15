@@ -1,0 +1,280 @@
+{
+  "feature": "proof",
+  "id": "case:document-writing-counts",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7b08e132ac9e",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "471b80b3d00d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:document-writing-counts#1",
+        "kind": "case",
+        "id": "document-writing-counts",
+        "suite": "regression",
+        "title": "Writing step, the scene sent as a Word file: it counts, and feedback comes from the file with no paste ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the doc when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.docx: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 4 is in, Jordan 🔥 \"Neither of them said the name\" is a great line, and the lamp turning over at the end adds a lot. It runs about 50 words against the 200 target, so I'm logging it as a shorter version today. How do you feel about the scene yourself, and what cut it short?",
+          "at": "2026-11-03T01:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The document is accepted as proof and celebrated with \"Scene 4 is in, Jordan 🔥\" rather than questioned."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to specific details, quoting \"Neither of them said the name\" and the lamp turning over at the end."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": false,
+                "borderline": true,
+                "reason": "Says \"logging it as a shorter version today\" without stating what, how much, when, or proof for the reduced step."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, and the final text asks two things joined by \"and\", exceeding the one-question and three-sentence limits."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with one emoji used as punctuation and no suspicion."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "document-no-paste",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the document as proof and gives feedback from it without asking for the scene to be pasted or for other proof."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the doc right away, celebrates specific lines and asks a reflection question, but also reduces the step and asks a compound question."
+          }
+        ],
+        "summary": "ZOH counted the document immediately and gave specific, warm praise without asking for a paste or other proof, which matches the regression case. It slipped by logging the step as a shorter version without confirming the details and by asking a compound question in a four-sentence text."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:document-writing-counts#2",
+        "kind": "case",
+        "id": "document-writing-counts",
+        "suite": "regression",
+        "title": "Writing step, the scene sent as a Word file: it counts, and feedback comes from the file with no paste ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the doc when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.docx: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 4 is in, Jordan, and day 4 is done 🔥 I love \"Neither of them said the name.\" It tells me there's history without spelling it out. How did the scene feel to write? Did it come easily, or did you have to fight for it?",
+          "at": "2026-11-03T01:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Counts the submitted scene document right away with 'Scene 4 is in... day 4 is done'."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Quotes the scene's line 'Neither of them said the name' and says what it does for the story."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences including the closing question, slightly over the one-to-three limit, though only one question is asked."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a single emoji as punctuation, sincere and never accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "document-no-paste",
+            "pass": true,
+            "borderline": false,
+            "reason": "Treats the document as proof and gives feedback from it, with no request to paste the scene or send other proof."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the doc immediately, reacts to a specific scene detail, and asks one reflection question without asking for a paste or other proof."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it counted the Word document immediately, reacted to a specific line from the scene, and asked one reflection question without requesting a paste or other proof. The only slip is that the reply runs about four sentences, slightly over the short-text limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:document-writing-counts#3",
+        "kind": "case",
+        "id": "document-writing-counts",
+        "suite": "regression",
+        "title": "Writing step, the scene sent as a Word file: it counts, and feedback comes from the file with no paste ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the doc when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.docx: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 4 is in, Jordan, and \"the lamp turned over once, twice, and the harbor went white and dark again\" is a great closing image 🔥 I'll be straight with you: it's about 55 words, so I'm logging it as a smaller version of the 200-word step. How did it feel writing it? Was this the scene you wanted, or did you run out of time or steam?",
+          "at": "2026-11-03T01:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The document is accepted as proof and celebrated right away with 'Scene 4 is in, Jordan'."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "It quotes a specific line from the scene, 'the lamp turned over once, twice', as a great closing image."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "The reply runs four sentences and asks two questions ('How did it feel writing it?' and 'Was this the scene you wanted...?'), breaking the one-question limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic with one fire emoji as punctuation, though it is a little more measured than the Pushy default."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "document-no-paste",
+            "pass": true,
+            "borderline": false,
+            "reason": "The document counts as proof and feedback comes from it; ZOH never asks Jordan to paste the scene or send other proof."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "It counts the doc at once and reacts to a specific image without asking for a paste, but it logs the step as a smaller version, which the expected behaviour does not call for."
+          }
+        ],
+        "summary": "ZOH counted the document right away, reacted to a specific image from the scene, and never asked for a paste or other proof, which is the regression behaviour. It went too long, though: it asked two questions in four sentences, and it logged the 55-word doc as a reduced version of the 200-word step, which is a debatable call."
+      }
+    }
+  ]
+}

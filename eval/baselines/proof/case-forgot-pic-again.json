@@ -1,0 +1,517 @@
+{
+  "feature": "proof",
+  "id": "case:forgot-pic-again",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d951ccd8fe02",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "d0e5b4235650"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:forgot-pic-again#1",
+        "kind": "case",
+        "id": "forgot-pic-again",
+        "suite": "regression",
+        "title": "\"Forgot the pic\" again: ask for other proof, a warm miss, and an offer to change how they prove it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "hit legs today but forgot the pic again 🤦",
+          "at": "2026-11-02T04:16:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you Chris, but no pic, no check mark. Tomorrow: gym selfie before you leave. Deal?",
+          "at": "2026-11-02T04:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "deal",
+          "at": "2026-11-02T04:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "went to the gym, forgot to take the pic AGAIN. I swear I went",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you, Chris, and I know it's frustrating. Real proof is what keeps this honest, though. Can you send anything from the gym that shows you were there? A sweaty post-workout selfie, your Planet Fitness check-in screen, or a shot of your gear in the car would all work.",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I don't track anything, I just lift",
+          "at": "2026-11-03T00:20:45.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Chris. Today stays a miss without proof, but the lifting is real, so let's lock in the proof. Tomorrow at 6 pm, take the selfie the second you walk into Planet Fitness, before you touch a weight. Then 45 minutes of lifting. Work for you?",
+          "at": "2026-11-03T00:20:52.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly I always forget the selfie, I'm in the zone",
+          "at": "2026-11-03T00:21:24.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That makes sense, Chris. The zone is a good problem to have. Let's change how you prove it, not whether you do. Here are two ways that don't depend on remembering mid-workout:\n• A photo of your Planet Fitness card or the front door the second you pull up, before you head in\n• A 10-second voice note as you walk out, saying what you lifted\n\nWhich one will you actually do?",
+          "at": "2026-11-03T00:21:31.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only photo-type proof: a selfie, a check-in screen, or a shot of gear."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, though it ends with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, not suspicious, with no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a selfie photo as tomorrow's proof."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences, over the one-to-three limit, though only one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and non-accusing: 'the lifting is real' with no shaming."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Offers a card or door photo and a voice note, with no typed text as proof."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Around five sentences before the list, though the list itself doesn't count and it ends in one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, believes in him, and not accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "No unclear proof arrived; the tester sent none, and the miss was warmly handled."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked for other proof first (check-in screen, gear shot) before marking today a warm miss."
+          },
+          {
+            "rule": "change-method",
+            "pass": true,
+            "borderline": false,
+            "reason": "After repeated forgotten selfies, ZOH offered a different proof method rather than dropping proof."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Typed 'I swear I went' got no check mark and a request for a photo-type proof."
+          },
+          {
+            "rule": "writing-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable as a writing step; check skipped in spirit with no writing proof issues."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH asked for proof today, marked a warm miss without accusation, and offered a changed proof method, though it first re-locked the selfie."
+          }
+        ],
+        "summary": "ZOH handled the no-proof moment warmly, asked for other proof first, and marked today a miss without accusation. It then offered a proof method that fits Chris (a card photo or voice note) instead of dropping proof, though its replies ran long and it repeated the selfie plan once before changing it."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:forgot-pic-again#2",
+        "kind": "case",
+        "id": "forgot-pic-again",
+        "suite": "regression",
+        "title": "\"Forgot the pic\" again: ask for other proof, a warm miss, and an offer to change how they prove it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "hit legs today but forgot the pic again 🤦",
+          "at": "2026-11-02T04:16:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you Chris, but no pic, no check mark. Tomorrow: gym selfie before you leave. Deal?",
+          "at": "2026-11-02T04:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "deal",
+          "at": "2026-11-02T04:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "went to the gym, forgot to take the pic AGAIN. I swear I went",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you, Chris, and I know it's frustrating. Real proof keeps it honest, so can you send anything from today that shows you were there? A Planet Fitness app check-in screenshot, a post-workout mirror pic, or even your sweaty gym clothes would count. Anything you can send tonight?",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I don't track anything, I just lift",
+          "at": "2026-11-03T00:20:45.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally fair, Chris. Without proof, today goes down as a miss, but I'm not doubting you. 💪 Tomorrow at 6, take the selfie as soon as you walk into Planet Fitness, before your first set. That way it's done and you can't forget. Can you do that?",
+          "at": "2026-11-03T00:20:52.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly I always forget the selfie, I'm in the zone",
+          "at": "2026-11-03T00:21:24.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That makes sense, Chris. When you're in the zone, a selfie is the first thing to go. We can change how you prove it, but we can't drop it. Which would fit you better?\n\n• A 10-second voice note as you walk out (\"legs done, 45 min\")\n• A photo of your first lift setup, taken when you arrive\n• A phone alarm at 6:05 that says \"selfie\"",
+          "at": "2026-11-03T00:21:31.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Three sentences with two questions ('can you send anything...?' and 'Anything you can send tonight?'), breaking the one-question rule."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and not accusing ('I believe you, Chris'), with no emoji row."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a screenshot, a mirror pic and gym clothes, with no typed text offered as proof."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences, more than the three-sentence limit, though it ends with one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and non-suspicious ('I'm not doubting you'), with one emoji as punctuation."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a selfie photo as the proof for tomorrow, not typed text."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences and one closing question, plus a list; the list may stretch the limit a bit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm with no accusation; no emoji row."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": true,
+                "reason": "Voice note and photo are proof kinds, but the phone alarm is a reminder, not proof."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked for proof first, accepted the miss warmly, and offered a changed proof method (voice note, photo, alarm) without dropping proof."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'forgot the pic', ZOH asked for other proof first, then warmly ended today as a miss."
+          },
+          {
+            "rule": "change-method",
+            "pass": true,
+            "borderline": false,
+            "reason": "After repeated forgotten selfies, ZOH offered to change the proof method to options that fit Chris, keeping proof required."
+          },
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "With no proof sent, ZOH asked for proof, then ended warmly as a miss without accusing Chris."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it asked for any proof first, closed today warmly as a miss, and offered Chris proof methods that fit him without dropping proof. Its texts ran long and the first two each carried more than one question, so the short-text rule is where it fell down."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:forgot-pic-again#3",
+        "kind": "case",
+        "id": "forgot-pic-again",
+        "suite": "regression",
+        "title": "\"Forgot the pic\" again: ask for other proof, a warm miss, and an offer to change how they prove it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "hit legs today but forgot the pic again 🤦",
+          "at": "2026-11-02T04:16:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you Chris, but no pic, no check mark. Tomorrow: gym selfie before you leave. Deal?",
+          "at": "2026-11-02T04:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "deal",
+          "at": "2026-11-02T04:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "went to the gym, forgot to take the pic AGAIN. I swear I went",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I believe you, Chris, and I'm not doubting you went. Without proof I can't give you the check mark, so today's logged as a miss. If you've got a Planet Fitness app check-in or any workout photo, send it tonight and it still counts. Tomorrow at 6, the selfie comes first, before you lift. Can you do that?",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I don't track anything, I just lift",
+          "at": "2026-11-03T00:20:45.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair enough, Chris, and that's fine. The selfie is your tracker, so it just has to happen before the lift. Tomorrow at 6: walk in, snap the gym selfie at the door, then hit your 45 minutes. Can you make that happen?",
+          "at": "2026-11-03T00:20:52.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly I always forget the selfie, I'm in the zone",
+          "at": "2026-11-03T00:21:24.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's useful, Chris. Being in the zone is a good problem, and we just need proof that fits how you train. Two ways to make it stick:\n\n• A phone alarm at 5:55 that says \"selfie at the door\", so it's done before you're locked in\n• Or skip the selfie and send a 30-second voice note in the parking lot after, saying what you hit\n\nWhich one fits you better?",
+          "at": "2026-11-03T00:21:31.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": true,
+                "reason": "Names an app check-in, workout photo and a selfie as proof; an app check-in is arguably a screenshot, so it reads as fitting."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs about five sentences plus a question, well over the one-to-three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no suspicion or accusation. The 'I believe you' line fits the tone."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the gym selfie as the proof and never offers typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences ending in one question; slightly over the three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, calm and sincere, with no accusation and no emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Offers a voice note as the alternative proof and doesn't offer typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Prose is about three sentences with one final question; the bulleted list doesn't count against the limit, though it runs a bit long."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and supportive, but calmer than Pushy-level hype with no emoji."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'forgot the pic', ZOH first asks for an app check-in or workout photo to be sent tonight, then logs a warm miss."
+          },
+          {
+            "rule": "change-method",
+            "pass": true,
+            "borderline": false,
+            "reason": "After repeated forgotten selfies, ZOH offers a voice note or alarm approach that fits how Chris trains."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester's words alone earn no check mark, and ZOH asks for proof instead."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asks for something sendable tonight, logs a warm miss with no check mark, and offers a fitting proof change without dropping proof."
+          }
+        ],
+        "summary": "ZOH handled the repeated forgotten selfie well: it asked for something sendable tonight, logged a warm miss without accusing Chris, and then offered a voice note or alarm instead of dropping proof. The main weakness is length, since ZOH 1 and ZOH 2 run past the three-sentence limit, and ZOH 3's calm energy sits a little below Pushy level."
+      }
+    }
+  ]
+}

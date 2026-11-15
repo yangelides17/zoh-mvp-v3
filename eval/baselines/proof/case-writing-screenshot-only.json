@@ -1,0 +1,337 @@
+{
+  "feature": "proof",
+  "id": "case:writing-screenshot-only",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7b0ff639a617",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "072706fe07f5"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:writing-screenshot-only#1",
+        "kind": "case",
+        "id": "writing-screenshot-only",
+        "suite": "regression",
+        "title": "Writing step, screenshot only: it counts, then a request for the full text, for feedback",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 4 is in the books, Jordan 🔥 \"Somebody had to\" is a great line, and so is Mara wiping a glass that's already dry. It came in around 90 words, so it's tighter than the 200 we aimed for. Paste the whole scene here so I can give you real feedback on it?",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
+          "at": "2026-11-03T01:26:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Here's my take. The unnamed name is the strongest part. \"Neither of them said the name\" lets the reader feel the weight without you explaining it. The lamp turning over at the end works too, because the light going white and dark again mirrors the tension. One thing to try: give Theo one small physical beat before he sits, so the pause before \"He sat\" carries even more.\n\nYou landed at about 90 words against the 200 target. What happened there: did the scene feel finished, or did the time run out?",
+          "at": "2026-11-03T01:26:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the screenshot right away with 'Scene 4 is in the books' and specific praise, without questioning it."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names no proof type for a step, only asks for the pasted text for feedback."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, one fire emoji as punctuation, no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Feedback runs about five sentences plus a question, past the one-to-three limit, though feedback on work allows a longer take."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere coaching tone with no emoji row or accusation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "writing-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Screenshot counted and checked off right away, then the full paste was requested for feedback."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counted the screenshot, asked for the paste, then gave specific feedback on the unnamed name and lamp with one reflection question and no further proof ask."
+          }
+        ],
+        "summary": "ZOH handled the writing step as intended: it counted the screenshot immediately, celebrated specifically, and asked for the paste. Its feedback picked out real details from the scene and ended with one reflection question, though the feedback text ran longer than the short-text rule allows."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:writing-screenshot-only#2",
+        "kind": "case",
+        "id": "writing-screenshot-only",
+        "suite": "regression",
+        "title": "Writing step, screenshot only: it counts, then a request for the full text, for feedback",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 4 is in the books, Jordan 🔥 \"Neither of them said the name\" and the lamp turning over is a great way to close that scene. It came in under the 200 words, but the images are doing real work. Can you paste the whole scene here so I can give you real feedback on it?",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
+          "at": "2026-11-03T01:26:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thanks, Jordan. Before I weigh in, what's your own take on this scene? What feels strongest to you, and what feels unfinished?",
+          "at": "2026-11-03T01:26:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The Notes screenshot plainly shows scene 4 and is celebrated and counted right away with no questioning."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, which is over the one-to-three limit, though only one question and it sits at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, specific to the scene, with one emoji as punctuation and no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm enough, though it reads flatter and more formal than the energy used earlier."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After the paste, ZOH 2 only says thanks and asks for the tester's own take; it never reacts to something specific in the writing like the second chair or the unsaid name."
+          }
+        ],
+        "summary": "ZOH counted the screenshot right away, celebrated it, and asked for the paste without requesting more proof, which is correct. After the paste, though, it thanked the tester and asked for their own take instead of reacting to a specific line in the writing, so the regression case fails."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:writing-screenshot-only#3",
+        "kind": "case",
+        "id": "writing-screenshot-only",
+        "suite": "regression",
+        "title": "Writing step, screenshot only: it counts, then a request for the full text, for feedback",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 4 is in, Jordan, and \"Neither of them said the name\" is a great line 🔥 The scene runs about 85 words, so I logged it as a smaller version today. What kept it short tonight: you chose to leave things unsaid, or did the time run out?",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
+          "at": "2026-11-03T01:26:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thanks for pasting it, Jordan. The dry glass Mara keeps wiping tells me she's nervous without saying so, and the lamp turning over to close the scene works. One thing to try: tomorrow, give Theo something he almost says out loud, so the unsaid name has something pushing against it. When you reread it, which line feels strongest to you?",
+          "at": "2026-11-03T01:26:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the Notes screenshot right away with a specific line praise and does not question the proof."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, with one fire emoji as punctuation and no suspicion."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences with the question at the end; the rule allows at most three."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with no suspicion or emoji row."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "writing-proof",
+            "pass": false,
+            "borderline": true,
+            "reason": "The screenshot was counted, but ZOH's question asked why it ran short instead of asking for the full paste; the paste came only because the tester volunteered it."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH counted and celebrated the screenshot but did not ask for the paste. It also logged an unrequested smaller version. After the paste, it reacted specifically and asked one reflection question without asking for more proof."
+          }
+        ],
+        "summary": "ZOH counted the screenshot and celebrated it well, then gave specific feedback on the pasted scene that picked up the dry glass and the lamp. It missed the core of the regression case: it asked a reflection question instead of requesting the paste, and its feedback text ran to four sentences."
+      }
+    }
+  ]
+}
