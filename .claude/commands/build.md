@@ -57,13 +57,16 @@ cases once both are on `dev`.
    - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format or what gets
      written to the DB: add `needs-signoff` (`gh issue edit $ARGUMENTS --add-label needs-signoff`).
    - Purely internal choices (a variable name, a loop vs. map) need neither.
-6. **Eval** (only if ZOH's words change): run only the cases this change touches, adding a regression case in
-   `eval/cases/<feature>/` when none covers it. While iterating, `npm run eval -- <feature> --case <id>` (graded by
-   Haiku, cheap); when done, one `--final` run of those cases (graded by the coach's model) for the results in the PR.
-   Check cost first with `--dry-run` (free). A full run (no `--case`) only for changes that affect every conversation,
-   and only with Yanni's OK; never `--over-budget` without it. In a group, run every issue's cases together once the
-   prompt changes are in. Fix causes in the coach's instructions, not one-off cases. If the budget runs out before the
-   target, stop and report honestly.
+6. **Eval** (only if ZOH's words change), as in "How to test a change to ZOH's words" in `eval/README.md`: run only
+   the cases this change touches, adding one in `eval/cases/<feature>/` when none covers it (a new behavior's cases
+   are `"suite": "capability"`). While iterating, `npm run eval -- <feature> --case <id>` (one run, cheap); when done,
+   one comparison of those cases for the PR: `--case <id>... --runs 3 --compare --store-baseline`, then commit
+   `eval/baselines/`. If it stops because the baseline was graded with different checks or voice page, run the
+   `--regrade-baseline` command it prints first. Check cost first with `--dry-run` (free). A full run (no `--case`)
+   only for changes that affect every conversation, and only with Yanni's OK; never `--over-budget` without it. In a
+   group, compare every issue's cases together once the prompt changes are in. Fix causes in the coach's
+   instructions, not one-off cases; never tune against `replay` cases. A group or regression case flagged worse
+   beyond noise is fixed or explained in the PR. If the budget runs out before the target, stop and report honestly.
 7. **Before pushing or opening the PR:**
    - `npm run check` green, rebased on the latest `dev`, and `git merge-base --is-ancestor origin/dev HEAD` passes
      (if not, stop: the branch isn't based on `dev`).

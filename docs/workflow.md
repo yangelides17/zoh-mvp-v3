@@ -113,10 +113,18 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   other open PRs touching the same files to rebase.
 - **Decisions are written down.** If a build makes a call on its own, it posts a `Decision:` comment
   on the issue; anything that changes what testers experience waits for you.
-- **Eval budget: $0.50 per issue on the branch, up to $1.50 for a group**, enforced by the eval itself. Each change
-  runs only the cases it touches, graded by Haiku while the build iterates (about $0.015 a short case) and once by the
-  coach's model at the end (about $0.04), so the results you read are full quality. A full run only for changes to
-  every conversation, with your OK. The tests in `npm run check` are free. Live testing and the beta catch the rest.
+- **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself, plus about $4.50
+  for the full run at each release. A full run between releases only for changes to every conversation, with your
+  OK. The tests in `npm run check` are free. Live testing and the beta catch the rest.
+- **How a change to ZOH's words is tested** (#197). The build runs only the cases the change touches: once while
+  iterating, then 3 times each, compared with the stored baseline case by case. The report scores four groups:
+  conversation, the case's own goal, flow and facts, and style. Style is shown but never decides. In plain words it
+  says what got worse beyond noise; a move within noise is neither a regression nor a win. Cases are regression
+  (should keep passing; a drop is flagged), capability (the new feature's own; they graduate once they pass every
+  run) or real replays (an honest read on real people, never tuned against). The branch's runs become those cases'
+  baseline when it merges, and each release refreshes every case. Numbers aren't the last word: a change that
+  reads well in the report but feels off to you doesn't ship. Details: "How to test a change to ZOH's words" in
+  `eval/README.md`.
 
 ## Quick fixes and changes outside the flow
 
