@@ -6,7 +6,7 @@ import { loadProof } from "../src/coach/state.js";
 import { messages, testers } from "../src/db/schema.js";
 import { MAX_DOCUMENT_PAGES, readDocument } from "../src/media/documents.js";
 import type { AudioRewrapper } from "../src/media/rewrap.js";
-import { MediaTooBigError, type MediaFetcher } from "../src/media/storage.js";
+import { MediaTooBigError, mediaKind, type MediaFetcher } from "../src/media/storage.js";
 import { searchMemory } from "../src/memory/store.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { proofHtml } from "../src/console/views/shared.js";
@@ -218,5 +218,14 @@ describe("#185: voice notes play in Chrome", () => {
     expect(stored!.transcript).toBe("I went for a run this morning");
     expect(stored!.status).toBe("REPLIED");
     expect(proofHtml(stored!)).toContain("Download (Chrome can't play iPhone voice notes");
+  });
+});
+
+describe("#163: more file types are recognized", () => {
+  it("maps the new audio, video and document extensions to their kind", () => {
+    for (const ext of ["aiff", "aif", "3ga"]) expect(mediaKind(undefined, `https://cdn.sendblue.test/f/note.${ext}`)).toBe("audio");
+    for (const ext of ["avi", "mkv", "3gp"]) expect(mediaKind(undefined, `https://cdn.sendblue.test/f/clip.${ext}`)).toBe("video");
+    expect(mediaKind("video/webm", "https://cdn.sendblue.test/f/clip.webm")).toBe("video");
+    for (const ext of ["pdf", "docx", "xlsx", "csv", "pptx", "txt", "md", "ts"]) expect(mediaKind(undefined, `https://cdn.sendblue.test/f/file.${ext}`)).toBe("document");
   });
 });
