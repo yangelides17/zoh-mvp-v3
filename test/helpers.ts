@@ -23,7 +23,6 @@ import type { Transcriber } from "../src/transcription/speaches.js";
 import { createNudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { createJumper } from "../src/testers/jump.js";
-import type { ClosingMoment, ThreadCheck } from "../src/coach/thread-check.js";
 
 export const SECRET = "test-webhook-secret";
 export const ME = "+19085550100";
@@ -204,18 +203,6 @@ export class FakeClaudeModel implements ClaudeModel {
   memoryOf(i = -1): string | undefined {
     const system = this.requests.at(i)?.system ?? [];
     return system.length === 3 ? system[1]!.text : undefined;
-  }
-}
-
-/** #157: the outside read before the coach closes out: answers what it's told, and keeps what it was asked. */
-export class FakeThreadCheck implements ThreadCheck {
-  seen: string[] = [];
-  moments: ClosingMoment[] = [];
-  constructor(public answer: string | undefined = undefined) {}
-  async open(conversation: string, moment: ClosingMoment = "next_step") {
-    this.seen.push(conversation);
-    this.moments.push(moment);
-    return this.answer;
   }
 }
 

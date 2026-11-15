@@ -251,7 +251,8 @@ function reflectionLine(s: CoachState): string {
   const said = !!row?.howItWentSaid;
   const went = said ? " They've said how it went for them." : " They haven't said how it went for them yet.";
   const n = s.proof.zohTextsSince + 1;
-  const week = s.week && !s.week.recapped ? " It's Sunday: the week look-back (WEEK LOOK-BACK) comes when the reflection wraps up, before any next step." : "";
+  // #102: on that Sunday, the text that ends the reflection carries the recap, even when they're done or rushed.
+  const week = s.week && !s.week.recapped ? " It's Sunday: the week (WEEK LOOK-BACK) comes in the text that wraps up the reflection, even when they're done or rushed, in place of the next step." : "";
   const long = n >= REFLECTION_SAFETY_NET ? " This has been a long talk: time to wrap up." : "";
   return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today.${long}${week}`;
 }

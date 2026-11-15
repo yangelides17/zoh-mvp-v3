@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach, onlySaveConfirmation } from "../src/coach/coach.js";
 import { buildStateBlock } from "../src/coach/prompt.js";
 import { insideQuietHours, loadCoachState, localDate } from "../src/coach/state.js";
-import { runTool, type ReplyStart } from "../src/coach/tools.js";
+import { runTool } from "../src/coach/tools.js";
 import { insertOutbound } from "../src/db/messages.js";
 import { flags, messages, planInputs, plans, stepDays, type Tester } from "../src/db/schema.js";
 import { OPT_OUT_CONFIRMATION } from "../src/testers/commands.js";
 import { getTesterByPhone, updateTester } from "../src/testers/testers.js";
-import { DEV, FakeClaudeModel, FakeThreadCheck, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
+import { DEV, FakeClaudeModel, ME, inboundEvent, makeApp, makeDb, postWebhook, type TestApp } from "./helpers.js";
 
 let t: TestApp;
 let model: FakeClaudeModel;
@@ -74,23 +74,6 @@ afterEach(async () => {
 
 describe("proposing a plan", () => {
   beforeEach(() => onboarded());
-
-  it("#157: before the first plan, the outside read holds it while something they said is still open; their words win", async () => {
-    const check = new FakeThreadCheck("why getting back in shape matters now");
-    const start: ReplyStart = { howItWentSaid: false, openThread: (moment) => check.open("ZOH: ...\nThem: ...", moment) };
-    const held = await runTool(t.db, await state("", ME, at), "propose_plan", GYM, at, start);
-    expect(held).toMatchObject({ ok: false, error: expect.stringContaining("they just said something worth following up first (why getting back in shape matters now)") });
-    expect(held).toMatchObject({ error: expect.stringContaining("never mention the plan waiting") });
-    expect(await allPlans()).toHaveLength(0);
-    expect(check.moments).toEqual(["plan"]);
-    // "just give me the plan": their words let it through without asking the read again.
-    const asked = "just give me the plan";
-    expect(await runTool(t.db, await state(asked, ME, at), "propose_plan", { ...GYM, ready: asked }, at, start)).toMatchObject({ ok: true });
-    expect(check.moments).toEqual(["plan"]);
-    // A revision of a plan they've seen isn't held.
-    expect(await runTool(t.db, await state("", ME, at), "propose_plan", { time: "07:00" }, at, start)).toMatchObject({ ok: true });
-    expect(check.moments).toEqual(["plan"]);
-  });
 
   it("saves a draft, and a revision changes only the fields given", async () => {
     expect(await run("propose_plan", GYM)).toMatchObject({ ok: true });

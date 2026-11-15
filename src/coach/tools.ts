@@ -50,8 +50,7 @@ import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
-import type { ClosingMoment } from "./thread-check.js";
-import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
+import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -104,7 +103,7 @@ const schemas = {
   restart_coaching: z.object({}).strict(),
   send_feedback: z.object({ feedback: text(1000) }).strict(),
   flag_back_off: z.object({ reason: text(300) }).strict(),
-  propose_plan: z.object({ ...planFields, ready: text(160).optional() }).strict(),
+  propose_plan: z.object(planFields).strict(),
   lock_plan: z.object({ commitment: text(200), start: z.enum(["today", "tomorrow"]) }).strict(),
   change_plan: z
     .object({
@@ -155,7 +154,6 @@ const schemas = {
       agreed: z.boolean().optional(),
       asked: text(300).optional(),
       reason: text(200).optional(),
-      ready: text(160).optional(),
     })
     .strict(),
   save_reflection: z
@@ -275,16 +273,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     name: "propose_plan",
     description:
       "Save the plan you're showing them as the draft. The first time, give every field; for a revision, only the fields that change (an empty setup_step removes it).",
-    input_schema: {
-      type: "object",
-      properties: {
-        ...planProperties(),
-        ready: {
-          type: "string",
-          description: "Only when told it's early: their words from their latest text, exactly, that show they want the plan now or are done talking.",
-        },
-      },
-    },
+    input_schema: { type: "object", properties: planProperties() },
   },
   {
     name: "lock_plan",
@@ -435,11 +424,6 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         agreed: { type: "boolean" },
         asked: { type: "string" },
         reason: { type: "string", description: "Why this step, in a line: what they said that shaped it (#93)" },
-        ready: {
-          type: "string",
-          description:
-            "Only when told it's early: their words from their latest text, exactly, that show they're rushed (\"gotta run\"), said skip, said they're done (\"that's about it\", \"nah\"), or asked what's next (\"what's tomorrow?\"). Wanting more, harder, or an idea for tomorrow isn't asking: ask about it.",
-        },
       },
       required: ["step", "kind"],
     },
@@ -505,63 +489,7 @@ export type ToolResult = { ok: true; message: string; tester: Tester; optedOut?:
  * Validates and runs one tool call against the current state. Never throws for bad input:
  * the model gets the error back and can fix its call.
  */
-/** #131: what a tool can't tell from the state mid-reply, which reloads after every call: how the reply began. */
-export interface ReplyStart {
-  /** Whether how it went was already said (something real) when this reply began. */
-  howItWentSaid: boolean;
-  /**
-   * #157: the outside read of the conversation since their proof (`ThreadCheck`): what's still worth following up,
-   * or undefined to close out. Absent in tests and texts ZOH starts.
-   */
-  openThread?: (moment: ClosingMoment) => Promise<string | undefined>;
-}
-
-/**
- * #131 (soft hold): why proposing the next step day's step now is early in today's reflection, or undefined
- * when it isn't. Early: the text that celebrates their proof, the reply where their first real answer came in,
- * or a thin reflection before they've given little back twice. The coach can go ahead with their words (`ready`),
- * so it pushes back, never forces a question. The safety net and texts ZOH starts are never early. After that,
- * `threadStillOpen` asks the outside read (#157).
- */
-export function earlyProposal(state: CoachState, start?: ReplyStart): string | undefined {
-  const row = state.todayRow;
-  if (!inReflection(state) || !row) return undefined;
-  const n = state.proof.zohTextsSince + 1;
-  const said = !!row.howItWentSaid;
-  const why =
-    n === 1
-      ? "this text celebrates their proof: ask your one question about it first"
-      : !said
-        ? n < REFLECTION_LITTLE_BACK
-          ? "nothing real on how it went yet: ask what's behind their answer first"
-          : undefined
-        : !(start?.howItWentSaid ?? said)
-          ? "they just gave you their first real answer: ask about it first (an idea for tomorrow is something to ask about, not the plan)"
-          : undefined;
-  return why && held(why);
-}
-
-/** Today's step is done and ZOH is replying in today's reflection, before the safety net. */
-function inReflection(state: CoachState): boolean {
-  const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
-  return done && !state.nudgeMoment && state.proof.today > 0 && state.proof.zohTextsSince + 1 < REFLECTION_SAFETY_NET;
-}
-
-const held = (why: string) =>
-  `Not saved, and early: ${why}. Ask it open in this text (never an either/or guess), as a natural reply to what they said; never mention the step waiting. The next step comes once they've answered. If they're rushed, said skip, said they're done ("that's about it", "nah") or asked what's next: call again with ready = those words of theirs, exactly.`;
-
-/**
- * #157: once nothing else holds it, the outside read decides whether something they just said is still worth
- * following up. Only where a real reflection is under way (a thin one has its own exit); if the read fails, the step
- * goes, since a reply must never wait on it.
- */
-async function threadStillOpen(state: CoachState, start?: ReplyStart): Promise<string | undefined> {
-  if (!start?.openThread || !inReflection(state) || !state.todayRow?.howItWentSaid) return undefined;
-  const open = await start.openThread("next_step").catch(() => undefined);
-  return open && held(`they just said something worth following up (${open})`);
-}
-
-export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date, start?: ReplyStart): Promise<ToolResult> {
+export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date): Promise<ToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as ToolName].safeParse(rawInput ?? {});
   if (!parsed.success) {
@@ -682,18 +610,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return { ok: false, error: `Ask these first: ${state.openRequired.map((q) => q.key).join(", ")}` };
       }
       const draft = state.draft?.goalSlug === state.goal.slug ? state.draft : undefined;
-      const { ready, ...fields } = input as z.infer<typeof schemas.propose_plan>;
-      // #157: before the first plan, the outside read checks nothing they just said is still worth following up.
-      if (!draft && start?.openThread && !(ready && saidIt(ready, state.lastTesterText))) {
-        const open = await start.openThread("plan").catch(() => undefined);
-        if (open) {
-          return {
-            ok: false,
-            error: `Not shown yet: they just said something worth following up first (${open}). Ask about it in this text, open and as a natural reply; never mention the plan waiting. The plan comes once they've answered. If they asked for the plan or said they're done: call again with ready = those words of theirs, exactly.`,
-          };
-        }
-      }
-      const merged = mergePlan(draft, fields as PlanFieldsInput);
+      const merged = mergePlan(draft, input as PlanFieldsInput);
       if (typeof merged === "string") return { ok: false, error: merged };
       if (draft) {
         // On the same clock as the texts (#37: a revision counts as shown only once a later text carries it).
@@ -1081,7 +998,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "set_today_step": {
-      const { step, kind, minutes, proof, day, agreed, asked, reason, ready } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, kind, minutes, proof, day, agreed, asked, reason } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
       const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
@@ -1097,12 +1014,6 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           error: `They haven't seen a step for ${date} yet: save it without agreed, give it in full in your text and ask if it works; agreed only after their yes.`,
         };
       }
-      // #131 (soft hold): proposing it too early in today's reflection gets one push back; a reason lets it through.
-      // #157: a reason to go early is their own words from their latest text, so it can't be the coach's guess.
-      // Only the first proposal is held: once a step for that day is out, the reflection is over and they're adjusting it.
-      const first = day === "next" && !agreed && !row?.step;
-      // Lean variant (#157 experiment): no conversational holds; the coach judges when the talk has landed.
-      void first; void ready; void start;
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,

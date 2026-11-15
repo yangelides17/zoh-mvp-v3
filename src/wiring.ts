@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import type { AppDeps } from "./app.js";
 import { createClaudeModel } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
-import { createThreadCheck } from "./coach/thread-check.js";
 import { missingSettings, type Config } from "./config.js";
 import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";

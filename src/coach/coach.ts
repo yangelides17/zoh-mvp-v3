@@ -10,7 +10,6 @@ import {
   type Replier,
   type ReplyInput,
   type TokenUsage,
-  type Turn,
 } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
@@ -27,8 +26,7 @@ import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
 import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions } from "./prompt.js";
 import { loadCoachState, localTime, onboardingComplete, type CoachState } from "./state.js";
-import { runTool, TOOL_DEFINITIONS, type ReplyStart } from "./tools.js";
-import type { ThreadCheck } from "./thread-check.js";
+import { runTool, TOOL_DEFINITIONS } from "./tools.js";
 import { loadVoiceDoc } from "./voice.js";
 
 /**
@@ -138,27 +136,6 @@ export interface CoachOptions {
   voice?: string;
   /** Focus plus maintenance goals a tester can have (`GOAL_CAP`); defaults to 3. */
   goalCap?: number;
-  /** #157: the outside read before the next step after a reflection; without it, only the coach's own holds apply. */
-  threadCheck?: ThreadCheck;
-}
-
-/**
- * #157: the conversation since their proof, oldest first, for the outside read: ZOH's texts since the proof (as the
- * state counts them) and every text of theirs from the one before the first of those, which carries the proof.
- */
-export function sinceProof(turns: Turn[], zohTextsSince: number): string {
-  let zoh = 0;
-  let from = turns.length;
-  for (let i = turns.length - 1; i >= 0; i--) {
-    if (turns[i]!.role === "assistant" && ++zoh > zohTextsSince) break;
-    from = i;
-  }
-  return transcript(turns.slice(from));
-}
-
-/** Turns as a plain transcript for the outside read. */
-function transcript(turns: Turn[]): string {
-  return turns.map((t) => `${t.role === "assistant" ? "ZOH" : "Them"}: ${t.text}`).join("\n");
 }
 
 /**
@@ -207,15 +184,6 @@ export function createCoach(opts: CoachOptions): Replier {
       let tester: Tester = initial;
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
-      // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
-      const threadCheck = opts.threadCheck;
-      const start: ReplyStart = {
-        howItWentSaid: !!state.todayRow?.howItWentSaid,
-        // #157: the outside read sees the reflection since their proof, or before the first plan, the whole conversation.
-        ...(threadCheck
-          ? { openThread: (moment) => threadCheck.open(moment === "plan" ? transcript(turns) : sinceProof(turns, state.proof.zohTextsSince), moment) }
-          : {}),
-      };
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -289,7 +257,7 @@ export function createCoach(opts: CoachOptions): Replier {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId })
-            : await runTool(db, state, call.name, call.input, now, start);
+            : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
