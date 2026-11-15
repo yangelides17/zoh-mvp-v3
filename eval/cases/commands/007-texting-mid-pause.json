@@ -2,31 +2,62 @@
   "id": "texting-mid-pause",
   "title": "Texting during a pause: answered as usual, no step or proof push",
   "origin": "Issue #196 (coverage gap: a pause in progress)",
+  "suite": "capability",
   "seed": {
     "name": "Dani",
     "goal": "reading",
     "phase": "active",
     "history_hours_ago": 20,
-    "answers": { "what": "The Hobbit", "where": "on the train", "when": "8 am", "how_long": "20 min" },
+    "answers": {
+      "what": "The Hobbit",
+      "where": "on the train",
+      "when": "8 am",
+      "how_long": "20 min"
+    },
     "history": [
-      { "from": "tester", "text": "flying to Lisbon for a family thing, can we pause till Thursday?" },
-      { "from": "zoh", "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️" }
+      {
+        "from": "tester",
+        "text": "flying to Lisbon for a family thing, can we pause till Thursday?"
+      },
+      {
+        "from": "zoh",
+        "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️"
+      }
     ],
     "plan": {
       "step": "Read 20 minutes of The Hobbit",
       "place": "on the train",
       "time": "08:00",
-      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+      ],
       "proof": "photo",
       "proof_note": "the page you stopped on",
       "reason": "Your commute is already 20 minutes of free time.",
       "minutes": 20,
       "started_days_ago": 7
     },
-    "step_days": [{ "days_ago": 2, "status": "done", "step": "Read chapter 3 of The Hobbit" }],
-    "pause": { "started_hours_ago": 20, "until_days": 3, "reason": "family trip to Lisbon" }
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Read chapter 3 of The Hobbit"
+      }
+    ],
+    "pause": {
+      "started_hours_ago": 20,
+      "until_days": 3,
+      "reason": "family trip to Lisbon"
+    }
   },
-  "testerLines": ["landed! the hotel has a little library lol", "should I still read while I'm here?"],
+  "testerLines": [
+    "landed! the hotel has a little library lol",
+    "should I still read while I'm here?"
+  ],
   "whatWentWrong": "New case, not a past mistake: no case started mid-pause.",
   "shouldHaveHappened": "ZOH answers like a friend: warm about the trip, and nothing about today's step, proof or a streak in the first reply. Asked whether to read, it says honestly they're paused till Thursday so nothing is owed, and if they feel like it a few pages is a bonus, with no pressure, no ask for proof and no request to lift the pause. It doesn't call resume_texts unless they say they're back.",
   "startTime": "14:00",

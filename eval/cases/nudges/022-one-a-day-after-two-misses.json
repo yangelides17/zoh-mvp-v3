@@ -2,21 +2,41 @@
   "id": "one-a-day-after-two-misses",
   "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
   "origin": "Issue #196 (coverage gap: the one-a-day nudge)",
+  "suite": "capability",
   "seed": {
     "name": "Sam",
     "goal": "reading",
     "phase": "active",
     "history_hours_ago": 30,
-    "answers": { "what": "Atomic Habits", "where": "in bed", "when": "10 pm", "how_long": "15 min" },
+    "answers": {
+      "what": "Atomic Habits",
+      "where": "in bed",
+      "when": "10 pm",
+      "how_long": "15 min"
+    },
     "history": [
-      { "from": "zoh", "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?" },
-      { "from": "zoh", "text": "Still here, Sam. Ten pages before bed, you've got this." }
+      {
+        "from": "zoh",
+        "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?"
+      },
+      {
+        "from": "zoh",
+        "text": "Still here, Sam. Ten pages before bed, you've got this."
+      }
     ],
     "plan": {
       "step": "Read 15 minutes of Atomic Habits",
       "place": "in bed",
       "time": "22:00",
-      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
       "proof": "photo",
       "proof_note": "the page you stopped on",
       "reason": "A few pages before sleep builds the habit without a big ask.",
@@ -24,12 +44,27 @@
       "started_days_ago": 8
     },
     "step_days": [
-      { "days_ago": 1, "status": "missed", "step": "Read chapter 4 of Atomic Habits" },
-      { "days_ago": 2, "status": "missed", "step": "Read chapter 4 of Atomic Habits" },
-      { "days_ago": 3, "status": "done", "step": "Read chapter 3 of Atomic Habits", "proof_seen": "photo of page 52" }
+      {
+        "days_ago": 1,
+        "status": "missed",
+        "step": "Read chapter 4 of Atomic Habits"
+      },
+      {
+        "days_ago": 2,
+        "status": "missed",
+        "step": "Read chapter 4 of Atomic Habits"
+      },
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Read chapter 3 of Atomic Habits",
+        "proof_seen": "photo of page 52"
+      }
     ]
   },
-  "testerLines": ["advance to 21:59"],
+  "testerLines": [
+    "advance to 21:59"
+  ],
   "whatWentWrong": "New case, not a past mistake: no case covered the one-a-day text after two misses.",
   "shouldHaveHappened": "Exactly one text ZOH starts today, at the usual morning time: warm, with Sam's name, sincere and without guilt, and from a new angle rather than another push like the last ones (a different reason, a smaller start, or an open question about what's getting in the way). It names today's step. No second, third or follow-up text the rest of the day.",
   "startTime": "08:30",

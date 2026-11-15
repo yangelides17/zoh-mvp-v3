@@ -2,21 +2,39 @@
   "id": "yesterday-pickup",
   "title": "Yesterday's proof came with no word on how it went: picked up once, in a line",
   "origin": "Issue #196 (coverage gap: yesterday's reflection picked up, #93)",
+  "suite": "capability",
   "seed": {
     "name": "Kai",
     "goal": "speak_connect",
     "phase": "active",
     "history_hours_ago": 12,
-    "answers": { "what": "ask one question in standup", "where": "work standup", "when": "9:30 am", "how_long": "5 min" },
+    "answers": {
+      "what": "ask one question in standup",
+      "where": "work standup",
+      "when": "9:30 am",
+      "how_long": "5 min"
+    },
     "history": [
-      { "from": "tester", "text": "[voice: asked my question in standup today, about the release date]" },
-      { "from": "zoh", "text": "THAT'S what I'm talking about, Kai! Question asked, in front of everyone 🔥" }
+      {
+        "from": "tester",
+        "text": "[voice: asked my question in standup today, about the release date]"
+      },
+      {
+        "from": "zoh",
+        "text": "THAT'S what I'm talking about, Kai! Question asked, in front of everyone 🔥"
+      }
     ],
     "plan": {
       "step": "Ask one question in standup",
       "place": "work standup",
       "time": "09:30",
-      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+      ],
       "proof": "voice",
       "proof_note": "a quick voice note after",
       "reason": "One question a day builds the habit of speaking up.",
@@ -24,10 +42,19 @@
       "started_days_ago": 3
     },
     "step_days": [
-      { "days_ago": 1, "status": "done", "step": "Ask one question in standup", "proof_seen": "voice note: asked about the release date", "how_it_went_said": false }
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Ask one question in standup",
+        "proof_seen": "voice note: asked about the release date",
+        "how_it_went_said": false
+      }
     ]
   },
-  "testerLines": ["morning! standup in 20", "honestly my voice shook a bit yesterday but nobody seemed to notice"],
+  "testerLines": [
+    "morning! standup in 20",
+    "honestly my voice shook a bit yesterday but nobody seemed to notice"
+  ],
   "whatWentWrong": "New case, not a past mistake: no case covered picking up yesterday's reflection.",
   "shouldHaveHappened": "The morning text gets energy for today's standup, and ZOH may pick up yesterday in a line (how it went), once, without making it a quiz or holding up today. When he shares that his voice shook, ZOH gets curious about that moment (what it was like, or what helped him keep going) rather than reassuring and moving straight on, with at most one question per text. It never chases yesterday again after he's answered.",
   "startTime": "09:10",
