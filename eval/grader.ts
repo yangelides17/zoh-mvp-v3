@@ -1,7 +1,7 @@
 import { localTime } from "./clock.js";
 import { addUsage, type Completer } from "./claude.js";
 import type { RubricRule } from "./features.js";
-import { gradeSchema, type ConversationPlan, type Grade, type TokenUsage, type TranscriptLine } from "./types.js";
+import { gradeSchema, type ConversationPlan, type Grade, type GradedConversation, type TokenUsage, type TranscriptLine } from "./types.js";
 
 export interface GraderInput {
   plan: ConversationPlan;
@@ -189,6 +189,37 @@ export function parseGrade(raw: string, rubric: RubricRule[], zohTexts: number):
     return { ...t, checks };
   });
   return { ...grade, texts, conversation };
+}
+
+/**
+ * Re-grades saved conversations with the current checks and voice page (#197), without running them again:
+ * one grader call per conversation that has a transcript; everything but the grade is kept.
+ */
+export async function regradeConversations(
+  convs: GradedConversation[],
+  grading: { rubric: RubricRule[]; pages: { rules: string; voice: string }; complete: Completer; concurrency?: number },
+): Promise<{ convs: GradedConversation[]; usage: TokenUsage }> {
+  let usage: TokenUsage = { input: 0, output: 0 };
+  const out = await mapLimit(convs, grading.concurrency ?? 3, async (c) => {
+    if (c.transcript.length === 0) return c;
+    const g = await gradeConversation({ ...c, rubric: grading.rubric, pages: grading.pages }, grading.complete);
+    usage = addUsage(usage, g.usage);
+    return { ...c, grade: g.grade, gradeError: g.error };
+  });
+  return { convs: out, usage };
+}
+
+export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]!, i);
+    }
+  });
+  await Promise.all(workers);
+  return out;
 }
 
 /** Grades one conversation, retrying once if the output is malformed. */

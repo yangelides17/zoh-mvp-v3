@@ -44,15 +44,18 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
      verdict is **fix first**: list the unsigned decisions and stop until a founder removes the label.
    - The `CLAUDE.md` rules hold: no secrets or full phone numbers, one generated migration at most, the webhook stays
      fast, replies only to allowed numbers, `docs/reference.md` updated if needed.
-   - Read the eval results in the PR; don't rerun the eval. If only Haiku-graded runs are there, ask for the `--final` run.
+   - Read the eval results in the PR; don't rerun the eval. They should be a 3-run comparison with the stored baseline
+     (`--compare`), with `eval/baselines/` updated for those cases; if there's no comparison, ask for it. Anything
+     flagged worse beyond noise must be fixed or explained.
 3. Fix small problems yourself (push to the PR branch). For bigger ones, list them and don't merge.
 4. **Tell Yanni**, in plain words, and post the same as a PR comment:
    - **Verdict:** merge or fix first, and why in a line.
    - **Different from the plan:** only what changed and why; "As planned" if nothing did.
    - **Decisions worth knowing:** only those that affect testers or the design.
    - **Tests:** "All N Must tests pass", or what failed.
-   - **Eval** (if ZOH's words changed): a short summary of what passed and went well. For each check below target, more
-     detail: the weakness, the pattern behind it, one real reply showing it, and whether the build fixed the cause.
+   - **Eval** (if ZOH's words changed): the comparison's verdict in a line (what got better or worse beyond noise, by
+     group) and what went well. For anything worse, or a check below target, more detail: the weakness, the pattern
+     behind it, one real reply showing it, and whether the build fixed the cause.
    - **What ZOH will say differently:** the instruction change in a sentence or two, and one or two real exchanges
      from the eval.
    - **Live checks:** the Watch list ranked by where the build is least sure, each of the top one or two with a reason.

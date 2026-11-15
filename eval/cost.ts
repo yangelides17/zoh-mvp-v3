@@ -37,13 +37,14 @@ const GRADER = { inputBase: 1_500, perTurn: 120, output: 4_000 };
 
 export function estimateCost(
   plans: ConversationPlan[],
-  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string; memory?: boolean },
+  /** `gradeOnly`: re-grading saved conversations (#197), so only the grader is paid for. */
+  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string; memory?: boolean; gradeOnly?: boolean },
 ): Estimate {
   const pagesTokens = Math.ceil(opts.pagesChars / 4);
   const run = (turns: number, simulated: boolean) => {
-    const coach = { input: COACH.input * turns, output: COACH.output * turns };
+    const coach = opts.gradeOnly ? { input: 0, output: 0 } : { input: COACH.input * turns, output: COACH.output * turns };
     let sim = { input: 0, output: 0 };
-    if (simulated) {
+    if (simulated && !opts.gradeOnly) {
       // The k-th simulator call rereads k-1 earlier exchanges.
       sim = { input: SIM.inputBase * turns + (SIM.perTurn * turns * (turns - 1)) / 2, output: SIM.output * turns };
     }
@@ -58,7 +59,7 @@ export function estimateCost(
     let dollars = 0;
     for (const p of plans) {
       const r = run(turnsFor(p), p.kind === "scenario");
-      if (opts.memory) {
+      if (opts.memory && !opts.gradeOnly) {
         // One overnight pass per conversation, on the coach's model.
         r.coach.input += KEEPER.input;
         r.coach.output += KEEPER.output;

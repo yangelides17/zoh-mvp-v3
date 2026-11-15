@@ -41,6 +41,7 @@ ZOH's reply before sending the next one.
 | `startDay` | no | Weekday of the first text in the eval's week (`mon` to `sun`, default `mon`): the Sunday look-back cases start on `sun`. Seeded `days_ago` count back from it. |
 | `timeZone` | no | IANA zone for `startTime` (default `America/New_York`). |
 | `persona` | no | Which persona it belongs to in the per-persona table (default: its own "scripted" row). |
+| `suite` | no | `regression` (default: should keep passing; a drop is flagged), `capability` (a new feature's own case; graduates once it passes every run) or `replay` (a real tester conversation; reported apart, never tuned against). See `eval/README.md` (#197). |
 
 ## Adding one
 
