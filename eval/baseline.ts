@@ -50,7 +50,8 @@ export function producerFor(plan: ConversationPlan, grading: { model: string; ru
   const c = plan.regression;
   return {
     grader: grading.model,
-    checks: hash([grading.rubric.map((r) => [r.id, r.scope, r.label]), c ? [c.whatWentWrong, c.shouldHaveHappened] : null]),
+    // How each rule is judged counts too: alone in its own call, or counted in code.
+    checks: hash([grading.rubric.map((r) => [r.id, r.scope, r.label, r.alone ?? false, r.code ?? null]), c ? [c.whatWentWrong, c.shouldHaveHappened] : null]),
     voice: hash(grading.pages.voice),
     instructions: hash(graderSystemPrompt({ rubric: [], pages: { rules: "", voice: "" } })),
     script: hash(c ? [c.testerLines, c.seed ?? null, c.startTime, c.startDay ?? null, c.timeZone, c.areaCode, c.persona ?? null] : (plan.scenario ?? null)),

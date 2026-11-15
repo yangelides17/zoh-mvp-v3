@@ -1,0 +1,20 @@
+{
+  "id": "quiet-hours-breaks",
+  "rule": "quiet-hours",
+  "expect": "fail",
+  "why": "With default quiet hours, a 6:30 am step should get a few words that texts still reach them, not a question about moving quiet hours.",
+  "seed": {
+    "name": "Priya",
+    "goal": "get-moving",
+    "phase": "planning",
+    "answers": { "what": "a walk", "where": "around the block", "how_long": "15 minutes" },
+    "history": [
+      { "from": "zoh", "text": "What time of day works best for the walk?" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "6:30am before the kids wake up" },
+    { "from": "zoh", "text": "6:30 is inside my quiet hours (10 pm to 9 am), so I normally wouldn't text you then. Want me to move your quiet hours so I can?" },
+    { "from": "tester", "text": "uh sure" }
+  ]
+}

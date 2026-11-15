@@ -154,12 +154,15 @@ function finished(pass: boolean, runsCount = 3): GradedConversation[] {
   }));
 }
 
-/** A grader that passes everything and records its calls. */
+/** A grader that passes every rule it's offered (per text and for the conversation) and records its calls. */
 function countingGrader(): { complete: Completer; calls: CompletionRequest[] } {
   const calls: CompletionRequest[] = [];
   const complete: Completer = async (req) => {
     calls.push(req);
-    return { text: JSON.stringify({ texts: [{ zohText: 1, checks: [check("natural", true)] }], conversation: [check("regression", true)], summary: "ok" }), usage: { input: 10, output: 5 }, stopReason: "end_turn" };
+    const schema = req.jsonSchema as { properties: { texts: { items: { properties: { checks: { items: { properties: { rule: { enum: string[] } } } } } } }; conversation: { items: { properties: { rule: { enum: string[] } } } } } };
+    const text = schema.properties.texts.items.properties.checks.items.properties.rule.enum.map((r) => check(r, true));
+    const conversation = schema.properties.conversation.items.properties.rule.enum.map((r) => check(r, true));
+    return { text: JSON.stringify({ texts: [{ zohText: 1, checks: text }], conversation, summary: "ok" }), usage: { input: 10, output: 5 }, stopReason: "end_turn" };
   };
   return { complete, calls };
 }
@@ -186,12 +189,13 @@ describe("eval: re-grading saved conversations (#197)", () => {
     const grader = countingGrader();
     const pages = await readPages(curiosity);
     const { convs, usage } = await regradeConversations(saved, { rubric: rubricFor(curiosity), pages, complete: grader.complete });
-    expect(grader.calls).toHaveLength(3);
+    // One grading per conversation: curiosity's is 3 calls (the checks together, then not-leading and not-dragging alone).
+    expect(grader.calls).toHaveLength(9);
     expect(grader.calls[0]!.system).toContain(curiosity.rubric[0]!.label);
     // Same conversations, new grades: the transcripts are untouched (nothing was replayed).
     expect(convs.map((c) => c.transcript)).toEqual(saved.map((c) => c.transcript));
-    expect(convs.every((c) => c.grade!.conversation[0]!.pass)).toBe(true);
-    expect(usage).toEqual({ input: 30, output: 15 });
+    expect(convs.every((c) => c.grade!.conversation.find((k) => k.rule === "regression")!.pass)).toBe(true);
+    expect(usage).toEqual({ input: 90, output: 45 });
   });
 });
 

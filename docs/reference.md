@@ -51,6 +51,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
   environments use `EVAL_ANTHROPIC_API_KEY` and run with `env -u ANTHROPIC_BASE_URL` (see
   `eval/README.md`). Use a separate key with a low spending limit.
+- **Real replays (#197):** `npm run real` reads production with `DATABASE_URL` (Railway's public Postgres URL), like
+  `npm run memory`: read-only, numbers printed masked. A replay case keeps no names or phone numbers (refused if
+  anything number-like is left) and possibly sensitive conversations are left out. The grader check's stronger model
+  is Opus (`EVAL_STRONG_MODEL` overrides), about $0.30 a conversation.
 
 ## Decisions to carry forward (beyond `docs/coach-voice.md`)
 - Staging and production (#82, Nov 1): branches `feature/*` → `dev` (default branch, deploys staging)

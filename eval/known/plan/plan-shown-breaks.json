@@ -1,0 +1,21 @@
+{
+  "id": "plan-shown-breaks",
+  "rule": "plan-shown",
+  "expect": "fail",
+  "why": "ZOH asks for a commitment to a plan it never showed: no • list of the step, time, days or proof anywhere.",
+  "seed": {
+    "name": "Leo",
+    "goal": "read-more",
+    "phase": "planning",
+    "answers": { "what": "a novel", "where": "on the couch", "when": "after dinner", "how_long": "15 minutes" },
+    "history": [
+      { "from": "zoh", "text": "Got it. Paper book or e-reader?" },
+      { "from": "tester", "text": "paper" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "ok whats next" },
+    { "from": "zoh", "text": "Perfect, I've put together a reading plan that fits your evenings. Can you commit to it?" },
+    { "from": "tester", "text": "yes" }
+  ]
+}

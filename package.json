@@ -18,6 +18,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node dist/db/migrate-cli.js",
     "eval": "tsx eval/run.ts",
+    "grader-check": "tsx eval/grader-check.ts",
+    "real": "tsx eval/real.ts",
     "memory": "tsx src/memory/show-cli.ts",
     "load-scenario": "tsx src/synthetic/load-cli.ts",
     "lab:replay": "tsx eval/memory-lab/replay-cli.ts",

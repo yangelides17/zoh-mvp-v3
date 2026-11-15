@@ -1,0 +1,14 @@
+{
+  "id": "first-text-follows",
+  "rule": "first-text",
+  "expect": "pass",
+  "why": "The first text has every required part: it's ZOH, what it does, \"stop\" anytime, they can change how ZOH coaches, and it asks name and goal with the goal list.",
+  "transcript": [
+    { "from": "tester", "text": "hey" },
+    {
+      "from": "zoh",
+      "text": "Hey! I'm ZOH, a coach who texts you one small step a day toward a goal you pick. Text \"stop\" anytime and I'll stop, and you can tell me anytime to coach you differently. What's your name, and which of these do you want to work on?\n• Get moving\n• Read more\n• Eat better\n• Sleep better\n• Not sure yet"
+    },
+    { "from": "tester", "text": "Dana. reading i think" }
+  ]
+}

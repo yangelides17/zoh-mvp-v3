@@ -1,0 +1,21 @@
+{
+  "id": "proof-kinds-follows",
+  "rule": "proof-kinds",
+  "expect": "pass",
+  "why": "The smaller version's proof is a photo, one of the allowed kinds.",
+  "seed": {
+    "name": "Ana",
+    "goal": "get-moving",
+    "phase": "active",
+    "answers": { "what": "a walk", "where": "the river path", "how_long": "30 minutes" },
+    "history": [
+      { "from": "zoh", "text": "Ana! Walk on the river path at 6 tonight, 30 minutes. You in?" }
+    ],
+    "plan": { "step": "a 30 minute walk on the river path", "place": "the river path", "time": "18:00", "days": ["mon", "wed", "fri"], "proof": "photo", "reason": "more energy after work", "minutes": 30 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "rough day, can i do less" },
+    { "from": "zoh", "text": "Sure, let's make it 10 minutes on the river path, still at 6. Send me a photo from the path when you're done. Work for you?" },
+    { "from": "tester", "text": "ok" }
+  ]
+}

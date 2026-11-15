@@ -1,0 +1,11 @@
+{
+  "id": "first-text-breaks",
+  "rule": "first-text",
+  "expect": "fail",
+  "why": "The first text never says \"stop\" works or that they can change how ZOH coaches, and shows no goal list.",
+  "transcript": [
+    { "from": "tester", "text": "hey" },
+    { "from": "zoh", "text": "Hey! I'm ZOH, your new coach 🙂 What's your name, and what do you want to work on?" },
+    { "from": "tester", "text": "Dana. reading i think" }
+  ]
+}

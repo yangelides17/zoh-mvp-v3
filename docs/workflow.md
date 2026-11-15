@@ -125,6 +125,11 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
   baseline when it merges, and each release refreshes every case. Numbers aren't the last word: a change that
   reads well in the report but feels off to you doesn't ship. Details: "How to test a change to ZOH's words" in
   `eval/README.md`.
+- **The grader is checked too, with nothing for you to do.** Short conversations written to follow or break a key
+  rule show whether the grader catches it, and at each release a stronger model grades a few conversations to see
+  whether the grader agrees. Builds also pull a few real tester conversations worth a look (picked by signals like
+  "stop" or "I already said"), with names and numbers masked and anything sensitive left out, as replay cases.
+  Your own blind labels and a weekly read of transcripts come back in a later issue.
 
 ## Quick fixes and changes outside the flow
 

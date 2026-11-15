@@ -228,6 +228,7 @@ async function prepare(feature: FeatureDef, args: EvalArgs, models: { all: boole
     simModel: models.simModel,
     memory: feature.memory,
     gradeOnly: !!job.saved,
+    graderCalls: graderCalls(rubric),
   });
 
   if (args.compare && !args.regradeBaseline) {
@@ -252,7 +253,7 @@ function withCurrent(c: GradedConversation, plan: ConversationPlan | undefined):
 
 async function regradeEstimate(job: Job, ids: string[], models: { coachModel: string; evalModel: string }): Promise<number> {
   const plans = [...(job.baseline?.values() ?? [])].filter((e) => ids.includes(e.id)).flatMap((e) => e.runs.map((r) => fromStored(r, job.current.get(e.id)).plan));
-  const est = estimateCost(plans, { maxTurns: 20, pagesChars: job.pages.rules.length + job.pages.voice.length, coachModel: models.coachModel, evalModel: models.evalModel, gradeOnly: true });
+  const est = estimateCost(plans, { maxTurns: 20, pagesChars: job.pages.rules.length + job.pages.voice.length, coachModel: models.coachModel, evalModel: models.evalModel, gradeOnly: true, graderCalls: graderCalls(job.rubric) });
   return (est.dollars.low + est.dollars.high) / 2;
 }
 
@@ -364,6 +365,10 @@ async function latestReport(feature: string, persona: string | undefined, cases:
     }
   }
   return undefined;
+}
+
+function graderCalls(rubric: RubricRule[]): number {
+  return 1 + rubric.filter((r) => r.alone && !r.code).length;
 }
 
 function fmtTokens(n: number): string {
