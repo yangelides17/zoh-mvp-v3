@@ -210,7 +210,13 @@ describe("eval: proof cases send photos and voice notes", () => {
       "smaller-asked-with-reason",
       "smaller-no-reason",
       "zoh-suggests-smaller",
+      // #163: documents as proof.
+      "document-writing-counts",
     ]);
+    const doc = cases.find((c) => c.id === "document-writing-counts")!;
+    const docEcho = new EchoReplier();
+    await runConversation(planConversations([], [doc], { runs: 1 })[0]!, scriptedTester(doc.testerLines), { maxTurns: 2, index: 3, env: {}, replier: docEcho });
+    expect(docEcho.received[0]!.at(-1)!.text).toContain("[Sent a document: lighthouse-scene-4.docx]\n<document>\nTheo set the ledger down");
     for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic" || c.id === "writing-screenshot-only")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();

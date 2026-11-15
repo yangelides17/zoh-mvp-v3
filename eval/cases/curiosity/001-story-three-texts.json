@@ -1,0 +1,44 @@
+{
+  "id": "story-three-texts",
+  "title": "Too fast: a story told over three texts gets followed, not cut off with tomorrow's step",
+  "origin": "#157 spec: new eval cases (a story over three texts); Yanni: moving on mid-thought feels broken",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Chapter 5 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "Chapter 3 of Atomic Habits on the couch" },
+      { "days_ago": 1, "status": "done", "step": "Chapter 4 of Atomic Habits on the couch" }
+    ],
+    "today_step": { "step": "Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min)", "agreed_hours_ago": 2 }
+  },
+  "testerLines": [
+    "[voice: Done with chapter 5. It's about habit stacking, linking a new habit to one you already do.]",
+    "so the first half went fine but then",
+    "my roommate came home and sat down next to me and started talking about her day, and I read the same page like four times",
+    "yeah. I think I need to read before she gets home, she's back around 8:15",
+    "sounds good"
+  ],
+  "whatWentWrong": "New case: ZOH tends to propose tomorrow's step as soon as it has something, even while the tester is mid-story.",
+  "shouldHaveHappened": "ZOH counts the proof and celebrates. After \"so the first half went fine but then\" it lets the story come (a short \"and then?\" or similar), with no next step in that text. After the roommate part it stays on it: understanding, and a question about it, or what they'd do differently. Their fix (reading before she's back at 8:15) is what they'd do differently, said after a real reflection, so it can go straight into the next step day's step (an acknowledgement or a one-line playback first is a plus): fully defined, using it (an earlier time, before the roommate's back), and asking if it works. What fails is a step before the story is told. After \"sounds good\" it confirms in a line.",
+  "startTime": "20:25",
+  "timeZone": "America/New_York"
+}

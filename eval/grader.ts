@@ -83,6 +83,17 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       `What should happen: ${plan.regression.shouldHaveHappened}`,
     );
   }
+  // #157: what ZOH already knew from the case's setup (name, saved answers, plan), so using it isn't graded as invented.
+  const seed = plan.regression?.seed ?? plan.scenario?.seed;
+  if (seed) {
+    const known = [
+      `name ${seed.name}`,
+      ...Object.entries(seed.answers ?? {}).map(([k, v]) => `${k}: ${v}`),
+      ...(seed.plan ? [`plan step: ${seed.plan.step}`, `plan time: ${seed.plan.time}`] : []),
+      ...(seed.today_step ? [`today's step: ${seed.today_step.step}`] : []),
+    ];
+    context.push("", `What ZOH already knew before this conversation (from earlier texts, not shown; using it isn't inventing): ${known.join("; ")}.`);
+  }
   const before = earlier.length
     ? [
         "",
