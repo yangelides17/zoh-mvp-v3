@@ -179,7 +179,7 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   later replies within the two-day window show them like a paste), plus a one-line summary.
   `open_file` reopens any file a tester sent from our copy and reads it afresh. **Every file is kept
   for good** (Yanni, Nov 14), reversing the old 30-day delete of voice-note audio; audio deleted
-  before then stays gone (`media_deleted_at`). A file still being read 15 s after it arrived gets one
+  before then stays gone (`media_deleted_at`). A file still being read 10 s after it arrived gets one
   fixed holding text ("reading it now 📖" / "watching it now 👀"), recorded with `holding` in its
   timings and not counted as one of ZOH's texts since the proof.
 - Test mode (#14): a dev number texts `jump 3h`, `jump 2d`, `jump 7:30am` or `jump next`, and that

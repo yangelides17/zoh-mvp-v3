@@ -70,8 +70,8 @@ export interface PipelineDeps {
   holdingAfterMs?: number;
 }
 
-/** #163 (spec): the holding text goes once a file has taken longer than this. */
-export const HOLDING_AFTER_MS = 15_000;
+/** #163: the holding text goes once a file has taken longer than this (10 s, Decision Nov 14, matching #162). */
+export const HOLDING_AFTER_MS = 10_000;
 
 /** #163: what ZOH says while it watches or reads; fixed, so it goes at once with no Claude call. */
 export const HOLDING_TEXTS = { video: "watching it now 👀", document: "reading it now 📖" } as const;
