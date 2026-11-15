@@ -1,7 +1,7 @@
 import { localTime } from "./clock.js";
 import { addUsage, type Completer } from "./claude.js";
 import type { RubricRule } from "./features.js";
-import { gradeSchema, type ConversationPlan, type Grade, type GradedConversation, type TokenUsage, type TranscriptLine } from "./types.js";
+import { gradeSchema, type Check, type ConversationPlan, type Grade, type GradedConversation, type TokenUsage, type TranscriptLine } from "./types.js";
 
 export interface GraderInput {
   plan: ConversationPlan;
@@ -84,7 +84,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
     );
   }
   // #157: what ZOH already knew from the case's setup (name, saved answers, plan), so using it isn't graded as invented.
-  const seed = plan.regression?.seed ?? plan.scenario?.seed;
+  const seed = plan.regression?.seed ?? plan.scenario?.seed ?? plan.seed;
   if (seed) {
     const known = [
       `name ${seed.name}`,
@@ -222,13 +222,72 @@ export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, in
   return out;
 }
 
-/** Grades one conversation, retrying once if the output is malformed. */
+/**
+ * Grades one conversation: the rules counted in code are counted, each `alone` rule gets its own grader
+ * call, and the rest share one (#197). Any call still unusable after a retry leaves it ungraded.
+ */
 export async function gradeConversation(
   input: GraderInput,
   complete: Completer,
 ): Promise<{ grade?: Grade; error?: string; usage: TokenUsage }> {
   const zohTexts = input.transcript.filter((l) => l.from === "zoh").length;
   if (zohTexts === 0) return { error: "ZOH never replied, so there was nothing to grade", usage: { input: 0, output: 0 } };
+  const judged = input.rubric.filter((r) => !r.code);
+  // The feature's rules text, less the lines for rules judged elsewhere (counted in code, or in their own call).
+  const elsewhere = new Set(input.rubric.filter((r) => r.code || r.alone).map((r) => `- ${r.label}`));
+  const together = { ...input.pages, rules: input.pages.rules.split("\n").filter((l) => !elsewhere.has(l)).join("\n") };
+  const main = await gradeOnce({ ...input, rubric: judged.filter((r) => !r.alone), pages: together }, zohTexts, complete);
+  if (!main.grade) return main;
+  let { grade, usage } = main;
+  for (const rule of judged.filter((r) => r.alone)) {
+    const one = await gradeOnce({ ...input, rubric: [rule], pages: { ...input.pages, rules: `- ${rule.label}` } }, zohTexts, complete);
+    usage = addUsage(usage, one.usage);
+    if (!one.grade) return { error: `${rule.id}: ${one.error}`, usage };
+    grade = mergeGrades(grade, one.grade);
+  }
+  return { grade: mergeGrades(grade, { texts: codeChecks(input.rubric, input.transcript), conversation: [], summary: "" }), usage };
+}
+
+/** Rules counted in code (#197), one check per ZOH text to the tester. */
+export function codeChecks(rubric: RubricRule[], transcript: TranscriptLine[]): Grade["texts"] {
+  const rules = rubric.filter((r) => r.code);
+  if (rules.length === 0) return [];
+  const out: Grade["texts"] = [];
+  let n = 0;
+  for (const line of transcript) {
+    if (line.from !== "zoh") continue;
+    n += 1;
+    if (line.console) continue;
+    out.push({ zohText: n, checks: rules.map((r) => questionCheck(r, line.text, n)) });
+  }
+  return out;
+}
+
+/** At most one question (the first text may allow more), and with `atEnd`, nothing but punctuation or emoji after it. */
+export function questionCheck(rule: RubricRule, text: string, zohText: number): Check {
+  const count = (text.match(/\?+/g) ?? []).length;
+  const max = zohText === 1 ? (rule.code?.firstText ?? 1) : 1;
+  const after = text.slice(text.lastIndexOf("?") + 1);
+  if (count > max) return { rule: rule.id, pass: false, borderline: false, reason: `${count} questions in one text (counted in code)` };
+  if (rule.code?.atEnd && count > 0 && /[\p{L}\p{N}]/u.test(after)) {
+    return { rule: rule.id, pass: false, borderline: false, reason: "the question isn't at the end (counted in code)" };
+  }
+  return { rule: rule.id, pass: true, borderline: false, reason: `${count === 0 ? "no question" : count === 1 ? "one question" : `${count} questions, allowed here`} (counted in code)` };
+}
+
+function mergeGrades(a: Grade, b: Grade): Grade {
+  const texts = a.texts.map((t) => ({ ...t, checks: [...t.checks] }));
+  for (const t of b.texts) {
+    const same = texts.find((x) => x.zohText === t.zohText);
+    if (same) same.checks.push(...t.checks);
+    else texts.push({ ...t, checks: [...t.checks] });
+  }
+  texts.sort((x, y) => x.zohText - y.zohText);
+  return { texts, conversation: [...a.conversation, ...b.conversation], summary: a.summary };
+}
+
+/** One grader call on these rules, retrying once if the output is malformed. */
+async function gradeOnce(input: GraderInput, zohTexts: number, complete: Completer): Promise<{ grade?: Grade; error?: string; usage: TokenUsage }> {
   const req = {
     system: graderSystemPrompt(input),
     messages: [{ role: "user" as const, content: graderUserPrompt(input) }],

@@ -38,8 +38,19 @@ const GRADER = { inputBase: 1_500, perTurn: 120, output: 4_000 };
 export function estimateCost(
   plans: ConversationPlan[],
   /** `gradeOnly`: re-grading saved conversations (#197), so only the grader is paid for. */
-  opts: { maxTurns: number; pagesChars: number; coachModel: string; evalModel: string; simModel?: string; memory?: boolean; gradeOnly?: boolean },
+  opts: {
+    maxTurns: number;
+    pagesChars: number;
+    coachModel: string;
+    evalModel: string;
+    simModel?: string;
+    memory?: boolean;
+    gradeOnly?: boolean;
+    /** Grader calls per conversation: one, plus one per `alone` rule (#197). */
+    graderCalls?: number;
+  },
 ): Estimate {
+  const calls = opts.graderCalls ?? 1;
   const pagesTokens = Math.ceil(opts.pagesChars / 4);
   const run = (turns: number, simulated: boolean) => {
     const coach = opts.gradeOnly ? { input: 0, output: 0 } : { input: COACH.input * turns, output: COACH.output * turns };
@@ -48,7 +59,7 @@ export function estimateCost(
       // The k-th simulator call rereads k-1 earlier exchanges.
       sim = { input: SIM.inputBase * turns + (SIM.perTurn * turns * (turns - 1)) / 2, output: SIM.output * turns };
     }
-    const grader = { input: GRADER.inputBase + pagesTokens + GRADER.perTurn * turns, output: GRADER.output };
+    const grader = { input: calls * (GRADER.inputBase + pagesTokens + GRADER.perTurn * turns), output: calls * GRADER.output };
     return { coach, sim, grader };
   };
   const coachPrice = priceOf(opts.coachModel);

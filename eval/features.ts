@@ -19,6 +19,13 @@ export interface RubricRule {
   scope: "text" | "conversation";
   /** Which score it counts toward (#197): a conversation passes a group only if every check in it passed. */
   group: Group;
+  /** Judged in its own grader call, not alongside every other check: for the checks that misfired most (#197). */
+  alone?: boolean;
+  /**
+   * Counted in code instead of judged (#197): at most one question per ZOH text (`firstText`: how many the
+   * first text may ask), and with `atEnd`, a question only at the end.
+   */
+  code?: { firstText?: number; atEnd?: boolean };
 }
 
 /**
@@ -64,7 +71,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       "ZOH has finished the onboarding questions and moved on to your plan: it showed you a proposed plan, or started asking details for it.",
     scenarios: onboardingScenarios,
     rubric: [
-      { id: "one-question", scope: "text", group: "style", label: "One question per text (the first text may ask name and goal together)" },
+      { id: "one-question", scope: "text", group: "style", code: { firstText: 2 }, label: "One question per text (the first text may ask name and goal together)" },
       { id: "short", scope: "text", group: "style", label: "Short: one to three sentences (a short list doesn't count), at most two texts per reply. The first text is exempt: it must carry the intro, the stop and coaching-style lines and the question" },
       { id: "plain-words", scope: "text", group: "style", label: "Plain words: no markdown, hashtags or filler" },
       {
@@ -122,7 +129,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       "your plan is locked: you committed and ZOH confirmed it and when day 1 is (or, if you came to switch goals, the new plan is locked or you've clearly decided to keep the current one).",
     scenarios: planScenarios,
     rubric: [
-      { id: "one-question", scope: "text", group: "style", label: "One question per text, at the end" },
+      { id: "one-question", scope: "text", group: "style", code: { atEnd: true }, label: "One question per text, at the end" },
       {
         id: "short",
         scope: "text",
@@ -558,6 +565,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "not-leading",
         scope: "text",
         group: "conversation",
+        alone: true,
         label: "No leading questions, and no menu of guesses about their own experience offered before they've said it (\"was it X or Y?\" in place of asking them). A question that offers a reframe after they've shared (\"has anyone actually reacted that way, or is it the story in your head?\") is fine, as is a choice of logistics (a time, a place, how long). No \"why\" about a lapse",
       },
       { id: "feelings-first", scope: "conversation", group: "conversation", label: "An emotional text gets understanding first; no push or plan in that same text. A gentle, no-pressure mention framed for them (\"a little escape might help\") is fine; an abrupt step is not" },
@@ -590,6 +598,7 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "not-dragging",
         scope: "conversation",
         group: "conversation",
+        alone: true,
         label:
           "Reads as a conversation with someone who cares, not an interrogation. Dragging means more questions after they've signalled they're done (\"that's it\", \"nah\", a thumbs up, one-word replies to two questions in a row) or questions with no new purpose; gently following a real signal that opens something up is not dragging, even past an \"idk\". Once they're done or say what they'll do, it moves to the step; rushed or done gets let go",
       },

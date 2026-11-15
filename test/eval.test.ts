@@ -409,10 +409,12 @@ describe("eval: grader", () => {
   });
 
   const good: Grade = {
-    texts: [{ zohText: 1, checks: [ok("one-question"), bad("short")] }],
+    texts: [{ zohText: 1, checks: [bad("short")] }],
     conversation: [bad("first-text")],
     summary: "Meh.",
   };
+  /** What gradeConversation returns for it: the grader's checks plus one question per text, counted in code (#197). */
+  const graded: Grade = { ...good, texts: [{ zohText: 1, checks: [bad("short"), { rule: "one-question", pass: true, borderline: false, reason: "no question (counted in code)" }] }] };
   const plan = conv("x", "terse", good).plan;
   const transcript: TranscriptLine[] = [
     { from: "tester", text: "Start", at: "2026-11-03T04:05:00Z" },
@@ -473,7 +475,7 @@ describe("eval: grader", () => {
       return { text: replies.shift() ?? "", usage: { input: 100, output: 10 }, stopReason: "end_turn" };
     };
     const res = await gradeConversation({ plan, transcript, rubric, pages }, flaky);
-    expect(res.grade).toEqual(good);
+    expect(res.grade).toEqual(graded);
     expect(res.usage).toEqual({ input: 200, output: 20 });
     expect(seen[0]!.system).toContain("## 4. Rules");
     expect(seen[0]!.jsonSchema).toBeDefined();
