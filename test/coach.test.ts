@@ -597,10 +597,10 @@ describe("instructions", () => {
   it("keep follow-ups, the commitment ask and the quiet-hours offer natural", () => {
     // The coach echoed "say it like you mean it" back word for word.
     expect(PLAN_AGREEMENT).not.toContain("say it like they mean it");
-    expect(PLAN_AGREEMENT).toContain("never pick apart their wording");
-    // #86: 'Say "I'm in" and I'll lock it' came back after a soft "ok".
-    expect(PLAN_AGREEMENT).toContain("one more ask in your own words");
-    expect(PLAN_AGREEMENT).toContain("quote words back or say what to type");
+    // #86: 'Say "I'm in" and I'll lock it' came back after an "ok". #157: and "'Ok' is a soft one": the prompt's own
+    // label for it came back too, so the rule names no label.
+    expect(PLAN_AGREEMENT).toContain("ask once more in your own words, without commenting on their reply, quoting it back or saying what to type");
+    expect(PLAN_AGREEMENT).not.toContain('soft "ok"');
     // #91: "That's everything I need, here's your plan:" felt like a checkout screen; one text bridges in warmly.
     expect(PLAN_AGREEMENT).not.toContain("everything I need");
     expect(PLAN_AGREEMENT).toContain("save it with propose_plan, and that text opens with one line reacting to something specific they shared");

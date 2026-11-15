@@ -129,9 +129,16 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   is day 1's. The coach can no longer send a harder step to the founders: only a new focus.
   Each saved step has a `step_kind` (#88): first (day 1), same, easier or harder than the step
   before; Metrics' "Progressed" counts harder days (untagged older days aren't counted).
+- Conversation judged by the coach, not by holds (#157, Nov 14, from a measured experiment): how ZOH asks and when it
+  moves on comes from principles with their reasons and tagged example exchanges in the voice page, and the per-reply
+  state states facts, never orders. Code keeps only hard rules (a yes counts only for a step they've seen, a deepen or
+  upgrade is saved only after it's shown and agreed, the reflection's safety net). The #131 soft hold and an outside
+  "reviewer" call were tried and removed: on the same eval suite they did no better and the rule-heavy version did worse.
+  Details on #157 and #196.
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
-  upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade
+  upgrade the tester asks for is made once they've seen the new version and said yes (#157, Nov 14;
+  was "right away"), and recorded too. An approved deepen or upgrade
   rides on the next step-day kickoff (or a reply); a new focus is raised in a reply, within the goal
   cap, and keeps the old focus as maintenance. Maintenance goals get a one-line check-in in the
   kickoff twice a week; alerts cover milestones (focus only), a second miss, 2 quiet days, two
