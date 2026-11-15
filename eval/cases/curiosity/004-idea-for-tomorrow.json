@@ -1,0 +1,41 @@
+{
+  "id": "idea-for-tomorrow",
+  "title": "Too fast: an idea for tomorrow mid-reflection gets asked about, not turned straight into the plan",
+  "origin": "#157 spec: an idea for tomorrow; #131 reflection-engaged proposed in the same text",
+  "seed": {
+    "name": "Lena",
+    "goal": "speak_connect",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "what": "speaking up in meetings", "where": "at work", "when": "10 am standup", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Standup at 10, Lena: say one thing in the first two minutes, before anyone else. Voice note after on how it went." },
+      { "from": "tester", "text": "on it" }
+    ],
+    "plan": {
+      "step": "Say one thing in the first two minutes of standup",
+      "place": "at work",
+      "time": "10:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "voice",
+      "proof_note": "a voice note right after on what you said and how it went",
+      "reason": "Saying it out loud right after is how you notice what's changing.",
+      "minutes": 15,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "Say one thing in the first two minutes of standup" }
+    ],
+    "today_step": { "step": "Say one thing in the first two minutes of standup at 10 am", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "[voice: Did it. I gave my update first before anyone. My voice was a bit shaky at the start but it was fine after the first sentence.]",
+    "tomorrow I could maybe ask a question to someone else too",
+    "like I never really engage with what others say, I just give my update and tune out",
+    "yeah that sounds right"
+  ],
+  "whatWentWrong": "In #131's eval, a tester's idea for tomorrow pulled the next step into that same text.",
+  "shouldHaveHappened": "ZOH counts the proof and celebrates, then asks one question (the shaky start, or what made it fine after the first sentence). The idea for tomorrow gets a question or a short acknowledgement and more curiosity (what it would give them, what usually happens), not an instant step. Once they've said why (tuning out), ZOH may play it back in a line, draws out what went well (going first worked) and proposes the next step day's step, fully defined, using both, and asks if it works. \"yeah that sounds right\" is a yes to it.",
+  "startTime": "10:20",
+  "timeZone": "America/New_York"
+}

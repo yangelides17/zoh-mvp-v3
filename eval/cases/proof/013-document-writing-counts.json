@@ -1,0 +1,53 @@
+{
+  "id": "document-writing-counts",
+  "title": "Writing step, the scene sent as a Word file: it counts, and feedback comes from the file with no paste ask",
+  "origin": "Issue #163 (More ways to send proof): documents count as proof",
+  "seed": {
+    "name": "Jordan",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "short scenes for my novel, Lighthouse",
+      "where": "Word on my laptop",
+      "when": "8 pm",
+      "how_long": "20 min",
+      "tracks_with": "a Word doc per scene"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the doc when it's done. You in?"
+      },
+      { "from": "tester", "text": "in" }
+    ],
+    "plan": {
+      "step": "Write one 200-word scene of Lighthouse in Word",
+      "destination": "a full draft of Lighthouse by spring",
+      "place": "Word on my laptop",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "document",
+      "proof_note": "the scene's Word doc",
+      "reason": "The doc is the proof and lets me read the whole scene for feedback.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "Scene 1 of Lighthouse: Mara opens the bar", "proof_seen": "the scene's Word doc" },
+      { "days_ago": 2, "status": "done", "step": "Scene 2 of Lighthouse: the storm night", "proof_seen": "the scene's Word doc" },
+      { "days_ago": 1, "status": "done", "step": "Scene 3 of Lighthouse: Theo's letter", "proof_seen": "the scene's Word doc" }
+    ],
+    "today_step": {
+      "step": "Scene 4 of Lighthouse in Word: Theo comes back to Mara's bar, about 200 words, 8 pm, 20 minutes",
+      "agreed_hours_ago": 10
+    }
+  },
+  "testerLines": [
+    "[document lighthouse-scene-4.docx: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.] done!"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a document of the writing is proof and already the whole text.",
+  "shouldHaveHappened": "ZOH counts the doc right away and celebrates with a specific reaction to the scene (the second chair, the name nobody says, the lamp over the harbor), then asks one reflection question. It never asks them to paste the scene or for other proof.",
+  "startTime": "20:25",
+  "timeZone": "America/New_York"
+}

@@ -268,7 +268,7 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "propose_plan_change",
       description:
-        'Draft a change to the tester\'s plan for ZOH to ask them about: only what changes. time: their local 24-hour "HH:MM". days: step days (mon..sun). proof: photo, screenshot or voice (proof_note: which one). minutes: how long. why: the founders\' reason, if given. Nothing changes until the tester says yes; they can tweak it. A different step (more, harder, another activity): suggest_next_step.',
+        'Draft a change to the tester\'s plan for ZOH to ask them about: only what changes. time: their local 24-hour "HH:MM". days: step days (mon..sun). proof: photo, screenshot, voice, document or video (proof_note: which one). minutes: how long. why: the founders\' reason, if given. Nothing changes until the tester says yes; they can tweak it. A different step (more, harder, another activity): suggest_next_step.',
       input_schema: {
         type: "object",
         properties: {

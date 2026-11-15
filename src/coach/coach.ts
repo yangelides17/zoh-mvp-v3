@@ -184,12 +184,12 @@ export function createCoach(opts: CoachOptions): Replier {
         .slice(turns.findLastIndex((t) => t.role === "assistant") + 1)
         .map((t) => t.text)
         .join("\n");
+      // #157: what ZOH last said, so a deepen or upgrade is saved only once it was shown to them.
+      const lastZohText = turns.findLast((t) => t.role === "assistant")?.text ?? "";
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, goalCap });
-      // #131: how the reply began, for the soft hold on an early next step (the state reloads after each tool).
-      const start = { howItWentSaid: !!state.todayRow?.howItWentSaid };
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
@@ -263,18 +263,18 @@ export function createCoach(opts: CoachOptions): Replier {
           checkpoint(fallbackText);
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media, watcher: opts.watcher })
-            : await runTool(db, state, call.name, call.input, now, start);
+            : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
           if (result.ok) {
             const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
             done.push(action);
             onAction?.(action);
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, goalCap });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             }
           }
           // #163: open_file hands back the file itself (a photo, a PDF) after its words.

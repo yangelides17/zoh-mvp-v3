@@ -136,7 +136,10 @@ export function stepLogSections(view: StepDayView, days: StepDayView[], testerId
   return `<div class="day-log">${[
     line("Reflection", day.reflection ? `${esc(day.reflection)} · ${chat}` : none),
     line("Learned", view.learned?.length ? `${view.learned.map(esc).join("; ")} · ${chat}` : none),
+    // #157: shown only when said, so older days and quiet reflections don't fill up with "None".
+    day.wentWell ? line("What went well", esc(day.wentWell)) : "",
     offDay ? line("What got in the way", day.inTheWay ? esc(day.inTheWay) : none) : "",
+    day.differently ? line("Would do differently", esc(day.differently)) : "",
     line("ZOH's take", day.coachTake ? esc(day.coachTake) : none),
     line("Next step", nextHtml),
   ].join("")}</div>`;

@@ -458,7 +458,7 @@ describe("the state block on Sunday", () => {
     await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "", mediaUrl: "https://cdn.example/p.jpg", mediaContentType: "image/jpeg", createdAt: at(SUN2, "19:25"), sentAt: at(SUN2, "19:25") });
     expect(await tool("mark_step_done", { how: "full", proof: "clear", seen: "Dune open at page 120" }, at(SUN2, "19:26"))).toMatchObject({ ok: true });
     const first = await block(at(SUN2, "19:27"));
-    expect(first).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the week (WEEK LOOK-BACK) waits for a later text");
+    expect(first).toContain("This reply is your 1st text since their proof today. It's Sunday: the week (WEEK LOOK-BACK) comes in the text that wraps up the reflection");
     expect(first).toContain("Not given yet: not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up");
     // The text that celebrates their proof can't record the recap; the next one can.
     expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
@@ -466,7 +466,7 @@ describe("the state block on Sunday", () => {
     const second = await block(at(SUN2, "19:30"));
     expect(second).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
     // #102: the text that ends the reflection carries the recap, even when they're done or rushed.
-    expect(second).toContain("then the week (WEEK LOOK-BACK) in that same text, even when they're done or rushed");
+    expect(second).toContain("the week (WEEK LOOK-BACK) comes in the text that wraps up the reflection, even when they're done or rushed, in place of the next step");
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
     expect(await block(at(SAT, "19:27"))).not.toContain("then the week");

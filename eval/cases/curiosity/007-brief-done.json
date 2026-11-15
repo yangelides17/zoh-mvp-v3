@@ -1,0 +1,41 @@
+{
+  "id": "brief-done",
+  "title": "Too slow: a brief tester who's clearly done gets let go warmly, never a third push",
+  "origin": "#157 spec: a brief tester who's clearly done",
+  "seed": {
+    "name": "Kai",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "a run", "where": "around the park", "when": "7 am", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Kalimera Kai! 20 minute run around the park at 7. You in?" },
+      { "from": "tester", "text": "ya" }
+    ],
+    "plan": {
+      "step": "20 minute easy run around the park",
+      "place": "around the park",
+      "time": "07:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "voice",
+      "proof_note": "a quick voice note when you're back",
+      "reason": "Quickest thing to send while you catch your breath.",
+      "minutes": 20,
+      "started_days_ago": 8
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "20 minute easy run around the park" }
+    ],
+    "today_step": { "step": "20 minute easy run around the park at 7 am", "agreed_hours_ago": 2 }
+  },
+  "testerLines": [
+    "[voice: done. ran the loop, 20 min]",
+    "good",
+    "nah that's about it",
+    "k"
+  ],
+  "whatWentWrong": "New case: a terse tester must not get chased for depth.",
+  "shouldHaveHappened": "ZOH counts the run and celebrates with one question. \"good\" gets at most one light follow-up. \"nah that's about it\" ends the questions: ZOH wraps up warmly and gives the next step day's step, fully defined, with \"work for you?\" or similar, with no further question about how it went. \"k\" is a yes; at most a short line back.",
+  "startTime": "07:30",
+  "timeZone": "America/New_York"
+}

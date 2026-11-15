@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Weekday } from "../src/db/schema.js";
+import { PROOF_METHODS, type Weekday } from "../src/db/schema.js";
 
 export const PERSONAS = ["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
 export type Persona = (typeof PERSONAS)[number];
@@ -57,7 +57,7 @@ export const seedSchema = z.object({
       place: z.string().optional(),
       time: z.string().regex(/^\d{2}:\d{2}$/),
       days: z.array(z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"])).min(3),
-      proof: z.enum(["photo", "screenshot", "voice"]),
+      proof: z.enum(PROOF_METHODS),
       proof_note: z.string().optional(),
       reason: z.string(),
       /** How long the step takes, in minutes. */
@@ -117,7 +117,7 @@ export const seedSchema = z.object({
         raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
         /** adjust only (#155): the plan fields the founders proposed, as stored (stepTime "HH:MM", place, days...). */
         plan_changes: z
-          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(["photo", "screenshot", "voice"]).optional() })
+          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(PROOF_METHODS).optional() })
           .optional(),
         /** How long ago ZOH raised it, for one waiting on their answer. */
         delivered_hours_ago: z.number().optional(),

@@ -1,0 +1,43 @@
+{
+  "id": "routine-day-full",
+  "title": "Too slow: a routine day with full answers gets a question or two, then the step, not an interrogation",
+  "origin": "#157 spec: a routine day with full answers; Yanni: an interrogation feels broken",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Chapter 9 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 9
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "Chapter 6 of Atomic Habits on the couch" },
+      { "days_ago": 2, "status": "done", "step": "Chapter 7 of Atomic Habits on the couch" },
+      { "days_ago": 1, "status": "done", "step": "Chapter 8 of Atomic Habits on the couch" }
+    ],
+    "today_step": { "step": "Chapter 9 of Atomic Habits on the couch at 8 pm (about 20 min)", "agreed_hours_ago": 2 }
+  },
+  "testerLines": [
+    "[voice: Chapter 9 done. It's about how your environment shapes habits more than motivation does. Went smoothly, phone was in the other room which honestly made the whole difference. Took about 20 minutes, felt like a good amount.]",
+    "I'm going to try it with my gym bag too, leave it by the door the night before",
+    "yep sounds good"
+  ],
+  "whatWentWrong": "New case: on a smooth day with full answers, more curiosity must not become five questions.",
+  "shouldHaveHappened": "ZOH counts the proof and celebrates, asking at most one question that goes deeper on something they said (the phone in the other room, or the environment idea), not re-asking how it felt or how long it took. After their gym bag answer it moves to the next step day's step (chapter 10, same time and place, keeping the phone-away move that worked), fully defined, and asks if it works. A question or two in all, never an interrogation. After \"yep sounds good\" it confirms in a line with no new question.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

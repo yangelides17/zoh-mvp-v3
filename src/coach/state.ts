@@ -125,6 +125,8 @@ export interface CoachState {
   teamRequestsDone: ConsoleMessage[];
   /** Their latest text: what lock_plan checks the commitment against. */
   lastTesterText: string;
+  /** #157: ZOH's last text before their latest: what a deepen or upgrade they agree to must have shown. */
+  lastZohText: string;
   /** No first reply has been sent since the tester's context started. */
   isFirstText: boolean;
   /** Onboarding finished during this reply: it must be the recap turn. */
@@ -140,6 +142,7 @@ export async function loadCoachState(
     isFirstText: boolean;
     justFinished?: boolean;
     lastTesterText?: string;
+    lastZohText?: string;
     nudgeMoment?: NudgeMoment;
     carry?: NudgeCarry;
     goalCap?: number;
@@ -251,6 +254,7 @@ export async function loadCoachState(
         : await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
+    lastZohText: opts.lastZohText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
     now: opts.now,
