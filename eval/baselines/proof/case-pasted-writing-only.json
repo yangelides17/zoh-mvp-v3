@@ -2,7 +2,7 @@
   "feature": "proof",
   "id": "case:pasted-writing-only",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
+  "storedAt": "2026-11-15T19:15:46.945Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Jordan, \"Neither of them said the name\" is a great beat, and that lamp turning over twice does a lot of quiet work 🔥 Real proof keeps it honest, and words alone are easy to game. Can you send a screenshot of the scene in Notes so I can log it?",
+          "text": "Jordan, \"Neither of them said the name\" is a great beat, and the lamp turning over works well as a clock. Typed text alone can't get the check mark, since a screenshot keeps it honest. Can you send me a screenshot of the scene in Notes? It reads closer to 70 words than 200, so do you have more of the scene to add before you send it?",
           "at": "2026-11-03T01:25:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "There it is, Jordan, scene 4 logged. Day 4 in a row 📝 Theo sits down and neither of them says the name. What were you going for in that moment, and did it come out the way you pictured?",
+          "text": "Got it, Jordan, that's logged as done 📝 It's a reduced day since it's about 70 words against the 200 we set, but the streak lives. What happened tonight that kept it short: the scene wanted to be tight, or did the time get away from you?",
           "at": "2026-11-03T01:27:04.000Z"
         }
       ],
@@ -68,19 +68,19 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for a screenshot of the scene in Notes, naming only a screenshot as proof."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Names a screenshot of the Notes scene as the proof and does not accept typed text as the step's proof."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific, praises the actual beats, one emoji as punctuation, not suspicious."
+                "reason": "Warm and specific, praising the 'Neither of them said the name' beat and the lamp clock, with no suspicion."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Ends with two questions ('Can you send me a screenshot...?' and 'do you have more of the scene...?'), breaking the one-question limit."
               }
             ]
           },
@@ -90,57 +90,57 @@
               {
                 "rule": "plausible-counts",
                 "pass": true,
-                "borderline": false,
-                "reason": "Screenshot plausibly shows the Notes scene, so it's celebrated and logged."
+                "borderline": true,
+                "reason": "Screenshot titled 'Lighthouse - scene 4' matches the step and is counted as done; celebration is thin ('logged as done') though."
               },
               {
-                "rule": "file-specific",
+                "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to a specific beat, Theo sitting down and neither saying the name."
+                "reason": "Names no proof method for a next step; nothing typed is offered as proof."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": true,
+                "reason": "Calls the day 'reduced' against 200 words without confirming a smaller version with what, how much, when and proof; it is not framed as an agreed smaller version."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "About four short sentences; the one question is at the end, but it runs slightly over three."
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and celebratory, but 'Day 4 in a row' isn't in the given state, so the streak claim is unverified."
+                "borderline": false,
+                "reason": "Warm, casual, with one emoji as punctuation and no accusation about the shorter scene."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Pasted writing got no check mark, ZOH asked for a screenshot with its own why, then counted it once the screenshot arrived."
-          },
-          {
             "rule": "typed-not-proof",
             "pass": true,
-            "borderline": false,
-            "reason": "Pasted scene alone was not checked off; ZOH explained real proof and asked for a screenshot."
+            "borderline": true,
+            "reason": "Typed scene gets no check mark and a screenshot is requested, but the why ('keeps it honest') is brief and does not say words alone are easy to game."
           },
           {
             "rule": "writing-proof",
             "pass": true,
             "borderline": true,
-            "reason": "Screenshot counted and scene commented on; it didn't ask for a paste since the full text was already sent, which a reviewer could question."
+            "reason": "Screenshot is accepted as proof and checked off; since the full text was already pasted, no further paste ask was needed."
           },
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Duplicate placeholder removed; see first regression entry."
+            "pass": false,
+            "borderline": true,
+            "reason": "Core fix holds: the pasted scene was not accepted as proof and the screenshot was requested, but ZOH 1 asked two questions despite the one-question limit."
           }
         ],
-        "summary": "ZOH handled the regression case well: it held off checking the pasted scene, asked for a Notes screenshot with a warm why-real-proof explanation, then counted and celebrated it while reacting to a specific beat. The main weaknesses are a slightly long closing text and an unsupported 'Day 4 in a row' streak claim not found in the given state."
+        "summary": "ZOH fixed the regression's main failure: it refused to check off the pasted scene, asked for a Notes screenshot, and counted the day once the screenshot arrived. It fell short in ZOH 1 by asking two questions in one text and giving a thin reason for the screenshot, and ZOH 2 celebrated only lightly while counting a reduced day without confirming a smaller version."
       }
     },
     {
@@ -175,7 +175,7 @@
         },
         {
           "from": "zoh",
-          "text": "Jordan, \"Neither of them said the name\" is a great line. The lamp turning over at the end is a nice touch too 🔥 Words alone don't get the check mark, though. Can you send a screenshot of the scene in Notes so I can log it?",
+          "text": "Jordan, \"Neither of them said the name\" is a great line. It leaves a lot unsaid, and that makes me want to know who it is 🔥\n\nI believe you wrote it, but words alone don't get the check mark. Can you send a screenshot of the scene in Notes so I can log day 4?",
           "at": "2026-11-03T01:25:07.000Z"
         },
         {
@@ -185,7 +185,7 @@
         },
         {
           "from": "zoh",
-          "text": "Got it, scene 4 is logged, Jordan 🔥 It came in around 55 words, so I counted it as the smaller version, and the target is 200. Was that a choice to keep it tight, or did the time run out on you tonight?",
+          "text": "Got it, Jordan, day 4 is logged 🔥 It came in around 75 words, so it counts as the shorter version today, and that's fine. The second chair and the dry glass say a lot in very few words. How did it feel writing this one, and was the short length a choice or did the time run out?",
           "at": "2026-11-03T01:27:04.000Z"
         }
       ],
@@ -196,22 +196,22 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Four sentences: 'Jordan, ... great line.', 'The lamp ... too 🔥', 'Words alone ... though.', 'Can you send ...?' Over the three-sentence limit."
-              },
-              {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a screenshot as the proof to send, not typed text."
+                "reason": "Asks only for a screenshot of the scene in Notes, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five sentences across two beats, beyond the one-to-three-sentence limit, though it has one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific praise of the lines, emoji used as punctuation, not suspicious."
+                "reason": "Warm and energetic with a single fire emoji as punctuation, not suspicious."
               }
             ]
           },
@@ -222,44 +222,50 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": true,
-                "reason": "Screenshot is checked off and celebrated as logged, but calling a ~55-word scene a 'smaller version' against a 200-word target is a questionable count."
+                "reason": "Counts the screenshot and logs day 4, though calling it the shorter version and stating a word count undercuts the celebration."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to specific details, the second chair and the dry glass."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, slightly over the three-sentence limit, with one closing question."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm but flat: 'Got it, scene 4 is logged' is a thin celebration and doesn't comment on the scene's content."
+                "borderline": false,
+                "reason": "Warm, specific, and sincere with one emoji, no row."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "typed-not-proof",
-            "pass": false,
+            "rule": "regression",
+            "pass": true,
             "borderline": true,
-            "reason": "Pasted scene got no check mark and a screenshot was requested, but ZOH never explained why real proof matters, only 'Words alone don't get the check mark.'"
+            "reason": "Pasted scene was not accepted as proof; ZOH asked for a Notes screenshot and counted the day only after it arrived, though the why-real-proof explanation is thin."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": true,
+            "reason": "No check mark for the pasted text and a screenshot requested, but the why is only 'words alone don't get the check mark', not the honesty or gaming reason."
           },
           {
             "rule": "writing-proof",
             "pass": true,
             "borderline": true,
-            "reason": "Screenshot counted as proof; the full text was already pasted, so no paste request was needed, and none was made."
-          },
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "The pasted scene wasn't accepted as proof and the screenshot was asked for, which fixes the Nov 1 failure; but the why-real-proof explanation was left out."
+            "reason": "Screenshot counted as proof; the full text had already been pasted, so no further paste ask was needed, but ZOH's stated word count for the screenshot is unsupported."
           }
         ],
-        "summary": "ZOH fixed the core regression: it refused to check off the pasted scene, asked for a Notes screenshot, and counted the day once the screenshot arrived. It fell short on the warm explanation of why real proof matters, ran a bit long in its first text, and counted a 55-word scene as a reduced step against a 200-word target."
+        "summary": "ZOH avoided the Nov 1 failure: it withheld the check mark on the pasted scene, asked for a Notes screenshot, and only logged day 4 after it arrived, then reacted to specific lines. It fell short on brevity in both texts, and its explanation of why real proof matters was thin and its claimed word count for the screenshot was not supported by what was shown."
       }
     },
     {
@@ -294,7 +300,7 @@
         },
         {
           "from": "zoh",
-          "text": "Jordan, \"Neither of them said the name\" is a great beat, and the lamp turning over ties it back to the lighthouse. 🔥 Real proof keeps this honest, and words alone are too easy to game. Can you send a screenshot of the scene in Notes so I can check it off?",
+          "text": "Neither of them saying the name is great, Jordan, and the lamp turning over twice is a nice touch 🔥 Words alone are easy to game, so no check mark until I see the real thing. Can you send a screenshot of the scene in Notes tonight? Your step was about 200 words, so I'm hoping the full scene is in there.",
           "at": "2026-11-03T01:25:07.000Z"
         },
         {
@@ -304,7 +310,7 @@
         },
         {
           "from": "zoh",
-          "text": "Got it, Jordan, scene 4 is in the books and the streak lives 🔥 It came in shorter than the 200 words we aimed for, and it reads tight, like you trimmed it on purpose. How did tonight's writing go for you?",
+          "text": "There it is, Jordan, scene 4 in Notes 🔥 It came in around 75 words, so I'm logging it as a shorter version, and the streak is safe. What happened tonight with the other 125 words?",
           "at": "2026-11-03T01:27:04.000Z"
         }
       ],
@@ -318,19 +324,19 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a screenshot as the proof to send, not typed text."
+                "reason": "Asks for a screenshot of the scene in Notes and never names typed text as proof."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, and the one question sits mid-text rather than at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific, praising the 'Neither of them said the name' beat, with no suspicion."
+                "reason": "Warm and energetic with one fire emoji as punctuation, never suspicious."
               }
             ]
           },
@@ -340,14 +346,8 @@
               {
                 "rule": "plausible-counts",
                 "pass": true,
-                "borderline": false,
-                "reason": "Screenshot matching the pasted scene is celebrated and the step is counted, not questioned."
-              },
-              {
-                "rule": "file-specific",
-                "pass": true,
                 "borderline": true,
-                "reason": "Comments on the scene's tightness and shorter length, though the reaction is fairly general."
+                "reason": "Counts the screenshotted scene and celebrates, but the claimed 'around 75 words' is well above the roughly 58 words actually pasted."
               },
               {
                 "rule": "short",
@@ -359,7 +359,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype energy with an emoji as punctuation, warm and never accusing."
+                "reason": "Excited and warm, with an emoji as punctuation and no accusation."
               }
             ]
           }
@@ -369,22 +369,22 @@
             "rule": "typed-not-proof",
             "pass": true,
             "borderline": false,
-            "reason": "Pasted scene got no check mark; ZOH explained why real proof matters and asked for a screenshot."
+            "reason": "Pasted scene gets no check mark; ZOH explains that words alone are easy to game and asks for a screenshot."
           },
           {
             "rule": "writing-proof",
             "pass": true,
-            "borderline": false,
-            "reason": "Screenshot of where they wrote it counted as proof; the text was already pasted, so no extra paste ask."
+            "borderline": true,
+            "reason": "Screenshot is accepted as proof and the day is counted; no paste request is needed since the text was already sent."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Warm response to the writing, no check mark until the screenshot, a 'real proof keeps it honest' reason, then counted and celebrated with a scene comment."
+            "borderline": true,
+            "reason": "Regression fixed: the pasted scene wasn't accepted, and the screenshot then counted with a warm celebration. It's borderline because the count was reduced, not full, and the word estimate was off."
           }
         ],
-        "summary": "ZOH handled the Nov 1 regression case well: it praised the pasted scene, withheld the check mark, and asked for a screenshot with a warm, non-suspicious reason. Once the screenshot arrived it counted the day, celebrated, and commented on the writing with one question at the end."
+        "summary": "ZOH handled the core regression well: it held off the check mark on the pasted scene, asked for a screenshot with a plain reason, and counted the day once the screenshot arrived. Its weak spots are a four-sentence first text with the question mid-text, and a second text that overstated the word count and logged a full step as reduced."
       }
     }
   ]

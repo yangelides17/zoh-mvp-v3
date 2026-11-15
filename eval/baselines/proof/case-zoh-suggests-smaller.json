@@ -2,7 +2,7 @@
   "feature": "proof",
   "id": "case:zoh-suggests-smaller",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
+  "storedAt": "2026-11-15T19:15:46.945Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Long day at work, I hear you. Let's shrink it tonight instead of skipping it: 2 rounds of 2 min jog, 1 min walk around your block at 7 pm, about 10 minutes. Send the Strava screenshot when you're done and it still counts. Does that work?",
+          "text": "Work wipeouts are real, Sam. But it's 15 easy minutes, and a jog is often the best cure for a fried brain. You said yes this morning, so what if you just step out the door and do round 1, then see how you feel?",
           "at": "2026-11-02T22:30:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Totally fair, wiped is wiped. But you've done 2 in a row and a mile by December is the goal, so let's not let tonight break it. Shoes on, one round at 7: 2 min jog, 1 min walk, about 5 minutes total, and send the Strava screenshot. If you feel good after, keep going. Can you give me that?",
+          "text": "Fair, a fried brain is a real reason. Let's lower the bar without dropping it. Tonight is 2 rounds of 2 min jog and 1 min walk around your block at 7. That's about 10 minutes. Send me the Strava screenshot after and it counts as a win. Work for you?",
           "at": "2026-11-02T22:30:49.900Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's the spirit. Tonight at 7: one round around the block, 2 min jog and 1 min walk, about 5 minutes. Send me the Strava screenshot after, and if you feel good, keep going. 💪",
+          "text": "Deal, Sam. Ten minutes, then you're done for the day 💪 Send the Strava screenshot when you're back.",
           "at": "2026-11-02T22:31:30.700Z"
         }
       ],
@@ -75,12 +75,6 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names a Strava screenshot as the proof, not typed text."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
@@ -90,13 +84,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging, not suspicious or accusing; no emoji row."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "Spells out 2 rounds, 2 min jog and 1 min walk, 7 pm, about 10 minutes, and the screenshot, as a suggestion."
+                "reason": "Warm and encouraging, not accusing, with the emoji-free push matching the tester's tired tone."
               }
             ]
           },
@@ -104,28 +92,34 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names the Strava screenshot as proof."
-              },
-              {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about five sentences, over the one-to-three limit, though it ends on one question."
+                "reason": "About six short sentences; it's a specific smaller-version offer, so it runs longer than the one-to-three limit."
               },
               {
-                "rule": "voice",
+                "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and firm without shaming; no emoji row."
+                "reason": "Names only a Strava screenshot as proof, never typed text."
               },
               {
                 "rule": "smaller-in-full",
                 "pass": true,
                 "borderline": false,
-                "reason": "States one round at 7, 2 min jog and 1 min walk, about 5 minutes, and the screenshot; not set before a yes."
+                "reason": "Spells out what (jog/walk), how much (2 rounds, about 10 min), when (at 7) and proof (screenshot), and is only offered."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Spells out what (jog/walk), how much (2 rounds, about 10 min), when (at 7) and proof (screenshot), and is only offered."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with no suspicion or accusation."
               }
             ]
           },
@@ -133,47 +127,41 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms in one line the round, 2 min jog and 1 min walk, 7 pm, about 5 minutes, and screenshot proof."
-              },
-              {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Three sentences with an emoji and no question, though one sentence is a fragment."
+                "borderline": false,
+                "reason": "Three short sentences with no question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Upbeat and sincere with a single emoji as punctuation."
-              },
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names the Strava screenshot, not typed text."
+                "reason": "Warm and celebratory with one emoji as punctuation."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": true,
+            "reason": "Held the line once warmly before offering the smaller version, though the tester gave a reason (wiped from work)."
+          },
+          {
             "rule": "smaller-suggested",
             "pass": true,
             "borderline": false,
-            "reason": "Suggested smaller versions end in a 'Does that work?' or 'Can you give me that?' ask and are not confirmed until the tester says yes."
+            "reason": "The suggested smaller version ends with 'Work for you?' and is only confirmed after 'ok yeah that works'."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "ZOH1 offered the smaller version without first holding the line, though the tester gave a real reason; it did hold warmly in ZOH2, confirmed only after 'ok yeah that works' with no new question."
+            "borderline": false,
+            "reason": "Held the line once, then spelled out the smaller version with one work-for-you question, and confirmed only after a yes with no new question."
           }
         ],
-        "summary": "ZOH handled the struggle well: it offered a specific, spelled-out smaller version ending in a question and confirmed it only after the tester agreed, with no new question. The main gap is that it offered the reduction immediately rather than holding the line once first, and ZOH2 ran long."
+        "summary": "ZOH handled the regression well: it held the line once warmly, then offered a specific smaller version with what, how much, when and Strava proof ending in 'Work for you?', and only confirmed it after the tester said yes. The only soft spot is that the smaller-version offer ran longer than the three-sentence limit."
       }
     },
     {
@@ -208,7 +196,7 @@
         },
         {
           "from": "zoh",
-          "text": "Long day, I get it. Let's make it smaller so tonight still counts: 2 rounds of 2 min jog, 1 min walk around your block at 7 pm, about 10 minutes. Send me the Strava screenshot after and it's logged 💪",
+          "text": "Long workdays will do that, Sam. Tonight's only about 15 minutes, and you've already done this twice, so I'd rather you head out at 7 and see how the first round feels. Can you give me the full 3 rounds?",
           "at": "2026-11-02T22:30:07.000Z"
         },
         {
@@ -218,7 +206,7 @@
         },
         {
           "from": "zoh",
-          "text": "Sounds like a draining day, Sam. What happened at work that wiped you out?",
+          "text": "Understood, Sam. Work wiped you out, so let's shrink it and keep today alive. At 7, do 2 rounds instead of 3: 2 min jog, 1 min walk, around your block, about 10 minutes total. Then send me the Strava screenshot. Even tired, you can do that. 💪",
           "at": "2026-11-02T22:30:49.900Z"
         },
         {
@@ -228,7 +216,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's the spirit, Sam. Tired and you're still going out there, which is exactly what builds a runner 🙌 Screenshot when you're back.",
+          "text": "Good call, Sam. Tired and going anyway is what keeps this alive. Send me that Strava screenshot when you're back. 🔥",
           "at": "2026-11-02T22:31:30.700Z"
         }
       ],
@@ -239,28 +227,16 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names only a Strava screenshot as the proof."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": true,
-                "reason": "Spells out 2 rounds, 10 minutes, 7 pm and the screenshot, though it is worded as already set."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question."
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging, one emoji as punctuation."
+                "reason": "Warm, calm and not suspicious; holds the line without shaming."
               }
             ]
           },
@@ -268,16 +244,40 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "short",
+                "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Names only a Strava screenshot as proof, never typed text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": true,
+                "reason": "Spells out 2 rounds, about 10 minutes, at 7 and the screenshot proof in one text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": true,
+                "reason": "Spells out 2 rounds, about 10 minutes, at 7 and the screenshot proof in one text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": true,
+                "reason": "Spells out 2 rounds, about 10 minutes, at 7 and the screenshot proof in one text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences with no question, well over the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no accusation."
+                "reason": "Warm and encouraging, with one emoji used as punctuation."
               }
             ]
           },
@@ -285,47 +285,29 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks for a screenshot as the proof."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": false,
-                "borderline": false,
-                "reason": "Confirms the smaller version without restating what, how much or when; only says screenshot later."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, no question."
+                "reason": "Three sentences, no question, ending on the screenshot request."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging, one emoji as punctuation."
+                "reason": "Warm, hype-appropriate and sincere with one emoji."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "smaller-suggested",
-            "pass": false,
-            "borderline": false,
-            "reason": "Smaller version was stated as set in ZOH 1 with no 'work for you?' question before the tester's yes."
-          },
-          {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "ZOH offered the smaller version immediately without holding the line first, presented it as set, and never ended with a work-for-you question."
+            "reason": "ZOH2 states the 2-round version as settled ('At 7, do 2 rounds') and never ends with a 'work for you?' question before the tester's yes."
           }
         ],
-        "summary": "ZOH spelled out a concrete smaller version with proof, but it skipped holding the line once and presented the change as already logged rather than asking for a yes. Its final confirmation also omitted the what, how much and when, so this regression case fails."
+        "summary": "ZOH held the line once warmly, then handled the tester's tiredness well, with a specific smaller version and a clean confirmation after the yes. It missed the regression point, because it set the smaller version as done without the 'work for you?' check and ran long in that text."
       }
     },
     {
@@ -360,7 +342,7 @@
         },
         {
           "from": "zoh",
-          "text": "Long workday, I get it, Sam. Let's make it lighter: at 7 pm, 2 rounds around the block of 2 min jog and 1 min walk, about 10 minutes total. Send me the Strava screenshot after and it counts 💪 Can you get out the door for that?",
+          "text": "Long day at work, that's fair. Let's shrink it, not skip it. Tonight at 7 pm, around your block: 2 min jog, 1 min walk, just 2 rounds, about 10 minutes. Send me the Strava screenshot after. Getting out the door is the hardest part, and you've already done that twice 💪",
           "at": "2026-11-02T22:30:07.000Z"
         },
         {
@@ -370,7 +352,7 @@
         },
         {
           "from": "zoh",
-          "text": "Wiped is real, Sam, and I'm not going to pretend otherwise. But you said you'd be a person who runs a mile by December, and a day like today is where that gets built. How about the tiny version: one round, 2 min jog and 1 min walk, about 5 minutes around the block at 7 pm, then a Strava screenshot? Work for you?",
+          "text": "Totally hear you, work took a lot out of you today. How about we make it almost too small to say no to: one round, 2 min jog and 1 min walk around the block, 3 minutes total, then you're done. A quick Strava screenshot keeps the streak alive, and the hardest part is just getting your shoes on. Work for you?",
           "at": "2026-11-02T22:30:49.900Z"
         },
         {
@@ -380,7 +362,7 @@
         },
         {
           "from": "zoh",
-          "text": "Good call, Sam. Here's tonight: 1 round around the block at 7 pm, 2 min jog then 1 min walk, about 5 minutes. Send me the Strava screenshot after and it counts 🔥",
+          "text": "Deal. At 7 pm, one round around the block: 2 min jog, 1 min walk, 3 minutes total. Then send me the Strava screenshot. Shoes on and out the door, Sam 💪",
           "at": "2026-11-02T22:31:30.700Z"
         }
       ],
@@ -391,28 +373,28 @@
             "zohText": 1,
             "checks": [
               {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a Strava screenshot as the proof, never typed text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Spells out what (jog/walk rounds), how much (2 rounds, 10 min), when (7 pm) and proof (screenshot)."
+              },
+              {
                 "rule": "short",
                 "pass": false,
-                "borderline": true,
-                "reason": "Four sentences with a question at the end; runs a bit long for one to three sentences."
+                "borderline": false,
+                "reason": "Five sentences with no question, well over the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging, no suspicion or accusation, emoji used as punctuation."
-              },
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names the Strava screenshot as proof, not typed text."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": true,
-                "reason": "Spells out 2 rounds, 2 min jog and 1 min walk, 10 minutes, 7 pm and screenshot proof."
+                "reason": "Warm and encouraging, with one emoji as punctuation."
               }
             ]
           },
@@ -420,46 +402,34 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "short",
+                "rule": "proof-kinds",
                 "pass": true,
+                "borderline": false,
+                "reason": "Names a quick Strava screenshot as the proof."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": false,
                 "borderline": true,
-                "reason": "Four short sentences with one question at the end; slightly over the limit but within reason."
+                "reason": "Gives what and how much and proof, but no time; it's an offer, so the full spelled-out standard is only partly met."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, ending with one question, slightly over the three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, holds the line without shaming or suspicion."
-              },
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks for a Strava screenshot, a permitted proof kind."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "Suggests one round, 2 min jog and 1 min walk, about 5 minutes, at 7 pm with screenshot proof, ending in 'Work for you?' without setting it."
+                "reason": "Warm and supportive, no suspicion, no emoji row."
               }
             ]
           },
           {
             "zohText": 3,
             "checks": [
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with no question, as a confirmation."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, upbeat, one fire emoji as punctuation."
-              },
               {
                 "rule": "proof-kinds",
                 "pass": true,
@@ -470,32 +440,38 @@
                 "rule": "smaller-in-full",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms in one text: 1 round, 2 min jog and 1 min walk, 7 pm, about 5 minutes, screenshot proof."
+                "reason": "Confirms what (one round), how much (3 minutes), when (7 pm) and proof (screenshot) in one text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Short fragments with no question, roughly within the limit, though a bit choppy."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat and warm with a single emoji at the end."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "smaller-pushback",
-            "pass": true,
-            "borderline": true,
-            "reason": "Tester gave a real reason (wiped from work), so the smaller version came without a heavy push."
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH shrank the step right away in ZOH 1 instead of holding the line once, and stated the smaller version as settled rather than offering it with work-for-you."
           },
           {
             "rule": "smaller-suggested",
-            "pass": true,
-            "borderline": false,
-            "reason": "The suggested tiny version ends in 'Work for you?' and is only confirmed after 'ok yeah that works'."
-          },
-          {
-            "rule": "regression",
             "pass": false,
-            "borderline": true,
-            "reason": "ZOH 1 lowered the bar to 2 rounds at the first pushback with no held line, though it never claimed it was set before agreement."
+            "borderline": false,
+            "reason": "ZOH 1 proposed the 2-round version as set, with no work-for-you question before a yes; ZOH 2 handled the offer correctly."
           }
         ],
-        "summary": "ZOH handled the final smaller version well: it spelled out the tiny version with proof and asked 'Work for you?' before confirming it after the yes, with no new question. It skipped the warm hold-the-line step, offering a lighter 2-round version right away, which is the part of the regression sequence it missed."
+        "summary": "ZOH recovered well once it offered the smaller version: ZOH 2 spelled it out with a work-for-you question, and ZOH 3 confirmed cleanly after the yes. It missed the regression case, though, because ZOH 1 cut the step immediately without holding the line once and presented the 2-round version as settled, and ZOH 2 dropped the time."
       }
     }
   ]

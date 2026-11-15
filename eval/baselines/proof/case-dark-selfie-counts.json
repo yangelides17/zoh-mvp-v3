@@ -2,7 +2,7 @@
   "feature": "proof",
   "id": "case:dark-selfie-counts",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
+  "storedAt": "2026-11-15T19:15:46.945Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Day 3 is done, Yanni, and you're in early too 😴 That squint says the phone screen was bright. How did it feel putting it down tonight?",
+          "text": "Day 3 in the books, Yanni, and you beat 9:45 🔥 That squint says the screen light was brutal. How did it feel getting the phone down tonight?",
           "at": "2026-11-03T02:39:07.000Z"
         }
       ],
@@ -56,21 +56,39 @@
             "checks": [
               {
                 "rule": "plausible-counts",
-                "pass": false,
-                "borderline": true,
-                "reason": "Counts the photo as done, but \"That squint says the phone screen was bright\" questions the proof with an inference the photo doesn't show."
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the dark flash selfie as proof and counts day 3 without questioning the photo."
+              },
+              {
+                "rule": "kind-pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No pushback needed since the photo is plausible, and none is given."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not name typed text as proof or ask for anything other than the photo already sent."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the squint and the flash, which are visible in the photo, not invented detail."
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Three short sentences with one question at the end, at the upper edge of the limit."
+                "reason": "Two sentences with one question at the end, but the second sentence adds a question about feelings; the line count is within limits."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and sincere with an emoji as punctuation, but \"Day 3 is done\" is calmer than Pushy-level energy."
+                "borderline": false,
+                "reason": "Energetic, warm, uses the name and a single emoji as punctuation; not suspicious."
               }
             ]
           }
@@ -78,12 +96,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "Counts night 3 as the regression asks, but adds a squint-based comment about the screen and a reflection question instead of a one-or-two-sentence celebration."
+            "pass": true,
+            "borderline": false,
+            "reason": "Treats the dark flash selfie as plausible bedtime proof, counts night 3, celebrates briefly without asking for a better photo."
           }
         ],
-        "summary": "ZOH counted the dark selfie as night 3 and kept the reply warm, which is the core of the regression case. It undercut that by commenting on the screen brightness, something the photo doesn't show, and by running a three-sentence reply with a reflection question instead of a short celebration."
+        "summary": "ZOH accepted the dark, flash-lit selfie as plausible proof, counted night 3, and celebrated without interrogating the photo, matching the regression expectation. The only soft spot is that the reply runs slightly long with a feelings question that may cut against the brevity rule."
       }
     },
     {
@@ -118,81 +136,7 @@
         },
         {
           "from": "zoh",
-          "text": "Ha, that squint says the screen light was brutal 😂 Three nights in a row, Yanni, and you're early tonight. How many hours of sleep are you aiming for once the lights are out?",
-          "at": "2026-11-03T02:39:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "plausible-counts",
-                "pass": false,
-                "borderline": true,
-                "reason": "Celebrates and counts the night, but turns to a sleep-hours question instead of simply celebrating the proof; it doesn't question the photo, so partly fine."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Two questions would be avoided, but here it has one question at the end and three sentences; the question about hours is a new topic rather than reflection on the step."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, playful, energetic, with emoji as punctuation and no suspicion or accusation."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "Plausible selfie is accepted and night 3 is acknowledged without questioning, but it moves straight to sleep-hours talk and never clearly counts the step done."
-          }
-        ],
-        "summary": "ZOH accepted the dark selfie as plausible proof and warmly acknowledged the early night, without questioning the photo or asking for a better one. It fell short of the ideal by not clearly counting night 3 as done and pivoting to a new sleep-hours question instead of a short celebration."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:dark-selfie-counts#3",
-        "kind": "case",
-        "id": "dark-selfie-counts",
-        "suite": "regression",
-        "title": "A dark, flash-lit bedtime selfie with no bed in shot counts",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "21:39",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "zoh",
-          "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off.",
-          "at": "2026-11-02T16:36:00.000Z"
-        },
-        {
-          "from": "tester",
-          "text": "bet",
-          "at": "2026-11-02T16:37:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "[photo dark-selfie.jpg: a dark, flash-lit selfie of the tester squinting at the flash, shirt off, dark room; no bed visible in the shot] phone's going down 😴",
-          "at": "2026-11-03T02:39:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Yanni, that squint says it all 😂 Phone down six minutes early, and that's day 3 in the books 😴 How did it feel tonight, getting into bed with the phone away?",
+          "text": "Three nights in a row, Yanni, and you beat 9:45 by a few minutes 🔥 That squint says the phone light is brutal in the dark. Over these three nights, what's been the hardest part of putting the phone down?",
           "at": "2026-11-03T02:39:07.000Z"
         }
       ],
@@ -206,19 +150,19 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the dark flash selfie as proof and counts day 3 without questioning the photo."
+                "reason": "Celebrates the dark flash selfie as night 3 without questioning or asking for a better photo."
               },
               {
                 "rule": "short",
-                "pass": false,
+                "pass": true,
                 "borderline": true,
-                "reason": "Two sentences plus one question at the end, which is within limits, but the second sentence is a bit long; mostly fine."
+                "reason": "Three sentences with one question at the end, at the top of the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, playful energy with a fitting emoji mix, no suspicion or accusation."
+                "reason": "Energetic and warm with one emoji as punctuation, no suspicion or accusation."
               }
             ]
           }
@@ -227,11 +171,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Treats the dark flash selfie as plausible proof, counts night 3, and asks nothing about the photo or bed."
+            "borderline": true,
+            "reason": "Counts night 3 as plausible proof and celebrates without interrogating the photo, but runs three sentences plus a reflective question rather than one or two."
           }
         ],
-        "summary": "ZOH accepted the dark flash-lit selfie as plausible proof, celebrated it warmly and counted day 3 without interrogating the photo. The one text is short and on-voice, with only a minor question about whether its length stays within the one-to-three-sentence limit."
+        "summary": "ZOH accepted the dark flash selfie as plausible proof, counted night 3 and celebrated without questioning the photo or describing anything missing. It ran slightly long, adding a reflective question where one or two short sentences were asked for, but the core behavior held."
       }
     }
   ]

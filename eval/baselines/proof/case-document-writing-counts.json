@@ -2,7 +2,7 @@
   "feature": "proof",
   "id": "case:document-writing-counts",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
+  "storedAt": "2026-11-15T19:15:46.945Z",
   "branch": "feature/196-prompt-groundwork",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Scene 4 is in, Jordan 🔥 \"Neither of them said the name\" is a great line, and the lamp turning over at the end adds a lot. It runs about 50 words against the 200 target, so I'm logging it as a shorter version today. How do you feel about the scene yourself, and what cut it short?",
+          "text": "Scene 4 is in, Jordan, and it's logged 🔥 \"Neither of them said the name\" is a great line. It says a lot without spelling it out. It came in well under 200 words, so I counted it as a shorter version today. What happened tonight: did the scene want to be this tight, or did the time get away from you?",
           "at": "2026-11-03T01:25:07.000Z"
         }
       ],
@@ -58,31 +58,25 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "The document is accepted as proof and celebrated with \"Scene 4 is in, Jordan 🔥\" rather than questioned."
+                "reason": "Counts the document as proof and celebrates it right away with 'Scene 4 is in... logged'."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to specific details, quoting \"Neither of them said the name\" and the lamp turning over at the end."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": false,
-                "borderline": true,
-                "reason": "Says \"logging it as a shorter version today\" without stating what, how much, when, or proof for the reduced step."
+                "reason": "Quotes a specific line from the scene, 'Neither of them said the name', and comments on it."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Four sentences, and the final text asks two things joined by \"and\", exceeding the one-question and three-sentence limits."
+                "reason": "Runs about five sentences before its one question, well over the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": false,
-                "reason": "Warm, energetic and sincere, with one emoji used as punctuation and no suspicion."
+                "borderline": true,
+                "reason": "Warm and sincere with one emoji at the end of a beat; the 'shorter version' framing reads a little flat for a win."
               }
             ]
           }
@@ -92,16 +86,16 @@
             "rule": "document-no-paste",
             "pass": true,
             "borderline": false,
-            "reason": "Counts the document as proof and gives feedback from it without asking for the scene to be pasted or for other proof."
+            "reason": "Takes the document as the whole proof and gives feedback from it, with no request to paste the scene or send other proof."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Counts the doc right away, celebrates specific lines and asks a reflection question, but also reduces the step and asks a compound question."
+            "reason": "Counts the doc immediately, reacts to a specific line, asks one reflection question, and never asks for a paste or other proof; labeling it a shorter version is debatable."
           }
         ],
-        "summary": "ZOH counted the document immediately and gave specific, warm praise without asking for a paste or other proof, which matches the regression case. It slipped by logging the step as a shorter version without confirming the details and by asking a compound question in a four-sentence text."
+        "summary": "ZOH counted the document right away, praised a specific line, and asked one reflection question without requesting a paste or other proof, which is what the regression case needed. Its main miss is length: the text runs about five sentences against the three-sentence limit, and calling the scene a shorter version is a debatable choice."
       }
     },
     {
@@ -136,7 +130,7 @@
         },
         {
           "from": "zoh",
-          "text": "Scene 4 is in, Jordan, and day 4 is done 🔥 I love \"Neither of them said the name.\" It tells me there's history without spelling it out. How did the scene feel to write? Did it come easily, or did you have to fight for it?",
+          "text": "Scene 4 is in, Jordan, and that second chair line is great 🔥 It came in around 55 words against the 200 we aimed for, so I'm logging it as a shorter version. How did tonight feel when you were writing it? What made it come out short?",
           "at": "2026-11-03T01:25:07.000Z"
         }
       ],
@@ -149,26 +143,26 @@
               {
                 "rule": "plausible-counts",
                 "pass": true,
-                "borderline": false,
-                "reason": "Counts the submitted scene document right away with 'Scene 4 is in... day 4 is done'."
+                "borderline": true,
+                "reason": "Counts the document right away and celebrates it, but logs it as a shorter version instead of a clean step done."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Quotes the scene's line 'Neither of them said the name' and says what it does for the story."
+                "reason": "Reacts to a specific line from the document: 'that second chair line is great'."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about four sentences including the closing question, slightly over the one-to-three limit, though only one question is asked."
+                "reason": "Three sentences, but it contains two question marks ('How did tonight feel...?' and 'What made it come out short?'), breaking the one-question limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with a single emoji as punctuation, sincere and never accusing."
+                "reason": "Warm and energetic with one emoji as punctuation, not suspicious or accusing."
               }
             ]
           }
@@ -178,16 +172,16 @@
             "rule": "document-no-paste",
             "pass": true,
             "borderline": false,
-            "reason": "Treats the document as proof and gives feedback from it, with no request to paste the scene or send other proof."
+            "reason": "Treats the document as proof and gives feedback from it without asking Jordan to paste the scene."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Counts the doc immediately, reacts to a specific scene detail, and asks one reflection question without asking for a paste or other proof."
+            "borderline": true,
+            "reason": "Counts the doc immediately, reacts to a specific detail, asks a reflection question and never asks for paste or other proof; the 'shorter version' logging and double question are slight misses."
           }
         ],
-        "summary": "ZOH handled the regression case well: it counted the Word document immediately, reacted to a specific line from the scene, and asked one reflection question without requesting a paste or other proof. The only slip is that the reply runs about four sentences, slightly over the short-text limit."
+        "summary": "ZOH handled the document-as-proof regression case well: it counted the scene right away, reacted to a specific line, and never asked for a paste or other proof. It slipped on the one-question rule by asking two questions in one text, and it logged the scene as a shorter version when the document already counted as the full step."
       }
     },
     {
@@ -222,7 +216,7 @@
         },
         {
           "from": "zoh",
-          "text": "Scene 4 is in, Jordan, and \"the lamp turned over once, twice, and the harbor went white and dark again\" is a great closing image 🔥 I'll be straight with you: it's about 55 words, so I'm logging it as a smaller version of the 200-word step. How did it feel writing it? Was this the scene you wanted, or did you run out of time or steam?",
+          "text": "Scene 4 is in, Jordan, and \"You kept the second chair\" is a great line 🔥 It came in around 55 words, so I'm logging it as a shorter version of the 200. How did the scene feel as you wrote it? Did it come out tight on purpose, or did the time get away from you?",
           "at": "2026-11-03T01:25:07.000Z"
         }
       ],
@@ -233,28 +227,22 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "plausible-counts",
-                "pass": true,
+                "rule": "short",
+                "pass": false,
                 "borderline": false,
-                "reason": "The document is accepted as proof and celebrated right away with 'Scene 4 is in, Jordan'."
+                "reason": "Four sentences with two question marks; it exceeds three sentences and asks two questions in one text."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "It quotes a specific line from the scene, 'the lamp turned over once, twice', as a great closing image."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "The reply runs four sentences and asks two questions ('How did it feel writing it?' and 'Was this the scene you wanted...?'), breaking the one-question limit."
+                "reason": "It quotes the document's line \"You kept the second chair\" and calls it a great line, reacting to something specific in the file."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and energetic with one fire emoji as punctuation, though it is a little more measured than the Pushy default."
+                "borderline": false,
+                "reason": "Warm and energetic with one fire emoji used as punctuation, and nothing suspicious or accusing."
               }
             ]
           }
@@ -264,16 +252,16 @@
             "rule": "document-no-paste",
             "pass": true,
             "borderline": false,
-            "reason": "The document counts as proof and feedback comes from it; ZOH never asks Jordan to paste the scene or send other proof."
+            "reason": "The document counts as proof and ZOH gives feedback from it without asking Jordan to paste the scene."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "It counts the doc at once and reacts to a specific image without asking for a paste, but it logs the step as a smaller version, which the expected behaviour does not call for."
+            "reason": "It counts the doc immediately and reacts to a specific line, with no paste or other-proof ask. But it asks two questions instead of one and frames the 55 words as a shorter version."
           }
         ],
-        "summary": "ZOH counted the document right away, reacted to a specific image from the scene, and never asked for a paste or other proof, which is the regression behaviour. It went too long, though: it asked two questions in four sentences, and it logged the 55-word doc as a reduced version of the 200-word step, which is a debatable call."
+        "summary": "ZOH handled the document well: it counted it right away, reacted to a specific line, and never asked for a paste or other proof. It missed the short-text rule by sending four sentences and two questions, and its reflection question could have been one clean question."
       }
     }
   ]
