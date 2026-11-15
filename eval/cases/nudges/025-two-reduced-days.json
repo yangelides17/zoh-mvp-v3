@@ -1,0 +1,36 @@
+{
+  "id": "two-reduced-days",
+  "title": "Asking for the smaller version a third day: ZOH asks which it is",
+  "origin": "Issue #196 (coverage gap: two reduced days in a row)",
+  "seed": {
+    "name": "Chris",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "what": "deep work on my thesis", "where": "the library", "when": "2 pm", "how_long": "60 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Chris! 60 minutes of thesis writing at the library at 2, phone in the bag. You in?" }
+    ],
+    "plan": {
+      "step": "60 min of thesis writing, phone in the bag",
+      "place": "the library",
+      "time": "14:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "screenshot",
+      "proof_note": "the word count in your doc",
+      "reason": "One focused hour a day moves the thesis more than scattered time.",
+      "minutes": 60,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done_reduced", "step": "30 min of thesis writing", "note": "just too tired" },
+      { "days_ago": 2, "status": "done_reduced", "step": "30 min of thesis writing", "note": "an hour feels like a lot right now" },
+      { "days_ago": 3, "status": "done", "step": "60 min of thesis writing" }
+    ]
+  },
+  "testerLines": ["can I just do the 30 min again today?", "honestly I think an hour is just too much right now, my lab hours went up this month"],
+  "whatWentWrong": "New case, not a past mistake: no case covered two reduced days in a row.",
+  "shouldHaveHappened": "After two reduced days in a row, ZOH doesn't just set the 30 minutes again: it asks which it is, in its own words: lower the daily goal for good, or lighter for a short stretch with an end date. Once he explains (lab hours up this month), it agrees a change that fits (a lower plan for good, or a lighter one through the end of the month), saved as a plan change, and confirms it in a line. No guilt, no second push.",
+  "startTime": "11:00",
+  "timeZone": "America/New_York"
+}

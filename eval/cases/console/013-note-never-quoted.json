@@ -1,0 +1,34 @@
+{
+  "id": "note-never-quoted",
+  "title": "A team note shapes the reply but is never quoted or credited",
+  "origin": "Issue #196 (coverage gap: a team note that is never quoted)",
+  "seed": {
+    "name": "Priya",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "bodyweight workout", "where": "living room", "when": "7 am", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Priya! 15 minutes in the living room at 7: squats, push-ups, plank. You in?" },
+      { "from": "tester", "text": "in" }
+    ],
+    "plan": {
+      "step": "15 min bodyweight circuit: squats, push-ups, plank",
+      "place": "living room",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "photo",
+      "proof_note": "a post-workout selfie",
+      "reason": "Short and at home, so it fits before work.",
+      "minutes": 15,
+      "started_days_ago": 4
+    },
+    "step_days": [{ "days_ago": 1, "status": "done", "step": "15 min bodyweight circuit" }],
+    "team": [{ "kind": "note", "body": "Her dad is in hospital this week, so she's stretched thin. Go gentle on misses.", "hours_ago": 20 }]
+  },
+  "testerLines": ["honestly couldn't do it this morning, was at the hospital with my dad till late", "yeah thanks. I'll try tonight maybe"],
+  "whatWentWrong": "New case, not a past mistake: no case checked that a team note stays unquoted.",
+  "shouldHaveHappened": "ZOH answers what she said first, with real warmth about her dad, and no push in that text beyond, at most, a gentle no-pressure mention of a smaller version. It never says the team, the founders, a note or that it already knew about the hospital: what it knows comes only from what she just said. Her \"I'll try tonight maybe\" gets a light, kind reply (a smaller version is fine as an offer, never a guilt trip), still with no mention of the team or the note.",
+  "startTime": "10:00",
+  "timeZone": "America/New_York"
+}

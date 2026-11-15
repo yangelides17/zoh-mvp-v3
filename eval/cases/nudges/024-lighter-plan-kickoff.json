@@ -1,0 +1,35 @@
+{
+  "id": "lighter-plan-kickoff",
+  "title": "On a temporary lighter plan: the kickoff asks for the lighter step, not the usual one",
+  "origin": "Issue #196 (coverage gap: a temporary lighter plan in progress)",
+  "seed": {
+    "name": "Ana",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "push-ups and squats", "where": "wherever I am", "when": "7 am", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "at my sister's wedding all weekend, can we go lighter till Monday?" },
+      { "from": "zoh", "text": "Course, Ana. 10 push-ups and 10 squats a day through Sunday, then back to the full 20 minutes Monday. Enjoy the wedding 💃" }
+    ],
+    "plan": {
+      "step": "10 push-ups and 10 squats",
+      "place": "wherever you are",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a selfie after",
+      "reason": "Something small keeps the habit alive while you're away.",
+      "minutes": 5,
+      "started_days_ago": 9,
+      "temporary": { "ends_in_days": 2, "usual_step": "20 min: 4 rounds of 10 push-ups and 15 squats" }
+    },
+    "step_days": [{ "days_ago": 1, "status": "done", "step": "20 min: 4 rounds of 10 push-ups and 15 squats" }]
+  },
+  "testerLines": ["advance to 07:05", "yep, in my hotel room now"],
+  "whatWentWrong": "New case, not a past mistake: no case started on a temporary lighter plan.",
+  "shouldHaveHappened": "The kickoff names the lighter step (10 push-ups and 10 squats), not the usual 20 minutes, without guilt and without pushing for more; it may mention the full plan coming back Monday, in a few words. Her yes gets a short, warm reply and no second question.",
+  "startTime": "06:30",
+  "startDay": "fri",
+  "timeZone": "America/New_York"
+}

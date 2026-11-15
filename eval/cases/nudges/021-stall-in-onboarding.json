@@ -1,0 +1,22 @@
+{
+  "id": "stall-in-onboarding",
+  "title": "Onboarding stalls: one stall nudge picks up where it left off",
+  "origin": "Issue #196 (coverage gap: the stall nudge)",
+  "seed": {
+    "name": "Leo",
+    "goal": "bedtime",
+    "phase": "onboarding",
+    "answers": { "what": "phone out of the bedroom and lights out by 11" },
+    "history": [
+      { "from": "tester", "text": "I want to stop scrolling in bed, I'm up till 1 most nights" },
+      { "from": "zoh", "text": "Up till 1 is rough, Leo. What time would you actually like to be asleep by?" },
+      { "from": "tester", "text": "11 would be amazing" },
+      { "from": "zoh", "text": "11 it is. Where does the phone usually end up when you get into bed?" }
+    ]
+  },
+  "testerLines": ["advance to 15:30", "sorry, crazy day. on the nightstand, right next to my head lol"],
+  "whatWentWrong": "New case, not a past mistake: no case covered a stalled onboarding.",
+  "shouldHaveHappened": "About 3 hours after ZOH's unanswered question, one text ZOH starts itself: warm, with Leo's name, picking up where it left off (where the phone ends up at night) rather than starting over, in 1 to 3 sentences with one question, and no guilt about the silence. Only one such text by 15:30. His reply carries onboarding on naturally from what he said, without re-asking anything already settled (11 pm, the phone out of the bedroom).",
+  "startTime": "12:00",
+  "timeZone": "America/New_York"
+}

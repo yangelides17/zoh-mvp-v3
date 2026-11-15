@@ -1,5 +1,7 @@
 import { createDraft } from "../src/console/drafts.js";
+import { createCoach } from "../src/coach/coach.js";
 import type { Db } from "../src/db/client.js";
+import { FakeClaudeModel } from "./helpers.js";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -19,7 +21,7 @@ import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
 import { DONE, cleanSimulatorText, simulatedTester } from "../eval/simulator.js";
-import type { Check, ConversationPlan, Grade, GradedConversation, TranscriptLine } from "../eval/types.js";
+import { caseSchema, type Check, type ConversationPlan, type Grade, type GradedConversation, type TranscriptLine } from "../eval/types.js";
 
 const onboarding = FEATURES.onboarding!;
 const rubric = rubricFor(onboarding);
@@ -174,8 +176,15 @@ describe("eval: nudge cases", () => {
       "kickoff-after-one-day-move",
       "recommit-after-day-three",
       "still-in-morning-yes",
+      // #196: moments with no case before.
+      "stall-in-onboarding",
+      "one-a-day-after-two-misses",
+      "followup-no-proof",
+      "lighter-plan-kickoff",
+      "two-reduced-days",
     ]);
-    expect(cases.every((c) => c.seed?.plan)).toBe(true);
+    // The stall nudge is for a plan not locked yet; every other nudge case starts on a locked plan.
+    expect(cases.filter((c) => !c.seed?.plan).map((c) => c.id)).toEqual(["stall-in-onboarding"]);
     expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);
   });
 });
@@ -275,6 +284,51 @@ describe("eval: texts sent together (#16)", () => {
     const photo = turns.find((t) => t.image);
     expect(photo?.text).toContain("[Sent a photo]");
     expect(turns.at(-1)!.text).toBe("Not bad!");
+  });
+});
+
+describe("eval: seeds for the team, a pause and a lighter plan (#196)", () => {
+  it("start the tester with the founders' note and request, a break in progress and a temporary plan, as the coach sees them", async () => {
+    const regression = caseSchema.parse({
+      id: "seeded",
+      title: "seeded",
+      origin: "test",
+      testerLines: ["hey"],
+      whatWentWrong: "-",
+      shouldHaveHappened: "-",
+      seed: {
+        name: "Sam",
+        goal: "reading",
+        phase: "active",
+        answers: {},
+        history: [{ from: "zoh", text: "LET'S GO" }],
+        plan: { step: "5 pages", time: "19:00", days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], proof: "photo", reason: "r", temporary: { ends_in_days: 3, usual_step: "10 pages" } },
+        team: [
+          { kind: "note", body: "Sam's mom is in hospital this week" },
+          { kind: "request", body: "Suggest the Dune audiobook for the drive" },
+        ],
+        pause: { started_hours_ago: 2, until_days: 2, reason: "family" },
+      },
+    });
+    const model = new FakeClaudeModel("Thinking of you, Sam.");
+    let coach: Replier | undefined;
+    const replier: Replier = { reply: (input) => coach!.reply(input), check: async () => {} };
+    const plan = planConversations([], [regression], { runs: 1 })[0]!;
+    const result = await runConversation(plan, scriptedTester(regression.testerLines), {
+      maxTurns: 2,
+      index: 9,
+      env: {},
+      replier,
+      onApp: (app) => (coach = createCoach({ db: app.db, model })),
+    });
+    expect(result.appErrors).toEqual([]);
+    const state = model.stateOf();
+    expect(state).toContain("FROM THE TEAM, notes (context only; never quote them or mention the team):");
+    expect(state).toContain("Sam's mom is in hospital this week");
+    expect(state).toMatch(/FROM THE TEAM, request \[\w+\]: Suggest the Dune audiobook for the drive/);
+    expect(state).toMatch(/This is a temporary lighter plan through \d{4}-\d{2}-\d{2}; then their usual plan comes back\./);
+    expect(state).toContain("PAUSED");
+    expect(result.savedState).toMatchObject({ plans: [{ version: 1, step: "10 pages" }, { version: 2, step: "5 pages", change_kind: "other" }] });
   });
 });
 

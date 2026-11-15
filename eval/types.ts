@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PROOF_METHODS, type Weekday } from "../src/db/schema.js";
+import { PROOF_METHODS, REQUEST_DELIVERIES, type Weekday } from "../src/db/schema.js";
 
 /**
  * Which suite a case belongs to (#197). "regression": established behavior that should pass almost every
@@ -72,7 +72,27 @@ export const seedSchema = z.object({
       minutes: z.number().int().min(0).max(600).optional(),
       /** Day 1 this many days before the run's day (0: day 1 is today). */
       started_days_ago: z.number().int().min(0).max(30).default(0),
+      /**
+       * #196: this plan is a temporary lighter one (change_plan with until), through this many days
+       * after the run's day; `usual_step` is the version before it, which comes back after.
+       */
+      temporary: z.object({ ends_in_days: z.number().int().min(0).max(30), usual_step: z.string() }).optional(),
     })
+    .optional(),
+  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff). */
+  team: z
+    .array(
+      z.object({
+        kind: z.enum(["note", "request"]),
+        body: z.string().min(1),
+        hours_ago: z.number().min(0).max(72).default(1),
+        delivery: z.enum(REQUEST_DELIVERIES).default("natural"),
+      }),
+    )
+    .default([]),
+  /** #196: a break in progress, started this many hours ago, until a local day this many days on (none: until they're back). */
+  pause: z
+    .object({ started_hours_ago: z.number().min(0).max(240), until_days: z.number().int().min(1).max(30).optional(), reason: z.string().optional() })
     .optional(),
   /**
    * How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }; optionally
@@ -89,6 +109,8 @@ export const seedSchema = z.object({
         reflection: z.string().optional(),
         /** A time moved for that day only, local "HH:MM". */
         moved_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+        /** #196: whether they said how it went when they marked it done (false: proof alone, #93's pickup). */
+        how_it_went_said: z.boolean().optional(),
       }),
     )
     .default([]),
