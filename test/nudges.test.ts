@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { raiseAlert } from "../src/console/alerts.js";
-import { createCoach } from "../src/coach/coach.js";
+import { createCoach, NUDGE_TOOLS } from "../src/coach/coach.js";
 import { buildStateBlock, NUDGES } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
@@ -644,9 +644,9 @@ describe("the coach writing a nudge", () => {
     expect(text).toBe("Kalimera Sam! Ten pages of Dune on the couch at 7 tonight. Still on?");
     expect(model.requests).toHaveLength(1);
     const req = model.requests[0]!;
-    // Tools on, so it can save today's step first (#76); only set_today_step runs (test/todays-step.test.ts).
+    // Tools on, so it can save today's step first (#76); #196: offered only the tools a text it starts can use.
     expect(req.toolChoice).toBe("auto");
-    expect(req.tools.map((x) => x.name)).toContain("mark_step_done");
+    expect(req.tools.map((x) => x.name).sort()).toEqual([...NUDGE_TOOLS].sort());
     expect(req.system[0]!.text).toContain(NUDGES);
     expect(model.stateOf()).toContain("NUDGE MOMENT: kickoff");
     expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet.");

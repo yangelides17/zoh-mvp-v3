@@ -300,9 +300,9 @@ export function createCoach(opts: CoachOptions): Replier {
       }
     },
     /**
-     * A text ZOH starts itself: the same prompt and tools (so the cache holds), only `NUDGE_TOOLS`
-     * run (after lock, so the day's step can be saved first), and a note in place of a tester text
-     * naming the moment (the state block says it too).
+     * A text ZOH starts itself: the same prompt, only `NUDGE_TOOLS` offered (after lock, so the
+     * day's step can be saved first; #196: a tool it can't use isn't offered), and a note in place
+     * of a tester text naming the moment (the state block says it too).
      */
     async nudge({ tester, turns, now, moment, previous, carry, mayskip }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
@@ -317,6 +317,7 @@ export function createCoach(opts: CoachOptions): Replier {
       const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
       // After lock, a text it starts can save the day's step first (#76); nothing else runs.
       const rounds = tester.phase === "active" ? NUDGE_ROUNDS : 1;
+      const nudgeTools = toolsFor(tester).filter((t) => NUDGE_TOOLS.includes(t.name));
       let round = 1;
       let retried = false;
       for (;;) {
@@ -324,7 +325,7 @@ export function createCoach(opts: CoachOptions): Replier {
         const response = await model.create({
           system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
           messages,
-          tools: toolsFor(tester),
+          tools: nudgeTools,
           toolChoice: last ? "none" : "auto",
         });
         const calls = last ? [] : response.content.filter((b) => b.type === "tool_use");
