@@ -30,7 +30,8 @@ export const PROMPT_BUDGET_CHARS = {
   todaysStep: 1700,
   proof: 3600,
   weekLookback: 1870,
-  nextSteps: 1620,
+  // #196: +30 for two phrases merged in from the voice page's copy, which went.
+  nextSteps: 1650,
   team: 650,
   memory: 1300,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;

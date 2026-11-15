@@ -158,6 +158,8 @@ export interface Inventory {
   entries: Entry[];
   /** Lines taken out because another line already said the same thing, and where that line is. */
   merged: { removed: string; from: string; keptIn: string; why: string }[];
+  /** Overlaps looked at and kept on purpose, with why they aren't the same sentence. */
+  leftAlone: { where: string; why: string }[];
 }
 
 export const KINDS: Record<string, string> = {
@@ -260,6 +262,7 @@ export function rebuild(found: Found[], old: Inventory | undefined): Inventory {
     kinds: KINDS,
     entries,
     merged: old?.merged ?? [],
+    leftAlone: old?.leftAlone ?? [],
   };
 }
 
