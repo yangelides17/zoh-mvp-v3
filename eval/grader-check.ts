@@ -235,7 +235,7 @@ export function renderGraderCheck(r: { known: KnownRate[]; feel?: { rates: Agree
       "",
       "## Feel, against a stronger model",
       "",
-      `${r.feel.sampled} conversations from ${r.feel.from}: \`${r.feel.strong}\` graded the conversation checks; the report's grader was \`${r.feel.regular}\`.`,
+      `${r.feel.sampled} conversation${r.feel.sampled === 1 ? "" : "s"} from ${r.feel.from}: \`${r.feel.strong}\` graded the conversation checks; the report's grader was \`${r.feel.regular}\`.`,
       "Catches: of the checks the stronger model failed, how many the regular grader failed too. Passes: of those it passed, how many the regular grader passed.",
       "",
       "| Rule | Catches | Passes |",
@@ -291,7 +291,7 @@ async function main(): Promise<number> {
   const feelEst = estimateCost(sampled.map((c) => c.plan), { maxTurns: 20, pagesChars: 20_000, coachModel, evalModel: strongModel, gradeOnly: true, graderCalls: 1 + (feelFeature?.rubric.filter((r) => r.group === "conversation" && r.alone).length ?? 0) });
   const estimate = { low: knownEst.dollars.low + feelEst.dollars.low, high: knownEst.dollars.high + feelEst.dollars.high };
   console.log(
-    `Grader check: ${examples.length} known-answer examples × ${runs} runs (grader ${regularModel})${sampled.length ? `, ${sampled.length} conversations from ${values.report} re-graded by ${strongModel}` : ""}. About $${estimate.low.toFixed(2)}–$${estimate.high.toFixed(2)}.`,
+    `Grader check: ${examples.length} known-answer examples × ${runs} runs (grader ${regularModel})${sampled.length ? `, ${sampled.length} conversation${sampled.length === 1 ? "" : "s"} from ${values.report} re-graded by ${strongModel}` : ""}. About $${estimate.low.toFixed(2)}–$${estimate.high.toFixed(2)}.`,
   );
   const ledgerPath = `${REPORTS_DIR}spend.json`;
   const branch = currentBranch(REPO_ROOT);
