@@ -1,0 +1,97 @@
+{
+  "feature": "console",
+  "id": "case:suggest-unclear-goal",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "65f1123b38d8",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "f903eaee6866"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:suggest-unclear-goal",
+        "kind": "case",
+        "id": "suggest-unclear-goal",
+        "title": "A founder asks for a vague next step for a tester with two goals; ZOH asks which goal and how before filing",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "run done, legs are toast",
+          "at": "2026-11-02T05:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ten days in a row, Jordan. Toast legs are earned legs 🏃",
+          "at": "2026-11-02T05:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Stamati: he's doing great, bump him up a level",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Do you mean a harder run, like longer or more days (an upgrade), or adding a new goal on top? He's already at Pushy, the top coaching level, so it can't go higher. Tell me which and I'll draft it.",
+          "at": "2026-11-02T18:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Stamati: the running. make it a harder version, intervals instead of a steady run",
+          "at": "2026-11-02T18:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] File a next step for Jordan (upgrade on Get fitter): \"Swap the steady 20 minute run for a 20 minute interval run at the park, same days and time (7 am Mon, Wed, Fri, Sat), same screenshot proof from the run app summary.\". ZOH raises it as its own idea when it fits, and asks first.",
+          "at": "2026-11-02T18:00:30.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "The draft is on your screen. If you click Do it, ZOH will offer Jordan intervals in place of the steady 20 minute run. The days, time and screenshot proof stay the same. ZOH brings it up when it fits, and Jordan decides.",
+          "at": "2026-11-02T18:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: done\nTue, Oct 20: done\nWed, Oct 21: done\nThu, Oct 22: done\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: done\nMon, Oct 26: step day, nothing recorded\nTue, Oct 27: done\nWed, Oct 28: done\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: step day, nothing recorded\nSun, Nov 1 (yesterday): done\nMon, Nov 2 (today): step day, not done yet at 07:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 07:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 07:00\nSat, Nov 7: step day at 07:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 07:00",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked which goal and how before filing, then drafted the interval upgrade on the exercise goal once Stamati said running, intervals, and claimed nothing was filed."
+          },
+          {
+            "rule": "files-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "It asked first when the goal and kind were unclear, then drafted with the goal named, though the draft's 'ZOH raises it... and asks first' line is slightly muddled."
+          },
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "The draft card and the follow-up line say exactly what gets filed, for which goal, and that Jordan decides, with no claim it already happened."
+          }
+        ],
+        "summary": "ZOH handled the ambiguous 'bump him up a level' well: it asked which goal and what kind of change before drafting, then drafted only once Stamati named the running goal and intervals. The only soft spot is the draft's slightly muddled wording about asking first, which a reviewer could score either way."
+      }
+    }
+  ]
+}

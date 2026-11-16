@@ -1,0 +1,529 @@
+{
+  "feature": "onboarding",
+  "id": "sam-reality-check",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "66b58c0479f2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "sam-reality-check",
+        "kind": "scenario",
+        "id": "sam-reality-check",
+        "title": "Sam wants an hour a night but has 20 minutes (page example)",
+        "persona": "terse",
+        "areaCode": "646",
+        "startTime": "19:15",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey. got this from a friend, supposed to help me actually read every night",
+          "at": "2026-11-03T00:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Reading every night? Let's go! I'm ZOH, and I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" What's your name?",
+          "at": "2026-11-03T00:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "sam",
+          "at": "2026-11-03T00:15:49.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to have you, Sam. When you picture reading every night, what do you want to read: a book you've been meaning to get to, a topic you're curious about, or something else?",
+          "at": "2026-11-03T00:15:56.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly books. nothing specific yet",
+          "at": "2026-11-03T00:16:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Books are a great base, Sam. What kinds of stories or subjects do you tend to be drawn to, like fiction, history, business, or something else?",
+          "at": "2026-11-03T00:16:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "fiction mostly i think. used to read a lot",
+          "at": "2026-11-03T00:16:54.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fiction, nice. Used to read a lot means you've got the habit in you already, Sam. What time at night could you realistically read, like 9 or after dinner?",
+          "at": "2026-11-03T00:17:01.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "Nights after dinner, around 9:30. Only got like 20 min free realistically",
+          "at": "2026-11-03T00:17:33.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes at 9:30 is plenty to work with, Sam. Where do you want to read, in bed, on the couch, or somewhere else?",
+          "at": "2026-11-03T00:17:40.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "in bed mostly. i have a few books at home, paper ones",
+          "at": "2026-11-03T00:18:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Paper books in bed at 9:30 is a solid setup, Sam. Where do you want this to get you, like finishing a book a week or two, or just getting the reading habit back? Totally fine if you're not sure yet.",
+          "at": "2026-11-03T00:18:29.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "Mostly just getting the habit back i think",
+          "at": "2026-11-03T00:19:05.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam, you used to read a lot, so this is about getting back to something you already know how to do. Here's the plan:\n\n• Headed for: getting the nightly reading habit back\n• Setup tonight: pick one of your paper fiction books and put it on your pillow before dinner ends\n• Day 1, tonight: read 20 minutes of that book in bed at 9:30 pm\n• Every day, same time, 20 minutes\n• Proof: a 20-30 second voice note on what happened in your 20 minutes. Talking it through helps the story stick. If you'd rather, a photo of the book open in bed works too.\n\nEach night shapes the next step, so we can adjust as the habit comes back. What do you think?",
+          "at": "2026-11-03T00:19:12.700Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt from the length limit and carries the intro, stop and style-change lines plus a question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat with 'Let's go!' and no emoji; warm without being overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for the name, which is what the tester hadn't yet given."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing the tester had already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no claims about the tester beyond their stated goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji, appropriate energy."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they want to read, which fits a reading goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new, the reading material."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the name and goal the tester gave."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and steady, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about genre preferences, which fits the reading goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Tester said mostly books, but the genre question is a new detail."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reflects the tester's own words only."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging and sincere; 'you've got the habit in you' is mildly effusive but acceptable."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks when they could read, which fits the goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about time, which hadn't been given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "'You've got the habit in you already' goes a little beyond the tester's 'used to read a lot'."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about reading time, not wake or sleep."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Steady and warm."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they'd read, which fits the setup."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Location had not been given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats the tester's 20 minutes and 9:30 accurately."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and calm, appropriate energy."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the destination lightly and allows 'not sure yet'."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Destination had not been given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the tester's paper-book and bed details accurately."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation with a short bullet list; intro and closing sentences are brief and within the plan allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown headings."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji or hype overload."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan fits a nightly reading habit, 9:30 in bed, 20 minutes, with a voice-note proof."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only details the tester gave: bed, 9:30, 20 minutes, paper books."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses 'used to read a lot' and the tester's own timing; no invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that stop works anytime, that coaching can change, and asks the name; goal was already named."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No detail the tester clearly gave is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Covers what (paper fiction), where (in bed), when (9:30) and how long (20 minutes) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks about an app or tool and doesn't push one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": true,
+            "reason": "Reading is a starter goal, but the goal list was never shown; the goal was accepted as a starter."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Text 1 says the tester can change coaching with lines like 'chill out'."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": true,
+            "reason": "Plan shown without asking which book to read; the tester said 'nothing specific yet' and the plan relies on any paper fiction book."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Seven ZOH texts over about four minutes, within limits."
+          }
+        ],
+        "summary": "ZOH handled the onboarding cleanly: it opened with the required intro, gathered what, where, when and how long in short one-question texts, and showed a clear plan with a voice-note proof. The main miss is that it presented the plan without first settling which book the tester will read, which it should have asked before wrapping up."
+      }
+    }
+  ]
+}

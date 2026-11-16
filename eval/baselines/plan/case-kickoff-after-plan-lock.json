@@ -1,0 +1,293 @@
+{
+  "feature": "plan",
+  "id": "case:kickoff-after-plan-lock",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "0e5816cadbe8",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "103500461920"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-plan-lock",
+        "kind": "case",
+        "id": "kickoff-after-plan-lock",
+        "title": "Plan locked the night before: the morning kickoff reminds and checks they're still in, not a first \"You in?\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "Honestly I can barely do 3 push-ups right now",
+          "at": "2026-11-03T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Everyone starts somewhere, and 3 is a start. Is there something you're working toward with this?",
+          "at": "2026-11-03T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "I want to do 10 real push-ups in a row by Christmas. Every day except Sunday works",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ten real push-ups by Christmas, starting from 3, is a solid and doable target, Jordan. Here's the plan:\n\n• Goal: 10 real push-ups in a row by Dec 25\n• Setup today: pick a sturdy spot (counter or couch edge) for incline push-ups, and clear a patch of floor\n• Day 1, tonight at 9 pm at home, 20 min: 2 min warm-up, 4 sets of 5 incline push-ups with 90 sec rest, then one all-out set of floor push-ups to find your starting number\n• Usual schedule: 6:30 pm, 20 min, Monday to Saturday, Sunday off\n• Proof: a photo of you in the push-up position on your setup. A voice note with your max count works too.\n• Why: incline reps build the strength for floor reps, and tonight's max gives us a number to beat.\n\nEach day's result shapes the next step, so we build toward 10 on the floor.\n\nWhat do you think?",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "love it",
+          "at": "2026-11-03T01:30:51.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Jordan. Ten real push-ups by Christmas, Monday to Saturday, starting tonight at 9. Are you officially committing to this?",
+          "at": "2026-11-03T01:30:58.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "Yes, I'm committing to it. Let's start tomorrow",
+          "at": "2026-11-03T01:31:20.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Jordan! Day 1 is tomorrow, Tuesday, at 6:30 pm at home. Ten real push-ups by Christmas starts there 💪",
+          "at": "2026-11-03T01:31:27.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning Jordan! Tonight is day 1 toward your 10 real push-ups by Christmas. You said yes, so it's 4 sets of 5 incline push-ups with a 2 min warm-up first, then one all-out floor set to find your starting number. Pick your counter or couch edge now so it's ready. Still in?",
+          "at": "2026-11-03T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A plan-presenting text may run about 8 lines; this runs roughly 9 to 10 lines counting blanks, so it is at the edge."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown headings, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and confident, opens by reacting to the specific target starting from 3, with no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses Jordan's 10 push-ups, from 3, Monday to Saturday and the 6:30 pm usual, plus a suggested 9 pm day 1 time that Jordan never gave."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Day 1 gives what, where, when and length, but the 9 pm day-1 time conflicts with the 6:30 pm usual schedule given in the same plan."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere; the commitment ask is in its own words, not a stock line."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the goal and schedule Jordan agreed to, with no invented facts."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with a hype line and no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text; a single emoji used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line locks it in, warm and not overfamiliar, with one emoji at the end."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 Tuesday at 6:30 pm at home matches the usual schedule and Monday start context."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives when and where for day 1, but does not restate what the step is in this text."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Five sentences (greeting, day 1, step, setup, question), more than the one-to-three limit for a kickoff."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, opens with Jordan's name, and ends with a light Still in? rather than a first-time ask."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to Jordan's yes and the agreed step, with no invented facts."
+              },
+              {
+                "rule": "step-defined",
+                "pass": false,
+                "borderline": true,
+                "reason": "Says tonight but never gives the 6:30 pm time or the 20 min length, leaving when and how long unclear."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra questions were needed before the plan; the destination was given and the plan came straight after."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete with what, how much, where, when, days and a photo or voice proof, though the day 1 time conflicts with the usual schedule."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": true,
+            "reason": "Shows the destination, day 1 step, usual schedule, proof and a progression line, but gives a day 1 time that differs from the schedule."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "After love it, ZOH asked in its own words whether Jordan is officially committing, and locked only on a clear yes."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Jordan pushed to start tomorrow and ZOH accepted it without argument."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet-hours question or change was raised after the plan was locked."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a bullet list ending with one question, What do you think?"
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The next morning's kickoff uses Jordan's name, restates the step and ends with Still in? instead of a first-time You in? with no time or commitment re-ask."
+          }
+        ],
+        "summary": "ZOH fixed the regression: the commitment ask, the lock with tomorrow's day 1 and the next morning's Still in? kickoff all behave as intended. The weak spots are the plan's conflicting 9 pm day-1 time against the 6:30 pm schedule, and the kickoff being too long and omitting the 6:30 pm time."
+      }
+    }
+  ]
+}

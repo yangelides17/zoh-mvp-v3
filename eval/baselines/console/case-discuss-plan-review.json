@@ -1,0 +1,131 @@
+{
+  "feature": "console",
+  "id": "case:discuss-plan-review",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "20d15e9e1c97",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "7c7425d9b701"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:discuss-plan-review",
+        "kind": "case",
+        "id": "discuss-plan-review",
+        "title": "Discussing a plan-review alert: explained from the record (already active), then marked reviewed by draft",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: About the alert \"Plan version 1 to review\" (plan review): what happened, why does it matter, and where does it stand now?",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "This alert says Jordan's plan, version 1, is waiting for a founder to look at it. The plan is already active. Jordan committed with \"I'm in\", and reviewing it only records that one of you looked.\n\nThe plan is a 20 minute run at the park at 6 pm on Mon, Wed, Fri and Sat. The proof is a screenshot from their running app, and the reason they gave was \"Twenty minutes after work, before dinner.\"\n\nSo far they've done 4 step days in a row: Oct 26, Oct 28, Oct 30 and Oct 31. Oct 23 and Oct 24 show nothing recorded. Today's step isn't done yet.\n\nDo you want me to mark the alert as reviewed?",
+          "at": "2026-11-02T19:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni: ok mark it reviewed",
+          "at": "2026-11-02T19:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Mark reviewed: Plan version 1 to review. Their plan is already active; this records that you've looked.",
+          "at": "2026-11-02T19:00:30.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted the mark-reviewed card. When a founder clicks Do it, the alert will show as reviewed. Jordan's plan is already active, so nothing changes for them.",
+          "at": "2026-11-02T19:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: rest day\nMon, Oct 26: done\nTue, Oct 27: rest day\nWed, Oct 28: done\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): rest day\nMon, Nov 2 (today): step day, not done yet at 18:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 18:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 18:00\nSat, Nov 7: step day at 18:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 18:00",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan details, step log counts (Oct 26, 28, 30, 31 done; Oct 23-24 nothing recorded) and proof type all match the record."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says the plan is already active, which matches the saved state and the earlier commitment."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says the card is drafted and what Do it will do, but it is a draft status line, not a confirmation of a completed action."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 3 states exactly what Do it will do and that nothing changes for Jordan; it does not claim the alert is already reviewed."
+          },
+          {
+            "rule": "alert-accurate",
+            "pass": true,
+            "borderline": false,
+            "reason": "Explains the plan is already active from Jordan's 'I'm in' and never says it needs approval."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Covers committed plan v1, already active, and reviewing only records a look; 'no approval needed' is implied rather than stated outright. Marking reviewed is offered, then drafted only after Yanni's ask."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it explained that the plan is already active and that reviewing only records a founder's look, and it only drafted the mark-reviewed action after Yanni asked. The main weak spot is that it implied rather than stated that no approval is needed, which a reviewer could score either way."
+      }
+    }
+  ]
+}

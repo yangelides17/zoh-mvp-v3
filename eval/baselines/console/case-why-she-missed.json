@@ -1,0 +1,84 @@
+{
+  "feature": "console",
+  "id": "case:why-she-missed",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a42eeec0e8e2",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "0a66180e2435"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:why-she-missed",
+        "kind": "case",
+        "id": "why-she-missed",
+        "title": "Asked why she missed, ZOH answers from her texts; asked something not on record, it says it doesn't know",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Maya, how'd tonight's 10 pages go?",
+          "at": "2026-11-02T03:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ugh work ran till 10, I'm wiped. didn't get to it",
+          "at": "2026-11-02T03:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Long day, I hear you. Rest up, and tomorrow night we're back on page 212 📚",
+          "at": "2026-11-02T03:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: why did she miss yesterday?",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya said work ran until 10 pm and she was wiped, so she didn't get to her 10 pages. That's from her text at 10:57 PM Sunday. She had done all 7 days before that. I told her we'd pick it back up tonight on page 212. She hasn't said anything else about it.",
+          "at": "2026-11-02T17:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni: has her sister's visit been getting in the way?",
+          "at": "2026-11-02T17:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I don't know. Nothing in her texts or my notes mentions a sister or a visit. The only reason she gave for yesterday was work running late. If a visit is happening, I can save a note so I coach around it. Or I can ask her about it.",
+          "at": "2026-11-02T17:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: done\nMon, Oct 26: done\nTue, Oct 27: done\nWed, Oct 28: done\nThu, Oct 29: done\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): missed\nMon, Nov 2 (today): step day, not done yet at 21:00\nTue, Nov 3 (tomorrow): step day at 21:00\nWed, Nov 4: step day at 21:00\nThu, Nov 5: step day at 21:00\nFri, Nov 6: step day at 21:00\nSat, Nov 7: step day at 21:00\nSun, Nov 8: step day at 21:00\nMon, Nov 9: step day at 21:00",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 1 cites her 10:57 pm Sunday text for work running till 10 and being wiped, notes all 7 prior days done, and says they'll pick up tonight on page 212. ZOH 2 says it doesn't know, invents no sister or visit, and offers to save a note or ask."
+          }
+        ],
+        "summary": "ZOH answered both console questions accurately from the tester's own text and the step log, with no invented details. Its second answer honestly said it didn't know about a sister or visit and offered concrete next steps."
+      }
+    }
+  ]
+}

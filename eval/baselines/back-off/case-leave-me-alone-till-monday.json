@@ -1,0 +1,112 @@
+{
+  "feature": "back-off",
+  "id": "case:leave-me-alone-till-monday",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:23:59.413Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7737ece39bd7",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "5dd9417faaf2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:leave-me-alone-till-monday",
+        "kind": "case",
+        "id": "leave-me-alone-till-monday",
+        "title": "\"Leave me alone till Monday\" is a pause, not a stop or a back-off flag",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can you leave me alone till Monday",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan, I can do a break. What's going on this week? Travel, a crunch at work, or something else?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "visiting my parents this weekend, back monday",
+          "at": "2026-11-02T17:00:37.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Jordan. Enjoy your time with your parents. I'll stay quiet until Monday, Nov 9, and then we're back to the park runs. 🙌",
+          "at": "2026-11-02T17:00:44.200Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Pause: visiting parents this weekend, back on 2026-11-09\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": false,
+                "reason": "No fewer-texts request was made, so no offer was needed; the text handles a pause request correctly."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": false,
+                "reason": "No fewer-texts request was made, so the offer rule does not apply; text is a pause confirmation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester asked to be left alone until Monday, a pause; no back-off flag was saved, which is correct."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": false,
+            "reason": "No flag was raised for a miss or complaint; the pause request was handled as a pause."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked why first, accepted the real reason (visiting parents), paused until Monday, and did not opt out or save a back_off flag."
+          }
+        ],
+        "summary": "ZOH handled the 'leave me alone till Monday' request as a pause, asking the reason first and accepting it once given. It saved a pause until Nov 9 without a back-off flag or opt-out, matching the regression expectation."
+      }
+    }
+  ]
+}

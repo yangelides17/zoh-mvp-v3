@@ -1,0 +1,78 @@
+{
+  "feature": "commands",
+  "id": "case:feedback",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:12.402Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5381ae1d35dd",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "9b59f9ead4c2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:feedback",
+        "kind": "case",
+        "id": "feedback",
+        "title": "Feedback gets a natural thanks and \"the team's on it\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "feedback: the 9am text is too early for me",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thanks, Jordan. I passed that along to the team word for word, and they're on it. Your run is still set for 6 pm today, 30 minutes at the park. Send me the Strava screenshot when you're done.",
+          "at": "2026-11-02T17:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": true,
+                "reason": "Thanks Jordan and says the team's on it, no promise of a time change; 'passed along word for word' is slightly echo-like but acceptable and steers to today's run."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Acknowledged feedback with thanks and 'they're on it', made no promise to move the text, and briefly steered back to today's run as allowed."
+          }
+        ],
+        "summary": "ZOH handled the feedback path well: it thanked Jordan, said the team is on it, and promised no schedule change, then briefly returned to the 6 pm run. The only weak spot is the near-verbatim 'word for word' phrasing, which reads a bit like an echo rather than a fully natural acknowledgment."
+      }
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "feature": "plan",
+  "id": "case:commitment-ask-gimmicky",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2cf713a9783a",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "efd2edb1640b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:commitment-ask-gimmicky",
+        "kind": "case",
+        "id": "commitment-ask-gimmicky",
+        "title": "Commitment ask and soft-yes re-ask sound scripted",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "Yea I track everything on my whoop app",
+          "at": "2026-11-02T21:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's everything I need, here's your plan:\n• Mon, Tue, Wed, Fri, Sat at 6:30 pm: 75 min lifting at Crunch\n• After: a Whoop strain screenshot\nFive days after work builds the habit without eating your weekend. What do you think?",
+          "at": "2026-11-02T21:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Looks good",
+          "at": "2026-11-02T22:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tracking everything in Whoop makes the proof easy, Yanni. Here's the full plan:\n\n• Day 1 is today: 75 min lifting at Crunch, starting 6:30 pm\n• Schedule: Mon, Tue, Wed, Fri, Sat at 6:30 pm, 75 min each\n• Proof: a screenshot of your Whoop strain after each workout\n• Why: five days after work builds the habit without eating your weekend\n• Easy alternative: if the strain screen isn't handy, send a photo from the gym\n\nEach workout shapes the next one, so we build from what you actually do. What do you think?",
+          "at": "2026-11-02T22:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ok",
+          "at": "2026-11-02T22:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good. Before we lock it in, I want to hear it from you, Yanni. Are you committing to lifting at Crunch at 6:30 pm, five days a week, starting today?",
+          "at": "2026-11-02T22:00:37.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in!",
+          "at": "2026-11-02T22:00:57.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Yanni! 💪 Day 1 is today: 75 minutes of lifting at Crunch, starting at 6:30 pm. Send me that Whoop strain screenshot when you're done.",
+          "at": "2026-11-02T22:01:04.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A plan-presenting text may run about 8 lines; this is about 8 lines including the bullets and closing question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets and ordinary wording, no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with the Whoop tie-in and no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the known Whoop, Crunch, 6:30 pm and 75 min details plus the earlier five-day schedule."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (lifting), where (Crunch), when (6:30 pm), how long (75 min) and proof."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Natural, sincere re-ask; it doesn't pick apart the tester's wording or quote it back."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, emoji used once as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Real hype line after the lock, with one emoji and no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only repeats the agreed day 1 details."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 states what, where, when, how long, and the proof to send."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra questions were needed before the plan, and none are asked after it."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete schedule, place, time, length, days, and a Whoop screenshot proof method."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1, the schedule, the proof and a short progression line without a future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "No destination was given and none was asked for, so the plan locks smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the soft 'Ok' it re-asks once in natural words without picking apart the wording."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 6:30 pm."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": false,
+            "borderline": true,
+            "reason": "After 'Looks good' ZOH re-posted the full plan as a bullet list instead of going straight to the commitment ask."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The 'Ok' and 'I'm in!' handling is fixed, but after 'Looks good' ZOH showed the plan again, which the expected behavior forbids."
+          }
+        ],
+        "summary": "ZOH handled the soft 'Ok' well by re-asking once in natural words, then locked the plan with a hype line and day 1 after 'I'm in!'. It missed the key expectation after 'Looks good' by re-posting the full plan instead of asking for the commitment directly, so the regression case fails."
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "feature": "back-off",
+  "id": "case:skipped-today",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:23:59.413Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c433e8535684",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "337caa35984c"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:skipped-today",
+        "kind": "case",
+        "id": "skipped-today",
+        "title": "A skipped day isn't a back-off request",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "skipped today, too tired",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan, it's only noon, and your run isn't until 6. Being tired is exactly when a run helps. You said 30 minutes at the park, so let's keep it. Can you lace up at 6 and send me the Strava screenshot after?",
+          "at": "2026-11-02T17:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Step set for 2026-11-02, not agreed: 30 min run around the park by your place at 6 pm, then send a Strava run summary screenshot\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester asked for no fewer texts or less pushing; ZOH set no back_off flag, pause or stop."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": false,
+            "reason": "The skipped-today message is a miss, and ZOH treated it as a slip without flagging it as a back-off request."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH avoided flags, pauses and stops and kept the run at 6 pm, but offered no smaller version or tomorrow fallback, and 'Being tired is exactly when a run helps' leans toward pushing."
+          }
+        ],
+        "summary": "ZOH handled the early skip without any back-off flag, pause or stop, and kept the plan's 6 pm run with no guilt. It was borderline on the slip path because it held the full step without offering a smaller version or tomorrow fallback, and its 'tired is exactly when a run helps' line could read as dismissive."
+      }
+    }
+  ]
+}

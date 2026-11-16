@@ -1,0 +1,390 @@
+{
+  "feature": "plan",
+  "id": "gym-tweak-lock",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "1c6e3384e201"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "gym-tweak-lock",
+        "kind": "scenario",
+        "id": "gym-tweak-lock",
+        "title": "Alex finishes onboarding, moves the time, then commits (spec example; outside Eastern)",
+        "persona": "terse",
+        "areaCode": "303",
+        "startTime": "18:30",
+        "timeZone": "America/Denver",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-03T01:21:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yo! I'm ZOH. I'm gonna text you every day to help you start one thing and actually stick with it. Text \"stop\" anytime. What's your name, and what are you looking to work on?",
+          "at": "2026-11-03T01:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "alex. exercise, wanna get back to lifting",
+          "at": "2026-11-03T01:23:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Alex. Have you lifted before, and what did you usually do?",
+          "at": "2026-11-03T01:24:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in college. home now, i have dumbbells",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dumbbells at home works. When are you usually free to get a workout in?",
+          "at": "2026-11-03T01:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "7:30 before work, 20 min",
+          "at": "2026-11-03T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it. You can change how I coach you anytime, just tell me. Do you track your workouts anywhere, like a watch or an app?",
+          "at": "2026-11-03T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "nah",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Last thing before I build your plan, Alex: what city are you in? It helps me get your 7:30 am timing right.",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "denver",
+          "at": "2026-11-03T01:30:27.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Denver, got it. Where do you want this to get you, Alex? Like lifting a certain weight, a certain look, or just feeling strong again? Not sure yet is fine too.",
+          "at": "2026-11-03T01:30:34.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "not sure yet. just wanna feel strong again and get the lifting back",
+          "at": "2026-11-03T01:30:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Feeling strong again is a solid place to start, Alex. Here's the plan:\n• Headed for: feeling strong and getting lifting back in your routine\n• Day 1 (tonight, 7:30 pm, 20 min): 3 rounds of 10 goblet squats, 10 one-arm rows per side, and 8 to 10 floor presses. Pick weights that feel like a 6 or 7 out of 10.\n• Usual schedule: 7:30 am, 20 min, Mon to Fri, at home. I'll text you a heads-up at 7:20 am.\n• Proof: a photo of your dumbbells and workout space right after you finish. A quick voice note works too.\n• Why: easy full-body moves rebuild your form and habit first, then we add weight.\n\nEach day's workout shapes the next one, so it gets harder as you get stronger. What do you think?",
+          "at": "2026-11-03T01:31:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "i'd rather start at 7 than 7:30",
+          "at": "2026-11-03T01:31:43.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Easy, 7 it is. Starting earlier means more of the day is yours. Here's the updated plan:\n• Headed for: feeling strong again and getting lifting back\n• Day 1 (tonight, 7:00 pm, 20 min, at home): 3 rounds of 10 goblet squats, 10 one-arm rows per side, and 8 to 10 floor presses. Pick weights that feel like a 6 or 7 out of 10.\n• Usual schedule: 7:00 am, 20 min, Mon to Fri. I'll still reach you with a heads-up at 6:50 am.\n• Proof: a photo of your dumbbells and workout space right after you finish. A voice note works too.\n• Why: easy full-body moves rebuild your form and habit first, then we add weight.\n\nEach workout shapes the next one, so it gets harder as you get stronger. What do you think?",
+          "at": "2026-11-03T01:31:50.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good. im in",
+          "at": "2026-11-03T01:32:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO, Alex! 💪 Day 1 is tonight at 7:00 pm: goblet squats, rows and floor presses. Send me that photo when you're done.",
+          "at": "2026-11-03T01:32:27.100Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, within the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and direct, with the tester's name and no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for the city and uses the 7:30 am timing they already gave."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, with a multi-option question that runs longer than one to three sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, and it offers an easy 'not sure yet' exit."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses what the tester said and asks a neutral question about the destination."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A plan presentation of about eight lines, which is within the allowed length."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown headings."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic enough and sincere, with no emoji rows."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": true,
+                "reason": "States a 'Mon to Fri' schedule the tester never gave; the default is every day unless they say otherwise."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Day 1 names the exercises, reps, place, time and length; the dumbbell weights are left to effort guidance."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A revised plan of about eight lines, within the allowed length for plan changes."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullet list, no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and warm, with one clear question at the end."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": true,
+                "reason": "Repeats the invented 'Mon to Fri' schedule; it also reads 'start at 7' as 7 pm tonight, which the tester never clarified."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Day 1 has what, how long, where and when; the 7 pm versus 7 am reading of the tester's request is not confirmed."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, a hype line plus the day 1 step and proof request."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler; one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Genuine hype caps fit the lock-in moment, with one emoji."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed day 1 workout and time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 is tonight at 7:00 pm with the exercises and a photo proof, so the step is clear."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "After the lock it carries the next move: day 1 timing and proof."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": false,
+            "borderline": true,
+            "reason": "'Last thing before I build your plan' is followed by a destination question, so the plan-needed questions came after a 'that's everything' line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete exercises, reps, home, 7:30 am and photo proof, though weights are only effort-based and the Mon to Fri days were assumed."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination, day 1 step, usual schedule, proof and a progression line with no future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "One light destination ask with a 'not sure yet' option, and the plan locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "No explicit commitment ask was sent; the tester volunteered 'im in' after a 'What do you think?' revision text."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 7:00 pm, the same day, with no pushback needed."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 7 am step is inside quiet hours and ZOH says it will still reach them with a 6:50 am heads-up."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the lock, ZOH did not raise quiet hours."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "The time change kept the exercises, proof and progression line unchanged."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Both plan versions were shown as • lists and each ended with a single question."
+          }
+        ],
+        "summary": "ZOH built a concrete, well-shaped plan quickly and handled the time revision and lock cleanly, with a day 1 step and proof that fit the tester. The main misses are an invented Mon to Fri schedule, a 'Last thing' line followed by another question, and no explicit commitment ask before the tester's 'im in'."
+      }
+    }
+  ]
+}

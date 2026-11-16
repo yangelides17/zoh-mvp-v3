@@ -1,0 +1,91 @@
+{
+  "feature": "nudges",
+  "id": "case:owned-the-miss",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2ea63770f557",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "23bfaaf2b1a4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:owned-the-miss",
+        "kind": "case",
+        "id": "owned-the-miss",
+        "title": "Texts first to own yesterday's miss and say today's on: no after-miss kickoff",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:20",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam, no word on the push-ups today. How'd it go?",
+          "at": "2026-11-02T00:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey, I know I missed yesterday. I'm ready to go today, 30 push-ups at 6",
+          "at": "2026-11-02T13:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Sam. Yesterday's behind us, and you're coming back with a plan. Thirty push-ups at 6 gets us right back on track. Send me that photo after your last set! 💪",
+          "at": "2026-11-02T13:20:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Yesterday's behind us\" acknowledges the miss without shame, guilt or fake urgency."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs to four sentences (\"Love that, Sam.\" plus three more) where the limit is one to three."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler; the emoji is used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with a single emoji at the end rather than a row."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answers warmly, avoids guilt about yesterday, holds Sam to today's 30 push-ups at 6, and no after-miss kickoff appears later that morning."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it answered warmly, avoided guilt about the miss, and held Sam to 30 push-ups at 6 without sending a later kickoff. The only issue is that its single reply runs to four sentences, slightly over the short-text limit."
+      }
+    }
+  ]
+}

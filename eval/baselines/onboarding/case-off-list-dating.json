@@ -1,0 +1,184 @@
+{
+  "feature": "onboarding",
+  "id": "case:off-list-dating",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c8e63962ada4",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "941cd48fbd14"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:off-list-dating",
+        "kind": "case",
+        "id": "off-list-dating",
+        "title": "Off-list, out of scope (dating): honest limit with a way forward",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and you can change how I coach whenever you want, just say \"chill out\" or \"push me harder.\"\n\nWhat's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Chris. can you help me get better at dating",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to meet you, Chris. Dating coaching is outside what I can do, but I can help with the everyday skills around it, like starting conversations and feeling at ease talking to new people. Want to go that route with \"Speak & connect better,\" or pick something else from the list?",
+          "at": "2026-11-02T23:30:35.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "First text is exempt, but its intro, stop and style lines run to about four sentences plus the list."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the bullet list is a plain goal list."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar; no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for name and goal with the goal list, as the first text should."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing already given is asked for."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Describes only what ZOH does, with no invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep, pushiness or city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain prose with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no affection or emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "The offered route, Speak & connect, fits Chris's request about dating."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the name Chris already gave and asks nothing repeated."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims about what ZOH can do beyond the Speak & connect scope."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Declines dating in a short line and steers back to the list and a close option."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it is ZOH, what it does, that stop works anytime, that coaching style can change, and asks name and goal with the list."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Says dating is outside what it can do without lecturing, offers Speak & connect and the list in one text, gives no dating tips, and asks one question; 'outside what I can do' is slightly less clearly 'not yet' than expected."
+          }
+        ],
+        "summary": "ZOH handled Chris's dating request well: it declined plainly without lecturing, gave no dating tips, and offered the close Speak & connect route or the list in one text with a single question. The only soft spot is the first text running a bit long for its exemption, and the transcript ends before onboarding finishes, so the wrap-up and coverage rules were not scored."
+      }
+    }
+  ]
+}

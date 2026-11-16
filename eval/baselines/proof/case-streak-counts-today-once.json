@@ -2,27 +2,27 @@
   "feature": "proof",
   "id": "case:streak-counts-today-once",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
-  "branch": "feature/196-prompt-groundwork",
+  "storedAt": "2026-11-16T19:20:07.488Z",
+  "branch": "feature/199-judgment-over-rules",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "3197497c4812",
-    "voice": "14110ca5ae91",
+    "voice": "fbc3a37c5b97",
     "instructions": "c7348af58300",
     "script": "ce561ffcbf1b"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:streak-counts-today-once#1",
+        "key": "case:streak-counts-today-once",
         "kind": "case",
         "id": "streak-counts-today-once",
-        "suite": "regression",
         "title": "The done celebration's streak counts today once",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "20:35",
-        "timeZone": "America/New_York"
+        "timeZone": "America/New_York",
+        "suite": "regression"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Page 94 and six days in a row, Dana! 🔥 What's one idea from today's fifteen pages that stuck with you?",
+          "text": "Day 6 in the books, Dana! 📚 Page 94 is real momentum. What stuck with you from today's fifteen pages? A quick voice note works great.",
           "at": "2026-11-03T01:35:07.000Z"
         }
       ],
@@ -58,25 +58,25 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Voice note of fifteen pages with a specific page number is celebrated, not questioned."
+                "reason": "The voice note describing fifteen pages on the couch is plausible proof, and ZOH celebrates it with 'Day 6 in the books' and 'Page 94 is real momentum.'"
               },
               {
-                "rule": "file-specific",
+                "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the specific detail of reaching page 94 and asks about an idea from the reading."
+                "reason": "It names a voice note as the proof kind and never suggests typed text."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, and the single question comes before the voice-note line rather than at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm with one fire emoji as punctuation, no accusation."
+                "reason": "Warm, hype-level energy with a single book emoji as punctuation and no suspicion."
               }
             ]
           }
@@ -86,158 +86,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Says six days in a row, which is five prior days plus today counted once, matching the expected 6 without double-counting."
+            "reason": "It counts the voice note as proof and says 'Day 6', which is correct (five prior days plus today once). The celebration runs about three or four sentences, longer than the one or two specified."
           }
         ],
-        "summary": "ZOH counted the voice note as proof and celebrated in two short sentences with one question, avoiding the earlier double-count. The regression is fixed: the streak number is 6, not 7, and nothing else in the reply was invented."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:streak-counts-today-once#2",
-        "kind": "case",
-        "id": "streak-counts-today-once",
-        "suite": "regression",
-        "title": "The done celebration's streak counts today once",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "20:35",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "zoh",
-          "text": "Night 5 in the books, Dana. Same deal tomorrow: 15 pages at 8.",
-          "at": "2026-11-02T05:32:00.000Z"
-        },
-        {
-          "from": "tester",
-          "text": "🙌",
-          "at": "2026-11-02T05:33:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "[voice: Just finished fifteen pages of Atomic Habits on the couch, I am on page ninety four now] done!",
-          "at": "2026-11-03T01:35:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Six days in a row, Dana, and you're on page 94 🙌 What stuck with you from today's fifteen pages?",
-          "at": "2026-11-03T01:35:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": false,
-                "reason": "The voice note is treated as proof and celebrated with \"Six days in a row, Dana, and you're on page 94 🙌\" without questioning it."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with exactly one question at the end, \"What stuck with you from today's fifteen pages?\""
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and energetic with one emoji as punctuation, no suspicion or row of emoji."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "The streak is stated as six, the correct count of five prior days plus today counted once, not the earlier wrong seven or double-counted number."
-          }
-        ],
-        "summary": "ZOH accepted the voice note as proof, celebrated it warmly in two short sentences, and asked one reflection question. Its streak count of six is correct, so the earlier double-counting bug did not recur."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:streak-counts-today-once#3",
-        "kind": "case",
-        "id": "streak-counts-today-once",
-        "suite": "regression",
-        "title": "The done celebration's streak counts today once",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "20:35",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "zoh",
-          "text": "Night 5 in the books, Dana. Same deal tomorrow: 15 pages at 8.",
-          "at": "2026-11-02T05:32:00.000Z"
-        },
-        {
-          "from": "tester",
-          "text": "🙌",
-          "at": "2026-11-02T05:33:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "[voice: Just finished fifteen pages of Atomic Habits on the couch, I am on page ninety four now] done!",
-          "at": "2026-11-03T01:35:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Six days in a row, Dana, and you're on page 94 🔥 Take today's fifteen pages: what's one idea that stuck with you?",
-          "at": "2026-11-03T01:35:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": false,
-                "reason": "Voice note of fifteen pages is accepted and celebrated with 'Six days in a row, Dana, and you're on page 94 🔥'."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with exactly one question at the end, 'what's one idea that stuck with you?'."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energetic and warm with an emoji as punctuation, not a row, and nothing suspicious."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Streak stated as six, which is five prior days plus today counted once, not seven."
-          }
-        ],
-        "summary": "ZOH handled the voice-note proof well: it accepted and celebrated the fifteen pages in two short sentences with one closing question. It avoided the double-counting regression by saying six days, which is five prior days plus today."
+        "summary": "ZOH counted the voice note as proof and gave the correct count of 6 instead of repeating the earlier double-count of 7. Its celebration ran slightly long, with the question placed before the closing voice-note line."
       }
     }
   ]

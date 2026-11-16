@@ -1,0 +1,358 @@
+{
+  "feature": "onboarding",
+  "id": "sam-off-topic-book",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "0d8bf2414f17"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "sam-off-topic-book",
+        "kind": "scenario",
+        "id": "sam-off-topic-book",
+        "title": "Sam asks which book to start with (page example)",
+        "persona": "chatty",
+        "areaCode": "718",
+        "startTime": "20:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey! so I signed up for ZOH, I'm Sam. I want to start reading again daily, haven't really read a book in like two years lol. Ready when you are!",
+          "at": "2026-11-03T01:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam, I'm ZOH! I'll help you get better at one thing, reading again, with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\"\n\nTwo years off is an easy thing to fix. What topics or kinds of books are you into, or is there one you've been meaning to read?",
+          "at": "2026-11-03T01:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm not really sure what I'm into anymore tbh lol. Used to read a lot of thrillers and some sci-fi back in college, then life got busy and I just stopped. What's the best book to start with?",
+          "at": "2026-11-03T01:01:10.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thrillers and sci-fi is plenty to work with, Sam. We'll pick a fast-paced one together when we build your plan, so you get hooked quickly. When in your day could you realistically read, like 7:30 pm or right before bed?",
+          "at": "2026-11-03T01:01:17.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "Evenings for sure, I'm usually free after 9. I can do like 20 to 30 min. Still not sure what the best book to start with is though lol. Is it going to be something I can actually finish?",
+          "at": "2026-11-03T01:02:34.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, you can finish it. 20 to 30 minutes a night is enough to get through a fast thriller in a couple of weeks, and I'll pick one that hooks you early. Where do you want this to get you, like finishing one book or having reading be a nightly habit again?",
+          "at": "2026-11-03T01:02:41.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly both lol. I'd love to finish one and then just have it be a normal nightly thing again like it was in college. Also still wondering what book you'd pick for me, is there a specific one you'd recommend?",
+          "at": "2026-11-03T01:03:57.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two years off and you still remember thrillers and sci-fi, so my pick is The Martian by Andy Weir. It's a survival thriller with sci-fi at its core, the chapters are short, and it hooks fast.\n\n• Destination: finish The Martian, then keep nightly reading going like in college\n• Setup for today: grab a copy (ebook, library or paperback) before 9:30 pm\n• Day 1, tonight at 9:30 pm: read from page 1 for 25 minutes, wherever you're comfiest\n• Usual schedule: every day, 9:30 pm, 20 to 30 min\n• Proof: a photo of the page you stopped on, next to the book or your e-reader. If that's a hassle, a 20-second voice note on what happened so far works too\n• Why: a photo keeps it honest, and short chapters mean you can always stop at a natural spot\n\nEach night's read shapes the next one, always aimed at finishing the book. I'll still reach you at 9:30 pm.\n\nWhat do you think?",
+          "at": "2026-11-03T01:04:04.000Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt, and it carries the intro, the stop line, the coaching-change line and a question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with one emoji-free, non-affectionate tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what topics or books they're into, which fits a returning reader."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing the tester had already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said, and makes no invented claims."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, with the 'Sam' name use fitting the tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks when in the day they could read, which is needed for the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about time, which hadn't been answered yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only references the thrillers and sci-fi they named."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a time of day for reading, not a wake or sleep question."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the book question briefly and steers back to onboarding."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and encouraging, but lower energy than the pushy default."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they want reading to get them, which is a plan question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not repeat the time question already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Claims a fast thriller can be finished in a couple of weeks at 20 to 30 minutes, which is a reasonable estimate but not from the tester."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the finish question briefly, then asks the next onboarding question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 9 lines, within the allowed exception but near its upper edge."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere, but calmer than pushy-level energy."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recommends a book matching their thriller and sci-fi history and asks for their plan answers."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not ask again for anything they already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses their stated genres and time window; the book facts are well known."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives a short book recommendation and moves straight into the plan."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, stop anytime, and how to change coaching, then asks about books."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No clearly answered detail is asked again across the conversation."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learns the book, the time, the 20 to 30 minute length and the destination before presenting the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks whether they already use an app or tool, and never pushes one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is a starter goal, so no off-list handling was needed."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "The first text tells them they can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": true,
+            "reason": "Moves straight into the plan with a 'Destination' line, which is part of the plan rather than a recap."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts over a few minutes, well within the limit."
+          }
+        ],
+        "summary": "ZOH covered the onboarding inputs efficiently in four texts and gave a clear, specific plan with a fitting book pick, proof and a timed first step. The main weak spots are the plan text running close to the length limit and the energy sitting calmer than the pushy default."
+      }
+    }
+  ]
+}

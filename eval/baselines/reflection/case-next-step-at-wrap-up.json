@@ -1,0 +1,193 @@
+{
+  "feature": "reflection",
+  "id": "case:next-step-at-wrap-up",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2d8b8d59bdd5",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "064c308fa236"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:next-step-at-wrap-up",
+        "kind": "case",
+        "id": "next-step-at-wrap-up",
+        "title": "The next step at the wrap-up: proposed fully defined, adjusted by the tester, then set",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Starts in 10, Riley! 2 min jog, 1 min walk, 3 rounds around the block at 7.",
+          "at": "2026-11-02T23:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "going",
+          "at": "2026-11-02T23:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, three rounds of two minutes jogging and one minute walking, about a mile and a half.]",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LFG Riley!! Day 4 in the books, and that's your first day with 2-minute jogs in all three rounds 🔥 How did those jogs feel today compared to yesterday, when you said they felt long?",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: That was way better than yesterday. I slowed the jogs right down and could actually talk, the second round was easy.]",
+          "at": "2026-11-03T00:20:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the whole trick, Riley: slow enough to talk, and the second round got easy. What made you try slowing down? Was it something you figured out mid-jog?",
+          "at": "2026-11-03T00:21:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I could probably do another round",
+          "at": "2026-11-03T00:22:01.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Then let's use that, Riley. Tomorrow at 7 pm: 2 min jog, 1 min walk, 4 rounds around the block, with the jogs slow enough to talk. That's about 20 min, and a voice note after like today. Work for you?",
+          "at": "2026-11-03T00:22:08.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "can we do it at the park instead of my block? it's flatter",
+          "at": "2026-11-03T00:22:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Flatter is a smart reason, Riley, and it'll be easier on your legs for a fourth round. Tomorrow at 7 pm at the park: 2 min jog, 1 min walk, 4 rounds, with the jogs slow enough to talk. That's about 20 min, and you'll send a voice note after like today. Good to go?",
+          "at": "2026-11-03T00:22:46.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "perfect",
+          "at": "2026-11-03T00:23:24.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Riley. Tomorrow at 7 pm: park, four rounds, jogs slow enough to talk. Talk to you then 💪",
+          "at": "2026-11-03T00:23:31.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Slow the jogs down until you can talk; that's the right pace\nReflection for 2026-11-02: Slowed jogs, could talk, second round easy; says could probably do another round.\nStep set for 2026-11-03, agreed: 2 min jog, 1 min walk, 4 rounds at the park (flat route) at 7 pm, jogs slow enough to talk (about 20 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences plus one question at the end; within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with real win language and one fire emoji as punctuation; warm and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks two questions: 'What made you try slowing down?' and 'Was it something you figured out mid-jog?' against the one-question limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Specific, warm praise tied to the pace trick; no emoji or affection issues."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the proposal is a single short block."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident, warm tone that uses the tester's 'another round' comment without overdoing it."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one closing question; adjusted park step stated once with nothing else changed."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, responds to the 'flatter' reason without gushing."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, confirming the lock in a line as requested."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and sincere with one fitting emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Voice note is reflected on, the agreed next step is proposed fully with the pace lesson and extra round, the park change is applied once, and it saves for the next day; only the double question in ZOH 2 is a slip."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it reflected on the voice note, built the pace lesson and the extra round into a fully defined step, applied the park change cleanly, and confirmed the lock without a new question. The one clear miss was ZOH 2 asking two questions in a single text, which breaks the one-question rule."
+      }
+    }
+  ]
+}

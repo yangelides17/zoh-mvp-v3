@@ -1,0 +1,265 @@
+{
+  "feature": "onboarding",
+  "id": "case:recap-invents-details",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "3ac9e0e40ced",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "34b0ad45c87d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:recap-invents-details",
+        "kind": "case",
+        "id": "recap-invents-details",
+        "title": "Recap added a detail the tester never gave, and the coaching-style line was missing",
+        "persona": "chatty",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey! I'm Sam. I haven't read a book in like two years and I want to get back into it, a little every day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam, I'm ZOH! I'll help you get back into books with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" Getting back after two years? Let's go. What kind of stuff do you like to read, or is there a book you've been meaning to get to?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "thrillers mostly, I loved Gone Girl. what's the best one to start with?",
+          "at": "2026-11-02T23:30:58.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Gone Girl fan, so you want fast and twisty. Something like The Girl on the Train by Paula Hawkins or The Silent Patient by Alex Michaelides would pull you right back in. We'll lock in the pick in your plan. When in your day could you read, like a set time that's yours?",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "evenings after 9, like 20 to 30 min. I've got a library card",
+          "at": "2026-11-02T23:31:46.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Library card is perfect, that means a free copy of The Silent Patient or Girl on the Train. Where do you want this to get you, like finishing a whole book in a couple of weeks? Totally fine if you're not sure yet.",
+          "at": "2026-11-02T23:31:53.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with no emoji rows."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences: 'Gone Girl fan...', 'Something like...', 'We'll lock in the pick...', 'When in your day...'."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy is right and the tone is sincere, not overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks when in the day they can read, which is the next onboarding question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask anything Sam already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Both suggested books are real titles with correct authors; nothing invented about Sam."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives a short book answer and moves on to onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the library card."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the destination goal, a fitting onboarding question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the time or library answer."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "'A free copy' is a slight assumption about library borrowing, but it does not add a fact about Sam."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says ZOH, what it does, stop anytime, that coaching can change, and asks the goal, which Sam already named."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No clearly answered item is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": false,
+            "reason": "Cut off mid-onboarding before wrap-up, so covers-inputs fails by the cap rule."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": true,
+            "reason": "No app or tool question was asked, so nothing is pushed."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is a starter goal and the book help stays within it."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text says Sam can tell ZOH to coach differently, like 'chill out' or 'push me harder'."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": false,
+            "reason": "Conversation ends mid-onboarding with a destination question still open, so wrap-up fails by the cap rule."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Three ZOH texts, well within limits."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No 'at home' invented and the change-coaching line appears once; 'We'll lock in the pick in your plan' edges toward a plan-coming line."
+          }
+        ],
+        "summary": "ZOH fixed the two regression problems: it no longer invents 'at home' and it states once that Sam can change how it coaches. It still runs a four-sentence text 2 with a 'lock in the pick in your plan' aside, and the transcript ends mid-onboarding so covers-inputs and wrap-up fail by the cap rule."
+      }
+    }
+  ]
+}

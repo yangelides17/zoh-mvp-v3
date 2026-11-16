@@ -1,0 +1,372 @@
+{
+  "feature": "plan",
+  "id": "bedtime-late",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "c990c2e74913"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "bedtime-late",
+        "kind": "scenario",
+        "id": "bedtime-late",
+        "title": "Jordan wants lights out at 11:30 pm, inside the default quiet hours",
+        "persona": "all-at-once",
+        "areaCode": "917",
+        "startTime": "20:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "Jordan here. bedtime goal. I scroll till 1am every night and my Oura sleep score is a mess",
+          "at": "2026-11-03T00:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Jordan! I'm ZOH. I'm gonna text you every day to help you start one thing and actually stick with it. Text \"stop\" anytime, and you can change how I coach you anytime. What time do you want to be in bed, lights out?",
+          "at": "2026-11-03T00:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "11:30 lights out, that's the goal",
+          "at": "2026-11-03T01:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that goal, Jordan. 11:30 is 90 minutes earlier than now, and that's doable. How many hours of sleep are you aiming for each night?",
+          "at": "2026-11-03T01:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Around 7.5 hours, I think. Right now I'm getting like 5-6 on bad nights since I'm up till 1 and my alarm is 7am. Oura says I'm mostly in light sleep and barely any deep.",
+          "at": "2026-11-03T01:00:36.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Jordan, 11:30 lights out to a 7am alarm is exactly 7.5 hours, so your goal and your alarm already match. Where do you want this to get you in a few weeks? It could be an Oura score, how you feel in the morning, or \"not sure yet,\" which is fine too.",
+          "at": "2026-11-03T01:00:43.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly I want to wake up not feeling like a zombie. If my Oura deep sleep numbers go up and my mornings feel better, that's a win for me.",
+          "at": "2026-11-03T01:01:54.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Waking up like a zombie after 5-6 hours is rough, Jordan, and deep sleep is a great number to chase since your Oura will show it.\n\n• Where you're headed: wake up feeling human, with your Oura deep sleep trending up\n• Setup for tonight: pick a spot across the room to charge your phone, away from the bed\n• Day 1, tonight: at 11:00 pm, plug your phone in at that spot, then lights out at 11:30 with no scrolling in between\n• Every night, same routine, 30 minutes, in your bedroom\n• Proof: a photo of your phone on the charger at 11:00 pm. If that's awkward, send a screenshot of your Oura sleep screen the next morning.\n• Why: the scrolling is what pushes you to 1am, and a phone out of reach takes it off the table\n\nI'll still reach you with a heads-up at 10:50 pm. Each night shapes the next step, and we'll build toward 11:30 lights out sticking and your deep sleep improving. What do you think?",
+          "at": "2026-11-03T01:02:01.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "Okay that plan makes sense. The phone charging across the room is the part I actually need, since I'll just keep scrolling if it's by the bed. Quick q though, can you do the 10:50 heads-up at a different time? I'm usually still on my laptop til like 10:45 some nights. Otherwise I'm in",
+          "at": "2026-11-03T01:03:03.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good call on the phone, Jordan. Across the room is what makes this work. I can't set the heads-up separately, because it always lands shortly before the 11:00 step. If your laptop runs to 10:45, would you rather move the phone-on-charger step to 11:10, so the heads-up comes after you've closed it?",
+          "at": "2026-11-03T01:03:10.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in. 11:10 works better since I'm usually off the laptop by then. Lights out still 11:30?",
+          "at": "2026-11-03T01:04:55.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, lights out stays at 11:30, Jordan. Here's the locked plan:\n\n• Headed for: wake up not feeling like a zombie, with your Oura deep sleep trending up\n• Setup: pick your charging spot across the room\n• Tonight at 11:10 pm: phone on the charger, then lights out at 11:30 with no scrolling in between\n• Every night, in your bedroom\n• Proof: a photo of the phone on the charger, or your Oura sleep screenshot the next morning\n\nI'll reach you around 11:00 pm with a heads-up. Day 1 is tonight, so let's go! 🌙",
+          "at": "2026-11-03T01:05:02.800Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with no emoji or overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "The 90-minute comparison uses the tester's stated 1am bedtime."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus one question, within limits."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific to the 7.5-hour math, and not overfamiliar."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "11:30 to 7am is correctly computed as 7.5 hours from the tester's own numbers."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "The plan presentation runs about 9 to 10 lines with closing text, slightly over the roughly 8-line allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets are plain text, with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic but measured, and the heads-up mention is respectful."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the tester's Oura, 7am alarm and 1am scrolling, with ZOH's suggested phone-charging step."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives time (11:00 pm), place (across the room, bedroom), length (30 minutes) and the what."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences plus a question, though it is a plan revision so the longer allowance could apply."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and straightforward, with no emoji or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Honestly explains it cannot set the heads-up separately."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Locked-plan text is about 9 lines, a little over 8, though it is a plan presentation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets and a single emoji, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with a single moon emoji, warm and not overfamiliar."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses the agreed details: 11:10 step, 11:30 lights out, proof options."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Tonight's step gives time, what, lights-out time and bedroom location."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "After locking, the text carries Day 1 timing and a clear next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "Key questions about sleep hours, destination and lights-out came before the plan was shown."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan gives what, when, where, schedule and a fitting photo or Oura screenshot proof."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows destination, day 1, schedule, proof and a short line on how nightly steps progress."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester gave a destination; ZOH asked once and used it in the plan."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "After the revision, ZOH never asked for the commitment; the tester's conditional 'Otherwise I'm in' locked the plan without a real ask."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 11:10 pm, not pushed to tomorrow."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "Step times inside default quiet hours got a brief note that texts still reach them, with no question."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "After lock ZOH did not raise quiet hours."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable; the tester did not set quiet hours."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable; no nutrition goal in this conversation."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable; no goal switch was requested."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 11:10 change kept lights out at 11:30, the proof and the daily routine unchanged."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan was shown as a bullet list and the revised version was shown again in the locked text."
+          }
+        ],
+        "summary": "ZOH ran a tight, warm onboarding that moved from bedtime goal to a concrete phone-charging plan with a clear proof method and an honest explanation of the heads-up timing. The main miss is that after the tester's revision it never asked for an explicit commitment, locking on a conditional 'Otherwise I'm in' instead."
+      }
+    }
+  ]
+}

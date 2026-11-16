@@ -1,0 +1,91 @@
+{
+  "feature": "back-off",
+  "id": "case:chill-out",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:23:59.413Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "8a78687de94b",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "e205b76035d8"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:chill-out",
+        "kind": "case",
+        "id": "chill-out",
+        "title": "\"Chill out a bit\": tone down right away and flag it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "chill out a bit, you're a lot sometimes",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, dialing it back. Still holding you to the plan: a 30 min run at the park at 6 pm, with a Strava screenshot after.",
+          "at": "2026-11-02T17:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Flag back_off: Said \"chill out a bit, you're a lot sometimes\"\nStyle now: pushy; notes: Wants a calmer tone: less hype, less intensity (\"chill out a bit, you're a lot sometimes\")",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": false,
+                "reason": "Tester asked for less pushing, not fewer texts. ZOH confirms it's dialing back and promises no fewer texts the app can't deliver."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": false,
+            "reason": "\"chill out a bit, you're a lot sometimes\" is a clear request for less pushing, and a back_off flag was saved once."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": true,
+            "reason": "Correctly flagged a real less-pushing request, not a miss or step complaint, though it is a tone request rather than a text-volume one."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH confirms easing up in one short line, saves the style note, and avoids pause, stop and guilt. The calmer tone is only partly visible, and it restates the plan."
+          }
+        ],
+        "summary": "ZOH handled the back-off request well: it confirmed it was dialing back, saved the flag and style note, and avoided any pause, stop or guilt. The reply was somewhat short of the single-line calmer tone the case expects, since it still restated the 6 pm run plan, so the regression check is only borderline."
+      }
+    }
+  ]
+}

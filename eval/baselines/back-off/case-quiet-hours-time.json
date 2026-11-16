@@ -1,0 +1,91 @@
+{
+  "feature": "back-off",
+  "id": "case:quiet-hours-time",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:23:59.413Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1b76df77d905",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "e7590b4396ac"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:quiet-hours-time",
+        "kind": "case",
+        "id": "quiet-hours-time",
+        "title": "A new morning time isn't a back-off request",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can you start texting me at 10 instead of 9 in the mornings",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, Jordan. I won't text you before 10 am from now on. Your 6 pm run in the park is still on for today, so get ready for it. 🏃",
+          "at": "2026-11-02T17:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": false,
+                "reason": "No fewer-texts request was made, so no offer is needed; the text makes no promise beyond the quiet-hours change."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": false,
+            "reason": "A quiet-hours time change is not a fewer-texts request; no back_off flag was raised, matching the expected outcome."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester asked to move the morning start time, which is a quiet-hours change; ZOH did not flag it as a back-off or pause."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH moved the start to 10 am and confirmed in one line, with no back_off flag, pause, or stop, as expected."
+          }
+        ],
+        "summary": "ZOH handled the quiet-hours change correctly: it confirmed the move to 10 am in one line and did not flag, pause, or stop anything. The reply also kept the 6 pm run on track, which is a sensible touch without adding a question."
+      }
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "feature": "reflection",
+  "id": "case:live-felt-okay",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5a06f1453d48",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "e7d7ea38ec28"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:live-felt-okay",
+        "kind": "case",
+        "id": "live-felt-okay",
+        "title": "Live Nov 4: 'It felt okay' moved straight to the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:53",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! Ten minutes to your 6:30. After each question, stop and leave a real pause, like you're waiting for their answer.",
+          "at": "2026-11-02T23:51:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Tell me about the last time you had to follow up with a client. ... What did you do next? ... What did you use to keep track of that follow-up?]",
+          "at": "2026-11-02T23:53:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice one, Yanni! All three questions came through, and the tracking question sounds natural after the other two 🎙️ How did it feel saying them out loud? Did any of them feel clunky?",
+          "at": "2026-11-02T23:53:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "It felt okay",
+          "at": "2026-11-02T23:54:12.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Okay is a good start. What's behind it? Was it easy, or did saying them out loud to an imaginary freelancer feel a bit awkward?",
+          "at": "2026-11-02T23:54:19.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-11-02: Said all three questions aloud, said it \"felt okay\"; nothing more yet.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Ends with two questions: 'How did it feel saying them out loud?' and 'Did any of them feel clunky?' Rule allows at most one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, upbeat energy with one emoji as punctuation; sincere, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with a single question at the end, asking what's behind the 'okay'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere; 'Okay is a good start' is a little flat for the pushy default but acceptable."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": false,
+            "borderline": true,
+            "reason": "Opened the reflection after proof, but the opening text asked two questions instead of one, and no voice-note suggestion was made."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 asked two questions in one text, breaking the one-question-per-text rule."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'It felt okay' got a follow-up asking what's behind it, with no proposal yet, though offering 'awkward' as an option edges toward guessing."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "After 'It felt okay', ZOH asked what's behind it and did not propose tomorrow's step. It did offer 'awkward' as a guess at meaning, which the case warned against."
+          }
+        ],
+        "summary": "ZOH fixed the reported regression: after 'It felt okay' it asked what was behind it and did not push tomorrow's step. It still broke the one-question rule in its opening text and leaned on a guessed 'awkward' option in its follow-up."
+      }
+    }
+  ]
+}

@@ -154,6 +154,29 @@ export interface Entry extends Found {
   kind: string;
   /** What #196 did with it: "unchanged", "moved from …", "merged: …" or "new". */
   change: string;
+  /**
+   * #199, voice and rule lines: why the rule holds, quoted from the page as the coach reads it (its own line or
+   * its section's reason line). A reworded line loses it, so someone looks again.
+   */
+  reason?: string;
+  /** #199: not a rule (an example, a heading, the purpose or a priority itself, a description of a level). */
+  rule?: false;
+}
+
+/** #199: how an old status sheet line was sorted when the sheet became facts only. */
+export const SORTS = {
+  fact: "a plain fact, kept (maybe reworded)",
+  "fact + guidance": "a fact kept on the sheet; how to act on it moved to its section, with its reason",
+  "in code": "already enforced by code (a tool's result or refusal), so dropped",
+} as const;
+
+export interface Resorted {
+  /** The old line, as the inventory listed it. */
+  old: string;
+  sort: keyof typeof SORTS;
+  /** Where the fact and its guidance live now. */
+  now: string;
+  why: string;
 }
 
 export interface Inventory {
@@ -165,6 +188,8 @@ export interface Inventory {
   merged: { removed: string; from: string; keptIn: string; why: string }[];
   /** Overlaps looked at and kept on purpose, with why they aren't the same sentence. */
   leftAlone: { where: string; why: string }[];
+  /** #199: every status sheet line removed or rewritten, how it was sorted, and where it lives now. */
+  resorted: Resorted[];
 }
 
 export const KINDS: Record<string, string> = {
@@ -264,21 +289,39 @@ export function rebuild(found: Found[], old: Inventory | undefined): Inventory {
     (byKey.get(key(e)) ?? byKey.set(key(e), []).get(key(e))!).push(e);
     (byText.get(e.text) ?? byText.set(e.text, []).get(e.text)!).push(e);
   }
+  // #199: a line's reason (or that it isn't a rule) carries over only while its words stay the same.
+  const tags = (e: Entry | undefined) => (e?.reason ? { reason: e.reason } : e?.rule === false ? { rule: false as const } : {});
   const entries = found.map((f): Entry => {
     const same = byKey.get(key(f))?.shift();
-    if (same) return { ...f, kind: kindOf(f), change: same.change };
+    if (same) return { ...f, kind: kindOf(f), change: same.change, ...tags(same) };
     const moved = byText.get(f.text)?.find((e) => e.file !== f.file || e.where !== f.where);
-    if (moved) return { ...f, kind: kindOf(f), change: `moved from ${moved.file} (${moved.where})` };
+    if (moved) return { ...f, kind: kindOf(f), change: `moved from ${moved.file} (${moved.where})`, ...tags(moved) };
     return { ...f, kind: kindOf(f), change: old ? "new" : "unchanged" };
   });
+  const resorted = old?.resorted ?? [];
+  const unsorted = droppedSheetLines(found, old).filter((text) => !resorted.some((r) => r.old === text));
+  if (unsorted.length) {
+    throw new Error(`Status sheet lines removed or reworded with no "resorted" entry saying where they went (#199):\n${unsorted.join("\n")}`);
+  }
   return {
     about:
-      "#196: every line ZOH (the coach model) reads, where it lives and what #196 did with it. Checked by test/prompt-inventory.test.ts; rebuild with `npm run inventory -- --write` and review the diff.",
+      "#196: every line ZOH (the coach model) reads, where it lives and what #196 did with it; #199: each voice and rule line's reason, and how the status sheet's old lines were sorted. Checked by test/prompt-inventory.test.ts; rebuild with `npm run inventory -- --write` and review the diff.",
     kinds: KINDS,
     entries,
     merged: old?.merged ?? [],
     leftAlone: old?.leftAlone ?? [],
+    resorted,
   };
+}
+
+/**
+ * #199: status sheet lines from before the sheet became facts (not marked "new") that no longer appear anywhere
+ * on it. A line added since can be reshaped freely; an old one can't leave without saying where its behavior went.
+ */
+export function droppedSheetLines(found: Found[], old: Inventory | undefined): string[] {
+  const now = new Set(found.filter((f) => kindOf(f) === "status sheet").map((f) => f.text));
+  const gone = (old?.entries ?? []).filter((e) => e.kind === "status sheet" && e.change !== "new" && !now.has(e.text));
+  return [...new Set(gone.map((e) => e.text))];
 }
 
 export function readInventory(): Inventory {

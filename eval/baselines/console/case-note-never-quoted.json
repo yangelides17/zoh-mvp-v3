@@ -1,0 +1,283 @@
+{
+  "feature": "console",
+  "id": "case:note-never-quoted",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:14:05.869Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "00ff7e8b2c69",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "56789c6f6e48"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:note-never-quoted#1",
+        "kind": "case",
+        "id": "note-never-quoted",
+        "suite": "capability",
+        "title": "A team note shapes the reply but is never quoted or credited",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Priya! 15 minutes in the living room at 7: squats, push-ups, plank. You in?",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "honestly couldn't do it this morning, was at the hospital with my dad till late",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, I'm so sorry. Being at the hospital with your dad comes before any workout, and nobody's keeping score on it today. How's he doing, and how are you holding up?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah thanks. I'll try tonight maybe",
+          "at": "2026-11-02T15:00:50.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tonight works, Priya, and I'm glad you're giving yourself the chance. After the day you've had, a shorter version counts too. Do 8 minutes in the living room whenever you've got the energy: squats, push-ups and a plank. Then send me a quick post-workout selfie. Work for you?",
+          "at": "2026-11-02T15:00:57.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the hospital visit with her dad, which she just said, and asks how he is without claiming prior knowledge."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ties the reply to her own words about tonight and the hard day, without referencing anything outside the conversation."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Offers an 8-minute version at a natural moment as ZOH's own idea, though the selfie ask and 'Work for you?' add more push than the spec's gentle mention."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answers her hospital news warmly with no push in text 1, and offers a smaller version gently in text 2 with no team, note or prior-knowledge mention."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it responded to Priya's hospital news with real warmth and no pressure, then offered a smaller version without guilt. The only soft spot is text 2, where the post-workout selfie request and 'Work for you?' add a bit more push than the case called for."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:note-never-quoted#2",
+        "kind": "case",
+        "id": "note-never-quoted",
+        "suite": "capability",
+        "title": "A team note shapes the reply but is never quoted or credited",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Priya! 15 minutes in the living room at 7: squats, push-ups, plank. You in?",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "honestly couldn't do it this morning, was at the hospital with my dad till late",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Oh Priya, I'm sorry. A night at the hospital with your dad is a lot, and today's workout can wait. How are you holding up?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah thanks. I'll try tonight maybe",
+          "at": "2026-11-02T15:00:50.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tonight works, Priya, and I'm glad you're giving yourself the option. Given the day you've had, let's make it a shorter one. Do a 7-minute circuit of squats, push-ups and plank in the living room, any time before bed. Then send me a quick post-workout selfie. Work for you?",
+          "at": "2026-11-02T15:00:57.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Responds to the hospital night with her dad, which she just said, and asks nothing beyond it."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Builds on the known circuit (squats, push-ups, plank) and her stated day, without inventing history."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Offers a shorter version as ZOH's idea, but sets a firm circuit and selfie proof rather than a light, no-pressure offer."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No mention of team, founders, notes or prior knowledge of the hospital; the reply to her 'tonight maybe' is kind, but the 7-minute step with a selfie ask is firmer than a gentle offer."
+          }
+        ],
+        "summary": "ZOH handled Priya's missed workout warmly, responding to her father's hospital night with no push in the first reply. It never mentioned the team, a note, or knowledge beyond what she said, though the shorter-step follow-up is firmer than the gentle offer the case called for."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:note-never-quoted#3",
+        "kind": "case",
+        "id": "note-never-quoted",
+        "suite": "capability",
+        "title": "A team note shapes the reply but is never quoted or credited",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Priya! 15 minutes in the living room at 7: squats, push-ups, plank. You in?",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "honestly couldn't do it this morning, was at the hospital with my dad till late",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, that's completely okay. Being there for your dad comes first. How is he doing, and how are you holding up?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah thanks. I'll try tonight maybe",
+          "at": "2026-11-02T15:00:50.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tonight works, Priya. Same circuit: squats, push-ups, plank, in the living room. If you're wiped, a shorter 7-minute version still counts, with a selfie after. What time tonight feels doable?",
+          "at": "2026-11-02T15:00:57.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Responds to the hospital and dad detail she just gave, without claiming prior knowledge of it."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Circuit, living room and 7-minute option match the saved step and her words."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "The smaller version is offered in ZOH's voice as a no-pressure option, with no mention of the team or a note."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Text 1 is warm with no push and no team, note, or hospital-knowledge mention; text 2 offers a kind smaller version with no guilt or team reference."
+          }
+        ],
+        "summary": "ZOH handled Priya's hospital disclosure warmly, with no push and no mention of the team, a note, or prior knowledge of the hospital. Its follow-up offered a smaller 7-minute version as a kind option, keeping the same circuit and staying grounded in the saved step."
+      }
+    }
+  ]
+}

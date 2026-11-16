@@ -1,0 +1,643 @@
+{
+  "feature": "nudges",
+  "id": "case:followup-no-proof",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:14:43.857Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2ad6c6451902",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "3da436dd9d95"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:followup-no-proof#1",
+        "kind": "case",
+        "id": "followup-no-proof",
+        "suite": "capability",
+        "title": "The follow-up after the step time; a \"did it\" with no proof gets a warm ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Jordan! 30 minutes around the park at 6 tonight, nice and easy. You in?",
+          "at": "2026-11-02T05:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T05:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6, so lace up and get to the park with a few minutes to spare. Start the first 5 minutes slower than feels natural, because easy pace is the whole point today. Is Strava ready to record?",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35, so the run should be done or close to it. How did it go?",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "did it! legs are dead lol",
+          "at": "2026-11-03T00:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work getting it done, Jordan! Dead legs means you put in the work 💪 Send me the Strava run summary screenshot and we'll lock in today.",
+          "at": "2026-11-03T00:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I forgot to record it on Strava",
+          "at": "2026-11-03T00:15:34.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, skata, that happens. Real proof keeps this honest, and words alone are too easy to game. Is there anything else you can send from the run, like a screenshot from a watch or phone health app, or a quick voice note about it?",
+          "at": "2026-11-03T00:15:41.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the run at 6 at the park, which is today's step and its time."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\""
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences with one question at the end, and the teaching tip is allowed to run longer."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "The tip to start slower fits an easy-pace run and is grounded in the step."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\" and a check on the time."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Neutral check-in with no pressure or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and appropriately casual."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with the tester's name and celebrates the run."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, with one ask at the end for the proof."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebratory with no guilt or urgency."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and suits the win, with one emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"Words alone are too easy to game\" leans slightly toward suspicion, though it stays warm."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, matches the tone and says why proof matters without accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Check-in before 6, then a follow-up at 6:35 asking how it went. \"did it!\" got energy and a proof ask with no check mark, and the forgot-to-record reply stayed warm and asked for anything still sendable. It does not say \"today\" explicitly and the game line is slightly suspicious."
+          }
+        ],
+        "summary": "ZOH followed the regression script closely: a warm check-in before 6, a single follow-up at 6:35, real energy on \"did it!\", and proof asked for without counting the run. The main soft spots are the \"too easy to game\" wording and not explicitly asking for proof to be sent today."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:followup-no-proof#2",
+        "kind": "case",
+        "id": "followup-no-proof",
+        "suite": "capability",
+        "title": "The follow-up after the step time; a \"did it\" with no proof gets a warm ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Jordan! 30 minutes around the park at 6 tonight, nice and easy. You in?",
+          "at": "2026-11-02T05:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T05:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6 in 10 minutes, so lace up and head to the park. Keep it easy and conversational pace, 30 minutes, and send me the Strava summary when you're back 🏃",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! How did the run at the park go today?",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "did it! legs are dead lol",
+          "at": "2026-11-03T00:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work, Jordan, dead legs mean you showed up 💪 Send me the Strava run summary screenshot so I can make it official?",
+          "at": "2026-11-03T00:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I forgot to record it on Strava",
+          "at": "2026-11-03T00:15:34.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, that happens, Jordan. Real proof keeps it honest, and words alone don't count. Can you send anything that shows the run, like a voice note walking me through it, a photo from the park, or a screenshot from a watch or phone health app?",
+          "at": "2026-11-03T00:15:41.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the run, the park, 6 pm and the 30 minutes of easy pace."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\"."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where, when, how long and pace clearly."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic, sincere, one emoji as punctuation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": true,
+                "reason": "Names the run at the park but not the time or length, which a follow-up doesn't need."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\"."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how it went with no pressure or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and neutral, no overfamiliarity."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the run and asks for proof without shaming."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Real energy on \"did it!\" with one emoji as punctuation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or hashtags."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and non-accusing about the forgotten Strava record."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and calm, sincere, no emoji row."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Sends a follow-up asking how it went, celebrates \"did it!\", asks for proof without a check mark, and explains why proof matters without caving; it doesn't say \"today\" in the proof ask."
+          }
+        ],
+        "summary": "ZOH handled the follow-up well: it sent a warm check-in, a short how-it-went nudge, celebrated the \"did it!\" and asked for proof without counting the run. The only soft spot is that the final proof ask doesn't say the proof must come today, so the regression check is borderline."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:followup-no-proof#3",
+        "kind": "case",
+        "id": "followup-no-proof",
+        "suite": "capability",
+        "title": "The follow-up after the step time; a \"did it\" with no proof gets a warm ask",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Jordan! 30 minutes around the park at 6 tonight, nice and easy. You in?",
+          "at": "2026-11-02T05:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T05:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6, so lace up and get to the park. Take the first few minutes really easy, since an easy run should feel like you could chat the whole way. What's one thing you'll do differently from Saturday's 3.1 miles?",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35, so I'm guessing the run's either happening or just wrapped. How did it go?",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "did it! legs are dead lol",
+          "at": "2026-11-03T00:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work getting out there, Jordan 🔥 Send me the Strava run summary screenshot and I'll log it. Real proof keeps it honest.",
+          "at": "2026-11-03T00:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I forgot to record it on Strava",
+          "at": "2026-11-03T00:15:34.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, that stings, but it happens. Real proof keeps the check mark honest, and words alone can't do that. Is there anything else you can send today, like a screenshot from a watch or phone health app, or a photo from the park?",
+          "at": "2026-11-03T00:15:41.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the run at 6 at the park, which is today's step, and the time."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\""
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs four short sentences with one question at the end, slightly over the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct, sincere, with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\""
+              },
+              {
+                "rule": "names-commitment",
+                "pass": false,
+                "borderline": true,
+                "reason": "Follow-up only says \"the run's either happening or just wrapped\" and never names the step again."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; a simple check on how it went."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, with no extra questions."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"Nice work getting out there\" is warm but flat for a \"did it!\" win; the energy is low."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words; the emoji sits at the end as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Ah, that stings, but it happens\" is kind, with no accusation."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm about proof without caving."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no filler or markdown."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Check-in before 6, follow-up at 6:35 asking how it went, quick proof ask after \"did it!\", and warm, non-accusing refusal to count it. The \"did it!\" energy is modest and \"I'll log it\" is slightly loose."
+          },
+          {
+            "rule": "no-restating",
+            "pass": true,
+            "borderline": false,
+            "reason": "The step and time are not restated in the later replies to the tester."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it sent a warm check-in before 6, followed up at 6:35 without a lecture, and held firm on proof after the forgotten Strava recording, asking for alternatives and never counting it. The main weaknesses are that the follow-up doesn't name the step, and the reply to \"did it!\" was flatter than the win deserved."
+      }
+    }
+  ]
+}

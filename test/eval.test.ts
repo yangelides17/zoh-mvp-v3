@@ -323,9 +323,10 @@ describe("eval: seeds for the team, a pause and a lighter plan (#196)", () => {
     });
     expect(result.appErrors).toEqual([]);
     const state = model.stateOf();
-    expect(state).toContain("FROM THE TEAM, notes (context only; never quote them or mention the team):");
+    // #199: the sheet's team lines are facts now (how to use them is THE TEAM's).
+    expect(state).toContain("FROM THE TEAM, notes:");
     expect(state).toContain("Sam's mom is in hospital this week");
-    expect(state).toMatch(/FROM THE TEAM, request \[\w+\]: Suggest the Dune audiobook for the drive/);
+    expect(state).toMatch(/FROM THE TEAM, request \[\w+\], not done yet: Suggest the Dune audiobook for the drive/);
     expect(state).toMatch(/This is a temporary lighter plan through \d{4}-\d{2}-\d{2}; then their usual plan comes back\./);
     expect(state).toContain("PAUSED");
     expect(result.savedState).toMatchObject({ plans: [{ version: 1, step: "10 pages" }, { version: 2, step: "5 pages", change_kind: "other" }] });

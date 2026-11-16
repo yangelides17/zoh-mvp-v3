@@ -1,0 +1,165 @@
+{
+  "feature": "nudges",
+  "id": "case:kickoff-after-one-day-move",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b968eea4aa6c",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "1c10d75cc517"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-one-day-move",
+        "kind": "case",
+        "id": "kickoff-after-one-day-move",
+        "title": "Kickoff after a one-day time move states the usual time and never asks what time (#73)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "can we do 7:30 tonight instead, running late",
+          "at": "2026-11-02T00:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "7:30 it is, Riley. Just for tonight.",
+          "at": "2026-11-02T00:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done! read the one on pricing",
+          "at": "2026-11-02T00:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's GO. Day 3 in the books.",
+          "at": "2026-11-02T00:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Riley! Three days in a row now: unit economics, hiring, pricing. Tonight at 6:30 it's a new angle: 10 minutes at home on an article about marketing or customer acquisition. Send me a screenshot and a one-line recap after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Riley. One correction to my last text: tonight is 7:30, not 6:30, like you asked. Marketing or customer acquisition article, and I'll look for your screenshot and recap after. Go get it 💪",
+          "at": "2026-11-02T14:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 10 minutes at home on a marketing or customer acquisition article, at 6:30 tonight."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Kalimera Riley!\", a warm greeting with the name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or fake urgency; it frames the streak positively."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about four or five short sentences with one question at the end, a bit over the limit but still compact."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its one question is \"You in?\"; it doesn't re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (article on marketing or customer acquisition), where (home), when (6:30 tonight), and how long (10 minutes), plus proof."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, and sincere with one emoji-free kickoff; no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, and it restates the time and wrongly calls 7:30 \"like you asked\"."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, though the correction itself is confused."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Its reply to \"yep\" states the time as 7:30 tonight, moving today's step from the usual 6:30 that the kickoff had set."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": false,
+            "reason": "After \"yep\" it restates the step and time and changes the time to 7:30 without the tester asking for a change."
+          }
+        ],
+        "summary": "ZOH's 9 am kickoff was solid: it named the step at the usual 6:30 pm, varied the angle, and asked only whether Riley was in. The reply to \"yep\" repeats the bug: it restates the step and wrongly moves today to 7:30, which contradicts the 6:30 plan and invents a correction nobody asked for."
+      }
+    }
+  ]
+}

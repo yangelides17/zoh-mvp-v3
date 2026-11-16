@@ -2,27 +2,27 @@
   "feature": "next-step",
   "id": "case:whats-my-streak",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:41:17.595Z",
-  "branch": "feature/196-prompt-groundwork",
+  "storedAt": "2026-11-16T19:20:51.076Z",
+  "branch": "feature/199-judgment-over-rules",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "ce22d8f7e052",
-    "voice": "d54400a50c11",
+    "voice": "fbc3a37c5b97",
     "instructions": "c7348af58300",
     "script": "02379892f702"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:whats-my-streak#1",
+        "key": "case:whats-my-streak",
         "kind": "case",
         "id": "whats-my-streak",
-        "suite": "regression",
         "title": "\"What's my streak?\" gives every goal's streak in one short reply",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "08:40",
-        "timeZone": "America/New_York"
+        "timeZone": "America/New_York",
+        "suite": "regression"
       },
       "context": [
         {
@@ -44,143 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Focus is at 9 step days, and a screenshot of your focus timer today makes it 10. Reading is at 27 step days on the maintenance side. 🔥",
-          "at": "2026-11-02T13:40:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "all-streaks",
-                "pass": true,
-                "borderline": false,
-                "reason": "Gives both goals' streaks, focus at 9 and reading at 27, in one short reply with no lists."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences, no question, one emoji at the end."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "Gives both streaks in one short reply and adds a proof push. It projects 'makes it 10' with a screenshot, which edges toward counting today's block early, and the 27 can't be checked against the state."
-          }
-        ],
-        "summary": "ZOH answered the two-goal streak question in one short reply with both numbers and a light proof push, matching the expected regression behavior. The main risk is the phrasing 'makes it 10', which leans toward counting today's unfinished block, and the 27 figure could not be verified from the transcript."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:whats-my-streak#2",
-        "kind": "case",
-        "id": "whats-my-streak",
-        "suite": "regression",
-        "title": "\"What's my streak?\" gives every goal's streak in one short reply",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "08:40",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "tester",
-          "text": "50 minutes, boom",
-          "at": "2026-11-01T19:37:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "That's 9 in a row, Nico. The thesis is moving 🔥",
-          "at": "2026-11-01T19:38:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "what's my streak at right now?",
-          "at": "2026-11-02T13:40:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Focus is at 9 step days, and it becomes 10 once today's block is done. Reading, your maintenance goal, is at 27 step days.\n\nSend the focus timer screenshot when you wrap today's 50 minutes and we'll lock in the 10.",
-          "at": "2026-11-02T13:40:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Three sentences with a second paragraph, but it's a bit long; it does have one question? No question present, and a directive; mainly the reply is short-ish but contains two separate blocks."
-              },
-              {
-                "rule": "all-streaks",
-                "pass": true,
-                "borderline": false,
-                "reason": "Gives both the focus streak (9) and the reading streak (27) in one reply."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Gives both streaks in one short reply, with the reading streak as kept up, and a brief push for today's block without counting it early."
-          }
-        ],
-        "summary": "ZOH answered the two-goal streak question with both numbers and correctly excluded today's unfinished block. The reply runs slightly long and its wording of the reading streak as 27 step days is accepted from the state."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:whats-my-streak#3",
-        "kind": "case",
-        "id": "whats-my-streak",
-        "suite": "regression",
-        "title": "\"What's my streak?\" gives every goal's streak in one short reply",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "08:40",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "tester",
-          "text": "50 minutes, boom",
-          "at": "2026-11-01T19:37:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "That's 9 in a row, Nico. The thesis is moving 🔥",
-          "at": "2026-11-01T19:38:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "what's my streak at right now?",
-          "at": "2026-11-02T13:40:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Your streaks, Nico:\n• Focus: 9 step days, and today's 50 minutes makes it 10 once I see the screenshot of your focus timer\n• Reading: 27 step days\n\nGot that timer screenshot handy?",
+          "text": "Focus is at 9 days in a row, and today's block at 10 makes it 10. Reading is at 27 days, still going strong 📚 Send me the focus timer screenshot when you finish.",
           "at": "2026-11-02T13:40:07.000Z"
         }
       ],
@@ -194,13 +58,13 @@
                 "rule": "all-streaks",
                 "pass": true,
                 "borderline": true,
-                "reason": "Gives both goals' streaks in one reply, but the focus line leans on today's unfinished block to reach 10."
+                "reason": "Gives both streaks in one short reply, but phrases focus as 10 by counting today's unfinished block."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "A two-line list plus a single closing question is near the limit, though the list format is allowed."
+                "borderline": false,
+                "reason": "Three sentences, no question mark, ends with a clear request for the screenshot."
               }
             ]
           }
@@ -208,12 +72,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Gives 9 for thesis and 27 for reading without counting today's block as done, but its 'makes it 10' framing and bullet list stretch the one short reply."
+            "reason": "Reply says today's block at 10 makes focus 10, counting today's block before it is done, though it is framed as a forecast."
           }
         ],
-        "summary": "ZOH gave both streaks from the state, and it kept today's thesis block out of the count until proof arrives. It stayed borderline on brevity and on the 'makes it 10' wording, which slightly anticipates today's block."
+        "summary": "ZOH gave both streaks in one short, well-formed reply with a specific push for today's block. It did slip by projecting today's unfinished thesis block into the focus count, which the regression case says should not happen."
       }
     }
   ]

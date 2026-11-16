@@ -1,0 +1,251 @@
+{
+  "feature": "memory",
+  "id": "case:day-of-chatter",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:25:09.958Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "9d5fa1a09d39",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "fd746ba51c60"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:day-of-chatter",
+        "kind": "case",
+        "id": "day-of-chatter",
+        "title": "A chatty day gets filed into the right pages overnight",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Mike! Ten pages of Project Hail Mary in bed at 9 tonight. You in?",
+          "at": "2026-11-02T03:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T03:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "my sister Ana started reading with me this week lol, she's way faster than me",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, nice, having Ana reading alongside you is a real boost, Mike. Her pace doesn't matter, your ten pages a night is the whole game, and you've got two days stacked already. Is she reading the same book or her own?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "and my dog Max sleeps on my feet while I read, honestly helps me wind down",
+          "at": "2026-11-02T23:30:50.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Mike. Max on your feet is basically a built-in wind-down routine 🐶 Tonight's ten pages at 9 are going to feel good. What's been your favorite part of Project Hail Mary so far?",
+          "at": "2026-11-02T23:30:57.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "saw the cutest dog on my walk today btw",
+          "at": "2026-11-02T23:31:39.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, dogs are clearly your thing, Mike. Save some of that good energy for tonight though: ten pages in bed at 9, and a photo of the page you stop on. And you never told me, what's been your favorite part of Project Hail Mary so far?",
+          "at": "2026-11-02T23:31:46.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "I just love dogs tbh",
+          "at": "2026-11-02T23:32:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, I can tell, Mike. Max is lucky to have you. Now let's get those ten pages in tonight at 9, and I'll be waiting on that photo of your page. What's got you hooked so far in Project Hail Mary?",
+          "at": "2026-11-02T23:32:25.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Mike! Ten minutes to 9, so grab your book and get settled in bed, Max on your feet and all. Ten pages, then a photo of the page you stop on. Ready to go?",
+          "at": "2026-11-03T01:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Mike! It's 9:25, so how did the ten pages go? Send me a photo of the page you stop on when you're done, and tell Max he did a good job keeping your feet warm.",
+          "at": "2026-11-03T02:25:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok done, 10 pages. Ana's already 3 chapters ahead smh",
+          "at": "2026-11-03T02:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work getting the ten pages in, Mike. Ana's pace is hers, you're showing up every night, and that's what counts. Send me a photo of the page you stop on and I'll get it checked off. 📚",
+          "at": "2026-11-03T02:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "memory": "--- At the start of the conversation ---\n(no memory pages)\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done\n\n--- At the end ---\np:0e349a2c · Mike (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Loves dogs. (Nov 2)\nHow they text:\n- Texts very short, lowercase, no punctuation (\"yep\"). (Nov 1)\n- Uses \"lol\", \"smh\", \"tbh\", \"btw\"; casual tone. (Nov 2)\nRelated: p:02f14205 Ana (his sister); p:d0eaadb3 Max (his dog)\n\np:bf8ffe17 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\nObservations (evidence, not yet a pattern):\n- [replies to evening check-in] Replied at 21:25 after the 21:25 nudge saying 10 pages done; no photo sent yet. Didn't answer repeated question about favorite part of the book. (Nov 2)\n\np:2e05fb85 · Goal: Read & learn more (books, ideas, any topic) [goal]\nBooks, articles, podcasts or any topic they want to learn\n- Reads in bed with Max on his feet; feels a bit behind his faster sister Ana, who reads alongside him. (Nov 2)\nStep path, first to latest: v1 (Oct 28): 10 pages of Project Hail Mary (current)\nCurrent plan: step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nRelated: p:02f14205 Ana (his sister); p:d0eaadb3 Max (his dog)\n\np:d0eaadb3 · Max (his dog) [person]\nMike's dog, sleeps on his feet while he reads.\n- Sleeps on Mike's feet while he reads; helps Mike wind down. (Nov 2)\nRelated: p:2e05fb85 Goal: Read & learn more (books, ideas, any topic); p:0e349a2c Mike (the tester)\n\np:02f14205 · Ana (his sister) [person]\nMike's sister, started reading alongside him this week; reads faster.\n- Reads much faster than Mike; already 3 chapters ahead (Nov 2). (Nov 2)\n- Started reading with Mike the week of Nov 2. (Nov 2)\nRelated: p:2e05fb85 Goal: Read & learn more (books, ideas, any topic); p:0e349a2c Mike (the tester)\n\np:22402673 · Mon Nov 2 · Mon Nov 2: 10 pages done, Ana and Max joined [daily]\nMike read his ten pages; photo not yet sent.\nMike chatted in the afternoon about his sister Ana starting to read with him (she's faster) and his dog Max sleeping on his feet while he reads. He said he loves dogs. He didn't answer questions about his favorite part of the book. At 21:25 he said he finished 10 pages, with a little grumble about Ana being 3 chapters ahead. No photo had been sent by the end of the day.\n\np:3d420b28 · Sun Nov 1 · Sun Nov 1: Mike said yep [daily]\nBrief check-in; Mike confirmed he's in for tonight's reading.\nZOH asked at 22:27 about ten pages of Project Hail Mary in bed at 9. Mike replied \"yep\" a minute later. No proof or reflection was sent, so it isn't clear whether the step was done. His reply was very short.\n\nStep days on record, newest first: 2026-11-02 missed, 2026-11-01 done, 2026-10-31 done",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Mentions Ana reading and the two stacked days, both consistent with what's in memory and the texts."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day one of the tester's reading, light and friendly, with no claims about knowing him well."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to Max on his feet, which Mike said and memory records."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to what he shared, without overstepping the first week."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only refers to the dog comment and the tonight step, both from the conversation."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says 'dogs are clearly your thing', a light read of one comment, not a claim about who he is."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Mentions Max and tonight's pages, both grounded in what the tester said."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and brief, no assumptions beyond what he's said."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to Max on his feet and the plan, both from the conversation and memory."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Unprompted nudge that stays on the plan and uses his name only as an opener."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about Max keeping his feet warm, which matches the dog detail he shared."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light check-in with no claims beyond the shared details."
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": true,
+                "reason": "'You're showing up every night' stretches the record, which shows only Oct 31, Nov 1 done and Nov 2 unproven."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging and specific to tonight's pages, nothing overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pages-real",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pages exist for Ana, Max and the reading goal, with general dog love filed on Mike's own page and no page for the walk dog."
+          },
+          {
+            "rule": "learned-not-single",
+            "pass": true,
+            "borderline": true,
+            "reason": "Preferences page logs one evening observation labeled 'not yet a pattern', so no learned preference was recorded from a single instance."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Ana and Max have their own pages, 'Loves dogs' is on Mike's page, no walk-dog or general dog page exists, and there's one daily doc per day; 'feels a bit behind' slightly stretches his words."
+          }
+        ],
+        "summary": "ZOH stayed warm, grounded in what Mike shared, and avoided overfamiliarity across the exchange, with only a slight stretch in its final 'showing up every night' line. Memory filed Ana, Max and dog-love in the right places with no invented pages, though the goal page's 'feels a bit behind' is a mild embellishment."
+      }
+    }
+  ]
+}

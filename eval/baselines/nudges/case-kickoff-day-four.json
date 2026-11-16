@@ -1,0 +1,208 @@
+{
+  "feature": "nudges",
+  "id": "case:kickoff-day-four",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a83434aad938",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "a0a60a0bb4b8"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-day-four",
+        "kind": "case",
+        "id": "kickoff-day-four",
+        "title": "Day 4: the kickoff builds on how the last runs went, and the check-in uses today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "done! 2 min jogs felt easy honestly",
+          "at": "2026-10-31T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "THAT'S what I'm talking about, Sam. Two-minute jogs, done and easy. See you Monday.",
+          "at": "2026-10-31T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Sam! Last time the 2-minute jogs felt easy, so we're bumping it up. Tonight at 6:30 pm, around your block: 2 min easy walk, then 3 min jog, 1 min walk, 3 rounds. Strava screenshot after. You said you'd get to that mile, and this gets you closer. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yes let's go",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sam! 🔥 6:30 tonight, 3-minute jogs, and I'll be waiting on that Strava screenshot.",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam! 6:30 is coming up, so get your shoes on and head to the block. 2 min walk warm-up, then 3 min jog, 1 min walk, 3 rounds. Send me that Strava screenshot when you're back. 🏃",
+          "at": "2026-11-02T23:20:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step (2 min walk, 3 min jog, 1 min walk, 3 rounds), where (around your block) and when (6:30 pm)."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Sam!\", a greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"You said you'd get to that mile\" points back to their own words without shaming them."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs to about six short sentences and fragments, more than the one-to-three-sentence limit for a kickoff."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only \"You in?\" and does not re-ask the time or step."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives what, where and when; total duration is implied by the rounds rather than stated outright."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with no question, well within the length limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, with the emoji used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level energy with a single emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", a warm greeting with their name."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's new step (2 min walk, 3 min jog, 1 min walk, 3 rounds), where (the block) and when (6:30)."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences including the greeting, slightly over the three-sentence limit for a check-in."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text; the running emoji is used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with one emoji and no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The kickoff builds correctly to 3-min jogs without re-asking the time, but the reply to \"yes let's go\" restates the time and step (\"6:30 tonight, 3-minute jogs\")."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 repeats the 6:30 time and the 3-minute jog step right after the kickoff already covered them."
+          },
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Moves from 2-minute jogs to 3-minute jogs with 1-minute walks, a sensible step up rather than a jump or the plan's original 1-minute jogs."
+          },
+          {
+            "rule": "kickoff-not-repeated",
+            "pass": true,
+            "borderline": false,
+            "reason": "The morning kickoff goes out once and the time is never re-asked."
+          }
+        ],
+        "summary": "ZOH's kickoff correctly builds on the 2-minute jogs with a fully defined step, asks only \"You in?\", and never re-asks the time. It falls short on brevity in the kickoff and check-in, and the reply to \"yes let's go\" restates the time and step when it should stay short and not repeat them."
+      }
+    }
+  ]
+}

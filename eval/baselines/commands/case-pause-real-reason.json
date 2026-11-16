@@ -1,0 +1,96 @@
+{
+  "feature": "commands",
+  "id": "case:pause-real-reason",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:12.402Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c35e0412a1d1",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "60ea54dcf0e1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:pause-real-reason",
+        "kind": "case",
+        "id": "pause-real-reason",
+        "title": "Pause with a real reason: ask why, then a yes in one line, then quiet",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey can you pause the texts for a bit",
+          "at": "2026-11-02T13:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Jordan. Is something going on, like a busy stretch, travel, or feeling off? Just want to know what's behind it.",
+          "at": "2026-11-02T13:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "flying to Greece for my cousin's wedding, back in 5 days",
+          "at": "2026-11-02T13:30:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Greece for a wedding, that's a great reason. You're paused until Saturday, Nov 7, and I won't text before then. Safe travels, Jordan. Enjoy the wedding, and we'll get back to your runs when you're home ✈️",
+          "at": "2026-11-02T13:30:45.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 1 asked warmly what's going on before pausing, and the wedding trip was accepted right away in ZOH 2 with no pushback."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH asked why first, accepted the wedding trip with no pushback or guilt, and said it would go quiet until Saturday. ZOH 2 runs two sentences plus an emoji, a little longer than the requested one short line."
+          }
+        ],
+        "summary": "ZOH handled the real-reason pause well: it asked warmly why, accepted the wedding trip immediately, and paused with no pushback or guilt. The only soft spot is that the acceptance text runs a bit longer than the requested one short warm line."
+      }
+    }
+  ]
+}

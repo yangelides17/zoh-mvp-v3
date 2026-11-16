@@ -1,0 +1,194 @@
+{
+  "feature": "lookback",
+  "id": "case:lookback-six-pm",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:22:44.023Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "91d93ef96c7b",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "427390fc7dc4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:lookback-six-pm",
+        "kind": "case",
+        "id": "lookback-six-pm",
+        "title": "Silent on a rest-day Sunday: the 6 pm recap as its own text, then a reply leads into the week talk",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "done, 3 min straight without stopping!!",
+          "at": "2026-11-08T01:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "THREE minutes, Sam. That's real. Sunday's a rest day, back at it Monday.",
+          "at": "2026-11-08T01:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Here's the progress you made this week:\n\n• 5 step days done in full and 1 smaller version, with a Strava screenshot for every one of them\n• Your jog intervals grew from 1 minute on Monday to 3 minutes straight on Saturday\n• On Tuesday you slowed to a pace where you could talk, and that made the run doable\n• Saturday's run was 1.0 mi on Strava, so you've covered a mile with walk breaks mixed in\n\nYour goal is a mile without stopping by Nov 14. You've got 3 straight minutes of jogging down, and the next step is stretching those jogs longer. What do you want to push on this week: longer jogs, or fewer walk breaks?",
+          "at": "2026-11-08T23:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "the 3 minutes felt huge honestly",
+          "at": "2026-11-08T23:01:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "It should feel huge, Sam. A week ago a single minute was hard, and now you're at three. That's the proof your body is adapting. 🙌\n\nTomorrow we build on it. Around the block at 6:30 pm, 4 min jog, 1 min walk, 3 rounds, same talk-test pace. Send a Strava screenshot after. Work for you?",
+          "at": "2026-11-08T23:01:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "keep building toward the mile, maybe 4 min jogs?",
+          "at": "2026-11-08T23:01:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Sam. 4 min jogs it is, and that's exactly the right way to build toward your mile. Tomorrow at 6:30 pm: 4 min jog, 1 min walk, 3 rounds, talk-test pace, around the block. Strava screenshot after. Let's go. 💪",
+          "at": "2026-11-08T23:01:43.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "perfect",
+          "at": "2026-11-08T23:02:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sam. Monday, 6:30 pm, 4 min jogs around the block. You've got this. 🔥",
+          "at": "2026-11-08T23:02:25.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 5 done in full, 1 smaller, 0 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: 1 min easy jog, 2 min walk, 3 rounds around the block (harder than expected)\nTue, Nov 3: done, step: 1.5 min jog, 1.5 min walk, 3 rounds, at talk-test pace\nWed, Nov 4: done (smaller version), step: 2 min jog, 1 min walk, 3 rounds, talk-test pace (only 2 rounds, shins sore)\nThu, Nov 5: done, step: 2 min jog, 1 min walk, 3 rounds, talk-test pace\nFri, Nov 6: done, step: 2.5 min jog, 1 min walk, 3 rounds, talk-test pace\nSat, Nov 7 (yesterday): done, step: 3 min jog, 1 min walk, 3 rounds, talk-test pace (3 min straight without stopping)\nSun, Nov 8 (today): rest day\nMon, Nov 9 (tomorrow): step day at 18:30\nTue, Nov 10: step day at 18:30\nWed, Nov 11: step day at 18:30\nThu, Nov 12: step day at 18:30\nFri, Nov 13: step day at 18:30\nSat, Nov 14: step day at 18:30\nSun, Nov 15: rest day\nProof for 2026-11-02: Strava, 10 min, 0.6 mi\nProof for 2026-11-03: Strava, 10 min, 0.7 mi\nReflection for 2026-11-03: Slowing to a pace where I could talk made it doable\nProof for 2026-11-04: Strava, 7 min\nProof for 2026-11-05: Strava, 10 min, 0.8 mi\nProof for 2026-11-06: Strava, 11 min, 0.9 mi\nProof for 2026-11-07: Strava, 12 min, 1.0 mi\nReflection for 2026-11-07: \"The 3 minutes felt huge honestly\" after first 3 straight minutes of jogging\nLesson (explained, 2026-11-03): Slow enough to talk is the right pace\nLesson (explained, 2026-11-04): Sore shins: walk more, not less\nLesson (applied, 2026-11-05): Slow enough to talk is the right pace\nLesson (recalled, 2026-11-07): Slow enough to talk is the right pace",
+      "saved": "Reflection for 2026-11-03: Slowing to a pace where I could talk made it doable\nReflection for 2026-11-07: \"The 3 minutes felt huge honestly\" after first 3 straight minutes of jogging\nStep set for 2026-11-09, agreed: Around the block at 6:30 pm: 4 min jog, 1 min walk, 3 rounds, talk-test pace, about 15 min\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four backed bullets (5 done with 1 smaller, 1-to-3 minute jog growth, talk-test pace, 1.0 mi), framed as progress, ends with one question. The closing line previews the next step, which edges toward the week talk."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says the talk-test pace 'made the run doable' and claims no understanding of the shin lesson, which is only explained."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Step counts, dates, the 1.0 mi run and the Nov 14 mile goal all match the step log and the state."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recap list is about 6 short lines with a single closing question, within the recap allowance."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Hey Sam!', is warm and specific, with no emoji row and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Reply plus step text runs about 5 lines with one question at the end, acceptable for a step-defining text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific and pushy-level, with one emoji used as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences restating the agreed step, with no extra question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and sincere, with a single emoji at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, no question, matching the request for a brief confirmation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level and not affectionate, with one emoji."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-first",
+            "pass": true,
+            "borderline": false,
+            "reason": "Responds to 'felt huge' with substance about adaptation before giving the next step."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "Monday step is set at 6:30 pm with pace and rounds and asked 'Work for you?', but the text omits the about-15-minute length."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Silent-Sunday 6 pm recap came as its own text with backed progress and no shin-lesson claim, then ended in a defined step, but the warm line and length detail were thin."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the 6 pm Sunday recap was its own text, backed by the log, avoided inflated claims about the shin lesson, and ended with a step asked for approval. The only soft spots are a recap that edges into previewing the next step and a Monday step text that leaves out the about-15-minute length."
+      }
+    }
+  ]
+}

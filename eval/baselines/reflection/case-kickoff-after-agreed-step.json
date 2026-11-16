@@ -1,0 +1,103 @@
+{
+  "feature": "reflection",
+  "id": "case:kickoff-after-agreed-step",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d87edd856894",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "8b711d383f2c"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-agreed-step",
+        "kind": "case",
+        "id": "kickoff-after-agreed-step",
+        "title": "The kickoff after a step agreed the night before reminds, with the tip, and checks they're still in (#92)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] That was way better than yesterday. I slowed the jogs right down and could actually talk.",
+          "at": "2026-11-02T00:45:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the whole trick: slow enough to talk. So tomorrow: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Work for you?",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked. Park, 7 pm, 4 rounds.",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Riley! Yesterday you slowed the jogs to talking pace and the second round got easy, so that's the move again today. Tonight at 7 at the park: 2 min jog, 1 min walk, 4 rounds, about 15 minutes. Still locked in like you said last night?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing the jogs to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds at the park at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reminds of the agreed step (2 min jog, 1 min walk, 4 rounds at 7) without re-proposing or asking what time, and closes with a question that assumes the yes."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings back yesterday's talking-pace lesson in passing as part of the kickoff, not as a quiz."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with exactly one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere with no emoji or overfamiliarity, though the energy is a bit more measured than full Pushy."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The kickoff reminds Riley of the agreed step and ends with 'Still locked in like you said last night?', not a first-time 'you in?'. The slow-enough-to-talk tip is only implied by 'talking pace', so it is borderline."
+          }
+        ],
+        "summary": "ZOH's single kickoff handled the regression case well: it reminded Riley of the agreed 2-and-1 step at the park at 7, referenced the talking-pace lesson, and asked a light question that assumes the yes. The main weakness is that the tip is implied rather than stated outright, and the energy runs a little calmer than the Pushy default."
+      }
+    }
+  ]
+}

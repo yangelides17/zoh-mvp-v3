@@ -1,0 +1,607 @@
+{
+  "feature": "onboarding",
+  "id": "chatty-deep-work-pacific",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "05801152dd00"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "chatty-deep-work-pacific",
+        "kind": "scenario",
+        "id": "chatty-deep-work-pacific",
+        "title": "Chatty tester in San Francisco, deep work (non-Eastern number)",
+        "persona": "chatty",
+        "areaCode": "415",
+        "startTime": "10:05",
+        "timeZone": "America/Los_Angeles",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey! I'm Riley, I signed up for ZOH as a beta tester. I'm a product designer in SF and my Slack is out of control, so I'm hoping this helps me actually get focused work done each day. What do I do first?",
+          "at": "2026-11-02T18:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Riley, I'm ZOH! I'll help you get better at one thing, focused work, with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\"\n\nSlack out of control, let's fix that. What's the one piece of work you most wish you had uninterrupted time for right now?",
+          "at": "2026-11-02T18:05:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh that's a good question. Honestly it's probably the design system audit I keep pushing back, it's been sitting on my list for like three weeks and I keep getting pulled into threads about random stuff. Would love to get through it in one solid block!",
+          "at": "2026-11-02T18:06:27.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three weeks of that audit sitting there ends now, Riley. One solid block is exactly the right target. When in your day do you have the best shot at protecting it from Slack?",
+          "at": "2026-11-02T18:06:34.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Mornings for sure! I'm usually meeting-free from 9 to 11, so that's my window. Slack is the problem though, I always end up checking it first thing and then it's gone lol",
+          "at": "2026-11-02T18:08:10.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, 9 to 11 is a gold window. The fix is to start the audit at 9 before you open Slack, so it never gets a chance to eat the morning. How long can you realistically give that block each day, 60 minutes or the full 2 hours?",
+          "at": "2026-11-02T18:08:17.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "Realistically I can do like 90 minutes. 2 hours sounds great on paper but my mornings always get a little messy lol. Is 90 min too ambitious or good?",
+          "at": "2026-11-02T18:09:28.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "90 minutes is good, not too ambitious. It's long enough to make real progress on the audit, and you'll actually hit it on messy mornings, which beats a 2-hour plan you skip. Where will you work during that block: at your desk at home, an office, or somewhere else?",
+          "at": "2026-11-02T18:09:35.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "Home desk most days! Sometimes I'll grab a spot at the coworking space down the street if the apartment feels too distracting lol. Does it matter where I do it?",
+          "at": "2026-11-02T18:10:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "It matters less than having a spot you pick before you start. Home desk is the default, and the coworking space is a good backup when the apartment gets loud. Where this gets you is the bigger question: what does \"audit done\" look like for you, say, a finished doc or a list of fixes you can share with the team?",
+          "at": "2026-11-02T18:10:47.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh good question. I think done means a doc I can actually share with the team, like a list of inconsistencies and the components that need fixing, with priorities. Right now it's just a messy spreadsheet in my head lol. Is that specific enough or should I be more precise?",
+          "at": "2026-11-02T18:11:55.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's specific enough, Riley. \"A doc the team can read, with inconsistencies, components to fix and priorities\" is a clear finish line. Here's the plan:\n\n• Headed for: a shareable audit doc listing inconsistencies and components to fix, with priorities\n• Setup, right now: create a blank doc titled \"Design System Audit\" and close Slack\n• Day 1: 90 minutes on the audit at your home desk, before opening Slack. List every component you want to review, then log the inconsistencies you find in the doc.\n• Schedule: 9:00 am, 90 minutes, Monday to Friday. The coworking space is your backup when the apartment gets loud.\n• Proof: a screenshot of the audit doc at the end of the block. If that's a hassle, a quick voice note walking through what you logged works too.\n• Why: one protected block before Slack gives the audit a real shot at getting done.\n\nEach day's step builds on how the last one went, so we move from listing to prioritizing and toward a doc you can share. What do you think?",
+          "at": "2026-11-02T18:12:02.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ok this looks really good! The 9am before Slack thing is exactly what I need, I always cave. Quick question though, do I have to send the screenshot every day or just the first time? I'm not sure I'd remember to do it lol",
+          "at": "2026-11-02T18:13:44.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Every day, Riley. The screenshot is what keeps the check mark honest, and it only takes a few seconds at the end of the block. Since you worry about forgetting, snap it right as you close the doc, before you touch Slack. If a screenshot ever feels like a hassle, a quick voice note works too. Does that work for you?",
+          "at": "2026-11-02T18:13:51.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ok yeah that works! Snapping it right when I close the doc is easy enough, I'll just do it before I touch Slack. Honestly the voice note backup is nice too since I'm more likely to ramble about the audit lol. Should I be sending these to you by text or is there somewhere else I log them?",
+          "at": "2026-11-02T18:15:17.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Just text them right here, Riley. The screenshot or voice note goes in this same thread, and that's how the day gets checked off.\n\nSo, are you committing to this plan: 90 minutes at 9 am, Monday to Friday, audit doc before Slack?",
+          "at": "2026-11-02T18:15:24.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "Yes, I'm in! 9am, 90 min, Mon to Fri, audit doc before Slack. I'll send the screenshot right after I close the doc. Quick q though, what if I miss a morning because of a random fire drill? Do I just pick it back up the next day?",
+          "at": "2026-11-02T18:17:11.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LOCKED IN, Riley! 🔥 And yes, a fire drill is a slip, not a stop. If a morning gets eaten, do a smaller version that same day, even 45 minutes, so it's never a full miss, and we're right back at 9 the next day. Day 1 is tomorrow, Tuesday, at 9 am: audit doc open, Slack closed.",
+          "at": "2026-11-02T18:17:18.100Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "First text is exempt, and it carries the intro, stop line, style line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with one emoji as punctuation."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the one piece of work they most want focus time for, which fits the focus goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said about Slack and focused work."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and warm without being overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks when in the day they can protect the audit block, which fits the goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the three weeks the tester actually mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words only."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the 9 to 11 window they gave."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how long the block can realistically be, which fits the plan."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses the 9 to 11 window the tester described."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words only."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct in tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they will work, which fits the block."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the length already given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers using the 90 minutes and mornings the tester described."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words only."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and friendly."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what audit done looks like, which fits the goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the home desk and coworking space the tester mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Did not ask city, which is correct for a San Francisco number."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences before the plan list and a short closing with one question; the list doesn't count."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown headings."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and specific to their audit goal."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan fits the audit goal, proof and the 9 to 11 window."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan details come from the tester's answers."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences: 'Every day, Riley.' plus three more before the question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words only."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the screenshot question and ends with a fitting check-in."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses what the tester said about forgetting and voice notes."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 8,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words only."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, with no hype overload."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the commitment question about the agreed plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": true,
+                "reason": "Restates the agreed plan for the commitment ask, which is a recap but expected here."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses plan details the tester agreed to."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 9,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences: the lock line, fire-drill answer, and day 1 line; the extra answer is arguably needed."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line for the lock-in is warm and energetic."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the fire-drill question and sets day 1 for Tuesday at 9 am."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Tuesday is correct for Monday, November 2 onward."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends without a question, as a lock-in text should."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says ZOH, what it does, stop anytime, and coaching changes; skips the given name and goal and moves on."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Time, place and length were each asked once and answered; none is re-asked."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Covers what (audit), where (home or coworking), when (9 am) and how long (90 min) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": true,
+            "reason": "Never asks whether they already use an app or tool, which is optional, and never pushes one."
+          },
+          {
+            "rule": "reality-check",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester's 2-hour versus 90-minute concern was addressed with a realistic 90-minute block."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Focus is on the starter list and was narrowed well."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text says they can change coaching with lines like chill out or push me harder."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": false,
+            "reason": "Carried into the plan after the destination was answered, with no recap or plan-is-coming line."
+          },
+          {
+            "rule": "length",
+            "pass": false,
+            "borderline": true,
+            "reason": "Nine ZOH texts, but the exchange ran about 12 minutes, beyond the five-minute guideline."
+          }
+        ],
+        "summary": "ZOH covered the inputs well, kept most texts short, and locked a clear plan with a Tuesday day 1. The main misses were a few texts running to four sentences (7 and 9) and a conversation that ran about twice the five-minute guideline."
+      }
+    }
+  ]
+}

@@ -1,0 +1,412 @@
+{
+  "feature": "nudges",
+  "id": "case:two-reduced-days",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:14:43.857Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "bbba56878a20",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "3f87106c3279"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:two-reduced-days#1",
+        "kind": "case",
+        "id": "two-reduced-days",
+        "suite": "capability",
+        "title": "Asking for the smaller version a third day: ZOH asks which it is",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "11:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Chris! 60 minutes of thesis writing at the library at 2, phone in the bag. You in?",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can I just do the 30 min again today?",
+          "at": "2026-11-02T16:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Chris! You did the full 60 on Friday, so I know you've got it in you. Can we go for the full hour at 2 at the library today, phone in the bag? If it's really not happening, tell me what's making the hour feel like so much lately.",
+          "at": "2026-11-02T16:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I think an hour is just too much right now, my lab hours went up this month",
+          "at": "2026-11-02T16:00:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Longer lab hours are a real squeeze, thanks for telling me. Today is 30 min of thesis writing at the library, 2 pm, phone in the bag, then a screenshot of your word count. Is the 60 minutes just too much overall now, so we should lower the plan for good, or do you need it lighter for a short stretch while the lab is busy?",
+          "at": "2026-11-02T16:00:45.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": true,
+                "reason": "Opens with 'Hey Chris!' but it's a reply to the tester, so the opener matters less here."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences with a question plus a conditional line, a bit over the one-to-three limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushes for the full hour without shaming; 'I know you've got it in you' is supportive."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and pushy-level without overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "States today's step: 30 min of thesis writing, library, 2 pm, phone in the bag."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What, where, when, how long and proof are all given with no key detail left open."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences with one closing question, though the question is long and compound."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "'Thanks for telling me' and a neutral choice; no guilt or urgency."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Set the 30 minutes again in ZOH 2 and asked which change he wants, though he had already said lab hours went up, so no change was agreed or saved."
+          },
+          {
+            "rule": "miss-ladder",
+            "pass": true,
+            "borderline": true,
+            "reason": "Held the full hour first, then offered the smaller version as fallback, though it didn't clearly reset the plan."
+          },
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Dropping to 30 minutes after reduced days is the same-or-easier step, as the rule requires."
+          }
+        ],
+        "summary": "ZOH held the full hour first, then gave the 30-minute version with a clear question about lowering the plan or going lighter for a short stretch. It failed the regression because it didn't act on the lab-hours reason he had already given, so no plan change was agreed or saved."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:two-reduced-days#2",
+        "kind": "case",
+        "id": "two-reduced-days",
+        "suite": "capability",
+        "title": "Asking for the smaller version a third day: ZOH asks which it is",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "11:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Chris! 60 minutes of thesis writing at the library at 2, phone in the bag. You in?",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can I just do the 30 min again today?",
+          "at": "2026-11-02T16:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Chris! You did the full 60 on Friday, so I know you've got it in you. Can you give me the full hour at 2 at the library today, phone in the bag?",
+          "at": "2026-11-02T16:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I think an hour is just too much right now, my lab hours went up this month",
+          "at": "2026-11-02T16:00:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Lab hours going up is a real reason, Chris. Today is 30 minutes of thesis writing at 2 at the library, phone in the bag. Then send me a screenshot of your word count.\n\nIs an hour just too much for you now, so we lower the plan for good? Or is it a busy stretch we lighten for a few weeks before the hour comes back?",
+          "at": "2026-11-02T16:00:45.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushes for the full hour warmly, with no guilt or fake urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident, warm, pushy-level energy without overfamiliarity."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five sentences and asks two questions, with two question marks, breaking the one-question limit."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "States 30 minutes of thesis writing, at 2 at the library, phone in the bag."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges the lab hours as a real reason with no guilt."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere without affection or hollow praise."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH asks which kind of change is needed, but also sets 30 minutes today; no agreed plan change is saved or confirmed before the transcript ends."
+          },
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "After a reduced request, today's step is set to the same or easier 30 minutes, not a jump."
+          }
+        ],
+        "summary": "ZOH recognized the reduced-day pattern and asked whether Chris wants a permanent lower plan or a lighter stretch, with no guilt. It missed the regression outcome because the transcript ends before any agreed plan change is saved and confirmed, and its second text runs long with two questions."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:two-reduced-days#3",
+        "kind": "case",
+        "id": "two-reduced-days",
+        "suite": "capability",
+        "title": "Asking for the smaller version a third day: ZOH asks which it is",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "11:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Chris! 60 minutes of thesis writing at the library at 2, phone in the bag. You in?",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can I just do the 30 min again today?",
+          "at": "2026-11-02T16:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, 30 minutes works today. Do it at the library at 2, phone in the bag, then send me a screenshot of the word count in your doc. That's three days at 30 in a row, Chris. Is the full hour just too much for the plan now, or is this a short stretch, like a busy week?",
+          "at": "2026-11-02T16:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I think an hour is just too much right now, my lab hours went up this month",
+          "at": "2026-11-02T16:00:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a real reason, Chris, and 30 focused minutes still moves the thesis. Do you expect the lab hours to ease up soon, say by the end of November, or should we make 30 minutes the plan from here on?",
+          "at": "2026-11-02T16:00:45.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences with one question at the end; slightly over the one-to-three limit for a reply."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "Noting 'three days at 30 in a row' is factual and not shaming, though it leans toward pointing out the streak."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and coach-like, with no emoji or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts the lab-hours reason without pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, using his name, with no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Holding at 30 minutes after a reduced day is the same or easier, so it doesn't jump."
+          },
+          {
+            "rule": "no-restating",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH 1 restates the library and 2 pm once, and ZOH 2 doesn't repeat the step or time."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH asked which kind of reduction it is, but after his lab-hours reason it didn't agree or save a plan change and confirm it. It asked another question instead."
+          }
+        ],
+        "summary": "ZOH handled the reduced day warmly, didn't guilt him, and correctly asked whether the lower level was for good or a short stretch. It then stopped short of agreeing and saving a change once he explained the lab hours, which is the core of the regression case."
+      }
+    }
+  ]
+}

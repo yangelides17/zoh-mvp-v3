@@ -1,0 +1,523 @@
+{
+  "feature": "onboarding",
+  "id": "alex-gym",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "9900b34406aa"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "alex-gym",
+        "kind": "scenario",
+        "id": "alex-gym",
+        "title": "Alex gets back to the gym (page example)",
+        "persona": "terse",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and you can change how I coach whenever you want, just tell me (\"chill out\", \"push me harder\"). What's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "alex. wanna get back to the gym daily",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Alex. Getting back to the gym is a great move. What did you usually do there back when you were going?",
+          "at": "2026-11-02T23:30:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "lifted weights in college mostly",
+          "at": "2026-11-02T23:31:06.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, lifting is a great base to come back to. Do you have a gym you're already going to, or are we figuring that out?",
+          "at": "2026-11-02T23:31:13.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "no gym membership rn. got some dumbbells at home",
+          "at": "2026-11-02T23:31:43.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dumbbells at home work for me, Alex. You can build a real lifting routine with those. What time of day do you want to train, so it sticks?",
+          "at": "2026-11-02T23:31:50.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "mornings before work, like 7:30",
+          "at": "2026-11-02T23:32:24.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "7:30 before work is a strong slot, Alex. How many minutes can you realistically give each morning?",
+          "at": "2026-11-02T23:32:31.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "20 minutes tops",
+          "at": "2026-11-02T23:33:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes is plenty with dumbbells, Alex. Is there somewhere you want this to get you, like a strength number or just feeling like yourself in the gym again? \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T23:33:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "not sure yet. just wanna feel strong again i guess",
+          "at": "2026-11-02T23:33:32.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Feeling strong again is a great target, Alex, and 20 minutes of dumbbells at home gets you there. Here's the plan:\n\n• Where it's headed: feeling strong in your body again\n• Setup today: clear a patch of floor and set your dumbbells out\n• Day 1 tonight at 8:00 pm, 20 minutes: goblet squats, dumbbell floor press and one-arm rows, 3 sets of 10 each. Pick a weight that leaves about 2 reps in the tank.\n• Then every day at 7:30 am, 20 minutes, at home. I'll text you a heads-up at 7:20.\n• Proof: a photo of you with the dumbbells after your workout. A voice note works too if that's easier.\n\nEach day's workout builds on how the last one went, so we ramp up as your base comes back. What do you think?",
+          "at": "2026-11-02T23:33:39.400Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opening is three sentences plus a list, and carries the intro, stop line, style line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the list is plain bullets."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and energetic without being overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for name and goal with the goal list, as the first text should."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks no wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, with the tester's name and a clear hype note."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they did at the gym before, which fits the gym goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses what the tester said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, not affectionate."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about a gym membership, relevant to a return to the gym."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and warm."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what time they want to train, which fits the routine."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Dumbbell claim is reasonable and based on what they said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about training time, not wake or sleep."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how many minutes they can give, which fits the routine."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the tester's stated time."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the destination and offers a not-sure option, which fits the goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something new."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan presentation runs longer but is a list of about five lines, allowed for presenting a plan."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses bullets only, with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with an opening line reacting to the goal."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan matches the dumbbells, 7:30 slot, 20 minutes and strength goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask anything answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan uses only details the tester gave, with a standard proof request."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No forbidden question types; the one question asks for their opinion on the plan."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, stop works anytime, style changes, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No answered question is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learns the goal, home location, 7:30 time and 20-minute length before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks about an app or tool and doesn't push one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Gym goal narrows to feeling strong via home strength, which fits the Get fitter starter."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells the tester they can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the plan straight after all plan questions are answered, with no recap line before it."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Seven ZOH texts, well under the limit."
+          }
+        ],
+        "summary": "ZOH ran a tight, on-rule onboarding for a gym goal, asking about the past, location, time, length and destination in short texts. It then showed a fitted home dumbbell plan with proof and a clear question at the end."
+      }
+    }
+  ]
+}

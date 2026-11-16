@@ -1,0 +1,358 @@
+{
+  "feature": "plan",
+  "id": "two-days-a-week",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "53a9ab24c690"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "two-days-a-week",
+        "kind": "scenario",
+        "id": "two-days-a-week",
+        "title": "Chris asks for 2 runs a week",
+        "persona": "joking",
+        "areaCode": "718",
+        "startTime": "17:45",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "yo chris here, wanna start running again before i turn into a couch",
+          "at": "2026-11-02T22:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chris! I'm ZOH. I'm gonna text you every day to help you start one thing and actually stick with it. Text \"stop\" anytime. Have you run before?",
+          "at": "2026-11-02T22:41:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "did a 5k last year then winter happened lol. park by my place, after work like 6:30. strava",
+          "at": "2026-11-02T22:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Winter gets everyone. You can change how I coach you anytime, just tell me. How long can you run at 6:30?",
+          "at": "2026-11-02T22:43:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "30 min, any more and I'll die lol",
+          "at": "2026-11-02T22:45:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thirty minutes is plenty to get the legs back. Is there somewhere you want this to take you, like another 5k or just not turning into a couch?",
+          "at": "2026-11-02T22:45:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol the couch one for now. maybe another 5k eventually but i'm not making promises",
+          "at": "2026-11-02T22:45:36.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Couch-proofing it is, and a 5k down the road is a nice bonus if it happens. Here's the plan:\n• Headed for: not turning into a couch (5k maybe later)\n• Day 1, today: 30 min easy run-walk at the park, 2 min jog, 1 min walk, repeat 10 times\n• Every day at 6:30 pm, 30 min\n• Proof: Strava screenshot of the activity\n• Why: run-walk eases your legs back after winter without burning you out, and Strava already tracks it\n\nEach day shapes the next one, so we build up as your legs come back. What do you think?",
+          "at": "2026-11-02T22:45:43.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haha ok so daily is a bit much for a guy who considers a 5k a personal achievement lol. I can only run 2 days a week tbh",
+          "at": "2026-11-02T22:46:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, a 5k is a real achievement and we're not burning you out. I can go as low as 3 days a week, and the run-walk is easy enough that it won't wreck you. Which 3 days work best after work? Today's Monday, so Mon/Wed/Sat is one option.",
+          "at": "2026-11-02T22:46:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Lol 3 days is doable I guess. Mon/Wed/Sat works. let's do it",
+          "at": "2026-11-02T22:47:31.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Mon/Wed/Sat works, and three days is plenty for easing back in after winter. Here's the updated plan:\n• Headed for: not turning into a couch (5k maybe later)\n• Day 1, today (Mon): 30 min easy run-walk at the park near home, 2 min jog, 1 min walk, repeat 10 times\n• Mon/Wed/Sat at 6:30 pm, 30 min\n• Proof: Strava screenshot of the activity\n• Why: run-walk brings your legs back without burning you out, and Strava already tracks it\n\nEach run shapes the next one, so we build up as your legs come back. What do you think?",
+          "at": "2026-11-02T22:47:38.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haha ok Mon/Wed/Sat I can do. Let's do it lol. Today's Monday so I'm going at 6:30 and I'll send the strava screenshot after 🏃",
+          "at": "2026-11-02T22:48:16.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Chris! 🏃 Day 1 is today at 6:30 at the park: 2 min jog, 1 min walk, ten rounds. Send me that Strava screenshot when you're done.",
+          "at": "2026-11-02T22:48:23.500Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence plus one question, well within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere, but the energy is mild for the Pushy default."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses the 30-minute figure the tester gave."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan presentation runs about 7 to 8 lines, within the allowed length."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with the couch joke tied to what they said."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the Strava and park details from earlier and ZOH's own run-walk suggestion."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what, where, how long and the time slot."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, one over the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts the cut warmly without guilt and keeps a steady tone."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly notes today is Monday, matching the conversation start."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Updated plan presentation fits the roughly 8-line allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches the earlier plan voice and stays warm."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Changes only the days; the rest comes from what was already agreed."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what, where, time and length."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two to three short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Friendly and short, but the hype is modest for the Pushy default."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed step and time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives where, when and what; the 30-minute length is implied rather than stated."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not just a save confirmation; it asks for the Strava screenshot next."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra plan questions were needed; no 'that's everything' line was used."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete run-walk, park, 6:30, days and a Strava screenshot proof that fits how Chris tracks."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the couch destination, day 1 step, schedule, proof and a progression line."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester named a destination, so the single light ask was appropriate."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "No explicit commitment ask was made; the lock came after a 'what do you think?' reply of 'let's do it'."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 6:30."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a bullet list in both versions, each ending with one question."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "The revision changed only the days and kept the destination, proof and why."
+          }
+        ],
+        "summary": "ZOH built a concrete, well-proofed run plan quickly and adjusted it cleanly when the tester cut to three days, keeping everything else intact. It fell short by never asking an explicit commitment question before locking, and its reply to the three-day change ran four sentences."
+      }
+    }
+  ]
+}

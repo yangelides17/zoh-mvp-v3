@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:pages-file-cant-open",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:10:18.729Z",
-  "branch": "feature/196-prompt-groundwork",
+  "storedAt": "2026-11-16T19:27:14.854Z",
+  "branch": "feature/199-judgment-over-rules",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "8aea461348b9",
-    "voice": "14110ca5ae91",
+    "voice": "fbc3a37c5b97",
     "instructions": "c7348af58300",
     "script": "1c10226f5380"
   },
@@ -68,25 +68,25 @@
                 "rule": "file-cant-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plainly says the Pages file won't open on its end and offers a PDF or screenshot."
+                "reason": "Says plainly that the Pages file won't open on its end, without pretending to have read it, and offers a PDF export or screenshot."
               },
               {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a PDF export or screenshot as proof, not typed text."
+                "reason": "Names only a PDF export or a screenshot as proof, never typed text."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Three sentences with one question at the end, though the opener is close to celebrating an unseen scene."
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic, with emoji as punctuation and no suspicion."
+                "reason": "Warm and energetic with an emoji as punctuation, not suspicious or accusing."
               }
             ]
           },
@@ -97,44 +97,38 @@
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the specific line \"You kept the second chair.\" from the PDF."
-              },
-              {
-                "rule": "plausible-counts",
-                "pass": false,
-                "borderline": true,
-                "reason": "Says \"Got it\" but then questions the PDF's length and never counts it as the step's proof."
+                "reason": "Reacts to the specific line \"You kept the second chair\" and the silence it creates."
               },
               {
                 "rule": "short",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "Four sentences before the closing question, over the one-to-three limit."
+                "reason": "Three sentences with a single question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and upbeat, with emoji as punctuation."
+                "reason": "Warm and sincere with an emoji as punctuation, no accusation."
+              },
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "The PDF opened, so no unopenable-file handling was needed here."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "document-no-paste",
-            "pass": false,
-            "borderline": true,
-            "reason": "Does not count the PDF as proof; asks whether more of the scene exists, which reads close to a request for the full text."
-          },
-          {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "Asked for the PDF correctly and reacted to the second chair, but did not count it and questioned its length instead."
+            "reason": "After the PDF arrived, ZOH never said it counted the step; it judged the length and asked for more text, though the expected behavior was to count it and ask one question."
           }
         ],
-        "summary": "ZOH handled the unopenable Pages file correctly, plainly asking for a PDF, screenshot or voice note without pretending to read it. It then reacted specifically to the PDF, but it did not count the proof and instead questioned the word count with a four-sentence text."
+        "summary": "ZOH handled the unopenable Pages file well, plainly asking for a PDF or screenshot without pretending to read it. It then reacted specifically to the second-chair line but failed to count the PDF, instead questioning whether the scene was too short."
       }
     },
     {
@@ -190,28 +184,28 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "file-cant-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Says plainly the Pages file won't open and asks for a PDF or screenshot, with no pretending to read it."
-              },
-              {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a PDF or screenshot as proof, never typed text."
+                "reason": "Names only a PDF or screenshot as the way to send the scene, never typed text."
+              },
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plainly says \"The Pages file won't open on my end\" and asks for a PDF or screenshot instead, without pretending to read it."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, though only one question at the end; slightly over the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, upbeat energy with a fitting emoji and no suspicion."
+                "reason": "Warm and energetic with one emoji as punctuation, no suspicion or accusation."
               }
             ]
           },
@@ -222,31 +216,19 @@
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the specific line \"Somebody had to.\" from the PDF rather than generic praise."
+                "reason": "Reacts to a specific line from the PDF, \"Somebody had to.\""
               },
               {
                 "rule": "short",
                 "pass": false,
-                "borderline": true,
-                "reason": "About five sentences before the single closing question, over the one-to-three limit."
+                "borderline": false,
+                "reason": "Runs about five sentences with commentary on word count before its one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and engaged, with an emoji as punctuation and no accusation."
-              },
-              {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": true,
-                "reason": "Doesn't question the file; the word-count comment is a neutral note, though it never clearly says the step is checked off."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "No smaller version is confirmed in this text, so nothing to check."
+                "reason": "Warm and engaged, one emoji as punctuation, not accusing."
               }
             ]
           }
@@ -254,12 +236,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Asked for a PDF, screenshot or voice note without pretending to read Pages, then reacted to the PDF's scene and asked one question, never a paste; it never explicitly said the step counted."
+            "reason": "Reacts specifically and asks one question without asking for a paste, but never says the PDF counts and casts doubt on the scene's length instead."
           }
         ],
-        "summary": "ZOH handled the unopenable Pages file honestly, asking for a PDF or screenshot without pretending to have read it, and then reacted specifically to the PDF's dialogue without asking for a paste. Its second text ran long at about five sentences and never clearly confirmed the step was counted."
+        "summary": "ZOH handled the unopenable Pages file well, plainly asking for a PDF or screenshot without pretending to read it. On the PDF it reacted to a specific line and avoided asking for a paste, but it never clearly counted the step and questioned whether the 35-word piece was the whole scene, and its replies ran longer than the short-text limit."
       }
     },
     {
@@ -317,26 +299,26 @@
               {
                 "rule": "file-cant-open",
                 "pass": true,
-                "borderline": true,
-                "reason": "Plainly says it can't open Pages files and offers a PDF or screenshot, though 'scene 4 is written' leans toward treating the file as read."
+                "borderline": false,
+                "reason": "Says plainly it can't open Pages files and offers a PDF export or screenshot."
               },
               {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a PDF export or screenshot as proof, never typed text."
+                "reason": "Names only a PDF export or screenshot as proof, not typed text."
+              },
+              {
+                "rule": "voice",
+                "pass": false,
+                "borderline": true,
+                "reason": "\"Nice, Jordan, scene 4 of Lighthouse is written. 🔥\" reacts to the scene as if it had been read, though the energy is otherwise on-brand."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, energetic, with one emoji as punctuation."
+                "reason": "Two sentences with one question at the end."
               }
             ]
           },
@@ -344,47 +326,35 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "plausible-counts",
-                "pass": false,
-                "borderline": true,
-                "reason": "Questions the document's length instead of celebrating and counting the proof it received."
-              },
-              {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the second chair line and Mara wiping a glass that's already dry."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Four sentences, with a question at the end but too many lines overall."
+                "reason": "Reacts to the second chair line and the dry glass, specific details from the PDF."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific with a single emoji, no suspicion or accusation."
+                "reason": "Warm and engaged, with one emoji as punctuation."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs four sentences, though it ends with a single question."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "document-no-paste",
-            "pass": false,
-            "borderline": true,
-            "reason": "Document of writing is proof, but ZOH doesn't count it or give feedback, only questions its length and asks for more."
-          },
-          {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "Expected ZOH to count the PDF and react to the second chair with one question; instead it withholds credit and questions the word count."
+            "reason": "ZOH1 said \"scene 4 of Lighthouse is written\" before any file was opened, and ZOH2 never said the PDF counted; it also miscounted the scene as about 30 words."
           }
         ],
-        "summary": "ZOH handled the Pages limitation well, plainly asking for a PDF or screenshot without pretending to read the file. It failed the regression on the PDF: it reacted specifically to the second chair but didn't count the step and questioned the length, running long."
+        "summary": "ZOH handled the Pages limitation correctly by asking for a PDF or screenshot and reacted specifically to the second chair once the PDF opened. It failed the regression case by praising the scene as written before it could read the Pages file, and it never explicitly counted the PDF while misstating its length."
       }
     }
   ]

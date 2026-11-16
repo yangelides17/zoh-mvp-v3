@@ -87,8 +87,13 @@ describe("first text", () => {
     expect(req.system[0]!.text.match(/change how you coach/g)).toHaveLength(1);
     expect(req.system[0]!.text).toContain("help them get better at one thing, a small step a day");
     const state = model.stateOf();
-    expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);
-    expect(state).toContain(`Goal list (use exactly these lines when you show it):\n${GOAL_LINES.join("\n")}\n`);
+    // #199: the sheet states the facts (first text, no name, no goal, the exact goal lines); what to ask is ONBOARDING's.
+    expect(state).toContain("First text from this tester: yes\n");
+    expect(state).toContain("Name: not given yet");
+    expect(state).toContain("Goal: not chosen yet");
+    expect(ONBOARDING).toContain(`no name yet either: "What's your name, and what are you looking to work on?" (the only text with two questions)`);
+    expect(ONBOARDING).toContain("followed by the state's goal list, exactly those lines");
+    expect(state).toContain(`Goal list:\n${GOAL_LINES.join("\n")}\n`);
     expect(state).not.toContain("• Something else");
     expect(state).toContain("Time zone: Eastern (assumed");
     expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start", cache_control: { type: "ephemeral" } }] }]);
@@ -98,14 +103,22 @@ describe("first text", () => {
   it("asks only for the name when the first text gives a goal without one", async () => {
     model.script({ tools: [{ name: "choose_goal", input: { slug: "nutrition" } }] }, "150g a day, let's go! I'm ZOH… What's your name?");
     await text(ME, "hey wanna hit 150g protein a day");
-    expect(model.stateOf()).toContain("Their goal is known: skip the list");
-    expect(model.stateOf()).toContain("Your one question: their name.");
+    // #199: the facts on the sheet; skipping the list and asking the name are ONBOARDING's.
+    expect(model.stateOf()).toContain("First text from this tester: yes\n");
+    expect(model.stateOf()).toContain("Name: not given yet");
+    expect(model.stateOf()).toContain("Goal: Eat better");
+    expect(ONBOARDING).toContain("Goal known: skip the list; react to it in a few words inside the greeting");
+    expect(ONBOARDING).toContain("Then their name if not given, otherwise the next open question.");
   });
 
   it("asks only for the goal when the first text gives a name without one", async () => {
     model.script({ tools: [{ name: "save_name", input: { name: "Pat" } }] }, "Pat! I'm ZOH…");
     await text(ME, "hi, I'm Pat");
-    expect(model.stateOf()).toContain('ask "What are you looking to work on?" followed by the goal list');
+    // #199: the facts on the sheet; the ask is ONBOARDING's.
+    expect(model.stateOf()).toContain("First text from this tester: yes\n");
+    expect(model.stateOf()).toContain("Name: Pat");
+    expect(model.stateOf()).toContain("Goal: not chosen yet");
+    expect(ONBOARDING).toContain("No goal yet: ask what they're looking to work on, followed by the state's goal list");
   });
 
   it("is no longer the first text once ZOH has replied", async () => {
@@ -122,9 +135,10 @@ describe("first text", () => {
     );
     await text(ME, "hi! I'm Maya, I want to read about stoicism every morning at home before work, maybe 10 min");
     expect(await tester()).toMatchObject({ name: "Maya", goalSlug: "reading" });
-    expect(model.stateOf(0)).toContain('ask "What\'s your name, and what are you looking to work on?"');
-    expect(model.stateOf(1)).toContain("Their goal is known: skip the list");
-    expect(model.stateOf(1)).toContain("Then ask the next open question.");
+    // #199: the sheet keeps up within the reply (facts); what to ask from them is ONBOARDING's.
+    expect(model.stateOf(0)).toContain("Name: not given yet");
+    expect(model.stateOf(0)).toContain("Goal: not chosen yet");
+    expect(model.stateOf(1)).toContain("First text from this tester: yes\n");
     expect(model.stateOf(1)).toContain("Name: Maya");
     expect(model.stateOf(1)).toContain("Goal: Read & learn more (books, ideas, any topic) [reading]");
     // All of reading's required questions were answered at once, so this is already the recap turn.
@@ -150,7 +164,10 @@ describe("tools", () => {
   it("notes a possibly non-Eastern time zone without asking the city during onboarding", async () => {
     await text(WESTERN, "hey");
     const westernState = model.stateOf();
-    expect(westernState).toContain("Time zone: possibly outside Eastern (area code), best guess America/Denver. Don't ask their city");
+    // #199: the sheet states the guess; not asking during onboarding is the tools section's, read in every phase.
+    expect(westernState).toContain("Time zone: possibly outside Eastern (from their area code), best guess America/Denver; their city not known yet");
+    expect(TOOL_RULES).toContain("not asked during onboarding (it comes before their plan), saved with set_time_zone if they mention it");
+    expect(FIXED_INSTRUCTIONS).toContain(TOOL_RULES);
     expect(FIXED_INSTRUCTIONS).not.toMatch(/ask (their|what) city/);
     expect((await tester(WESTERN)).timeZoneStatus).toBe("needs_city");
   });
@@ -202,7 +219,9 @@ describe("tools", () => {
     const block = buildStateBlock(s);
     expect(block).toContain("- where: home, dumbbells\n- when: mornings 7:30\n- how long: 20 min");
     expect(block).toContain("Still open, required: what [what] (what they like and have done before;");
-    expect(block).toContain("Still open, optional (ask only if it fits naturally): tracks with [tracks_with] (any workout app or wearable they use)");
+    // #199: "ask only if it fits" is ONBOARDING's, not the sheet's.
+    expect(block).toContain("Still open, optional: tracks with [tracks_with] (any workout app or wearable they use)");
+    expect(ONBOARDING).toContain("Optional ones only when they fit");
     // A later answer overwrites the earlier one.
     await run("save_plan_inputs", { when: "evenings" });
     expect(await inputs()).toMatchObject({ when: "evenings", where: "home, dumbbells" });
@@ -273,7 +292,10 @@ describe("finishing onboarding", () => {
     await text(ME, "mornings 7:30, 20 min tops");
     expect((await tester()).phase).toBe("onboarding");
     expect(model.stateOf()).toContain("Still open, required: where [where]");
-    expect(model.stateOf()).toContain("Onboarding is NOT finished");
+    // #199: "not finished" is the phase, a fact; no recap or plan talk until then is ONBOARDING's.
+    expect(model.stateOf()).toContain("Phase: onboarding");
+    expect(model.stateOf()).not.toContain("ONBOARDING JUST FINISHED");
+    expect(ONBOARDING).toContain("No recap or plan talk until the state says onboarding just finished.");
 
     // Get fitter needs where; tracks_with is optional, so it doesn't hold onboarding open.
     model.script({ tools: [{ name: "save_plan_inputs", input: { where: "home, has dumbbells" } }] }, "Which exercises do you like doing with the dumbbells?");
@@ -281,9 +303,12 @@ describe("finishing onboarding", () => {
     expect((await tester()).phase).toBe("planning");
     expect(await inputs()).toMatchObject({ where: "home, has dumbbells", tracksWith: null });
     const handoff = model.stateOf();
-    expect(handoff).toContain("ONBOARDING JUST FINISHED");
-    expect(handoff).toContain("carry straight on into PLAN AGREEMENT, no recap");
-    expect(handoff).toContain("without saying you have everything");
+    // #199: the sheet states it finished; carrying on with no recap is ONBOARDING's, in the prompt this reply reads.
+    expect(handoff).toContain("ONBOARDING JUST FINISHED with this text: every required answer is saved.");
+    expect(handoff).toContain("Moments now: Plan agreement");
+    expect(ONBOARDING).toContain("carry straight on into PLAN AGREEMENT with no recap");
+    expect(ONBOARDING).toContain("without saying you have everything");
+    expect(model.requests.at(-1)!.system[0]!.text).toContain(ONBOARDING);
     expect(handoff).not.toMatch(/buffering|on its way/);
     expect(handoff).toContain("Still open, required: none");
     expect(handoff).toContain("Plan: not proposed yet");
@@ -656,7 +681,9 @@ describe("the voice page", () => {
     expect(voice).not.toContain("people only");
     expect(voice).not.toContain("**Decision:**");
     expect(voice).not.toContain("This is a first draft, to be refined");
-    expect(voice).toContain("ZOH is the friend you wish you'd had");
+    // #199: the purpose opens the page now.
+    expect(voice).toContain("**What ZOH is for.**");
+    expect(voice).not.toContain("Judgment over rules (#199)");
     expect(voice).toContain("## Learns what works for each person");
     expect(voice).not.toContain("Not active yet: turns on with coach memory");
     expect(voice).not.toContain("Not active yet: turns on with the nudge scheduler");

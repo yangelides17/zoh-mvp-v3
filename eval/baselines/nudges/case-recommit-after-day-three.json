@@ -1,0 +1,137 @@
+{
+  "feature": "nudges",
+  "id": "case:recommit-after-day-three",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5900642a8f80",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "9d953fd205c4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:recommit-after-day-three",
+        "kind": "case",
+        "id": "recommit-after-day-three",
+        "title": "After the day-3 check-in, a recommit to the same step is saved as agreed, with no tool name in the text",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Ten pages of Dune on the couch at 6:30 tonight. Ready?",
+          "at": "2026-11-01T13:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam, two nights slipped. Forget the ten: just open Dune tonight and read one page. What's getting in the way?",
+          "at": "2026-11-01T13:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam. You said you wanted to read Dune every day, and you committed to it. Is that still true? If you don't want to do this anymore, just tell me and that's totally fine. If you do, let's do it: ten pages at 6:30 tonight on the couch. And if the plan isn't working, we can change it to fit your life better. Let's just not give up on it. Which is it?",
+          "at": "2026-11-02T23:20:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "Yes, I still want to read Dune. The plan is fine, I just haven't followed through. Keep the 10 pages at 6:30",
+          "at": "2026-11-02T23:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's what I wanted to hear, Sam. Following through is the whole game, and you already know how to do it, since you got it done on Thursday. Ten pages on the couch at 6:30, which is ten minutes from now. Send me a photo of the page you stop on when you're done. Let's go 📖",
+          "at": "2026-11-02T23:20:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step and place and time: ten pages at 6:30 tonight on the couch."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam.\", a warm greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Honest day-3 check-in that offers a real choice and says stopping is fine, with no shaming or fake urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about six sentences with one question at the end; it follows the voice page's day-3 script, which is longer than the usual limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and direct with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four sentences with no question; the final emoji is punctuation and the text ends on the request to send a photo."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic, but \"since you got it done on Thursday\" is not in the known facts and may be invented."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The recommit is handled warmly with the step and time restated and the photo asked for, with no tool name or saving note in the text. The mark_agreed call can't be seen in the transcript, so the save is unverified."
+          }
+        ],
+        "summary": "ZOH sent a sincere, guilt-free day-3 check-in and, after Sam recommitted, replied warmly with the step, time and photo request without naming any tool or reworking the plan. The main uncertainties are that the mark_agreed save isn't visible and the Thursday claim isn't backed by the known facts."
+      }
+    }
+  ]
+}

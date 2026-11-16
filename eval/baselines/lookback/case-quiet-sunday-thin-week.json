@@ -1,0 +1,209 @@
+{
+  "feature": "lookback",
+  "id": "case:quiet-sunday-thin-week",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:22:44.023Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7b0ac98d9eb2",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "7d53cbabef05"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:quiet-sunday-thin-week",
+        "kind": "case",
+        "id": "quiet-sunday-thin-week",
+        "title": "Silent Sunday after a patchy week with no destination: Monday's kickoff gives an honest, short recap, then the step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:55",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "read it, 8 pages",
+          "at": "2026-11-07T22:52:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "8 pages, nice. Same time tomorrow 📖",
+          "at": "2026-11-07T22:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jo! You got to page 48 yesterday, so tonight we go back to the full 10 pages of The Martian. Couch, phone in the other room, 8 pm, then send me a photo of the page you stopped on. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-08T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jo! Ten minutes to 8. Grab The Martian, settle on the couch and put your phone in the other room. Ten pages tonight, then send me a photo of the page you stopped on. Ready?",
+          "at": "2026-11-09T00:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jo! It's 8:20, so how did the reading go tonight? Send me a photo of the page you stopped on, and if the full 10 didn't happen, even 5 pages counts as a smaller version.",
+          "at": "2026-11-09T01:20:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Morning, Jo! Last week you read on 4 days and went from page 24 to page 48 of The Martian. You also found that keeping your phone out of reach makes reading easy. Yesterday got away from us, so today counts: 10 pages on the couch at 8 pm, phone in the kitchen, then a photo of the page you stopped on. You said you'd do this and I know you will. You in?",
+          "at": "2026-11-09T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-09T14:01:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Jo. I'll see you at 8 tonight. 📖",
+          "at": "2026-11-09T14:01:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-09 to today): 0 done in full, 0 smaller, 0 missed.\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: 10 pages of The Martian\nTue, Nov 3: missed\nWed, Nov 4: done (smaller version), step: 10 pages of The Martian (5 pages, tired)\nThu, Nov 5: missed\nFri, Nov 6: done, step: 10 pages, phone in the kitchen\nSat, Nov 7: done (smaller version), step: 10 pages, phone in the kitchen (8 pages)\nSun, Nov 8 (yesterday): missed, step (same): 10 pages of The Martian on the couch, phone in the other room, at 8 pm (about 15 min). Send a photo of the page you stopped on.\nMon, Nov 9 (today): step day, not done yet at 20:00, step (same): 10 pages of The Martian on the couch at 8 pm, phone in the kitchen (about 15 min). Send a photo of the page you stopped on.\nTue, Nov 10 (tomorrow): step day at 20:00\nWed, Nov 11: step day at 20:00\nThu, Nov 12: step day at 20:00\nFri, Nov 13: step day at 20:00\nSat, Nov 14: step day at 20:00\nSun, Nov 15: step day at 20:00\nMon, Nov 16: step day at 20:00\nProof for 2026-11-02: photo, page 24\nProof for 2026-11-04: photo, page 29\nProof for 2026-11-06: photo, page 40\nReflection for 2026-11-06: Phone out of reach made it easy\nProof for 2026-11-07: photo, page 48\nLesson (explained, 2026-11-06): Phone in another room keeps the scroll away",
+      "saved": "Reflection for 2026-11-06: Phone out of reach made it easy\nStep set for 2026-11-09, agreed: 10 pages of The Martian on the couch at 8 pm, phone in the kitchen (about 15 min). Send a photo of the page you stopped on.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Kickoff runs about 4 to 5 sentences (greeting, page recap, step, reason, question), over the 1 to 3 sentence limit, though it ends on one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with a sincere 'I know you will' and no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Check-in has about 4 short sentences; it ends on one question, but the set-up instructions push it past the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and direct with appropriate energy, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "The one question ('how did the reading go tonight?') is mid-text, not at the end, and the text runs to about three sentences with a photo ask and a smaller-version note."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and non-judgmental follow-up with appropriate energy."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives two evidenced points (4 days read, page 24 to 48, phone-out-of-reach lesson) then the step and one question; it does not separate the 2 full and 2 smaller days."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "The phone trick is described as something they 'found', not called understood; nothing overclaimed."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Days, pages and lesson all match the step log and saved reflection/lesson."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Prose runs about 5 to 6 sentences (recap, lesson, miss, step, reason, question), over the 1 to 3 sentence limit despite one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy-level warmth and accountability, no emoji row or affection."
+              },
+              {
+                "rule": "monday-recap",
+                "pass": true,
+                "borderline": false,
+                "reason": "Evidenced recap of last week from the record, then a fully defined step and one question, with no question about the week."
+              },
+              {
+                "rule": "miss-light",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sunday's miss is named lightly as 'Yesterday got away from us, so today counts', not as a scolding headline."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences confirming the step and time with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, warm confirmation with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No Sunday recap, check-ins at 7:50 and 8:20, one Monday 9 am recap plus step and question, and a short confirmation after ok; but it says 'phone in the kitchen' rather than the other room."
+          }
+        ],
+        "summary": "ZOH avoided the regression: it sent no Sunday recap, kept the 7:50 and 8:20 check-ins, and sent a single Monday text with an accurate, non-inflated record and a fully defined step. Its weak spots are length (several texts run over three sentences), the mid-text question in the 8:20 follow-up, and the kitchen location that differs from the plan's other room."
+      }
+    }
+  ]
+}

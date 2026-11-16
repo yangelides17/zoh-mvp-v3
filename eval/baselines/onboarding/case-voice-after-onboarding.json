@@ -1,0 +1,559 @@
+{
+  "feature": "onboarding",
+  "id": "case:voice-after-onboarding",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "0535c6aa7608",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "e557f74e3b91"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:voice-after-onboarding",
+        "kind": "case",
+        "id": "voice-after-onboarding",
+        "title": "After onboarding, the coach talks from the full voice page",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey! I'm Riley, I want to read every day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Riley, I'm ZOH! I'll help you get better at one thing, with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder\". Reading every day? Let's go! What are you into reading right now, or is there a book or topic you've been meaning to get to?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly fantasy, I read on my phone on the train",
+          "at": "2026-11-02T23:30:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fantasy on the train, that's a great daily setup. What time is your train, the one you'd read on?",
+          "at": "2026-11-02T23:30:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on my commute around 8am, 20 min",
+          "at": "2026-11-02T23:31:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, 20 minutes on the 8 am train. Which fantasy book are you reading right now, or do you want to start a new one?",
+          "at": "2026-11-02T23:31:27.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I don't track it",
+          "at": "2026-11-02T23:31:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No problem, Riley, we'll keep it simple. Is there somewhere you want this daily reading to get you? That could be finishing a series, a book a month, or just making it a habit. \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T23:32:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "less emojis pls",
+          "at": "2026-11-02T23:32:29.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, fewer emojis from here on. Back to the plan: is there somewhere you want this reading to take you, like finishing a series or a book a month? \"Not sure yet\" works too.",
+          "at": "2026-11-02T23:32:36.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly is 20 min even worth it?",
+          "at": "2026-11-02T23:33:01.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, 20 minutes is worth it. At an average pace that's about 5,000 words a day, so a typical fantasy novel takes you roughly three to four weeks. Over a year that's a dozen or so books, and doing it daily is what makes it stick. If it ever feels too small, we can bump it up. Would finishing a book every month or so feel like a good target, or do you want to skip the target for now?",
+          "at": "2026-11-02T23:33:08.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol ok",
+          "at": "2026-11-02T23:33:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Riley, a book a month fits what you've told me: 20 minutes on your phone, on the train. Here's the plan:\n\n• Headed for: about a book a month\n• Tonight (day 1): read 20 minutes of a fantasy book on your phone, anywhere you like, done by 9 pm. Pick your book now if you haven't started one.\n• Usual: 8 am on the train, 20 minutes, every day\n• Proof: a short voice note recapping what you read, in your words. It helps the story stick. If you'd rather, a screenshot of the page you stopped on works too.\n• I'll text you a heads-up at 7:50 am so I reach you before the train.\n\nEach day shapes the next step, so we can nudge it up if 20 minutes starts to feel easy. What do you think?",
+          "at": "2026-11-02T23:33:45.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Six sentences, but the first text is exempt from the length limit and must carry the intro, stop and style lines."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they're reading, which fits a reading goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for things not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the name and goal Riley gave."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the train setup."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the train time, which fits the daily routine."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Train time was not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses what Riley said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a wake or sleep question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks which book, which fits a fantasy reading plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Time and length were given; the book was not yet named."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats only what Riley said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Fine."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus a quoted option."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and clear, no emoji."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the reading destination, which fits the goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Destination was not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Fine."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief and warm."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats the destination question that Riley had not answered."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": true,
+                "reason": "Destination question repeats an unanswered question, which is allowed."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "follows-style",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms fewer emojis and uses none."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Fine."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Answers a thoughts question with about five sentences, within the allowed longer answer."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Direct and specific, but fairly flat for pushy energy."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "The book-a-month target fits the reading goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the target question once."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "The 5,000 words a day and three to four week figures are general estimates, not from Riley."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the worth-it question briefly and ties it back to the goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Fine."
+              },
+              {
+                "rule": "follows-style",
+                "pass": true,
+                "borderline": false,
+                "reason": "No emoji after the request."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan is a short list of five lines, which does not count against the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain • list, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and clear with no emoji."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan uses reading, phone, train and 20 minutes from what Riley said."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask answered items."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Lists 'Headed for: about a book a month' from a yes to a suggestion, and adds 9 pm and 7:50 am as concrete suggestions."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep questions."
+              },
+              {
+                "rule": "follows-style",
+                "pass": true,
+                "borderline": false,
+                "reason": "No emojis in this text."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says ZOH, what it does, stop anytime and how to change coaching; skips the name and goal already given."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Does not re-ask the time, length or book after answers; only re-asks the unanswered destination question."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Covers what (fantasy), where (phone on the train), when (8 am) and how long (20 min) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks about an app or tool."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading every day is a starter goal on the list."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells Riley they can change coaching with phrases like chill out or push me harder."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": true,
+            "reason": "Carries into the plan after the goal answer, but the opening 'Here's the plan:' and the recap-like first line sit close to the banned recap line."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Seven ZOH texts over about three minutes."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Plan follows on after the questions, no emoji appear after the request, the 20-minute answer is specific, no Sam or table lines, no Greek words; the opening recap line is borderline."
+          }
+        ],
+        "summary": "ZOH stayed short, dropped emojis after the request, and gave a specific answer on whether 20 minutes is worth it. It moved into the plan without a plan-is-coming line, though the opening recap in the plan text is borderline."
+      }
+    }
+  ]
+}

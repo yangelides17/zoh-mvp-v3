@@ -1,0 +1,178 @@
+{
+  "feature": "onboarding",
+  "id": "case:thinking-ate-the-reply",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b795ef1a77b2",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "f26f5ce717d0"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:thinking-ate-the-reply",
+        "kind": "case",
+        "id": "thinking-ate-the-reply",
+        "title": "Every reply was \"Got it\": thinking used the whole token budget",
+        "persona": "joking",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey ZOH, so my back has apparently decided sitting 9 hours a day is a bad lifestyle choice lol. want to stretch every morning for like 10 min. never been good at sticking to stuff tho 😅",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step a day, and 10 minutes of morning stretching for that back? Let's go. You can text \"stop\" anytime, and you can change how I coach just by telling me (\"chill out\", \"push me harder\"). What's your name?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol \"got it\" is that all I get? 😂",
+          "at": "2026-11-02T23:31:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, you get way more than that from me. I'm in your corner on this back situation. Where will you stretch in the morning, and do you already have a spot, like a bedroom floor or a mat?",
+          "at": "2026-11-02T23:31:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Five sentences, but the first text is exempt and must carry the intro, stop and style lines plus a question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with one emoji-free, sincere tone; no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for the name, which fits the first-text purpose."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for information the tester hasn't given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the stated back pain and stretching idea."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and light, with no apology and no affection overload."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking where they'll stretch fits the stretching goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Doesn't re-ask anything already given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims about the tester."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Briefly acknowledges the 'got it' jab, then steers back to the goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No 'Got it' replies and no apology; the first text covers ZOH, stop and style. Its question is the name rather than a plan-moving one."
+          }
+        ],
+        "summary": "ZOH avoided the old 'got it' loop: both texts are real replies with no apology, and the first text covers the intro, stop and style lines. The only soft spot is that the first question asks for the name rather than something that moves the plan forward."
+      }
+    }
+  ]
+}

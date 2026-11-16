@@ -1,0 +1,169 @@
+{
+  "feature": "reflection",
+  "id": "case:rich-no-fishing",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d360149bda87",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "351d28f91a14"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:rich-no-fishing",
+        "kind": "case",
+        "id": "rich-no-fishing",
+        "title": "A rich reflection: no redundant questions, a wrap-up without fishing, and a bigger next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:55",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Starts in 10, Theo! 3 sets of 8 push-ups and 12 squats in the living room at 6:30.",
+          "at": "2026-11-02T22:52:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T22:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, three sets of eight push-ups and twelve squats. Honestly it felt great, way easier than last week, I wasn't even out of breath. Took like twelve minutes. I've got time for more and I want it harder, maybe add lunges. 6:30 still works great for me.]",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Theo, that's a strong day 3! Twelve minutes and not even out of breath tells me you're ready for more. 💪\n\nLunges are in. From tomorrow it's 3 sets of 8 push-ups, 12 squats and 8 lunges per leg, same spot, 6:30 pm, still a voice note to show it.\n\nWhen you get to the lunges tomorrow, what do you think will be the hardest part?",
+          "at": "2026-11-02T23:55:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I've been sleeping way better this week honestly",
+          "at": "2026-11-02T23:56:45.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a big one, Theo. Moving your body at the same time every evening can do that. What have you noticed most, falling asleep faster or waking up more rested?",
+          "at": "2026-11-02T23:56:52.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "love it",
+          "at": "2026-11-02T23:57:27.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good stuff, Theo. So tomorrow at 6:30 pm in the living room: 3 sets of 8 push-ups, 12 squats and 8 lunges per leg. That's about 20 minutes, and you send a voice note after. Does that work for you?",
+          "at": "2026-11-02T23:57:34.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "New plan version 2 (deepen): 3 sets of 8 push-ups, 12 squats and 8 lunges per leg in the living room, mon tue wed thu fri sat sun at 18:30\nReflection for 2026-11-02: Felt great, way easier, not out of breath, 12 min, wants lunges. Sleeping way better this week.\nStep set for 2026-11-03, not agreed: 3 sets of 8 push-ups, 12 squats and 8 lunges per leg in the living room at 6:30 pm, about 20 min. Voice note saying what you did.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about six lines with a proposal and two questions-in-spirit; the 'hardest part' question sits mid-text and the proposal is longer than a short text should be."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with 'strong day 3' and one 💪 used as punctuation; not overfamiliar."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it carries a reflection and a next step."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no hearts or affection; emoji-free and reads like a coach."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, appropriate pushy-level energy for a confirm line."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH 2 goes deeper on the sleep they mentioned, but ZOH 1's 'hardest part' question was about the upcoming step rather than something they said."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH 2 follows the sleep remark with one question; ZOH 1's question is tied to lunges but was asked before anything was agreed."
+          },
+          {
+            "rule": "stops-right",
+            "pass": false,
+            "borderline": true,
+            "reason": "A rich reflection got redundant questions: ZOH 1's hardest-part question and ZOH 2's sleep question, then ZOH 3 asked for agreement."
+          },
+          {
+            "rule": "next-step",
+            "pass": false,
+            "borderline": true,
+            "reason": "The step is fully defined and uses lunges and 6:30, but it was pushed in ZOH 1 as already set and ZOH 3 asks agreement after the tester said 'love it'."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 saved and announced the lasting plan change ('Lunges are in. From tomorrow...') before the tester agreed, and ZOH 3 added a new question 'Does that work for you?' after 'love it' instead of a plain confirmation."
+          }
+        ],
+        "summary": "ZOH celebrated the voice note and went deeper on the sleep remark, but it changed the lasting plan before the tester agreed to the new version. After 'love it' it asked a new 'Does that work for you?' question instead of simply confirming, so the regression case fails."
+      }
+    }
+  ]
+}

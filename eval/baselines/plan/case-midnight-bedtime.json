@@ -1,0 +1,315 @@
+{
+  "feature": "plan",
+  "id": "case:midnight-bedtime",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "8591f8d25fbf",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "b39e0f88609d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:midnight-bedtime",
+        "kind": "case",
+        "id": "midnight-bedtime",
+        "title": "An 11:50 pm bedtime with default quiet hours: a few words that ZOH will still reach them, no question, nothing about quiet hours after lock",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I want to be in bed by 11:50 with my phone charging in the kitchen",
+          "at": "2026-11-02T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Dana. Which nights do you want this to happen?",
+          "at": "2026-11-02T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Sunday to Thursday, weekends I'm out late anyway",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sunday to Thursday works, and it's a clear plan: bed by 11:50, phone charging in the kitchen. Where do you want this to get you, like more energy in the mornings or a steadier sleep schedule? Not sure yet is fine too.",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "not sure yet honestly",
+          "at": "2026-11-02T23:00:41.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sunday to Thursday with the phone in the kitchen is a clear, doable setup, Dana. 👏\n\n• Tonight (Mon): phone on the kitchen charger, then in bed by 11:50 pm\n• Schedule: Sun to Thu, about 10 minutes of winding down before 11:50 pm\n• Proof: a photo of your phone charging in the kitchen before you head to bed\n• Why: the phone out of the room is what makes the bedtime stick. If a photo's a hassle, a quick voice note from bed works too.\n• I'll still reach you with a heads-up at 11:40 pm\n\nEach night shapes the next step, so we can tweak things as we learn what's working. What do you think?",
+          "at": "2026-11-02T23:00:48.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T23:01:14.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dana, last thing before we lock it in: are you committing to this? Phone in the kitchen and in bed by 11:50 pm, Sunday to Thursday, starting tonight.",
+          "at": "2026-11-02T23:01:21.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-02T23:01:44.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Dana. Day 1 is tonight: phone on the kitchen charger, then in bed by 11:50. Let's go! 🌙",
+          "at": "2026-11-02T23:01:51.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus one closing question, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no emoji row or overfamiliar language."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the bedtime, phone-charging and Sunday-to-Thursday details Dana gave."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives bed time and phone location; the 10-minute length is not restated here, though it was known earlier."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs to about 8 to 9 lines, near the upper limit allowed for a plan text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets are plain text with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with a single clap emoji used as punctuation."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan uses Dana's stated bedtime, phone setup, schedule and 10 minutes, plus a concrete proof suggestion."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (phone on charger, bed), when (11:50 pm, Sun to Thu), how long (10 minutes) and proof."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm; asks for commitment in natural words without emoji clutter."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the plan details Dana already agreed to."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the bedtime, phone location, days and start date clearly."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, as the lock text should be."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with a single moon emoji as punctuation."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 details match what Dana committed to."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "States day 1 clearly: phone on charger, bed by 11:50."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The one destination question came before the plan, and no extra questions followed the plan."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan is concrete: what, time, days, length and a photo proof that fits a phone-charging habit."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1, the schedule, the proof and a general progression line, with no list of future steps."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "One light destination ask was made, and the plan locked smoothly after 'not sure yet'."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks for commitment in natural words after 'looks good' and locks on a clear 'I'm in'."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 11:40 heads-up is a few words with no question about quiet hours."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Quiet hours are not raised after the plan locks."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a bullet list ending with one question."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the plan with a heads-up, asks no quiet-hours question, asks commitment naturally, then locks with a hype line and day 1."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it showed the plan with a brief 11:40 heads-up and no quiet-hours question, asked for commitment in natural words, and locked with hype and a clear day 1. The only soft spot is that the plan text runs to the upper edge of the length limit."
+      }
+    }
+  ]
+}

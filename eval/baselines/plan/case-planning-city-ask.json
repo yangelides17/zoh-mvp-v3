@@ -1,0 +1,769 @@
+{
+  "feature": "plan",
+  "id": "case:planning-city-ask",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:17:34.186Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "e893af010603",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "8efa08f59934"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:planning-city-ask#1",
+        "kind": "case",
+        "id": "planning-city-ask",
+        "suite": "capability",
+        "title": "A number outside Eastern time: the city is asked in planning, before the plan",
+        "persona": "scripted",
+        "areaCode": "312",
+        "startTime": "17:00",
+        "timeZone": "America/Chicago"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "30 min is about what I've got after work",
+          "at": "2026-11-02T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "30 minutes is plenty for a real flow. Do you track your workouts anywhere right now?",
+          "at": "2026-11-02T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not really, I just follow YouTube videos",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Following YouTube videos works great for yoga, Rosa. Quick one so I get your times right: what city are you in?",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Chicago",
+          "at": "2026-11-02T23:00:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chicago, got it. Last thing before I put your plan together: where do you want this yoga to get you, like more flexibility, less stiffness, or something else? \"Not sure yet\" is fine too.",
+          "at": "2026-11-02T23:00:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly just to feel less stiff after work",
+          "at": "2026-11-02T23:01:08.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Less stiff after work is a great reason, and 30 minutes of flow is a good fit for that. Here's the plan:\n\n• Where it gets you: feeling less stiff after work\n• Before 6:30 today: pick your video by searching YouTube for \"30 minute yoga stretch for tight back and hips\"\n• Day 1: 30-minute yoga flow with that video, in the living room, 6:30 pm today\n• Schedule: every day, 6:30 pm, 30 minutes\n• Proof: a photo of your mat with the video on screen, or a 1-minute video of you mid-flow if that's easier\n• Why: a daily stretch after sitting all day is what loosens you up, and the photo keeps it honest\n\nEach day shapes the next one, so we can shift the focus (hips, back, shoulders) based on where you feel stiffest. What do you think?",
+          "at": "2026-11-02T23:01:15.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good!",
+          "at": "2026-11-02T23:01:48.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rosa, glad it works for you. Are you officially committing to this: yoga every day at 6:30 pm in the living room, starting today?",
+          "at": "2026-11-02T23:01:55.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific to yoga and her answer, with one clear question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, one light destination question with an easy out."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language, no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges Chicago naturally and keeps the energy warm."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what she has said."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 8 to 9 lines, which is within the allowed plan length."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets are plain and no markdown headings are used."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, ties the plan to her stiffness reason and ends with one question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses her stated reason and ZOH's own suggestions; the hips and back focus is a reasonable suggestion, not a fact about her."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (30-minute flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one commitment question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording, no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, asks for commitment in its own words without showing the plan again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the plan details already agreed."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "City asked before the plan in ZOH 1, plan shown at 6:30 pm for 30 minutes, 'what do you think' asked, then commitment asked without re-showing the plan; saving the time zone can't be seen in the transcript."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: it asked for her city before the plan, asked once and lightly about the destination, showed a concrete 6:30 pm, 30-minute plan with proof, and then asked for commitment without repeating the plan. The only gap is that the saved time zone isn't visible in the transcript, so that part is unverified."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:planning-city-ask#2",
+        "kind": "case",
+        "id": "planning-city-ask",
+        "suite": "capability",
+        "title": "A number outside Eastern time: the city is asked in planning, before the plan",
+        "persona": "scripted",
+        "areaCode": "312",
+        "startTime": "17:00",
+        "timeZone": "America/Chicago"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "30 min is about what I've got after work",
+          "at": "2026-11-02T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "30 minutes is plenty for a real flow. Do you track your workouts anywhere right now?",
+          "at": "2026-11-02T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not really, I just follow YouTube videos",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Following YouTube videos works well for yoga. Which city are you in, Rosa? I want to get your 6:30 pm start time right for your time zone.",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Chicago",
+          "at": "2026-11-02T23:00:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chicago, locked in. 6:30 pm Central works. Where do you want this yoga habit to take you, Rosa? More flexibility, less stiffness, or just feeling stronger? \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T23:00:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly just to feel less stiff after work",
+          "at": "2026-11-02T23:01:08.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Feeling less stiff after work is a clear target, Rosa, and a daily flow fits it well.\n\n• Headed toward: less stiffness after work\n• Day 1, today: a 30-minute yoga flow in your living room at 6:30 pm. Search YouTube for \"30 minute yoga for stiffness and tight back\" and pick one you like.\n• Schedule: every day, 6:30 pm, 30 minutes\n• Proof: a photo of your mat after the flow, or a screenshot of the finished video. A quick voice note on how your body feels works too.\n• Why: a daily flow loosens you up from sitting, and the photo keeps it honest.\n\nEach day shapes the next one. I'll shift the focus, like hips, back or shoulders, based on how your body feels. What do you think?",
+          "at": "2026-11-02T23:01:15.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good!",
+          "at": "2026-11-02T23:01:48.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rosa, are you officially committing to this: a 30-minute yoga flow every day at 6:30 pm in your living room, starting today?",
+          "at": "2026-11-02T23:01:55.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, with no emoji, which suits the setting."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what she said about YouTube videos."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct; the destination ask is light and allows 'not sure yet'."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the city she gave and uses her 6:30 pm time."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the Chicago save and carries on with the next question."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 8 lines, at the allowed limit for a plan text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain • list with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific to her goal, and ends with a single question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses her stiffness goal and the 6:30 pm, 30-minute details she gave."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (yoga flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Direct and warm, though 'officially committing' leans slightly stock."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the plan details she already approved."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "City and destination questions come before the plan, one at a time, with no 'that's everything' line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete on what, where, when and schedule, with a photo or voice note proof that fits a home yoga routine."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination, day 1 step, schedule, proof and a general progression line without a future-step list."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": true,
+            "reason": "Asks for commitment in its own words after 'looks good!' without re-showing the plan."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today, with no push to tomorrow."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a • list ending with 'What do you think?'; it was not re-shown before commitment."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks the city first on its own, saves Chicago, asks the destination once lightly, shows the 6:30 pm 30-minute plan, then asks for commitment without re-showing it."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it asked for her city first, saved Chicago, asked about her destination once, showed a concrete 6:30 pm plan, and then asked for commitment without repeating the plan. The only minor softness is a slightly stock phrase in the commitment ask and a plan text at the upper edge of the length limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:planning-city-ask#3",
+        "kind": "case",
+        "id": "planning-city-ask",
+        "suite": "capability",
+        "title": "A number outside Eastern time: the city is asked in planning, before the plan",
+        "persona": "scripted",
+        "areaCode": "312",
+        "startTime": "17:00",
+        "timeZone": "America/Chicago"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "30 min is about what I've got after work",
+          "at": "2026-11-02T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "30 minutes is plenty for a real flow. Do you track your workouts anywhere right now?",
+          "at": "2026-11-02T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not really, I just follow YouTube videos",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "YouTube flows are a great base, and they make it easy to show up. Quick one before I put your plan together: what city are you in?",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Chicago",
+          "at": "2026-11-02T23:00:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chicago, got it, so 6:30 pm your time. Is there somewhere you'd like this yoga habit to take you, like more flexibility, less stiffness or feeling stronger? \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T23:00:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly just to feel less stiff after work",
+          "at": "2026-11-02T23:01:08.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Less stiff after work is a clear target, Rosa, and 6:30 is the right moment to loosen up 🙌\n\n• Headed for: feeling less stiff after work\n• Setup for today: pick your video before 6:30. Try searching \"30 minute yoga flow for tight back and hips\"\n• Day 1, today: a 30-minute yoga flow from that video, in your living room at 6:30 pm\n• Schedule: every day, 6:30 pm, 30 minutes\n• Proof: a photo of your mat with the finished video on screen, or a screenshot. Easy alternative: a quick voice note on how loose you feel\n• Why: proof keeps it honest, and noticing how you feel afterward shows us what's working\n\nEach day shapes the next one. If certain poses leave you feeling looser, we lean into those. What do you think?",
+          "at": "2026-11-02T23:01:15.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good!",
+          "at": "2026-11-02T23:01:48.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad it works, Rosa. So are you committing to this, every day at 6:30 pm, starting today?",
+          "at": "2026-11-02T23:01:55.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with no emoji row or overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to what she said about YouTube videos."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and brief, with no pressure or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the city she gave to set the 6:30 pm local time."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 9 lines including the closing, near the 8-line limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic with one emoji as punctuation; sincere, not affectionate."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Search phrase is a ZOH suggestion; 'tight back and hips' goes slightly beyond her 'stiff' but is reasonable."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (yoga flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, no emoji or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the plan she approved, with no invented facts."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "City asked first as one question, then destination asked once, plan shown at 6:30 pm for 30 minutes, then commitment asked without re-showing the plan."
+          },
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "City and destination questions both came before the plan, one at a time."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete plan with what, where, when, schedule and a fitting photo or voice-note proof."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows destination, day 1 step, schedule, proof and a line on how each day shapes the next."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks in natural words whether she's committing every day at 6:30 pm starting today."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a bullet list before the 'looks good' reply, and not repeated after it."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: it asked for the city first, asked once about the destination, showed a concrete 6:30 pm plan, and asked for the commitment without re-showing the plan. The only soft spots are the plan text running near the length limit and a search phrase slightly beyond her wording."
+      }
+    }
+  ]
+}

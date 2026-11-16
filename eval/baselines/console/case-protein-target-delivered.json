@@ -1,0 +1,115 @@
+{
+  "feature": "console",
+  "id": "case:protein-target-delivered",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ad6649958efc",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "4f228d058419"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:protein-target-delivered",
+        "kind": "case",
+        "id": "protein-target-delivered",
+        "title": "\"Propose a protein target\" is confirmed with what and when, then rides the morning text as ZOH's own idea",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[photo: chicken and rice bowl] chicken bowl again lol",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Six days straight, Alex. That bowl is becoming your thing 🍗",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: propose a protein target to him, something like 100g a day",
+          "at": "2026-11-02T13:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] File a next step for Alex (upgrade on Eat better): \"Add a daily protein target of about 100g, building on the protein lunch he's kept up for 6 days. Ask if he wants to try it.\". ZOH raises it as its own idea when it fits, and asks first.",
+          "at": "2026-11-02T13:50:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I drafted it as an upgrade on Eat better: a daily protein target of about 100g, built on his 6-day protein lunch streak. Once you approve, I'll bring it up as my own idea at a natural moment and ask if he wants to try it. Nothing has gone to him yet.",
+          "at": "2026-11-02T13:50:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni clicks Do it on: File a next step for Alex (upgrade on Eat better): \"Add a daily protein target of about 100g, building on the protein lunch he's kept up for 6 days. Ask if he wants to try it.\". ZOH raises it as its own idea when it fits, and asks first.",
+          "at": "2026-11-02T13:50:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning, Alex! Six protein lunches in a row, so today it's your 12:30 lunch at work again. Want to try adding a daily protein target of about 100g on top of it?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: done\nWed, Oct 28: done\nThu, Oct 29: done\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): done\nMon, Nov 2 (today): step day, not done yet at 12:30\nTue, Nov 3 (tomorrow): step day at 12:30\nWed, Nov 4: step day at 12:30\nThu, Nov 5: step day at 12:30\nFri, Nov 6: step day at 12:30\nSat, Nov 7: step day at 12:30\nSun, Nov 8: step day at 12:30\nMon, Nov 9: step day at 12:30",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Six protein lunches and the 12:30 lunch at work match the step log and saved plan details."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "Raises the 100g target as a question at a natural morning moment, with no mention of Yanni, the team or a founder suggestion."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": true,
+            "reason": "Card and line say it will bring up the 100g target as its own idea and that nothing has gone out, but the timing is only 'at a natural moment', not the next morning text."
+          },
+          {
+            "rule": "files-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Drafted it as an upgrade on Eat better with the goal named in one line, and the goal was clear so no question was needed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "After Do it, the 9 am text raises the protein target as ZOH's own idea, tied to the lunch streak, with one question and no team mention."
+          }
+        ],
+        "summary": "ZOH handled the founder suggestion well: it drafted the upgrade with the goal named, said nothing had gone to Alex yet, and never claimed it was queued. The morning text raised the protein target in ZOH's voice tied to his real six-day lunch streak, with one question and no mention of the founders, though the draft's timing was vaguer than the 'next morning text' the case expected."
+      }
+    }
+  ]
+}

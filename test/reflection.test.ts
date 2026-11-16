@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach, NOT_SENT_NOTE } from "../src/coach/coach.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, NUDGES, PROOF, TODAYS_STEP } from "../src/coach/prompt.js";
 import { loadCoachState, loadDaySummary } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { messages, plans, stepDays, takeaways, testers, type Tester } from "../src/db/schema.js";
@@ -130,8 +130,11 @@ describe("takeaways", () => {
     expect(await tool("save_takeaway", { text: "Slow enough to talk is the right pace", evidence: "recalled" }, at(WED, "18:50"))).toMatchObject({ ok: true });
     const wed = await block(at(WED, "19:00"));
     expect(wed).toContain(
-      'Takeaways, newest first (bring one back now and then, or build it into a step; see PROOF):\n- today (Wed): "Slow enough to talk is the right pace" (recalled)\n- 2 days ago (Mon): "Slow enough to talk is the right pace" (explained)',
+      'Takeaways, newest first:\n- today (Wed): "Slow enough to talk is the right pace" (recalled)\n- 2 days ago (Mon): "Slow enough to talk is the right pace" (explained)',
     );
+    // #199: bringing one back or building it into a step is PROOF's and TODAY'S STEP's guidance, not the sheet's.
+    expect(PROOF).toContain("Recall: now and then, about 1, 3 and 7 days on, bring one back in a check-in or the conversation");
+    expect(TODAYS_STEP).toContain("Build an earlier takeaway in when it fits (about 1, 3 and 7 days on)");
   });
 
   it("shows only the last two weeks, and is gone after a reset", async () => {
@@ -195,7 +198,9 @@ describe("reflection", () => {
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
       if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today.");
     }
-    expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today. This has been a long talk: time to wrap up.");
+    // #199: the sheet says it's long (a fact); wrapping up is PROOF's guidance, with its reason.
+    expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today. That's a long talk, past the usual length of a reflection.");
+    expect(PROOF).toContain("a talk the state calls long is time to wrap up, since their time matters as much as the talk");
     // A text ZOH starts isn't part of the exchange.
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(MON, "19:50"), isFirstText: false, nudgeMoment: "followup" }));
     expect(nudge).not.toContain("since their proof");
@@ -325,7 +330,9 @@ describe("reflection that gets to know them (#93)", () => {
   it("yesterday's step done with no word on how it went: picked up in a line when they text, never in a text ZOH starts", async () => {
     await setup();
     await doneMonday();
-    expect(await block(at(TUE, "10:00"))).toContain("Yesterday's step was done with no word on how it went: you may pick it up in a line now");
+    // #199: the sheet states it; picking it up in a line, once, never chased, is PROOF's guidance.
+    expect(await block(at(TUE, "10:00"))).toContain("Yesterday's step was done with no word yet on how it went.");
+    expect(PROOF).toContain("Yesterday's step done with no word yet on how it went (state): you may pick it up in a line when they text, once (save_reflection day yesterday); never chase it");
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(TUE, "10:00"), isFirstText: false, nudgeMoment: "rest_day" }));
     expect(nudge).not.toContain("Yesterday's step was done");
     // Once they've said, or for a day from before it was recorded, nothing.
@@ -361,14 +368,16 @@ describe("the next step, agreed at the wrap-up", () => {
 
     const wed = await block(at(WED, "09:00"));
     expect(wed).toContain(`Today's step (set, holds for today): "${NEXT}"`);
-    expect(wed).toContain("They said yes to today's step ahead of time (Mon 7:55 PM): the kickoff reminds them of it (with any tip), and its one question checks they're still in, in words that show they already said yes");
+    // #199: the sheet states the yes came ahead; reminding and checking they're still in is the kickoff's guidance (NUDGES).
+    expect(wed).toContain("They said yes to it ahead of time, on an earlier day (Mon 7:55 PM).");
+    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes, never a first-time \"you in?\"");
     expect(wed).not.toContain("asks nothing");
 
     // The kickoff that morning writes with that state.
     const model = new FakeClaudeModel("Morning Sam! 2 on, 1 off, 4 rounds tonight at 6:30. Same rule: slow enough to talk.");
     const coach = createCoach({ db: t.db, model, voice: "v" });
     await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
-    expect(model.stateOf()).toContain("ahead of time (Mon 7:55 PM): the kickoff reminds them of it");
+    expect(model.stateOf()).toContain("They said yes to it ahead of time, on an earlier day (Mon 7:55 PM)");
   });
 
   it("a changed step without a new yes is asked fresh; with a yes it stays agreed (#92)", async () => {
@@ -401,7 +410,9 @@ describe("the next step, agreed at the wrap-up", () => {
   it("a yes the same day is settled as before (#42)", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: NEXT, agreed: true }, at(WED, "08:30"), "yes");
-    expect(await block(at(WED, "08:31"))).toContain("They said yes to today's step (Wed 8:30 AM): it's settled.");
+    // #199: "settled" is the fact; not re-saying it is TODAY'S STEP's guidance.
+    expect(await block(at(WED, "08:31"))).toContain("They said yes to it today (Wed 8:30 AM): settled.");
+    expect(TODAYS_STEP).toContain("Once they've said yes (settled), don't re-say it or its proof, or ask if they're still on");
   });
 });
 
