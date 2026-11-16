@@ -11,7 +11,8 @@
     "phase": "onboarding",
     "answers": {},
     "history": [
-      { "from": "zoh", "text": "Hey! I'm ZOH, a coach that helps you turn what you want into small daily steps. What's your name, and what do you want to work on?" },
+      { "from": "tester", "text": "hey" },
+      { "from": "zoh", "text": "Hey! I'm ZOH, a coach who texts you one small step a day toward a goal you pick. Text \"stop\" anytime and I'll stop, and you can tell me anytime to coach you differently. What's your name, and which of these do you want to work on?\n• Get moving\n• Read more\n• Eat better\n• Sleep better\n• Not sure yet" },
       { "from": "tester", "text": "Lena. reading, I want to read more" }
     ]
   },

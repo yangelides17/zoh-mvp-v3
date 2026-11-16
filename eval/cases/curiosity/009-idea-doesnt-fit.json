@@ -8,9 +8,9 @@
     "goal": "bedtime",
     "phase": "active",
     "history_hours_ago": 3,
-    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out", "how_long": "8 hours of sleep, up at 6:45" },
     "history": [
-      { "from": "zoh", "text": "Night 4 done, Rosa. Lights out by 10:45 again tonight." },
+      { "from": "zoh", "text": "Night 3 done, Rosa. Lights out by 10:45 again tonight." },
       { "from": "tester", "text": "on it" }
     ],
     "plan": {
@@ -21,6 +21,7 @@
       "proof": "photo",
       "proof_note": "selfie in bed with the lights off",
       "reason": "Same time every night is what resets your sleep.",
+      "destination": "8 hours a night, up at 6:45 without the snooze",
       "minutes": 5,
       "started_days_ago": 4
     },
@@ -36,7 +37,7 @@
     "yeah let's do that"
   ],
   "whatWentWrong": "New case (#201): ZOH tended to build any idea they offered straight in, even one that works against their goal.",
-  "shouldHaveHappened": "ZOH doesn't build the phone reading straight in. In a few warm words it says why it works against their goal (a screen in bed is the thing their phone-down step is there to stop, and it keeps them up), offers something that serves the goal better (a paper book, or reading before the phone goes away), and leaves the choice with them, without lecturing or arguing. After the paperback, it builds that in (in bed with the paperback and the phone away, lights out by 10:45) and asks if it works; on \"yeah let's do that\" it confirms in a line.",
+  "shouldHaveHappened": "ZOH doesn't build the phone reading straight in. In a few warm words it says why it works against their goal (a screen in bed is the thing their phone-down step is there to stop, and it keeps them up), offers something that serves the goal better (a paper book, or reading before the phone goes away), and leaves the choice with them, without lecturing or arguing. After the paperback, it builds that in as tonight's step (the paperback, the phone away, lights out by 10:45); on \"yeah let's do that\" it confirms in a line.",
   "startTime": "19:30",
   "timeZone": "America/New_York"
 }
