@@ -53,6 +53,9 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
    - **Different from the plan:** only what changed and why; "As planned" if nothing did.
    - **Decisions worth knowing:** only those that affect testers or the design.
    - **Tests:** "All N Must tests pass", or what failed.
+   - **How the words changed** (if ZOH's words changed): the PR lists the principle, the placement, conflicts found and
+     fixed, and the new cases ("How to change what ZOH says" in the voice page's people-only header); say what's
+     missing.
    - **Eval** (if ZOH's words changed): the comparison's verdict in a line (what got better or worse beyond noise, by
      group) and what went well. For anything worse, or a check below target, more detail: the weakness, the pattern
      behind it, one real reply showing it, and whether the build fixed the cause.

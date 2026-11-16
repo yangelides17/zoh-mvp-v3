@@ -57,7 +57,9 @@ cases once both are on `dev`.
    - **Post, label, keep building** for smaller deviations that still change behavior, the fixture format or what gets
      written to the DB: add `needs-signoff` (`gh issue edit $ARGUMENTS --add-label needs-signoff`).
    - Purely internal choices (a variable name, a loop vs. map) need neither.
-6. **Eval** (only if ZOH's words change), as in "How to test a change to ZOH's words" in `eval/README.md`: run only
+6. **Eval** (only if ZOH's words change). First follow "How to change what ZOH says" in the voice page's people-only
+   header (cases before the wording); the PR lists the principle, the placement, conflicts found and fixed, and the
+   new cases. Then test as in "How to test a change to ZOH's words" in `eval/README.md`: run only
    the cases this change touches, adding one in `eval/cases/<feature>/` when none covers it (a new behavior's cases
    are `"suite": "capability"`). While iterating, `npm run eval -- <feature> --case <id>` (one run, cheap); when done,
    one comparison of those cases for the PR, one run each: `--case <id>... --compare`. Then rerun only the cases the

@@ -116,6 +116,12 @@ plus `decide` (a question waiting for Yes / Later / No) and `bug`.
 - **Eval budget: $1 per issue on the branch, up to $3 for a group**, enforced by the eval itself from what the API
   actually billed. The full run at each release is estimated at about $34 (Nov 15), so it waits for your OK each time. A full run between releases only for changes to every conversation, with your
   OK. The tests in `npm run check` are free. Live testing and the beta catch the rest.
+- **How a change to ZOH's words is made** (#201). One method, written in the voice page's people-only header and
+  pointed to by `/spec`, `/build`, `/quick` and `/review`: find the principle it refines and sharpen that line rather
+  than add one; place it (the core, or one moment's section, and onboarding's short version or not); write the
+  reason with it; look for lines it contradicts; an example only for a judgment call, as a contrasting pair; then
+  cases written before the wording, a grader check, and an entry on #196's "Refined along the way" list. The PR
+  lists what it found, and `/review` checks it.
 - **How a change to ZOH's words is tested** (#197). The build runs only the cases the change touches: once while
   iterating, then once more each, compared with the stored baseline case by case; only the cases that did worse
   are run 3 more times to tell real from noise (Nov 15: more cases beat more runs, and it costs far less). The report scores four groups:
