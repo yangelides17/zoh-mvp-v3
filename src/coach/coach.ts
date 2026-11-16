@@ -180,7 +180,7 @@ export function createCoach(opts: CoachOptions): Replier {
       ? { system: systemBlocks(blocks, undefined, memory), messages: withSheet(messages, state) }
       : { system: systemBlocks(blocks, state, memory), messages };
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, interrupted, signal, dropped, media }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
@@ -226,6 +226,7 @@ export function createCoach(opts: CoachOptions): Replier {
         addUsage(usage, r.usage);
         web.searches += r.usage?.searches ?? 0;
         web.fetches += r.usage?.fetches ?? 0;
+        for (const line of r.lookups ?? []) onLookup?.(line);
         for (const link of r.found ?? []) {
           found.push(link);
           allowed.seen.add(linkKey(link));
@@ -355,8 +356,9 @@ export function createCoach(opts: CoachOptions): Replier {
             const watchedNow = opts.watcher
               ? await runWatchVideo(opts.watcher, call.input, { budget: web, allowed, ...(onActivity ? { onActivity } : {}) })
               : ({ ok: false, error: "Videos can't be watched right now: say so if it matters." } as const);
+            const url = String((call.input as { url?: unknown } | undefined)?.url ?? "");
+            onLookup?.(watchedNow.ok ? `watched ${url}` : `couldn't watch ${url} (${watchedNow.error.slice(0, 80)})`);
             if (watchedNow.ok) {
-              const url = String((call.input as { url: string }).url);
               watched.push(url);
               const action = `watch_video (${watchedNow.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
               done.push(action);

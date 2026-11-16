@@ -172,6 +172,8 @@ describe("caps per reply", () => {
     await text("teach me https://youtu.be/abc");
     const [inbound] = await t.db.select().from(messages).where(and(eq(messages.direction, "inbound")));
     expect(inbound!.timings).toMatchObject({ web_searches: 1, web_pages: 1, video_watches: 1 });
+    // What it asked and found, for the record (and the eval's grader).
+    expect((inbound!.timings as { lookups: string }).lookups.split("\n")).toEqual(['searched "q": https://a.com/x', "opened https://a.com/x", "watched https://youtu.be/abc"]);
     const [reply] = await t.db.select().from(messages).where(eq(messages.content, "Here https://a.com/x"));
     expect(lookupLine(reply!.timings)).toBe("🔎 1 · 📖 1 · 👀 1 · ~8¢");
     expect(lookupLine(null)).toBe("");

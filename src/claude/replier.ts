@@ -44,6 +44,8 @@ export interface ReplyInput {
   onSections?: (sections: string[]) => void;
   /** #162: told the moment a web search, page read or video watch starts, for a status text. */
   onActivity?: (kind: WebActivity) => void;
+  /** #162: told each search, page and video as it finishes (a line on what it asked and found), for the record. */
+  onLookup?: (line: string) => void;
 }
 
 /** #162: what ZOH is doing that takes a while: searching, reading a page, watching a video. */
@@ -181,6 +183,8 @@ export interface ModelResponse {
   usage?: TokenUsage;
   /** #162: every link a search result or an opened page in this call turned up. */
   found?: string[];
+  /** #162: a line per search or page ("searched "…": links", "opened link"), for the message's record. */
+  lookups?: string[];
 }
 
 /** The seam between the coach and Anthropic's API; `test/helpers.ts` has a scripted fake. */
@@ -256,9 +260,12 @@ export function createClaudeModel(opts: ClaudeModelOptions): ClaudeModel {
  * last server tool's result is the answer (before it is preamble: "let me look that up"), and a search splits its
  * answer into cited pieces, so those join with nothing between them. Without one, text blocks stay as they came.
  */
-export function readBlocks(blocks: readonly { type: string }[]): { content: ModelBlock[]; found: string[] } {
+export function readBlocks(blocks: readonly { type: string }[]): { content: ModelBlock[]; found: string[]; lookups: string[] } {
   const calls: ModelBlock[] = [];
   const found: string[] = [];
+  const lookups: string[] = [];
+  /** What each search asked, by its id, for the lookup lines. */
+  const asked = new Map<string, string>();
   let texts: string[] = [];
   let searched = false;
   for (const b of blocks) {
@@ -266,15 +273,31 @@ export function readBlocks(blocks: readonly { type: string }[]): { content: Mode
     else if (b.type === "tool_use") {
       const t = b as Anthropic.ToolUseBlock;
       calls.push({ type: "tool_use", id: t.id, name: t.name, input: t.input });
+    } else if (b.type === "server_tool_use") {
+      const s = b as Anthropic.ServerToolUseBlock;
+      const input = (s.input ?? {}) as { query?: unknown; url?: unknown };
+      asked.set(s.id, String(input.query ?? input.url ?? ""));
     } else if (b.type.endsWith("_tool_result")) {
       searched = true;
       texts = [];
-      found.push(...foundIn(b));
+      const links = foundIn(b);
+      found.push(...links);
+      const line = lookupLine(b, asked.get((b as { tool_use_id?: string }).tool_use_id ?? "") ?? "", links);
+      if (line) lookups.push(line);
     }
   }
   const joined = texts.join("");
   const text: ModelBlock[] = searched ? (joined.trim() ? [{ type: "text", text: joined }] : []) : texts.map((t) => ({ type: "text" as const, text: t }));
-  return { content: [...text, ...calls], found };
+  return { content: [...text, ...calls], found, lookups };
+}
+
+/** #162: one line on a search or page, for the message's record (the console and the eval's grader read it). */
+function lookupLine(block: { type: string }, asked: string, links: string[]): string | undefined {
+  const content = (block as { content?: unknown }).content;
+  const error = content && !Array.isArray(content) && typeof content === "object" && "error_code" in content ? String((content as { error_code: unknown }).error_code) : undefined;
+  if (block.type === "web_search_tool_result") return error ? `search for "${asked}" failed (${error})` : `searched "${asked}": ${links.join(" ") || "nothing found"}`;
+  if (block.type === "web_fetch_tool_result") return error ? `couldn't open ${asked} (${error})` : `opened ${links[0] ?? asked}`;
+  return undefined;
 }
 
 /** The links a search result or an opened page holds; an error holds none. */

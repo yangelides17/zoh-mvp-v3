@@ -87,6 +87,8 @@ export const MAX_STATUS_TEXTS = 2;
 
 /** #162: what a reply looked up, kept in its timings (and the reply's own) for the console's cost line. */
 export const LOOKUP_TIMINGS = ["web_searches", "web_pages", "video_watches"] as const;
+/** #162: the record of what a reply looked up is cut here, so a runaway reply can't bloat the row. */
+const LOOKUPS_MAX_CHARS = 4_000;
 
 /**
  * Sends the holding text for a video or document still being read, unless "stop" or "reset" came in
@@ -395,6 +397,11 @@ async function draftReply(
         media: batch.some((p) => p.inbound.mediaUrl),
         onSections: (s) => (timings.coach_sections = s.join(",")),
         onActivity,
+        // #162: what it searched, opened and watched, kept with their text (the eval's grader reads it too).
+        onLookup: (l) => {
+          const lines = timings.lookups ? `${timings.lookups}\n${l}` : l;
+          timings.lookups = lines.slice(0, LOOKUPS_MAX_CHARS);
+        },
         onUsage: (u) => {
           timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
           timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;

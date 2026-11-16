@@ -1753,6 +1753,20 @@
    "change": "new"
   },
   {
+   "text": "watched ${url}",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > replyLoop",
+   "kind": "coach note",
+   "change": "new"
+  },
+  {
+   "text": "couldn't watch ${url} (${watchedNow.error.slice(0, 80)})",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > replyLoop",
+   "kind": "coach note",
+   "change": "new"
+  },
+  {
    "text": "watch_video (${watchedNow.message.split(\"\\n\")[0]!.slice(0, ACTION_RESULT_CHARS)})",
    "file": "src/coach/coach.ts",
    "where": "createCoach > reply > replyLoop > action",

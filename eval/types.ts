@@ -245,8 +245,11 @@ export const caseSchema = z.object({
 export type RegressionCase = z.infer<typeof caseSchema>;
 
 export interface TranscriptLine {
-  /** "founder": a founder's line in the console chat (console feature); never seen by the tester. */
-  from: "tester" | "zoh" | "founder";
+  /**
+   * "founder": a founder's line in the console chat (console feature); never seen by the tester. "lookup" (#162):
+   * what ZOH searched, opened or watched for its next reply, for the grader; never seen by the tester.
+   */
+  from: "tester" | "zoh" | "founder" | "lookup";
   text: string;
   /** ZOH answering the founders in the console chat, not a text to the tester. */
   console?: boolean;
