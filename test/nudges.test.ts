@@ -3,7 +3,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { raiseAlert } from "../src/console/alerts.js";
 import { createCoach, NUDGE_TOOLS } from "../src/coach/coach.js";
-import { buildStateBlock, NUDGES } from "../src/coach/prompt.js";
+import { buildStateBlock, NUDGES, TODAYS_STEP } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import {
@@ -25,6 +25,7 @@ import { summarizeDays } from "../src/nudges/streak.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { goalMetrics, loadTesterGoals, setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
+import { loadVoiceDoc } from "../src/coach/voice.js";
 import { DEV, FakeClaudeModel, LINE, ME, STRANGER, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
 
 const TZ = "America/New_York";
@@ -509,7 +510,9 @@ describe("moving today and saying they're on it", () => {
     expect(await stepDay(tester, MON)).toMatchObject({ onItAt: null, agreedAt: at(MON, "09:01") });
     const block = buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "09:02"), isFirstText: false }));
     expect(block).not.toContain("on it");
-    expect(block).toContain("They said yes to today's step");
+    expect(block).toContain("They said yes to it today (Mon 9:01 AM): settled.");
+    // #199: why "on it" is only within the hour (the check-in it makes unneeded) is now NUDGES' reason.
+    expect(NUDGES).toContain("Starting it now or within the hour: call mark_on_it (the app then skips the check-in it no longer needs)");
   });
 
   it("#137: on it within the hour still counts, right up to the step", async () => {
@@ -649,7 +652,8 @@ describe("the coach writing a nudge", () => {
     expect(req.tools.map((x) => x.name).sort()).toEqual([...NUDGE_TOOLS].sort());
     expect(req.system[0]!.text).toContain(NUDGES);
     expect(model.stateOf()).toContain("NUDGE MOMENT: kickoff");
-    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet.");
+    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet (the plan's step applies until it is).");
+    expect(model.stateOf()).toMatch(/Moments now: Nudges; Today's step/);
     expect(model.stateOf()).toContain("Next step day: Tue 2026-11-03.");
     expect(model.stateOf()).toContain('Their words when they committed: "I\'m in"');
     const last = req.messages.at(-1)!;
@@ -676,7 +680,10 @@ describe("the state block for an active tester", () => {
     await tool("mark_on_it", {}, at(MON, "20:10"));
     const state = await loadCoachState(t.db, tester, { now: at(MON, "20:12"), isFirstText: false });
     const block = buildStateBlock(state);
-    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet. Pick it the first time you talk about today (see NUDGES) and save it with set_today_step; until then the plan's step applies. Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
+    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
+    // #199: picking it and saving it is TODAY'S STEP's guidance, not the sheet's.
+    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
+    expect(TODAYS_STEP).toContain("set_today_step saves it");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
     await doneWithPhoto("full", at(MON, "20:40"), "10 pages");
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(MON, "20:41"), isFirstText: false }))).toContain("Status: done.");
@@ -830,9 +837,11 @@ describe("a kickoff the morning already covered (#42)", () => {
     expect(await stepDay(tester, MON)).toMatchObject({ agreedAt: at(MON, "10:00") });
     const block = async () =>
       buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "20:00"), isFirstText: false }));
-    expect(await block()).toContain("They said yes to today's step (Mon 10:00 AM): it's settled.");
+    // #199: "settled" is the fact; not re-saying it is TODAY'S STEP's guidance (#42).
+    expect(await block()).toContain("They said yes to it today (Mon 10:00 AM): settled.");
+    expect(TODAYS_STEP).toContain("Once they've said yes (settled), don't re-say it or its proof, or ask if they're still on");
     await doneWithPhoto("full", at(MON, "19:30"));
-    expect(await block()).not.toContain("They said yes to today's step");
+    expect(await block()).not.toContain("They said yes to it");
     // A rest day has nothing to agree to.
     expect(await tool("mark_agreed", {}, at(TUE, "10:00"))).toMatchObject({ ok: false });
   });
@@ -894,7 +903,10 @@ describe("a temporary lighter plan (rule 7)", () => {
     const block = buildStateBlock(await loadCoachState(t.db, tester, { now: at(WED, "10:00"), isFirstText: false }));
     expect(block).toContain("Recent step days, newest first:\n- Tue 2026-11-03, done (reduced version): the plan's step\n- Mon 2026-11-02, done (reduced version): the plan's step");
     expect(block).toContain("Streak: 0 step days, not counting today (done today makes it 1). Missed in a row: 0. Reduced in a row: 2.");
-    expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
+    // #199: the sheet gives the count and the moment; asking which it is lives in "When they start to slip".
+    expect(block).toMatch(/Moments now: .*When they start to slip/);
+    expect(loadVoiceDoc()).toContain("So after two reduced days in a row (on their usual plan), ZOH asks which it is");
+    expect(loadVoiceDoc()).toContain("(change_plan with until)");
   });
 });
 

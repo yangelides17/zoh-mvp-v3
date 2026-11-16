@@ -345,7 +345,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "record_checkin",
     description:
-      'A maintenance goal (by slug): their answer to "still keeping up?" (kept_up; mostly = a day or two missed; stopped), or asked when the state says to ask it on its own and you do.',
+      'A maintenance goal (by slug): their answer to "still keeping up?" (kept_up; mostly = a day or two missed; stopped), or asked when this text carries an owed check-in ("This text carries" in the state) and you ask it.',
     input_schema: {
       type: "object",
       properties: { goal: { type: "string" }, answer: { type: "string", enum: [...CHECKIN_ANSWERS, "asked"] } },
@@ -1088,6 +1088,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
       // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
       if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
+      // #199: the backstop for "never twice", now that the sheet states only that it was given.
+      if (!state.nudgeMoment && state.week?.recapped && !state.week.recappedNow) {
+        return { ok: false, error: "The week's recap was already given today. Their replies to it are the week talk: write this text without a recap." };
+      }
       // Spec #78: the week comes after the day's reflection, never in the text that celebrates their proof.
       const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
       if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {

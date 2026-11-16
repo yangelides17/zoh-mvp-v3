@@ -2,7 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { alertFailure } from "../src/console/alerts.js";
 import { addRequest } from "../src/console/requests.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, TOOL_RULES } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { consoleMessages, messages, pauses, plans, stepDays, testers, type Tester } from "../src/db/schema.js";
@@ -305,14 +305,19 @@ describe("after a stop", () => {
     const sam = await setup();
     await t.db.update(testers).set({ stoppedAt: at(MON, "08:00") }).where(eq(testers.id, sam.id));
     const block = async () => buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, sam.id))!, { now: at(MON, "12:00"), isFirstText: false, lastTesterText: "" }));
-    expect(await block()).toMatch(/STOPPED: they texted stop on .*ask once, warmly, if they want to pick their goal back up/);
+    // #199: the sheet states the stop and whether ZOH has asked; what to do with that is the tools section's (every phase).
+    expect(await block()).toMatch(/STOPPED: they texted stop on .*Nothing you'd start goes out\. Not asked yet if they want to restart\./);
+    expect(await block()).toMatch(/Moments now: .*Saving, style and requests/);
+    expect(TOOL_RULES).toContain("Ask once, warmly, if they want to pick their goal back up; once asked, just answer, with no new offer, invite or mention of their goal or step.");
+    expect(TOOL_RULES).toContain("Only a clear yes (\"yes\", \"let's go\") restarts it: restart_coaching. A hi, maybe or question isn't one.");
+    expect(FIXED_INSTRUCTIONS).toContain(TOOL_RULES);
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Thank you very much. Noted. We will stop sending you messages.", createdAt: at(MON, "08:01") });
-    expect(await block()).toContain("ask once, warmly");
+    expect(await block()).toContain("Not asked yet if they want to restart.");
     // A reply that never reached them doesn't count as asking.
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", status: "SEND_FAILED", createdAt: at(MON, "10:00") });
-    expect(await block()).toContain("ask once, warmly");
+    expect(await block()).toContain("Not asked yet if they want to restart.");
     await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Want to pick reading back up?", createdAt: at(MON, "11:00") });
-    expect(await block()).toContain("You've asked if they want to restart: just answer what they say");
+    expect(await block()).toContain("You've asked if they want to restart.");
   });
 
   it("#109: restart_coaching starts ZOH's texts again on the same plan; days stopped aren't misses", async () => {

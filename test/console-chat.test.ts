@@ -4,7 +4,7 @@ import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.j
 import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance, stepLog } from "../src/console/chat.js";
 import { addRequest, addThreadLine, APP_AUTHOR, COACH_AUTHOR, requestRef } from "../src/console/requests.js";
 import { createCoach } from "../src/coach/coach.js";
-import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, PLAN_AGREEMENT, TEAM } from "../src/coach/prompt.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, NUDGES, PLAN_AGREEMENT, TEAM } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { loadVoiceDoc, splitVoicePage } from "../src/coach/voice.js";
@@ -418,8 +418,11 @@ describe("the texting coach and the team", () => {
     await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "EXACT ONE", exact: true, sendNow: false, at: now });
     await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "CANCELLED ONE", exact: false, sendNow: false, at: now, status: "cancelled" });
     const block = buildStateBlock(await loadCoachState(t.db, tester, { now, isFirstText: false }));
-    expect(block).toContain("FROM THE TEAM, notes (context only; never quote them or mention the team):\n- Nov 3: Traveling next week");
-    expect(block).toContain(`FROM THE TEAM, request [${requestRef(due.id)}]: Share https://example.com/sleep.`);
+    // #199: the sheet lists them as facts; never quoting a note, and doing a request as your own idea, are THE TEAM's.
+    expect(block).toContain("FROM THE TEAM, notes:\n- Nov 3: Traveling next week");
+    expect(block).toContain(`FROM THE TEAM, request [${requestRef(due.id)}], not done yet: Share https://example.com/sleep`);
+    expect(TEAM).toContain("A note is context: let it shape how you coach; never quote it or say where it came from.");
+    expect(TEAM).toContain("A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done.");
     expect(block).not.toContain("LATER ONE");
     expect(block).not.toContain("EXACT ONE");
     expect(block).not.toContain("CANCELLED ONE");
@@ -447,7 +450,8 @@ describe("the texting coach and the team", () => {
     expect(rows.at(-1)!.body).toMatch(/^Done \(in a reply, Tue 12:00 PM\): Share the sleep article$/);
     // Later rounds of the same reply still see it, so the text doesn't drop it (eval: article-link).
     const sameReply = await loadCoachState(t.db, tester, { now, isFirstText: false });
-    expect(buildStateBlock(sameReply)).toContain(`request [${requestRef(request.id)}], marked done in this reply: Share the sleep article. This text (not sent yet) carries it`);
+    // #199: under "This text carries", so the text doesn't drop it.
+    expect(buildStateBlock(sameReply)).toContain(`This text carries (not sent yet):\n- the team's request [${requestRef(request.id)}] (you marked it done): Share the sleep article`);
     const again = await runTool(t.db, sameReply, "mark_request_done", { request: requestRef(request.id) }, now);
     expect(again.ok).toBe(false);
     // The next reply doesn't.
@@ -470,7 +474,7 @@ describe("the texting coach and the team", () => {
     expect((await thread(tester.id)).at(-1)!.body).toContain("Done (in the morning text");
   });
 
-  it("the carried request is written by the real coach from its THIS TEXT ALSO line", async () => {
+  it("the carried request is written by the real coach from its This text carries line", async () => {
     const tester = await seed();
     const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share https://example.com/sleep", exact: false, sendNow: false, at: now });
     const [plan] = await t.db.select().from(plans).where(eq(plans.testerId, tester.id));
@@ -479,8 +483,11 @@ describe("the texting coach and the team", () => {
     const coach = createCoach({ db: t.db, model: coachModel, voice: "v" });
     await coach.nudge!({ tester, turns: [{ role: "user", text: "hi" }], now: at(WED, "09:00"), moment: "kickoff", carry: { requestId: request.id } });
     const state = coachModel.requests[0]!.system.at(-1)!.text;
-    expect(state).toContain(`THIS TEXT ALSO CARRIES the team's request [${requestRef(request.id)}]: Share https://example.com/sleep.`);
+    // #199: a fact about this text, recorded by the app; how a carried text does it is NUDGES'.
+    expect(state).toContain(`This text carries (not sent yet):\n- the team's request [${requestRef(request.id)}] (the app records it): Share https://example.com/sleep`);
     expect(state).not.toContain("then mark_request_done");
+    expect(state).not.toContain("not done yet");
+    expect(NUDGES).toContain("What a text carries (state): in place of its usual question, as its only one, and as your own idea; 1 to 3 sentences, no proof ask.");
   });
 });
 
@@ -643,8 +650,11 @@ describe("when a request goes: agreed in the console chat", () => {
     const coachModel = new FakeClaudeModel("Sam! How are the new shoes feeling?");
     const coach = createCoach({ db: t.db, model: coachModel, voice: "v" });
     await coach.nudge!({ tester, turns: [{ role: "user", text: "hi" }], now, moment: "team", carry: { requestId: request.id } });
-    expect(coachModel.requests[0]!.system.at(-1)!.text).toContain(`[${requestRef(request.id)}]: Ask how the new shoes feel. It's this text's whole job`);
-    expect(TEAM).toContain("NUDGE MOMENT team");
+    // #199: the sheet says this text carries it; that it's the text's whole job is THE TEAM's (NUDGE MOMENT team).
+    const state = coachModel.requests[0]!.system.at(-1)!.text;
+    expect(state).toContain(`- the team's request [${requestRef(request.id)}] (the app records it): Ask how the new shoes feel`);
+    expect(state).toContain("NUDGE MOMENT: team.");
+    expect(TEAM).toContain("NUDGE MOMENT team: a text they asked you to send. Its one job is the request, as your own idea; no step or proof push.");
   });
 
   it("follows the nudge rules: never after a stop or past 3 unanswered; dropped with a note when it's too late", async () => {
@@ -682,7 +692,7 @@ describe("when a request goes: agreed in the console chat", () => {
     await scheduler.tick(at(TUE, "12:00"));
     expect(nudgeMoments()).toEqual([]);
     const reply = buildStateBlock(await loadCoachState(t.db, tester, { now: at(TUE, "12:00"), isFirstText: false }));
-    expect(reply).toContain(`FROM THE TEAM, request [${requestRef(request.id)}]: Ask about the shoes.`);
+    expect(reply).toContain(`FROM THE TEAM, request [${requestRef(request.id)}], not done yet: Ask about the shoes`);
     await scheduler.tick(at(TUE, "12:05"));
     expect(nudgeMoments()).toEqual(["team"]);
   });
@@ -821,7 +831,7 @@ describe("#155: the console chat drafts, a founder confirms", () => {
     const real = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: createCoach({ db: t.db, model: coachModel, voice: "v" }), allowedNumbers: [ME], lineNumber: LINE });
     await real.tick(at(WED, "09:00"));
     await real.stop();
-    expect(coachModel.stateOf()).toContain(`THIS TEXT ALSO CARRIES the team's request [${requestRef(request.id)}]`);
+    expect(coachModel.stateOf()).toContain(`This text carries (not sent yet):\n- the team's request [${requestRef(request.id)}]`);
     expect((await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, request.id)))[0]!.requestStatus).toBe("done");
   });
 

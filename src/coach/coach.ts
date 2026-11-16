@@ -306,7 +306,7 @@ export function createCoach(opts: CoachOptions): Replier {
      */
     async nudge({ tester, turns, now, moment, previous, carry, mayskip }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
-      const carries = carry ? ` It also does what the state's "THIS TEXT ALSO" line says.` : "";
+      const carries = carry ? ` It also does what the state's "This text carries" says.` : "";
       // #42: a kickoff right after a morning chat that settled today's step only repeats it.
       const skip = mayskip
         ? ` They've already texted today. If today's conversation already covered what this text would say (today's step and time agreed, they're on it or moved it, or they owned a miss and talked through today's plan), answer only ${SKIP} and nothing goes out. Otherwise write it without repeating what was already said.`
