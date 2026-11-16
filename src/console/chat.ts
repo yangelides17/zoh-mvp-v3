@@ -6,7 +6,7 @@ import { toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { buildStateBlock } from "../coach/prompt.js";
 import { loadCoachState, localTime } from "../coach/state.js";
-import { loadVoiceDoc } from "../coach/voice.js";
+import { loadVoiceDoc, splitVoicePage } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
 import {
   consoleMessages,
@@ -546,7 +546,12 @@ export interface ConsoleCoachOptions {
 
 export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
   const { db, model, goalCap } = opts;
-  const fixed = `${CONSOLE_INSTRUCTIONS}\n\nVOICE PAGE (how you text testers)\n${opts.voice ?? loadVoiceDoc()}`;
+  // #196 (Yanni, Nov 16): the console reads only the voice, not the texting coach's rule sections (plan agreement,
+  // nudges, proof, the look-back, next steps, the team, memory), as before #196 moved them into the page. If the
+  // console seems confused about why ZOH did something in practice (asked for a screenshot, didn't count "ok" as a
+  // yes, held a request), this may be why: it doesn't know those rules. Giving it `splitVoicePage(...).rules` too was
+  // left for later, with its own console eval, since it could also follow rules meant for texting testers.
+  const fixed = `${CONSOLE_INSTRUCTIONS}\n\nVOICE PAGE (how you text testers)\n${opts.voice ?? splitVoicePage(loadVoiceDoc()).voice}`;
   const chains = new Map<string, Promise<unknown>>();
 
   async function answer(testerId: string, now: Date): Promise<ConsoleMessage | undefined> {

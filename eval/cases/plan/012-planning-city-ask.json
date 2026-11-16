@@ -1,0 +1,38 @@
+{
+  "id": "planning-city-ask",
+  "title": "A number outside Eastern time: the city is asked in planning, before the plan",
+  "origin": "Issue #196 (coverage gap: the planning-phase city ask)",
+  "suite": "capability",
+  "seed": {
+    "name": "Rosa",
+    "goal": "exercise",
+    "phase": "planning",
+    "answers": {
+      "what": "yoga flow",
+      "where": "living room",
+      "when": "6:30 pm",
+      "how_long": "30 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "30 min is about what I've got after work"
+      },
+      {
+        "from": "zoh",
+        "text": "30 minutes is plenty for a real flow. Do you track your workouts anywhere right now?"
+      }
+    ]
+  },
+  "testerLines": [
+    "not really, I just follow YouTube videos",
+    "Chicago",
+    "honestly just to feel less stiff after work",
+    "looks good!"
+  ],
+  "whatWentWrong": "New case, not a past mistake: no case covered asking for the city during planning.",
+  "shouldHaveHappened": "Before showing the plan, ZOH asks which city she's in, as one natural question (so her texts come at the right time), without asking anything else in that text. Once she says Chicago it saves her time zone; it may ask once, lightly, where she wants this to get her (the plan rules allow it) before showing the plan (6:30 pm, 30 minutes, with times as people text them), then asks what she thinks. After \"looks good!\" it asks for her commitment in its own words, without showing the plan again.",
+  "areaCode": "312",
+  "startTime": "17:00",
+  "timeZone": "America/Chicago"
+}

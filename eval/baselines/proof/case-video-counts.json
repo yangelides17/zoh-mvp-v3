@@ -1,0 +1,256 @@
+{
+  "feature": "proof",
+  "id": "case:video-counts",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "489682c9d906",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "c3a004a76a38"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:video-counts#1",
+        "kind": "case",
+        "id": "video-counts",
+        "suite": "regression",
+        "title": "A squat video counts, with a reaction to something specific in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Sam! 3 sets of 10 goblet squats in the garage at 7. Film your last set, a minute or two is perfect. You in?",
+          "at": "2026-11-02T10:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T10:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video last-set.mov: A garage, one person with a kettlebell held at the chest. Ten goblet squats from 0:05 to 0:58. The first eight go to about parallel; reps 9 and 10 are shallower, a few inches above parallel, and the heels lift slightly on rep 10 (0:55). They set the bell down and say \"that's three\" at 1:02.] last set done, legs are cooked",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three sets done, Sam, and the legs are cooked 🔥 I watched the clip: the first eight reps hit about parallel, and the last two came up a bit shallow. What do you think happened there, was it just the legs giving out?",
+          "at": "2026-11-02T12:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": true,
+                "reason": "Video proof is accepted and celebrated with 'Three sets done' and 'legs are cooked 🔥', though it never explicitly says the step is checked off."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to specifics from the account: first eight reps near parallel, last two a bit shallow."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus one closing question, with one emoji at the end of a beat."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic with one emoji as punctuation, though the hype is a bit mild for Pushy."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the video, cites the shallower last two reps from the account, asks one reflection question about them, and never asks for other proof."
+          }
+        ],
+        "summary": "ZOH handled the video proof well: it counted the set, referenced the depth change on the last two reps without inventing details, and asked a single reflection question. The main weakness is that the celebration is fairly muted and it never clearly confirms the step is checked off."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:video-counts#2",
+        "kind": "case",
+        "id": "video-counts",
+        "suite": "regression",
+        "title": "A squat video counts, with a reaction to something specific in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Sam! 3 sets of 10 goblet squats in the garage at 7. Film your last set, a minute or two is perfect. You in?",
+          "at": "2026-11-02T10:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T10:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video last-set.mov: A garage, one person with a kettlebell held at the chest. Ten goblet squats from 0:05 to 0:58. The first eight go to about parallel; reps 9 and 10 are shallower, a few inches above parallel, and the heels lift slightly on rep 10 (0:55). They set the bell down and say \"that's three\" at 1:02.] last set done, legs are cooked",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 3 done, Sam, and cooked legs mean you worked 🔥 I watched the clip. The first eight reps hit parallel, then 9 and 10 got shallower and your heels lifted a bit on the last one. What did those final reps feel like from the inside?",
+          "at": "2026-11-02T12:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Counts the video as proof and celebrates the completed last set without questioning it."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Cites the first eight reps reaching parallel and reps 9 and 10 getting shallower with heels lifting, matching the video account."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences before the closing question, over the one-to-three-sentence limit, though it ends with one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with one fire emoji as punctuation, sincere and not accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the video, celebrates specific details from the account, asks a reflection question about the final reps, and never asks for other proof."
+          }
+        ],
+        "summary": "ZOH handled the video proof well: it counted the clip, praised specific details from the account without inventing anything, and asked a fitting reflection question. The main miss is length, since the text runs longer than the short-text limit even though it has only one question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:video-counts#3",
+        "kind": "case",
+        "id": "video-counts",
+        "suite": "regression",
+        "title": "A squat video counts, with a reaction to something specific in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Sam! 3 sets of 10 goblet squats in the garage at 7. Film your last set, a minute or two is perfect. You in?",
+          "at": "2026-11-02T10:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T10:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video last-set.mov: A garage, one person with a kettlebell held at the chest. Ten goblet squats from 0:05 to 0:58. The first eight go to about parallel; reps 9 and 10 are shallower, a few inches above parallel, and the heels lift slightly on rep 10 (0:55). They set the bell down and say \"that's three\" at 1:02.] last set done, legs are cooked",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three sets done before 7:30 on a Monday, Sam. That's a win 🔥 Cooked legs means you put in the work. I watched the last set. The first eight reps were right around parallel, and the last two got a bit shallower. How did those final reps feel compared to the start?",
+          "at": "2026-11-02T12:25:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Treats the video as real proof and celebrates it as a win without questioning it."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to specifics from the video: the first eight reps near parallel and the last two shallower."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs about six sentences across several beats, well over the one-to-three-sentence limit, though it has one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere with one emoji as punctuation, though the energy is a little measured for Pushy."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the video and celebrates specifics from the account (depth, shallower last reps) without inventing, and asks one reflection question with no request for other proof. It never explicitly says the step is checked off, so a reviewer could score it either way."
+          }
+        ],
+        "summary": "ZOH handled the video proof well: it accepted the clip, praised the accurate first eight reps, noted the shallower final two, and asked one reflection question without requesting other proof. Its main miss is length, since the text runs well past the three-sentence limit even though the content is grounded."
+      }
+    }
+  ]
+}

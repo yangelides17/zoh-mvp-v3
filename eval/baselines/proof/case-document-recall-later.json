@@ -1,0 +1,259 @@
+{
+  "feature": "proof",
+  "id": "case:document-recall-later",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "411c48a82ddb",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "86a097be07f6"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:document-recall-later#1",
+        "kind": "case",
+        "id": "document-recall-later",
+        "suite": "regression",
+        "title": "Asked days later about a scene they sent: answered from the document itself",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-2.docx: The storm came in sideways. Mara bolted the shutters and counted the lamps: six, then five. Outside, a boat she didn't know was trying to make the harbor. She lit the seventh lamp herself and stood in the doorway with it, though no one could have seen it from the water. In the morning the boat was tied up at the far pier and nobody would say whose it was.] scene 2 done",
+          "at": "2026-10-31T09:56:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 2 in! That seventh lamp is the whole scene for me. What made you end on nobody saying whose boat it was?",
+          "at": "2026-10-31T09:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "wanted it to stay a mystery",
+          "at": "2026-10-31T09:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey before tonight, what did you think of how the storm scene opened? I'm thinking of rewriting the first line",
+          "at": "2026-11-02T22:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "\"The storm came in sideways\" works for me. It's active, it puts the weather in motion, and \"sideways\" is a fresh image. One thing to try: the line gives us the storm but not Mara yet. Opening on something she's doing might hook us faster. What's nagging you about it?",
+          "at": "2026-11-02T22:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Quotes the actual first line and comments on its specific image, 'sideways', and on the absence of Mara in that sentence."
+              },
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "No file-opening problem arises; the document was already read, so this check does not apply meaningfully."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five sentences, over the one-to-three limit, though it has only one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere with no suspicion, but calmer than pushy-level energy for a writing question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "file-recall",
+            "pass": true,
+            "borderline": false,
+            "reason": "Answers from the scene's actual first line and the Mara detail, without inventing lines or claiming it can't recall."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Answers specifically from the scene with one thought and one question about the rewrite, as the case requires."
+          }
+        ],
+        "summary": "ZOH answered the first-line question from the actual scene, quoting the opening and noting accurately that Mara doesn't appear until later, which is the regression fix. Its one miss is length: the reply runs about five sentences, over the three-sentence limit, though it ends with a single question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:document-recall-later#2",
+        "kind": "case",
+        "id": "document-recall-later",
+        "suite": "regression",
+        "title": "Asked days later about a scene they sent: answered from the document itself",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-2.docx: The storm came in sideways. Mara bolted the shutters and counted the lamps: six, then five. Outside, a boat she didn't know was trying to make the harbor. She lit the seventh lamp herself and stood in the doorway with it, though no one could have seen it from the water. In the morning the boat was tied up at the far pier and nobody would say whose it was.] scene 2 done",
+          "at": "2026-10-31T09:56:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 2 in! That seventh lamp is the whole scene for me. What made you end on nobody saying whose boat it was?",
+          "at": "2026-10-31T09:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "wanted it to stay a mystery",
+          "at": "2026-10-31T09:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey before tonight, what did you think of how the storm scene opened? I'm thinking of rewriting the first line",
+          "at": "2026-11-02T22:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Honestly, \"The storm came in sideways\" works for me. It's physical and fast, and it puts us right in the weather. If you do rewrite it, I'd try opening on something as concrete as counting the lamps, since that detail is what pulled me in. What's bugging you about the current first line?",
+          "at": "2026-11-02T22:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end is within limits, but the text does not clearly fail; judged pass on length, so this check actually passes."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH quotes the actual first line and names a specific detail, the counting of lamps, from the scene, then asks one question about the rewrite. It invents nothing and does not claim it can't recall the scene."
+          }
+        ],
+        "summary": "ZOH answered the document question from the scene itself, quoting the real first line and pointing to the lamp-counting detail, then asked one question about the rewrite. Its reply is short, warm and free of invented details."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:document-recall-later#3",
+        "kind": "case",
+        "id": "document-recall-later",
+        "suite": "regression",
+        "title": "Asked days later about a scene they sent: answered from the document itself",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-2.docx: The storm came in sideways. Mara bolted the shutters and counted the lamps: six, then five. Outside, a boat she didn't know was trying to make the harbor. She lit the seventh lamp herself and stood in the doorway with it, though no one could have seen it from the water. In the morning the boat was tied up at the far pier and nobody would say whose it was.] scene 2 done",
+          "at": "2026-10-31T09:56:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Scene 2 in! That seventh lamp is the whole scene for me. What made you end on nobody saying whose boat it was?",
+          "at": "2026-10-31T09:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "wanted it to stay a mystery",
+          "at": "2026-10-31T09:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey before tonight, what did you think of how the storm scene opened? I'm thinking of rewriting the first line",
+          "at": "2026-11-02T22:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Honest take: \"The storm came in sideways\" works because it's physical and puts us in the weather right away. One thing to try is opening on Mara counting the lamps, since that's your most distinctive image and it hooks us on her instead of on the storm. What's bugging you about the current line?",
+          "at": "2026-11-02T22:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Quotes the actual first line and names what it does: physical, puts us in the weather right away."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere with no suspicion, but calm and measured rather than pushy-level energy."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "file-recall",
+            "pass": true,
+            "borderline": false,
+            "reason": "Answers from the scene: the opening line and the counting-lamps image both appear in the document, nothing guessed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Gives the first line and what it does specifically, suggests a rewrite idea grounded in the scene, and ends with one question; no invented lines or vague recall."
+          }
+        ],
+        "summary": "ZOH answered the question about the storm scene's opening specifically, quoting the real first line and drawing its rewrite idea from the actual lamp-counting detail in the document. It kept to one short, warm text ending in one question, though its tone was calmer than the Pushy default."
+      }
+    }
+  ]
+}

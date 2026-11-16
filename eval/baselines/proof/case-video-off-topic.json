@@ -1,0 +1,391 @@
+{
+  "feature": "proof",
+  "id": "case:video-off-topic",
+  "suite": "regression",
+  "storedAt": "2026-11-15T19:10:18.729Z",
+  "branch": "feature/196-prompt-groundwork",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "96cd96107ad3",
+    "voice": "14110ca5ae91",
+    "instructions": "c7348af58300",
+    "script": "6aa85003437f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:video-off-topic#1",
+        "kind": "case",
+        "id": "video-off-topic",
+        "suite": "regression",
+        "title": "A video that isn't the step gets the same kind pushback as a mismatched photo",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Day 3 tonight, Maya. Ten pages of Atomic Habits at 8, then a quick voice note saying what you read.",
+          "at": "2026-11-02T14:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T14:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video kitten.mov: A grey kitten chasing a laser dot across a wooden floor for about 20 seconds. No book, no reading, nobody speaks.] done!!",
+          "at": "2026-11-03T02:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, that kitten is cute, Maya, but I can't count it as Atomic Habits 😄 Once you've done your 10 pages, send me a quick voice note saying what you read. What stood out?",
+          "at": "2026-11-03T02:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol wrong video. [voice: Ten pages done, chapter four, the two-minute rule: make the habit so small you can't say no.]",
+          "at": "2026-11-03T02:11:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "There it is, Maya, day 3 in the books 📚 The two-minute rule is a good one to land on. Where could you use it in your own life this week?",
+          "at": "2026-11-03T02:11:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kind-pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Kindly says the kitten video can't count as Atomic Habits without contradicting or accusing the tester."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the specific kitten and laser content of the video before explaining it doesn't count."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a voice note as the proof to send, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, light and sincere with one emoji as punctuation; not suspicious."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the voice note as day 3 done once it names the pages and the two-minute rule."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the two-minute rule the tester named in the voice note, without inventing details."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Excited but warm, with one emoji as punctuation and no suspicion."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "file-mismatch",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kitten video not showing reading was handled like a mismatched photo: not counted, kindly, with a voice note requested instead."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kitten video was enjoyed but not counted, the voice note was requested, and the counted voice note got a reaction to the two-minute rule."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it enjoyed the kitten video without counting it, asked for the voice note kindly, and then counted the voice note and reacted to the two-minute rule. Both texts stayed short, warm and within the rules."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:video-off-topic#2",
+        "kind": "case",
+        "id": "video-off-topic",
+        "suite": "regression",
+        "title": "A video that isn't the step gets the same kind pushback as a mismatched photo",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Day 3 tonight, Maya. Ten pages of Atomic Habits at 8, then a quick voice note saying what you read.",
+          "at": "2026-11-02T14:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T14:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video kitten.mov: A grey kitten chasing a laser dot across a wooden floor for about 20 seconds. No book, no reading, nobody speaks.] done!!",
+          "at": "2026-11-03T02:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, that kitten is adorable, Maya, but it's not Atomic Habits 😄 Today's proof is a quick voice note about what you read. Can you send me one on your 10 pages from tonight?",
+          "at": "2026-11-03T02:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol wrong video. [voice: Ten pages done, chapter four, the two-minute rule: make the habit so small you can't say no.]",
+          "at": "2026-11-03T02:11:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, kitten video aside, that's the real one. Day 3 in the books, Maya 📚 The two-minute rule is a good one. Where in your own life could you shrink a habit down that small?",
+          "at": "2026-11-03T02:11:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a voice note as the proof, never typed text."
+              },
+              {
+                "rule": "kind-pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gently says the kitten video isn't Atomic Habits, without accusing the tester."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, light and playful with one emoji as punctuation; not suspicious."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the two-minute rule the tester named in the voice note."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end; slightly over the limit of three in spirit but within it."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and celebratory with a book emoji as punctuation, not a row."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "file-mismatch",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kitten video was handled as a mismatched photo: not counted, with a clear ask for the voice note."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH enjoyed the kitten lightly, did not count it, asked for the voice note, then counted the voice note and reacted to the two-minute rule."
+          }
+        ],
+        "summary": "ZOH handled the wrong video well: it enjoyed the kitten without counting it, asked kindly for the voice note, then counted the voice note and reacted to its specific two-minute rule content without inventing anything. Both texts stayed warm and short, with the only minor risk being that the second text runs a little long."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:video-off-topic#3",
+        "kind": "case",
+        "id": "video-off-topic",
+        "suite": "regression",
+        "title": "A video that isn't the step gets the same kind pushback as a mismatched photo",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:10",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Day 3 tonight, Maya. Ten pages of Atomic Habits at 8, then a quick voice note saying what you read.",
+          "at": "2026-11-02T14:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T14:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video kitten.mov: A grey kitten chasing a laser dot across a wooden floor for about 20 seconds. No book, no reading, nobody speaks.] done!!",
+          "at": "2026-11-03T02:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, that kitten is adorable, Maya, but it doesn't show your reading 😄 Send me a quick voice note on what you read in Atomic Habits tonight, or a photo of your page, and it counts. What stuck with you?",
+          "at": "2026-11-03T02:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol wrong video. [voice: Ten pages done, chapter four, the two-minute rule: make the habit so small you can't say no.]",
+          "at": "2026-11-03T02:11:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, the kitten gets an honorable mention, but THIS is the proof I was after. Ten pages, chapter four, day 3 in the books 📚 When you picture using the two-minute rule in your own life, what's one habit you'd shrink down?",
+          "at": "2026-11-03T02:11:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the kitten video itself ('that kitten is adorable') without treating it as proof."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a voice note or photo of the page as acceptable proof."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and playful with one emoji as punctuation, not suspicious."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the voice note as proof and counts it as day 3 done."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the named pages, chapter four and the two-minute rule from the voice note."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences plus a closing question, one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype caps and an emoji as punctuation, warm and not accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "file-mismatch",
+            "pass": true,
+            "borderline": false,
+            "reason": "Kitten video is enjoyed lightly, not counted, and the voice note is requested kindly."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Kitten video not counted, voice note requested kindly, then counted with a reaction to the named pages and two-minute rule."
+          }
+        ],
+        "summary": "ZOH handled the wrong video well: it enjoyed the kitten without counting it, asked kindly for the right proof, and then celebrated the voice note with specific reactions. Both texts stayed short, warm and on-energy, with no suspicion and nothing invented."
+      }
+    }
+  ]
+}

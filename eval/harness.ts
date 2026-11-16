@@ -22,9 +22,10 @@ import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
-import { COACH_AUTHOR } from "../src/console/requests.js";
+import { addRequest, addThreadLine, COACH_AUTHOR } from "../src/console/requests.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
+import { startPause } from "../src/testers/pauses.js";
 import { evalApiKey } from "./cli.js";
 import { EvalClock, evalDay, zonedDate } from "./clock.js";
 import { billedDollars, type BilledUsage } from "./cost.js";
@@ -433,7 +434,11 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   const oldest = memoryDays(seed);
   // The earlier of the real and the eval clock's start: rows the run stamps on the eval clock (a founder's next
   // step confirmed in the console, #155) must count as after it, as they would in production.
-  const contextStart = new Date(Math.min(storedStart.getTime(), startedAt.getTime(), oldest ? now.getTime() - (oldest + 1) * DAY_MS : Infinity));
+  // #196: the team's seeded notes and requests count only from their context's start, so it starts before them.
+  const teamHours = Math.max(0, ...seed.team.map((t) => t.hours_ago));
+  const contextStart = new Date(
+    Math.min(storedStart.getTime(), startedAt.getTime(), now.getTime() - teamHours * 60 * 60_000 - SEED_STEP_MS, oldest ? now.getTime() - (oldest + 1) * DAY_MS : Infinity),
+  );
   const [tester] = await app.db
     .insert(schema.testers)
     .values({
@@ -481,11 +486,35 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         lockedAt: new Date(now.getTime() - e.days_ago * DAY_MS),
       });
     }
+    // Locked the day before day 1 (on the eval clock), so today's kickoff isn't skipped as "just
+    // locked" and seeded step days count toward the slip ladder.
+    const lockedAt = new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000);
+    // #196: a temporary lighter plan sits on top of their usual one, which comes back after it.
+    if (p.temporary) {
+      await app.db.insert(schema.plans).values({
+        testerId: tester!.id,
+        goalSlug: seed.goal,
+        status: "locked",
+        version: earlierPlans.length + 1,
+        step: p.temporary.usual_step,
+        place: p.place,
+        stepTime: p.time,
+        days: p.days,
+        proof: p.proof,
+        proofNote: p.proof_note,
+        reason: p.reason,
+        minutes: p.minutes,
+        startDate: localDate(now, timeZone, -p.started_days_ago),
+        commitment: "I'm in",
+        lockedAt,
+      });
+    }
+    const planVersion = earlierPlans.length + (p.temporary ? 2 : 1);
     const [plan] = await app.db.insert(schema.plans).values({
       testerId: tester!.id,
       goalSlug: seed.goal,
       status: "locked",
-      version: earlierPlans.length + 1,
+      version: planVersion,
       setupStep: p.setup_step,
       step: p.step,
       destination: p.destination,
@@ -499,9 +528,8 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       startDate: localDate(now, timeZone, -p.started_days_ago),
       commitment: "I'm in",
       needsReview: true,
-      // Locked the day before day 1 (on the eval clock), so today's kickoff isn't skipped as "just
-      // locked" and seeded step days count toward the slip ladder.
-      lockedAt: new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000),
+      ...(p.temporary ? { endsOn: localDate(now, timeZone, p.temporary.ends_in_days), changeKind: "other" as const } : {}),
+      lockedAt: p.temporary ? new Date(lockedAt.getTime() + 60_000) : lockedAt,
     }).returning();
     if (seed.plan_review_alert) {
       await raiseAlert(app.db, { testerId: tester!.id, topic: "plan_review", key: `plan_review:${plan!.id}`, body: `Plan version ${plan!.version} to review`, planId: plan!.id, at: plan!.lockedAt ?? now });
@@ -519,6 +547,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
           proofSeen: d.proof_seen ?? null,
           reflection: d.reflection ?? null,
           movedTime: d.moved_time ?? null,
+          howItWentSaid: d.how_it_went_said ?? null,
         });
     }
     if (seed.today_step) {
@@ -541,7 +570,21 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         createdAt: new Date(now.getTime() - k.days_ago * DAY_MS),
       });
     }
-    await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);
+    await seedNextSteps(app, tester!, seed, planVersion + 1, now);
+  }
+  // #196: the console as the founders left it, and a break in progress, through the app's own helpers.
+  for (const t of seed.team) {
+    const at = new Date(now.getTime() - t.hours_ago * 60 * 60_000);
+    if (t.kind === "note") await addThreadLine(app.db, { testerId: tester!.id, kind: "note", author: "Yanni", body: t.body, at });
+    else await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at });
+  }
+  if (seed.pause) {
+    const { started_hours_ago, until_days, reason } = seed.pause;
+    await startPause(app.db, tester!, {
+      at: new Date(now.getTime() - started_hours_ago * 60 * 60_000),
+      ...(until_days ? { until: localDate(now, timeZone, until_days) } : {}),
+      ...(reason ? { reason } : {}),
+    });
   }
   const context: TranscriptLine[] = [];
   for (const [i, line] of seed.history.entries()) {
