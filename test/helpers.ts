@@ -126,8 +126,11 @@ export class FakeReplier implements Replier {
     if (next) throw next;
     // Like the coach's last safe point: interrupted before the send, it hands back what it did.
     if (input.interrupted?.()) throw new DraftDroppedError({ actions: this.draftActions, text: this.replyText });
+    input.onSections?.(this.sections);
     return this.replyText;
   }
+  /** #200: the parts of the instructions it reports loading, as the coach does. */
+  sections = ["core", "proof"];
   /** Every nudge asked for, in order. */
   nudges: NudgeRequest[] = [];
   /** Thrown one per nudge call, in order, before any nudge succeeds. */
@@ -200,10 +203,9 @@ export class FakeClaudeModel implements ClaudeModel {
   stateOf(i = -1): string {
     return this.requests.at(i)?.system.at(-1)?.text ?? "";
   }
-  /** The memory block of a request, when the tester's plan is locked. */
+  /** The memory block of a request, when the tester's plan is locked (#200: found by its header, as the blocks before it vary). */
   memoryOf(i = -1): string | undefined {
-    const system = this.requests.at(i)?.system ?? [];
-    return system.length === 3 ? system[1]!.text : undefined;
+    return this.requests.at(i)?.system.find((b) => b.text.startsWith("MEMORY (what you know about them"))?.text;
   }
 }
 

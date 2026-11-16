@@ -416,11 +416,60 @@
    "change": "unchanged"
   },
   {
+   "text": "When they start to slip",
+   "file": "src/coach/prompt.ts",
+   "where": "PART_SOURCES > heading",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "Sunday look-back",
+   "file": "src/coach/prompt.ts",
+   "where": "PART_SOURCES > heading",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "Next steps and maintenance",
+   "file": "src/coach/prompt.ts",
+   "where": "PART_SOURCES > heading",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "Today's step",
+   "file": "src/coach/prompt.ts",
+   "where": "partsFor",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "When they start to slip",
+   "file": "src/coach/prompt.ts",
+   "where": "partsFor",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "Sunday look-back",
+   "file": "src/coach/prompt.ts",
+   "where": "partsFor",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
+   "text": "Next steps and maintenance",
+   "file": "src/coach/prompt.ts",
+   "where": "partsFor",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/prompt.ts (MOMENTS)"
+  },
+  {
    "text": "VOICE PAGE",
    "file": "src/coach/prompt.ts",
-   "where": "fullVoiceInstructions",
+   "where": "instructionsFor > core",
    "kind": "frame",
-   "change": "unchanged"
+   "change": "moved from src/coach/prompt.ts (fullVoiceInstructions)"
   },
   {
    "text": "Plan agreement",
@@ -1720,9 +1769,16 @@
   {
    "text": "Only ${NUDGE_TOOLS.join(\", \")} while writing a text you start.",
    "file": "src/coach/coach.ts",
-   "where": "createCoach > nudge > result > error",
+   "where": "createCoach > nudge > nudgeLoop > result > error",
    "kind": "tool error",
-   "change": "unchanged"
+   "change": "moved from src/coach/coach.ts (createCoach > nudge > result > error)"
+  },
+  {
+   "text": "[Written by the app, not by them: the status sheet for this text. They never see it.]",
+   "file": "src/coach/coach.ts",
+   "where": "SHEET_LABEL",
+   "kind": "coach note",
+   "change": "new"
   },
   {
    "text": "Goal: not chosen yet.",
@@ -5631,25 +5687,25 @@
   {
    "text": "- After lock, tweaks go through change_plan; confirm the new version in one line.",
    "file": "docs/coach-voice.md",
-   "where": "Plan agreement (rules: plan)",
+   "where": "Changing the plan (rules: planChange)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PLAN_AGREEMENT)",
+   "change": "moved from docs/coach-voice.md (Plan agreement (rules: plan))",
    "reason": "They choose where they're headed and what they hold themselves accountable to"
   },
   {
    "text": "- Switching goals needs a real reason (an injury, the goal turned out wrong): ask what's changed if they don't say. \"Bored\" or \"don't feel like it\": ask what's made it that way, then a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way. Showing the goals: the state's goal list, exactly those lines.",
    "file": "docs/coach-voice.md",
-   "where": "Plan agreement (rules: plan)",
+   "where": "Changing the plan (rules: planChange)",
    "kind": "rule",
-   "change": "new",
+   "change": "moved from docs/coach-voice.md (Plan agreement (rules: plan))",
    "reason": "wanting out of something hard isn't a new direction"
   },
   {
    "text": "- One focus goal at a time; a second waits until it sticks.",
    "file": "docs/coach-voice.md",
-   "where": "Plan agreement (rules: plan)",
+   "where": "Changing the plan (rules: planChange)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PLAN_AGREEMENT)",
+   "change": "moved from docs/coach-voice.md (Plan agreement (rules: plan))",
    "reason": "it turns what they want into one small step a day, and keeps them taking it"
   },
   {
@@ -5743,9 +5799,9 @@
   {
    "text": "When they text (phase \"active\"): a yes to today's step: call mark_agreed (settled). Done or proof: PROOF. Starting it now or within the hour: call mark_on_it (the app then skips the check-in it no longer needs); a yes, chatting or a question isn't that. A new time for today in their latest texts: call move_today (a time from an earlier day was for that day). Smaller version (half the time, fewer, what fits where they are): asked with no real reason, one warm push as its only question; with one, or still wanted: set it at once, no check-back. You suggest one: ask \"work for you?\" first. Spell it out: what, how much, when (now if asked), proof. Never promise a reminder or check-in the app doesn't send.",
    "file": "docs/coach-voice.md",
-   "where": "Nudges (rules: nudges)",
+   "where": "When they reply about today's step (rules: nudgeReplies)",
    "kind": "rule",
-   "change": "new",
+   "change": "moved from docs/coach-voice.md (Nudges (rules: nudges))",
    "reason": "When they push back, one response on why it matters, then their call"
   },
   {
@@ -6269,14 +6325,6 @@
    "reason": "so a real change of direction gets a second look and a goal isn't dropped just because it got hard or boring"
   },
   {
-   "text": "- A next step the state lists as approved: raise it at a natural moment (after a done, or when they talk about how it's going) as your own idea, specific to them, then record_next_step delivered. A plan change is a question, a change to their usual plan from now on that they may or may not want, never news of a decision: their direction is their call. Yes: change_plan or switch_goal with its id (a counter like \"8 instead\" is a yes: pass only what they changed, then confirm, no more questions). No: record_next_step declined, warmly, and drop it.",
-   "file": "docs/coach-voice.md",
-   "where": "How it runs (rules: nextSteps)",
-   "kind": "rule",
-   "change": "new",
-   "reason": "their direction is their call"
-  },
-  {
    "text": "- When they ask: a change to their one goal (time, a tweak, a destination, a different goal) goes as in PLAN AGREEMENT; a different step just for today is set_today_step. A lasting change to more of the same (deepen) or a harder or different activity (upgrade): unless they've said exactly what (\"20 reps\"), first ask what it would look like for them; then show the new version and ask if it works; on their yes, change_plan, that kind, their words, shown. Something new on top of a goal that's going well: suggest_next_step (new_focus), then a warm line and one question about what draws them to it, then that you'll think on it (no timeline, no talk of a plan); asked again, one short line: still thinking. Can't tell which: suggest_next_step with unsure.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: nextSteps)",
@@ -6285,20 +6333,28 @@
    "reason": "They choose where they're headed and what they hold themselves accountable to"
   },
   {
-   "text": "- Maintenance check-in: one light line in place of the kickoff's question, never a second push; an owed one (their last 2 unanswered) is asked on its own. Their answer: record_checkin; \"mostly\" counts as kept up, so take it lightly.",
-   "file": "docs/coach-voice.md",
-   "where": "How it runs (rules: nextSteps)",
-   "kind": "rule",
-   "change": "new",
-   "reason": "light enough not to nag about something they've proven"
-  },
-  {
    "text": "- \"What's my streak?\": every goal's streak from the state, in one short reply.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: nextSteps)",
    "kind": "rule",
    "change": "moved from src/coach/prompt.ts (NEXT_STEPS)",
    "reason": "tells the truth and remembers what they said"
+  },
+  {
+   "text": "- A next step the state lists as approved: raise it at a natural moment (after a done, or when they talk about how it's going) as your own idea, specific to them, then record_next_step delivered. A plan change is a question, a change to their usual plan from now on that they may or may not want, never news of a decision: their direction is their call. Yes: change_plan or switch_goal with its id (a counter like \"8 instead\" is a yes: pass only what they changed, then confirm, no more questions). No: record_next_step declined, warmly, and drop it.",
+   "file": "docs/coach-voice.md",
+   "where": "Team-approved steps and maintenance (rules: nextStepsTeam)",
+   "kind": "rule",
+   "change": "moved from docs/coach-voice.md (How it runs (rules: nextSteps))",
+   "reason": "their direction is their call"
+  },
+  {
+   "text": "- Maintenance check-in: one light line in place of the kickoff's question, never a second push; an owed one (their last 2 unanswered) is asked on its own. Their answer: record_checkin; \"mostly\" counts as kept up, so take it lightly.",
+   "file": "docs/coach-voice.md",
+   "where": "Team-approved steps and maintenance (rules: nextStepsTeam)",
+   "kind": "rule",
+   "change": "moved from docs/coach-voice.md (How it runs (rules: nextSteps))",
+   "reason": "light enough not to nag about something they've proven"
   },
   {
    "text": "THE TEAM: the founders read along and sometimes weigh in (the state's FROM THE TEAM lines). You're their one point of contact, as you will be when you run on your own; the team works behind you.",

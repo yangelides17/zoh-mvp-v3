@@ -16,7 +16,8 @@ export function voiceForCoach(markdown: string): string {
 const collapse = (text: string) => text.replace(/\n{3,}/g, "\n\n").trim();
 
 /** #196: the page's rule sections, each under a heading marked `<!-- rules: <key> -->`. */
-export const RULE_KEYS = ["tools", "plan", "nudges", "todaysStep", "proof", "weekLookback", "nextSteps", "team", "memory"] as const;
+// #200: plan agreement, nudges and next steps split where they mix moments (planChange, nudgeReplies, nextStepsTeam).
+export const RULE_KEYS = ["tools", "plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "proof", "weekLookback", "nextSteps", "nextStepsTeam", "team", "memory"] as const;
 export type RuleKey = (typeof RULE_KEYS)[number];
 
 export interface VoiceSections {
@@ -55,6 +56,14 @@ export function splitVoicePage(page: string): VoiceSections {
     voice: collapse(voice.join("\n")),
     rules: Object.fromEntries(RULE_KEYS.map((k) => [k, collapse(rules[k]!.join("\n"))])) as Record<RuleKey, string>,
   };
+}
+
+/**
+ * #200: the voice in its `## ` sections, in page order, each with its heading's words ("" for what opens the page),
+ * so a section only some moments use can be loaded with them. Joined with a blank line they are the voice again.
+ */
+export function voiceSections(voice: string): { heading: string; text: string }[] {
+  return voice.split(/\n\n(?=## )/).map((text) => ({ heading: /^## (.*)/.exec(text)?.[1]?.trim() ?? "", text }));
 }
 
 /**

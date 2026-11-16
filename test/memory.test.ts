@@ -462,8 +462,10 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     await coach.reply({ tester: mike, turns: turnsFor("hi"), now: at(TUE, "09:00") });
 
     const req = model.requests[0]!;
-    expect(req.system).toHaveLength(3);
-    expect(req.system[1]!.cache_control).toEqual({ type: "ephemeral" });
+    // #200: the core, the parts this reply loads, the memory block (each cached), then the state.
+    expect(req.system).toHaveLength(4);
+    expect(req.system[2]!.text).toBe(model.memoryOf());
+    expect(req.system[2]!.cache_control).toEqual({ type: "ephemeral" });
     const memory = model.memoryOf()!;
     expect(memory).toContain("Mike (the tester)");
     expect(memory).toContain("- f:");
@@ -486,7 +488,9 @@ describe("the coach reads memory once the plan is locked (part 2)", () => {
     // Before the plan locks: no memory block and no lookups, just save_preference.
     const planning = { ...mike, phase: "planning" as const };
     await coach.reply({ tester: planning, turns: turnsFor("hi"), now: at(TUE, "09:10") });
-    expect(model.requests.at(-1)!.system).toHaveLength(2);
+    // #200: the core and plan agreement, then the state; no memory block.
+    expect(model.requests.at(-1)!.system).toHaveLength(3);
+    expect(model.memoryOf()).toBeUndefined();
     const names = model.requests.at(-1)!.tools.map((x) => x.name);
     expect(names).toContain("save_preference");
     expect(names).not.toContain("open_pages");

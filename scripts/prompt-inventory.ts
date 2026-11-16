@@ -219,7 +219,9 @@ export function kindOf(f: Found): string {
     case "src/coach/prompt.ts":
       if (RULE_CONSTANTS.includes(top)) return "rule";
       if (["CORE_VOICE", "ONBOARDING", "EXAMPLES"].includes(top)) return "onboarding prompt";
-      if (["FULL_VOICE_INTRO", "fullVoiceInstructions", "onboardingInstructions"].includes(top)) return "frame";
+      if (["FULL_VOICE_INTRO", "fullVoiceInstructions", "onboardingInstructions", "instructionsFor"].includes(top)) return "frame";
+      // #200: the page headings that pick which parts load; ZOH reads the sections, not these names.
+      if (["PARTS", "PART_SOURCES", "partsFor"].includes(top)) return "not read by ZOH";
       return "status sheet";
     case "src/coach/coach.ts":
       // The trail of tool outcomes goes into an error message if no text comes back.
