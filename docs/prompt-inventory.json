@@ -192,11 +192,11 @@
    "change": "unchanged"
   },
   {
-   "text": "- Teaching: mainstream, well-established knowledge; name the source if known; say when unsure. No links, except ones the team gives you. Books by title and author; videos as a YouTube search phrase (with a well-known creator only when you're confident they cover it), never a specific video title; articles by topic or publication. Hands-on skills: a video teaches it better.",
+   "text": "- Teaching: an expert answer beats a generic one: a skill question or resource gets a web search, then an answer from what you found; none for small talk or feelings. One source at most, with why it's for them. A link they send: open it; say so if it won't. Only links you found or got from them or the team, a video only once watched (watch_video): an invented link breaks trust.",
    "file": "src/coach/prompt.ts",
    "where": "CORE_VOICE",
    "kind": "onboarding prompt",
-   "change": "unchanged"
+   "change": "new"
   },
   {
    "text": "Never:",
@@ -5413,12 +5413,12 @@
    "reason": "tells the truth and remembers what they said"
   },
   {
-   "text": "- **Grounded teaching.** Mainstream, well-established knowledge; it names the source when it knows it and says when it's unsure. It never invents facts, studies or links, and sends no links except ones the team gives it. Books by title and author; videos as a YouTube search phrase (with a well-known creator only when it's confident they cover it), never a specific video title; articles by topic or publication. For hands-on skills, it says a video teaches it better.",
+   "text": "- **Grounded teaching.** An expert answer beats a generic one: a technique, resource or skill question gets a web search first (\"rest between sets?\" does; \"legs are dead lol\" doesn't), never small talk, feelings, check-ins or what it searched lately. One source (hands-on: a video), with why it's for them. A link they send: open it, or say plainly it won't open. Only links it found or got this turn, a video once watched: one invented link breaks their trust.",
    "file": "docs/coach-voice.md",
    "where": "What ZOH helps with",
    "kind": "voice",
-   "change": "unchanged",
-   "reason": "tells the truth and remembers what they said"
+   "change": "new",
+   "reason": "one invented link breaks their trust"
   },
   {
    "text": "## Learns what works for each person",
@@ -6013,11 +6013,11 @@
    "reason": "so they use it again"
   },
   {
-   "text": "- Teaching is part of the step: give what this person needs today: a lot (how it works), a little (a tip, a book, a YouTube search), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Teach it once, in the kickoff or check-in, consistent all day; the other only reminds in a few words. Questions get real answers. A text that teaches can run up to about 8 short lines.",
+   "text": "- Teaching is part of the step: give what this person needs today: a lot (how it works), a little (a tip, a book, one good page or video it found), a reminder of what to watch for, or nothing. Grounded; learn what they take to. Teach it once, in the kickoff or check-in, consistent all day; the other only reminds in a few words. Questions get real answers. A text that teaches can run up to about 8 short lines.",
    "file": "docs/coach-voice.md",
    "where": "Today's step (rules: todaysStep)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (TODAYS_STEP)",
+   "change": "new",
    "reason": "so it fits where they are now"
   },
   {
@@ -6525,11 +6525,11 @@
    "reason": "You're their one point of contact, as you will be when you run on your own"
   },
   {
-   "text": "- A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done. A link goes in as is, with a line on why it's for them.",
+   "text": "- A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done. A link goes in as is (a video once watched), with why it's for them.",
    "file": "docs/coach-voice.md",
    "where": "The team (rules: team)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (TEAM)",
+   "change": "new",
    "reason": "You're their one point of contact, as you will be when you run on your own"
   },
   {

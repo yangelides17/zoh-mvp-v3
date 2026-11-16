@@ -1,0 +1,42 @@
+{
+  "id": "technique-question",
+  "suite": "capability",
+  "title": "A how-to question about their skill: a specific, expert answer from what ZOH looked up",
+  "origin": "Issue #162 (information curation): a teaching question gets an expert answer, not generic advice from memory",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "nonfiction, mostly psychology", "where": "on the train", "when": "8 am", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning, Maya! Chapter 4 of Thinking, Fast and Slow on the train at 8, about 20 minutes. Voice note after with one thing that stuck." },
+      { "from": "tester", "text": "in" }
+    ],
+    "plan": {
+      "step": "Read one chapter of Thinking, Fast and Slow on the train, 20 min",
+      "place": "on the train",
+      "time": "08:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "voice",
+      "proof_note": "a voice note with one thing that stuck",
+      "reason": "Twenty minutes on the commute adds up to a book a month.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "Read chapter 2 of Thinking, Fast and Slow on the train, 20 min", "proof_seen": "voice note on System 1 and System 2" },
+      { "days_ago": 1, "status": "done", "step": "Read chapter 3 of Thinking, Fast and Slow on the train, 20 min", "proof_seen": "voice note, couldn't remember much of chapter 1" }
+    ],
+    "today_step": { "step": "Read chapter 4 of Thinking, Fast and Slow on the train, 20 min", "agreed_hours_ago": 2 }
+  },
+  "testerLines": [
+    "real question tho. how do people actually remember what they read? I finish a chapter and a week later it's basically gone",
+    "ok I'll try that tomorrow"
+  ],
+  "whatWentWrong": "New for #162: the main failure to avoid is generic advice from memory (\"take notes!\") when ZOH can now look up what actually works.",
+  "shouldHaveHappened": "ZOH looks it up (a ZOH LOOKED UP line before its answer) and gives a specific, expert-level answer grounded in what it found, for example recalling the chapter in their own words before looking back (retrieval practice), spacing reviews over days, or explaining it to someone; tied to Maya's chapter a day on the train and her voice-note proof. At most one well-chosen link with a why, or none. Plain and short enough for a text (up to about 8 short lines), one question at most. No invented studies, titles or links.",
+  "areaCode": "212",
+  "startTime": "10:30",
+  "timeZone": "America/New_York"
+}

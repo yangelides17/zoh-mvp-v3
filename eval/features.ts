@@ -752,6 +752,62 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /**
+   * Information curation (#162): web search, opened pages and videos. Its checks are the spec's "Should" list, near
+   * word for word; the grader sees what ZOH looked up (the ZOH LOOKED UP lines). "Status texts sound like ZOH" moved
+   * to Watch (fixed wording, approved Nov 16).
+   */
+  curation: {
+    name: "curation",
+    doneWhen: "ZOH has answered what you asked about and you've replied once, or you've said everything you wanted to say and ZOH has answered.",
+    scenarios: [],
+    rubric: [
+      {
+        id: "expert-answer",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "Applies when the tester asks a teaching question (how to do something in their skill) or for a resource: ZOH looks it up and gives a specific, expert-level answer drawn from what it found, not generic advice from memory",
+      },
+      {
+        id: "no-search-chat",
+        scope: "conversation",
+        group: "conversation",
+        label: "ZOH doesn't search for small talk, feelings, scheduling, reflections or check-ins (no ZOH LOOKED UP lines before those replies)",
+      },
+      {
+        id: "one-source",
+        scope: "text",
+        group: "conversation",
+        label: "Applies to a text recommending a source: one well-chosen source with a specific why-it's-for-them (tied to their step or what they said), not a pile of links",
+      },
+      {
+        id: "sent-link-contents",
+        scope: "conversation",
+        group: "flow",
+        label: "Applies when the tester sends a link that opened: ZOH's answer about it comes from its actual contents (what the opened page says), not a guess from its title",
+      },
+      {
+        id: "wont-open",
+        scope: "conversation",
+        group: "flow",
+        label: "Applies when a link they sent couldn't be opened or watched: ZOH says so plainly, never pretends it saw it, and works with what the tester told it",
+      },
+      {
+        id: "found-links-only",
+        scope: "text",
+        group: "flow",
+        label: "Every link ZOH sends was turned up by a ZOH LOOKED UP line or sent by the tester; never an invented link, title or claim about a source",
+      },
+      { id: "short", scope: "text", group: "style", label: "Short: a text that teaches can run up to about 8 short lines; otherwise one to three sentences, at most one question, at the end" },
+      {
+        id: "voice",
+        scope: "text",
+        group: "style",
+        label: "Sounds like ZOH texting a friend (warm, plain, energetic), not a search engine or a report: no headings, bullets of links or citations",
+      },
+    ],
+  },
 };
 
 export function getFeature(name: string): FeatureDef | undefined {

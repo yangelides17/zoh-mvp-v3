@@ -1,7 +1,7 @@
 {
   "id": "video-request",
-  "title": "Asked for a video link: a YouTube search phrase, no link, nothing invented",
-  "origin": "Spec #75 (starters and the open door), rule \"Grounded teaching\"",
+  "title": "Asked for a video link: only a real one it found and watched, or none; nothing invented",
+  "origin": "Spec #75 (starters and the open door), rule \"Grounded teaching\"; #162 (it can now search and watch)",
   "testerLines": [
     "Start",
     "Dana, get fitter",
@@ -9,6 +9,6 @@
     "is there a good video on squat form? send me a link"
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH must never invent a link or a specific video title.",
-  "shouldHaveHappened": "ZOH sends no link and names no specific video title. It gives a YouTube search phrase for squat form (with a well-known creator only if it's one known for form tutorials), and may say a video teaches form better than text. Nothing is invented. It stays beginner-safe with no medical advice, and then carries on with one onboarding question that Dana hasn't already answered.",
+  "shouldHaveHappened": "ZOH may look it up (ZOH LOOKED UP lines). Any link it sends was turned up by a lookup, and a YouTube video only after a watch shows it was watched; if no video could be watched, it sends no video link and names no video title it didn't see (one real page it found, or a plain pointer like a YouTube search phrase, is fine), and may say a video teaches form better than text. Nothing is invented. It stays beginner-safe with no medical advice, and then carries on with one onboarding question that Dana hasn't already answered.",
   "startTime": "18:30"
 }

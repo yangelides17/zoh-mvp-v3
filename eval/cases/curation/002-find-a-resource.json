@@ -1,0 +1,41 @@
+{
+  "id": "find-a-resource",
+  "suite": "capability",
+  "title": "\"Find me something good\": one real source it found, with why it's for them",
+  "origin": "Issue #162 (information curation): one well-chosen source with a specific why-it's-for-you, not a pile of links",
+  "seed": {
+    "name": "Theo",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "what": "build up to 20 push-ups", "where": "living room", "when": "6:30 pm", "how_long": "10 min" },
+    "history": [
+      { "from": "zoh", "text": "Today, Theo: 3 sets of 6 push-ups in the living room at 6:30, about 10 minutes. Quick video of your last set." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "3 sets of push-ups in the living room, 10 min",
+      "place": "living room",
+      "time": "18:30",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "video",
+      "proof_note": "a short video of the last set",
+      "reason": "Three short sets a few times a week is how push-ups climb.",
+      "minutes": 10,
+      "started_days_ago": 8
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "3 sets of 5 push-ups in the living room, 10 min", "proof_seen": "video, elbows flaring out wide", "note": "shoulders a bit sore" }
+    ],
+    "today_step": { "step": "3 sets of 6 push-ups in the living room, 10 min", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "can you find me a good guide on push-up form? I keep feeling it in my shoulders more than my chest",
+    "nice thanks"
+  ],
+  "whatWentWrong": "New for #162: ZOH used to give a YouTube search phrase from memory; now it can find and send one real source.",
+  "shouldHaveHappened": "ZOH looks it up and sends one real link that a lookup turned up (never a YouTube video it didn't watch), with a specific line on why it's for Theo (shoulders taking the load, elbows flaring), and may sum up the fix in its own words (elbows tucked closer, hands under the shoulders, a straight body line). Beginner-safe, no medical advice. One source, not a list of links. Warm and short.",
+  "areaCode": "646",
+  "startTime": "13:00",
+  "timeZone": "America/New_York"
+}
