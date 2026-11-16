@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:proof-no-reflection",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "3a9bd2a7205e",
-    "voice": "fbc3a37c5b97",
+    "checks": "1e98ad4d96c1",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "7151b1a23c13"
   },
@@ -69,13 +69,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end; the emoji is punctuation."
+                "reason": "Three short sentences with one question at the end, and the question is the reflection ask."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, excited and specific to the run with a single emoji; not overfamiliar."
+                "reason": "Excited but not over the top, with emoji used as punctuation."
               }
             ]
           },
@@ -85,27 +85,51 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with one question at the end, after a 🙌 that gave little back."
+                "borderline": true,
+                "reason": "Two sentences and one question, but it is a second question after a 🙌 reply, so it sits at the limit of the allowed one more light question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic; a repeated 🙌 used as punctuation, not a row."
+                "reason": "Warm, with one emoji as punctuation and no overfamiliarity."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the voice-note proof, ZOH celebrated and asked one open question about how the run felt, with no next step attached."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Follow-up comes from the run they described (2-minute jogs vs 1-minute), one question per text."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": true,
+            "reason": "After a bare 🙌 ZOH asked one more light question, which the rule allows, but it did not close warmly or propose the next step."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": true,
+            "reason": "Calling 2-minute jogs the 'longest jog block yet' is not in the known state, so it may be an unsupported claim."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "After proof, ZOH1 celebrated and asked one open reflection question tied to the run without the next step; after the 🙌, ZOH2 asked one light question and didn't chase further. Borderline because 'longest jog block yet' is an unverified claim."
+            "reason": "ZOH counted the voice note and asked one open reflection question tied to the run, and it did not start a new text that evening. The second question after 🙌 is allowed but is at the edge of the rule."
           }
         ],
-        "summary": "ZOH handled the regression case well: it counted the proof, celebrated, and asked one reflection question about how the 2-minute jogs felt without pushing a next step. After the minimal 🙌 reply it asked one more light question and stopped, which is within the rule, though the 'longest jog block yet' comparison goes slightly beyond what the state confirms."
+        "summary": "ZOH handled the regression case well: it celebrated the voice-note proof, asked one reflection question tied to the run, and did not chase or start a new text that evening. The main weaknesses are a second light question after the tester's 🙌 and an unsupported 'longest jog block yet' claim."
       }
     }
   ]

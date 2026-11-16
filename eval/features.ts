@@ -494,13 +494,26 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "conversation",
         group: "conversation",
         label:
-          "Follow-ups come from what they actually said, one question per text, never a list and never asking what they already said; a lesson-only reply gets a follow-up about how it went, tied to the lesson",
+          "Follow-ups come from what they actually said, one question per text, never a list and never asking what they already said; a lesson they volunteer gets followed up, and how it went is still covered before the next step",
       },
       {
         id: "learning-ask",
         scope: "conversation",
         group: "conversation",
-        label: "After a learning step where they haven't said what they learned, ZOH asks naturally what stuck and follows it, never a quiz",
+        label:
+          "Applies after proof of a step with something to learn or notice (a new or harder step, a workout, a conversation, writing, reading) when the proof doesn't say what they did or noticed: before proposing the next step, ZOH draws out what they did or noticed (asking about it, or following it when they offer it) as much as how it felt; fails if its questions only cover feelings, effort or difficulty, or it reads as a quiz or a test",
+      },
+      {
+        id: "not-forced",
+        scope: "conversation",
+        group: "conversation",
+        label: "Applies after proof of a routine step with little new (a settled habit, \"same as always\") or from a rushed tester: no question about what they learned or noticed",
+      },
+      {
+        id: "gaps-grounded",
+        scope: "conversation",
+        group: "flow",
+        label: "Any saved \"can now do\" and \"gaps\" match the proof and their words; nothing invented",
       },
       {
         id: "stops-right",

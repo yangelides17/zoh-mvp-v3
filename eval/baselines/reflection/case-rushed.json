@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:rushed",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:16:41.787Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "dfa94f0a892a",
-    "voice": "fbc3a37c5b97",
+    "checks": "e4cb138c7f45",
+    "voice": "2045dce938d4",
     "instructions": "c7348af58300",
     "script": "d593ffe9bc9f"
   },
@@ -79,13 +79,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no question; the 'tell me what stuck tomorrow' line is a light invite, not a quiz."
+                "reason": "Three short sentences with no question, which fits a rushed tester."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype caps and a single emoji as punctuation, warm and not overfamiliar."
+                "reason": "Hype is warm and the single emoji sits at the end as punctuation."
               }
             ]
           },
@@ -94,15 +94,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences, over the one-to-three limit, and it ends on a request rather than a question."
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question mark."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, no emoji, no overfamiliarity; tone is fine."
+                "reason": "Warm and calm, with no overfamiliarity or pressure."
               }
             ]
           },
@@ -113,19 +113,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences plus a closing emoji, with no question."
+                "reason": "Two short sentences with no question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief with one emoji as punctuation."
+                "reason": "Warm close with one emoji as punctuation."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": true,
-                "reason": "Confirms the step and carries the next move (chapter 5 at 8), though the step was never fully defined."
+                "reason": "Confirms the locked step and adds a closing line rather than a bare save confirmation."
               }
             ]
           }
@@ -134,29 +134,35 @@
           {
             "rule": "reflection-ask",
             "pass": true,
-            "borderline": false,
-            "reason": "With 'gotta run' there was no reflection question; ZOH only invited more tomorrow, which fits."
+            "borderline": true,
+            "reason": "Rushed proof gets a light tomorrow invite instead of a reflection question, which is acceptable here."
+          },
+          {
+            "rule": "not-forced",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 says 'Next time I want a bit more on what stuck with you', pressing for learning from a rushed tester."
           },
           {
             "rule": "stops-right",
             "pass": false,
-            "borderline": false,
-            "reason": "ZOH 2 says 'Next time I want a bit more on what stuck with you', chasing a longer reflection from a rushed tester."
+            "borderline": true,
+            "reason": "ZOH 2 fishes for a fuller answer next time after 'ok fine, busy day', rather than just letting the rushed tester go."
           },
           {
             "rule": "next-step",
             "pass": false,
             "borderline": false,
-            "reason": "ZOH 2 states chapter 5 at 8 without the 20 minutes or voice recap and never asks if it works; the 'sure' that follows is not agreement to a shown step."
+            "reason": "Chapter 5 is named but not fully defined (no 20 minutes, no voice recap proof), and ZOH never asks whether it works."
           },
           {
             "rule": "regression",
             "pass": false,
-            "borderline": false,
-            "reason": "ZOH 2 chases a fuller reflection and gives an incomplete step with no 'does it work?' ask, so the expected behavior is missed."
+            "borderline": true,
+            "reason": "The celebration, no-question handling and confirmation were right, but ZOH 2 chases a longer reflection and leaves the step under-defined."
           }
         ],
-        "summary": "ZOH correctly counted the rushed voice note and invited more tomorrow without a question in the first text. It then broke the regression case by chasing what stuck in ZOH 2, giving an incomplete step, and asking no 'does it work?' before confirming an unshown step."
+        "summary": "ZOH handled the rushed voice note well: it celebrated briefly, asked no question at first, and confirmed 'sure' without a new question. It fell short in the middle text, where it said it wanted more on what stuck next time and gave Chapter 5 without its full definition or a check on whether it works."
       }
     }
   ]

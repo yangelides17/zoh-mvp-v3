@@ -450,3 +450,41 @@ describe("what a reply can and can't record", () => {
     expect(await row(WED)).toBeUndefined();
   });
 });
+
+describe("#160: what each step shows they can now do, and gaps", () => {
+  it("saves can-do and gaps with the reflection, and a later save without them keeps them", async () => {
+    await setup();
+    await doneMonday();
+    const saved = await tool(
+      "save_reflection",
+      { summary: "Ran all 3 rounds; the hill gassed them", how_it_went: true, can_do: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill", take: "Full step." },
+      at(MON, "19:33"),
+    );
+    expect(saved).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ canDo: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill" });
+    await tool("save_reflection", { summary: "Hill was hard, slowing on the flats worked", how_it_went: true, take: "Full step." }, at(MON, "19:36"));
+    expect(await row(MON)).toMatchObject({ canDo: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill" });
+  });
+
+  it("gaps show on that day in ZOH's recent step days; can-do stays off the sheet (the recap's 'can do' is applied or recalled lessons only)", async () => {
+    await setup();
+    await doneMonday();
+    await tool(
+      "save_reflection",
+      { summary: "Ran all 3 rounds; the hill gassed them", how_it_went: true, can_do: "Jog 1 min without stopping", gaps: "Pacing on the hill", take: "Full step." },
+      at(MON, "19:33"),
+    );
+    const tue = await block(at(TUE, "10:00"));
+    expect(tue).toMatch(/- Mon 2026-11-02, done: [^\n]*gaps: Pacing on the hill/);
+    expect(tue).not.toContain("Jog 1 min without stopping");
+  });
+
+  it("no word on what they learned never holds the next step", async () => {
+    await setup();
+    await doneMonday();
+    await tool("save_reflection", { summary: "Felt good, a bit tired", how_it_went: true, take: "Full step." }, at(MON, "19:33"));
+    await say("outbound", at(MON, "19:34"), `Wednesday: ${NEXT}. Work for you?`);
+    expect(await tool("set_today_step", { step: NEXT, kind: "harder", day: "next", reason: "Felt good" }, at(MON, "19:35"))).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: NEXT });
+  });
+});

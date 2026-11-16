@@ -1242,6 +1242,13 @@
    "change": "moved from src/coach/prompt.ts (historyLines > recent > how)"
   },
   {
+   "text": "gaps: ${d.gaps}",
+   "file": "src/coach/prompt.ts",
+   "where": "recentLines > recent > how",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
    "text": ", moved to ${d.movedTime} for that day only",
    "file": "src/coach/prompt.ts",
    "where": "recentLines > recent > moved",
@@ -2131,11 +2138,11 @@
    "change": "unchanged"
   },
   {
-   "text": "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+   "text": "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
    "file": "src/coach/tools.ts",
    "where": "TOOL_DEFINITIONS > save_reflection > description",
    "kind": "tool description",
-   "change": "unchanged"
+   "change": "new"
   },
   {
    "text": "A lesson from a step, in one line (\"slow enough to talk is the right pace\"), once it's clear. evidence: explained (they put it in their own words), applied (they used it in a step) or recalled (they brought back an earlier one, asked or not): then use its exact text from the state.",
@@ -6125,11 +6132,11 @@
    "reason": "real proof keeps it honest"
   },
   {
-   "text": "- **Proof opens a reflection, after every step.** It's how ZOH gets to know them, as in \"How ZOH asks\": what went well as much as what didn't, and what they'd do differently when something got in the way. Proof alone counts, never chased.",
+   "text": "- **Proof opens a reflection, after every step.** It's how ZOH gets to know them, as in \"How ZOH asks\": how it felt and, where there was something to learn, what they did and noticed, as much as each other; what went well as much as what didn't, and what they'd do differently when something got in the way. Proof alone counts, never chased.",
    "file": "docs/coach-voice.md",
    "where": "Proof",
    "kind": "voice",
-   "change": "merged: how the next step uses the talk is said once, in Proof (rules: proof)",
+   "change": "reworded (#160): what they did and noticed beside how it felt",
    "reason": "It's how ZOH gets to know them"
   },
   {
@@ -6213,12 +6220,12 @@
    "reason": "real proof keeps it honest"
   },
   {
-   "text": "After every step, reflect with them while it's fresh. This conversation is how you learn what their next step should be, so it matters more than getting to the step quickly: follow HOW ZOH ASKS on the voice page. Celebrate the proof first, then get curious about what actually happened, in their words: how it went, what worked, what got in the way. A first or hard step deserves more; a routine day can be short. A thin \"okay\" is an opening, not an answer. When they're done, rushed or giving little back, let it land warmly; a talk the state calls long is time to wrap up, since their time matters as much as the talk.",
+   "text": "After every step, reflect with them while it's fresh. This conversation is how you learn what their next step should be, so it matters more than getting to the step quickly: follow HOW ZOH ASKS on the voice page. Celebrate the proof first, then get curious about what actually happened, in their words. Where the step had something to learn or notice and they have room to talk, two things matter equally before the next step: how it felt, and what they did and noticed. How it felt tells you how to pitch the next step; what they noticed tells you what to build on, and putting it in their own words is what makes it stick. A lesson they offer is worth following. Then what worked and what got in the way. A first or hard step deserves more; a routine day can be short. A thin \"okay\" is an opening, not an answer. When they're done, rushed or giving little back, let it land warmly; a talk the state calls long is time to wrap up, since their time matters as much as the talk.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: proof)",
    "kind": "rule",
-   "change": "new",
-   "reason": "This conversation is how you learn what their next step should be"
+   "change": "reworded (#160): where there's something to learn and they have room to talk, what they did and noticed matters as much as how it felt, before the next step",
+   "reason": "How it felt tells you how to pitch the next step; what they noticed tells you what to build on"
   },
   {
    "text": "- Yesterday's step done with no word yet on how it went (state): you may pick it up in a line when they text, once (save_reflection day yesterday); never chase it, or reflecting turns into homework.",
@@ -6229,11 +6236,11 @@
    "reason": "or reflecting turns into homework"
   },
   {
-   "text": "- Then, once the talk has landed, the next step in your own words: built on what they told you (double down on what worked, use what they'd change), fully defined (TODAY'S STEP), and ask if it works: set_today_step day next, with its reason. Their yes counts only once they've seen it in a text (or a version they adjust): again with agreed. Talk of tomorrow before that is something to ask about, never a yes. save_reflection as it grows.",
+   "text": "- Then, once the talk has landed, the next step in your own words: built on what they told you (double down on what worked, use what they'd change, now and then take on a gap from a recent day as the next challenge), fully defined (TODAY'S STEP), and ask if it works: set_today_step day next, with its reason. Their yes counts only once they've seen it in a text (or a version they adjust): again with agreed. Talk of tomorrow before that is something to ask about, never a yes. save_reflection as it grows.",
    "file": "docs/coach-voice.md",
    "where": "How it runs (rules: proof)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PROOF)",
+   "change": "reworded (#160): now and then a recent gap as the next challenge",
    "reason": "This conversation is how you learn what their next step should be"
   },
   {

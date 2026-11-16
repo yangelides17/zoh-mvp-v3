@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:next-step-at-wrap-up",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "2d8b8d59bdd5",
-    "voice": "fbc3a37c5b97",
+    "checks": "2283e3616211",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "064c308fa236"
   },
@@ -99,13 +99,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences plus one question at the end; within the limit."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype with real win language and one fire emoji as punctuation; warm and not overfamiliar."
+                "reason": "Excited opener, emoji at the end, warm and not overfamiliar."
               }
             ]
           },
@@ -114,15 +114,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Asks two questions: 'What made you try slowing down?' and 'Was it something you figured out mid-jog?' against the one-question limit."
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences, but the last one holds two question marks ('What made you try slowing down? Was it something...'), which stretches the one-question limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Specific, warm praise tied to the pace trick; no emoji or affection issues."
+                "reason": "Warm and specific, reflects Riley's own words back."
               }
             ]
           },
@@ -133,13 +133,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end; the proposal is a single short block."
+                "reason": "Three sentences with one question at the end, and the proposal is shown before 'Work for you?'."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confident, warm tone that uses the tester's 'another round' comment without overdoing it."
+                "reason": "Calm, direct and warm, with no excess energy."
               }
             ]
           },
@@ -150,13 +150,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one closing question; adjusted park step stated once with nothing else changed."
+                "reason": "Three sentences, one question at the end, and the park change is stated once."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific, responds to the 'flatter' reason without gushing."
+                "reason": "Warm and specific, and uses Riley's reason."
               }
             ]
           },
@@ -164,16 +164,22 @@
             "zohText": 5,
             "checks": [
               {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": true,
+                "reason": "Confirms the lock in a line and carries a next move (talk at 7 pm), with no new question."
+              },
+              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question, confirming the lock in a line as requested."
+                "reason": "Short, with no question, as asked."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and sincere with one fitting emoji at the end."
+                "reason": "Energetic with one emoji at the end."
               }
             ]
           }
@@ -182,11 +188,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Voice note is reflected on, the agreed next step is proposed fully with the pace lesson and extra round, the park change is applied once, and it saves for the next day; only the double question in ZOH 2 is a slip."
+            "borderline": false,
+            "reason": "Counted the voice note, asked one reflection question, and gave a specific pace response. The proposal came in a separate text with the pace lesson and the extra round, and the park change was shown once. 'Perfect' got a short lock-in with no new question."
           }
         ],
-        "summary": "ZOH handled the regression case well: it reflected on the voice note, built the pace lesson and the extra round into a fully defined step, applied the park change cleanly, and confirmed the lock without a new question. The one clear miss was ZOH 2 asking two questions in a single text, which breaks the one-question rule."
+        "summary": "ZOH handled the regression case well: it counted the voice note, drew out the pace lesson, and kept the reflection ask separate from the proposal. The park change was made once and confirmed without a new question. Only minor questions remain on ZOH 2's double question and the unsourced 'easier on your legs' claim in ZOH 4."
       }
     }
   ]

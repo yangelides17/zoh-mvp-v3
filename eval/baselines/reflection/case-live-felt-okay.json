@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:live-felt-okay",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "5a06f1453d48",
-    "voice": "fbc3a37c5b97",
+    "checks": "c131768e2a30",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "e7d7ea38ec28"
   },
@@ -64,13 +64,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Ends with two questions: 'How did it feel saying them out loud?' and 'Did any of them feel clunky?' Rule allows at most one question."
+                "reason": "Asks two questions in one text ('How did it feel...?' and 'Did any of them feel clunky?') and runs past three sentences."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, upbeat energy with one emoji as punctuation; sincere, not overfamiliar."
+                "reason": "Warm, upbeat energy with one emoji at the end of the beat; not overfamiliar."
               }
             ]
           },
@@ -79,15 +79,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Three short sentences with a single question at the end, asking what's behind the 'okay'."
+                "reason": "Asks two questions ('What's behind it?' and 'Was it easy, or ... awkward?') in one text."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and sincere; 'Okay is a good start' is a little flat for the pushy default but acceptable."
+                "borderline": false,
+                "reason": "Warm and plain, with no overfamiliarity or emoji row."
               }
             ]
           }
@@ -95,30 +95,30 @@
         "conversation": [
           {
             "rule": "reflection-ask",
-            "pass": false,
-            "borderline": true,
-            "reason": "Opened the reflection after proof, but the opening text asked two questions instead of one, and no voice-note suggestion was made."
+            "pass": true,
+            "borderline": false,
+            "reason": "After the voice proof with no word on how it went, ZOH opened the reflection with a question about feeling."
           },
           {
             "rule": "follow-ups",
             "pass": false,
-            "borderline": false,
-            "reason": "ZOH 1 asked two questions in one text, breaking the one-question-per-text rule."
+            "borderline": true,
+            "reason": "Its first reflection text asks two questions at once, against one question per text."
           },
           {
             "rule": "thin-answer",
             "pass": true,
             "borderline": true,
-            "reason": "'It felt okay' got a follow-up asking what's behind it, with no proposal yet, though offering 'awkward' as an option edges toward guessing."
+            "reason": "'It felt okay' got a follow-up asking what's behind it, with no step proposed; the 'awkward' option leans toward a guess at what okay means."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "After 'It felt okay', ZOH asked what's behind it and did not propose tomorrow's step. It did offer 'awkward' as a guess at meaning, which the case warned against."
+            "reason": "ZOH asked what's behind 'okay' and did not propose tomorrow's 6:30 step, but it offered 'awkward' as a guess instead of staying fully open."
           }
         ],
-        "summary": "ZOH fixed the reported regression: after 'It felt okay' it asked what was behind it and did not push tomorrow's step. It still broke the one-question rule in its opening text and leaned on a guessed 'awkward' option in its follow-up."
+        "summary": "ZOH handled the thin 'It felt okay' reply correctly: it asked what was behind it and did not jump to tomorrow's step, which fixes the earlier regression. Its texts repeatedly asked two questions at once and ZOH guessed at 'awkward', so the follow-up was less open than it should have been."
       }
     }
   ]

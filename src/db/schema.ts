@@ -549,6 +549,10 @@ export const stepDays = pgTable(
     wentWell: text("went_well"),
     /** #157: what they'd do differently next time, in a line, if they said. */
     differently: text("differently"),
+    /** #160: what this step shows they can now do, from the proof and their words. Console only, never on ZOH's sheet. */
+    canDo: text("can_do"),
+    /** #160: what's still shaky, to work on later, from the proof and their words. */
+    gaps: text("gaps"),
     /** ZOH's candid take on the day, 1 to 2 sentences, for the founders only: never in the coach's state or a text (#93). */
     coachTake: text("coach_take"),
     /** Why this day's step, in a line, as the coach set it (#93): the step log's "Next step" reason. */
