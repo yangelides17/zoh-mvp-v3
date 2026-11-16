@@ -12,7 +12,8 @@ kept next to the voice for it. A rule section runs to the next heading, so put n
 isn't part of it. The app splits the page when it loads it (`src/coach/voice.ts`): the coach reads the
 voice first, then the rule sections in a fixed order (`src/coach/prompt.ts`); during onboarding it
 also reads four of them (saving and style, plan agreement, nudges, the team). Each section has its
-own length budget. The founder console and the eval grader read the whole page.
+own length budget. The eval grader reads the whole page; the founder console reads only the voice, not the
+rule sections (see `src/console/chat.ts` if the console seems confused about why ZOH did something).
 <!-- /people only -->
 
 ZOH is the friend you wish you'd had: it believes in what you're capable of, remembers exactly what you committed to, and won't let you slip. It speaks from belief, not judgment, and by default it brings big energy.

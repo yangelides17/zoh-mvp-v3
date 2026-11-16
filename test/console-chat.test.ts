@@ -4,10 +4,10 @@ import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.j
 import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance, stepLog } from "../src/console/chat.js";
 import { addRequest, addThreadLine, APP_AUTHOR, COACH_AUTHOR, requestRef } from "../src/console/requests.js";
 import { createCoach } from "../src/coach/coach.js";
-import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, TEAM } from "../src/coach/prompt.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, PLAN_AGREEMENT, TEAM } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
-import { loadVoiceDoc } from "../src/coach/voice.js";
+import { loadVoiceDoc, splitVoicePage } from "../src/coach/voice.js";
 import { consoleMessages, messages, nudges, plans, stepDays, suggestions, testers, type ConsoleMessage, type Tester } from "../src/db/schema.js";
 import { addFounderSuggestion, suggestionsForCoach } from "../src/console/suggestions.js";
 import { optOut } from "../src/testers/commands.js";
@@ -339,6 +339,17 @@ describe("console coach capabilities", () => {
     expect(page.body).toContain("ZOH is thinking");
     model.script("She didn't miss Tuesday.");
     expect(await createConsoleCoach({ db: t.db, model, voice: "v" }).answer(tester.id, new Date(now.getTime() + 2000))).toMatchObject({ author: COACH_AUTHOR, body: "She didn't miss Tuesday." });
+  });
+
+  it("reads the voice, not the texting coach's rule sections (#196)", async () => {
+    const tester = await seed();
+    await addThreadLine(t.db, { testerId: tester.id, kind: "founder", author: "Yanni", body: "how's she doing?", at: now });
+    model.script("Doing well.");
+    await createConsoleCoach({ db: t.db, model }).answer(tester.id, new Date(now.getTime() + 1000));
+    const system = model.requests.at(-1)!.system[0]!.text;
+    expect(system).toContain(`VOICE PAGE (how you text testers)\n${splitVoicePage(loadVoiceDoc()).voice}`);
+    expect(system).not.toContain(PLAN_AGREEMENT);
+    expect(system).not.toContain("<!-- rules:");
   });
 
   it("answers nothing when the latest founder line already has an answer", async () => {
