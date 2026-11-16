@@ -176,6 +176,15 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Once a plan is locked, replies and nudges read a cached memory block plus only today's and
   yesterday's texts (at least 30), instead of the last 200; up to 5 lookups a reply (2 searches).
   Each reply's tokens are logged in the message's `timings`.
+- Instructions by moment (#200): after onboarding, a reply reads a core (cached on its own, the same for
+  every reply in a phase) plus only the parts its moment can use (`partsFor`), cached as a second block;
+  a part is left out only when it can't apply in that reply, and a tool call can add one partway through
+  (a goal switch brings in making the plan), never drop one. Tools depend only on the phase. That's
+  4 cache breakpoints a request (core, parts, memory, the conversation): the API's maximum, so a new
+  cached block means merging two. Each reply's parts are in its message's `timings.coach_sections`; each
+  nudge's in its log line (`sections`). The status sheet rides at the end of the latest message, labelled
+  as the app's (`SHEET_IN_MESSAGE` in `src/wiring.ts`; false puts it back last in the system prompt).
+  Onboarding's prompt is unchanged.
 - Photo and voice verification (#7): the coach judges proof in its reply (no second Claude call)
   and saves a verdict and a line on what it saw on the day. No proof, no done. Proof-gaming flags
   are saved only.

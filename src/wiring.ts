@@ -164,6 +164,12 @@ function makeSendblue(config: Config) {
     : undefined;
 }
 
+/**
+ * #200: the status sheet rides at the end of their latest message rather than last in the system prompt. On, so
+ * staging and the retest after #201 try it; false puts it back on its own, with nothing else changed.
+ */
+export const SHEET_IN_MESSAGE = true;
+
 function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watcher: VideoWatcher | undefined) {
   return config.claude.apiKey
     ? createCoach({
@@ -171,6 +177,7 @@ function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watche
         media,
         watcher,
         goalCap: config.goalCap,
+        sheetInMessage: SHEET_IN_MESSAGE,
         model: createClaudeModel({
           apiKey: config.claude.apiKey,
           model: config.claude.model,

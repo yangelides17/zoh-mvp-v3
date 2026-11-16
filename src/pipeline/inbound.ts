@@ -326,6 +326,9 @@ async function draftReply(
         signal,
         onAction: (a) => actions.push(a),
         ...(handedOn ? { dropped: handedOn } : {}),
+        // #200: media loads the proof rules; the parts it loaded are kept with the message, so a wrong pick can be traced.
+        media: batch.some((p) => p.inbound.mediaUrl),
+        onSections: (s) => (timings.coach_sections = s.join(",")),
         onUsage: (u) => {
           timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
           timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;

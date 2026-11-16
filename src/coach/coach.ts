@@ -26,7 +26,7 @@ import {
 import { memoryBlock, usesMemory } from "../memory/context.js";
 import { OPT_OUT_CONFIRMATION } from "../testers/commands.js";
 import { updateTester } from "../testers/testers.js";
-import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions } from "./prompt.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, instructionsFor, PARTS, partsFor, type Part } from "./prompt.js";
 import { loadCoachState, localTime, onboardingComplete, type CoachState } from "./state.js";
 import { runTool, TOOL_DEFINITIONS } from "./tools.js";
 
@@ -141,6 +141,11 @@ export interface CoachOptions {
   media?: MediaStore;
   /** #163: re-watches a video for open_file, with their question. */
   watcher?: VideoWatcher;
+  /**
+   * #200: the status sheet goes at the end of the latest message, labelled as the app's, instead of last in the
+   * system prompt (models attend most to what's nearest the end). Off unless wiring turns it on.
+   */
+  sheetInMessage?: boolean;
 }
 
 /**
@@ -151,9 +156,19 @@ export interface CoachOptions {
 export function createCoach(opts: CoachOptions): Replier {
   const { db, model, goalCap } = opts;
   // The page is read when prompt.ts loads at startup, so a missing page stops the app, not a reply.
-  const afterOnboarding = fullVoiceInstructions(opts.voice);
+  /** #200: the cached instruction blocks: onboarding's own prompt, or the core and the parts loaded so far. */
+  const instructions = (phase: Tester["phase"], parts: readonly Part[]): string[] => {
+    if (phase === "onboarding") return [FIXED_INSTRUCTIONS];
+    const { core, moments } = instructionsFor(phase, parts, opts.voice);
+    return moments ? [core, moments] : [core];
+  };
+  /** One request's system and messages: the sheet last in the system prompt, or (the switch) last in their latest message. */
+  const request = (blocks: string[], state: CoachState, memory: string | undefined, messages: Anthropic.MessageParam[]) =>
+    opts.sheetInMessage
+      ? { system: systemBlocks(blocks, undefined, memory), messages: withSheet(messages, state) }
+      : { system: systemBlocks(blocks, state, memory), messages };
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, interrupted, signal, dropped }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, interrupted, signal, dropped, media }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
@@ -170,10 +185,13 @@ export function createCoach(opts: CoachOptions): Replier {
       const memory = usesMemory(initial) ? await memoryBlock(db, initial) : undefined;
       const budget: LookupBudget = { lookups: 0, searches: 0 };
       const usage: TokenUsage = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
+      /** #200: the parts this reply has loaded; a tool call can add one, never drop one. */
+      let parts: Part[] = [];
       try {
         return await replyLoop();
       } finally {
         onUsage?.(usage);
+        onSections?.(loadedNames(initial.phase, parts));
       }
 
       async function replyLoop(): Promise<string> {
@@ -192,8 +210,9 @@ export function createCoach(opts: CoachOptions): Replier {
       let fallbackText = "";
       // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
       const tools = toolsFor(initial);
-      // Onboarding keeps its condensed prompt so its rules stay sharp; afterwards, the whole voice page.
-      const fixed = initial.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding;
+      // Onboarding keeps its condensed prompt so its rules stay sharp; afterwards, the core and what this moment needs.
+      const reach = { media: !!media };
+      parts = partsFor(state, reach);
       /** Tool names and outcomes per round (never their inputs), for the error if no text comes back. */
       const trail: string[] = [];
       let retried = false;
@@ -207,8 +226,7 @@ export function createCoach(opts: CoachOptions): Replier {
         let response: Awaited<ReturnType<ClaudeModel["create"]>>;
         try {
           response = await model.create({
-            system: systemBlocks(fixed, state, memory),
-            messages,
+            ...request(instructions(initial.phase, parts), state, memory, messages),
             tools,
             toolChoice: last ? "none" : "auto",
             ...(signal ? { signal } : {}),
@@ -248,14 +266,14 @@ export function createCoach(opts: CoachOptions): Replier {
           continue;
         }
         if (calls.length === 0 || last) {
-          const reply = withoutToolNames(text, toolNames) || fallbackText;
+          const reply = withoutToolNames(text, ALL_TOOL_NAMES) || fallbackText;
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
           checkpoint(reply);
           return reply;
         }
-        if (text) fallbackText = withoutToolNames(text, toolNames);
+        if (text) fallbackText = withoutToolNames(text, ALL_TOOL_NAMES);
 
         const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
@@ -275,6 +293,7 @@ export function createCoach(opts: CoachOptions): Replier {
               justFinished = true;
               state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             }
+            parts = grown(parts, partsFor(state, reach));
           }
           // #163: open_file hands back the file itself (a photo, a PDF) after its words.
           const files = result.ok && "blocks" in result ? (result.blocks ?? []) : [];
@@ -304,7 +323,7 @@ export function createCoach(opts: CoachOptions): Replier {
      * day's step can be saved first; #196: a tool it can't use isn't offered), and a note in place
      * of a tester text naming the moment (the state block says it too).
      */
-    async nudge({ tester, turns, now, moment, previous, carry, mayskip }: NudgeRequest) {
+    async nudge({ tester, turns, now, moment, previous, carry, mayskip, onSections }: NudgeRequest) {
       const fresh = previous ? ` Your last ${moment} text was: "${previous}". Make this one different: another opener, detail and shape.` : "";
       const carries = carry ? ` It also does what the state's "This text carries" says.` : "";
       // #42: a kickoff right after a morning chat that settled today's step only repeats it.
@@ -318,13 +337,21 @@ export function createCoach(opts: CoachOptions): Replier {
       // After lock, a text it starts can save the day's step first (#76); nothing else runs.
       const rounds = tester.phase === "active" ? NUDGE_ROUNDS : 1;
       const nudgeTools = toolsFor(tester).filter((t) => NUDGE_TOOLS.includes(t.name));
+      // #200: exactly the parts its moment needs.
+      let parts = partsFor(state);
+      try {
+        return await nudgeLoop();
+      } finally {
+        onSections?.(loadedNames(tester.phase, parts));
+      }
+
+      async function nudgeLoop() {
       let round = 1;
       let retried = false;
       for (;;) {
         const last = round >= rounds;
         const response = await model.create({
-          system: systemBlocks(tester.phase === "onboarding" ? FIXED_INSTRUCTIONS : afterOnboarding, state, memory),
-          messages,
+          ...request(instructions(tester.phase, parts), state, memory, messages),
           tools: nudgeTools,
           toolChoice: last ? "none" : "auto",
         });
@@ -335,7 +362,10 @@ export function createCoach(opts: CoachOptions): Replier {
             const result = NUDGE_TOOLS.includes(call.name)
               ? await runTool(db, state, call.name, call.input, now)
               : ({ ok: false, error: `Only ${NUDGE_TOOLS.join(", ")} while writing a text you start.` } as const);
-            if (result.ok) state = await loadCoachState(db, result.tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
+            if (result.ok) {
+              state = await loadCoachState(db, result.tester, { now, isFirstText: false, nudgeMoment: moment, carry, goalCap });
+              parts = grown(parts, partsFor(state));
+            }
             results.push({ type: "tool_result", tool_use_id: call.id, ...(result.ok ? { content: result.message } : { content: result.error, is_error: true }) });
           }
           // #131: as in replies, text written with tool calls isn't sent.
@@ -355,12 +385,13 @@ export function createCoach(opts: CoachOptions): Replier {
         if (skipped && mayskip) return null;
         // #109: any other SKIP, or words about not sending, is a decline: held, never sent.
         if (skipped || readsAsSendDecision(text)) return { held: true, wrote: text } satisfies HeldNudge;
-        // #108: a tool's name on its own line never reaches them.
-        const clean = withoutToolNames(text, toolsFor(tester).map((t) => t.name));
+        // #108: a tool's name on its own line never reaches them, offered or not.
+        const clean = withoutToolNames(text, ALL_TOOL_NAMES);
         if (clean) return clean;
         // Rarely the answer comes back with no text (as in a reply's rounds): one more try before failing.
         if (retried) throw new NoReplyTextError(`Claude returned no nudge text (stop_reason: ${response.stopReason})`);
         retried = true;
+      }
       }
     },
     check: () => model.check(),
@@ -368,16 +399,42 @@ export function createCoach(opts: CoachOptions): Replier {
 }
 
 /**
- * Fixed instructions first, cached (tools are cached with them); then the memory block once the
- * plan is locked, cached too (it changes overnight); the state block, rebuilt every call, last.
+ * Fixed instructions first, each block cached (tools are cached with the first; #200: the core, then the parts this
+ * moment loads); then the memory block once the plan is locked, cached too (it changes overnight); the state block,
+ * rebuilt every call, last, unless it rides in the latest message (`withSheet`).
  */
-export function systemBlocks(fixed: string, state: CoachState, memory?: string): Anthropic.TextBlockParam[] {
+export function systemBlocks(fixed: string[], state: CoachState | undefined, memory?: string): Anthropic.TextBlockParam[] {
   return [
-    { type: "text", text: fixed, cache_control: { type: "ephemeral" } },
+    ...fixed.map((text) => ({ type: "text" as const, text, cache_control: { type: "ephemeral" as const } })),
     ...(memory ? [{ type: "text" as const, text: memory, cache_control: { type: "ephemeral" as const } }] : []),
-    { type: "text", text: buildStateBlock(state) },
+    ...(state ? [{ type: "text" as const, text: buildStateBlock(state) }] : []),
   ];
 }
+
+/** #200: what opens the status sheet when it rides in their latest message, so it's never read as their words. */
+export const SHEET_LABEL = "[Written by the app, not by them: the status sheet for this text. They never see it.]";
+
+/**
+ * #200: the messages with the status sheet as the last thing in the latest one. Only this call's copy carries it, so
+ * the conversation never holds an old sheet: there's exactly one, rebuilt every round.
+ */
+export function withSheet(messages: Anthropic.MessageParam[], state: CoachState): Anthropic.MessageParam[] {
+  const last = messages.at(-1);
+  if (!last) return messages;
+  const content: Anthropic.ContentBlockParam[] = typeof last.content === "string" ? [{ type: "text", text: last.content }] : last.content;
+  // Same role as before, one more text block: the cast only re-joins the role and content the spread split apart.
+  const withIt = { ...last, content: [...content, { type: "text", text: `${SHEET_LABEL}\n${buildStateBlock(state)}` }] } as Anthropic.MessageParam;
+  return [...messages.slice(0, -1), withIt];
+}
+
+/** #108, #200: every tool's name, offered in this reply or not, so none written as text reaches them. */
+const ALL_TOOL_NAMES = [...TOOL_DEFINITIONS, ...MEMORY_TOOL_DEFINITIONS].map((t) => t.name);
+
+/** #200: the parts loaded so far, plus any the reply can now reach; never fewer. */
+const grown = (had: readonly Part[], now: readonly Part[]): Part[] => PARTS.filter((p) => had.includes(p) || now.includes(p));
+
+/** #200: what a reply or text ZOH started read, for the log. */
+const loadedNames = (phase: Tester["phase"], parts: readonly Part[]): string[] => (phase === "onboarding" ? ["onboarding"] : ["core", ...parts]);
 
 /** The tools for a reply: onboarding adds choose_goal; once the plan is locked, the memory lookups and forget. */
 function toolsFor(tester: Tester): Anthropic.Tool[] {

@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { raiseAlert } from "../src/console/alerts.js";
-import { createCoach, NUDGE_TOOLS } from "../src/coach/coach.js";
-import { buildStateBlock, NUDGES, TODAYS_STEP } from "../src/coach/prompt.js";
+import { createCoach, NUDGE_TOOLS, SHEET_LABEL } from "../src/coach/coach.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, NUDGES, TODAYS_STEP } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import {
@@ -629,7 +629,86 @@ describe("dueNudge", () => {
   });
 });
 
+describe("#200: what a reply loads, in the real coach", () => {
+  const systemText = (model: FakeClaudeModel, i: number) => model.requests.at(i)!.system.map((b) => b.text).join("\n\n");
+  const reply = (coach: ReturnType<typeof createCoach>, tester: Tester, text: string, extra: object = {}) =>
+    coach.reply({ tester, turns: [{ role: "user", text }], now: at(MON, "10:00"), ...extra });
+
+  it("a goal switch partway through a reply brings in making the plan from the next round; the cached core stays the same", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script({ tools: [{ name: "switch_goal", input: { slug: "nutrition", reason: "hurt my knee, can't sit long" } }] }, "Makes sense. Do you have a protein target?");
+    let sections: string[] = [];
+    await reply(createCoach({ db: t.db, model }), tester, "my knee's wrecked, I want to switch to eating better", { onSections: (s: string[]) => (sections = s) });
+    expect(model.requests).toHaveLength(2);
+    expect(systemText(model, 0)).not.toContain("- With everything in hand: save it with propose_plan");
+    expect(systemText(model, 1)).toContain("- With everything in hand: save it with propose_plan");
+    expect(model.requests[1]!.system[0]).toEqual(model.requests[0]!.system[0]);
+    // Logged: what the reply read, the plan included.
+    expect(sections).toEqual(expect.arrayContaining(["core", "plan", "planChange"]));
+  });
+
+  it("the tools depend only on the phase, so the cached core is shared across replies", async () => {
+    // Monday is a rest day here: the photo is what brings in proof, so the two replies load different parts.
+    const tester = await setup({ days: ["tue", "thu", "sat"] });
+    const model = new FakeClaudeModel();
+    const coach = createCoach({ db: t.db, model });
+    model.script("Let's go.");
+    await reply(coach, tester, "in for tonight");
+    model.script("Nice!");
+    await reply(coach, tester, "[Sent a photo]", { media: true });
+    const [a, b] = model.requests.map((r) => r.tools.map((x) => x.name));
+    expect(b).toEqual(a);
+    expect(systemText(model, 1).length).not.toBe(systemText(model, 0).length);
+    expect(model.requests[1]!.system[0]).toEqual(model.requests[0]!.system[0]);
+  });
+
+  it("the sheet switch: on, exactly one sheet, last in the latest message, every round; off, last in the system prompt", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script({ tools: [{ name: "mark_agreed", input: {} }] }, "Locked in for 7.");
+    await reply(createCoach({ db: t.db, model, sheetInMessage: true }), tester, "yes I'm in");
+    expect(model.requests).toHaveLength(2);
+    for (const req of model.requests) {
+      expect(req.system.some((b) => b.text.startsWith("STATE ("))).toBe(false);
+      const blocks = req.messages.flatMap((m) => (typeof m.content === "string" ? [m.content] : m.content.map((c) => ("text" in c ? c.text : ""))));
+      expect(blocks.filter((x) => x.startsWith(SHEET_LABEL))).toHaveLength(1);
+      const last = req.messages.at(-1)!.content as { type: string; text?: string }[];
+      expect(last.at(-1)!.text).toMatch(new RegExp(`^\\${SHEET_LABEL.slice(0, 20)}[\\s\\S]*\\nSTATE \\(`));
+    }
+    // The second round's sheet shows what the first round's tool did.
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("They said yes to it today");
+
+    const off = new FakeClaudeModel();
+    off.script("ok");
+    await reply(createCoach({ db: t.db, model: off }), tester, "cool");
+    expect(off.stateOf()).toMatch(/^STATE \(/);
+    expect(JSON.stringify(off.requests[0]!.messages)).not.toContain(SHEET_LABEL);
+  });
+});
+
 describe("the coach writing a nudge", () => {
+  it("#108, #200: a tool's name on its own line never reaches them, even one the text wasn't offered", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script("Yo Sam!\nmark_agreed\nTen pages tonight, you in?");
+    const text = await createCoach({ db: t.db, model }).nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" });
+    expect(model.requests[0]!.tools.map((x) => x.name)).not.toContain("mark_agreed");
+    expect(text).toBe("Yo Sam!\nTen pages tonight, you in?");
+  });
+
+  it("#200: the scheduler logs which parts a text it starts loaded", async () => {
+    await setup();
+    const logged: Record<string, unknown>[] = [];
+    const log = { ...silent, info: (o: Record<string, unknown>) => logged.push(o) } as unknown as Logger;
+    const model = new FakeClaudeModel();
+    model.script("Kalimera Sam! Ten pages tonight at 7, you in?");
+    const real = createNudgeScheduler({ db: t.db, log, sendblue: t.sendblue, replier: createCoach({ db: t.db, model }), allowedNumbers: [ME], lineNumber: LINE });
+    await real.tick(at(MON, "09:00"));
+    await real.stop();
+    expect(logged).toContainEqual(expect.objectContaining({ kind: "kickoff", sections: "core,nudges,todaysStep" }));
+  });
+
   it("one call when it writes straight away, the moment in the state block and a note in place of a tester text", async () => {
     const tester = await setup();
     const model = new FakeClaudeModel();
@@ -650,7 +729,13 @@ describe("the coach writing a nudge", () => {
     // Tools on, so it can save today's step first (#76); #196: offered only the tools a text it starts can use.
     expect(req.toolChoice).toBe("auto");
     expect(req.tools.map((x) => x.name).sort()).toEqual([...NUDGE_TOOLS].sort());
-    expect(req.system[0]!.text).toContain(NUDGES);
+    // #200: a kickoff loads the texts ZOH starts and today's step, not how to answer a reply.
+    const system = req.system.map((b) => b.text).join("\n\n");
+    expect(system).toContain("NUDGES (texts you start;");
+    expect(system).toContain("TODAY'S STEP (phase");
+    expect(system).not.toContain('When they text (phase "active")');
+    expect(system).not.toContain("WEEK LOOK-BACK (phase");
+    expect(FIXED_INSTRUCTIONS).toContain(NUDGES);
     expect(model.stateOf()).toContain("NUDGE MOMENT: kickoff");
     expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet (the plan's step applies until it is).");
     expect(model.stateOf()).toMatch(/Moments now: Nudges; Today's step/);

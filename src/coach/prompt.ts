@@ -4,7 +4,7 @@ import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
-import { loadVoiceDoc, splitVoicePage, type RuleKey } from "./voice.js";
+import { loadVoiceDoc, splitVoicePage, voiceSections, type RuleKey } from "./voice.js";
 import { evidenceText, type WeekLookback } from "./week.js";
 
 /**
@@ -27,13 +27,17 @@ export const PROMPT_BUDGET_CHARS = {
   voice: 25_850,
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
-  plan: 4660,
-  nudges: 2580,
+  // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
+  plan: 4070,
+  planChange: 590,
+  nudges: 1872,
+  nudgeReplies: 708,
   todaysStep: 1890,
   proof: 3600,
   weekLookback: 2390,
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
-  nextSteps: 2040,
+  nextSteps: 1250,
+  nextStepsTeam: 790,
   team: 720,
   memory: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
@@ -44,9 +48,9 @@ const PAGE = splitVoicePage(loadVoiceDoc());
 /** The rules in every phase that the voice doesn't cover: saving and style requests. */
 export const TOOL_RULES = PAGE.rules.tools;
 /** Feature 5, plan agreement (spec: GitHub issue "Plan agreement"). In both prompts, so the handoff has no seam. */
-export const PLAN_AGREEMENT = PAGE.rules.plan;
+export const PLAN_AGREEMENT = [PAGE.rules.plan, PAGE.rules.planChange].join("\n");
 /** Feature 6, nudges (spec: GitHub issue "Nudge scheduler"). In both prompts: stalled onboarding gets nudged too. */
-export const NUDGES = PAGE.rules.nudges;
+export const NUDGES = [PAGE.rules.nudges, PAGE.rules.nudgeReplies].join("\n");
 /** Each step day's own step (#76): the coach picks it. After onboarding only. */
 export const TODAYS_STEP = PAGE.rules.todaysStep;
 /** Feature 7, photo and voice verification (spec: GitHub issue "Photo and voice verification"). After onboarding only. */
@@ -54,7 +58,7 @@ export const PROOF = PAGE.rules.proof;
 /** The Sunday look-back (#78): the week's progress, then the week talk. After onboarding only. */
 export const WEEK_LOOKBACK = PAGE.rules.weekLookback;
 /** Step log and next step (spec: GitHub issue "Step log and next step"). After onboarding only. */
-export const NEXT_STEPS = PAGE.rules.nextSteps;
+export const NEXT_STEPS = [PAGE.rules.nextSteps, PAGE.rules.nextStepsTeam].join("\n");
 /** The founders behind the console (spec: GitHub issue "Founder console"). Every phase. */
 export const TEAM = PAGE.rules.team;
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
@@ -146,9 +150,91 @@ export const FIXED_INSTRUCTIONS = [CORE_VOICE, TOOL_RULES, ONBOARDING, PLAN_AGRE
 /** Opens the voice page in the after-onboarding prompt. */
 export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your voice is the page below, word for word. Sections marked "Not active yet" describe features that aren't built yet: don't act on them. One text per reply.`;
 
-/** The fixed part of the system prompt after onboarding: the voice, then the rules it doesn't cover; cached. */
+/**
+ * #200: what a reply after onboarding reads beyond the core, each part named by what it covers and loaded only when
+ * it can apply somewhere in that reply. The core (the voice's other sections, saving and style, the team, and once
+ * the plan is locked, memory) is in every reply and cached on its own, so it's shared by all of them.
+ */
+export const PARTS = ["plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "slip", "proof", "weekLookback", "nextSteps", "nextStepsTeam"] as const;
+export type Part = (typeof PARTS)[number];
+
+/** The voice page's section (by its heading) and the rule section each part loads. */
+const PART_SOURCES: Record<Part, { heading?: string; rule?: RuleKey }> = {
+  plan: { rule: "plan" },
+  planChange: { rule: "planChange" },
+  nudges: { rule: "nudges" },
+  nudgeReplies: { rule: "nudgeReplies" },
+  todaysStep: { rule: "todaysStep" },
+  slip: { heading: "When they start to slip" },
+  proof: { heading: "Proof", rule: "proof" },
+  weekLookback: { heading: "Sunday look-back", rule: "weekLookback" },
+  nextSteps: { heading: "Next steps and maintenance", rule: "nextSteps" },
+  nextStepsTeam: { rule: "nextStepsTeam" },
+};
+const PART_HEADINGS = new Set(PARTS.flatMap((p) => PART_SOURCES[p].heading ?? []));
+
+/** What the pipeline knows about a reply that the state doesn't. */
+export interface Reach {
+  /** A photo, voice note, video or file is among the texts being answered. */
+  media?: boolean;
+}
+
+/**
+ * #200: the parts a reply (or a text ZOH starts) can use, from #199's moments plus what the reply can reach. A part is
+ * left out only when it can't apply anywhere in the reply; a reply adds the parts a tool call brings in (a goal
+ * switch into a new plan), never drops one partway through. Onboarding keeps its own prompt.
+ */
+export function partsFor(s: CoachState, reach: Reach = {}): Part[] {
+  const parts = new Set<Part>();
+  const plan = s.tester.phase === "active" ? s.plan : undefined;
+  if (s.tester.phase === "planning") {
+    parts.add("plan").add("planChange");
+    if (s.nudgeMoment) parts.add("nudges");
+  } else if (plan) {
+    const now = moments(s);
+    const started = !(plan.startDate && plan.startDate > s.today);
+    const stepDay = started && isStepDay(plan, s.today, s.todayRow);
+    if (s.nudgeMoment) {
+      parts.add("nudges");
+      if (now.includes("Today's step")) parts.add("todaysStep");
+      // A check-in may bring back a recent takeaway (PROOF).
+      if (now.includes("Proof") || s.nudgeMoment === "checkin") parts.add("proof");
+    } else {
+      // Any reply can bring a tweak, a switch or a request for more.
+      parts.add("planChange").add("nextSteps");
+      // What a text carries is guided under Nudges, and a reply can carry things too (an owed recap or check-in).
+      if (carriesLines(s).length) parts.add("nudges");
+      if (started) parts.add("nudgeReplies").add("todaysStep");
+      if (stepDay || reach.media || now.includes("Proof")) parts.add("proof");
+      // A first "can't today" is only in their text: until today's step is done, it can slip.
+      if (stepDay && !isDone(s.todayRow)) parts.add("slip");
+    }
+    if (now.includes("When they start to slip")) parts.add("slip");
+    if (now.includes("Sunday look-back")) parts.add("weekLookback");
+    if (now.includes("Next steps and maintenance")) parts.add("nextStepsTeam");
+  }
+  return PARTS.filter((p) => parts.has(p));
+}
+
+/**
+ * #200: the instructions after onboarding, as two cached blocks: the core, the same for every reply in a phase
+ * (memory's rules once the plan is locked), then the parts this reply loads, each with its voice section first.
+ */
+export function instructionsFor(phase: "planning" | "active", parts: readonly Part[], voice: string = PAGE.voice): { core: string; moments: string } {
+  const sections = voiceSections(voice);
+  const coreVoice = sections.filter((v) => !PART_HEADINGS.has(v.heading)).map((v) => v.text).join("\n\n");
+  const core = [FULL_VOICE_INTRO, `VOICE PAGE\n${coreVoice}`, TOOL_RULES, TEAM, ...(phase === "active" ? [MEMORY] : [])].join("\n\n");
+  const loaded = parts.flatMap((p) => {
+    const { heading, rule } = PART_SOURCES[p];
+    return [...sections.filter((v) => heading && v.heading === heading).map((v) => v.text), ...(rule ? [PAGE.rules[rule]] : [])];
+  });
+  return { core, moments: loaded.join("\n\n") };
+}
+
+/** Everything after onboarding, as a reply with every part loaded would read it: the reference no reply exceeds. */
 export function fullVoiceInstructions(voice: string = PAGE.voice): string {
-  return [FULL_VOICE_INTRO, `VOICE PAGE\n${voice}`, TOOL_RULES, PLAN_AGREEMENT, NUDGES, TODAYS_STEP, PROOF, WEEK_LOOKBACK, NEXT_STEPS, TEAM, MEMORY].join("\n\n");
+  const { core, moments } = instructionsFor("active", PARTS, voice);
+  return [core, moments].join("\n\n");
 }
 
 

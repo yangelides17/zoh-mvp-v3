@@ -8,6 +8,7 @@ import {
   FIXED_INSTRUCTIONS,
   NEXT_STEPS,
   fullVoiceInstructions,
+  instructionsFor,
   NUDGES,
   ONBOARDING,
   PLAN_AGREEMENT,
@@ -324,7 +325,8 @@ describe("finishing onboarding", () => {
     expect(later).toContain("Phase: planning");
     expect(later).not.toContain("ONBOARDING JUST FINISHED");
     expect(later).toContain("Still open, required: none");
-    const fixed = model.requests.at(-1)!.system[0]!.text;
+    // #200: plan agreement is in the part a planning reply loads, after the core.
+    const fixed = model.requests.at(-1)!.system.map((b) => b.text).join("\n\n");
     expect(fixed).toContain('PLAN AGREEMENT (phases "planning" and "active"; none of this applies during onboarding)');
     expect(fixed).not.toContain("PLAN COMING");
     expect(model.requests.at(-1)!.tools.map((x) => x.name)).not.toContain("choose_goal");
@@ -546,6 +548,13 @@ describe("a tool's name written as text (#108)", () => {
     expect(sent()).toEqual(["Hi there!"]);
   });
 
+  it("#200: one the reply wasn't offered is removed too (search_memory during onboarding)", async () => {
+    model.script("search_memory\n\nNice to meet you!");
+    await text(ME, "I'm Sam");
+    expect(model.requests[0]!.tools.map((x) => x.name)).not.toContain("search_memory");
+    expect(sent()).toEqual(["Nice to meet you!"]);
+  });
+
   it("matches only a line that's just a tool's name", () => {
     const names = ["mark_agreed", "save_name"];
     // Delivered live on Nov 1, word for word.
@@ -709,7 +718,7 @@ describe("the voice page", () => {
     expect(() => loadVoiceDoc(VOICE_DOC_PATH)).not.toThrow();
   });
 
-  it("onboarding uses the condensed prompt; after onboarding the coach reads the whole page", async () => {
+  it("onboarding uses the condensed prompt; after onboarding the coach reads the page's core and its moment's parts", async () => {
     model.script("Yo! I'm ZOH…");
     await text(ME, "Start");
     expect(model.requests.at(-1)!.system[0]!.text).toBe(FIXED_INSTRUCTIONS);
@@ -717,16 +726,22 @@ describe("the voice page", () => {
     await updateTester(t.db, (await tester()).id, { phase: "planning" });
     model.script("On its way!");
     await text(ME, "when's my plan coming?");
-    const fixed = model.requests.at(-1)!.system[0]!;
-    expect(fixed).toMatchObject({ text: fullVoiceInstructions(), cache_control: { type: "ephemeral" } });
-    expect(fixed.text).toContain("## When they start to slip");
-    expect(fixed.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
-    expect(fixed.text).toContain(TOOL_RULES);
-    expect(fixed.text).toContain(PLAN_AGREEMENT);
+    // #200: the core, cached on its own, then the parts a planning reply loads (plan agreement), cached too.
+    const [core, parts] = model.requests.at(-1)!.system;
+    const planning = instructionsFor("planning", ["plan", "planChange"]);
+    expect(core).toMatchObject({ text: planning.core, cache_control: { type: "ephemeral" } });
+    expect(parts).toMatchObject({ text: planning.moments, cache_control: { type: "ephemeral" } });
+    expect(core!.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
+    expect(core!.text).toContain(TOOL_RULES);
+    expect(parts!.text).toContain('PLAN AGREEMENT (phases "planning" and "active"');
+    expect(parts!.text).toContain("- After lock, tweaks go through change_plan");
+    // Nothing a plan that isn't locked can use: slipping, proof, the week, memory.
+    expect(`${core!.text}${parts!.text}`).not.toContain("## When they start to slip");
+    expect(`${core!.text}${parts!.text}`).not.toContain("PROOF (phase");
+    expect(`${core!.text}${parts!.text}`).not.toContain("MEMORY (phase");
     expect(FIXED_INSTRUCTIONS).toContain(PLAN_AGREEMENT);
-    expect(fixed.text).toContain(NUDGES);
     expect(FIXED_INSTRUCTIONS).toContain(NUDGES);
-    expect(fixed.text).not.toContain(ONBOARDING);
-    expect(fixed.text).not.toContain("Yanni's coaching voice");
+    expect(core!.text).not.toContain(ONBOARDING);
+    expect(core!.text).not.toContain("Yanni's coaching voice");
   });
 });

@@ -503,7 +503,8 @@ async function send(
   lastInboundAt?: Date,
 ): Promise<void> {
   const { db, log } = deps;
-  const ctx = { contact: maskNumber(tester.phone), kind: nudge.kind };
+  // #200: `sections` is filled in by the coach (the parts of its instructions this text loaded), so a wrong pick can be traced.
+  const ctx = { contact: maskNumber(tester.phone), kind: nudge.kind, sections: "" };
   if (!deps.sendblue || !deps.replier?.nudge) return;
   const [claim] = await db
     .insert(nudges)
@@ -541,6 +542,7 @@ async function send(
       previous,
       ...(carry ? { carry } : {}),
       ...(mayskip ? { mayskip } : {}),
+      onSections: (s) => (ctx.sections = s.join(",")),
     });
   } catch (err) {
     // Free the slot: the next tick tries again while its window is open. Never the system-down text.

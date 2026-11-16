@@ -38,6 +38,10 @@ export interface ReplyInput {
   onAction?: (action: string) => void;
   /** What earlier drafts of this reply did before they were dropped: the coach is told, so it doesn't redo it. */
   dropped?: DroppedDraft;
+  /** #200: a photo, voice note, video or file is among the texts being answered (its proof rules load). */
+  media?: boolean;
+  /** #200: told once, at the end, which parts of the instructions the reply loaded, for the log. */
+  onSections?: (sections: string[]) => void;
 }
 
 /** What a draft did before it was dropped (#16): actions it saved and words it had written. */
@@ -83,6 +87,8 @@ export interface NudgeRequest {
   carry?: NudgeCarry;
   /** They've already texted today: the coach may skip a kickoff the conversation already covered (#42). */
   mayskip?: boolean;
+  /** #200: told once, at the end, which parts of the instructions the text loaded, for the log. */
+  onSections?: (sections: string[]) => void;
 }
 
 /** #109: the coach declined a text it was asked to start (a SKIP, or words about not sending): never sent. */
