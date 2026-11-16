@@ -1242,6 +1242,13 @@
    "change": "moved from src/coach/prompt.ts (historyLines > recent > how)"
   },
   {
+   "text": "gaps: ${d.gaps}",
+   "file": "src/coach/prompt.ts",
+   "where": "recentLines > recent > how",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
    "text": ", moved to ${d.movedTime} for that day only",
    "file": "src/coach/prompt.ts",
    "where": "recentLines > recent > moved",
@@ -2131,11 +2138,11 @@
    "change": "unchanged"
   },
   {
-   "text": "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+   "text": "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
    "file": "src/coach/tools.ts",
    "where": "TOOL_DEFINITIONS > save_reflection > description",
    "kind": "tool description",
-   "change": "unchanged"
+   "change": "new"
   },
   {
    "text": "A lesson from a step, in one line (\"slow enough to talk is the right pace\"), once it's clear. evidence: explained (they put it in their own words), applied (they used it in a step) or recalled (they brought back an earlier one, asked or not): then use its exact text from the state.",

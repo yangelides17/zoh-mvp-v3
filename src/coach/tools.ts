@@ -163,6 +163,8 @@ const schemas = {
       in_the_way: optionalText(200),
       went_well: optionalText(200),
       differently: optionalText(200),
+      can_do: optionalText(200),
+      gaps: optionalText(200),
       take: text(300),
       day: z.enum(["today", "yesterday"]).optional(),
     })
@@ -431,7 +433,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
     input_schema: {
       type: "object",
       properties: {
@@ -440,6 +442,8 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         in_the_way: { type: "string" },
         went_well: { type: "string" },
         differently: { type: "string" },
+        can_do: { type: "string" },
+        gaps: { type: "string" },
         take: { type: "string" },
         day: { type: "string", enum: ["today", "yesterday"] },
       },
@@ -1037,7 +1041,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "save_reflection": {
-      const { summary, how_it_went, in_the_way, went_well, differently, take, day } = input as z.infer<typeof schemas.save_reflection>;
+      const { summary, how_it_went, in_the_way, went_well, differently, can_do, gaps, take, day } = input as z.infer<typeof schemas.save_reflection>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
       // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
@@ -1049,6 +1053,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         // #157: what went well and what they'd do differently stay once said, for the next step and the console.
         ...(went_well ? { wentWell: went_well } : {}),
         ...(differently ? { differently } : {}),
+        // #160: likewise what it shows they can now do, and gaps.
+        ...(can_do ? { canDo: can_do } : {}),
+        ...(gaps ? { gaps } : {}),
         coachTake: take,
         updatedAt: at,
       };
@@ -1063,6 +1070,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           inTheWay: in_the_way ?? null,
           wentWell: went_well ?? null,
           differently: differently ?? null,
+          canDo: can_do ?? null,
+          gaps: gaps ?? null,
           coachTake: take,
           updatedAt: at,
         })

@@ -1064,6 +1064,8 @@ describe("the Step log card's reflection sections (#93)", () => {
     inTheWay: null,
     wentWell: null,
     differently: null,
+    canDo: null,
+    gaps: null,
     coachTake: null,
     nextReason: null,
     createdAt: new Date(0),
@@ -1090,6 +1092,12 @@ describe("the Step log card's reflection sections (#93)", () => {
     const both = stepLogSections(view({ wentWell: "Phone in the other room", differently: "Start before dinner" }), [], "t1");
     expect(both).toContain("What went well:</span> Phone in the other room");
     expect(both).toContain("Would do differently:</span> Start before dinner");
+    // #160: what this step shows they can now do, and gaps to work on later, only when saved.
+    expect(html).not.toContain("Can now do");
+    expect(html).not.toContain("Gaps:");
+    const learned = stepLogSections(view({ canDo: "Read a chapter in one sitting", gaps: "Loses the thread in long dialogue" }), [], "t1");
+    expect(learned).toContain("Can now do:</span> Read a chapter in one sitting");
+    expect(learned).toContain("Gaps:</span> Loses the thread in long dialogue");
   });
 
   it('says "None" when empty, "not recorded" for days from before, and shows what got in the way on a missed day', () => {

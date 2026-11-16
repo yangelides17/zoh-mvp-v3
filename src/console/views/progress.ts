@@ -140,6 +140,9 @@ export function stepLogSections(view: StepDayView, days: StepDayView[], testerId
     day.wentWell ? line("What went well", esc(day.wentWell)) : "",
     offDay ? line("What got in the way", day.inTheWay ? esc(day.inTheWay) : none) : "",
     day.differently ? line("Would do differently", esc(day.differently)) : "",
+    // #160: what the step shows they can now do, and gaps to work on later, when saved.
+    day.canDo ? line("Can now do", esc(day.canDo)) : "",
+    day.gaps ? line("Gaps", esc(day.gaps)) : "",
     line("ZOH's take", day.coachTake ? esc(day.coachTake) : none),
     line("Next step", nextHtml),
   ].join("")}</div>`;

@@ -526,7 +526,10 @@ function recentLines(s: CoachState, plan: Plan): string[] {
   const lines: string[] = [];
   // Each day's step and how it went, so the next step builds on them (#76).
   const recent = s.recentDays.slice(0, 7).map((d) => {
-    const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`, d.reflection && `reflection: ${d.reflection}`].filter(Boolean).join("; ");
+    // #160: gaps, for a later step to take on; what they can now do stays off the sheet (the recap's "can do" is applied or recalled lessons only).
+    const how = [d.note && `they said: ${d.note}`, d.proofSeen && `proof: ${d.proofSeen}`, d.reflection && `reflection: ${d.reflection}`, d.gaps && `gaps: ${d.gaps}`]
+      .filter(Boolean)
+      .join("; ");
     // #73: a time moved for that day only, so "7:30 tonight" in yesterday's texts isn't read as today's.
     const moved = d.movedTime ? `, moved to ${d.movedTime} for that day only` : "";
     return `- ${dayName(d.date)}, ${STATUS_LABELS[d.status!]}${moved}: ${d.step ? `"${d.step}"` : "the plan's step"}${how ? ` (${how})` : ""}`;
