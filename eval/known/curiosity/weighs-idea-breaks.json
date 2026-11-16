@@ -1,0 +1,21 @@
+{
+  "id": "weighs-idea-breaks",
+  "rule": "weighs-idea",
+  "expect": "fail",
+  "why": "Their idea (scrolling the phone in bed) works against their bedtime goal, and ZOH builds it straight in without a word on why or anything better.",
+  "seed": {
+    "name": "Rosa",
+    "goal": "bedtime",
+    "phase": "active",
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "history": [
+      { "from": "zoh", "text": "Night 4 done, Rosa. Lights out by 10:45 again tonight." }
+    ],
+    "plan": { "step": "In bed with the phone down and lights off by 10:45 pm", "place": "your bedroom", "time": "22:45", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "photo", "reason": "Same time every night is what resets your sleep.", "minutes": 5 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "I keep lying there awake. thinking I'll read on my phone in bed for half an hour first to wind down" },
+    { "from": "zoh", "text": "Love that. New version: in bed at 10:15, 30 minutes of reading on your phone, lights out by 10:45. Work for you?" },
+    { "from": "tester", "text": "yep" }
+  ]
+}

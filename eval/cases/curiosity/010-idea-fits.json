@@ -1,0 +1,41 @@
+{
+  "id": "idea-fits",
+  "suite": "capability",
+  "title": "Their idea fits their goal (stretching after the run): ZOH says why it fits and builds it in, with no needless pushback",
+  "origin": "#201 (Yanni's notes from the #157 grader check): weigh their idea, the contrast case that catches pushing back on everything",
+  "seed": {
+    "name": "Dev",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "running", "where": "the park loop", "when": "7 am", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Kalimera Dev! Two laps of the park loop at 7, about 25 min, photo at the gate after. You in?" }
+    ],
+    "plan": {
+      "step": "Two laps of the park loop, easy pace",
+      "place": "the park loop",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a photo at the park gate after",
+      "reason": "Easy laps every morning build the base for a 5k in the spring.",
+      "destination": "run a 5k in the spring",
+      "minutes": 25,
+      "started_days_ago": 12
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "Two laps of the park loop, easy pace" },
+      { "days_ago": 2, "status": "done", "step": "Two laps of the park loop, easy pace" },
+      { "days_ago": 3, "status": "done", "step": "Two laps of the park loop, easy pace" }
+    ]
+  },
+  "testerLines": [
+    "in. my calves were tight after every run this week though, I want to add 5 min of stretching after each run from now on",
+    "yes"
+  ],
+  "whatWentWrong": "New case (#201): weighing their idea must not turn into second-guessing a good one.",
+  "shouldHaveHappened": "ZOH backs the idea in a few words saying why it fits (tight calves after every run, and stretching after keeps them running toward the 5k), with no pushback, no list of alternatives and no lecture. It shows the new version (two laps of the park loop at 7, then 5 minutes of stretching, about 30 minutes in all, photo at the gate) and asks if it works as their usual plan from now on. After \"yes\" it saves it as a lasting change and confirms in a line; today's run at 7 stays clear.",
+  "startTime": "06:15",
+  "timeZone": "America/New_York"
+}

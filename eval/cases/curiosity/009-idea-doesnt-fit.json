@@ -1,0 +1,42 @@
+{
+  "id": "idea-doesnt-fit",
+  "suite": "capability",
+  "title": "Their idea works against their goal (reading on the phone in bed): ZOH says why, offers something better, and it's still their call",
+  "origin": "#201 (Yanni's notes from the #157 grader check): weigh their idea before accepting it",
+  "seed": {
+    "name": "Rosa",
+    "goal": "bedtime",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "history": [
+      { "from": "zoh", "text": "Night 4 done, Rosa. Lights out by 10:45 again tonight." },
+      { "from": "tester", "text": "on it" }
+    ],
+    "plan": {
+      "step": "In bed with the phone down and lights off by 10:45 pm",
+      "place": "your bedroom",
+      "time": "22:45",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "selfie in bed with the lights off",
+      "reason": "Same time every night is what resets your sleep.",
+      "minutes": 5,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "I keep lying there wide awake for ages though. thinking I'll read on my phone in bed for half an hour first to wind down",
+    "ok fair. I do have a paperback on my nightstand",
+    "yeah let's do that"
+  ],
+  "whatWentWrong": "New case (#201): ZOH tended to build any idea they offered straight in, even one that works against their goal.",
+  "shouldHaveHappened": "ZOH doesn't build the phone reading straight in. In a few warm words it says why it works against their goal (a screen in bed is the thing their phone-down step is there to stop, and it keeps them up), offers something that serves the goal better (a paper book, or reading before the phone goes away), and leaves the choice with them, without lecturing or arguing. After the paperback, it builds that in (in bed with the paperback and the phone away, lights out by 10:45) and asks if it works; on \"yeah let's do that\" it confirms in a line.",
+  "startTime": "19:30",
+  "timeZone": "America/New_York"
+}

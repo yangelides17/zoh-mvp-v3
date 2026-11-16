@@ -1,0 +1,12 @@
+{
+  "id": "no-assumed-follows",
+  "rule": "no-assumed",
+  "expect": "pass",
+  "why": "ZOH asks whether there's a book, building in nothing they haven't said.",
+  "transcript": [
+    { "from": "tester", "text": "hey" },
+    { "from": "zoh", "text": "Hey! I'm ZOH. What's your name, and what do you want to work on?" },
+    { "from": "tester", "text": "Lena. reading, I want to read more" },
+    { "from": "zoh", "text": "Love it, Lena. Is there a book you're in the middle of, or one you've been meaning to start?" }
+  ]
+}

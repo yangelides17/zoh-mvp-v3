@@ -1,0 +1,26 @@
+{
+  "id": "no-assumed-book",
+  "suite": "capability",
+  "title": "Onboarding for reading: ZOH asks whether there's a book, never which book they're in the middle of",
+  "origin": "#201 (Yanni's notes from the #157 grader check): \"Is there a book you're in the middle of?\", not \"What book are you in the middle of?\"",
+  "areaCode": "212",
+  "startTime": "18:00",
+  "seed": {
+    "name": "Lena",
+    "goal": "reading",
+    "phase": "onboarding",
+    "answers": {},
+    "history": [
+      { "from": "zoh", "text": "Hey! I'm ZOH, a coach that helps you turn what you want into small daily steps. What's your name, and what do you want to work on?" },
+      { "from": "tester", "text": "Lena. reading, I want to read more" }
+    ]
+  },
+  "testerLines": [
+    "honestly I haven't finished a book in like a year. I used to read a ton of fantasy as a kid",
+    "no, nothing right now",
+    "ooh maybe, I've heard good things about Mistborn"
+  ],
+  "whatWentWrong": "New case (#201): questions like \"What book are you in the middle of?\" build in a guess, so they have to correct ZOH or play along.",
+  "shouldHaveHappened": "Every question ZOH asks builds in nothing they haven't said: it asks whether there's a book (\"Is there a book you'd want to start with?\", \"anything on your shelf calling you?\"), never which book they're reading now, what they're in the middle of, or what they read last night. After \"nothing right now\" it helps them find a way in from what they said (fantasy), without guessing about them. Onboarding continues as usual, one question at a time.",
+  "timeZone": "America/New_York"
+}

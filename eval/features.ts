@@ -606,6 +606,21 @@ export const FEATURES: Record<string, FeatureDef> = {
         label:
           "Reads as a conversation with someone who cares, not an interrogation. Dragging means more questions after they've signalled they're done (\"that's it\", \"nah\", a thumbs up, one-word replies to two questions in a row) or questions with no new purpose; gently following a real signal that opens something up is not dragging, even past an \"idk\". Once they're done or say what they'll do, it moves to the step; rushed or done gets let go",
       },
+      // #201: Yanni's notes from the #157 grader check.
+      {
+        id: "weighs-idea",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "When they offer their own idea for the step or plan, ZOH weighs it against their goal before building it in: a few words on why it fits, or why it doesn't and something that serves the goal better, and the choice stays theirs. Building in an idea that works against their goal without a word fails; so does pushing back on one that fits, or arguing past one response",
+      },
+      {
+        id: "no-assumed",
+        scope: "text",
+        group: "conversation",
+        label:
+          "A question builds in nothing they haven't said and ZOH doesn't know (\"What book are you in the middle of?\" when they never said they're reading one fails; \"Is there a book you're in the middle of?\" passes). Asking about something they did mention is fine",
+      },
       { id: "short", scope: "text", group: "style", label: "Short: one to three sentences, at most one question, at the end; a text that shows a plan or a step can run to about 8 short lines" },
       {
         id: "natural",

@@ -1,0 +1,22 @@
+{
+  "id": "weighs-idea-follows",
+  "rule": "weighs-idea",
+  "expect": "pass",
+  "why": "ZOH says in a few words why the phone works against the goal, offers a paper book instead, and leaves it to them; then builds in what they chose.",
+  "seed": {
+    "name": "Rosa",
+    "goal": "bedtime",
+    "phase": "active",
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "history": [
+      { "from": "zoh", "text": "Night 4 done, Rosa. Lights out by 10:45 again tonight." }
+    ],
+    "plan": { "step": "In bed with the phone down and lights off by 10:45 pm", "place": "your bedroom", "time": "22:45", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "photo", "reason": "Same time every night is what resets your sleep.", "minutes": 5 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "I keep lying there awake. thinking I'll read on my phone in bed for half an hour first to wind down" },
+    { "from": "zoh", "text": "Winding down is smart, Rosa. The phone's the catch though: its screen keeps you wired, which is what the phone-down step is fixing. Got a paper book you could read instead?" },
+    { "from": "tester", "text": "yeah I have one on my nightstand" },
+    { "from": "zoh", "text": "Perfect. In bed at 10:15 with the book, phone across the room, lights out by 10:45. Work for you?" }
+  ]
+}
