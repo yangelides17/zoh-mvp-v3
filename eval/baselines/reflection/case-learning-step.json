@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:learning-step",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "421a4bf7ad2e",
-    "voice": "fbc3a37c5b97",
+    "checks": "dcdb8456a5e2",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "b78dd1494726"
   },
@@ -88,14 +88,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end; celebrates the voice note and asks what stuck without quizzing."
+                "borderline": true,
+                "reason": "Fragmented into about four short beats, but one question sits at the end and it stays brief."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm with an emoji as punctuation, but 'Nice work' is mild for Pushy-level energy."
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation and a real celebration of the voice note."
               }
             ]
           },
@@ -112,7 +112,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no overfamiliarity or emoji row."
+                "reason": "Warm and plain, with no overfamiliarity or row of emoji."
               }
             ]
           },
@@ -129,7 +129,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, with no affectionate language."
+                "reason": "Warm acknowledgment of the stretch idea with no overfamiliarity."
               }
             ]
           },
@@ -139,14 +139,20 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Four sentences, but it proposes a step, which can run longer, and ends with one question."
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the recall is an instruction rather than a second question."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks her to check the brush-then-stretch stack inside the next-step text, which feels natural and purposeful."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and plain, with no overfamiliar language."
+                "reason": "Brief, warm and confident with no emoji or affection."
               }
             ]
           }
@@ -156,64 +162,64 @@
             "rule": "reflection-ask",
             "pass": true,
             "borderline": false,
-            "reason": "After the voice note proof, ZOH opened the reflection with one question about what stuck and did not chase it later."
+            "reason": "After the voice note with no word on how it went, ZOH opened with one question about what stuck and suggested a voice note."
           },
           {
             "rule": "follow-ups",
-            "pass": false,
+            "pass": true,
             "borderline": false,
-            "reason": "After 'habit stacking', ZOH asked how the 20 minutes felt instead of how she'd use the stack; the question ignores what she said."
+            "reason": "Each follow-up came from her own words, one question per text, and the stretch idea was picked up."
           },
           {
             "rule": "learning-ask",
             "pass": true,
-            "borderline": false,
-            "reason": "ZOH asked naturally what stuck, without a quiz or the answer in the question."
+            "borderline": true,
+            "reason": "It asked what stuck, but the next question was about feelings and the stacking idea was not probed on how she would use it."
           },
           {
             "rule": "stops-right",
             "pass": true,
             "borderline": true,
-            "reason": "After the flat 'ok cool' it did not push a third time, but it still asked a question in the same text."
+            "reason": "After flat replies it wrapped up without a third push, though the 20-minute question was a light extra."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved takeaway and reflection match what she said about habit stacking and the stretch idea."
           },
           {
             "rule": "thin-answer",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "'ok cool' is a thin answer, and ZOH moved to the next step without a proof-grounded follow-up about what was behind it."
-          },
-          {
-            "rule": "goes-deeper",
-            "pass": false,
-            "borderline": true,
-            "reason": "It did not go deeper on the stacking idea before moving on; the only follow-up was about session length."
+            "reason": "Her 'ok cool' got a confirmation and no probe, which matches the regression expectation but is arguably thin."
           },
           {
             "rule": "next-step",
             "pass": true,
             "borderline": false,
-            "reason": "It acknowledges the stretch idea, defines chapter 5 on the couch at 8 pm, and asks if it works after showing it."
+            "reason": "Acknowledged her idea, defined chapter 5 on the couch at 8 pm, and asked if it works."
           },
           {
             "rule": "plan-proof",
             "pass": true,
             "borderline": false,
-            "reason": "The voice recap fits a reading step, and the proof is a voice note."
+            "reason": "Voice recap fits the reading goal and is a voice note, not typed text."
           },
           {
             "rule": "lesson-reused",
             "pass": true,
             "borderline": false,
-            "reason": "The next step builds in the brush-teeth-then-stretch stack from habit stacking."
+            "reason": "Built the habit-stacking idea into tomorrow's recap."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "Expected a specific question on how she'd use habit stacking and a no-question confirmation after 'ok cool'; ZOH asked about session length and ended with 'Work for you?'."
+            "reason": "ZOH 2 asked about feelings instead of a specific habit-stacking question on how she'd use it, and ZOH 3 went to a duration question before the next step."
           }
         ],
-        "summary": "ZOH counted the voice note and asked naturally what stuck, and its step proposal was fully defined and built in her stacking idea. It missed the core of the regression case: it never followed up on how she'd use habit stacking, asked a session-length question instead, and ended with a question after 'ok cool'."
+        "summary": "ZOH counted the voice note, asked what stuck, and built her stretch idea into the next step with a clear, fully defined plan and a question that asks if it works. It missed the scripted specific follow-up on habit stacking, asking about feelings first and then a duration check, though the 'ok cool' handling and step turn were right."
       }
     }
   ]

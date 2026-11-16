@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:rich-no-fishing",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "d360149bda87",
-    "voice": "fbc3a37c5b97",
+    "checks": "60f8efa30518",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "351d28f91a14"
   },
@@ -76,22 +76,16 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs about six lines with a proposal and two questions-in-spirit; the 'hardest part' question sits mid-text and the proposal is longer than a short text should be."
-              },
-              {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm with 'strong day 3' and one 💪 used as punctuation; not overfamiliar."
+                "reason": "Warm and energetic, with one emoji used as punctuation and no affectionate language."
               },
               {
-                "rule": "no-saved-dead-end",
+                "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation; it carries a reflection and a next step."
+                "borderline": true,
+                "reason": "Runs about six lines and includes a plan change, so it sits within the longer allowance, but it also carries an extra question about tomorrow."
               }
             ]
           },
@@ -99,16 +93,16 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
-              },
-              {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no hearts or affection; emoji-free and reads like a coach."
+                "reason": "Warm and sincere, with no emoji row or overfamiliarity."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
               }
             ]
           },
@@ -116,53 +110,77 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
-              },
-              {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, appropriate pushy-level energy for a confirm line."
+                "reason": "Calm and warm, no emoji row, no affection."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "After 'love it' it adds a new question, 'Does that work for you?', when it should only confirm in a line."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "goes-deeper",
+            "rule": "reflection-ask",
             "pass": true,
-            "borderline": true,
-            "reason": "ZOH 2 goes deeper on the sleep they mentioned, but ZOH 1's 'hardest part' question was about the upcoming step rather than something they said."
+            "borderline": false,
+            "reason": "After the voice-note proof it celebrated and opened with a question, and it did not chase the reflection later."
           },
           {
             "rule": "follow-ups",
             "pass": true,
             "borderline": true,
-            "reason": "ZOH 2 follows the sleep remark with one question; ZOH 1's question is tied to lunges but was asked before anything was agreed."
+            "reason": "It followed up on the sleep remark with one question, though its first question about tomorrow's hardest part was forward-looking rather than about what they said."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "The proof already covered what they did and noticed (not out of breath, 12 minutes), so no extra learning question was needed."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "The saved reflection matches what the tester said: felt great, not out of breath, 12 min, wants lunges, sleeping better."
           },
           {
             "rule": "stops-right",
             "pass": false,
-            "borderline": true,
-            "reason": "A rich reflection got redundant questions: ZOH 1's hardest-part question and ZOH 2's sleep question, then ZOH 3 asked for agreement."
+            "borderline": false,
+            "reason": "After 'love it' ZOH asked 'Does that work for you?' instead of only confirming in one line."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 2 asked one deeper question about the sleep they mentioned, falling asleep faster or waking more rested."
           },
           {
             "rule": "next-step",
             "pass": false,
             "borderline": true,
-            "reason": "The step is fully defined and uses lunges and 6:30, but it was pushed in ZOH 1 as already set and ZOH 3 asks agreement after the tester said 'love it'."
+            "reason": "The next step was proposed in the first text before the sleep question was answered, and the final text asked for agreement after a 'love it' rather than confirming."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "The proof stays a voice note, with a length of about 20 minutes that fits the step."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "ZOH 1 saved and announced the lasting plan change ('Lunges are in. From tomorrow...') before the tester agreed, and ZOH 3 added a new question 'Does that work for you?' after 'love it' instead of a plain confirmation."
+            "reason": "The lasting plan was changed to version 2 with a full weekly schedule before the tester said yes to it, and the reflection was not followed through as the scripted case required."
           }
         ],
-        "summary": "ZOH celebrated the voice note and went deeper on the sleep remark, but it changed the lasting plan before the tester agreed to the new version. After 'love it' it asked a new 'Does that work for you?' question instead of simply confirming, so the regression case fails."
+        "summary": "ZOH counted the voice note, celebrated it, and followed up well on the sleep remark, but it proposed the bigger step before the reflection was finished. It also saved the lasting plan change before a yes and added an unneeded question after the tester's 'love it'."
       }
     }
   ]

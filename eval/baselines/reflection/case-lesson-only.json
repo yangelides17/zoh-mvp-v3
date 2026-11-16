@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:lesson-only",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "673f3b26a32f",
-    "voice": "fbc3a37c5b97",
+    "checks": "1bf9e6153c97",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "8baff5374aa1"
   },
@@ -88,14 +88,14 @@
               {
                 "rule": "short",
                 "pass": false,
-                "borderline": false,
-                "reason": "Runs about six sentences and asks two questions ('How did this one feel?' and 'Was it easy to write...?'), breaking the one-to-three sentence, one-question limit."
+                "borderline": true,
+                "reason": "Runs about four or five sentences before its question, over the one-to-three-sentence limit, though it has one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with one fire emoji as punctuation; no affection or emoji row."
+                "reason": "Warm, energetic and specific; one emoji used as punctuation."
               }
             ]
           },
@@ -105,14 +105,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Three sentences with one either/or question at the end, which reads as one question."
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no overfamiliarity or emoji."
+                "reason": "Warm and sincere, no overfamiliarity or emoji row."
               }
             ]
           },
@@ -123,13 +123,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "A plan-showing text of about six short lines with one question at the end, within the allowed length."
+                "reason": "A plan text may run about 8 lines; this is a short intro, four bullets and a closing ask, with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and specific, but calmer than pushy-level energy; no emoji or affection issues."
+                "borderline": false,
+                "reason": "Energy and tone fit Pushy level; no emoji row."
               }
             ]
           },
@@ -140,80 +140,50 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question, which is what the confirmation should be."
+                "reason": "Two short sentences with no question after the sounds-good confirmation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Brief, warm, one flexing emoji as punctuation."
+                "reason": "Warm and firm, one emoji as punctuation."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "reflection-ask",
+            "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Opens the reflection after the screenshot-style proof with a question about how writing felt, though it asks two questions in one turn."
+            "reason": "Counts the voice note, celebrates the lesson, follows the awkwardness with one question, proposes a fully defined step and asks if it works; borderline on text length and the slightly invented 'your two gyms'."
+          },
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After proof with no word on how it went, it opened with one feelings question and never chased it later."
           },
           {
             "rule": "follow-ups",
             "pass": true,
             "borderline": true,
-            "reason": "Follow-ups tie to Riley's words ('awkward', 'guessing'), but the first text asks two questions, against one per text."
-          },
-          {
-            "rule": "learning-ask",
-            "pass": true,
-            "borderline": false,
-            "reason": "Riley already stated the lesson, so no need to ask what stuck; the lesson was acknowledged without a quiz."
-          },
-          {
-            "rule": "stops-right",
-            "pass": true,
-            "borderline": false,
-            "reason": "Riley's 'sounds good' ends the exchange, and ZOH closes with no new question."
+            "reason": "Follow-ups tie to the lesson and the awkward writing; the 'your two gyms' detail in the proposal goes beyond what Riley said."
           },
           {
             "rule": "thin-answer",
             "pass": true,
-            "borderline": true,
-            "reason": "'Kind of awkward' got a proof-grounded follow-up about what would help, though 'writing for someone you haven't talked to' interprets it slightly."
-          },
-          {
-            "rule": "goes-deeper",
-            "pass": true,
             "borderline": false,
-            "reason": "The named difficulty got one question before the proposal, and reassurance came after Riley's answer."
+            "reason": "Riley's answer was rich ('felt kind of awkward... like I was guessing'), so it was followed with one proof-grounded question before the next step."
           },
           {
             "rule": "next-step",
             "pass": true,
             "borderline": true,
-            "reason": "Acknowledges Riley's insight, shows a fully defined Tuesday 7 pm desk step, and asks 'Work for you?' only after; 'your two gyms' is not in the known facts."
-          },
-          {
-            "rule": "plan-proof",
-            "pass": false,
-            "borderline": true,
-            "reason": "Proof is a voice note reading a message for a writing goal, with no reason given and no alternative offered."
-          },
-          {
-            "rule": "lesson-reused",
-            "pass": false,
-            "borderline": true,
-            "reason": "The next step doesn't reference the discovery-call lesson ('start with their problem') even though it would fit naturally."
-          },
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "Counts the voice note, praises the lesson specifically, asks one awkwardness question, proposes a fully defined desk 7 pm 15-min step, and confirms after 'sounds good' without a new question; the first text's double question is the flaw."
+            "reason": "Acknowledges the guessing and the need for an owner, then shows the full step and asks only after it is laid out; 'from your two gyms' is not in what they said."
           }
         ],
-        "summary": "ZOH handled the regression well: it counted the proof, celebrated the lesson, followed up on the awkwardness, and proposed a fully defined next step that used Riley's words before asking for agreement. The main misses were the first text running long with two questions, and the proposal missing a reason and alternative for its proof and not reusing the earlier lesson."
+        "summary": "ZOH counted the voice note, celebrated the lesson specifically, and followed the awkward feeling with one question before proposing a fully defined step for tomorrow at 7 pm that builds on Riley's wish to talk to a real owner. Its weak spots are a first text a little over the length limit and a detail in the proposal ('your two gyms') that Riley never mentioned."
       }
     }
   ]

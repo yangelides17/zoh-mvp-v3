@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:reflection-engaged",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-16T22:11:03.764Z",
+  "branch": "feature/160-proof-of-understanding",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "39a92d146c53",
-    "voice": "fbc3a37c5b97",
+    "checks": "cc37fe01edde",
+    "voice": "c0dfbb42fd2a",
     "instructions": "c7348af58300",
     "script": "bb71770d30f2"
   },
@@ -108,14 +108,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "borderline": true,
+                "reason": "Four short sentences with one question at the end; slightly over the three-sentence norm but reads tight."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype with LFG and a single book emoji, warm and not overfamiliar."
+                "reason": "Warm, hype with a real win, one emoji as punctuation."
               }
             ]
           },
@@ -126,13 +126,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end, tied to the buzzing phone."
+                "reason": "Three sentences with one closing question about the buzzing phone."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific, no emoji row or affection."
+                "reason": "Warm and specific, no overfamiliarity or emoji row."
               }
             ]
           },
@@ -142,14 +142,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "A fully defined plan proposal runs about five sentences with one closing question, within the plan-text allowance."
+                "borderline": false,
+                "reason": "Proposal text with one question at the end, within the allowed longer length for presenting a plan."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain, warm and direct, with no emoji or affection."
+                "reason": "Measured and warm, no pressure beyond the pushy level."
               }
             ]
           },
@@ -160,13 +160,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences and no question, which is allowed."
+                "reason": "Restates the agreed setup in a few sentences with no question, which fits a settled plan."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Encouraging with one emoji as punctuation."
+                "reason": "Warm and energetic with one emoji at the end."
               }
             ]
           },
@@ -177,13 +177,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Two sentences, one question at the end about where the sticky note went."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the sticky note with one emoji, sincere and not overfamiliar."
+                "reason": "Celebrates the note sincerely with one emoji as punctuation."
               }
             ]
           },
@@ -194,32 +194,44 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms the set plan in short lines with no question after her OK."
+                "reason": "Two sentences confirming tomorrow's setup with no new question, as required after agreement."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm close with one emoji at the end."
+                "reason": "Warm close with one emoji, not overfamiliar."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "follow-ups",
-            "pass": true,
-            "borderline": false,
-            "reason": "Each follow-up is tied to habit stacking, the buzzing phone or the sticky note, with one question at a time and no re-asking."
-          },
-          {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Counted proof and celebrated without a reflection ask, and asked deeper questions before proposing a fully defined chapter 5 step. It proposed after only one buzzing follow-up and never asked how the reading felt, and it treated her charger idea as settled without asking if it works."
+            "reason": "Counts the voice note as proof and celebrates without a reflection ask; follow-ups target habit stacking, buzzing and the sticky note, then it proposes chapter 5 fully defined with the kitchen-charger cue and confirms 'ok that works' with no question. The gap question on how the reading felt was only covered indirectly."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up builds on something Maya said, one question per text, and none asks what she already told it."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The chapter 5 proposal uses the buzzing and dishes cue and is asked only after it is shown in full."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Wraps up after the sticky note thread settles and ends on the agreed setup without pushing further."
           }
         ],
-        "summary": "ZOH counted the voice note, celebrated it, and asked specific follow-ups about habit stacking, the buzzing phone and the sticky note, one question at a time. It then proposed a fully defined chapter 5 step using her dishes and kitchen-charger cues and closed cleanly after her OK, though it moved to the proposal a little early and skipped the gap question about how the reading felt."
+        "summary": "ZOH handled the first voice note well: it counted and celebrated the proof, followed up on habit stacking, the buzzing phone and the sticky note one question at a time, then proposed a fully defined chapter 5 step built on the charger cue. After 'ok that works' it confirmed in one line with no new question, meeting the regression case, with the gap-on-reading question only covered indirectly."
       }
     }
   ]
