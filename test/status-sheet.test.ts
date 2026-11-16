@@ -173,6 +173,9 @@ describe("the status sheet's code-guaranteed facts, each when it applies (#199)"
     // #103, #199: the tally names its days and the rest days between them, so "in a row" or "every day" can be checked
     // against the sheet itself (the eval caught "four step days in a row" across rest days once the order left it).
     expect(sheet({ ...sunday, week: week() })).toContain("This week: 1 done in full (Mon), 0 smaller, 1 missed (Tue), today included; rest days: Sun.");
+    // Days before day 1 weren't rest days: the plan hadn't started.
+    const firstWeek = { ...sunday, plan: plan({ startDate: "2026-11-11" }), week: week({ days: [day({ date: "2026-11-11", status: "done" })] }) };
+    expect(sheet(firstWeek)).toContain("This week: 1 done in full (Wed), 0 smaller, 0 missed, today included; rest days: Sun.");
     const lookback = sheet({ ...sunday, week: week(), nudgeMoment: "lookback" });
     expect(carries(lookback)).toContain("- the week's recap (WEEK LOOK-BACK below; the app records it)");
     expect(lookback).toContain("Recap: in this text.");

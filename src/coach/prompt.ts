@@ -215,7 +215,8 @@ const tally = (w: WeekLookback, plan: Plan) => {
     return `${days.length} ${name}${days.length ? ` (${days.join(", ")})` : ""}`;
   };
   const rest: string[] = [];
-  for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!isStepDay(plan, d)) rest.push(short(d));
+  // Days before day 1 weren't rest days: the plan hadn't started.
+  for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (d >= (plan.startDate ?? d) && !isStepDay(plan, d)) rest.push(short(d));
   const between = rest.length ? `; rest days: ${rest.join(", ")}` : "";
   return { counts: `${count("done", "done in full")}, ${count("done_reduced", "smaller")}, ${count("missed", "missed")}`, rest: between };
 };
