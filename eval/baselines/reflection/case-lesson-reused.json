@@ -1,0 +1,114 @@
+{
+  "feature": "reflection",
+  "id": "case:lesson-reused",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "e5e3577d6001",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "646995a05112"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:lesson-reused",
+        "kind": "case",
+        "id": "lesson-reused",
+        "title": "A lesson from three days ago is built into today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] talked to the new guy on my team at lunch, it was fine but kinda died after 2 min",
+          "at": "2026-11-01T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two minutes with someone new is a real start, Sofia. We'll build on it tomorrow.",
+          "at": "2026-11-01T23:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Sofia! Friday you found that following up on what someone just said keeps a chat going, and yesterday's died at 2 minutes. So at 12:30 today, open with \"how's your week going?\", then ask a follow-up about whatever they say, and try to push past 2 minutes. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yeah ok I'm in",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Sofia. 12:30, follow-up questions, go past 2 minutes. Send me a quick voice note after to tell me how it went.",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Asking a follow-up about what they just said kept it going way longer\nReflection for 2026-11-01: It was fine but died after 2 minutes\nStep set for 2026-11-02, agreed: At lunch, ask one coworker a follow-up question about something they just told you (start with \"how's your week going?\", then follow what they say). Aim to keep it going past 2 minutes. At 12:30, about 10 min, at work.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings back Friday's follow-up lesson inside the morning kickoff as part of the step, not as a quiz or separate text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about four sentences with one closing question, slightly over the one-to-three limit but close."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with a name and no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, which is fine after the tester's agreement."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief ('Love it, Sofia.') without emoji or overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Builds the Friday lesson into the kickoff and asks one thing, but never states how long the step is, and the reply to 'yeah ok I'm in' restates the step (12:30, follow-up questions, past 2 minutes)."
+          }
+        ],
+        "summary": "ZOH correctly brought Friday's follow-up lesson back into the kickoff and asked for one commitment, which is the core of this case. It fell short on the fully defined step (no length given) and then restated the step in its reply to the tester's yes instead of answering in a short line."
+      }
+    }
+  ]
+}

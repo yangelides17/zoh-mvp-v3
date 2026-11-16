@@ -1,0 +1,196 @@
+{
+  "feature": "onboarding",
+  "id": "case:form-in-disguise",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "90b58de5a47e",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "37d66282e38e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:form-in-disguise",
+        "kind": "case",
+        "id": "form-in-disguise",
+        "title": "Welcome text reads like a form",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me anytime how you want coaching (\"chill out\", \"push me harder\").\n\nWhat's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Alex. Exercise, wanna get back to the gym",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Alex. What did you usually do back when you were going to the gym?",
+          "at": "2026-11-02T23:30:35.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Intro and stop/style lines plus the question fit in two sentences before the list, which is allowed for the exempt first text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the bullets are plain • lines."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly, energetic opener with an exclamation and no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for name and goal, with the goal list, as the first text should."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing was given yet, so nothing is re-asked."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no factual claims beyond what ZOH does."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks no wake/sleep, pushiness or city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Let's go, Alex.\" is warm and energetic without overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they used to do at the gym, which fits getting back to the gym."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing already answered; goal and name are not repeated."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Alex said (exercise, gym)."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep or pushiness question; a single question, not a numbered list."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, the small daily step, stop anytime, and changing coaching; asks name and goal with the ten-item list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Name and goal are asked once and not asked again in the excerpt."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells them they can change coaching anytime with examples."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Only two ZOH texts, well within the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "No numbered question list; one intro text with name, goal and starters, then one gym-fitting question after Alex answers."
+          }
+        ],
+        "summary": "ZOH fixed the regression: the opener is a single text with the intro, stop and style lines, a name-and-goal ask and the ten starters ending in \"Not sure?\", and after Alex said gym it asked one question about past gym routine instead of a numbered list. Nothing in the excerpt breaks a rule, though it doesn't confirm the goal is Get fitter before asking."
+      }
+    }
+  ]
+}

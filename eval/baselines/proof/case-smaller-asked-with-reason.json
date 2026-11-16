@@ -2,27 +2,27 @@
   "feature": "proof",
   "id": "case:smaller-asked-with-reason",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:15:46.945Z",
-  "branch": "feature/196-prompt-groundwork",
+  "storedAt": "2026-11-16T19:20:07.488Z",
+  "branch": "feature/199-judgment-over-rules",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "b115cb923a22",
-    "voice": "14110ca5ae91",
+    "voice": "fbc3a37c5b97",
     "instructions": "c7348af58300",
     "script": "53cac30ccad4"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:smaller-asked-with-reason#1",
+        "key": "case:smaller-asked-with-reason",
         "kind": "case",
         "id": "smaller-asked-with-reason",
-        "suite": "regression",
         "title": "Asked for a 5-minute version with a reason: set at once, spelled out in that text",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "17:10",
-        "timeZone": "America/New_York"
+        "timeZone": "America/New_York",
+        "suite": "regression"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Sorry your kid's sick, Jordan. Taking care of them comes first, and you're still showing up for the book. Here's the smaller version for today:\n\n• Write just the opening of Theo coming back to Mara's bar, about 75 words\n• In Notes, right now, 5 minutes\n• Send me a screenshot when you're done\n\nSkip the polish. Get Theo through the door and stop when the timer does 💪",
+          "text": "Sick kid at home, so yes. Here's the small version, Jordan.\n\n• Open Notes and write just the opening of Scene 4. Theo comes back to Mara's bar.\n• About 60 words, 4 or 5 sentences. Don't worry about polish.\n• Set a 5-minute timer and start now.\n• Send me a screenshot of it in Notes when you're done.\n\nA small version still counts and keeps your streak alive. Go take care of your kiddo, then knock this out. 💪",
           "at": "2026-11-02T22:10:07.000Z"
         }
       ],
@@ -55,114 +55,28 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms what (opening of Theo at the bar), how much (about 75 words, 5 minutes), when (right now) and proof (screenshot) in one text."
-              },
-              {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a screenshot as proof, with no typed text offered."
+                "reason": "Names only a screenshot of the Notes writing as proof, with no typed text offered as proof."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Spells out what (opening of Scene 4), how much (about 60 words, 5-minute timer), when (start now) and proof (screenshot); not just 'set'."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "The list is allowed, but the prose around it runs about five sentences, beyond the one-to-three limit."
+                "reason": "The bullet list is fine, but about four sentences sit outside it (opener and closing), over the three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and encouraging, not suspicious, with one emoji at the end and no emoji row."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "With a real reason (sick kid), no pushback; it sets a smaller version spelled out with what, how much, when and screenshot proof, not just 'it's set'."
-          },
-          {
-            "rule": "smaller-pushback",
-            "pass": true,
-            "borderline": false,
-            "reason": "The tester gave a real reason (kid home sick), so ZOH set the smaller version at once without pushing back."
-          }
-        ],
-        "summary": "ZOH handled the regression well: with a real reason it set a 5-minute version at once and spelled out the scene opening, the length, the timing and the screenshot proof, never saying only that it was set. The main miss is length, since the prose around the list runs past the one-to-three sentence limit."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:smaller-asked-with-reason#2",
-        "kind": "case",
-        "id": "smaller-asked-with-reason",
-        "suite": "regression",
-        "title": "Asked for a 5-minute version with a reason: set at once, spelled out in that text",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "17:10",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "zoh",
-          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
-          "at": "2026-11-02T21:07:00.000Z"
-        },
-        {
-          "from": "tester",
-          "text": "in",
-          "at": "2026-11-02T21:08:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "my kid's home sick and the full scene feels like too much today. can we make it easier, just 5 minutes? what's the smallest useful version I can do now?",
-          "at": "2026-11-02T22:10:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Sick kid at home, totally fair, Jordan. Here's the smallest useful version: right now, 5 minutes in Notes, write just the opening of Scene 4, Theo walking back into Mara's bar, about 60 words (a few sentences). Screenshot it when you're done and it counts. Go get it, then back to your kid 💪",
-          "at": "2026-11-02T22:10:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names only a screenshot of the Notes writing as proof, never typed text."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms what (opening of Scene 4), how much (about 60 words), when (right now, 5 minutes) and proof (screenshot) in one text."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs four sentences, one more than the three-sentence limit, though it has no question and stays brief."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and sincere with a single emoji as punctuation, no suspicion or accusation."
+                "reason": "Warm and sincere, acknowledges the sick kid without pushback, one emoji used as punctuation."
               }
             ]
           }
@@ -172,96 +86,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Honors the real reason with no pushback and sets a specific smaller piece with what, how much, when and screenshot proof, not just 'it's set'."
-          },
-          {
-            "rule": "smaller-pushback",
-            "pass": true,
-            "borderline": false,
-            "reason": "Tester gave a real reason (sick kid), so ZOH set the smaller version at once without pushing back."
+            "reason": "With a real reason (sick kid), ZOH doesn't push back, sets a smaller version in one text, and spells out what, how much, when and screenshot proof."
           }
         ],
-        "summary": "ZOH handled the regression well: with a real reason it set a concrete 5-minute opening for Scene 4 at once, spelled out what, how much, when and a screenshot proof, and never said only that it was set. The one miss is length, with four sentences in a text meant to run three at most.</br>"
-      }
-    },
-    {
-      "plan": {
-        "key": "case:smaller-asked-with-reason#3",
-        "kind": "case",
-        "id": "smaller-asked-with-reason",
-        "suite": "regression",
-        "title": "Asked for a 5-minute version with a reason: set at once, spelled out in that text",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "17:10",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "zoh",
-          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
-          "at": "2026-11-02T21:07:00.000Z"
-        },
-        {
-          "from": "tester",
-          "text": "in",
-          "at": "2026-11-02T21:08:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "tester",
-          "text": "my kid's home sick and the full scene feels like too much today. can we make it easier, just 5 minutes? what's the smallest useful version I can do now?",
-          "at": "2026-11-02T22:10:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Sick kid at home, totally fair, Jordan. Here's the smallest useful version:\n\n• Open Notes and set a 5-minute timer.\n• Write just the opening beat of Scene 4: Theo walking back into Mara's bar, about 80 words. Stop when the timer goes off.\n• Do it now or whenever the kid settles, anytime today.\n• Send me a screenshot of it in Notes.\n\nYou're keeping the thread alive, and that's what counts today. Can you grab 5 minutes soon?",
-          "at": "2026-11-02T22:10:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": true,
-                "reason": "Sets the 5-minute version with what (opening beat of Scene 4), how much (80 words) and proof, but the when is loose ('now or whenever the kid settles, anytime today') rather than a clear now."
-              },
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names only a screenshot of the Notes work as proof, with no typed text offered."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Outside the bullet list there are about four sentences, ending with one question, so it runs slightly over the one-to-three-sentence limit."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and sincere, acknowledges the sick kid, no suspicion or accusation, and no emoji row."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "Accepts the real reason with no pushback and spells out what, how much, proof and a timing, but it is a longer multi-line text and the timing is loose rather than now."
-          }
-        ],
-        "summary": "ZOH handled the regression well: it took the sick-kid reason at face value, offered a concrete 5-minute opening-beat version with a Notes screenshot as proof, and never said only that it was set. The main weaknesses are a looser 'when' than the 'now' the rule asks for and a text a bit longer than one short line."
+        "summary": "ZOH handled the regression well: it accepted the real reason and spelled out a smaller Scene 4 step with what to write, how long, when to start and a Notes screenshot as proof, never just saying it was set. Its one weak spot is length, with a few sentences outside the bullet list that push past the short-text limit."
       }
     }
   ]

@@ -1,0 +1,149 @@
+{
+  "feature": "commands",
+  "id": "case:yes-restart",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:12.402Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2d10941ce0a4",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "aa60659b5dcb"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:yes-restart",
+        "kind": "case",
+        "id": "yes-restart",
+        "title": "STOP, hey, then a clear yes: restart and confirm the next step and time",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "09:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! Page 61 tonight, nice. How did that chapter land?",
+          "at": "2026-11-01T18:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "good, slow start but it's picking up",
+          "at": "2026-11-01T18:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Same time tomorrow: 10 pages at 7 on the couch, photo of the page you stop on.",
+          "at": "2026-11-01T18:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "stop",
+          "at": "2026-11-02T14:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thank you very much. Noted. We will stop sending you messages.",
+          "at": "2026-11-02T14:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "hey",
+          "at": "2026-11-02T14:30:28.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam. Good to hear from you. Want to pick your reading goal back up? Dune, 10 pages a night, whenever you're ready.",
+          "at": "2026-11-02T14:30:35.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yes let's go again",
+          "at": "2026-11-02T14:30:56.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome back, Sam! We're on again: 10 pages of Dune tonight at 7 on the couch, photo of the page you stop on. I'm glad you're back.",
+          "at": "2026-11-02T14:31:03.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text, so the feedback rule does not apply beyond a non-issue; no violation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a feedback exchange; rule not triggered, no violation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a feedback exchange; rule not triggered, no violation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": false,
+            "reason": "No pause requested; STOP was an opt-out and was handled with a confirmation, not a pause."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "No can't-do-today text occurred in this exchange."
+          },
+          {
+            "rule": "restart-ask-once",
+            "pass": true,
+            "borderline": false,
+            "reason": "After STOP then 'hey', ZOH replied warmly and asked once about picking reading back up, with no restart."
+          },
+          {
+            "rule": "restart-yes-only",
+            "pass": true,
+            "borderline": false,
+            "reason": "Restart happened only after the clear yes; the reply confirmed 10 pages of Dune at 7 on the couch with photo proof."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Confirmation of STOP wording differs and the restart reply is reasonable, but ZOH's 'Thank you very much. Noted.' is stiff and the plan at 'tonight' is fine; the 'Welcome back' opener and 'I'm glad you're back' are acceptable, so the failure is mainly the stiff STOP reply."
+          }
+        ],
+        "summary": "ZOH handled the STOP, hey, and yes sequence without restarting early and asked once about restarting, matching the intended flow. The main weakness is the stiff STOP confirmation, which made the regression check borderline, while the restart message confirmed the step and time correctly."
+      }
+    }
+  ]
+}

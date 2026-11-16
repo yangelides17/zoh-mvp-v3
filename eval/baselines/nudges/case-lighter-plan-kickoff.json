@@ -1,0 +1,436 @@
+{
+  "feature": "nudges",
+  "id": "case:lighter-plan-kickoff",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:14:43.857Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "382344ef1053",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "d4b5c08786be"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:lighter-plan-kickoff#1",
+        "kind": "case",
+        "id": "lighter-plan-kickoff",
+        "suite": "capability",
+        "title": "On a temporary lighter plan: the kickoff asks for the lighter step, not the usual one",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "06:30",
+        "startDay": "fri",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "at my sister's wedding all weekend, can we go lighter till Monday?",
+          "at": "2026-11-05T21:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Course, Ana. 10 push-ups and 10 squats a day through Sunday, then back to the full 20 minutes Monday. Enjoy the wedding 💃",
+          "at": "2026-11-05T21:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Ana! Wedding weekend, day one. At 7, do 10 push-ups and 10 squats wherever you are, about 5 minutes, then send a selfie after as proof. You in?",
+          "at": "2026-11-06T11:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep, in my hotel room now",
+          "at": "2026-11-06T12:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hotel room reps, love it. Send the selfie when you're done 💪",
+          "at": "2026-11-06T12:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the lighter step (10 push-ups and 10 squats), where (wherever I am), and when (7 am)."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Kalimera Ana!\", a warm greeting with her name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; it frames the day as wedding weekend, day one."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four short sentences with a single question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "The only question is \"You in?\"; the 7 am time is restated as settled, not re-asked."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where, when, how long (about 5 minutes) and the proof required."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with no overfamiliarity and one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light, encouraging reply with no pressure."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words and one emoji at the end, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, casual and energetic, matching her short texting style."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats rather than 20 minutes, with no guilt or push, and her yes gets a short reply with no second question."
+          }
+        ],
+        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the reduced 10 push-ups and 10 squats at 7 am with no guilt or extra push, and it set the right proof. Her yes got a short, warm reply with no follow-up question, so the regression case passes."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lighter-plan-kickoff#2",
+        "kind": "case",
+        "id": "lighter-plan-kickoff",
+        "suite": "capability",
+        "title": "On a temporary lighter plan: the kickoff asks for the lighter step, not the usual one",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "06:30",
+        "startDay": "fri",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "at my sister's wedding all weekend, can we go lighter till Monday?",
+          "at": "2026-11-05T21:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Course, Ana. 10 push-ups and 10 squats a day through Sunday, then back to the full 20 minutes Monday. Enjoy the wedding 💃",
+          "at": "2026-11-05T21:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Ana! Wedding weekend, light version: 10 push-ups and 10 squats at 7 wherever you are, about 5 minutes, then send me a selfie after. You in?",
+          "at": "2026-11-06T11:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep, in my hotel room now",
+          "at": "2026-11-06T12:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Ana! Ten and ten, hotel room style 💪 Send me that selfie when you're done.",
+          "at": "2026-11-06T12:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the lighter step (10 push-ups and 10 squats), the time (7) and the place (wherever you are)."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Ana!\", a warm greeting with her name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; the wedding weekend is acknowledged and the step is kept light."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end (\"You in?\")."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its only question is \"You in?\", and it doesn't re-ask the agreed time or step."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where (wherever you are), when (7) and how long (about 5 minutes)."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and pushy enough without overfamiliarity; no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, no question, with one emoji as punctuation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches her yes with energy (\"Let's go, Ana!\") and stays warm, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats instead of the 20 minutes, without guilt or pushing for more, and her yes gets a short warm reply with no second question."
+          }
+        ],
+        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the 10 push-ups and 10 squats at 7 wherever she is, with no guilt and one ask. Her yes got a short, warm reply with no follow-up question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lighter-plan-kickoff#3",
+        "kind": "case",
+        "id": "lighter-plan-kickoff",
+        "suite": "capability",
+        "title": "On a temporary lighter plan: the kickoff asks for the lighter step, not the usual one",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "06:30",
+        "startDay": "fri",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "at my sister's wedding all weekend, can we go lighter till Monday?",
+          "at": "2026-11-05T21:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Course, Ana. 10 push-ups and 10 squats a day through Sunday, then back to the full 20 minutes Monday. Enjoy the wedding 💃",
+          "at": "2026-11-05T21:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Ana! Wedding weekend kicks off today, and at 7 it's 10 push-ups and 10 squats, wherever you are, about 5 minutes. Send a selfie after as proof. You in?",
+          "at": "2026-11-06T11:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep, in my hotel room now",
+          "at": "2026-11-06T12:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hotel room workout before a wedding, love it. Send the selfie when you're done 💪",
+          "at": "2026-11-06T12:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's lighter step (10 push-ups and 10 squats) with time (7) and place (wherever you are)."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Kalimera Ana!', a greeting with the tester's name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; it frames the lighter week positively."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four short sentences with one question at the end, slightly over the one-to-three limit."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, 'You in?', and re-asks no agreed time or step."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (push-ups and squats), where (wherever), when (7), and how long (about 5 minutes)."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "No teaching offered, which suits a simple lighter step on a busy weekend."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with proof asked as a plain ask rather than pushing for more."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, reply is brief and warm."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with no guilt or push for more."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with a single emoji used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and matched to the tester's brief reply, with the emoji used as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats, not 20 minutes, with no guilt or push; the yes gets a short warm reply with no second question. It doesn't mention Monday's return, which was optional."
+          }
+        ],
+        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the reduced 10 push-ups and 10 squats at 7 with no guilt or extra push, and the reply to Ana's yes was short and warm with no second question. The only soft spot is that the kickoff runs a little long at about four short sentences."
+      }
+    }
+  ]
+}

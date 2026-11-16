@@ -1,0 +1,283 @@
+{
+  "feature": "onboarding",
+  "id": "close-goal-stretching",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "a11c9102c329"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "close-goal-stretching",
+        "kind": "scenario",
+        "id": "close-goal-stretching",
+        "title": "Asks for a goal close to the list (stretching): should be accepted",
+        "persona": "joking",
+        "areaCode": "412",
+        "startTime": "07:50",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey! so this is the coaching thing? my back's been killing me from sitting all day lol. I'm hoping to start stretching every morning, like first thing when I wake up, maybe 10 min tops 🧘",
+          "at": "2026-11-02T12:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day, and you can text \"stop\" anytime or tell me to \"chill out\" or \"push me harder.\" Morning stretching for that sitting-all-day back? Let's go. What time do you usually wake up, so we can lock in a start time?",
+          "at": "2026-11-02T12:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "around 7! usually roll out of bed and go straight to the couch lol. would be good to have it set before coffee",
+          "at": "2026-11-02T12:51:23.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that you already have the couch spot picked. Where do you want this to get you, like a back that feels loose by the end of the workday? Totally fine if you're not sure yet.",
+          "at": "2026-11-02T12:51:30.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ha, yeah a looser back by the end of the day sounds great 😅 Mostly I just want it to not feel like a wooden plank when I stand up from my desk. Would be nice to actually stick with it this time lol",
+          "at": "2026-11-02T12:52:23.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Mornings on the couch before coffee is a good setup, and \"wooden plank\" is exactly what we're fixing. Here's the plan:\n\n• Goal: a back that feels loose when you stand up from your desk\n• Day 1 (today): 10 minutes on the couch at 8:15 am. Do 5 gentle moves for about 2 minutes each: seated cat-cow, seated twist (each side), figure-four hip stretch (each side), forward fold, and a chest opener.\n• Usual schedule: every day at 7 am, 10 minutes, on the couch. I'll text you at 6:50 am to get set.\n• Proof: a quick photo of you mid-stretch on the couch. If you'd rather, send a short voice note on how your back feels.\n• Why: a short daily routine is easy to stick with, and proof keeps it honest.\n\nEach day shapes the next. I'll adjust the moves based on what feels good and what your back needs. Stop if anything hurts sharply.\n\nWhat do you think?",
+          "at": "2026-11-02T12:52:30.100Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt from the length limit and carries the intro, stop and style lines plus a question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; plain wording throughout."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with a light 'Let's go.' and one emoji-free, sincere tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Question is tied to the stretching routine, but it asks about wake time rather than the name and goal the first text should collect."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing the tester had already given was asked again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only refers to the stretching goal the tester raised."
+              },
+              {
+                "rule": "not-asked",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks 'What time do you usually wake up', a wake-time question that is not allowed."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational wording with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific ('Love that you already have the couch spot picked') without overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where the routine should get them, a question that fits the back goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the wake time or couch location already given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the couch and back details the tester gave."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on the stretching goal with no off-topic content."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Presenting a plan allows a longer list of up to 8 lines; the sentences outside the list run to about four, which is borderline."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic but calm and sincere; no hearts or overfamiliar lines."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Closing question 'What do you think?' fits a plan just shown."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the 7 am schedule and couch setup the tester already gave without re-asking."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": false,
+                "reason": "Day 1 is set for 8:15 am while the usual schedule is 7 am, and the 6:50 am reminder doesn't match day 1's time."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": false,
+            "borderline": false,
+            "reason": "Explains ZOH, stop and style changes, but asks wake time instead of the name and goal list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No detail the tester clearly gave was asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": true,
+            "reason": "Covers what (stretching), where (couch), when (7 am) and how long (10 min) before the plan, though the name was never collected."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Did not push an app or tool the tester never mentioned."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": true,
+            "reason": "Stretching for back is a close starter goal for getting fitter, and it was handled within the list."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": true,
+            "reason": "First text says the tester can text 'chill out' or 'push me harder' to change coaching."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": true,
+            "reason": "Carries straight into showing the plan with no recap line, though the day 1 time conflict weakens it."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Three ZOH texts, well under the limit."
+          }
+        ],
+        "summary": "ZOH set up a clear, warm stretching plan in only three texts, with the right energy and short texts. It missed the required name question in the first text, asked a wake-time question that isn't allowed, and showed a plan with a day 1 time (8:15 am) that conflicts with the 7 am schedule."
+      }
+    }
+  ]
+}

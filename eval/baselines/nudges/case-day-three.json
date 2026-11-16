@@ -1,0 +1,251 @@
+{
+  "feature": "nudges",
+  "id": "case:day-three",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c48b92420e2a",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "bdf0e5ee14b1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:day-three",
+        "kind": "case",
+        "id": "day-three",
+        "title": "Three misses in a row: the honest day-3 check-in, then reworking the plan",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Ten pages of Dune on the couch at 7 tonight. Ready?",
+          "at": "2026-11-01T13:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam, two nights slipped. Forget the ten: just open Dune tonight and read one page. What's getting in the way?",
+          "at": "2026-11-01T13:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam. You said you wanted to read Dune every day, and you committed to it. Is that still true? If you don't want to do this anymore, just tell me and that's totally fine. If you do, let's do it: ten pages on the couch at 7, starting tonight. And if the plan isn't working, we can change it to something that fits your life better. Let's just not give up on it.",
+          "at": "2026-11-02T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "honestly evenings are chaos with my new job, the plan isn't working",
+          "at": "2026-11-02T23:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally fair, a new job will eat your evenings. Let's change the plan, not drop it. You've got a Dune streak worth getting back, and you did finish day 1. Is there a calmer pocket in your day, like morning before work or lunch, where 10 pages could fit?",
+          "at": "2026-11-02T23:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "mornings before work could work, like 7am",
+          "at": "2026-11-02T23:50:47.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in: 10 pages of Dune on the couch at 7 am, every day, with a photo of the page you stop on. I'll text you at 6:50 am to get you set up. You said you wanted this, and a morning slot gives you a real shot at it. Tomorrow we get the streak back.",
+          "at": "2026-11-02T23:50:54.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "yes do that",
+          "at": "2026-11-02T23:51:26.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Here's tomorrow's step: 10 pages of Dune on the couch at 7 am, about 20 minutes. Then send me a photo of the page you stop on. I'll text you at 6:50 am so you're ready. Mornings were your idea, and I think they'll work. Does that work for you?",
+          "at": "2026-11-02T23:51:33.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: ten pages on the couch at 7, starting tonight."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam.\""
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says stopping is totally fine and frames it as not giving up, with no shaming."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about five sentences, but it follows the voice page's day-3 message, which is the allowed exception."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain prose with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and firm, with one question at the end and no emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences before the question, over the one-to-three limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Totally fair, a new job will eat your evenings\" is understanding, not blame."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, with one question at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "States what (10 pages of Dune), where (couch), when (7 am) and proof (photo)."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, over the limit, though it's a plan lock."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging, with no guilt or urgency."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and confident, not affectionate."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Defines tomorrow's step: what, where, 7 am, about 20 minutes, and photo proof."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Five sentences before the question, over the limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"Mornings were your idea\" is a slight nudge but not guilt."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy is steady and sincere with one closing question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "step-progression",
+            "pass": false,
+            "borderline": true,
+            "reason": "After two slips the step was cut to one page, then jumps back to ten pages the next morning."
+          },
+          {
+            "rule": "no-restating",
+            "pass": true,
+            "borderline": false,
+            "reason": "Restates the step and time only after the time changed to mornings, which is allowed."
+          },
+          {
+            "rule": "miss-ladder",
+            "pass": true,
+            "borderline": false,
+            "reason": "The day-3 check-in follows the voice page's honest check-in with a real choice."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Opens at 6:50 pm and gives the honest check-in, but never offers to move the 7 am plan out of quiet hours, and it texts at 6:50 am, which is inside them."
+          }
+        ],
+        "summary": "ZOH handled the day-3 check-in well: it was sincere, guilt-free, gave a real choice and treated the evening clash as the plan's problem, then reworked it to mornings. It missed the quiet-hours offer for the 7 am slot, scheduled a 6:50 am text inside those hours, and ran several texts over the three-sentence limit."
+      }
+    }
+  ]
+}

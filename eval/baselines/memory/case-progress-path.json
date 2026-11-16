@@ -1,0 +1,135 @@
+{
+  "feature": "memory",
+  "id": "case:progress-path",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:25:09.958Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "fd88390517dc",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "cbff746465ab"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:progress-path",
+        "kind": "case",
+        "id": "progress-path",
+        "title": "\"How much progress have I made?\" traces the path from the start",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:40",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Dana! 15 pages of Atomic Habits on the couch at 8.",
+          "at": "2026-11-02T05:36:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done",
+          "at": "2026-11-02T05:37:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "15 pages, locked in.",
+          "at": "2026-11-02T05:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "done, 15 pages",
+          "at": "2026-11-03T01:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Dana, 15 pages is a solid night. Real proof keeps it honest, so send me a photo of the page you stopped on and I'll log it.",
+          "at": "2026-11-03T01:40:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly how much progress have I actually made since I started with you?",
+          "at": "2026-11-03T01:40:31.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Real progress, Dana. Here's what I've got:\n\n• You started on Oct 13 at 5 pages a night, after not reading a book in two years.\n• You got through your first full week with seven nights and no misses.\n• You moved up to 10 pages on Oct 21, then to 15 on Oct 29 because 10 felt easy.\n• You've done every step day since the 29th. One was the reduced version, and the rest were full.\n\nYou also switched from fighting your phone in bed to reading instead, and you've stuck with it. That's a real change. 📚\n\nSend me the photo of the page you stopped on tonight and I'll log your 15 pages.",
+          "at": "2026-11-03T01:40:38.200Z"
+        }
+      ],
+      "endedBy": "script",
+      "memory": "--- At the start of the conversation ---\np:16a13bbd · Dana (the tester) [self]\nWho they are: life, values, likes and how they text.\n(nothing saved yet)\n\np:cea8b3d1 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:5d680d21 · Goal: Sleep better [goal, past]\nAsleep at a set time; what keeps them up\n(nothing saved yet)\nGoal path, first to latest: p:5d680d21 Goal: Sleep better (this page) → p:ef79d135 Goal: Read & learn more (books, ideas, any topic) [switched Oct 12: kept scrolling in bed; wants to read at night instead of fighting her phone]\n\np:ef79d135 · Goal: Read & learn more (books, ideas, any topic) [goal]\nBooks, articles, podcasts or any topic they want to learn\n- Started at 5 pages because she hadn't read a book in two years (Oct 13)\n- Moved up to 10 pages after a full week without a miss (Oct 21)\n- Moved up to 15 pages; said 10 felt easy now (Oct 29)\nGoal path, first to latest: p:5d680d21 Goal: Sleep better → p:ef79d135 Goal: Read & learn more (books, ideas, any topic) (this page) [switched Oct 12: kept scrolling in bed; wants to read at night instead of fighting her phone]\nStep path, first to latest: v1 (Oct 13): 5 pages of Atomic Habits → v2 (Oct 21): 10 pages of Atomic Habits → v3 (Oct 28): 15 pages of Atomic Habits (current)\nCurrent plan: step: 15 pages of Atomic Habits; where: the couch; at 20:00, every day; takes 25 min; proof: photo (the page you stop on); reason: Fifteen pages keeps the book moving without eating the evening.\n\np:7a3ba709 · Thu Oct 29 · Up to 15 pages [daily]\nPlan moved to 15 pages.\nSaid 10 pages felt easy; plan changed to 15.\n\np:11d190b3 · Tue Oct 20 · First full week [daily]\nSeven nights of 5 pages, no misses.\nDana finished her first week without a miss.\n\np:6a5594c3 · Mon Oct 12 · Switched from bedtime to reading [daily]\nBedtime goal kept losing to her phone; switched to reading.\nDana said she kept scrolling in bed and wanted to read at night instead. Switched goals; new plan of 5 pages a night.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done, 2026-10-30 done_reduced, 2026-10-29 done\n\n--- At the end ---\np:16a13bbd · Dana (the tester) [self]\nWho they are: life, values, likes and how they text.\n(nothing saved yet)\n\np:cea8b3d1 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:5d680d21 · Goal: Sleep better [goal, past]\nAsleep at a set time; what keeps them up\n(nothing saved yet)\nGoal path, first to latest: p:5d680d21 Goal: Sleep better (this page) → p:ef79d135 Goal: Read & learn more (books, ideas, any topic) [switched Oct 12: kept scrolling in bed; wants to read at night instead of fighting her phone]\n\np:ef79d135 · Goal: Read & learn more (books, ideas, any topic) [goal]\nBooks, articles, podcasts or any topic they want to learn\n- Started at 5 pages because she hadn't read a book in two years (Oct 13)\n- Moved up to 10 pages after a full week without a miss (Oct 21)\n- Moved up to 15 pages; said 10 felt easy now (Oct 29)\nGoal path, first to latest: p:5d680d21 Goal: Sleep better → p:ef79d135 Goal: Read & learn more (books, ideas, any topic) (this page) [switched Oct 12: kept scrolling in bed; wants to read at night instead of fighting her phone]\nStep path, first to latest: v1 (Oct 13): 5 pages of Atomic Habits → v2 (Oct 21): 10 pages of Atomic Habits → v3 (Oct 28): 15 pages of Atomic Habits (current)\nCurrent plan: step: 15 pages of Atomic Habits; where: the couch; at 20:00, every day; takes 25 min; proof: photo (the page you stop on); reason: Fifteen pages keeps the book moving without eating the evening.\n\np:7a3ba709 · Thu Oct 29 · Up to 15 pages [daily]\nPlan moved to 15 pages.\nSaid 10 pages felt easy; plan changed to 15.\n\np:11d190b3 · Tue Oct 20 · First full week [daily]\nSeven nights of 5 pages, no misses.\nDana finished her first week without a miss.\n\np:6a5594c3 · Mon Oct 12 · Switched from bedtime to reading [daily]\nBedtime goal kept losing to her phone; switched to reading.\nDana said she kept scrolling in bed and wanted to read at night instead. Switched goals; new plan of 5 pages a night.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done, 2026-10-30 done_reduced, 2026-10-29 done",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only references the 15 pages just reported and the proof request; nothing outside memory is stated."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Refers to tonight's 15 pages only; no detail from a week or more back is used."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": true,
+                "reason": "Dates match the daily pages except the 15-page move, given as Oct 29 here but Oct 28 in the step path."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Weaves in the Oct 13 start and the not-reading-in-two-years detail, though as a bulleted recap rather than natural mention."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pages-real",
+            "pass": true,
+            "borderline": false,
+            "reason": "No new pages are created or referenced in this exchange; the reading goal is discussed in its existing context."
+          },
+          {
+            "rule": "learned-not-single",
+            "pass": true,
+            "borderline": false,
+            "reason": "No learned preference is recorded or claimed in this exchange."
+          },
+          {
+            "rule": "progress-path",
+            "pass": true,
+            "borderline": true,
+            "reason": "Traces 5 to 10 to 15 pages with accurate step-day counts, but omits the bedtime-goal start and gives the 15-page move as Oct 29 against the Oct 28 step path."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Traces the path accurately with recent done days and no invented facts, but the bullet list runs longer than the short text or two requested and the bedtime start is only implied."
+          }
+        ],
+        "summary": "ZOH answered the progress question with an accurate path from 5 to 10 to 15 pages and correctly described the recent run of step days, with no invented facts. Its main weaknesses are a longer list than the requested short text, a one-day date discrepancy for the 15-page move, and no explicit mention of the original bedtime goal."
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "feature": "reflection",
+  "id": "case:saved-dead-end",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "e77c1d7b6e3c",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "b87a1cbf948b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:saved-dead-end",
+        "kind": "case",
+        "id": "saved-dead-end",
+        "title": "After a reflection on the scene's subtext, a real reply leading to the next step, never just \"Saved.\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Lena's scene tonight, Dana: 8 pm at your desk, 30 minutes. Then read it to me in a voice note.",
+          "at": "2026-11-03T00:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
+          "at": "2026-11-03T02:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dana, that's day 3 in the books 🎭 \"Lena bites the thread\" is a great ending. She never says she's mad, and she doesn't have to. When you read it out loud, what felt strongest, and was any line you wanted to fix?",
+          "at": "2026-11-03T02:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
+          "at": "2026-11-03T02:01:51.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That line is the whole scene, Dana. Lena finally says it without saying she's hurt, and the sleeves carry all of it. I'd keep it. How did tonight's 30 minutes feel: enough time, or did the scene want more room?",
+          "at": "2026-11-03T02:01:58.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that works",
+          "at": "2026-11-03T02:03:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good. When you sat down at 8, did the scene come easily, or did you have to push to get started?",
+          "at": "2026-11-03T02:03:16.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Wants Lena to say \"I finally got the sleeves to fit.\" as the whole line; she made the costume for herself weeks ago, so it's her letting go of the part.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences before the closing question, slightly over the one-to-three-sentence limit for a non-teaching text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific energy with one emoji as punctuation, no row and no overfamiliarity."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it responds to the scene and asks a question."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences with one question at the end; slightly long but reads as a reply to a real idea."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and specific, engaging the sleeves idea directly without affection or emoji clutter."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the sleeves line itself and keeps the conversation moving with a question."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief, warm and direct with no emoji or overfamiliar language."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save-only reply; it carries the conversation forward with a question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the sleeves explanation ZOH reacts to the idea (the sleeves carry the letting-go) and asks a follow-up instead of replying only Saved."
+          }
+        ],
+        "summary": "ZOH counted the voice note and responded to the scene specifically, then reacted to the sleeves line itself rather than dead-ending on a save confirmation, so the regression is fixed. Its replies run slightly long and the final question shifts away from the next step, but the conversation keeps moving."
+      }
+    }
+  ]
+}

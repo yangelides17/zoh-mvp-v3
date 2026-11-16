@@ -1,0 +1,315 @@
+{
+  "feature": "plan",
+  "id": "case:chosen-quiet-hours",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "aa046b5a1a78",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "b714d8f16265"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:chosen-quiet-hours",
+        "kind": "case",
+        "id": "chosen-quiet-hours",
+        "title": "A 10:30 pm step inside quiet hours the tester set themselves: one question, a no accepted, never asked again",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "btw don't text me after 10, that's my wind-down time",
+          "at": "2026-11-02T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, nothing from me after 10 pm. When do you want to read, and for how long?",
+          "at": "2026-11-02T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "10:30 pm in bed, 20 minutes, every night",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Atomic Habits in bed every night. One catch: 10:30 falls after your 10 pm cutoff, so I couldn't text you a nudge or check in around reading time. Want me to push your wind-down start to 11 pm so I can reach you before and after you read?",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah keep them, I don't need a reminder",
+          "at": "2026-11-02T23:00:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds good, quiet hours stay as they are. Is there somewhere you want this reading habit to take you, like finishing the book by a certain date? \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T23:00:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T23:01:17.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Reading Atomic Habits right before sleep is a good pick. Here's the plan:\n\n• Tonight, 10:30 pm: read 20 minutes in bed, starting from page one (or wherever you left off)\n• Every night at 10:30 pm, 20 minutes, in bed\n• Proof: after you read, send a voice note on what stuck with you. A photo of your page works too.\n• Why: the same spot at the same time makes it easy to repeat, and saying the idea out loud helps it stick.\n\nI'll reach you earlier in the day, before your 10 pm cutoff. Each night shapes the next step, so we build as we go.\n\nWhat do you think?",
+          "at": "2026-11-02T23:01:24.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-02T23:01:47.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Priya! Day 1 is tonight at 10:30 pm: 20 minutes of Atomic Habits in bed. Then send me your voice note whenever you're done. Let's go 📖",
+          "at": "2026-11-02T23:01:54.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, one question, no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the tester's stated book, place and time."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences; the quiet-hours matter is closed without a re-ask."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts the no without pushing, one light question about a destination."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing invented about the tester."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text runs about 9 to 10 lines with blank lines, near the 8-line cap; redundant bullets stretch it."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets are plain •, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere, no hearts or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses Atomic Habits, bed, 10:30 pm, 20 minutes and a voice note that fit what they said."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Book, place, time, length and proof are all given."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "No save confirmation involved."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences, slightly over the one-to-three limit for a non-plan text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, emoji used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype lock-in line with a single emoji, no question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the agreed step only."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what, where, when and how long."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Lock confirmation carries the day 1 step and proof next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The only extra question (destination) came before the plan, with no 'that's everything' line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete: book, bed, 10:30 pm, 20 minutes, nightly, with a voice note proof."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1, schedule, proof and a general progression line without a future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once lightly with a not-sure option, and the plan locked without one."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "No real commitment ask; 'What do you think?' stood in, and the plan was shown instead of asking after 'looks good'."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 10:30 pm."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once about moving the chosen quiet hours, accepted 'nah keep them' and never re-asked."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never raised quiet hours after the lock; only referenced the existing cutoff."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a • list and ended with one question."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Quiet-hours handling is right, but the order is off: no plan after 'nah keep them' and a plan instead of a commitment ask after 'looks good'."
+          }
+        ],
+        "summary": "ZOH handled the chosen quiet hours correctly: it asked once, accepted the no without re-asking and never raised it again after locking. The sequence slipped, though: it showed the plan after 'looks good' instead of asking for the commitment, so the lock rested on a weak 'What do you think?' rather than a real commitment ask."
+      }
+    }
+  ]
+}

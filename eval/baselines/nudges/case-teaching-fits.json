@@ -1,0 +1,220 @@
+{
+  "feature": "nudges",
+  "id": "case:teaching-fits",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "bc75fa6a8949",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "59693763f0d6"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:teaching-fits",
+        "kind": "case",
+        "id": "teaching-fits",
+        "title": "Teaching fits what they're stuck on: a grounded tip, not a lecture",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "did my 10 min but the 2 ball thing is a mess, they keep crashing into each other",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the hardest part, Casey, and you showed up for it. We'll work on it tomorrow.",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Casey! Those crashes are a normal part of learning two balls, so we're staying on it today at 6 pm in the living room, for 10 min. Here's the fix: throw ball 1 up to eye level, then throw ball 2 only when ball 1 hits its peak, so the second ball goes under the first and the two never meet. Slow and clean beats fast. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok I'm in but seriously how do I stop them crashing",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Casey. Crashes usually come from two things: throws that drift forward, and arcs at different heights. Here's the fix:\n\n• Throw each ball up in a tall arc to eye level, not out in front of you.\n• Aim every throw at the opposite shoulder, so the ball lands by the opposite hand at your hip.\n• Keep your elbows at your sides and your hands at belt height.\n• Throw ball 2 only when ball 1 peaks. That timing sends it under ball 1, not into it.\n\nIf they still collide, stop and do five clean one-ball arcs, then try again. For a visual, search YouTube for \"learn to juggle 3 balls beginner cascade\". See you at 6, and send a voice note on how the arcs go.",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Casey! Ten minutes to 6, so grab your two balls and clear a little space in the living room. Remember the peak rule: ball 2 goes only when ball 1 tops out. You've got this 💪",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says 'staying on it today at 6 pm in the living room, for 10 min' and gives the two-ball fix, but never plainly names the two-ball exchange as the step."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Kalimera Casey!', warm and with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Frames the crashes as normal learning with no guilt or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "About four short sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only 'You in?' and does not re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives where (living room), when (6 pm) and how long (10 min)."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives the correct peak-timing fix for collisions, which fits the crashing problem reported."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, encouraging and sincere, with no affection or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A teaching text with a short list, about eight to nine lines including the bullets, so it is at the edge of the allowed length."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": false,
+                "borderline": false,
+                "reason": "Gives the 'learn to juggle 3 balls beginner cascade' YouTube search, which is a three-ball search, not for the two-ball exchange as required."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and sincere, with no affection or emoji row."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Frames collisions as a fixable technique with no guilt or pressure."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says 'grab your two balls' in the living room with 'Ten minutes to 6', so the step is implied but not spelled out as the exchange."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Hey Casey!' using their name."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, which fits a check-in."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Restates the peak rule as a short reminder, which is allowed, though it leans slightly toward re-teaching the fix."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging with no guilt or fake urgency."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with one emoji used as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Step stayed on the two-ball exchange with a correct fix and no contradictions, but ZOH 2 gave a three-ball 'cascade' YouTube search, which the rule forbids."
+          }
+        ],
+        "summary": "ZOH held today's two-ball step, gave a correct and consistent collision fix, and sent a short, warm check-in before 6 pm. It failed the regression case because ZOH 2 offered a three-ball YouTube search phrase, which is off-step for the two-ball exchange."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "feature": "back-off",
+  "id": "case:a-lot-of-texts",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:23:59.413Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "156c6297aa7a",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "05f0d55e1c62"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:a-lot-of-texts",
+        "kind": "case",
+        "id": "a-lot-of-texts",
+        "title": "\"A lot of texts\": flag it, offer fewer step days, then the feedback reply when they'd rather keep the days",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "this is a lot of texts lol",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, fair, Jordan. I can't send fewer texts, but I can cut your run days. Right now it's every day, and we could drop to 4 or 5 a week, with the same 6 pm park run. Want to try that, and if so, which days?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I want to keep running every day, it's just a lot of messages",
+          "at": "2026-11-02T17:00:34.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Jordan, every day it is. I passed your note about the message volume to the team, and I appreciate you telling me. Today's run is the 30 minutes at the park at 6 pm. Are you in?",
+          "at": "2026-11-02T17:00:41.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Flag back_off: Said \"this is a lot of texts lol\"\nFlag back_off: Said it's a lot of texts; wants to keep daily runs but fewer messages\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": false,
+                "reason": "Offers 4 or 5 run days a week, which meets the at-least-3 floor, and promises only what the app can do."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": true,
+                "reason": "Thanks them and says the note went to the team, with no promise or fewer-texts offer, but never says the team's on it outright."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": true,
+            "reason": "A back_off flag was saved for the message-volume complaint, though the second flag duplicates the same ask."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": false,
+            "reason": "No miss, step complaint or quiet-hours change was flagged; the only flag was for message volume."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Flag saved, fewer run days offered in one line, then keep-every-day taken as feedback with thanks and no promise, though 'team's on it' is only implied."
+          }
+        ],
+        "summary": "ZOH handled the back-off well: it offered 4 or 5 run days a week without guilt, then accepted the tester's choice to keep every day and passed the feedback on without promising anything. The only soft spot is that it said the note went to the team rather than explicitly saying the team's on it, and the back_off flag was saved twice for one ask."
+      }
+    }
+  ]
+}

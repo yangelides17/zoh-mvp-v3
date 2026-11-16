@@ -1,0 +1,361 @@
+{
+  "feature": "onboarding",
+  "id": "case:ai-starter",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "fc47def5ca77",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "3d641468b0a1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:ai-starter",
+        "kind": "case",
+        "id": "ai-starter",
+        "title": "Put AI to work: learn about the person before suggesting a step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me anytime how you want coaching (\"chill out,\" \"push me harder\"). What's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Priya. put AI to work for me",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Priya. Tell me about your work: what do you do, and what tasks do you wish you could hand off to an assistant?",
+          "at": "2026-11-02T23:30:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm a project manager at a construction company, drowning in meeting notes and status emails",
+          "at": "2026-11-02T23:31:03.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Meeting notes and status emails are perfect for AI, Priya. When in your day could you realistically sit down and try it, like right after your last meeting or first thing in the morning?",
+          "at": "2026-11-02T23:31:10.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I've barely used ChatGPT, maybe twice",
+          "at": "2026-11-02T23:31:58.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a fine starting point, Priya. We'll build on ChatGPT since you already have it, one small task at a time. What time of day works best for a daily step: right after your last meeting, or something like 8 am before the emails pile up?",
+          "at": "2026-11-02T23:32:05.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "weekday mornings around 9:30 after standup, like 15 min",
+          "at": "2026-11-02T23:32:39.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Weekdays at 9:30 after standup, 15 minutes. That works, Priya. Where do you want this to get you in a few weeks: say, status emails drafted in two minutes, or notes turned into action items automatically? \"Not sure yet\" is fine too.",
+          "at": "2026-11-02T23:32:46.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with a simple bullet list of starters, no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic intro with one emoji-free, sincere tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks name and goal with the goal list, as the first text should."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only describes what ZOH does; no invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences, but the question packs two parts (what you do, and what you'd hand off) into one ask."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational text with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, warm acknowledgment (\"Let's go, Priya.\") with no filler."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about her work and tasks, which fits an AI starter."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks something she hadn't yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what she said so far."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Affirms her tasks as AI-friendly without overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks when in her day she could try it, a fitting next question after her work answer."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to meeting notes and status emails she mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about time of day in general, not wake or sleep."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm, warm reply to her barely-used ChatGPT, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a daily time, which her earlier answer didn't give."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": true,
+                "reason": "Re-asks time, but her previous answer skipped it, so asking again is allowed."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Builds on ChatGPT, which she said she has used twice."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and warm; acknowledges the schedule she gave."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where this should get her, a fitting destination question for the AI goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plays back time and length she gave without re-asking them."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only her stated time and length."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, stop works anytime, coaching style can change, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Time was asked once unanswered and once again, and no clearly answered item was re-asked."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": true,
+            "reason": "Covers task, time and 15-minute length, but the transcript ends before the plan is built."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells her she can change coaching style anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": true,
+            "reason": "Transcript ends on a destination question with no plan step or next question carried into the plan."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Five ZOH texts, well under the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks about work and time one per text, never re-asks covered items, suggests no step or paid app, and moves toward a plan."
+          }
+        ],
+        "summary": "ZOH handled the AI starter well: it asked one fitting question at a time about Priya's work, time and daily length, and never re-asked what she'd already covered or pushed a paid product. The only real gap is that the transcript stops before ZOH carries the conversation into a plan, so wrap-up is marked as not reached."
+      }
+    }
+  ]
+}

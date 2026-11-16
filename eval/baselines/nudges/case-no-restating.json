@@ -1,0 +1,274 @@
+{
+  "feature": "nudges",
+  "id": "case:no-restating",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d73391342fb9",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "c757fc74a119"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:no-restating",
+        "kind": "case",
+        "id": "no-restating",
+        "title": "A day of back-and-forth: the step and time come up when they matter, not in every reply",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Priya! Ten pages of Dune on the couch at 7 tonight. You in?",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "yes! I'm in",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Priya! That's two days down, and tonight makes three. Go get lost in Arrakis. 📖",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "btw is it weird that I skip the appendices",
+          "at": "2026-11-02T15:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Not weird at all. The appendices are bonus material, and plenty of readers skip them or save them for after the story. Your plan is the 10 pages of story tonight. Are you excited for where you are in Dune?",
+          "at": "2026-11-02T15:00:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "work is insane today",
+          "at": "2026-11-02T15:01:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds like a heavy day, Priya. Ten pages at 7 still fits, even if you're fried by then. It's about 20 minutes on the couch, and it can be your wind-down. Think you can still make it happen tonight?",
+          "at": "2026-11-02T15:01:16.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "omg my boss just asked me to stay late, can we do 8:30 instead?",
+          "at": "2026-11-02T15:01:42.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, 8:30 tonight it is, Priya. Same 10 pages on the couch, so get through the late stretch at work and then it's you and Dune. Send me a photo of the page you stop on. 💪",
+          "at": "2026-11-02T15:01:49.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "cool cool",
+          "at": "2026-11-02T15:02:28.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds good. Good luck with the late stretch, Priya. Dune will be waiting at 8:30. 📖",
+          "at": "2026-11-02T15:02:35.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "what time was it again?",
+          "at": "2026-11-02T15:02:58.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "8:30 tonight, Priya. Ten pages on the couch, then a photo of the page you stop on. 📖",
+          "at": "2026-11-02T15:03:05.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, well within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level energy with one emoji at the end; not overfamiliar."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers her appendix question in three sentences with one question at the end."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief, grounded answer on skipping appendices that matches her question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and conversational, no pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges a heavy day without guilt or urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Restates 'Ten pages at 7' in reply to a work vent, which is a mild restatement but not pushy."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences; confirms the new time once and asks for a photo rather than a question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with a single emoji as punctuation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly send-off with no pressure."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Mentions 8:30 again after 'cool cool' with no change or question, a light restatement of the time."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, no question, answers her question directly."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain and direct, matching her question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-restating",
+            "pass": true,
+            "borderline": true,
+            "reason": "Step and time restated in ZOH 3 and 5 without change, but not in every reply; 'what time' answered plainly in ZOH 6."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The 8:30 move was confirmed once in ZOH 4, the 'cool cool' reply avoided the step, and 'what time' got a plain 8:30 answer, though ZOH 5 still mentions 8:30."
+          }
+        ],
+        "summary": "ZOH avoided the October 28 failure: it confirmed the move to 8:30 once, kept 'cool cool' short with no step restated, and answered the time question plainly. The only blemishes are a light re-mention of 8:30 in ZOH 5 and a pre-move restatement of 7 pm in ZOH 3, both borderline."
+      }
+    }
+  ]
+}

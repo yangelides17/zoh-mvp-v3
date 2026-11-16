@@ -1,0 +1,398 @@
+{
+  "feature": "plan",
+  "id": "switch-goal",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "f226b4b1b7a8"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "switch-goal",
+        "kind": "scenario",
+        "id": "switch-goal",
+        "title": "Taylor wants to switch from reading to exercise: first \"bored\", then a real reason",
+        "persona": "chatty",
+        "areaCode": "212",
+        "startTime": "19:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "This is yours now, Taylor: 10 pages of The Midnight Library every night at 9, and I'm holding you to it. You in?",
+          "at": "2026-11-02T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in!",
+          "at": "2026-11-02T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO 🔒 Day 1 is tonight at 9. Send me a pic of the page you finish on.",
+          "at": "2026-11-02T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey so I kinda want to switch to exercise instead of reading",
+          "at": "2026-11-03T00:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, already?! Before we switch, what's behind it? Ten pages of The Midnight Library in bed is a pretty small ask, so I'm curious what's not feeling right.",
+          "at": "2026-11-03T00:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I'm just kinda bored of it",
+          "at": "2026-11-03T00:00:45.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, and I appreciate you being straight with me. But you only just committed, and day 1 hasn't even happened yet. \"Bored\" usually means the setup needs a tweak, not that the goal is wrong.\n\nWhat if we keep reading but change the book, or make tonight 10 pages of something you're actually curious about? Want to try that first?",
+          "at": "2026-11-03T00:00:52.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly the book thing isnt really it, ive tried different books before and i still end up bored lol. i need to move more anyway, my doctor told me this week my back pain is bad and i need to get more movement in. i only have time for one thing right now so i was hoping to swap the reading for a walk",
+          "at": "2026-11-03T00:01:22.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a real reason, and moving more is a good call, so we're swapping reading for a walk. It's smart to check with your doctor on how much is right for your back. I'll keep this beginner-friendly. When can you fit the walk in each day? Tonight still counts as day 1 if there's time.",
+          "at": "2026-11-03T00:01:29.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Yes, tonight works! I usually get out around 7 pm, so I can do it then. It's 20 minutes around the neighborhood, I'll wear my Apple Watch so it tracks everything lol",
+          "at": "2026-11-03T00:03:19.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that the Apple Watch will do the tracking, Taylor. One quick thing before I put the plan together: is there somewhere you want this to get you, like less back pain or an easier time moving day to day? Totally fine if you're not sure yet.",
+          "at": "2026-11-03T00:03:26.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly mostly just want the back pain to chill out and feel less stiff when I get up in the morning. no big goal beyond that lol",
+          "at": "2026-11-03T00:04:36.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Less back pain and a easier time getting out of bed is a great reason to move, Taylor. Here's the plan:\n\n• Headed for: less back pain and less stiffness when you get up in the morning\n• Day 1, tonight: 20-minute easy-pace walk around the neighborhood at 7 pm, Apple Watch on\n• Schedule: 7 pm, 20 minutes, every day\n• Proof: a screenshot of your Apple Watch workout summary (Walk, 20 min). It shows the time and keeps us honest\n• Why: gentle daily movement fits your back and the time you already have\n\nEach walk shapes the next step, so we can build toward less stiffness at your pace. Easy pace is the goal, not fast. What do you think?",
+          "at": "2026-11-03T00:04:43.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in! Sounds good, easy pace it is. I'll head out tonight at 7 and send you the screenshot after 👍",
+          "at": "2026-11-03T00:05:42.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Taylor! 🔒 Day 1 is tonight at 7, easy pace, and I'll be here for that Apple Watch screenshot after.",
+          "at": "2026-11-03T00:05:49.000Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, curious and energetic without being overfamiliar."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the ten pages and reading they already committed to."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "About five sentences plus a question, well over the one-to-three sentence limit for a non-plan text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language with no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm pushback on the bored reason without shaming."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said about the reading commitment."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences with one question, longer than the three-sentence limit for this kind of text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts the doctor reason warmly and stays supportive."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Advises checking with a doctor on intensity rather than giving medical advice."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language, no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and light, with a single optional destination ask."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the Apple Watch the tester mentioned."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text with bullets runs to about 9 lines including blank lines, near the 8-line limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "A plain bullet list with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with a clear easy-pace framing."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the back pain and stiffness the tester mentioned plus the Apple Watch they named."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (20-min walk), where (neighborhood), when (7 pm) and proof method."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text; the lock emoji is used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line for locking in, with a single emoji."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed plan details."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 time, pace and proof are all given."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "After locking, it carries the next move: the screenshot after the walk."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked the time and destination questions before presenting the plan, one at a time."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete walk with time, length, place, days and an Apple Watch screenshot proof that fits the tester."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination, day 1, schedule, proof and a short progression line with no list of future steps."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once, lightly, and the tester answered so the plan locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "No dedicated commitment ask; it asked 'What do you think?' and locked on the tester's 'I'm in' reply."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 7 pm."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never raised quiet hours after locking."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pushed back warmly on the bored reason, then accepted the switch once the doctor-advised back pain reason came up."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The new walk plan was shown as a bullet list unprompted after the change of direction and ended with a question."
+          }
+        ],
+        "summary": "ZOH handled the switch well: it pushed back warmly on 'bored', accepted the back-pain reason, and showed a concrete walk plan with an Apple Watch proof and a same-day start. The main misses were overlong texts (ZOH 2 and 3 ran about five sentences) and locking on a 'What do you think?' reply without a direct commitment ask."
+      }
+    }
+  ]
+}

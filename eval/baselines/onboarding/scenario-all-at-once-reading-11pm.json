@@ -1,0 +1,466 @@
+{
+  "feature": "onboarding",
+  "id": "all-at-once-reading-11pm",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "8c3c88dd8a72"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "all-at-once-reading-11pm",
+        "kind": "scenario",
+        "id": "all-at-once-reading-11pm",
+        "title": "Answers several things at once, texting at 11 pm",
+        "persona": "all-at-once",
+        "areaCode": "202",
+        "startTime": "23:05",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hi! I'm Priya. I want to start reading every night before bed, around 10:30, for about 20 pages or 25 minutes. I read on my Kindle in bed. I only manage a few books a year right now, so I'd like it to become a real habit. What do you need from me to set that up?",
+          "at": "2026-11-03T04:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Priya. Nightly reading at 10:30 is a solid way to turn a few books a year into a real habit. All I need now is the book. What are you reading, or want to start, on your Kindle?",
+          "at": "2026-11-03T04:05:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haven't picked one yet, honestly. Open to suggestions. I like fiction that's easy to get into, not too heavy, since I'm usually tired by then. Anything under 400 pages would be good.",
+          "at": "2026-11-03T04:06:45.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Easy to get into, light, and under 400 pages. Here are three that fit:\n• The Thursday Murder Club by Richard Osman: a cozy mystery with short chapters, easy to pick up when you're tired\n• The Midnight Library by Matt Haig: about 290 pages, a quick, absorbing read\n• Anxious People by Fredrik Backman: funny and warm, with a page-turning pace\n\nWhich one sounds like your kind of bedtime book?",
+          "at": "2026-11-03T04:06:52.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh, The Midnight Library sounds nice, but I've heard it's kind of sad in parts? Would Thursday Murder Club be better if I'm wiped out? Also I'm on a Kindle so whichever one, it'd be the ebook. Thanks!",
+          "at": "2026-11-03T04:08:07.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, Thursday Murder Club is the better pick when you're wiped. It's a cozy mystery with short chapters, so it's easy to stop and start. You're right about Midnight Library too: it goes to some heavier places, so save it for later. The Kindle ebook of Thursday Murder Club it is.\n\nWhere do you want this habit to take you, like a number of books by year's end? \"Not sure yet\" is a fine answer.",
+          "at": "2026-11-03T04:08:14.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly not sure yet! Maybe 12 books by year end? Or just finishing one a month would feel like a win since I only do a few a year now. I'm at home in bed on my Kindle every night around 10:30, 20 pages or 25 mins max, so keep it realistic for me please",
+          "at": "2026-11-03T04:09:34.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "A book a month is a great win when you're at a few a year, and we'll keep it realistic. Here's the plan:\n\n• Headed for: a book a month, 12 by year end\n• Setup today: download The Thursday Murder Club on your Kindle\n• Day 1, tonight: in bed, read the first 10 pages (about 12 minutes)\n• Usual: every night at 10:30 pm, 20 pages or 25 minutes, in bed on your Kindle\n• Proof: a Kindle screenshot showing your page or percent progress. If that's a hassle, a quick voice note about what happened works too.\n• Why: a cozy mystery is easy when you're tired, and 20 pages a night adds up to roughly a book a month.\n\nI'll text you a heads-up at 10:20 pm so you're set. Each night shapes the next step, always aimed at that book a month.\n\nWhat do you think?",
+          "at": "2026-11-03T04:09:41.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Looks good! I'm in. Quick question though: 20 pages a night, does that really get me a book a month? Thursday Murder Club is around 370 pages I think, so I'd need closer to 12 a night, right? Just want to make sure the math works before I commit lol",
+          "at": "2026-11-03T04:11:17.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "You're right, and the math works in your favor. At about 370 pages, a book a month is roughly 12 pages a night. So 20 pages a night is more than enough, about 600 pages a month. That gives you room for a slow night or two and still finishes the book in under a month.\n\nSo we keep 20 pages or 25 minutes as the usual, and a book a month is very doable. Now that the math checks out, are you officially committing to this plan?",
+          "at": "2026-11-03T04:11:24.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "Yes, I'm in! Going to download the Thursday Murder Club on my Kindle tonight. Thanks for checking the math, that helps a lot.",
+          "at": "2026-11-03T04:12:59.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Priya! 🎉 Day 1 is tonight. Download The Thursday Murder Club, then read the first 10 pages in bed (about 12 minutes). Send me a Kindle screenshot of your page or percent when you're done. You've got this.",
+          "at": "2026-11-03T04:13:06.400Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences plus one question, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for the book, which is the logical next input for a reading goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing the tester already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only restates what the tester said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Intro line and closing question; the book list does not count toward the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three light fiction picks under 400 pages match the tester's stated criteria."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing already answered is asked again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Titles and authors are real; the page count and description are broadly accurate."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Roughly five or six sentences before the question, well over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and clear; energy is acceptable here."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about destination, which the plan needs."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "The destination had not been clearly answered yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses what the tester said about the books."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation is allowed to run longer, though the bullet list is long."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullet list with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan matches the book, time, length and place the tester gave."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates settled inputs only as plan summary."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the tester's stated time, length, place and goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Answers a math question about the plan, around seven sentences; arguably within the longer-answer allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and sincere, no affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Addresses the tester's concern and asks the commitment question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Commitment was not yet clearly given, so asking is fine."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "States the 370-page figure as fact, though it came from the tester's uncertain guess."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Five short sentences, over the three-sentence limit, though a lock-in hype line with day 1 is expected."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with one emoji as punctuation."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives day 1 and the proof request for the agreed plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats the plan's step and proof, which is a reminder rather than a re-ask."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches the agreed plan."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": false,
+            "borderline": true,
+            "reason": "Asks name and goal correctly skipped, but no ZOH intro, stop line or coaching-style line appears."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Name, goal, time, length and device are not asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learns what, where (bed, Kindle), when (10:30) and how long (20 pages or 25 minutes) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asked about an existing app or tool and never pushed one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is an on-list starter, and book suggestions fit it."
+          },
+          {
+            "rule": "style-offer",
+            "pass": false,
+            "borderline": false,
+            "reason": "Never tells the tester they can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": false,
+            "reason": "Destination was answered before the plan, and the plan follows with the commitment question."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Six ZOH texts in a few minutes, well within limits."
+          }
+        ],
+        "summary": "ZOH got the core job done: it picked up Priya's reading goal, learned the book, time, length and place, built a realistic plan, and locked it in after she checked the math. It missed on brevity (several texts run five or more sentences), skipped the ZOH intro and stop line in the first text, and never mentioned that she can change how it coaches."
+      }
+    }
+  ]
+}

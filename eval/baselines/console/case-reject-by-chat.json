@@ -1,0 +1,91 @@
+{
+  "feature": "console",
+  "id": "case:reject-by-chat",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "0a0a2169edf7",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "f602269e8ef0"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:reject-by-chat",
+        "kind": "case",
+        "id": "reject-by-chat",
+        "title": "\"Reject it\" in the chat is drafted, then a typed yes rejects it, and only then is it called done",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: reject his request to switch, he should stick with running for now",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Reject: Learn to solve a Rubik's cube (why: He should stick with running for now.). It never reaches Jordan.",
+          "at": "2026-11-02T19:00:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted the rejection of Jordan's Rubik's cube switch, with your reason: stick with running for now. It's a card now, and nothing happens until you click Do it or tell me yes. He won't be told about it either way.",
+          "at": "2026-11-02T19:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni: yes do it",
+          "at": "2026-11-02T19:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done. The Rubik's cube switch is rejected, and Jordan stays on running. He won't hear about it from this.",
+          "at": "2026-11-02T19:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: rest day\nMon, Oct 26: done\nTue, Oct 27: rest day\nWed, Oct 28: done\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): rest day\nMon, Nov 2 (today): step day, not done yet at 18:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 18:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 18:00\nSat, Nov 7: step day at 18:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 18:00",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 1 and 2 say exactly what will happen: a Reject card with Yanni's reason, nothing until Do it or yes, and it never reaches Jordan."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The rejection is drafted as a card with Yanni's reason and says it won't reach Jordan, then 'yes do it' confirms it as rejected in one line, with no text to Jordan."
+          }
+        ],
+        "summary": "ZOH handled the regression case correctly: it drafted the rejection with Yanni's stick-with-running reason and said nothing would happen until he confirmed. After 'yes do it' it confirmed the rejection to Yanni and made clear Jordan wouldn't be told."
+      }
+    }
+  ]
+}

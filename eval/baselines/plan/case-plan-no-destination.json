@@ -1,0 +1,252 @@
+{
+  "feature": "plan",
+  "id": "case:plan-no-destination",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "fe7bb86f7cc7",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "d01ffb4470f6"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:plan-no-destination",
+        "kind": "case",
+        "id": "plan-no-destination",
+        "title": "No destination yet: no pushing for one, and the plan still locks",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "20 min is about all I've got before I fall asleep lol",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Twenty it is. Do you track your reading anywhere, like Goodreads or a notes app?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "nope, no app. and no idea what I'm aiming for yet tbh, I just want to read more",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No worries, \"just read more\" is a solid place to start. Here's the plan:\n\n• Today's step: read Atomic Habits in bed for 20 minutes, from wherever you are (or page 1)\n• When: 9 pm, every day\n• Proof: a short voice note recapping what you read, in your own words\n• Why: 20 minutes is short enough to finish before you get sleepy, and the book is already on your nightstand\n• Easy alternative: if talking feels like a lot, tell me and we'll tweak how you show it\n\nEach day shapes the next step, and a destination can come later once you see what you like. I'll text you around 9 to get you set.\n\nWhat do you think?",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T18:00:50.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Jordan. Twenty minutes with Atomic Habits at 9 tonight. Are you officially committing to this?",
+          "at": "2026-11-02T18:00:57.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-02T18:01:20.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Jordan. LFG! 📚 Day 1 is tonight at 9 pm: 20 minutes of Atomic Habits in bed, then a quick voice note telling me what you read.",
+          "at": "2026-11-02T18:01:27.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 9 short lines including the bullets, slightly over the roughly 8-line allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere, but calm rather than pushy-level energy; no emoji used."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Jordan said (Atomic Habits, nightstand, 9 pm, 20 minutes) plus a voice-note proof suggestion."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (Atomic Habits), where (in bed), when (9 pm) and how long (20 minutes)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational wording with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific and not overfamiliar; no emoji."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers back to the agreed 20 minutes and Atomic Habits at 9 tonight without invented facts."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences confirming the lock and day 1."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler; the single emoji is used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line 'LFG!' fits a locked commitment and stays warm."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the agreed details only."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 states what, where, when, how long and the voice-note proof."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "After locking, the text carries the day 1 next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra plan questions were asked; the plan went straight to the lock."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete five-line plan with what, how much, where, when and a voice-note proof that fits a non-app user."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1, schedule, proof and a one-line progression note with no list of future steps."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Did not re-ask the destination; only a light note that one can come later, and the plan locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'looks good' it asked in natural words whether Jordan is committing; the ask feels real."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 9 pm."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a bullet list ending with the single question 'What do you think?'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Matches the expected flow: no repeat destination ask, full day 1 plan, natural commitment ask, and a clean lock."
+          }
+        ],
+        "summary": "ZOH handled the no-destination case well: it skipped re-asking, presented a concrete voice-note plan, asked for commitment naturally and locked with no friction. The only soft spot is that the plan text runs slightly long and its energy is a bit calmer than the pushy default."
+      }
+    }
+  ]
+}

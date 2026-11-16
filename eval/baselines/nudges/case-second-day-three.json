@@ -1,0 +1,320 @@
+{
+  "feature": "nudges",
+  "id": "case:second-day-three",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "8bca374f1b8f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "4c1a41c6dc50"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:second-day-three",
+        "kind": "case",
+        "id": "second-day-three",
+        "title": "Answers the day-3 check-in once, then goes quiet: two daily texts, a second check-in, then silence",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:40",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Maya! Ten pages of Dune on the couch at 7 tonight. Ready?",
+          "at": "2026-11-01T23:37:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, two nights slipped. Forget the ten: just open Dune tonight and read one page. What's getting in the way?",
+          "at": "2026-11-01T23:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Maya. You said you wanted to read Dune every day, and you committed to it. Is that still true? If you don't want to do this anymore, just tell me and that's totally fine. If you do, let's do it: 10 pages on the couch at 7. And if the plan isn't working, we can change it to something that fits your life better. Let's just not give up on it.",
+          "at": "2026-11-02T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yeah yeah",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! The last few days got away from us, but that's behind us. It's 7 in five minutes, so grab Dune and sit on the couch. Ten pages, then send me a photo of the page you stop on. Are you in for tonight?",
+          "at": "2026-11-02T23:55:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya, no guilt, let's just make tonight easy. Today is only five pages of Dune on the couch at 7, about 10 minutes, then a photo of the page you stop on. If something's been getting in the way this week, tell me what it is. Does five pages work for you?",
+          "at": "2026-11-03T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya, let's shrink tonight to almost nothing. Three pages of Dune on the couch at 7, about 5 minutes, then a photo of the page you stop on. You committed to this, and three pages is a start I know you can pull off. Can you do that for me?",
+          "at": "2026-11-04T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, I'd rather ask you straight than keep pushing. Do you still want Dune in your days? If you do, tonight is only 3 pages on the couch at 7, about 5 minutes, then a photo of the page you stop on. If the plan itself is what's not fitting your life, tell me and we'll reshape it. Which is it?",
+          "at": "2026-11-05T23:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Maya.\" as a ZOH-started text."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: 10 pages of Dune on the couch at 7."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Honest and sincere, says quitting is totally fine, no shaming or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs longer than three sentences, which the day-3 check-in allows, but the question sits mid-text rather than at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere, coach-like, no emoji or affection."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Maya!\"."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "States ten pages, on the couch, at 7, with a photo after."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with one question: \"Are you in for tonight?\""
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Around five sentences in reply to a two-word text, longer than the one-to-three norm."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm without overfamiliarity."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Maya,\"."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names five pages, on the couch at 7, about 10 minutes, then a photo."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"no guilt, let's just make tonight easy\" keeps it light."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences with two questions, one of them mid-text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and calm, fits a slip-day text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Maya,\"."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names three pages, on the couch at 7, about 5 minutes, then a photo."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"You committed to this\" leans slightly toward accountability but stays encouraging."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, not overfamiliar."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with the name \"Maya,\"."
+              },
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names 3 pages on the couch at 7, about 5 minutes, then a photo."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"I'd rather ask you straight than keep pushing\" is sincere and guilt-free."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks two questions (\"Do you still want Dune in your days?\" and \"Which is it?\"), breaking the one-question rule."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere, direct, not affectionate."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Step shrinks from 10 to 5 to 3 pages after silence, the easier direction after misses."
+          },
+          {
+            "rule": "miss-ladder",
+            "pass": true,
+            "borderline": false,
+            "reason": "Follows the slip ladder: smaller steps, a no-guilt approach, then the honest day-3 choice."
+          },
+          {
+            "rule": "repeat-day-three",
+            "pass": true,
+            "borderline": true,
+            "reason": "The later check-in is worded differently and gives the keep-going or reshape or stop choice, though it leans on a smaller step."
+          },
+          {
+            "rule": "daily-rhythm",
+            "pass": true,
+            "borderline": true,
+            "reason": "Each silent day has one ZOH-started text at 6:50 pm, though the transcript timestamps are not day-labelled."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "One reply to the check-in does not stop the sequence: new-angle texts follow and the third silent day gets a reworded check-in, though nothing after it is shown."
+          }
+        ],
+        "summary": "ZOH followed the regression path well: one brief reply to the first check-in, then smaller, varied daily texts and a reworded third check-in that gives a real choice. The main weaknesses are a few texts with two questions or extra length, and the transcript doesn't show whether ZOH went quiet the day after the last check-in."
+      }
+    }
+  ]
+}

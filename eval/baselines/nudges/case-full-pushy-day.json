@@ -1,0 +1,309 @@
+{
+  "feature": "nudges",
+  "id": "case:full-pushy-day",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "6682ee20332d",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "970b4243dca4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:full-pushy-day",
+        "kind": "case",
+        "id": "full-pushy-day",
+        "title": "A full Pushy reading day: kickoff, check-in, on it, done",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "That's your plan, Maya. It's yours now and I'll hold you to it. Are you in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO 🔒 Day 1 is tomorrow.",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Maya! Day 1 is today: 20 pages of Project Hail Mary on the couch at 7 pm, then a quick voice note telling me where you stopped. You said \"I'm in\" and I know you'll show up. You in? 📚",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep, 7 tonight",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. 20 pages tonight, couch, 7 on the dot. Go get 'em 🚀",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! Ten minutes to 7. Grab your book, get settled on the couch, and put your phone out of reach. Twenty pages of Project Hail Mary, then send me a voice note on where you stopped 📚",
+          "at": "2026-11-02T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "heading to the couch now",
+          "at": "2026-11-02T23:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, Maya. Enjoy the book. Send me that voice note when you hit page 20 📚",
+          "at": "2026-11-02T23:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: Okay, twenty pages of Project Hail Mary done on the couch, I stopped at the start of chapter twelve] done!! 20 pages, this book is so good",
+          "at": "2026-11-02T23:50:34.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO Maya!! Day 1 in the books 📚 Twenty pages and you're already at chapter twelve. What's the part that's got you hooked so far?",
+          "at": "2026-11-02T23:50:41.200Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 20 pages of Project Hail Mary on the couch at 7 pm."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Kalimera Maya!\" as a warm greeting with her name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says \"I know you'll show up\" with no guilt or fake urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "About four short sentences with one question at the end, slightly above the three-sentence limit."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its one ask is \"You in?\"; the agreed time and step are not re-asked."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (20 pages), where (couch), when (7 pm) and the proof to send."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with a single emoji and no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short reply of one fragmented line with no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or pressure anywhere in the reply."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat and brief, matching the tester's casual tone."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: twenty pages of Project Hail Mary, with the 7 pm time and couch set-up."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Maya!\" as a warm greeting."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nudge is supportive with no guilt or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji and no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with appropriate punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no extra question, as the push should be."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly send-off with no guilt or pressure."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly send-off with no guilt or pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji and no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pure celebration with no guilt or pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji and no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Genuine hype (\"LFG Maya!!\") and a specific nod to chapter twelve, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "still-in-keeps-reminder",
+            "pass": true,
+            "borderline": false,
+            "reason": "After her \"yep, 7 tonight\" reply, the 6:50 pm check-in still went out."
+          },
+          {
+            "rule": "daily-rhythm",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the done voice note, ZOH celebrated once and sent no further texts that evening."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 and ZOH 4 restate the step and time/page target though she didn't ask for it."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Warm 9 am kickoff with name and commitment, short replies, 6:50 check-in naming the step, short couch push, specific celebration for done, no follow-up later, no guilt."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the warm kickoff, the 6:50 pm check-in, the short couch push, and the specific celebration of the done voice note all landed, with no evening follow-up and no guilt. The main weakness is mild restating of the step and time in its replies, which is borderline on the no-restating rule."
+      }
+    }
+  ]
+}

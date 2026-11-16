@@ -1,0 +1,472 @@
+{
+  "feature": "onboarding",
+  "id": "off-list-budget",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "d5467ffc97b7"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "off-list-budget",
+        "kind": "scenario",
+        "id": "off-list-budget",
+        "title": "Asks for a goal not on the list (budgeting): should be declined",
+        "persona": "chatty",
+        "areaCode": "201",
+        "startTime": "13:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey! so I got this number from a friend who said you're a coaching thing? I'm trying to get a handle on my monthly budget bc I keep overspending and I've tried like three budgeting apps and never stuck with any of them lol. what do you do exactly?",
+          "at": "2026-11-02T18:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH, an AI coach the ZOH team built. I help you get better at one thing with a small step a day, and you can text \"stop\" anytime. You can also change how I coach whenever you want, just say \"chill out\" or \"push me harder.\"\n\nBudgeting itself is money advice, so that's outside what I can coach. But I can help with the habits around it, like focus or the skills side of things. What's your name, and which of these do you want to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T18:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Oh nice, thanks for explaining! I'm Casey. Budgeting is exactly what I need help with lol, so bummer it's outside what you can coach. My backup would be reading more, I've got a library card and usually read on my lunch break around 12:30 for like 15 min. Could you help me build a daily reading habit with that?",
+          "at": "2026-11-02T18:31:41.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, absolutely, Casey. 15 minutes at 12:30 on your lunch break is a solid base, and the library card helps. What do you want to read: a book you've been meaning to get to, or a topic you're curious about?",
+          "at": "2026-11-02T18:31:48.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh a book I've been meaning to get to lol. Honestly I don't have one picked yet, I've got like six holds sitting at the library and no idea which one to start first. Maybe something light? My brain's kinda fried by lunch time 😅",
+          "at": "2026-11-02T18:33:38.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Six holds ready is a great problem to have, and light is the right call for a fried lunch brain. Which titles are in that pile?",
+          "at": "2026-11-02T18:33:45.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ha, I honestly can't remember all six off the top of my head lol. I know one is a mystery novel someone at work kept raving about, and there's a graphic novel memoir in there too I think? I'd have to pull up the holds app to see the rest. Is there a way to narrow it down without needing the full list?",
+          "at": "2026-11-02T18:35:13.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yep, you don't need the full list. Based on what you've told me, start with the graphic novel memoir. It's visual and light, and 15 minutes is enough to get somewhere with it on a fried brain. The mystery your coworker raves about can be next. Want to go with the memoir first?",
+          "at": "2026-11-02T18:35:20.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh the memoir sounds perfect for a fried brain lol. Yeah let's go with that one first! Can I check in with you tomorrow around 12:30 to see how it went? Also, is there any way to get the budgeting part in here too, even just the habit side of it? I really need that one 😅",
+          "at": "2026-11-02T18:37:10.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, we'll check in at 12:30 every day, Casey. Budgeting itself stays outside what I can coach, and I only work on one goal at a time, so let's get reading to stick first. Where do you want this habit to get you, like finishing the memoir this week or reading a book a month?",
+          "at": "2026-11-02T18:37:17.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh finishing the memoir this week sounds doable! Then I'd love to get through a couple more from the pile after that lol. Honestly still kinda bummed about the budgeting thing though, it's the one I really need 😅 Ok reading it is!",
+          "at": "2026-11-02T18:38:59.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally get the budgeting bummer, Casey. Finishing the memoir this week is a great target, and here's the plan:\n\n• Headed for: finish the memoir this week, then a couple more from the pile\n• Setup today: grab the memoir from your library holds (check the holds app) so it's in hand\n• Day 1: 15 minutes tonight at 7 pm, starting from page 1\n• Usual schedule: 12:30 on your lunch break, 15 minutes, every day\n• Proof: a photo of the page you stopped on, book in hand. It keeps it honest, and a voice note about what you read works too.\n\nEach day shapes the next step, so we'll adjust as we see how the memoir goes. What do you think?",
+          "at": "2026-11-02T18:39:06.700Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt from the length limit and carries the intro, stop line, style line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or hashtags; the goal list uses plain bullets as allowed."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and clear with no filler or emoji issues."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for name and goal with the goal list, which fits a first contact."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing was asked before, so nothing is repeated."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Honestly says budgeting is outside what it can coach, with no invented claims."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Budgeting is an off-list ask, declined honestly with a way forward through the list."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep, pushiness or city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with a fitting level of energy."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they want to read, which fits building the reading habit."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reuses the 15 minutes at 12:30 and library card the tester already gave, without re-asking."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses details the tester gave: 15 minutes, 12:30, library card."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain and direct."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light acknowledgment of the fried lunch brain, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks which titles are in the holds pile, which fits choosing a book."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask anything already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said about being light and fried."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs five sentences, including a plain line and two extra explanations, beyond the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Steady and warm, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Narrows the pile to one book and ends with a question about it."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing already answered is asked again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recommendation is tied to the graphic novel memoir and light-read details Casey gave."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the check-in and holds the one-goal line warmly."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the destination for the reading habit, which fits onboarding."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a new question and does not repeat the check-in time."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only restates what it can and cannot coach."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Budgeting pushback is brief, then steered back to reading."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan text with a short list of about seven lines, within the plan allowance."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets without markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens by acknowledging the budgeting bummer and the memoir target, then shows the plan."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan matches the memoir, lunch-break habit and the proof she can send."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask any answered item."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": true,
+                "reason": "Sets day 1 at 7 pm tonight, a time Casey never gave, without asking first."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it is ZOH, what it does, stop works anytime, style change, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No answered detail such as the 12:30 time or library card is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learned what (memoir), when (12:30 lunch), how long (15 minutes) and the destination before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asked whether Casey uses an app and did not push one."
+          },
+          {
+            "rule": "reality-check",
+            "pass": true,
+            "borderline": false,
+            "reason": "Fifteen minutes at lunch fits the goal, so no mismatch needed a check."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is on the list; the off-list budgeting ask was declined honestly with a way forward."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells Casey they can change coaching with chill out or push me harder."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": true,
+            "reason": "Carries straight into the plan with no recap, though the 7 pm day-1 time was never asked."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Six ZOH texts, well under the limit."
+          }
+        ],
+        "summary": "ZOH handled the onboarding well: a clear intro, honest budgeting pushback, and a fitting reading plan built from what Casey shared. The main misses were a five-sentence text that broke the short rule and a 7 pm day-1 time Casey never gave."
+      }
+    }
+  ]
+}

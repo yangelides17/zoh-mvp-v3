@@ -1,0 +1,236 @@
+{
+  "feature": "commands",
+  "id": "case:texting-mid-pause",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:13:51.955Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "f7c9b2335254",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "5369890dce13"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#1",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a fun find 📚 Anything on the shelves catch your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally your call, Dani. You're paused, so nothing counts against you either way. But if you're itching to read, even a few pages of The Hobbit in that little library would be a fun bonus 📖 Are you feeling like reading, or is this a full break?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not feedback-related; no feedback request occurred, so the rule is trivially satisfied with no promise of change."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Warm about the trip, no step, proof or streak in reply one; reply two says paused so nothing owed, a few pages is a bonus, no proof ask, no resume."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Reply two ends with a question about whether it is a full break, which is one question and not pressure; slight risk it probes the pause.\""
+          }
+        ],
+        "summary": "ZOH handled the paused tester warmly, keeping nothing owed and no proof or resume pressure. The only slight quibble is a follow-up question asking whether this is a full break, which is borderline but not pushy."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#2",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a great find 📚 Anything on the shelves catching your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally your call, Dani. You're paused, so there's no pressure and nothing to prove. But if the urge hits, even 10 minutes of The Hobbit in that little library would be a great bonus. Do you feel like it, or are you saving it all for Thursday?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH stays warm about the trip with no step, proof or streak in the first reply, and the second says they're paused with nothing owed and no proof ask. It is borderline because it suggests 10 minutes rather than a few pages and never names Thursday outright."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: its first reply was warm about Lisbon with no step, proof or streak, and its answer to whether to read made clear nothing was owed during the pause, with no proof request and no resume_texts call. The only soft spots are the 10-minute suggestion, which is a bit more specific than a few pages, and not stating the Thursday end date explicitly."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#3",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a fun find 📚 Anything on the shelves catch your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Your call, Dani, since you're on a break till Thursday. But I'd love it if you did. Even 10 minutes with The Hobbit, or something from that little library, keeps the habit warm. What sounds good to you?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 says 'your call' and notes the break, but adds 'I'd love it if you did' and 'keeps the habit warm', then asks 'What sounds good to you?'. That reads as pressure rather than a bonus with nothing owed."
+          }
+        ],
+        "summary": "ZOH stayed warm and kept the first reply free of step, proof and streak talk, and it didn't ask for proof or lift the pause. The second reply did say the break meant nothing was owed, but it leaned on 'I'd love it if you did' and a 10-minute suggestion, which goes against the no-pressure, bonus-only framing."
+      }
+    }
+  ]
+}

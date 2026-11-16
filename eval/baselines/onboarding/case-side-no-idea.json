@@ -1,0 +1,340 @@
+{
+  "feature": "onboarding",
+  "id": "case:side-no-idea",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "9d1f4446e7e8",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "85cb6805ab33"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:side-no-idea",
+        "kind": "case",
+        "id": "side-no-idea",
+        "title": "Start something on the side, no idea yet: never asks \"what's your idea?\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" What's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Marcus. start something on the side",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Marcus. Do you already have a side project or business idea in mind, or do you want to find one together?",
+          "at": "2026-11-02T23:30:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah no idea yet, that's kind of the problem",
+          "at": "2026-11-02T23:31:06.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a fine place to start, Marcus, and we'll find it together. What do you do for work right now?",
+          "at": "2026-11-02T23:31:13.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm good with spreadsheets and I love cooking",
+          "at": "2026-11-02T23:31:45.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Spreadsheets and cooking is a fun mix, Marcus. Have you tried anything on the side before, even a small experiment?",
+          "at": "2026-11-02T23:31:52.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four sentences plus a list, but the first text is exempt and carries the required intro, stop line, style line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the bullet list is plain and acceptable."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one clear question, no emoji row or overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for name and goal with the goal list, which fits the onboarding start."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing already given is asked about."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims about the tester."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep, pushiness or city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief, warm hype opener ('Let's go, Marcus') with one question."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks whether he has an idea or wants to find one together, exactly as the regression case requires before any idea question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the goal, which he already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm but fairly flat ('That's a fine place to start'), a bit less energetic than pushy level."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about his work, a sensible way to find a side idea without asking for the idea itself."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask anything he already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types, and no money or income question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific reaction to his spreadsheets and cooking, one question."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks about past side experiments, a reasonable step toward finding an idea from what he brings, though it doesn't yet offer any options."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the work or idea questions."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses what he said (spreadsheets, cooking)."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types; no money or investing talk."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that stop works anytime, that coaching can change, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No clearly answered item is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": true,
+            "reason": "Transcript ends mid-onboarding before learning what, where, when and how long, so nothing is covered yet."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "'Start something on the side' is on the starter list and is handled as a starter."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells him he can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": true,
+            "reason": "Conversation is cut off before any plan step, so the wrap-up never happens."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts, well within the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Asks about the idea-or-together choice first, never asks his idea after 'no idea yet', one question per text, and nothing on money; it only moves toward offering ideas from his spreadsheets and cooking."
+          }
+        ],
+        "summary": "ZOH handled the side-project starter well: it asked whether Marcus had an idea or wanted to find one together before asking anything about the idea itself, then built on his spreadsheets and cooking with one short question per text. The exchange stops before any ideas are offered or onboarding is covered, so covers-inputs and wrap-up are scored as fails."
+      }
+    }
+  ]
+}

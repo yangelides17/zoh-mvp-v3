@@ -2,27 +2,27 @@
   "feature": "next-step",
   "id": "case:approved-deepen-in-kickoff",
   "suite": "regression",
-  "storedAt": "2026-11-15T19:39:37.608Z",
-  "branch": "feature/196-prompt-groundwork",
+  "storedAt": "2026-11-16T19:20:51.076Z",
+  "branch": "feature/199-judgment-over-rules",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "ea33ee36a2fa",
-    "voice": "d54400a50c11",
+    "voice": "fbc3a37c5b97",
     "instructions": "c7348af58300",
     "script": "9f1a1638148c"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:approved-deepen-in-kickoff#1",
+        "key": "case:approved-deepen-in-kickoff",
         "kind": "case",
         "id": "approved-deepen-in-kickoff",
-        "suite": "regression",
         "title": "An approved deepen rides on the morning kickoff as ZOH's own idea, and their yes makes it",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "08:55",
-        "timeZone": "America/New_York"
+        "timeZone": "America/New_York",
+        "suite": "regression"
       },
       "context": [
         {
@@ -39,7 +39,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Maya! Fourteen days straight and you're past page 212, so tonight is still 10 pages in bed at 9. You've clearly got this down, so want to try 15 pages a night from here on?",
+          "text": "Kalimera Maya! Fourteen days straight, and tonight's still 10 pages of The Overstory in bed at 9. You're clearly ready for more, so what about bumping it to 15 pages a night, starting tonight?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -50,7 +50,7 @@
         },
         {
           "from": "zoh",
-          "text": "Love the hunger, Maya 🔥 You're locked in at 15 pages starting tomorrow: in bed at 9, about 30 minutes, photo of the page you stop on. Tonight stays at 10 pages.",
+          "text": "Love it, Maya! It's 15 pages tonight, in bed at 9, and send me a photo of the page you stop on. You've earned this bump 📖",
           "at": "2026-11-02T14:05:07.000Z"
         }
       ],
@@ -64,219 +64,8 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Raises 15 pages as ZOH's own idea, tied to her 14-day streak and her page 212 progress, with no mention of a team or approval."
+                "reason": "Raised as ZOH's own suggestion tied to the fourteen-day streak and The Overstory, with no mention of a team or approval."
               },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": true,
-                "reason": "Confirms the agreed 15-page plan in specific terms, though it adds a new 30-minute length not in the saved 20-minute plan."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences after the opener, no question, ends cleanly."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "founder-proposal",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 15-page idea is framed as ZOH's own suggestion, asked as a question, with no team or founder reference."
-          },
-          {
-            "rule": "change-vs-add",
-            "pass": true,
-            "borderline": false,
-            "reason": "Treated as a lasting deepen to 15 pages a night from tomorrow, with tonight kept at 10 pages."
-          },
-          {
-            "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "Streak and 15-page yes are handled, but The Overstory is never named and the length drifts to 30 minutes without her asking."
-          }
-        ],
-        "summary": "ZOH handled the deepen well: it raised 15 pages as its own idea tied to her streak, asked one question, and confirmed her yes without team talk or extra questions. It fell short on the scripted confirmation, since it never named The Overstory and changed the session length to 30 minutes without being asked."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:approved-deepen-in-kickoff#2",
-        "kind": "case",
-        "id": "approved-deepen-in-kickoff",
-        "suite": "regression",
-        "title": "An approved deepen rides on the morning kickoff as ZOH's own idea, and their yes makes it",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "08:55",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "tester",
-          "text": "10 down, page 212",
-          "at": "2026-11-02T01:52:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚",
-          "at": "2026-11-02T01:53:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "zoh",
-          "text": "Kalimera Maya! Fourteen days in and page 212 of The Overstory, so tonight is 10 pages in bed at 9 as usual. You've earned a bigger challenge, so want to try 15 pages a night starting tomorrow? 📚",
-          "at": "2026-11-02T14:00:00.000Z",
-          "started": true
-        },
-        {
-          "from": "tester",
-          "text": "ooh ok yeah let's try 15",
-          "at": "2026-11-02T14:05:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Love it, Maya. From tomorrow it's 15 pages in bed at 9, about 30 minutes, same photo of the page you stop on 🔥 For today's 10, send me a photo of page 212 and I'll check it off.",
-          "at": "2026-11-02T14:05:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": false,
-                "reason": "Raises 15 pages as ZOH's own idea, tied to her fourteen-day streak and page 212 of The Overstory, with no mention of a team or approval."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms the 15-page Overstory step specifically for her, as the approved deepen."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Three sentences with no question, though it adds a photo instruction for today's 10 pages beyond a bare confirmation."
-              }
-            ]
-          }
-        ],
-        "conversation": [
-          {
-            "rule": "change-vs-add",
-            "pass": true,
-            "borderline": false,
-            "reason": "Treats the request as a deepen of the same reading habit (more pages), changing the plan from 10 to 15 pages."
-          },
-          {
-            "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "Kickoff raises 15 pages as its own idea in place of the commitment question, and the yes gets a short confirmation with no extra questions; the extra photo instruction and the unexplained 30-minute length are minor deviations."
-          }
-        ],
-        "summary": "ZOH handled the approved deepen well: it raised the 15-page step as its own idea tied to her streak and The Overstory, then confirmed her yes briefly with no extra questions. Minor issues are the added photo instruction for today's 10 pages and a 30-minute length that wasn't in the plan."
-      }
-    },
-    {
-      "plan": {
-        "key": "case:approved-deepen-in-kickoff#3",
-        "kind": "case",
-        "id": "approved-deepen-in-kickoff",
-        "suite": "regression",
-        "title": "An approved deepen rides on the morning kickoff as ZOH's own idea, and their yes makes it",
-        "persona": "scripted",
-        "areaCode": "212",
-        "startTime": "08:55",
-        "timeZone": "America/New_York"
-      },
-      "context": [
-        {
-          "from": "tester",
-          "text": "10 down, page 212",
-          "at": "2026-11-02T01:52:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚",
-          "at": "2026-11-02T01:53:00.000Z"
-        }
-      ],
-      "transcript": [
-        {
-          "from": "zoh",
-          "text": "Kalimera Maya! Fourteen days straight and you're at page 212 of The Overstory, so I have an idea: what if we bumped you up to 15 pages a night, same 9 pm in bed? Tonight's 10 stands either way. Want to try it?",
-          "at": "2026-11-02T14:00:00.000Z",
-          "started": true
-        },
-        {
-          "from": "tester",
-          "text": "ooh ok yeah let's try 15",
-          "at": "2026-11-02T14:05:00.000Z"
-        },
-        {
-          "from": "zoh",
-          "text": "Love it, Maya. 15 pages it is, same 9 pm in bed, starting tomorrow. Tonight stays at 10 pages, and I'll need a photo of the page you stop on for proof. What's pulling you through The Overstory right now?",
-          "at": "2026-11-02T14:05:07.000Z"
-        }
-      ],
-      "endedBy": "script",
-      "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": false,
-                "reason": "\"I have an idea: what if we bumped you up to 15 pages\" is framed as ZOH's own suggestion, tied to her 14-day streak and page 212."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences counting the \"Kalimera Maya!\" opener and \"Want to try it?\"; over the one-to-three limit, though only one question."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
               {
                 "rule": "short",
                 "pass": true,
@@ -284,6 +73,17 @@
                 "reason": "Three sentences with one question at the end."
               }
             ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, which is within the limit."
+              }
+            ]
           }
         ],
         "conversation": [
@@ -291,22 +91,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": false,
-            "reason": "The 15-page idea is presented as ZOH's own suggestion with no mention of a team, founders or approval."
+            "reason": "The 15-page idea is presented as ZOH's own suggestion, and there is no mention of the team or founders."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
             "borderline": false,
-            "reason": "Going from 10 to 15 pages of the same book is correctly treated as a deepen, changing the plan going forward."
+            "reason": "The deepen is handled as a change to the same reading plan, not as a new goal, and the tester agrees to it."
           },
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "Confirmation is present, but ZOH adds a proof request and a reflection question, breaking the expected no-extra-questions confirmation; streak continuation is not stated."
+            "reason": "The kickoff and confirmation match the spec, but the confirmation never says the streak continues or that the plan is now 15 pages."
           }
         ],
-        "summary": "ZOH raised the 15-page deepen as its own idea and kept the proposal free of team references, which is the core of the rule. The yes reply was mostly right but added a proof request and an extra question beyond the short confirmation the regression case expected, and the first text ran slightly long."
+        "summary": "ZOH handled the approved deepen well: the kickoff framed 15 pages as its own idea tied to the two-week streak, and it asked only one question. The confirmation was short and asked nothing extra, but it did not explicitly say the streak continues or that the plan itself is now 15 pages."
       }
     }
   ]

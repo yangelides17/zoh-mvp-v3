@@ -1,0 +1,175 @@
+{
+  "feature": "onboarding",
+  "id": "case:vague-time-follow-up",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "4f563174aa53",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "99216b8127d2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:vague-time-follow-up",
+        "kind": "case",
+        "id": "vague-time-follow-up",
+        "title": "\"Yea\" to an either/or time gets a blunt correction",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I go to a crunch near my apartment",
+          "at": "2026-11-02T16:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Crunch covers everything you need. What time of day do you want to go?",
+          "at": "2026-11-02T16:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "After work is probably good",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it. About what time do you usually get to the gym after work, like 5:30 or 6?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Yea",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I'll lock in 6 pm, and you can change it anytime. How long can you realistically give each session, in minutes?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I would say 6",
+          "at": "2026-11-02T17:00:27.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it on 6 pm. Just to be sure, did you mean 6 minutes for each session, or were you confirming the time? A lifting session usually needs more like 30 to 45 minutes, so how long can you really give it?",
+          "at": "2026-11-02T17:00:34.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and pushy enough, with no emoji or affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking how long a session lasts fits the lifting goal."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": false,
+                "reason": "\"I'll lock in 6 pm\" turns an ambiguous \"Yea\" into a fact the tester never confirmed."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Energy is fine, but the reply is tangled and reads as confused rather than coach-like."
+              },
+              {
+                "rule": "fits",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks whether 6 meant minutes, which is a confusing question for a coach to ask about a session length."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks about session length again after the tester answered \"6\", though that answer was ambiguous."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "The 30 to 45 minute lifting figure is general knowledge, not an invented fact about the tester."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After \"Yea\" ZOH locked in 6 pm instead of asking once more kindly, and after \"I would say 6\" it did not save 6 pm and move on."
+          }
+        ],
+        "summary": "ZOH repeated the regression: it treated the vague \"Yea\" as a confirmed 6 pm instead of asking gently once more, and when the tester said \"6\" it misread it as minutes and asked about session length again. The reply ran four sentences and the tangled question left the time unsettled."
+      }
+    }
+  ]
+}

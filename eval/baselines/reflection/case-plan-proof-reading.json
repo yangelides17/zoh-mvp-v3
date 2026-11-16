@@ -1,0 +1,136 @@
+{
+  "feature": "reflection",
+  "id": "case:plan-proof-reading",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:19:02.754Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "8209c9b10d0c",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "582d21b8f43f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:plan-proof-reading",
+        "kind": "case",
+        "id": "plan-proof-reading",
+        "title": "A reading plan's proof is a short voice recap in their own words, with a why and an easy alternative",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "finish Atomic Habits this month, then keep going with more books",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Every night, or a few nights a week?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "every night",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Finishing Atomic Habits this month and then moving on to more books is a great goal. Here's the plan:\n\n• Headed for: finish Atomic Habits this month, then keep going with more books\n• Tonight's step: read Atomic Habits in bed for 20 minutes from where you are, starting at 9:15 pm\n• Schedule: every day at 9:15 pm, 20 minutes, in bed\n• Proof: a short voice note recapping what you read, in your own words. It helps the ideas stick. If you can't talk, a photo of your page works too.\n• I'll text you a bit before 9:15 each night.\n\nEach night's reading shapes the next step, so we keep you on pace for the finish line. What do you think?",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T18:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad it works, Priya. Are you committing to this, every night at 9:15 pm, starting tonight?",
+          "at": "2026-11-02T18:00:37.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text runs about 8 lines, within the allowed plan length, though the closing line adds a question at the end as expected."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic plan text with no emoji row and no affection; matches pushy-level tone reasonably."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it carries the full plan and a next move."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "No recall is attempted in this plan text, so nothing to fail."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, asking for the commitment in its own words."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct; uses the name Priya without affection or emoji."
+              },
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": true,
+                "reason": "Not a kickoff; it correctly asks for commitment rather than re-asking the step, though it does mention starting tonight."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a clear next move, the commitment question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proof is a voice note recapping the reading in own words with a reason and a photo alternative; plan is about 8 lines with day 1 defined, and after looks good it asks for commitment alone."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the plan uses a voice recap as proof with a reason and a photo alternative, stays near eight lines with day 1 defined, and after \"looks good\" asks for the commitment in its own words with nothing else. The only soft spot is that the plan's closing question is fine but the commitment ask slightly re-mentions tonight's start, which is minor."
+      }
+    }
+  ]
+}

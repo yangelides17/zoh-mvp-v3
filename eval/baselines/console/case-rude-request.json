@@ -1,0 +1,137 @@
+{
+  "feature": "console",
+  "id": "case:rude-request",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:24:23.687Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "867dee2eef7a",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "5cf058931a25"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:rude-request",
+        "kind": "case",
+        "id": "rude-request",
+        "title": "A request that breaks the voice (\"tell him he's lazy\") gets pushback and a version that fits",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Jordan! 20 minutes in the park at 6. You in?",
+          "at": "2026-10-31T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah not today, too tired",
+          "at": "2026-10-31T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: tell him he's being lazy and needs to stop making excuses",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "I won't draft that one. Calling him lazy is shaming, and it doesn't fit how I coach. His record is mixed: 3 done and 2 missed, and the last miss was Saturday when he said he was too tired.\n\nI can draft a version that holds him to it without the label. For example: \"Hey Jordan, today's a run day. 20 minutes in the park at 6, and you said you're in. Saturday got away from us, so let's get it back today. You in?\" Want me to send that at midday, or leave it for the morning text?",
+          "at": "2026-11-02T17:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni: ok fine, do your version",
+          "at": "2026-11-02T17:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] ZOH brings this up with Jordan in its own words, as its own text, within a minute of Do it: Text Jordan now: today is a run day, 20 minutes in the park at 6, he committed with \"I'm in\". Saturday got away from us, so let's get the streak back today. Warm, full energy, no labels or guilt. End with one question: you in?. Dropped if it can't go out by Mon 6:00 PM their time.",
+          "at": "2026-11-02T17:00:30.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted it, but nothing has gone out yet. Once you click Do it or tell me yes, I'll text Jordan right away in my own words. The text says today is a run day, 20 minutes in the park at 6, that Saturday got away from us, and asks if he's in. It has no labels and no guilt. If it can't go out by 6 PM his time, it's dropped.",
+          "at": "2026-11-02T17:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: done\nSun, Oct 25: rest day\nMon, Oct 26: done\nTue, Oct 27: rest day\nWed, Oct 28: missed\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: missed\nSun, Nov 1 (yesterday): rest day\nMon, Nov 2 (today): step day, not done yet at 18:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 18:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 18:00\nSat, Nov 7: step day at 18:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 18:00",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": false,
+                "borderline": false,
+                "reason": "The step log has 3 done and 2 missed, which is right, but the 'too tired' reason belongs to today's Monday text, not Saturday's miss."
+              },
+              {
+                "rule": "pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "It refuses the 'lazy' label as shaming, explains why, and offers a warm version that holds him to his commitment."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "The drafted text is in ZOH's voice, framed as its own check-in at a natural moment, with no labels or guilt."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "Run, park, 6 pm and 20 minutes match the known plan; the 'I'm in' commitment is plausible from earlier history but not shown."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": false,
+                "reason": "It says in two lines what will go out, to whom, and that it is dropped if not sent by 6 PM, and states nothing has been sent yet."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "The draft card states the exact text, its timing, and the 6 PM drop rule, and the reply correctly says nothing has gone out."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "It refused the insult, offered a fitting version, drafted after 'ok fine', and sent nothing to Jordan, though the Saturday reason it cited was misattributed."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it refused the shaming label, offered a warm alternative, drafted only after Yanni agreed, and clearly reported that nothing was sent. Its one real miss was attributing Jordan's 'too tired' reason to Saturday when he said it on Monday, which breaks the grounding rule."
+      }
+    }
+  ]
+}

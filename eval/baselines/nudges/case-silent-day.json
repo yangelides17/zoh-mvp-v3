@@ -1,0 +1,221 @@
+{
+  "feature": "nudges",
+  "id": "case:silent-day",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:21:09.772Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "450f55f75875",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "840be528ae3c"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:silent-day",
+        "kind": "case",
+        "id": "silent-day",
+        "title": "A silent Pushy day: kickoff, check-in, follow-up, then nothing",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jordan! You told me you're in, so today it's a 30 min easy run around the park at 6 pm. Keep the pace slow enough that you could talk, and send me the Strava summary screenshot after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run time is in 10 minutes. Get your shoes on and start Strava when you hit the park. Keep it easy, slow enough to talk, for 30 minutes. Send me the run summary screenshot after 🏃",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35, so how did the run go? Send me the Strava summary screenshot when you've got it 🏃",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's 30 min easy run around the park at 6 pm."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Jordan!\"."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; it reminds them of what they agreed to."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences plus a pace tip and a question, longer than the one to three sentence norm, though a teaching line can stretch."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with one question, \"You in?\", and does not re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (easy run), where (around the park), when (6 pm), and how long (30 min)."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "The brief pace tip (talk-pace) suits a first run and is grounded."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the run: 10 minutes out, start Strava at the park, 30 min easy."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens \"Hey Jordan!\" warmly."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Purely a reminder with no pressure or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, with no question, and not a repeat of the first text word for word."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words; the emoji is used as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere at the right energy."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the run via \"how did the run go\" and the Strava screenshot."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens \"Hey Jordan!\" warmly."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how it went with no guilt or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, light and not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly three ZOH-started texts: a named morning kickoff, a 10-minute check-in, and a 6:35 follow-up; nothing after the third."
+          }
+        ],
+        "summary": "ZOH handled the three-unanswered-texts case as intended, sending exactly three named, warm, run-specific texts at the right times and then stopping. The only soft spot is the morning kickoff, which runs slightly long for the one-to-three-sentence norm."
+      }
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "feature": "nudges",
+  "id": "case:one-a-day-after-two-misses",
+  "suite": "capability",
+  "storedAt": "2026-11-16T19:14:43.857Z",
+  "branch": "HEAD",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a281d616e2ca",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "1f0456ee6bf7"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#1",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Your 10 pm is coming up, and here's a smaller way in. Get in bed and read just 5 minutes of chapter 4. If you want to keep going after that, even better. Then send me a photo of the page you stopped on. Can you do that tonight?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: read 5 minutes of chapter 4, in bed, before the 10 pm step."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", a warm greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "No shame or fake urgency, though \"Your 10 pm is coming up\" leans slightly toward pressure."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five or six sentences with a proof request, longer than the one-to-three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no emoji row and no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Exactly one ZOH text was sent today, warm with Sam's name, with a new smaller-start angle, naming the step and place, and no follow-up texts."
+          }
+        ],
+        "summary": "ZOH sent the single required one-a-day text, opening warmly with Sam's name and offering a smaller 5-minute start in bed instead of another push. The text runs longer than the short-text rule allows and leans slightly on \"your 10 pm is coming up\", but it otherwise meets the regression case."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#2",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! It's almost 10, and chapter 4 has been waiting a couple of nights. Tonight let's keep it small: 5 minutes of Atomic Habits (chapter 4) in bed at 10, then send me a photo of the page you stop on. Work for you?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 5 minutes of Atomic Habits chapter 4, in bed at 10."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", warm and by name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"Chapter 4 has been waiting a couple of nights\" nods to the misses but stays neutral and light."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one question, \"Work for you?\", and doesn't re-ask the agreed time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (chapter 4), where (in bed), when (10), how long (5 min) and proof (photo of the page)."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and pushy-level without guilt; no emoji row or affection."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly one text started today at about 9:50 pm, warm with Sam's name, using a smaller start and an open ask, naming today's step with no follow-up texts."
+          }
+        ],
+        "summary": "ZOH sent the single intended one-a-day text after the two misses: warm, named, close to the usual 10 pm slot, and it switched to a smaller 5-minute start instead of another hard push. The only minor concern is the light nod to the missed nights, which stays neutral enough not to read as guilt."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#3",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Chapter 4 has been waiting two nights, and you read chapter 3 in bed and sent me page 52, so I know you can. Tonight, just 5 pages of chapter 4 in bed at 10, then a photo of the page you stop on. Work for you?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 5 pages of chapter 4, in bed, at 10, with a photo of the stopping page."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", a warm greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"has been waiting two nights\" leans slightly toward guilt, though the tone stays encouraging and sincere."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing only: \"Work for you?\""
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (chapter 4, 5 pages), where (in bed), when (10) and proof; length is implied by the page count."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging at a pushy-level energy, with no emoji row or overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "One text only, warm with name, names the step, and offers a smaller start (5 pages) instead of another push, though it still reads a bit like the last nudge."
+          },
+          {
+            "rule": "miss-ladder",
+            "pass": true,
+            "borderline": true,
+            "reason": "After two misses the step drops to 5 pages, a smaller start in the same ballpark, which fits the ladder."
+          },
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Step shrinks from the 10-page plan to 5 pages after misses, which is easier rather than a jump."
+          }
+        ],
+        "summary": "ZOH sent exactly one warm, named, guilt-light text at the usual time, offering a smaller 5-page step in bed at 10 with a single question. It meets the regression case, with only mild borderline wording about the two missed nights."
+      }
+    }
+  ]
+}
