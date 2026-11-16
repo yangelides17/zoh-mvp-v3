@@ -21,12 +21,13 @@ import { evidenceText, type WeekLookback } from "./week.js";
 // (voice), the reasons, and the guidance that moved here from the status sheet's old orders (the rest).
 // #201: core and voice raised for weighing their idea and no assumptions in questions (a line each, with reasons),
 // and the voice's "make it harder" example made a contrasting pair.
+// #160: voice +100 for what they did and noticed beside how it felt, in Proof's reflection line.
 export const PROMPT_BUDGET_CHARS = {
   core: 5280,
   onboarding: 3700,
   examples: 800,
   /** The voice page without its rule sections. */
-  voice: 26_650,
+  voice: 26_750,
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
