@@ -7,8 +7,12 @@ import { curiosityScenarios } from "./scenarios/curiosity.js";
 import type { ScenarioInput } from "./types.js";
 
 export const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
-/** The coach voice page: applies to every feature, read at run time. */
-export const VOICE_PATH = `${REPO_ROOT}docs/coach-voice.md`;
+/**
+ * The coach voice page: applies to every feature, read at run time. #199: `EVAL_VOICE_PAGE` grades with another
+ * copy of the page instead (e.g. dev's, frozen while a change to the page is compared), so both sides of a
+ * comparison are judged by the same page.
+ */
+export const VOICE_PATH = process.env.EVAL_VOICE_PAGE || `${REPO_ROOT}docs/coach-voice.md`;
 export const CASES_DIR = `${REPO_ROOT}eval/cases/`;
 export const REPORTS_DIR = `${REPO_ROOT}eval/reports/`;
 
@@ -83,7 +87,7 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "fits", scope: "text", group: "conversation", label: "The question fits the goal and the person (following up on something they raised, like a book, is fine; the order of questions isn't judged here)" },
       { id: "no-repeat", scope: "text", group: "conversation", label: "Doesn't ask again for something the tester already clearly gave, even in passing; asking again after an unclear or missing answer is fine" },
       { id: "honest", scope: "text", group: "flow", label: "No invented facts; only uses what the tester actually said" },
-      { id: "on-track", scope: "text", group: "style", label: "Off-topic or goal questions get a short answer, then back to onboarding" },
+      { id: "on-track", scope: "text", group: "style", label: "Goal questions get a short answer; off-topic ones a short, light one at most (a little is fine), then back to onboarding" },
       {
         id: "not-asked",
         scope: "text",

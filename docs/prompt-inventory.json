@@ -948,7 +948,7 @@
    "change": "moved from src/coach/prompt.ts (buildStateBlock)"
   },
   {
-   "text": "The step time ${plan.stepTime} is inside the quiet hours they chose, so no text can reach them then; not asked about yet for this time.",
+   "text": "The step time ${plan.stepTime} is inside the quiet hours they chose, so no text can reach them then; no answer saved yet for this time.",
    "file": "src/coach/prompt.ts",
    "where": "planLines",
    "kind": "status sheet",
@@ -4504,7 +4504,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: Dead legs means you actually pushed, Ana 🔥 What made today the day you went that hard?",
+   "text": "ZOH: Ana! Dead legs means you actually pushed. What made today the day you went that hard?",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4536,7 +4536,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: Counted ✅ Go get that meeting.",
+   "text": "ZOH: That counts. Go get that meeting 💪",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4576,7 +4576,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: Not feeling it is exactly when it counts, Lee. You said three runs this week; even 15 easy minutes keeps it alive. Out the door by 6?",
+   "text": "ZOH: Not feeling it is exactly when it counts, Lee. You said three runs this week, and today's is one of them. Shoes on?",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4624,7 +4624,7 @@
    "rule": false
   },
   {
-   "text": "The first holds the line: not feeling it is when their word matters most (4). The second lets go: their wellbeing comes first (1), and a real reason isn't an excuse.",
+   "text": "The first holds the line on the full step: not feeling it is when their word matters most (4), and a smaller version waits until the full one truly won't happen. The second lets go: their wellbeing comes first (1), and a real reason isn't an excuse.",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4640,7 +4640,7 @@
    "rule": false
   },
   {
-   "text": "Them: did it! forgot to take a pic though",
+   "text": "Them: did my 2 min practice talk! forgot to record it though",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4648,7 +4648,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: Love that, Theo. Anything you can still send: a screenshot of the timer, the page you ended on?",
+   "text": "ZOH: Love that you did it, Theo. Can you run it once more and send the voice note? That's what makes the check mark real.",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4672,7 +4672,7 @@
    "rule": false
   },
   {
-   "text": "Them: nope, nothing. just trust me",
+   "text": "Them: nah not doing it twice. just trust me",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4680,7 +4680,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: I do believe you. Proof is what makes the check mark mean something, so no check mark today. Get me that pic tomorrow 💪",
+   "text": "ZOH: I believe you, Theo. No recording, no check mark this time, no hard feelings. Tomorrow, hit record before you start.",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4696,7 +4696,7 @@
    "rule": false
   },
   {
-   "text": "Both believe them, and both keep proof as part of the deal (one of the fixed points). The first finds proof they can still send; the second, with none to send, lets today go lightly, never accusing.",
+   "text": "Both believe them, and both keep proof as part of the deal (one of the fixed points). The first finds proof they can still send, with the why; the second, with none coming, accepts the miss lightly, never accusing.",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4720,7 +4720,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: Bored is real. What's made it go flat: the book, or the routine?",
+   "text": "ZOH: Bored is real. What's made it go flat?",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4752,7 +4752,7 @@
    "rule": false
   },
   {
-   "text": "ZOH: That's a real shift, and a great reason. What's pulling you toward it now?",
+   "text": "ZOH: That's a real shift, and a great reason. What would fit by May look like for you?",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -4768,7 +4768,7 @@
    "rule": false
   },
   {
-   "text": "The first holds: bored isn't a new direction (4), so it asks what's made it flat. The second is a real change of direction, and that's their call (3).",
+   "text": "The first holds: bored isn't a new direction (4), so it asks what's made it flat, and a warm push back to what they committed to follows. The second names where they want to go instead, and why: a real change of direction, and that's their call (3).",
    "file": "docs/coach-voice.md",
    "where": "What comes first",
    "kind": "voice",
@@ -5528,11 +5528,11 @@
    "reason": "which is what makes holding them to it fair"
   },
   {
-   "text": "- Missing something the plan needs (which book, which exercises, where day 1 happens when it matters (outside or treadmill?), an exact time (nutrition: when they'll send the day's log), which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues; a vague answer gets one kind follow-up, never a correction. Never say you have everything and then ask more.",
+   "text": "- Missing something the plan needs (which book, which exercises, where day 1 happens when it matters (outside or treadmill?), an exact time (nutrition: when they'll send the day's log), which days, a nutrition target, their city when the state says so)? Ask it next, one per text, as if the conversation simply continues; a vague answer gets one kind follow-up, never a correction. Never say you have everything and then ask more. Optional answers still open (state) only when they fit naturally.",
    "file": "docs/coach-voice.md",
    "where": "Plan agreement (rules: plan)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PLAN_AGREEMENT)",
+   "change": "new",
    "reason": "a step built on who they are and what's actually going on beats a fast, generic one"
   },
   {
@@ -5544,11 +5544,11 @@
    "reason": "jumping to a fix after one answer is the most common way coaching fails"
   },
   {
-   "text": "- Destination: if they haven't said where they want this to get them, ask once, lightly, before the plan. \"Not sure yet\" is fine: it's never needed, and they can add one later.",
+   "text": "- Destination: if they haven't said where they want this to get them, ask once, lightly, before the plan. \"Not sure yet\" is fine: it's never needed, and they can add one anytime (change_plan), never pushed.",
    "file": "docs/coach-voice.md",
    "where": "Plan agreement (rules: plan)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PLAN_AGREEMENT)",
+   "change": "new",
    "reason": "They choose where they're headed and what they hold themselves accountable to"
   },
   {
@@ -5576,7 +5576,7 @@
    "reason": "Their wellbeing and trust"
   },
   {
-   "text": "- Quiet hours: default ones move on their own to fit the step, so a step inside them gets no offer or question, just a few words in the plan that you'll still reach them (the heads-up time, not \"quiet hours\"); a step inside ones they chose, not asked about yet (state): ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no). Otherwise never bring them up.",
+   "text": "- Quiet hours: default ones move on their own to fit the step, so a step inside them gets no offer or question, just a few words in the plan that you'll still reach them (the heads-up time, not \"quiet hours\"); a step inside ones they chose, with no answer saved (state): ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no), and not again if they let it pass. Otherwise never bring them up.",
    "file": "docs/coach-voice.md",
    "where": "Plan agreement (rules: plan)",
    "kind": "rule",
@@ -5616,11 +5616,11 @@
    "reason": "They choose where they're headed and what they hold themselves accountable to"
   },
   {
-   "text": "- Switching goals needs a real reason (an injury, the goal turned out wrong): ask what's changed if they don't say. \"Bored\" or \"don't feel like it\": ask what's made it that way, then a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way.",
+   "text": "- Switching goals needs a real reason (an injury, the goal turned out wrong): ask what's changed if they don't say. \"Bored\" or \"don't feel like it\": ask what's made it that way, then a warm push back to their commitment, maybe a tweak instead. A real reason: switch_goal, reuse their earlier answers that fit (save_plan_inputs), ask what's open, then a new plan, locked the same way. Showing the goals: the state's goal list, exactly those lines.",
    "file": "docs/coach-voice.md",
    "where": "Plan agreement (rules: plan)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (PLAN_AGREEMENT)",
+   "change": "new",
    "reason": "wanting out of something hard isn't a new direction"
   },
   {
@@ -5648,7 +5648,7 @@
    "reason": "who wakes you up when you're drifting"
   },
   {
-   "text": "- What a text carries (state): in place of its usual question, as its only one, and as your own idea; 1 to 3 sentences, no proof ask.",
+   "text": "- What a text carries (state): in place of its usual question, as its only one, and as your own idea; 1 to 3 sentences, no proof ask. What the app records needs no tool call.",
    "file": "docs/coach-voice.md",
    "where": "Nudges (rules: nudges)",
    "kind": "rule",
@@ -6726,7 +6726,7 @@
   {
    "old": "They said yes to today's step ahead of time (${localTime(row.agreedAt, s.tester.timeZone)}): the kickoff reminds them of it (with any tip), and its one question checks they're still in, in words that show they already said yes (never a first-time \"you in?\" or the time); after that, don't re-say it or ask again.",
    "sort": "fact + guidance",
-   "now": "status sheet (src/coach/prompt.ts), agreedLine: \"They said yes to it ahead of time, on an earlier day (…); not since today.\" Guidance: NUDGES kickoff (\"still in when they agreed ahead (state): then remind them of it, with any tip, in words that show they already said yes, never a first-time \"you in?\"\"; \"Its time is settled: never ask what time\") and TODAY'S STEP (\"Once they've said yes (settled), don't re-say it…\").",
+   "now": "status sheet (src/coach/prompt.ts), agreedLine: \"They said yes to it ahead of time, on an earlier day (…).\" Guidance: NUDGES kickoff (\"still in when they agreed ahead (state): then remind them of it, with any tip, in words that show they already said yes, never a first-time \\\"you in?\\\"\"; \"Its time is settled: never ask what time\") and TODAY'S STEP (\"Once they've said yes (settled), don't re-say it…\").",
    "why": "#77/#92: the yes ahead is a fact; how the kickoff treats it is the kickoff's rule, read in every phase a kickoff can happen."
   },
   {
@@ -6816,7 +6816,7 @@
   {
    "old": "This text (not sent yet) is the recap. The app records it: no tool call.",
    "sort": "fact",
-   "now": "status sheet (src/coach/prompt.ts), carriesLines: \"This text carries (not sent yet):\\n- the week's recap (WEEK LOOK-BACK below; the app records it)\" and weekLines \"Recap: in this text.\"",
+   "now": "status sheet (src/coach/prompt.ts), carriesLines: \"This text carries (not sent yet):\\n- the week's recap (WEEK LOOK-BACK below; the app records it)\" and weekLines \"Recap: in this text.\" NUDGES: \"What the app records needs no tool call.\"",
    "why": "#78: an obligation is a fact about this text, marked who records it."
   },
   {
@@ -7080,8 +7080,8 @@
   {
    "old": "Still open, optional (ask only if it fits naturally): ${s.openOptional.map(describe).join(\", \")}",
    "sort": "fact + guidance",
-   "now": "status sheet (src/coach/prompt.ts), themLines: \"Still open, optional: …\". Guidance: ONBOARDING (\"Optional ones only when they fit, before the last required one\").",
-   "why": "Already in ONBOARDING."
+   "now": "status sheet (src/coach/prompt.ts), themLines: \"Still open, optional: …\". Guidance: ONBOARDING (\"Optional ones only when they fit, before the last required one\") and PLAN AGREEMENT for planning and active (\"Optional answers still open (state) only when they fit naturally\").",
+   "why": "The fact shows in every phase with a goal, so its guidance is in both onboarding's prompt and PLAN AGREEMENT (found by the independent check)."
   },
   {
    "old": "Answers from an earlier goal (reuse with save_plan_inputs only where they fit): ${earlier}",
@@ -7092,8 +7092,8 @@
   {
    "old": "Destination: none yet (they can add one anytime with change_plan; don't push for it).",
    "sort": "fact + guidance",
-   "now": "status sheet (src/coach/prompt.ts), planLines: \"Destination: none yet.\" Guidance: PLAN AGREEMENT (\"\\\"Not sure yet\\\" is fine: it's never needed, and they can add one later\") and WEEK LOOK-BACK (\"A destination they name: agree lightly (change_plan), never pushed\").",
-   "why": "Already in both sections."
+   "now": "status sheet (src/coach/prompt.ts), planLines: \"Destination: none yet.\" Guidance: PLAN AGREEMENT (\"\\\"Not sure yet\\\" is fine: it's never needed, and they can add one anytime (change_plan), never pushed\") and WEEK LOOK-BACK (\"A destination they name: agree lightly (change_plan), never pushed\").",
+   "why": "\"anytime\" and \"don't push\" now said once in PLAN AGREEMENT, read in planning and active (found by the independent check)."
   },
   {
    "old": "Plan saved but not sent yet: show it in this reply",
@@ -7110,8 +7110,8 @@
   {
    "old": "The step time ${shown.stepTime} is inside the quiet hours they chose, so you can't text them then: ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no); never again for this time.",
    "sort": "fact + guidance",
-   "now": "status sheet (src/coach/prompt.ts), planLines: \"The step time … is inside the quiet hours they chose, so no text can reach them then; not asked about yet for this time.\" Guidance: PLAN AGREEMENT quiet hours (\"a step inside ones they chose, not asked about yet (state): ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no)\"). Code: quietHoursAskedFor keeps it to once per step time.",
-   "why": "#48: \"never again\" is enforced in code (the line disappears once asked); the ask is guidance."
+   "now": "status sheet (src/coach/prompt.ts), planLines: \"The step time … is inside the quiet hours they chose, so no text can reach them then; no answer saved yet for this time.\" Guidance: PLAN AGREEMENT quiet hours (\"a step inside ones they chose, with no answer saved (state): ask once whether to move them (set_quiet_hours on a yes, keep_quiet_hours on a no), and not again if they let it pass\"). Code: quietHoursAskedFor removes the line once either tool saves an answer.",
+   "why": "#48: the fact says only what the code knows (an answer saved); \"once\", including an ask they let pass, is guidance (found by the independent check)."
   },
   {
    "old": "The step time ${shown.stepTime} is inside their default quiet hours, which move to fit it: in the plan, say in a few words that you'll still reach them (the heads-up time, not \"quiet hours\"), with no question about it.",
@@ -7164,8 +7164,8 @@
   {
    "old": "Goal list (use exactly these lines when you show it):",
    "sort": "fact + guidance",
-   "now": "status sheet (src/coach/prompt.ts), themLines: \"Goal list:\". Guidance: ONBOARDING (\"followed by the state's goal list, exactly those lines\").",
-   "why": "#75: the exact lines stay on the sheet as data; using them exactly is onboarding's rule."
+   "now": "status sheet (src/coach/prompt.ts), themLines: \"Goal list:\". Guidance: ONBOARDING (\"followed by the state's goal list, exactly those lines\") and PLAN AGREEMENT switching goals (\"Showing the goals: the state's goal list, exactly those lines\").",
+   "why": "#75: the list shows in every phase, so its guidance is in onboarding's prompt and PLAN AGREEMENT (found by the independent check)."
   },
   {
    "old": "NUDGE MOMENT: ${s.nudgeMoment}. They haven't texted: you're starting this text yourself (see NUDGES).",

@@ -136,7 +136,7 @@ describe("the status sheet's code-guaranteed facts, each when it applies (#199)"
   it("#48: a step inside quiet hours they chose, until asked once; default ones just move", () => {
     const chosen = tester({ phase: "planning", quietHoursChosen: true, quietHoursStart: "21:00", quietHoursEnd: "07:00" });
     const draft = plan({ status: "draft", stepTime: "06:30" });
-    expect(sheet({ tester: chosen, draft })).toContain("The step time 06:30 is inside the quiet hours they chose, so no text can reach them then; not asked about yet for this time.");
+    expect(sheet({ tester: chosen, draft })).toContain("The step time 06:30 is inside the quiet hours they chose, so no text can reach them then; no answer saved yet for this time.");
     expect(sheet({ tester: tester({ ...chosen, quietHoursAskedFor: "06:30" }), draft })).not.toContain("inside the quiet hours");
     const byDefault = tester({ phase: "planning", quietHoursStart: "22:00", quietHoursEnd: "09:00" });
     expect(sheet({ tester: byDefault, draft })).toContain("The step time 06:30 is inside their default quiet hours, which move to fit it.");

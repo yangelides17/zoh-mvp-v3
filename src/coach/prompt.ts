@@ -24,11 +24,11 @@ export const PROMPT_BUDGET_CHARS = {
   onboarding: 3700,
   examples: 800,
   /** The voice page without its rule sections. */
-  voice: 25_650,
+  voice: 25_850,
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
-  plan: 4480,
-  nudges: 2520,
+  plan: 4660,
+  nudges: 2550,
   todaysStep: 1890,
   proof: 3600,
   weekLookback: 2390,
@@ -342,7 +342,7 @@ function planLines(s: CoachState): string[] {
   const plan = t.phase === "active" ? s.plan : s.draft;
   if (plan && insideQuietHours(plan.stepTime, t)) {
     if (t.quietHoursChosen && t.quietHoursAskedFor !== plan.stepTime) {
-      lines.push(`The step time ${plan.stepTime} is inside the quiet hours they chose, so no text can reach them then; not asked about yet for this time.`);
+      lines.push(`The step time ${plan.stepTime} is inside the quiet hours they chose, so no text can reach them then; no answer saved yet for this time.`);
     } else if (!t.quietHoursChosen && t.phase === "planning") {
       lines.push(`The step time ${plan.stepTime} is inside their default quiet hours, which move to fit it.`);
     }
