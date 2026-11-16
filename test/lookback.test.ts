@@ -252,7 +252,7 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     // #199: the sheet says this text carries it (the app records it); how it opens the text is WEEK LOOK-BACK's guidance.
     expect(kickoff).toContain("This text carries (not sent yet):\n- last week's recap, owed since Sunday (LAST WEEK'S LOOK-BACK below; the app records it)");
     expect(WEEK_LOOKBACK).toContain("Owed from a silent Sunday (LAST WEEK'S LOOK-BACK): it opens the next text, before that text's own job, minus its question about the week, a miss in it named lightly, never the headline");
-    expect(kickoff).toContain("Last week: 6 done in full, 0 smaller, 1 missed");
+    expect(kickoff).toContain("Last week: 6 done in full (Mon, Tue, Wed, Thu, Fri, Sat), 0 smaller, 1 missed (Sun).");
     expect(kickoff).toContain("Their destination: a mile by Nov 14");
     expect(kickoff).not.toContain("WEEK LOOK-BACK, Mon 2026-11-09");
     expect(await day(MON2, "09:00", "09:00")).toEqual(["after_miss@09:00"]);
@@ -451,7 +451,7 @@ describe("the state block on Sunday", () => {
     expect(sunday).toContain(
       "WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: not given yet.\n" +
         // #103: the tally is the only count ZOH may give, and "each" only for what's true of every day.
-        "This week: 5 done in full, 0 smaller, 0 missed, today included (each day in Recent step days and Today above).\n" +
+        "This week: 5 done in full (Mon, Tue, Wed, Thu, Fri), 0 smaller, 0 missed, today included; rest days: Sun.\n" +
         'Understood this week (applied or recalled):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
         'Only explained so far (starting to click):\n- "Summarize each chapter in a line" (explained Fri 2026-11-06)\n' +
         "Their destination: finish Dune by Dec 1",

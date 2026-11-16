@@ -170,7 +170,9 @@ describe("the status sheet's code-guaranteed facts, each when it applies (#199)"
   it("#78, #102: Sunday's recap, not given, in this text (the 6 pm one, recorded by the app), then given", () => {
     const sunday = { today: "2026-11-15", now: at("2026-11-15T22:00:00Z") };
     expect(sheet({ ...sunday, week: week() })).toContain("WEEK LOOK-BACK, Mon 2026-11-09 to today. Recap: not given yet.");
-    expect(sheet({ ...sunday, week: week() })).toContain("This week: 1 done in full, 0 smaller, 1 missed, today included");
+    // #103, #199: the tally names its days and the rest days between them, so "in a row" or "every day" can be checked
+    // against the sheet itself (the eval caught "four step days in a row" across rest days once the order left it).
+    expect(sheet({ ...sunday, week: week() })).toContain("This week: 1 done in full (Mon), 0 smaller, 1 missed (Tue), today included; rest days: Sun.");
     const lookback = sheet({ ...sunday, week: week(), nudgeMoment: "lookback" });
     expect(carries(lookback)).toContain("- the week's recap (WEEK LOOK-BACK below; the app records it)");
     expect(lookback).toContain("Recap: in this text.");

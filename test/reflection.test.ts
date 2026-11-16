@@ -370,7 +370,7 @@ describe("the next step, agreed at the wrap-up", () => {
     expect(wed).toContain(`Today's step (set, holds for today): "${NEXT}"`);
     // #199: the sheet states the yes came ahead; reminding and checking they're still in is the kickoff's guidance (NUDGES).
     expect(wed).toContain("They said yes to it ahead of time, on an earlier day (Mon 7:55 PM).");
-    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, in words that show they already said yes, never a first-time \"you in?\"");
+    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes, never a first-time \"you in?\"");
     expect(wed).not.toContain("asks nothing");
 
     // The kickoff that morning writes with that state.

@@ -286,7 +286,7 @@ describe("locking", () => {
     const morning = buildStateBlock(await state("", ME, new Date("2026-10-28T13:00:00Z")));
     // #199: the sheet states the yes came ahead; how the kickoff checks they're still in is NUDGES'.
     expect(morning).toContain("They said yes to it ahead of time, on an earlier day (");
-    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, in words that show they already said yes");
+    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes");
   });
 
   it("works end to end: the coach locks on the tester's text", async () => {

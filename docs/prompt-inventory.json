@@ -542,11 +542,32 @@
    "change": "unchanged"
   },
   {
-   "text": "${n(\"done\")} done in full, ${n(\"done_reduced\")} smaller, ${n(\"missed\")} missed",
+   "text": "${days.length} ${name}${days.length ? ` (${days.join(\", \")})` : \"\"}",
    "file": "src/coach/prompt.ts",
-   "where": "tally",
+   "where": "tally > count",
    "kind": "status sheet",
-   "change": "moved from src/coach/prompt.ts (weekLines > tally)"
+   "change": "new"
+  },
+  {
+   "text": "; rest days: ${rest.join(\", \")}",
+   "file": "src/coach/prompt.ts",
+   "where": "tally > between",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "${count(\"done\", \"done in full\")}, ${count(\"done_reduced\", \"smaller\")}, ${count(\"missed\", \"missed\")}",
+   "file": "src/coach/prompt.ts",
+   "where": "tally > counts",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "done in full",
+   "file": "src/coach/prompt.ts",
+   "where": "tally > counts",
+   "kind": "status sheet",
+   "change": "new"
   },
   {
    "text": "the app records it",
@@ -1284,7 +1305,7 @@
    "change": "new"
   },
   {
-   "text": "This week: ${tally(w)}, today included (each day in Recent step days and Today above).",
+   "text": "This week: ${tally(w, plan).counts}, today included${tally(w, plan).rest}.",
    "file": "src/coach/prompt.ts",
    "where": "weekLines",
    "kind": "status sheet",
@@ -1326,7 +1347,7 @@
    "change": "new"
   },
   {
-   "text": "Last week: ${tally(l)} (each day in Recent step days above).",
+   "text": "Last week: ${tally(l, plan).counts}${tally(l, plan).rest}.",
    "file": "src/coach/prompt.ts",
    "where": "weekLines",
    "kind": "status sheet",
@@ -5640,7 +5661,7 @@
    "reason": "because a text with one job gets a real answer"
   },
   {
-   "text": "- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in, or still in when they agreed ahead (state): then remind them of it, with any tip, in words that show they already said yes, never a first-time \"you in?\". Its time is settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.",
+   "text": "- kickoff (step day): a detail from memory in a few words (a recent day, a person, their why, the streak), then today's step in a sentence or two and one question: are they in, or still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes, never a first-time \"you in?\". Its time is settled: never ask what time. Unlike your last kickoff. kickoff_checkin: same, starting soon.",
    "file": "docs/coach-voice.md",
    "where": "Nudges (rules: nudges)",
    "kind": "rule",
@@ -7184,6 +7205,12 @@
    "sort": "fact + guidance",
    "now": "Phase \"onboarding\" and Moments (\"Onboarding\"). Guidance: ONBOARDING (\"No recap or plan talk until the state says onboarding just finished\").",
    "why": "Already in ONBOARDING word for word."
+  },
+  {
+   "old": "${n(\"done\")} done in full, ${n(\"done_reduced\")} smaller, ${n(\"missed\")} missed",
+   "sort": "fact",
+   "now": "status sheet (src/coach/prompt.ts), tally: \"This week: 4 done in full (Mon, Wed, Fri, Sun), 0 smaller, 0 missed, today included; rest days: Tue, Thu, Sat.\" (and last week's the same way). Guidance: WEEK LOOK-BACK recap (the block's numbers exactly; \"every\" or \"each\" only for what's true of every one of those days).",
+   "why": "#103, #199: the comparison caught recaps claiming \"four step days in a row\" across rest days once the sheet's \"use these numbers exactly\" left; the counts now name their days and the rest days between, so the claim can be checked against the sheet itself."
   }
  ]
 }

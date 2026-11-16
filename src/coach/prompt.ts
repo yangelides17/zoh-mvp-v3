@@ -28,7 +28,7 @@ export const PROMPT_BUDGET_CHARS = {
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   plan: 4660,
-  nudges: 2550,
+  nudges: 2580,
   todaysStep: 1890,
   proof: 3600,
   weekLookback: 2390,
@@ -207,9 +207,17 @@ const label = (d: Weekday) => d[0]!.toUpperCase() + d.slice(1);
 const dayName = (date: string) => `${label(weekdayOf(date))} ${date}`;
 const STATUS_LABELS: Record<StepDayStatus, string> = { done: "done", done_reduced: "done (reduced version)", missed: "missed" };
 const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
-const tally = (w: WeekLookback) => {
-  const n = (status: StepDayStatus) => w.days.filter((d) => d.status === status).length;
-  return `${n("done")} done in full, ${n("done_reduced")} smaller, ${n("missed")} missed`;
+/** #103, #199: the week's counts with their days, and the rest days between, so "in a row" can be checked against them. */
+const tally = (w: WeekLookback, plan: Plan) => {
+  const short = (date: string) => label(weekdayOf(date)).slice(0, 3);
+  const count = (status: StepDayStatus, name: string) => {
+    const days = w.days.filter((d) => d.status === status).map((d) => short(d.date));
+    return `${days.length} ${name}${days.length ? ` (${days.join(", ")})` : ""}`;
+  };
+  const rest: string[] = [];
+  for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!isStepDay(plan, d)) rest.push(short(d));
+  const between = rest.length ? `; rest days: ${rest.join(", ")}` : "";
+  return { counts: `${count("done", "done in full")}, ${count("done_reduced", "smaller")}, ${count("missed", "missed")}`, rest: between };
 };
 const goalTitle = (s: CoachState, slug: string) => s.goals.find((g) => g.slug === slug)?.title ?? slug;
 const ref = (id: string) => `[${suggestionRef(id)}]`;
@@ -468,7 +476,7 @@ function weekLines(s: CoachState, plan: Plan): string[] {
       [
         `WEEK LOOK-BACK, ${dayName(w.from)} to today. Recap: ${recap}.`,
         // #103: a recap said "5 done in full, each with a voice recap" in a week with a miss; these numbers are the only count.
-        `This week: ${tally(w)}, today included (each day in Recent step days and Today above).`,
+        `This week: ${tally(w, plan).counts}, today included${tally(w, plan).rest}.`,
         ...weekProgress(w, plan, "this week"),
       ].join("\n"),
     );
@@ -479,7 +487,7 @@ function weekLines(s: CoachState, plan: Plan): string[] {
     lines.push(
       [
         `LAST WEEK'S LOOK-BACK, ${dayName(l.from)} to ${dayName(l.to)}. Recap: ${recap}.`,
-        `Last week: ${tally(l)} (each day in Recent step days above).`,
+        `Last week: ${tally(l, plan).counts}${tally(l, plan).rest}.`,
         ...weekProgress(l, plan, "last week"),
       ].join("\n"),
     );
