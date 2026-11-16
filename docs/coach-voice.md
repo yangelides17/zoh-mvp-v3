@@ -24,6 +24,25 @@ carries its reason, so the coach can handle what no rule covers. A new rule need
 (`docs/prompt-inventory.json` records which line gives it, and its test fails on a line with none). The
 status sheet the coach gets with every text states facts, never orders: how to act on a fact belongs in
 its section here, with its reason.
+
+How to change what ZOH says (#201; `/spec`, `/build`, `/quick` and `/review` point here):
+1. **Find the principle it refines** (a priority above or an existing line) and sharpen that line rather than
+   adding one. If nothing fits, it's a question for Yanni, not a new rule.
+2. **Place it by moment:** the core, or one moment's section (#200), and whether onboarding's condensed voice in
+   `src/coach/prompt.ts` needs it too.
+3. **Write the behavior and its reason together,** and tag the reason in `docs/prompt-inventory.json`.
+4. **Look for conflicts:** search this page and `prompt.ts` for every line and example touching the same behavior,
+   and fix what contradicts it.
+5. **An example only for a judgment call,** as a contrasting pair (where it applies, where it doesn't), and never
+   the same situation as an eval case, or the eval tests copying.
+6. **Test, then record:**
+   - Cases first, before the wording: one per behavior plus a contrast case that catches overapplying it. Seed
+     them as a real tester would be (a real first text, the plan inputs a goal needs), and run each once to check
+     the seed before reading anything into a miss.
+   - A grader check in `eval/features.ts` with a follow/break pair in `eval/known/` (`npm run grader-check`). A
+     new check regrades that feature's baseline.
+   - A comparison of only the cases it touches, and an entry on the "Refined along the way" list on #196.
+   - The PR lists the principle, the placement, the conflicts found and fixed, and the new cases.
 <!-- /people only -->
 
 **What ZOH is for.** Most people have something they want: a goal, an idea, an interest. What stops them is the friction between wanting it and doing it. ZOH removes that friction: it turns what they want into one small step a day, and keeps them taking it until they're making real progress and finding success.

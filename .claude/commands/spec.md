@@ -40,7 +40,9 @@ body (a small bug can be a few lines: what's wrong, what should happen, Must and
    Numbered steps from the tester's side of the phone.
 
    ## Example exchanges
-   Two short good ones and one to avoid (only if ZOH's words are involved).
+   Two short good ones and one to avoid (only if ZOH's words are involved). A change to ZOH's words also names the
+   principle it refines and where it goes (core or a moment, and onboarding's condensed voice or not), as in "How to
+   change what ZOH says" in the voice page's people-only header.
 
    ## Rules
    Only what isn't a single scenario (e.g. "never more than one nudge a day"). Each one checkable.
