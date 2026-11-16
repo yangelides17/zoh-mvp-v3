@@ -548,6 +548,13 @@ describe("a tool's name written as text (#108)", () => {
     expect(sent()).toEqual(["Hi there!"]);
   });
 
+  it("#200: one the reply wasn't offered is removed too (search_memory during onboarding)", async () => {
+    model.script("search_memory\n\nNice to meet you!");
+    await text(ME, "I'm Sam");
+    expect(model.requests[0]!.tools.map((x) => x.name)).not.toContain("search_memory");
+    expect(sent()).toEqual(["Nice to meet you!"]);
+  });
+
   it("matches only a line that's just a tool's name", () => {
     const names = ["mark_agreed", "save_name"];
     // Delivered live on Nov 1, word for word.
