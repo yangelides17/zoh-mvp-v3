@@ -30,7 +30,8 @@ export const PROMPT_BUDGET_CHARS = {
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
-  plan: 4070,
+  // #201 review: +160 for rest days where the step needs recovery (Yanni, Nov 16).
+  plan: 4230,
   planChange: 590,
   nudges: 1872,
   nudgeReplies: 708,
