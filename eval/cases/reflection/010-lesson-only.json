@@ -1,6 +1,6 @@
 {
   "id": "lesson-only",
-  "title": "A lesson-only reply: a follow-up about how it went, tied to the lesson",
+  "title": "A lesson-only reply: the lesson gets followed up, and how it went is still covered",
   "origin": "Issue #93 (spec example: discovery calls); Oct 30 live check on PR #90",
   "seed": {
     "name": "Riley",
@@ -67,7 +67,7 @@
     "sounds good"
   ],
   "whatWentWrong": "After a screenshot and a typed lesson, ZOH celebrated and went straight to tomorrow's step: it never learned how the step felt or what size suited them (Oct 30 live check).",
-  "shouldHaveHappened": "ZOH counts the voice note and celebrates the lesson specifically. A lesson alone isn't how it went, so its question is about that, tied to what Riley said (did writing the question feel natural, or like pulling teeth?), never a list. It follows the awkwardness with at most one more specific question, then turns naturally to the next step: it acknowledges what Riley shared (it felt like guessing; a real owner would help) and proposes the next step day's step, fully defined (what, at the desk, 7 pm, 15 min), visibly using what Riley said (moving toward a real owner, or preparing for that), and asks if it works. One question per text. After \"sounds good\" it confirms in a line with no new question.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates the lesson specifically. A lesson they volunteer is worth following (#160, Yanni Nov 16), and how it went still matters: its question picks up the lesson or how writing the question went, tied to what Riley said, never a list, and how it felt is covered before the next step. It follows the awkwardness with at most one more specific question, then turns naturally to the next step: it acknowledges what Riley shared (it felt like guessing; a real owner would help) and proposes the next step day's step, fully defined (what, at the desk, 7 pm, 15 min), visibly using what Riley said (moving toward a real owner, or preparing for that), and asks if it works. One question per text. After \"sounds good\" it confirms in a line with no new question.",
   "areaCode": "212",
   "startTime": "19:20",
   "timeZone": "America/New_York"

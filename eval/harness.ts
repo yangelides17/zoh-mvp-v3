@@ -871,6 +871,8 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
     ...versions.map((x) => `New plan version ${x.version}${x.changeKind ? ` (${x.changeKind})` : ""}: ${x.step}, ${x.days.join(" ")} at ${x.stepTime}${x.endsOn ? `, until ${x.endsOn}` : ""}`),
     ...lessons.map((k) => `Takeaway (${k.evidence}, ${k.day}): ${k.text}`),
     ...days.flatMap((d) => (d.reflection ? [`Reflection for ${d.date}: ${d.reflection}`] : [])),
+    // #160: what the step shows they can now do, and gaps, so the grader can check both against the conversation.
+    ...days.flatMap((d) => [...(d.canDo ? [`Can now do (${d.date}): ${d.canDo}`] : []), ...(d.gaps ? [`Gaps (${d.date}): ${d.gaps}`] : [])]),
     ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");

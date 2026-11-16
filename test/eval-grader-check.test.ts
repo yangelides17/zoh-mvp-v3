@@ -77,7 +77,7 @@ describe("eval: grader check against known answers (#197)", () => {
     expect(all.length).toBeGreaterThanOrEqual(10);
     const byRule = new Map<string, Set<string>>();
     for (const ex of all) byRule.set(`${ex.feature}/${ex.rule}`, (byRule.get(`${ex.feature}/${ex.rule}`) ?? new Set()).add(ex.expect));
-    expect([...byRule.keys()].sort()).toEqual(["curiosity/no-assumed", "curiosity/weighs-idea", "onboarding/first-text", "plan/no-seam", "plan/plan-shown", "plan/quiet-hours", "proof/proof-kinds"]);
+    expect([...byRule.keys()].sort()).toEqual(["curiosity/no-assumed", "curiosity/weighs-idea", "onboarding/first-text", "plan/no-seam", "plan/plan-shown", "plan/quiet-hours", "proof/proof-kinds", "reflection/learning-ask", "reflection/not-forced"]);
     expect([...byRule.values()].every((s) => s.has("pass") && s.has("fail"))).toBe(true);
     // Shown to the grader as a conversation: the seed's history as context, never graded.
     const seeded = all.find((e) => e.seed)!;

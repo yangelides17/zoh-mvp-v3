@@ -1,0 +1,70 @@
+{
+  "id": "workout-something-to-notice",
+  "suite": "capability",
+  "title": "A first interval run, proof that says nothing about it: what they did and noticed gets as much attention as how it felt",
+  "origin": "Issue #160 (eval of #157: exercise steps never asked what they noticed)",
+  "seed": {
+    "name": "Dev",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "run a mile without stopping",
+      "where": "around the park",
+      "when": "7 am",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Morning, Dev! First intervals today: 1 min jog, 2 min walk, 4 rounds around the park at 7. A quick voice note when you're done."
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "20 min brisk walk around the park",
+      "destination": "a mile without stopping by December",
+      "place": "around the park",
+      "time": "07:00",
+      "days": ["mon", "wed", "fri"],
+      "proof": "voice",
+      "proof_note": "a quick voice note when you're done",
+      "reason": "Short jogs build up to the mile without wrecking you.",
+      "minutes": 20,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      {
+        "days_ago": 5,
+        "status": "done",
+        "step": "20 min brisk walk around the park",
+        "proof_seen": "voice: walked the park loop twice"
+      },
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "20 min brisk walk around the park, last 5 min faster",
+        "proof_seen": "voice: walked it, pushed the last stretch"
+      }
+    ],
+    "today_step": {
+      "step": "1 min jog, 2 min walk, 4 rounds around the park at 7 am (about 15 min)",
+      "agreed_hours_ago": 2
+    }
+  },
+  "testerLines": [
+    "[voice: Done, all four rounds.]",
+    "harder than I expected, rounds 3 and 4 were rough",
+    "idk, I kind of just pushed through them",
+    "oh I think I started the first jog way too fast actually",
+    "sounds good"
+  ],
+  "whatWentWrong": "In #157's eval, exercise and social steps were only ever asked how they felt, how tired, what made them wince: never what they did or noticed, so nothing they learned was drawn out.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates the first intervals. The reflection covers how it felt (rounds 3 and 4 were rough) and, with equal weight, what Dev did and noticed in those rounds, in ZOH's own words, one question per text, never a quiz. Once Dev names starting too fast, ZOH picks that up and builds the next step on it (fully defined, asked if it works). After \"sounds good\" it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "07:25",
+  "timeZone": "America/New_York"
+}
