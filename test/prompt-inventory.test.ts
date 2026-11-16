@@ -39,7 +39,8 @@ describe("the prompt inventory", () => {
 });
 
 describe("the assembled instructions", () => {
-  // Snapshots taken on dev before #196 touched anything. A change to what ZOH reads shows up as a diff here.
+  // Taken on dev before #196; the rearrange matched them byte for byte, and the after-onboarding one now holds
+  // #196's merges (its git history shows each). A change to what ZOH reads shows up as a diff here.
   it("are the same as before, during onboarding and after", () => {
     expect(FIXED_INSTRUCTIONS).toBe(readFileSync("test/snapshots/instructions-onboarding.txt", "utf8"));
     expect(fullVoiceInstructions()).toBe(readFileSync("test/snapshots/instructions-after-onboarding.txt", "utf8"));
