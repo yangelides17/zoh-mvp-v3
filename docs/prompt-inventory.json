@@ -1718,6 +1718,20 @@
    "change": "unchanged"
   },
   {
+   "text": "[Your text has ${links.length === 1 ? \"a link\" : \"links\"} you didn't find, open or get from them in this reply: ${links.join(\", \")}. Only links from your searches, pages you opened or the texts may go to them, and a YouTube link only once you've watched it this reply (watch_video). Look it up now if you need it, or write your text without it. Don't mention this note.]",
+   "file": "src/coach/coach.ts",
+   "where": "unseenLinkNote",
+   "kind": "coach note",
+   "change": "new"
+  },
+  {
+   "text": "a link",
+   "file": "src/coach/coach.ts",
+   "where": "unseenLinkNote",
+   "kind": "coach note",
+   "change": "new"
+  },
+  {
    "text": "The app already checked this text may go now (stops, breaks and quiet hours included). If it still shouldn't, answer only ${SKIP}: never explain.",
    "file": "src/coach/coach.ts",
    "where": "DECLINE_NOTE",
@@ -1730,6 +1744,20 @@
    "where": "createCoach > reply > replyLoop",
    "kind": "not read by ZOH",
    "change": "unchanged"
+  },
+  {
+   "text": "Videos can't be watched right now: say so if it matters.",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > replyLoop > watchedNow > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "watch_video (${watchedNow.message.split(\"\\n\")[0]!.slice(0, ACTION_RESULT_CHARS)})",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > replyLoop > action",
+   "kind": "coach note",
+   "change": "new"
   },
   {
    "text": "${call.name} (${result.message.split(\"\\n\")[0]!.slice(0, ACTION_RESULT_CHARS)})",
@@ -3937,18 +3965,25 @@
    "change": "unchanged"
   },
   {
-   "text": "watching it now 👀",
+   "text": "looking that up 🔎",
    "file": "src/pipeline/inbound.ts",
-   "where": "HOLDING_TEXTS > video",
+   "where": "STATUS_TEXTS > search",
    "kind": "app text in history",
-   "change": "unchanged"
+   "change": "new"
   },
   {
    "text": "reading it now 📖",
    "file": "src/pipeline/inbound.ts",
-   "where": "HOLDING_TEXTS > document",
+   "where": "STATUS_TEXTS > reading",
    "kind": "app text in history",
-   "change": "unchanged"
+   "change": "moved from src/pipeline/inbound.ts (HOLDING_TEXTS > document)"
+  },
+  {
+   "text": "watching it now 👀",
+   "file": "src/pipeline/inbound.ts",
+   "where": "STATUS_TEXTS > watching",
+   "kind": "app text in history",
+   "change": "moved from src/pipeline/inbound.ts (HOLDING_TEXTS > video)"
   },
   {
    "text": "media: ${errorMessage(err)}",
@@ -3967,16 +4002,16 @@
   {
    "text": "claude (attempt ${attempt}): ${errorMessage(err)}",
    "file": "src/pipeline/inbound.ts",
-   "where": "draftReply",
+   "where": "draftReply > attempts",
    "kind": "not read by ZOH",
-   "change": "unchanged"
+   "change": "moved from src/pipeline/inbound.ts (draftReply)"
   },
   {
    "text": "The coach failed after retries; they got the system-down reply (${errorMessage(err).slice(0, 120)})",
    "file": "src/pipeline/inbound.ts",
-   "where": "draftReply",
+   "where": "draftReply > attempts",
    "kind": "not read by ZOH",
-   "change": "unchanged"
+   "change": "moved from src/pipeline/inbound.ts (draftReply)"
   },
   {
    "text": "send: ${errorMessage(err)}",
@@ -4474,6 +4509,62 @@
    "where": "envReply",
    "kind": "app text in history",
    "change": "unchanged"
+  },
+  {
+   "text": "Watch a YouTube video (a link they sent, or one your search or an opened page turned up) and get an account of what it actually shows and teaches, answering your question. Before you recommend, sum up or answer about any video. At most ${MAX_WATCHES} a reply.",
+   "file": "src/coach/web.ts",
+   "where": "WATCH_VIDEO_TOOL > watch_video > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "What you need from it (their question, or whether it fits their step)",
+   "file": "src/coach/web.ts",
+   "where": "WATCH_VIDEO_TOOL > watch_video > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "${i.path.join(\".\") || \"input\"}: ${i.message}",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > error",
+   "kind": "tool error",
+   "change": "moved from src/coach/tools.ts (runTool > error)"
+  },
+  {
+   "text": "Only YouTube links can be watched.",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Only a link they sent or your search or a page turned up can be watched.",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Video limit reached for this reply (${MAX_WATCHES}): answer with what you have.",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Watched ${url}:",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > message",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "${url} couldn't be watched. Don't recommend or describe it as if you'd seen it; say plainly it wouldn't open if it matters.",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > error",
+   "kind": "tool error",
+   "change": "new"
   },
   {
    "text": "# Coach voice and principles",

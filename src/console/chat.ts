@@ -28,6 +28,7 @@ import {
   type Tester,
 } from "../db/schema.js";
 import { awaitingAnswer as raisedAwaiting, findSuggestion, readyToRaise, suggestionRef } from "../coach/next-steps.js";
+import { MAX_CONTINUATIONS, webBudget, webTools } from "../coach/web.js";
 import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
@@ -568,8 +569,11 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
       CONFIRM_TOOL,
       ...(memory ? MEMORY_TOOL_DEFINITIONS.filter((t) => LOOKUPS.includes(t.name)) : []),
     ];
+    // #162: the founders can ask it to find something for a tester; what it finds goes out only through a draft.
+    const web = webBudget();
     const messages = toClaudeMessages(thread.map(threadTurn));
     let fallback = "";
+    let continued = 0;
     for (let round = 1; round <= CONSOLE_MAX_ROUNDS; round++) {
       const last = round === CONSOLE_MAX_ROUNDS;
       const context = await recordBlock(db, tester, now, goalCap);
@@ -580,9 +584,19 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
           { type: "text", text: context },
         ],
         messages,
-        tools,
+        tools: [...tools, ...webTools(web)],
         toolChoice: last ? "none" : "auto",
+        noRetry: web.searches + web.fetches > 0,
       });
+      web.searches += response.usage?.searches ?? 0;
+      web.fetches += response.usage?.fetches ?? 0;
+      // A search that paused goes on where it stopped (not a round), at most twice.
+      if (response.stopReason === "pause_turn" && continued < MAX_CONTINUATIONS) {
+        continued++;
+        round--;
+        messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+        continue;
+      }
       const reply = response.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)

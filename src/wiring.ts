@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { AppDeps } from "./app.js";
-import { createClaudeModel } from "./claude/replier.js";
+import { createClaudeModel, WEB_TIMEOUT_MS } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
@@ -183,6 +183,8 @@ function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watche
           model: config.claude.model,
           maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
           effort: "medium",
+          // #162: a reply that searches and opens pages takes 20 to 60 s.
+          timeoutMs: WEB_TIMEOUT_MS,
         }),
       })
     : undefined;
@@ -194,7 +196,7 @@ function makeConsoleCoach(config: Config, db: Db) {
     ? createConsoleCoach({
         db,
         goalCap: config.goalCap,
-        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium" }),
+        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium", timeoutMs: WEB_TIMEOUT_MS }),
       })
     : undefined;
 }

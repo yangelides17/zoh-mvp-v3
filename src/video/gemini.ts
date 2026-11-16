@@ -5,15 +5,17 @@ import { ApiError, FileState, GoogleGenAI, Type, type Part } from "@google/genai
  * picture and sound and writes an account focused on today's step; the coach judges from that account.
  * Behind an interface: tests and the eval use a fake.
  */
-export interface WatchRequest {
-  video: Uint8Array;
-  contentType: string;
+export type WatchRequest = (
+  | { video: Uint8Array; contentType: string }
+  /** #162: a public YouTube video, which Gemini opens itself (full resolution, the first 20 minutes). */
+  | { youtubeUrl: string }
+) & {
   /** Today's step, so the account focuses on it; missing before a plan. */
   step?: string;
   caption?: string;
   /** open_file: what they asked about it, answered from the video. */
   question?: string;
-}
+};
 
 export interface Watched {
   /** What it shows and says, focused on the step, with rough times. */
@@ -54,13 +56,17 @@ export function createGeminiWatcher(opts: { apiKey: string; model: string; clien
   const ai = opts.client ?? new GoogleGenAI({ apiKey: opts.apiKey });
   return {
     async watch(req) {
-      const seconds = videoSeconds(req.video);
+      const youtube = "youtubeUrl" in req;
+      // A YouTube video's length isn't known up front: Gemini is told only the start may be included.
+      const seconds = youtube ? undefined : videoSeconds(req.video);
       const clipped = seconds !== undefined && seconds > MAX_WATCH_SECONDS;
       const clip = { endOffset: `${MAX_WATCH_SECONDS}s` };
       let uploaded: string | undefined;
       try {
         let video: Part;
-        if (req.video.byteLength <= INLINE_MAX_BYTES) {
+        if (youtube) {
+          video = { fileData: { fileUri: req.youtubeUrl }, videoMetadata: clip };
+        } else if (req.video.byteLength <= INLINE_MAX_BYTES) {
           video = { inlineData: { mimeType: req.contentType, data: Buffer.from(req.video).toString("base64") }, videoMetadata: clip };
         } else {
           const file = await ai.files.upload({ file: new Blob([req.video], { type: req.contentType }), config: { mimeType: req.contentType } });
@@ -68,12 +74,19 @@ export function createGeminiWatcher(opts: { apiKey: string; model: string; clien
           const ready = await waitUntilActive(ai, file.name!);
           video = { fileData: { fileUri: ready.uri!, mimeType: req.contentType }, videoMetadata: clip };
         }
-        const asked = [
-          req.step ? `Today's step: ${req.step}` : "No step set yet.",
-          req.caption ? `Their words with it: ${req.caption}` : "No words with it.",
-          req.question ? `The coach's question: ${req.question}` : "",
-          clipped ? `Only the first ${MAX_WATCH_SECONDS / 60} minutes are included; say so if it matters.` : "",
-        ].filter(Boolean);
+        const asked = youtube
+          ? [
+              "This is a public YouTube video, not one they made: the coach wants to know what it actually teaches. Ignore the proof framing; give its main points and anything the question asks about, with rough times.",
+              req.step ? `Today's step: ${req.step}` : "",
+              req.question ? `The coach's question: ${req.question}` : "",
+              `Only the first ${MAX_WATCH_SECONDS / 60} minutes may be included; say so if it's longer and that matters.`,
+            ].filter(Boolean)
+          : [
+              req.step ? `Today's step: ${req.step}` : "No step set yet.",
+              req.caption ? `Their words with it: ${req.caption}` : "No words with it.",
+              req.question ? `The coach's question: ${req.question}` : "",
+              clipped ? `Only the first ${MAX_WATCH_SECONDS / 60} minutes are included; say so if it matters.` : "",
+            ].filter(Boolean);
         const response = await ai.models.generateContent({
           model: opts.model,
           contents: [{ role: "user", parts: [video, { text: asked.join("\n") }] }],

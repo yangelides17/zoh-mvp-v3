@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
 import type { MediaFetcher } from "../src/media/storage.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
-import type { VideoWatcher } from "../src/video/gemini.js";
+import { VideoWatchError, type VideoWatcher } from "../src/video/gemini.js";
 
 /** Photos a case can send: small JPEGs with their metadata (location, camera) stripped. */
 export const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
@@ -39,9 +39,13 @@ export function parseMediaLine(line: string): MediaText | undefined {
   return { caption: m[15]!.trim(), mediaUrl: `${HOST}/video/${Buffer.from(m[14]!.trim()).toString("base64url")}/${basename(m[13]!)}` };
 }
 
-/** Stands in for Gemini: the eval's videos carry what they show as their bytes. */
+/**
+ * Stands in for Gemini: the eval's videos carry what they show as their bytes. #162: it can't know a real YouTube
+ * video, so it fails the way Gemini does when a video won't open, and the coach can't recommend one it never saw.
+ */
 export const evalWatcher: VideoWatcher = {
   async watch(req) {
+    if ("youtubeUrl" in req) throw new VideoWatchError("failed", "The eval doesn't watch YouTube videos");
     const account = Buffer.from(req.video).toString("utf8");
     return { account, summary: account.slice(0, 120), clipped: false };
   },
