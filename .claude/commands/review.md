@@ -28,7 +28,7 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
      (`git restore --source=origin/dev --worktree -- src/`), run the new and changed test files
      (`npx vitest run <files>`) and confirm the Must tests fail; then `git restore --source=HEAD --worktree -- src/`.
      A Must test that still passes doesn't test the change: list it. Skip when the PR changes no code in `src/`.
-   - **Extra review (trial, risky PRs only).** If the diff touches anything that starts a text or decides who gets one
+   - **Extra review (risky PRs only; kept after a 5-PR trial, Nov 16).** If the diff touches anything that starts a text or decides who gets one
      (`src/sendblue/`, `src/nudges/`, `owns`/`ALLOWED_NUMBERS`), the database (`src/db/schema.ts`, `drizzle/`),
      `src/pipeline/` or `src/memory/`, start one background agent (model `sonnet`) as soon as you have the diff, so it
      runs while you check the rest. Give it the diff and the files it touches, and ask it only for silent failures:
@@ -59,10 +59,7 @@ say so and stop (unless it's a hotfix Yanni asked for through `/quick`).
    - **What ZOH will say differently:** the instruction change in a sentence or two, and one or two real exchanges
      from the eval.
    - **Live checks:** the Watch list ranked by where the build is least sure, each of the top one or two with a reason.
-   - **Extra review** (risky PRs only): "Extra review (trial n/5): <what it found that was real> / nothing real". Count
-     n from earlier reviews (`gh search prs --repo yangelides17/zoh-mvp-v3 "Extra review (trial" in:comments`). At
-     5/5, add the tally across the five and recommend keeping or dropping it; Yanni decides, and `/quick` updates this
-     command.
+   - **Extra review** (risky PRs only): "Extra review: <what it found that was real> / nothing real".
    - **A rule that would have caught it** (only when the review found a real problem): the `CLAUDE.md` line to sharpen,
      or one new line, that would have stopped it during the build. Yanni decides; `/quick` adds it.
 5. **Only when Yanni says merge:** `gh pr merge <pr> --merge --delete-branch`; `ExitWorktree` (`keep`) to get back to
