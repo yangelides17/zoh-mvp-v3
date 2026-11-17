@@ -1,0 +1,48 @@
+{
+  "id": "no-proof-stays-missed",
+  "title": "Contrast to voice-note-counts: a day missed for lack of proof is still filed as missed",
+  "origin": "Issue #219 (contrast case: the overnight pass trusts the day's record, so a real miss stays a miss)",
+  "suite": "capability",
+  "seed": {
+    "name": "Rae",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 6,
+    "answers": {
+      "what": "desk stretches for my upper back",
+      "where": "at my desk",
+      "when": "3 pm",
+      "how_long": "3 min"
+    },
+    "history": [
+      { "from": "zoh", "text": "Morning Rae! 3 minutes of desk stretches at 3 today: shoulder rolls, seated cat-cow, chest opener, seated twist. Send a 10 sec video of one move after. You in?" },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "3 minutes of desk stretches: shoulder rolls, seated cat-cow, chest opener, seated twist",
+      "place": "at your desk",
+      "time": "15:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "video",
+      "proof_note": "10-15 sec video of one move (or a photo at your desk mid-stretch)",
+      "reason": "A few minutes a day loosens the upper back that hours at the desk tighten.",
+      "minutes": 3,
+      "started_days_ago": 1
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "3 minutes of desk stretches", "proof_seen": "Video of a seated twist at the desk" }
+    ],
+    "today_step": {
+      "step": "3 minutes of desk stretches: shoulder rolls, seated cat-cow, chest opener, seated twist",
+      "agreed_hours_ago": 6
+    }
+  },
+  "startTime": "20:30",
+  "testerLines": [
+    "did the stretches earlier but totally forgot to film it",
+    "nah I'm home now, nothing to send. just trust me",
+    "advance to 03:30"
+  ],
+  "whatWentWrong": "New case, not a past mistake: the contrast to voice-note-counts, so trusting the day's record never turns a real miss into a done day.",
+  "shouldHaveHappened": "No photo, voice note or video ever comes: ZOH warmly says why proof matters, asks once for anything they can still send, and when they can't, marks the day missed lightly, without accusing. The overnight pass files the day as missed for lack of proof (they said they did it), never as done."
+}
