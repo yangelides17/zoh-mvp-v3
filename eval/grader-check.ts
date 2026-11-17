@@ -40,7 +40,8 @@ export const knownSchema = z.object({
   timeZone: z.string().default("America/New_York"),
   /** What ZOH knew before (its history is shown as earlier context, never graded). */
   seed: seedSchema.optional(),
-  transcript: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(2),
+  // #162: "lookup" lines show what ZOH searched, opened or watched before its next text.
+  transcript: z.array(z.object({ from: z.enum(["tester", "zoh", "lookup"]), text: z.string().min(1) })).min(2),
 });
 export type KnownExample = z.infer<typeof knownSchema> & { feature: string };
 

@@ -201,9 +201,28 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   later replies within the two-day window show them like a paste), plus a one-line summary.
   `open_file` reopens any file a tester sent from our copy and reads it afresh. **Every file is kept
   for good** (Yanni, Nov 14), reversing the old 30-day delete of voice-note audio; audio deleted
-  before then stays gone (`media_deleted_at`). A file still being read 10 s after it arrived gets one
-  fixed holding text ("reading it now 📖" / "watching it now 👀"), recorded with `holding` in its
-  timings and not counted as one of ZOH's texts since the proof.
+  before then stays gone (`media_deleted_at`). A video or document they send gets one fixed holding
+  text at once (#162; it was after 10 s) ("reading it now 📖" / "watching it now 👀"), recorded with
+  `holding` in its timings and not counted as one of ZOH's texts since the proof.
+- Information curation (#162): replies and the console chat use Anthropic's web search and web fetch
+  (`web_search_20260209` / `web_fetch_20260209`, run inside the Claude call; $10 per 1,000 searches,
+  a page costs only its tokens, cut at 8k). Per reply: 5 searches, 5 pages, 2 videos, enforced by
+  lowering each call's `max_uses` to what's left (so the tool list changes after a round that
+  searched; fine on our account, but Anthropic rejects tool changes mid-conversation on accounts
+  made after Aug 31 2026 unless thinking blocks are dropped). No daily cap; each reply's timings
+  record `web_searches`, `web_pages`, `video_watches` and `lookups` (what it searched and found), and
+  the console's Texts tab shows "🔎 2 · 📖 1 · ~4¢" under it. YouTube: Gemini only, given the link,
+  full resolution, first 20 minutes (`watch_video`); no transcript service, as YouTube has no
+  terms-compliant way to get other people's transcripts (captions.download needs edit rights, the
+  scraping libraries use undocumented endpoints and are blocked from cloud hosts). Gemini's YouTube
+  input is a free preview; low resolution would save about 3¢ per 10 minutes if Google starts
+  charging. **Only links ZOH saw this turn go out** (their texts, its earlier texts, team requests,
+  memory, search results, opened pages; a YouTube link only once watched): one nudge to fix it, then
+  the link is removed. **Status texts** go the moment a search, page read or watch starts ("looking
+  that up 🔎", "reading it now 📖", "watching it now 👀"), one per kind and at most 2 per reply
+  (the holding text counts), never repeated by a redraft. The coach and console chat stream, with a
+  2-minute timeout per call, and a reply that has searched isn't retried. No search in texts ZOH
+  starts (no morning kickoff search).
 - Test mode (#14): a dev number texts `jump 3h`, `jump 2d`, `jump 7:30am` or `jump next`, and that
   tester's own clock (`testers.clock_offset_ms`) walks forward in 5-minute steps, running their
   nudges, day closes, memory pass and Sunday summary on the way; then one ⏩ log line. The jump
@@ -227,4 +246,5 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   reply through: since #109 they stay stopped in ZOH (nothing it starts goes out) until they say a clear
   yes to restarting (`restart_coaching`), which records the stopped stretch as a closed pause. Turning the filter off,
   narrowing its match, and whether Sendblue sends its own STOP reply need Sendblue support (#30).
-- **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s).
+- **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s); a
+  reply that searches and opens pages takes about 20 to 60 s (#162), with a status text first.

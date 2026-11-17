@@ -16,7 +16,7 @@ import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
-import { createMeter, evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
+import { createMeter, evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester, SEARCH_DOLLARS } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
@@ -465,6 +465,28 @@ describe("eval: what a run really costs", () => {
     expect(meter.byModel["claude-sonnet-5-5"]).toEqual({ input: 1000, cacheRead: 10_000, cacheWrite: 4000, output: 500 });
     // Sonnet: $2 in, $10 out per million; cache reads at 0.1x the input price, writes at 1.25x.
     expect(meter.dollars).toBeCloseTo(((1000 + 1000 + 5000) * 2 + 500 * 10) / 1e6, 10);
+  });
+
+  it("#162: bills a streamed reply from its final usage, searches included, without holding the stream", async () => {
+    const real = globalThis.fetch;
+    const events = [
+      { type: "message_start", message: { model: "claude-sonnet-5-5", usage: { input_tokens: 1000, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, output_tokens: 1 } } },
+      { type: "message_delta", usage: { output_tokens: 500, input_tokens: 3000, server_tool_use: { web_search_requests: 2, web_fetch_requests: 1 } } },
+    ];
+    const sse = events.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
+    globalThis.fetch = (async () => new Response(sse, { status: 200, headers: { "content-type": "text/event-stream" } })) as typeof fetch;
+    const meter = createMeter();
+    const restore = guardFetch(meter);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", body: "{}" });
+      expect(await res.text()).toBe(sse);
+      await new Promise((r) => setTimeout(r, 10));
+    } finally {
+      restore();
+      globalThis.fetch = real;
+    }
+    expect(meter.byModel["claude-sonnet-5-5"]).toEqual({ input: 3000, cacheRead: 0, cacheWrite: 0, output: 500 });
+    expect(meter.dollars).toBeCloseTo((3000 * 2 + 500 * 10) / 1e6 + 2 * SEARCH_DOLLARS, 10);
   });
 });
 

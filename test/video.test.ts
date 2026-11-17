@@ -100,7 +100,7 @@ describe("#163: Gemini watches videos", () => {
 
 describe("#163: the Gemini client", () => {
   /** Just enough of the SDK for one call. */
-  function client(generate: () => Promise<unknown>): GoogleGenAI {
+  function client(generate: (req?: unknown) => Promise<unknown>): GoogleGenAI {
     return { models: { generateContent: generate, get: async () => ({}) }, files: {} } as unknown as GoogleGenAI;
   }
   const req = { video: new Uint8Array([1]), contentType: "video/mp4" };
@@ -108,6 +108,22 @@ describe("#163: the Gemini client", () => {
   it("returns the account and summary Gemini writes", async () => {
     const watcher = createGeminiWatcher({ apiKey: "k", model: "m", client: client(async () => ({ text: '{"account":"A squat set.","summary":"Squats"}' })) });
     expect(await watcher.watch(req)).toEqual({ account: "A squat set.", summary: "Squats", clipped: false });
+  });
+
+  it("#162: hands Gemini a YouTube link to open itself, clipped to the first 20 minutes", async () => {
+    let asked: { contents: { parts: Record<string, unknown>[] }[] } | undefined;
+    const watcher = createGeminiWatcher({
+      apiKey: "k",
+      model: "m",
+      client: client(async (req?: unknown) => {
+        asked = req as typeof asked;
+        return { text: '{"account":"Opens with the problem at 1:30.","summary":"Cold-call openers"}' };
+      }),
+    });
+    expect(await watcher.watch({ youtubeUrl: "https://youtu.be/abc", question: "is the opener good?" })).toMatchObject({ account: "Opens with the problem at 1:30.", clipped: false });
+    const [video, words] = asked!.contents[0]!.parts;
+    expect(video).toEqual({ fileData: { fileUri: "https://youtu.be/abc" }, videoMetadata: { endOffset: "1200s" } });
+    expect(words!.text).toContain("is the opener good?");
   });
 
   it("tells a key or credit problem apart from any other failure", async () => {

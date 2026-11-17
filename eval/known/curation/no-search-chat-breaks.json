@@ -1,0 +1,19 @@
+{
+  "id": "no-search-chat-breaks",
+  "rule": "no-search-chat",
+  "expect": "fail",
+  "why": "A venting text gets a web search and an article on burnout instead of ZOH meeting the feeling.",
+  "seed": {
+    "name": "Rae",
+    "goal": "bedtime",
+    "phase": "active",
+    "answers": { "what": "lights out by 11", "when": "11 pm" },
+    "history": [{ "from": "zoh", "text": "Lights out by 11 tonight, Rae. Quick pic when you're in." }],
+    "plan": { "step": "In bed, lights out by 11 pm", "place": "your bedroom", "time": "23:00", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "photo", "reason": "Same time every night resets your sleep.", "minutes": 5 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "ugh work was brutal today, I'm so tired of feeling behind" },
+    { "from": "lookup", "text": "searched \"how to stop feeling behind at work burnout tips\": https://www.healthline.com/health/how-to-deal-with-burnout" },
+    { "from": "zoh", "text": "That sounds rough, Rae. This guide on dealing with burnout might help: https://www.healthline.com/health/how-to-deal-with-burnout. Still on for lights out by 11?" }
+  ]
+}

@@ -725,6 +725,28 @@ describe("#155: the console chat drafts, a founder confirms", () => {
   const toolResults = () => JSON.stringify(model.requests.at(-1)!.messages.at(-1));
   const page = async (tester: Tester) => (await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}`, headers: { cookie: cookieFor("Yanni") } })).body;
 
+  it("#162: asked to find something, it searches and drafts it; nothing reaches the tester until a founder confirms", async () => {
+    const tester = await seed();
+    model.script(
+      {
+        web: [{ search: "beginner reading habit guide", results: ["https://jamesclear.com/reading"] }],
+        tools: [{ name: "send_text", input: { words: "Found you a short one on making reading stick: https://jamesclear.com/reading" } }],
+      },
+      "Drafted it with the link.",
+    );
+    await chat(tester, "find Sam something good on sticking with reading");
+    expect((model.requests[0]!.tools as { name: string }[]).map((x) => x.name)).toEqual(expect.arrayContaining(["web_search", "web_fetch"]));
+    const [draft] = await drafts(tester.id);
+    expect(draft).toMatchObject({ draftStatus: "draft", draftAction: "send_text" });
+    expect(draft!.body).toContain("https://jamesclear.com/reading");
+    await scheduler.tick(at(TUE, "12:05"));
+    expect(t.sendblue.sends).toEqual([]);
+    expect((await confirm(tester, draft!)).statusCode).toBe(303);
+    await scheduler.tick(at(TUE, "12:06"));
+    await scheduler.tick(at(TUE, "12:07"));
+    expect(t.sendblue.sends.map((s) => s.content)).toEqual(["Found you a short one on making reading stick: https://jamesclear.com/reading"]);
+  });
+
   it("a plan change in chat is only a draft: nothing changes and nothing is pending until a founder confirms", async () => {
     const tester = await seed();
     model.script({ tools: [{ name: "propose_plan_change", input: { time: "07:30", place: "the gym" } }] }, "Here's the draft.");

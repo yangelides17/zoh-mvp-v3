@@ -1,16 +1,21 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import {
   DraftDroppedError,
+  settled,
   NoReplyTextError,
   type HeldNudge,
   toClaudeMessages,
   type DroppedDraft,
   type ClaudeModel,
+  type ModelRequest,
+  type ModelResponse,
   type NudgeRequest,
   type Replier,
   type ReplyInput,
   type TokenUsage,
 } from "../claude/replier.js";
+import { addSeen, allowance, linkKey, unseenLinks, withoutLinks } from "./links.js";
+import { MAX_CONTINUATIONS, runWatchVideo, WATCH_VIDEO_TOOL, webBudget, webTools } from "./web.js";
 import type { Db } from "../db/client.js";
 import type { Tester } from "../db/schema.js";
 import type { MediaStore } from "../media/storage.js";
@@ -86,6 +91,14 @@ export const NOT_SENT_NOTE =
 /** #108: told once when a reply's text has a tool's name on its own line (it wrote the call instead of making it). */
 export const TOOL_AS_TEXT_NOTE =
   "[Your text had a tool's name on its own line, which they'd see. If you meant to use it, call it now; then write only your text to them. Don't mention this note.]";
+
+/**
+ * #162: told once when a reply has a link it didn't see this turn (an invented one breaks their trust), or a video it
+ * didn't watch. If it still has one after this, the link is taken out before sending.
+ */
+export function unseenLinkNote(links: string[]): string {
+  return `[Your text has ${links.length === 1 ? "a link" : "links"} you didn't find, open or get from them in this reply: ${links.join(", ")}. Only links from your searches, pages you opened or the texts may go to them, and a YouTube link only once you've watched it this reply (watch_video). Look it up now if you need it, or write your text without it. Don't mention this note.]`;
+}
 
 /** #108: a line that's only a tool's name ("mark_agreed", "`mark_agreed()`"). */
 function isToolNameLine(line: string, names: readonly string[]): boolean {
@@ -168,30 +181,74 @@ export function createCoach(opts: CoachOptions): Replier {
       ? { system: systemBlocks(blocks, undefined, memory), messages: withSheet(messages, state) }
       : { system: systemBlocks(blocks, state, memory), messages };
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, interrupted, signal, dropped, media }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
       const note = droppedDraftNote(dropped);
       if (note) (messages.at(-1)!.content as Anthropic.ContentBlockParam[]).push({ type: "text", text: note });
-      markCached(messages);
       /** Actions this draft finished, handed on if it's dropped. */
       const done: string[] = [];
+      // #162: the links it may send: everything in the texts, what a dropped draft found or wrote, and (below) the
+      // state, memory, tool results, searches, opened pages and videos it watches.
+      const allowed = allowance();
+      addSeen(allowed, ...turns.map((t) => t.text), ...(dropped?.found ?? []), dropped?.text ?? "");
+      for (const w of dropped?.watched ?? []) allowed.watched.add(linkKey(w));
+      /** #162: links this draft's searches and pages turned up, and videos it watched, handed on if it's dropped. */
+      const found: string[] = [];
+      const watched: string[] = [];
       /** #16: a safe point. They texted again: stop here, before the next call, action or send. */
       const checkpoint = (text?: string) => {
-        if (interrupted?.()) throw new DraftDroppedError({ actions: done, ...(text ? { text } : {}) });
+        if (interrupted?.()) throw new DraftDroppedError(handOn(text));
       };
+      const handOn = (text?: string): DroppedDraft => ({
+        actions: done,
+        ...(text ? { text } : {}),
+        ...(found.length ? { found } : {}),
+        ...(watched.length ? { watched } : {}),
+      });
       // Read once per reply: it only changes overnight (or on a preference or forget, which the tool result reports).
       const memory = usesMemory(initial) ? await memoryBlock(db, initial) : undefined;
+      if (memory) addSeen(allowed, memory);
       const budget: LookupBudget = { lookups: 0, searches: 0 };
+      const web = webBudget();
       const usage: TokenUsage = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
       /** #200: the parts this reply has loaded; a tool call can add one, never drop one. */
       let parts: Part[] = [];
       try {
         return await replyLoop();
       } finally {
-        onUsage?.(usage);
+        onUsage?.({ ...usage, watches: web.watches });
         onSections?.(loadedNames(initial.phase, parts));
+      }
+
+      /** Counts what a call used and keeps the links it found. */
+      function account(r: ModelResponse): void {
+        addUsage(usage, r.usage);
+        web.searches += r.usage?.searches ?? 0;
+        web.fetches += r.usage?.fetches ?? 0;
+        for (const line of r.lookups ?? []) onLookup?.(line);
+        for (const link of r.found ?? []) {
+          found.push(link);
+          allowed.seen.add(linkKey(link));
+        }
+      }
+
+      /**
+       * #162: one round's call. A search that pauses (`pause_turn`) is let go on, up to `MAX_CONTINUATIONS`: the same
+       * request with what it wrote so far, which the API resumes. Not a round, and no new sheet.
+       */
+      async function ask(req: ModelRequest): Promise<ModelResponse> {
+        let response = await model.create(req);
+        account(response);
+        for (let n = 0; response.stopReason === "pause_turn" && n < MAX_CONTINUATIONS; n++) {
+          const sofar = response.raw ?? (response.content as Anthropic.ContentBlockParam[]);
+          const next = await model.create({ ...req, messages: [...req.messages, { role: "assistant", content: sofar }], tools: [...req.tools.filter((t) => !isWebTool(t.name)), ...webTools(web)] });
+          account(next);
+          response = joinPaused(response, next);
+        }
+        if (response.stopReason === "pause_turn") onLookup?.(`search still paused after ${MAX_CONTINUATIONS} continuations`);
+        return response;
       }
 
       async function replyLoop(): Promise<string> {
@@ -207,9 +264,12 @@ export function createCoach(opts: CoachOptions): Replier {
       let tester: Tester = initial;
       let justFinished = false;
       let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
+      // #162: the team's requests (and anything else on the sheet) may carry a link to pass on.
+      addSeen(allowed, buildStateBlock(state));
       let fallbackText = "";
-      // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls.
-      const tools = toolsFor(initial);
+      // Fixed for the whole reply: changing tools mid-loop breaks the cache and the history's tool calls. #162: only the
+      // web tools change, and only once a round used some of the reply's searches or pages (their caps go down).
+      const ownTools = [...toolsFor(initial), ...(opts.watcher ? [WATCH_VIDEO_TOOL] : [])];
       // Onboarding keeps its condensed prompt so its rules stay sharp; afterwards, the core and what this moment needs.
       const reach = { media: !!media };
       parts = partsFor(state, reach);
@@ -218,25 +278,30 @@ export function createCoach(opts: CoachOptions): Replier {
       let retried = false;
       let nudgedPastSave = false;
       let nudgedPastToolName = false;
-      const toolNames = tools.map((t) => t.name);
+      let nudgedPastLinks = false;
+      const toolNames = ownTools.map((t) => t.name);
 
       for (let round = 1; round <= MAX_ROUNDS; round++) {
         const last = round === MAX_ROUNDS;
         checkpoint(fallbackText);
-        let response: Awaited<ReturnType<ClaudeModel["create"]>>;
+        // #162: the newest message is cached, so pages opened in one round are re-read from cache in the next.
+        cacheNewest(messages);
+        let response: ModelResponse;
         try {
-          response = await model.create({
+          response = await ask({
             ...request(instructions(initial.phase, parts), state, memory, messages),
-            tools,
+            tools: [...ownTools, ...webTools(web)],
             toolChoice: last ? "none" : "auto",
             ...(signal ? { signal } : {}),
+            ...(onActivity ? { onActivity } : {}),
+            // #162: once it has searched, a timed-out call isn't retried (each can take two minutes).
+            noRetry: web.searches + web.fetches + web.watches > 0,
           });
         } catch (err) {
           // Cut off because they texted again: nothing from this call ran.
-          if (signal?.aborted) throw new DraftDroppedError({ actions: done, ...(fallbackText ? { text: fallbackText } : {}) });
+          if (signal?.aborted) throw new DraftDroppedError(handOn(fallbackText));
           throw err;
         }
-        addUsage(usage, response.usage);
         const text = response.content
           .filter((b) => b.type === "text")
           .map((b) => b.text)
@@ -253,7 +318,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (calls.length === 0 && !last && !nudgedPastToolName && hasToolNameLine(text, toolNames)) {
           nudgedPastToolName = true;
           trail.push("tool-as-text");
-          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
           messages.push({ role: "user", content: [{ type: "text", text: TOOL_AS_TEXT_NOTE }] });
           continue;
         }
@@ -261,12 +326,26 @@ export function createCoach(opts: CoachOptions): Replier {
         if (calls.length === 0 && !last && !nudgedPastSave && trail.some((r) => r.includes(":ok")) && onlySaveConfirmation(text)) {
           nudgedPastSave = true;
           trail.push("save-only");
-          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
           messages.push({ role: "user", content: [{ type: "text", text: SAVE_ONLY_NOTE }] });
           continue;
         }
         if (calls.length === 0 || last) {
-          const reply = withoutToolNames(text, ALL_TOOL_NAMES) || fallbackText;
+          let reply = withoutToolNames(text, ALL_TOOL_NAMES) || fallbackText;
+          // #162: a link it never saw this turn, or a video it didn't watch: once, ask it to look it up or drop it.
+          const unseen = unseenLinks(reply, allowed);
+          if (unseen.length && !last && !nudgedPastLinks) {
+            nudgedPastLinks = true;
+            trail.push("unseen-link");
+            messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
+            messages.push({ role: "user", content: [{ type: "text", text: unseenLinkNote(unseen) }] });
+            continue;
+          }
+          // Still there (or no round left to ask): it's taken out, never sent.
+          if (unseen.length) {
+            reply = withoutLinks(reply, unseen);
+            onLookup?.(`removed a link it never saw: ${unseen.join(" ")}`);
+          }
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
@@ -278,6 +357,21 @@ export function createCoach(opts: CoachOptions): Replier {
         const results: (Anthropic.ToolResultBlockParam | Anthropic.TextBlockParam)[] = [];
         for (const call of calls) {
           checkpoint(fallbackText);
+          if (call.name === WATCH_VIDEO_TOOL.name) {
+            const watchedNow = opts.watcher
+              ? await runWatchVideo(opts.watcher, call.input, { budget: web, allowed, ...(onActivity ? { onActivity } : {}) })
+              : ({ ok: false, error: "Videos can't be watched right now: say so if it matters." } as const);
+            const url = String((call.input as { url?: unknown } | undefined)?.url ?? "");
+            onLookup?.(watchedNow.ok ? `watched ${url}` : `couldn't watch ${url} (${(("cause" in watchedNow && watchedNow.cause) || watchedNow.error).slice(0, 120)})`);
+            if (watchedNow.ok) {
+              watched.push(url);
+              const action = `watch_video (${watchedNow.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
+              done.push(action);
+              onAction?.(action);
+            }
+            results.push({ type: "tool_result", tool_use_id: call.id, ...(watchedNow.ok ? { content: watchedNow.message } : { content: watchedNow.error, is_error: true }) });
+            continue;
+          }
           const result = isMemoryTool(call.name)
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media, watcher: opts.watcher })
             : await runTool(db, state, call.name, call.input, now);
@@ -286,6 +380,8 @@ export function createCoach(opts: CoachOptions): Replier {
             const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
             done.push(action);
             onAction?.(action);
+            // #162: a document or memory it opened may hold a link to pass on.
+            addSeen(allowed, result.message);
             tester = result.tester;
             state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
@@ -312,7 +408,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (text) results.push({ type: "text", text: NOT_SENT_NOTE });
         // The model sometimes answers a forced-text round with nothing unless it's told why.
         if (round + 1 === MAX_ROUNDS) results.push({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." });
-        messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+        messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
         messages.push({ role: "user", content: results });
       }
       throw new Error("unreachable: the last round always returns");
@@ -428,7 +524,24 @@ export function withSheet(messages: Anthropic.MessageParam[], state: CoachState)
 }
 
 /** #108, #200: every tool's name, offered in this reply or not, so none written as text reaches them. */
-const ALL_TOOL_NAMES = [...TOOL_DEFINITIONS, ...MEMORY_TOOL_DEFINITIONS].map((t) => t.name);
+const ALL_TOOL_NAMES = [...TOOL_DEFINITIONS, ...MEMORY_TOOL_DEFINITIONS, WATCH_VIDEO_TOOL].map((t) => t.name);
+
+/** #162: Anthropic's web tools, whose caps change as a reply uses them. */
+const isWebTool = (name: string) => name === "web_search" || name === "web_fetch";
+
+/**
+ * #162: a paused call and its continuation as one answer: everything it wrote, in order (sent back as one assistant
+ * turn), the continuation's text if it wrote any, and every tool call.
+ */
+function joinPaused(paused: ModelResponse, next: ModelResponse): ModelResponse {
+  const said = next.content.some((b) => b.type === "text");
+  return {
+    content: [...paused.content.filter((b) => b.type === "tool_use" || !said), ...next.content],
+    raw: [...(paused.raw ?? (paused.content as Anthropic.ContentBlockParam[])), ...(next.raw ?? (next.content as Anthropic.ContentBlockParam[]))],
+    stopReason: next.stopReason,
+    found: [...(paused.found ?? []), ...(next.found ?? [])],
+  };
+}
 
 /** #200: the parts loaded so far, plus any the reply can now reach; never fewer. */
 const grown = (had: readonly Part[], now: readonly Part[]): Part[] => PARTS.filter((p) => had.includes(p) || now.includes(p));
@@ -448,15 +561,28 @@ function isMemoryTool(name: string): name is MemoryToolName {
 }
 
 /**
- * Caches the conversation up to their latest text: every later round in the reply re-reads it
- * from cache instead of paying for it again. (The marker isn't visible to the model.)
+ * Caches the conversation up to the newest message (their latest text, then each round's tool results): every later
+ * round in the reply re-reads it from cache instead of paying for it again. #162: the marker moves to the newest
+ * message each round (one breakpoint, as the API allows four and the system prompt uses up to three), so a page
+ * opened in one round isn't paid for in full again. (The marker isn't visible to the model.)
  */
-function markCached(messages: Anthropic.MessageParam[]): void {
+function cacheNewest(messages: Anthropic.MessageParam[]): void {
+  for (const m of messages) {
+    if (typeof m.content === "string") continue;
+    for (const [i, b] of m.content.entries()) {
+      if ("cache_control" in b && b.cache_control) {
+        const { cache_control: _, ...rest } = b;
+        (m.content as Anthropic.ContentBlockParam[])[i] = rest as Anthropic.ContentBlockParam;
+      }
+    }
+  }
   const last = messages.at(-1);
   if (!last || typeof last.content === "string") return;
   const blocks = last.content as Anthropic.ContentBlockParam[];
   const end = blocks.at(-1);
-  if (end && (end.type === "text" || end.type === "image")) blocks[blocks.length - 1] = { ...end, cache_control: { type: "ephemeral" } };
+  if (end && (end.type === "text" || end.type === "image" || end.type === "tool_result" || end.type === "document")) {
+    blocks[blocks.length - 1] = { ...end, cache_control: { type: "ephemeral" } };
+  }
 }
 
 function addUsage(total: TokenUsage, u: TokenUsage | undefined): void {
@@ -465,6 +591,8 @@ function addUsage(total: TokenUsage, u: TokenUsage | undefined): void {
   total.cacheRead += u.cacheRead;
   total.cacheWrite += u.cacheWrite;
   total.output += u.output;
+  if (u.searches) total.searches = (total.searches ?? 0) + u.searches;
+  if (u.fetches) total.fetches = (total.fetches ?? 0) + u.fetches;
 }
 
 /** Short progress note on each successful tool result, so the next round sees what's left. */

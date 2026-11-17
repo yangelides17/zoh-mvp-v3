@@ -2,7 +2,7 @@ import type { AppEnv } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
-import { toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
+import { settled, toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { buildStateBlock } from "../coach/prompt.js";
 import { loadCoachState, localTime } from "../coach/state.js";
@@ -28,6 +28,7 @@ import {
   type Tester,
 } from "../db/schema.js";
 import { awaitingAnswer as raisedAwaiting, findSuggestion, readyToRaise, suggestionRef } from "../coach/next-steps.js";
+import { MAX_CONTINUATIONS, webBudget, webTools } from "../coach/web.js";
 import { mediaKind } from "../media/storage.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
@@ -61,6 +62,7 @@ Answering the founders:
 - Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so, and don't ask whether to go ahead: the card's buttons ask. They want it different: a new draft with replaces = the old one's id.
 - Context for how to coach them ("traveling next week, go easy"): save_note.
 - Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
+- Asked to find something for them (a guide, an article, an answer): web search and open the best page, then plan_request it with the one link and a line on why it's for them. Only links you found; no videos (you can't watch them here).
 - Their own words sent as written ("send her exactly…", "text him: …"): send_text, copied exactly, never reworded or judged; even_in_quiet_hours only if they say to send it now anyway.
 - A request in your words that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't draft it. Say why in a line and offer a version that fits.
 - A different time, place, days, proof or length for their plan: propose_plan_change. You'll ask the tester; it changes only on their yes.
@@ -568,8 +570,11 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
       CONFIRM_TOOL,
       ...(memory ? MEMORY_TOOL_DEFINITIONS.filter((t) => LOOKUPS.includes(t.name)) : []),
     ];
+    // #162: the founders can ask it to find something for a tester; what it finds goes out only through a draft.
+    const web = webBudget();
     const messages = toClaudeMessages(thread.map(threadTurn));
     let fallback = "";
+    let continued = 0;
     for (let round = 1; round <= CONSOLE_MAX_ROUNDS; round++) {
       const last = round === CONSOLE_MAX_ROUNDS;
       const context = await recordBlock(db, tester, now, goalCap);
@@ -580,9 +585,19 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
           { type: "text", text: context },
         ],
         messages,
-        tools,
+        tools: [...tools, ...webTools(web)],
         toolChoice: last ? "none" : "auto",
+        noRetry: web.searches + web.fetches > 0,
       });
+      web.searches += response.usage?.searches ?? 0;
+      web.fetches += response.usage?.fetches ?? 0;
+      // A search that paused goes on where it stopped (not a round), at most twice.
+      if (response.stopReason === "pause_turn" && continued < MAX_CONTINUATIONS) {
+        continued++;
+        round--;
+        messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+        continue;
+      }
       const reply = response.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
@@ -600,7 +615,7 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
       for (const call of calls) {
         results.push({ type: "tool_result", tool_use_id: call.id, ...(await runCapability(ctx, call.name, call.input, lastFounder.createdAt)) });
       }
-      messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+      messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
       messages.push({ role: "user", content: results });
     }
     return undefined;

@@ -464,10 +464,10 @@ describe("opting out and failures", () => {
     expect(model.requests).toHaveLength(MAX_ROUNDS);
     const lastRequest = model.requests.at(-1)!;
     expect(lastRequest.toolChoice).toBe("none");
-    expect(lastRequest.messages.at(-1)!.content).toContainEqual({
-      type: "text",
-      text: "No more tool calls for this reply: write your text to the tester now.",
-    });
+    // #162: the newest block also carries the moving cache marker.
+    expect(lastRequest.messages.at(-1)!.content).toContainEqual(
+      expect.objectContaining({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." }),
+    );
     // The tool list stays the same for every round of one reply.
     expect(new Set(model.requests.map((r) => r.tools.map((x) => x.name).join()))).toHaveProperty("size", 1);
     expect(sent()).toEqual(["Hype it is!"]);

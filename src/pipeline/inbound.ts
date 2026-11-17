@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { FastifyBaseLogger } from "fastify";
-import { DraftDroppedError, NoReplyTextError, type DroppedDraft, type Turn, type Replier } from "../claude/replier.js";
+import { DraftDroppedError, NoReplyTextError, type DroppedDraft, type Turn, type Replier, type WebActivity } from "../claude/replier.js";
 import { ReplyLines, type PendingText, type PreparedMedia, type ReplyLine } from "./conversation.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
@@ -70,11 +70,25 @@ export interface PipelineDeps {
   holdingAfterMs?: number;
 }
 
-/** #163: the holding text goes once a file has taken longer than this (10 s, Decision Nov 14, matching #162). */
-export const HOLDING_AFTER_MS = 10_000;
+/**
+ * #163: when the holding text goes for a video or document they sent. #162 (Yanni, Nov 16): at once, like the status
+ * texts, rather than after 10 seconds.
+ */
+export const HOLDING_AFTER_MS = 0;
 
-/** #163: what ZOH says while it watches or reads; fixed, so it goes at once with no Claude call. */
-export const HOLDING_TEXTS = { video: "watching it now 👀", document: "reading it now 📖" } as const;
+/** #162: what ZOH says the moment it starts something slow; fixed, so it goes at once with no Claude call. */
+export const STATUS_TEXTS: Record<WebActivity, string> = { search: "looking that up 🔎", reading: "reading it now 📖", watching: "watching it now 👀" };
+
+/** #163: what ZOH says while it watches or reads a file they sent (the same as #162's status texts). */
+export const HOLDING_TEXTS = { video: STATUS_TEXTS.watching, document: STATUS_TEXTS.reading } as const;
+
+/** #162: status texts per reply, the holding text for a file they sent included. */
+export const MAX_STATUS_TEXTS = 2;
+
+/** #162: what a reply looked up, kept in its timings (and the reply's own) for the console's cost line. */
+export const LOOKUP_TIMINGS = ["web_searches", "web_pages", "video_watches"] as const;
+/** #162: the record of what a reply looked up is cut here, so a runaway reply can't bloat the row. */
+const LOOKUPS_MAX_CHARS = 4_000;
 
 /**
  * Sends the holding text for a video or document still being read, unless "stop" or "reset" came in
@@ -86,10 +100,20 @@ async function sendHolding(deps: PipelineDeps, sendblue: SendblueClient, tester:
   // Known once it's downloaded; before that, from the link (a slow download is a big file).
   const kind = String(timings.media_kind ?? mediaKind(undefined, inbound.mediaUrl ?? ""));
   if (kind === "image" || kind === "audio") return;
-  const content = kind === "video" ? HOLDING_TEXTS.video : HOLDING_TEXTS.document;
+  const activity: WebActivity = kind === "video" ? "watching" : "reading";
+  // #162: it counts toward the reply's status texts, so the coach's own watch or read doesn't say it again.
+  timings.holding_kind = activity;
+  await sendStatus(deps, sendblue, tester, inbound, STATUS_TEXTS[activity]);
+  timings.holding_sent_at = (deps.now ?? (() => new Date()))().toISOString();
+}
+
+/**
+ * #162: a status text ("looking that up 🔎"), or #163's holding text: sent and recorded with `holding` in its timings,
+ * so it's never one of ZOH's real texts in its state, then the typing bubble again for the real reply.
+ */
+async function sendStatus(deps: PipelineDeps, sendblue: SendblueClient, tester: Tester, inbound: Message, content: string): Promise<void> {
   const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content });
   const at = (deps.now ?? (() => new Date()))();
-  timings.holding_sent_at = at.toISOString();
   await insertOutbound(deps.db, {
     contactNumber: inbound.contactNumber,
     lineNumber: inbound.lineNumber,
@@ -176,14 +200,14 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
     : Promise.resolve(undefined);
   // #163: a video or document still being read after a while gets one "watching it now" first.
   let holding: Promise<void> = Promise.resolve();
-  const timer =
-    inbound.mediaUrl && deps.holdingAfterMs !== undefined
-      ? setTimeout(() => {
-          holding = sendHolding(deps, sendblue, tester, inbound, timings).catch((err: unknown) => {
-            log.error({ ...ctx, err: safeError(err) }, "Sending the holding text failed");
-          });
-        }, deps.holdingAfterMs)
-      : undefined;
+  const hold = () => {
+    holding = sendHolding(deps, sendblue, tester, inbound, timings).catch((err: unknown) => {
+      log.error({ ...ctx, err: safeError(err) }, "Sending the holding text failed");
+    });
+  };
+  // #162: no delay means at once, never racing a quick download.
+  if (inbound.mediaUrl && deps.holdingAfterMs === 0) hold();
+  const timer = inbound.mediaUrl && deps.holdingAfterMs ? setTimeout(hold, deps.holdingAfterMs) : undefined;
   const prepared = handled.then(async (media) => {
     clearTimeout(timer);
     await holding;
@@ -225,6 +249,8 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
   let batch: PendingText[] = [];
   let dropped: DroppedDraft = { actions: [] };
   let draftsDropped = 0;
+  /** #162: the status texts sent for the reply being written, across its redrafts (one per kind, at most two). */
+  let status = new Set<WebActivity>();
   for (;;) {
     if (line.cancelled) {
       for (const p of [...batch, ...line.cancelledPending.splice(0)]) {
@@ -234,6 +260,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
       batch = [];
       dropped = { actions: [] };
       draftsDropped = 0;
+      status = new Set();
       line.cancelled = false;
     }
     batch.push(...line.pending.splice(0));
@@ -249,9 +276,11 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     if (line.interrupted) continue;
     // Fresh each round: a dropped draft may already have saved answers or moved them on.
     const tester = (await getTester(db, first.id)) ?? first;
-    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal);
+    // #162: a holding text already sent for a file they sent counts as that kind's status text.
+    for (const p of batch) if (p.timings.holding_kind) status.add(p.timings.holding_kind as WebActivity);
+    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal, status);
     if (outcome.kind === "dropped") {
-      dropped = { actions: [...dropped.actions, ...outcome.draft.actions], ...((outcome.draft.text ?? dropped.text) ? { text: outcome.draft.text ?? dropped.text } : {}) };
+      dropped = mergeDropped(dropped, outcome.draft);
       draftsDropped++;
       log.info({ ...ctx, actions: outcome.draft.actions.length }, "Draft dropped: they texted again before it was sent");
       continue;
@@ -260,7 +289,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     if (line.cancelled) continue;
     if (line.interrupted || line.pending.length) {
       // #132: what it saved stays saved; the redraft is told it and the unsent words, so it doesn't redo them.
-      dropped = { actions: [...dropped.actions, ...outcome.actions], text: outcome.text };
+      dropped = { ...mergeDropped(dropped, { actions: outcome.actions }), text: outcome.text };
       draftsDropped++;
       log.info({ ...ctx, actions: outcome.actions.length }, "Draft dropped before sending: they texted again");
       continue;
@@ -271,7 +300,21 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     batch = [];
     dropped = { actions: [] };
     draftsDropped = 0;
+    status = new Set();
   }
+}
+
+/** What every dropped draft of one reply did (#16), plus (#162) the links they found and videos they watched. */
+function mergeDropped(had: DroppedDraft, more: DroppedDraft): DroppedDraft {
+  const text = more.text ?? had.text;
+  const found = [...(had.found ?? []), ...(more.found ?? [])];
+  const watched = [...(had.watched ?? []), ...(more.watched ?? [])];
+  return {
+    actions: [...had.actions, ...more.actions],
+    ...(text ? { text } : {}),
+    ...(found.length ? { found } : {}),
+    ...(watched.length ? { watched } : {}),
+  };
 }
 
 /** A finished draft carries the actions it took (#132), handed on if it's dropped before sending. */
@@ -289,6 +332,7 @@ async function draftReply(
   media: (PreparedMedia | undefined)[],
   dropped: DroppedDraft,
   signal: AbortSignal,
+  status: Set<WebActivity>,
 ): Promise<DraftOutcome> {
   const { db, log } = deps;
   const now = deps.now ?? (() => new Date());
@@ -301,9 +345,32 @@ async function draftReply(
     return { kind: "text", text: FALLBACK_REPLY, actions: [] };
   }
   const replier = deps.replier;
+  const sendblue = deps.sendblue;
   const interrupted = () => line.interrupted || line.cancelled;
   const current = new Map(batch.map((p, i) => [p.inbound.id, media[i] ?? {}]));
-  const handedOn = dropped.actions.length || dropped.text ? dropped : undefined;
+  const handedOn = dropped.actions.length || dropped.text || dropped.found?.length || dropped.watched?.length ? dropped : undefined;
+  /** #162: status texts on their way; the reply waits for them, so it never arrives first. */
+  const statusSends: Promise<void>[] = [];
+  const onActivity = (kind: WebActivity) => {
+    // One per kind and at most two per reply, redrafts included; none once they've texted again.
+    if (!sendblue || status.has(kind) || status.size >= MAX_STATUS_TEXTS || interrupted()) return;
+    status.add(kind);
+    timings.status_texts = status.size;
+    statusSends.push(
+      sendStatus(deps, sendblue, tester, latest.inbound, STATUS_TEXTS[kind]).catch((err: unknown) => {
+        log.error({ ...ctx, err: safeError(err) }, "Sending a status text failed");
+      }),
+    );
+  };
+  /** #162: a reply that has searched, opened a page or watched a video isn't retried (each try can take minutes). */
+  let searched = false;
+  try {
+    return await attempts();
+  } finally {
+    await Promise.all(statusSends);
+  }
+
+  async function attempts(): Promise<DraftOutcome> {
   const claudeStart = now();
   /** Actions finished by this draft's attempts, so far. */
   const actions: string[] = [];
@@ -329,11 +396,22 @@ async function draftReply(
         // #200: media loads the proof rules; the parts it loaded are kept with the message, so a wrong pick can be traced.
         media: batch.some((p) => p.inbound.mediaUrl),
         onSections: (s) => (timings.coach_sections = s.join(",")),
+        onActivity,
+        // #162: what it searched, opened and watched, kept with their text (the eval's grader reads it too).
+        onLookup: (l) => {
+          const lines = timings.lookups ? `${timings.lookups}\n${l}` : l;
+          timings.lookups = lines.slice(0, LOOKUPS_MAX_CHARS);
+        },
         onUsage: (u) => {
           timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
           timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;
           timings.claude_cache_write_tokens = Number(timings.claude_cache_write_tokens ?? 0) + u.cacheWrite;
           timings.claude_output_tokens = Number(timings.claude_output_tokens ?? 0) + u.output;
+          // #162: for the console's cost line.
+          for (const [key, n] of [["web_searches", u.searches], ["web_pages", u.fetches], ["video_watches", u.watches]] as const) {
+            if (n) timings[key] = Number(timings[key] ?? 0) + n;
+          }
+          if (u.searches || u.fetches || u.watches) searched = true;
         },
       });
       break;
@@ -353,7 +431,7 @@ async function draftReply(
         log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text again; sending fallback");
         break;
       }
-      const delay = delays[failures++];
+      const delay = searched ? undefined : delays[failures++];
       if (delay === undefined) {
         replyText = SYSTEM_DOWN_REPLY;
         log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
@@ -369,6 +447,7 @@ async function draftReply(
   }
   timings.claude_ms = now().getTime() - claudeStart.getTime();
   return { kind: "text", text: replyText, actions };
+  }
 }
 
 /**
@@ -478,6 +557,8 @@ async function sendReply(
     if (inbound.sentAt) timings.received_to_reply_sent_ms = sentAt.getTime() - inbound.sentAt.getTime();
     const started = Date.parse(String(timings.processing_started_at));
     if (Number.isFinite(started)) timings.processing_ms = realSentAt.getTime() - started;
+    // #162: the reply carries what it looked up, for the console's cost line beside it.
+    const lookups = Object.fromEntries(LOOKUP_TIMINGS.filter((k) => timings[k]).map((k) => [k, Number(timings[k])]));
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
@@ -487,6 +568,7 @@ async function sendReply(
       inReplyTo: inbound.id,
       sentAt,
       createdAt: onTesterClock(tester, sentAt),
+      ...(Object.keys(lookups).length ? { timings: lookups } : {}),
       raw: sent.raw as object,
     });
   } catch (err) {

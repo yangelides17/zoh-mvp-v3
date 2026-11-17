@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:teaching-fits",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-17T00:03:57.133Z",
+  "branch": "feature/162-web-search",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "bc75fa6a8949",
-    "voice": "fbc3a37c5b97",
+    "checks": "ffc42b327528",
+    "voice": "11bdb16a5bf6",
     "instructions": "c7348af58300",
     "script": "59693763f0d6"
   },
@@ -69,26 +69,20 @@
               {
                 "rule": "names-commitment",
                 "pass": true,
-                "borderline": true,
-                "reason": "Says 'staying on it today at 6 pm in the living room, for 10 min' and gives the two-ball fix, but never plainly names the two-ball exchange as the step."
+                "borderline": false,
+                "reason": "Names the two-ball step with 6 pm and the living room for 10 minutes."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Kalimera Casey!', warm and with their name."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Frames the crashes as normal learning with no guilt or urgency."
+                "reason": "Opens with Kalimera Casey, warm and named."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "About four short sentences with one question at the end."
+                "reason": "Four sentences and one question at the end, within the teaching allowance."
               },
               {
                 "rule": "kickoff-one-ask",
@@ -100,13 +94,13 @@
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives where (living room), when (6 pm) and how long (10 min)."
+                "reason": "Step, place, time and length are all given."
               },
               {
                 "rule": "teaching-fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives the correct peak-timing fix for collisions, which fits the crashing problem reported."
+                "reason": "Gives a correct, grounded fix (throw ball 2 at ball 1's peak) that matches the crash problem."
               },
               {
                 "rule": "plain-words",
@@ -118,7 +112,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging and sincere, with no affection or emoji row."
+                "reason": "Warm and energetic without being overfamiliar."
               }
             ]
           },
@@ -129,31 +123,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "A teaching text with a short list, about eight to nine lines including the bullets, so it is at the edge of the allowed length."
+                "reason": "Runs about 9 lines with four bullets, slightly over the roughly 8-line teaching allowance."
               },
               {
                 "rule": "teaching-fits",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "Gives the 'learn to juggle 3 balls beginner cascade' YouTube search, which is a three-ball search, not for the two-ball exchange as required."
+                "reason": "Answers the direct question about crashes with aim and height advice consistent with the morning tip."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain bullet list with no markdown, hashtags or filler."
+                "reason": "Short bullet list is allowed; no markdown headings or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, direct and sincere, with no affection or emoji row."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Frames collisions as a fixable technique with no guilt or pressure."
+                "reason": "Direct and warm, with no overfamiliarity or emoji row."
               }
             ]
           },
@@ -164,43 +152,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": true,
-                "reason": "Says 'grab your two balls' in the living room with 'Ten minutes to 6', so the step is implied but not spelled out as the exchange."
+                "reason": "Points to today's two-ball practice at 6 in the living room, though the 10 minutes is implied rather than stated."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Hey Casey!' using their name."
+                "reason": "Opens with Hey Casey!, warm and named."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no question, which fits a check-in."
-              },
-              {
-                "rule": "teaching-fits",
-                "pass": true,
-                "borderline": true,
-                "reason": "Restates the peak rule as a short reminder, which is allowed, though it leans slightly toward re-teaching the fix."
+                "reason": "Three short sentences with no question, as a check-in."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Encouraging with no guilt or fake urgency."
+                "reason": "Encouraging, no guilt or urgency."
               },
               {
-                "rule": "plain-words",
+                "rule": "teaching-fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Only a few-word reminder of the peak rule, not a repeated lesson."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, pushy-level energy with one emoji used as punctuation."
+                "reason": "Single emoji at the end used as punctuation."
               }
             ]
           }
@@ -210,10 +192,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "Step stayed on the two-ball exchange with a correct fix and no contradictions, but ZOH 2 gave a three-ball 'cascade' YouTube search, which the rule forbids."
+            "reason": "Fix and step are right, but the YouTube search phrase is for three balls, not the two-ball exchange the regression case requires."
           }
         ],
-        "summary": "ZOH held today's two-ball step, gave a correct and consistent collision fix, and sent a short, warm check-in before 6 pm. It failed the regression case because ZOH 2 offered a three-ball YouTube search phrase, which is off-step for the two-ball exchange."
+        "summary": "ZOH stayed on the two-ball step, gave an accurate collision fix consistent across texts, and sent a short, grounded reminder before 6. It missed on the resource, pointing Casey to a three-ball search, and the fix text runs slightly long."
       }
     }
   ]

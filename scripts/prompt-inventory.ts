@@ -34,6 +34,8 @@ export const SCANNED_FILES = [
   "src/memory/store.ts",
   "src/testers/commands.ts",
   "src/testers/env.ts",
+  // #162: watch_video's description, refusals and result.
+  "src/coach/web.ts",
 ] as const;
 
 export const VOICE_PAGE = "docs/coach-voice.md";
@@ -227,6 +229,9 @@ export function kindOf(f: Found): string {
       // The trail of tool outcomes goes into an error message if no text comes back.
       if (last === "error") return "tool error";
       return f.text.includes("no blocks") ? "not read by ZOH" : "coach note";
+    case "src/coach/web.ts":
+      if (top === "WATCH_VIDEO_TOOL") return "tool description";
+      return last === "error" ? "tool error" : "tool result";
     case "src/coach/tools.ts":
     case "src/memory/coach-tools.ts":
       if (/^alert/.test(top)) return "not read by ZOH";
@@ -247,7 +252,7 @@ export function kindOf(f: Found): string {
     case "src/pipeline/inbound.ts":
       // describeMedia's line is kept as the file's description, which later media notes show.
       if (["toTurns", "documentLine", "videoLine"].includes(top) || (top === "describeMedia" && f.text.startsWith("A video"))) return "media note";
-      if (["FALLBACK_REPLY", "SYSTEM_DOWN_REPLY", "HOLDING_TEXTS"].includes(top)) return "app text in history";
+      if (["FALLBACK_REPLY", "SYSTEM_DOWN_REPLY", "HOLDING_TEXTS", "STATUS_TEXTS"].includes(top)) return "app text in history";
       return "not read by ZOH";
     default:
       return "status sheet";

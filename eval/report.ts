@@ -137,6 +137,7 @@ function zohTextsWithContext(conv: GradedConversation): { text: string; after?: 
   const out: { text: string; after?: string }[] = [];
   let lastTester: string | undefined;
   for (const line of conv.transcript) {
+    if (line.from === "lookup") continue;
     if (line.from !== "zoh") lastTester = line.text;
     else out.push({ text: line.text, after: lastTester });
   }
@@ -390,6 +391,7 @@ export function renderMarkdown(r: ReportData): string {
     for (const l of conv.transcript) {
       if (l.from === "tester") lines.push(`**Tester:** ${l.text}`, "");
       else if (l.from === "founder") lines.push(`**Founder (console):** ${l.text}`, "");
+      else if (l.from === "lookup") lines.push(`_ZOH looked up: ${l.text}_`, "");
       else {
         n += 1;
         lines.push(`**ZOH ${n}${l.console ? " (console)" : ""}:** ${l.text.replace(/\n/g, "  \n")}`, "");

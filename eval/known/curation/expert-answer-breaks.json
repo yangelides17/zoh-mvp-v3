@@ -1,0 +1,18 @@
+{
+  "id": "expert-answer-breaks",
+  "rule": "expert-answer",
+  "expect": "fail",
+  "why": "A how-to question about their skill gets generic encouragement from memory, with no lookup and nothing specific to the technique.",
+  "seed": {
+    "name": "Leo",
+    "goal": "fun_skill",
+    "phase": "active",
+    "answers": { "what": "solve a Rubik's cube", "where": "desk", "when": "9 pm", "how_long": "15 min" },
+    "history": [{ "from": "zoh", "text": "Tonight, Leo: the white cross at your desk at 9, 15 minutes. Pic of the cross when it's done." }],
+    "plan": { "step": "Practice the white cross, 15 min", "place": "desk", "time": "21:00", "days": ["mon", "tue", "wed", "thu", "fri"], "proof": "photo", "reason": "The cross is the base everything else sits on.", "minutes": 15 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "I can do the cross but it takes me like 3 minutes, how do people get fast at it?" },
+    { "from": "zoh", "text": "Practice makes perfect! The more you do it the faster you'll get. Just keep at it every night and the speed will come. You've got this 💪" }
+  ]
+}

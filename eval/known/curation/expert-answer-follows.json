@@ -1,0 +1,20 @@
+{
+  "id": "expert-answer-follows",
+  "rule": "expert-answer",
+  "expect": "pass",
+  "why": "A how-to question about their skill: ZOH searches, opens a page, and answers with specific technique drawn from it, tied to their step.",
+  "seed": {
+    "name": "Leo",
+    "goal": "fun_skill",
+    "phase": "active",
+    "answers": { "what": "solve a Rubik's cube", "where": "desk", "when": "9 pm", "how_long": "15 min" },
+    "history": [{ "from": "zoh", "text": "Tonight, Leo: the white cross at your desk at 9, 15 minutes. Pic of the cross when it's done." }],
+    "plan": { "step": "Practice the white cross, 15 min", "place": "desk", "time": "21:00", "days": ["mon", "tue", "wed", "thu", "fri"], "proof": "photo", "reason": "The cross is the base everything else sits on.", "minutes": 15 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "I can do the cross but it takes me like 3 minutes, how do people get fast at it?" },
+    { "from": "lookup", "text": "searched \"how to get faster at the white cross rubik's cube beginner\": https://www.speedsolving.com/wiki/index.php/Cross https://ruwix.com/the-rubiks-cube/how-to-solve-the-rubiks-cube-beginners-method/" },
+    { "from": "lookup", "text": "opened https://www.speedsolving.com/wiki/index.php/Cross" },
+    { "from": "zoh", "text": "Speedcubers get the cross under 8 moves by planning it during inspection, before they turn anything. Tonight: find all 4 white edges first, plan the first two moves in your head, then go. And try solving it on the bottom so you're not flipping the cube after. Want to time 5 tries?" }
+  ]
+}

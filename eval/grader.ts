@@ -61,6 +61,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       return `[ZOH ${n}${l.started ? ", started by ZOH, not a reply" : ""}] (${when}) ${l.text}`;
     }
     if (l.from === "founder") return `[FOUNDER, in the console] (${when}) ${l.text}`;
+    if (l.from === "lookup") return `[ZOH LOOKED UP, for its next text; the tester never sees this] ${l.text}`;
     return `[TESTER] (${when}) ${l.text}`;
   });
   const context = [
@@ -73,6 +74,14 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       "Lines marked console are ZOH and the founders (Yanni and Stamati) talking about this tester in a private chat the tester never sees.",
       "ZOH's console answers are judged as a colleague's replies to the founders (this feature's rules); the voice page's texting rules",
       "(energy, one question, coaching tone) apply only to ZOH's texts to the tester. Times are still the tester's local time.",
+    );
+  }
+  if (transcript.some((l) => l.from === "lookup")) {
+    context.push(
+      "",
+      "Lines marked ZOH LOOKED UP are ZOH's real web searches (with the links each turned up), pages it opened and YouTube videos it watched before its next text.",
+      "They are what ZOH actually found: a link in its text that none of them turned up, and that the tester didn't send, was invented. A text that",
+      "only names a source it never looked up is answering from memory. They are not texts, and the voice page's texting rules don't apply to them.",
     );
   }
   if (plan.regression) {

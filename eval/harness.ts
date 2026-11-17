@@ -16,7 +16,7 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
@@ -84,6 +84,38 @@ export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
   });
 }
 
+/** #162: Anthropic's web search fee, per search ($10 per 1,000); opened pages cost only their tokens. */
+export const SEARCH_DOLLARS = 0.01;
+
+interface MessageUsage {
+  model?: string;
+  usage?: {
+    input_tokens?: number;
+    cache_read_input_tokens?: number | null;
+    cache_creation_input_tokens?: number | null;
+    output_tokens?: number;
+    server_tool_use?: { web_search_requests?: number } | null;
+  };
+}
+
+/**
+ * #162: a streamed response's model and final usage: `message_start` carries the model and the input side,
+ * `message_delta` the final counts (output, and searches made), which win where both have one.
+ */
+export function usageFromStream(text: string): MessageUsage | undefined {
+  let out: MessageUsage | undefined;
+  for (const line of text.split("\n")) {
+    if (!line.startsWith("data: ")) continue;
+    const event = JSON.parse(line.slice(6)) as { type?: string; message?: MessageUsage; usage?: Record<string, unknown> };
+    if (event.type === "message_start" && event.message) out = { model: event.message.model, usage: { ...event.message.usage } };
+    else if (event.type === "message_delta" && event.usage && out) {
+      const set = Object.fromEntries(Object.entries(event.usage).filter(([, v]) => v !== null && v !== undefined));
+      out.usage = { ...out.usage, ...set };
+    }
+  }
+  return out;
+}
+
 /** Blocks any request to Sendblue from this process, as a second lock behind the fake client. */
 /** What a run's Claude calls really cost (the app's coach and memory pass, the grader, the simulator), as billed. */
 export interface Meter {
@@ -106,10 +138,8 @@ export function guardFetch(meter?: Meter): () => void {
     if (/sendblue/i.test(url.hostname)) throw new Error("The eval must never call Sendblue");
     const res = await real(input, init);
     if (meter && res.ok && url.hostname === "api.anthropic.com" && url.pathname === "/v1/messages") {
-      const body = (await res.clone().json().catch(() => undefined)) as
-        | { model?: string; usage?: { input_tokens?: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null; output_tokens?: number } }
-        | undefined;
-      if (body?.model && body.usage) {
+      const bill = (body: MessageUsage | undefined) => {
+        if (!body?.model || !body.usage) return;
         const u: BilledUsage = {
           input: body.usage.input_tokens ?? 0,
           cacheRead: body.usage.cache_read_input_tokens ?? 0,
@@ -118,7 +148,14 @@ export function guardFetch(meter?: Meter): () => void {
         };
         const m = (meter.byModel[body.model] ??= { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 });
         for (const k of ["input", "cacheRead", "cacheWrite", "output"] as const) m[k] += u[k];
-        meter.dollars += billedDollars(u, body.model);
+        meter.dollars += billedDollars(u, body.model) + (body.usage.server_tool_use?.web_search_requests ?? 0) * SEARCH_DOLLARS;
+      };
+      // #162: the coach and console chat stream (server-sent events), billed once the stream ends without holding it
+      // up; everything else answers in one JSON body.
+      if ((res.headers.get("content-type") ?? "").includes("event-stream")) {
+        void res.clone().text().then((text) => bill(usageFromStream(text)), () => undefined);
+      } else {
+        bill((await res.clone().json().catch(() => undefined)) as MessageUsage | undefined);
       }
     }
     return res;
@@ -238,12 +275,19 @@ export const BURST_SEPARATOR = " +++ ";
  */
 export async function textZohBurst(app: EvalApp, texts: { text: string; mediaUrl?: string }[], handle: string): Promise<TranscriptLine[]> {
   const before = app.sendblue.sent.length;
+  const handles: string[] = [];
   for (const [i, t] of texts.entries()) {
     if (i > 0) app.clock.advance(1_000);
-    await postText(app, t.text, texts.length > 1 ? `${handle}-${i + 1}` : handle, t.mediaUrl ?? "");
+    handles.push(texts.length > 1 ? `${handle}-${i + 1}` : handle);
+    await postText(app, t.text, handles.at(-1)!, t.mediaUrl ?? "");
   }
   await app.built.queue.idle();
-  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+  const replies = app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+  // #162: what it searched, opened and watched for these replies, ahead of them, for the grader.
+  const rows = await app.db.select({ timings: schema.messages.timings }).from(schema.messages).where(inArray(schema.messages.sendblueHandle, handles));
+  const lookups = rows.flatMap((r) => String((r.timings as Record<string, unknown> | null)?.lookups ?? "").split("\n").filter(Boolean));
+  const at = replies[0]?.at ?? app.clock.now().toISOString();
+  return [...lookups.map((text) => ({ from: "lookup" as const, text, at })), ...replies];
 }
 
 /** How long after a tester's text ZOH's work on it happens, on the eval's clock (#131). */

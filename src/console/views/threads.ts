@@ -108,10 +108,28 @@ export function textItemsHtml(texts: Message[], now: Date): string {
       const who = m.direction === "inbound" ? "them" : "me";
       const body = m.mediaUrl ? proofHtml(m) : esc(m.content ?? "");
       const status = m.status && who === "me" ? ` · ${esc(m.status.toLowerCase())}` : "";
-      return `<div class="msg ${who}" data-id="${esc(m.id)}"><div class="bubble">${body}</div><div class="meta">${esc(clock(messageTime(m)))}${status}</div></div>`;
+      const lookups = who === "me" ? lookupLine(m.timings) : "";
+      return `<div class="msg ${who}" data-id="${esc(m.id)}"><div class="bubble">${body}</div><div class="meta">${esc(clock(messageTime(m)))}${status}${lookups ? ` · ${esc(lookups)}` : ""}</div></div>`;
     },
     now,
   );
+}
+
+/**
+ * #162: rough cents per lookup, beyond the reply's own tokens: a search ($10 per 1,000), a page (up to 8k tokens read
+ * by the coach, ~$2 per million), a video (Gemini at full resolution, about 10 minutes, if Google bills it: free in
+ * preview). Rough on purpose: it's there to spot a reply that looked up far more than it needed.
+ */
+export const LOOKUP_CENTS = { web_searches: 1, web_pages: 1.6, video_watches: 5 } as const;
+
+/** #162: "🔎 2 · 📖 1 · ~4¢" under a reply that looked things up; empty for one that didn't. */
+export function lookupLine(timings: unknown): string {
+  const t = (timings ?? {}) as Record<string, unknown>;
+  const n = (k: keyof typeof LOOKUP_CENTS) => Number(t[k] ?? 0) || 0;
+  const parts = ([["🔎", "web_searches"], ["📖", "web_pages"], ["👀", "video_watches"]] as const).filter(([, k]) => n(k)).map(([icon, k]) => `${icon} ${n(k)}`);
+  if (!parts.length) return "";
+  const cents = (Object.keys(LOOKUP_CENTS) as (keyof typeof LOOKUP_CENTS)[]).reduce((sum, k) => sum + n(k) * LOOKUP_CENTS[k], 0);
+  return `${parts.join(" · ")} · ~${Math.max(1, Math.round(cents))}¢`;
 }
 
 /** A scrolling thread box. `before`: where "load older" starts (absent when this is everything); `after`: the live cursor. */
