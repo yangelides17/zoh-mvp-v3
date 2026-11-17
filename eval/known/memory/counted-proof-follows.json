@@ -1,0 +1,22 @@
+{
+  "id": "counted-proof-follows",
+  "rule": "counted-proof",
+  "expect": "pass",
+  "why": "Yesterday was done with a voice note in place of the video: ZOH counts it as done and asks for today's proof, with only a light mention of the video.",
+  "startTime": "14:50",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "answers": { "what": "desk stretches", "where": "at my desk", "when": "3 pm", "how_long": "3 min" },
+    "history": [{ "from": "tester", "text": "[voice note] finished the routine, twist felt easier, gotta run" }, { "from": "zoh", "text": "Day 2 done, Sam! Easier twist is real progress. Go get it." }],
+    "plan": { "step": "3 minutes of desk stretches", "place": "at your desk", "time": "15:00", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "video", "proof_note": "10 sec video of one move", "reason": "loosen the upper back", "minutes": 3, "started_days_ago": 2 },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "3 minutes of desk stretches", "proof_seen": "Voice note saying they finished the routine; twist felt easier" }
+    ]
+  },
+  "transcript": [
+    { "from": "zoh", "text": "Sam! Two days down and that twist is already getting easier. Desk stretches at 3: a quick clip of one move if you can, a voice note works too." },
+    { "from": "tester", "text": "on it" }
+  ]
+}

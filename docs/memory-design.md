@@ -145,7 +145,8 @@ Tracker. Is it understanding of the person? Memory.
 4. **Memory informs, coach acts:** context leads the coach to use the tracker's own tools (move today's
    step, set today's step).
 5. **Meaning from the day's records:** the nightly pass reads each day's record and files only durable
-   meaning ("missed because of a double shift" → Work); never the counts.
+   meaning ("missed because of a double shift" → Work); never the counts. The record is the truth on done
+   or missed and the proof that counted (#219: proof of another kind than planned is never filed as none).
 6. **Lifecycle:** goal chosen → page created; plan versions and role changes → nothing written
    (computed); goal switched → old page past, new page, "leads to" link with the switch reason.
 

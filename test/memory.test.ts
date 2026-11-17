@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach } from "../src/coach/coach.js";
-import { flags, memoryFacts, memoryLinks, memoryPages, messages, plans, testers, type Message, type Tester } from "../src/db/schema.js";
+import { flags, memoryFacts, memoryLinks, memoryPages, messages, plans, stepDays, testers, type Message, type Tester } from "../src/db/schema.js";
 import type { MediaDescriber } from "../src/memory/describe.js";
 import { createMemoryKeeper, daysDue, KEEPER_MAX_ROUNDS, runKeeperTool, writeDay } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
@@ -156,6 +156,38 @@ describe("the overnight pass", () => {
     expect(req.system[1]!.text).toContain("Mike (the tester)");
     expect(req.system[1]!.text).toContain("How they like to be coached");
     expect(req.system[1]!.text).toContain("Goal: Read & learn more (books, ideas, any topic)");
+  });
+
+  // #219: it filed a voice note the coach had counted as "no proof sent" (the plan asked for a video).
+  it("reads what the app recorded for the day: a step done with proof of another kind than planned", async () => {
+    const mike = await tester();
+    await say(mike, "inbound", at(MON, "15:10"), "", { mediaUrl: "https://cdn/v.caf", mediaContentType: "audio/x-caf", transcript: "Finished the routine, gotta run" });
+    await t.db.insert(stepDays).values({
+      testerId: mike.id,
+      date: MON,
+      status: "done",
+      step: "3 min desk stretches",
+      proofVerdict: "plausible",
+      proofSeen: "Voice note saying he finished the 3-minute routine",
+      stepProof: "10 sec video of one move",
+    });
+    const model = new FakeClaudeModel();
+    await writeDay(t.db, model, mike, MON, at(TUE, "03:00"));
+    const texts = JSON.stringify(model.requests[0]!.messages);
+    expect(texts).toContain('THE STEP THAT DAY: \\"3 min desk stretches\\", marked done; the proof that counted: Voice note saying he finished the 3-minute routine');
+  });
+
+  it("reads a missed day as missed, and says when no step was recorded", async () => {
+    const mike = await tester();
+    await say(mike, "inbound", at(MON, "21:00"), "did it, forgot the pic");
+    await say(mike, "inbound", at(TUE, "12:00"), "rest day vibes");
+    await t.db.insert(stepDays).values({ testerId: mike.id, date: MON, status: "missed", step: "20 pages", note: "No proof sent" });
+    const model = new FakeClaudeModel();
+    await writeDay(t.db, model, mike, MON, at(TUE, "03:00"));
+    await writeDay(t.db, model, mike, TUE, at(WED, "03:00"));
+    expect(JSON.stringify(model.requests[0]!.messages)).toContain('THE STEP THAT DAY: \\"20 pages\\", missed (ZOH\'s note: No proof sent)');
+    expect(JSON.stringify(model.requests.at(-1)!.messages)).toContain("THE STEP THAT DAY: none recorded");
+    expect(await dailyDocs(mike)).toHaveLength(2);
   });
 
   it("backfills up to 14 days on a tester's first run, never before their context started", async () => {
