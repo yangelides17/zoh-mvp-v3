@@ -106,10 +106,10 @@ export async function cancelRequest(db: Db, opts: { testerId: string; requestId:
  * #155: claims a pending request for the text going out now, so a cancel can't race it (Cancel only
  * takes pending ones). False when it's no longer pending (cancelled, or another tick has it).
  */
-export async function claimRequest(db: Db, requestId: string): Promise<boolean> {
+export async function claimRequest(db: Db, requestId: string, at: Date): Promise<boolean> {
   const rows = await db
     .update(consoleMessages)
-    .set({ requestStatus: "sending" })
+    .set({ requestStatus: "sending", claimedAt: at })
     .where(and(eq(consoleMessages.id, requestId), eq(consoleMessages.requestStatus, "pending")))
     .returning({ id: consoleMessages.id });
   return rows.length > 0;
@@ -212,6 +212,35 @@ export async function expireRequests(db: Db, tester: Tester, now: Date, blockedB
     await addThreadLine(db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: `Didn't go out in time (${blockedBy}), so I dropped it: ${short}`, at: now });
     // #155: what couldn't go out is worth a founder's look.
     await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_sent:${r.id}`, body: `Didn't go out (${blockedBy}): ${short}`, at: now });
+  }
+  return rows.length;
+}
+
+/** #188: a send takes well under a minute; a request claimed longer ago than this was left by a crash. */
+export const STUCK_SENDING_MS = 15 * 60_000;
+
+/**
+ * #188: cancels requests left "sending" by a crash or an error before the send finished, and says so
+ * in the thread with a not-sent alert. Never retried: the text may already have reached the tester.
+ */
+export async function cancelStuckRequests(db: Db, tester: Tester, now: Date): Promise<number> {
+  const rows = await db
+    .update(consoleMessages)
+    .set({ requestStatus: "cancelled", doneAt: now })
+    .where(
+      and(
+        eq(consoleMessages.testerId, tester.id),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.requestStatus, "sending"),
+        // Claimed before claimedAt was recorded: no send runs across a deploy, so it's stuck too.
+        or(isNull(consoleMessages.claimedAt), lte(consoleMessages.claimedAt, new Date(now.getTime() - STUCK_SENDING_MS))),
+      ),
+    )
+    .returning();
+  for (const r of rows) {
+    const short = r.body.length > 100 ? `${r.body.slice(0, 97)}...` : r.body;
+    await addThreadLine(db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: `May not have gone out (the app stopped while sending it): check their messages and resend if needed: ${short}`, at: now });
+    await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_sent:${r.id}`, body: `May not have gone out: check their thread and resend if needed: ${short}`, at: now });
   }
   return rows.length;
 }
