@@ -291,8 +291,11 @@ export class FakeMedia implements MediaStore {
 
 export class FakeTranscriber implements Transcriber {
   calls = 0;
-  async transcribe() {
+  /** #217: what it was given (the original recording, never the converted copy). */
+  got: { audio: Uint8Array; filename: string; contentType: string }[] = [];
+  async transcribe(audio: Uint8Array, filename: string, contentType: string) {
     this.calls += 1;
+    this.got.push({ audio, filename, contentType });
     return "I went for a run this morning";
   }
   async check() {}

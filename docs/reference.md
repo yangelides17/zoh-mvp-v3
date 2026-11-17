@@ -27,8 +27,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Optional `REPLY_GRACE_SECONDS` (#132: how long a ready reply waits for a late typing signal or
   another text before it goes out, and again after a hold ends on "stopped"; default 2.5, decimals
   allowed, `0` turns it off). `RAILPACK_DEPLOY_APT_PACKAGES` includes `ffmpeg` on both apps (#185:
-  iPhone .caf voice notes are rewrapped, same audio, into .m4a or .ogg so the console plays them in
-  Chrome; `/health` reports `ffmpeg`; without it voice notes stay .caf and nothing else breaks).
+  iPhone .caf voice notes are stored as AAC .m4a so the console plays them in Chrome: AAC is copied,
+  anything else re-encoded, #217: iMessage notes are Opus with no header in the .caf, so they can't be
+  copied into .ogg; `/health` reports `ffmpeg`; without it voice notes stay .caf and nothing else breaks).
   `GEMINI_API_KEY` (#163: Gemini watches videos; a separate key per app, prepaid credits with
   auto-reload and a monthly limit in Google AI Studio; without it the coach is told it can't watch
   videos) and optional `GEMINI_MODEL` (default `gemini-3.8-flash`). `/health?deep=1` pings Gemini.
