@@ -802,8 +802,10 @@ async function handleMedia(
   if (kind === "audio" && isCaf(ext, downloaded.contentType) && deps.rewrapper) {
     try {
       const t0 = Date.now();
-      stored = await deps.rewrapper.rewrap(downloaded.bytes);
+      const { codec, ...rewrapped } = await deps.rewrapper.rewrap(downloaded.bytes);
+      stored = rewrapped;
       timings.rewrap_ms = Date.now() - t0;
+      timings.rewrap_codec = codec;
     } catch (err) {
       timings.rewrap_error = errorMessage(err).slice(0, 200);
       deps.log.warn({ messageId: inbound.id, err: safeError(err) }, "Rewrapping a voice note failed; keeping the .caf");

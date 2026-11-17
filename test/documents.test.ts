@@ -188,7 +188,7 @@ describe("#185: voice notes play in Chrome", () => {
     async rewrap(caf: Uint8Array) {
       this.got.push(caf);
       if (this.fail) throw new Error("ffmpeg: not found");
-      return { bytes: new Uint8Array([9, 9]), ext: "m4a" as const, contentType: "audio/mp4" };
+      return { bytes: new Uint8Array([9, 9]), ext: "m4a" as const, contentType: "audio/mp4", codec: "opus" };
     }
     async check() {}
   }
@@ -205,6 +205,10 @@ describe("#185: voice notes play in Chrome", () => {
     expect(rewrapper.got[0]).toEqual(new Uint8Array([1, 2, 3]));
     expect(stored!.transcript).toBe("I went for a run this morning");
     expect(proofHtml(stored!)).not.toContain("Download");
+    // #217: the codec it arrived in is kept for diagnosis; Speaches hears the original, not the copy.
+    expect(stored!.timings).toMatchObject({ rewrap_codec: "opus" });
+    expect(t.transcriber.got).toEqual([{ audio: new Uint8Array([1, 2, 3]), filename: "voice-note.caf", contentType: expect.any(String) }]);
+    expect(t.transcriber.got[0]!.contentType).not.toBe("audio/mp4");
   });
 
   it("keeps the .caf when ffmpeg fails, and still transcribes it", async () => {
@@ -215,8 +219,10 @@ describe("#185: voice notes play in Chrome", () => {
     await t.queue.idle();
     const [stored] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
     expect(stored!.mediaKey).toMatch(/\.caf$/);
+    expect(stored!.timings).toMatchObject({ rewrap_error: "ffmpeg: not found" });
     expect(stored!.transcript).toBe("I went for a run this morning");
     expect(stored!.status).toBe("REPLIED");
+    expect(t.sendblue.sends).toHaveLength(1);
     expect(proofHtml(stored!)).toContain("Download (Chrome can't play iPhone voice notes");
   });
 });
