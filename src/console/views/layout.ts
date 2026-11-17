@@ -95,6 +95,8 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 .msg.them .bubble { background: var(--them); color: var(--them-fg); border-bottom-left-radius: 6px; }
 .msg .meta { font-size: 11px; color: var(--muted); margin: 2px 8px 4px; }
 .msg.me .bubble a { color: inherit; text-decoration: underline; }
+.msg.target .bubble { animation: target 3s ease-out; } /* #218: the text "See in chat" opened at */
+@keyframes target { 0%, 50% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
 .divider { text-align: center; font-size: 12px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
 .event { margin: 8px auto; max-width: 560px; background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font-size: 14px; overflow-wrap: anywhere; }
 .event.app { background: none; border: none; text-align: center; color: var(--muted); font-size: 12px; padding: 2px; }
@@ -275,6 +277,13 @@ const SCRIPT = `(function () {
     }
     // After the page's own scroll to the newest text on load.
     window.addEventListener("load", function () { setTimeout(seek, 0); });
+  }
+  // #218: "See in chat" on a Media card opens at that text (the server put it on the page, marked).
+  var target = texts && texts.querySelector(".msg.target");
+  if (target) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { texts.scrollTop = target.offsetTop - texts.offsetTop - texts.clientHeight / 3; }, 0);
+    });
   }
   if (!boxes.length) return;
   function poll() {

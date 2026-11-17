@@ -699,9 +699,10 @@ describe("#98: all their media in Memory", () => {
     const m = await sendAll(s.tester.id);
     const media = mediaOf(await memoryOf(s.tester.id));
     const item = (id: string) => media.split(`data-id="${id}"`)[1]!.split('data-id="')[0]!;
-    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=texts&amp;day=${MON}"`);
+    // #218: the chat link names the message itself, not its day.
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=texts&amp;msg=${s.photoId}"`);
     expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=progress#day-${MON}"`);
-    expect(item(m.voice.id)).toContain(`?tab=texts&amp;day=2026-11-03"`);
+    expect(item(m.voice.id)).toContain(`?tab=texts&amp;msg=${m.voice.id}"`);
     expect(item(m.voice.id)).not.toContain("tab=progress");
   });
 
@@ -712,6 +713,57 @@ describe("#98: all their media in Memory", () => {
     const page = await memoryOf(s.tester.id);
     expect(page).not.toContain("Nothing in memory yet.");
     expect(mediaOf(page)).toContain('data-search="ran three miles by the river"');
+  });
+});
+
+describe("#218: See in chat opens that exact message", () => {
+  const textsAt = async (testerId: string, msg: string) => (await get(`/console/testers/${testerId}?tab=texts&msg=${msg}`, cookieFor("Yanni"))).body;
+  const targets = (page: string) => [...page.matchAll(/class="msg [a-z]+ target" data-id="([^"]+)"/g)].map((m) => m[1]);
+  const texts = (n: number, date: string, from: number) =>
+    t.db.insert(messages).values(
+      Array.from({ length: n }, (_, i) => ({ direction: i % 2 ? ("outbound" as const) : ("inbound" as const), contactNumber: ME, content: `text ${from + i}`, createdAt: new Date(at(date, "08:00").getTime() + (from + i) * 60_000) })),
+    );
+
+  it("opens at the photo itself on a day with earlier texts, not the day's first text", async () => {
+    const s = await seed();
+    // Earlier that day: a conversation about something else (Nov 17 on staging: the resume talk).
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "here is my resume", createdAt: at(MON, "13:32") });
+    const page = await textsAt(s.tester.id, s.photoId);
+    expect(targets(page)).toEqual([s.photoId]);
+    expect(page).toContain("here is my resume");
+    expect(page).not.toContain("Couldn't find that text");
+  });
+
+  it("opens at media from before a reset, with a jumped clock's texts stored after it", async () => {
+    const s = await seed();
+    // After "jump", texts sit days ahead; after "reset", new texts are back on real time.
+    await texts(4, "2026-11-20", 0);
+    const [fresh] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/s.jpg", mediaKey: `media/${s.tester.id}/s.jpg`, mediaContentType: "image/jpeg", createdAt: at("2026-11-03", "14:41") })
+      .returning();
+    expect(targets(await textsAt(s.tester.id, s.photoId))).toEqual([s.photoId]);
+    expect(targets(await textsAt(s.tester.id, fresh!.id))).toEqual([fresh!.id]);
+  });
+
+  it("opens at a text more than a page back, with everything after it", async () => {
+    const s = await seed();
+    await texts(80, "2026-11-05", 0);
+    const page = await textsAt(s.tester.id, s.photoId);
+    expect(targets(page)).toEqual([s.photoId]);
+    expect(page).toContain("text 79");
+    expect(page.indexOf(`data-id="${s.photoId}"`)).toBeLessThan(page.indexOf("text 79"));
+  });
+
+  it("says it couldn't find a text that isn't theirs or doesn't exist, and shows their latest texts", async () => {
+    const s = await seed();
+    const other = await seed("+15555550123", "Alex");
+    for (const id of [other.photoId, "00000000-0000-4000-8000-000000000000", "not-an-id"]) {
+      const page = await textsAt(s.tester.id, id);
+      expect(page).toContain("Couldn't find that text in the chat.");
+      expect(targets(page)).toEqual([]);
+      expect(page).toContain(`data-id="${s.photoId}"`);
+    }
   });
 });
 

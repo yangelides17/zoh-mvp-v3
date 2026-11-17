@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import {
@@ -263,6 +263,25 @@ export async function textsChunk(db: Db, tester: Tester, cursor: ChunkCursor = {
     .orderBy(desc(messages.createdAt), desc(messages.id))
     .limit(limit);
   return rows.reverse();
+}
+
+/** Texts shown above the one "See in chat" opens at, for context. */
+const CONTEXT_BEFORE = 10;
+
+/** #218: one of their texts and everything after it, with a few before; undefined when it isn't theirs. */
+export async function textsFrom(db: Db, tester: Tester, messageId: string): Promise<Message[] | undefined> {
+  const [target] = await db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.id, messageId), eq(messages.contactNumber, tester.phone)));
+  if (!target) return undefined;
+  const context = await textsChunk(db, tester, { before: target.createdAt }, CONTEXT_BEFORE + 1);
+  const from = context[0]?.createdAt ?? target.createdAt;
+  return db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.contactNumber, tester.phone), gte(messages.createdAt, from)))
+    .orderBy(asc(messages.createdAt), asc(messages.id));
 }
 
 /** Lines the "ZOH is thinking" check reads. */
