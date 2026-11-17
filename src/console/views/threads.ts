@@ -100,7 +100,8 @@ export function threadItemsHtml(items: ThreadItem[], ctx: ThreadContext): string
   return withDividers(items, (i) => i.at, (i) => itemHtml(i, ctx), ctx.now);
 }
 
-export function textItemsHtml(texts: Message[], now: Date): string {
+/** `target`: the text "See in chat" opened at (#218), marked so the page scrolls to it. */
+export function textItemsHtml(texts: Message[], now: Date, target?: string): string {
   return withDividers(
     texts,
     messageTime,
@@ -109,7 +110,7 @@ export function textItemsHtml(texts: Message[], now: Date): string {
       const body = m.mediaUrl ? proofHtml(m) : esc(m.content ?? "");
       const status = m.status && who === "me" ? ` · ${esc(m.status.toLowerCase())}` : "";
       const lookups = who === "me" ? lookupLine(m.timings) : "";
-      return `<div class="msg ${who}" data-id="${esc(m.id)}"><div class="bubble">${body}</div><div class="meta">${esc(clock(messageTime(m)))}${status}${lookups ? ` · ${esc(lookups)}` : ""}</div></div>`;
+      return `<div class="msg ${who}${m.id === target ? " target" : ""}" data-id="${esc(m.id)}"><div class="bubble">${body}</div><div class="meta">${esc(clock(messageTime(m)))}${status}${lookups ? ` · ${esc(lookups)}` : ""}</div></div>`;
     },
     now,
   );
@@ -190,9 +191,14 @@ export function consoleTabHtml(tab: ConsoleTab, tester: Tester, ctx: ThreadConte
 ${side}`;
 }
 
-export function textsTabHtml(texts: Message[], tester: Tester, now: Date, chunk: number): string {
-  const before = texts.length >= chunk ? texts[0]!.createdAt : undefined;
+/**
+ * #218: `target` opens at that text (`texts` then run from just before it to the newest, and older may remain);
+ * `missing` says "See in chat" couldn't find its text, above the latest texts.
+ */
+export function textsTabHtml(texts: Message[], tester: Tester, now: Date, chunk: number, opts: { target?: string; missing?: boolean } = {}): string {
+  const before = texts.length >= chunk || (opts.target && texts.length) ? texts[0]!.createdAt : undefined;
   const after = newest(texts.map((m) => m.createdAt), tester.createdAt);
-  return `<section id="texts">${scroller("texts", textItemsHtml(texts, now), { before, after, empty: "No texts yet." })}
+  const missing = opts.missing ? `<p class="muted warn" style="margin:8px 4px">Couldn't find that text in the chat.</p>` : "";
+  return `<section id="texts">${missing}${scroller("texts", textItemsHtml(texts, now, opts.target), { before, after, empty: "No texts yet." })}
 <p class="muted" style="margin:8px 4px">Their texts on the left, ZOH's on the right. Times are Eastern.</p></section>`;
 }

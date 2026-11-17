@@ -15,6 +15,7 @@ import {
   testerHeader,
   testerRows,
   textsChunk,
+  textsFrom,
   threadChunk,
   waitingAlerts,
   liveItems,
@@ -168,8 +169,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return html(reply, metricsView(await metricsPage(opts.db, clock(), { includeTest }), name, includeTest));
   }));
 
-  /** A tester's page (#63): the header, then one tab. Undefined for an unknown tester. */
-  const testerHtml = async (reply: FastifyReply, id: string, tab: Tab, name: string, notice?: string, code = 200) => {
+  /** A tester's page (#63): the header, then one tab. Undefined for an unknown tester. `msg`: the text to open the texts at (#218). */
+  const testerHtml = async (reply: FastifyReply, id: string, tab: Tab, name: string, notice?: string, code = 200, msg?: string) => {
     const now = await nowFor(id);
     const header = await testerHeader(opts.db, id, now);
     if (!header) return undefined;
@@ -178,7 +179,12 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (tab === "console") {
       const data = await consoleTab(opts.db, id);
       content = consoleTabHtml(data, header.tester, ctx, side(data, ctx).html, CHUNK);
-    } else if (tab === "texts") content = textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK);
+    } else if (tab === "texts") {
+      const from = msg === undefined ? undefined : isUuid(msg) ? await textsFrom(opts.db, header.tester, msg) : undefined;
+      content = from
+        ? textsTabHtml(from, header.tester, now, CHUNK, { target: msg })
+        : textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK, { missing: msg !== undefined });
+    }
     else if (tab === "memory") content = memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
     else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
     return html(reply, testerView(header, tab, content, name, notice), code);
@@ -187,7 +193,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.get("/console/testers/:id", page(async (request, reply, name) => {
     const { id } = request.params;
     if (!isUuid(id)) return html(reply, "Not found", 404);
-    return (await testerHtml(reply, id, asTab(query(request).tab), name)) ?? html(reply, "Not found", 404);
+    const { tab, msg } = query(request);
+    return (await testerHtml(reply, id, asTab(tab), name, undefined, 200, typeof msg === "string" ? msg : undefined)) ?? html(reply, "Not found", 404);
   }));
 
   // One memory page (#63), only under its own tester.

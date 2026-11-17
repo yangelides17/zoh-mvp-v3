@@ -58,7 +58,8 @@ function timeline(cards: MemoryCard[], testerId: string, today: string): string 
 function mediaItem(item: MediaItem, testerId: string, timeZone: string): string {
   const base = `/console/testers/${esc(testerId)}`;
   const links = [
-    `<a href="${base}?tab=texts&amp;day=${esc(item.day)}">see in chat</a>`,
+    // #218: the message itself, not its day (a day can hold an unrelated conversation before it).
+    `<a href="${base}?tab=texts&amp;msg=${esc(item.message.id)}">see in chat</a>`,
     item.stepDay && `<a href="${base}?tab=progress#day-${esc(item.day)}">that day's step</a>`,
   ].filter(Boolean);
   return `<div class="card media-item" data-id="${esc(item.message.id)}" data-search="${esc(item.search)}"><div class="muted">${esc(dayAndTime(item.at, timeZone))}</div>${proofHtml(item.message)}<div class="row muted">${links.join(" · ")}</div></div>`;
