@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import {
   DraftDroppedError,
+  settled,
   NoReplyTextError,
   type HeldNudge,
   toClaudeMessages,
@@ -316,7 +317,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (calls.length === 0 && !last && !nudgedPastToolName && hasToolNameLine(text, toolNames)) {
           nudgedPastToolName = true;
           trail.push("tool-as-text");
-          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
           messages.push({ role: "user", content: [{ type: "text", text: TOOL_AS_TEXT_NOTE }] });
           continue;
         }
@@ -324,7 +325,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (calls.length === 0 && !last && !nudgedPastSave && trail.some((r) => r.includes(":ok")) && onlySaveConfirmation(text)) {
           nudgedPastSave = true;
           trail.push("save-only");
-          messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+          messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
           messages.push({ role: "user", content: [{ type: "text", text: SAVE_ONLY_NOTE }] });
           continue;
         }
@@ -335,7 +336,7 @@ export function createCoach(opts: CoachOptions): Replier {
           if (unseen.length && !last && !nudgedPastLinks) {
             nudgedPastLinks = true;
             trail.push("unseen-link");
-            messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+            messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
             messages.push({ role: "user", content: [{ type: "text", text: unseenLinkNote(unseen) }] });
             continue;
           }
@@ -403,7 +404,7 @@ export function createCoach(opts: CoachOptions): Replier {
         if (text) results.push({ type: "text", text: NOT_SENT_NOTE });
         // The model sometimes answers a forced-text round with nothing unless it's told why.
         if (round + 1 === MAX_ROUNDS) results.push({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." });
-        messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+        messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
         messages.push({ role: "user", content: results });
       }
       throw new Error("unreachable: the last round always returns");

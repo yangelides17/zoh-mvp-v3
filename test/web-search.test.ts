@@ -180,6 +180,19 @@ describe("caps per reply", () => {
   });
 });
 
+describe("a search that never ran", () => {
+  it("isn't sent back: a search started alongside ZOH's own tool call has no result, which Anthropic rejects", async () => {
+    model.script({ web: [], unrun: true, tools: [{ name: "save_name", input: { name: "Dana" } }] }, "Got it, Dana. Here's a good one to start with.");
+    await text("I'm Dana, any good video on squat form?");
+    const sentBack = model.requests[1]!.messages.flatMap((m) => (Array.isArray(m.content) ? m.content : []));
+    const uses = sentBack.filter((b) => b.type === "server_tool_use").map((b) => (b as { id: string }).id);
+    const results = new Set(sentBack.filter((b) => b.type.endsWith("_tool_result") && b.type !== "tool_result").map((b) => (b as { tool_use_id: string }).tool_use_id));
+    expect(uses.every((id) => results.has(id))).toBe(true);
+    expect(sentBack.some((b) => b.type === "tool_use")).toBe(true);
+    expect(replies()).toEqual(["Got it, Dana. Here's a good one to start with."]);
+  });
+});
+
 describe("a paused search (pause_turn)", () => {
   it("goes on where it stopped, without a round or a new sheet", async () => {
     const { db } = await makeDb();

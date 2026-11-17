@@ -4525,7 +4525,7 @@
    "change": "unchanged"
   },
   {
-   "text": "Watch a YouTube video (a link they sent, or one your search or an opened page turned up) and get an account of what it actually shows and teaches, answering your question. Before you recommend, sum up or answer about any video. At most ${MAX_WATCHES} a reply.",
+   "text": "YouTube links only (any other page: web_fetch). Watch a video (a link they sent, or one your search or an opened page turned up) and get an account of what it actually shows and teaches, answering your question. Before you recommend, sum up or answer about any video. At most ${MAX_WATCHES} a reply.",
    "file": "src/coach/web.ts",
    "where": "WATCH_VIDEO_TOOL > watch_video > description",
    "kind": "tool description",

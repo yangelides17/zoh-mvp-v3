@@ -168,6 +168,8 @@ export interface FakeWebStep {
   cited?: string[];
   tools?: { name: string; input: unknown }[];
   pause?: boolean;
+  /** Also starts a search that never runs, because the turn stopped for ZOH's own tools (seen live, Nov 16). */
+  unrun?: boolean;
 }
 
 /** One scripted Claude response: plain text, or tool calls (with optional text alongside), or (#162) web use. */
@@ -252,6 +254,7 @@ export class FakeClaudeModel implements ClaudeModel {
       return { ...readBlocks(raw as { type: string }[]), raw: raw as unknown as Anthropic.ContentBlockParam[], stopReason: "pause_turn", usage };
     }
     for (const piece of step.cited ?? (step.text ? [step.text] : [])) raw.push({ type: "text", text: piece });
+    if (step.unrun) raw.push({ type: "server_tool_use", id: `srvtoolu_${++this.ids}`, name: "web_search", input: { query: "never ran" } });
     const calls = req.toolChoice === "none" ? [] : (step.tools ?? []);
     for (const t of calls) raw.push({ type: "tool_use", id: `toolu_${++this.ids}`, name: t.name, input: t.input });
     return {

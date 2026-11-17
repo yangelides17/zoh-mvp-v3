@@ -2,7 +2,7 @@ import type { AppEnv } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
-import { toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
+import { settled, toClaudeMessages, type ClaudeModel, type Turn } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import { buildStateBlock } from "../coach/prompt.js";
 import { loadCoachState, localTime } from "../coach/state.js";
@@ -615,7 +615,7 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
       for (const call of calls) {
         results.push({ type: "tool_result", tool_use_id: call.id, ...(await runCapability(ctx, call.name, call.input, lastFounder.createdAt)) });
       }
-      messages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
+      messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
       messages.push({ role: "user", content: results });
     }
     return undefined;

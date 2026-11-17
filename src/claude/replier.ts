@@ -300,6 +300,16 @@ function lookupLine(block: { type: string }, asked: string, links: string[]): st
   return undefined;
 }
 
+/**
+ * #162: a response's blocks to send back before the next round: without any search or page read that never ran (it
+ * was started alongside the coach's own tool call, so the turn stopped first). Anthropic rejects one with no result.
+ * A paused search (`pause_turn`) is resumed from its blocks as they came, not through this.
+ */
+export function settled(blocks: Anthropic.ContentBlockParam[]): Anthropic.ContentBlockParam[] {
+  const answered = new Set(blocks.flatMap((b) => (b.type.endsWith("_tool_result") && "tool_use_id" in b ? [String(b.tool_use_id)] : [])));
+  return blocks.filter((b) => b.type !== "server_tool_use" || answered.has(b.id));
+}
+
 /** The links a search result or an opened page holds; an error holds none. */
 function foundIn(block: { type: string }): string[] {
   if (block.type === "web_search_tool_result") {

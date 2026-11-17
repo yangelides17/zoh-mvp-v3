@@ -7,12 +7,11 @@
     "name": "Jordan",
     "goal": "deep_work",
     "phase": "active",
-    "history_hours_ago": 4,
+    "history_hours_ago": 1,
     "answers": { "what": "write my thesis without checking my phone", "where": "library", "when": "9 am", "how_long": "45 min" },
     "history": [
-      { "from": "zoh", "text": "Today, Jordan: 45 minutes of thesis writing at the library at 9, phone in your bag. Screenshot of what you wrote." },
-      { "from": "tester", "text": "did 45 but kept losing focus around minute 20" },
-      { "from": "zoh", "text": "45 minutes done ✅ Minute 20 is where it gets real. We'll work on that." }
+      { "from": "zoh", "text": "Yesterday's 45 counted ✅ and you said focus slipped around minute 20, so we'll work on that. Today: 45 minutes of thesis writing at the library at 9, phone in your bag. Screenshot of what you wrote." },
+      { "from": "tester", "text": "yep" }
     ],
     "plan": {
       "step": "Thesis writing at the library, phone in your bag, 45 min",
@@ -26,16 +25,17 @@
       "started_days_ago": 5
     },
     "step_days": [
-      { "days_ago": 1, "status": "done", "step": "Thesis writing at the library, phone in your bag, 45 min", "proof_seen": "screenshot of a draft section" }
-    ]
+      { "days_ago": 1, "status": "done", "step": "Thesis writing at the library, phone in your bag, 45 min", "proof_seen": "screenshot of a draft section", "note": "lost focus around minute 20" }
+    ],
+    "today_step": { "step": "Thesis writing at the library, phone in your bag, 45 min", "agreed_hours_ago": 1 }
   },
   "testerLines": [
     "should I try this for the writing? https://en.wikipedia.org/wiki/Pomodoro_Technique",
     "ok cool"
   ],
   "whatWentWrong": "New for #162: ZOH couldn't see what's behind a link and would have answered from the title alone.",
-  "shouldHaveHappened": "ZOH opens the page (a ZOH LOOKED UP line shows it opened) and answers from what it says: work in timed intervals, traditionally 25 minutes, with short breaks and a longer break after about four; ties it to Jordan losing focus around minute 20 (for example two 25-minute blocks with a short break inside the 45). It may propose trying it as a question; it doesn't change the plan without asking. Plain, short, no invented details about the page.",
+  "shouldHaveHappened": "ZOH opens the page (a ZOH LOOKED UP line shows it opened) and answers from what it says: work in timed intervals, traditionally 25 minutes, with short breaks and a longer break after about four; ties it to Jordan losing focus around minute 20 yesterday (for example two 25-minute blocks with a short break inside the 45). It may propose trying it as a question; it doesn't change the plan without asking. Plain, short, no invented details about the page.",
   "areaCode": "917",
-  "startTime": "13:30",
+  "startTime": "08:00",
   "timeZone": "America/New_York"
 }

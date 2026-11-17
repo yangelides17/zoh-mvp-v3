@@ -44,7 +44,7 @@ export function webTools(budget: WebBudget): ModelTool[] {
 
 export const WATCH_VIDEO_TOOL: Anthropic.Tool = {
   name: "watch_video",
-  description: `Watch a YouTube video (a link they sent, or one your search or an opened page turned up) and get an account of what it actually shows and teaches, answering your question. Before you recommend, sum up or answer about any video. At most ${MAX_WATCHES} a reply.`,
+  description: `YouTube links only (any other page: web_fetch). Watch a video (a link they sent, or one your search or an opened page turned up) and get an account of what it actually shows and teaches, answering your question. Before you recommend, sum up or answer about any video. At most ${MAX_WATCHES} a reply.`,
   input_schema: {
     type: "object",
     properties: { url: { type: "string" }, question: { type: "string", description: "What you need from it (their question, or whether it fits their step)" } },
