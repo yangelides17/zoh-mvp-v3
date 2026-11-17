@@ -1,0 +1,21 @@
+{
+  "id": "counted-proof-breaks",
+  "rule": "counted-proof",
+  "expect": "fail",
+  "why": "Yesterday is marked done with a voice note as its proof, and ZOH's check-in says that proof got skipped.",
+  "startTime": "14:50",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "answers": { "what": "desk stretches", "where": "at my desk", "when": "3 pm", "how_long": "3 min" },
+    "plan": { "step": "3 minutes of desk stretches", "place": "at your desk", "time": "15:00", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "video", "proof_note": "10 sec video of one move", "reason": "loosen the upper back", "minutes": 3, "started_days_ago": 2 },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "3 minutes of desk stretches", "proof_seen": "Voice note saying they finished the routine; twist felt easier" }
+    ]
+  },
+  "transcript": [
+    { "from": "zoh", "text": "Sam! Desk stretches at 3. Last time the proof got skipped, so a quick 10 sec video of one move is the one thing I'm after. Ready?" },
+    { "from": "tester", "text": "uh I sent a voice note yesterday?" }
+  ]
+}

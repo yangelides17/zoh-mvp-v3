@@ -336,6 +336,13 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "recall", scope: "text", group: "flow", label: "Uses a relevant detail from 1+ weeks back naturally, without reciting it" },
       { id: "stated-pref", scope: "text", group: "flow", label: "Follows a stated preference days later" },
       { id: "honest-memory", scope: "text", group: "flow", label: "Never states a fact that isn't in memory" },
+      {
+        id: "counted-proof",
+        scope: "conversation",
+        group: "flow",
+        label:
+          "A day marked done is never filed or described as missed, or its proof as skipped or missing (a different kind of proof than planned is still proof)",
+      },
       { id: "what-you-know", scope: "text", group: "flow", label: "Answers \"what do you know about me\" honestly in a few lines" },
       { id: "not-overfamiliar", scope: "text", group: "conversation", label: "No overfamiliarity in the first week" },
       {

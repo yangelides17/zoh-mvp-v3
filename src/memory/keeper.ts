@@ -1,11 +1,11 @@
 import { owns, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import type Anthropic from "@anthropic-ai/sdk";
-import { and, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { allowsEveryone } from "../config.js";
 import { z } from "zod";
 import type { ClaudeModel } from "../claude/replier.js";
 import type { Db } from "../db/client.js";
-import { memoryPages, testers, type MemoryPage, type Message, type Tester } from "../db/schema.js";
+import { memoryPages, stepDays, testers, type MemoryPage, type Message, type StepDay, type Tester } from "../db/schema.js";
 import { safeError } from "../errors.js";
 import { localDate } from "../coach/state.js";
 import { addDays, localClock, weekdayOf } from "../nudges/schedule.js";
@@ -69,6 +69,7 @@ How to file:
 - Link pages that belong together ("related": Ana ↔ the reading goal she does with them).
 - Never store sensitive health, mental-health, legal or financial details beyond what their step needs (a bad knee that changes their workout: yes; a diagnosis, medication or money trouble: no), and never anyone's phone number, email or address.
 - ZOH's own texts are context, not facts about the tester.
+- "The step that day" is what the app recorded, and it's the truth on whether the step was done and its proof counted: a day marked done had proof that counted, even of another kind than planned (a voice note for a video is just that), so never file it as no proof, skipped proof or a miss.
 - Anything listed under "Asked to forget" on the preferences page is never filed, and any fact about it is removed.
 
 Preferences from evidence:
@@ -300,6 +301,17 @@ export function transcriptLine(m: Message, tester: Tester): string {
   return `[${localClock(messageTime(m), tester.timeZone)}] ${messageRef(m.id)} ${who}: ${media}${m.content ?? ""}`.trimEnd();
 }
 
+/** #219: what the app recorded for the day's step, so counted proof is never filed as missing. */
+export function stepLine(row: StepDay | undefined): string {
+  if (!row) return "THE STEP THAT DAY: none recorded";
+  const step = row.step ? `"${row.step}"` : "the plan's step";
+  const labels: Record<string, string> = { done: "marked done", done_reduced: "marked done (a smaller version)", missed: "missed" };
+  const status = (row.status && labels[row.status]) ?? "not marked done or missed";
+  const proof = row.status && row.status !== "missed" && row.proofSeen ? `; the proof that counted: ${row.proofSeen}` : "";
+  const note = row.note ? ` (they said: ${row.note})` : "";
+  return `THE STEP THAT DAY: ${step}, ${status}${proof}${note}`;
+}
+
 /** The part of the system prompt about this tester: their pages and the index. */
 async function contextBlock(db: Db, tester: Tester, date: string): Promise<string> {
   const pages = await getPages(db, tester.id, ["self", "preferences", "goal"]);
@@ -325,13 +337,14 @@ export async function writeDay(db: Db, model: ClaudeModel, tester: Tester, date:
   await ensureCorePages(db, tester, at);
   await ensureGoalPages(db, tester, at);
 
+  const [day] = await db.select().from(stepDays).where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, date)));
   const ctx: DayContext = { db, tester, date, at, wroteDoc: false };
   const system: Anthropic.TextBlockParam[] = [
     { type: "text", text: KEEPER_INSTRUCTIONS, cache_control: { type: "ephemeral" } },
     { type: "text", text: await contextBlock(db, tester, date) },
   ];
   const messages: Anthropic.MessageParam[] = [
-    { role: "user", content: `TEXTS ON ${weekdayOf(date).toUpperCase()} ${date}\n${texts.map((m) => transcriptLine(m, tester)).join("\n")}` },
+    { role: "user", content: `TEXTS ON ${weekdayOf(date).toUpperCase()} ${date}\n${texts.map((m) => transcriptLine(m, tester)).join("\n")}\n\n${stepLine(day)}` },
   ];
   for (let round = 1; round <= KEEPER_MAX_ROUNDS; round++) {
     const last = round === KEEPER_MAX_ROUNDS;

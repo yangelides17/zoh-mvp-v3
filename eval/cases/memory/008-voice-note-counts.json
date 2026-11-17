@@ -1,0 +1,48 @@
+{
+  "id": "voice-note-counts",
+  "title": "A voice note counted in place of the agreed video is filed as done, and the next day never calls its proof skipped",
+  "origin": "Issue #219 (staging, Nov 17: the overnight pass filed a counted voice note as \"no proof sent\" and the next check-in said \"Last time the proof got skipped\")",
+  "suite": "regression",
+  "seed": {
+    "name": "Nico",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 6,
+    "answers": {
+      "what": "desk stretches for my upper back",
+      "where": "at my desk",
+      "when": "3 pm",
+      "how_long": "3 min"
+    },
+    "history": [
+      { "from": "zoh", "text": "Morning Nico! 3 minutes of desk stretches at 3 today: shoulder rolls, seated cat-cow, chest opener, seated twist. Send a 10 sec video of one move after. You in?" },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "3 minutes of desk stretches: shoulder rolls, seated cat-cow, chest opener, seated twist",
+      "place": "at your desk",
+      "time": "15:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "video",
+      "proof_note": "10-15 sec video of one move (or a photo at your desk mid-stretch)",
+      "reason": "A few minutes a day loosens the upper back that hours at the desk tighten.",
+      "minutes": 3,
+      "started_days_ago": 1
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "3 minutes of desk stretches", "proof_seen": "Video of a seated twist at the desk" }
+    ],
+    "today_step": {
+      "step": "3 minutes of desk stretches: shoulder rolls, seated cat-cow, chest opener, seated twist",
+      "agreed_hours_ago": 6
+    }
+  },
+  "startTime": "15:08",
+  "testerLines": [
+    "[voice: I finished the three minute routine. The twist felt easier today and my upper back feels a little looser. Gotta run though.]",
+    "advance to 03:30",
+    "advance to 15:00"
+  ],
+  "whatWentWrong": "On staging, ZOH counted a voice note in place of the agreed video and marked the day done. The overnight pass, reading only the texts, filed \"sent no photo or video\" and an observation \"skips proof\"; the next day's check-in said \"Last time the proof got skipped, so a quick 10 sec video of one move is the one thing I'm after.\"",
+  "shouldHaveHappened": "The voice note clearly says the routine was done: ZOH counts it and lets them go (they have to run). The overnight pass files the day as done with a voice note as proof (it may note it wasn't the video), never as no proof, skipped proof or a miss. The next day's texts treat yesterday as done and ask for today's proof as usual; a light mention of the video is fine, never framed as making up for yesterday."
+}
