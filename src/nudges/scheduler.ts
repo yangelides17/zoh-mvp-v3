@@ -13,7 +13,7 @@ import { coachHistory } from "../memory/context.js";
 import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
-import { addThreadLine, APP_AUTHOR, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
+import { addThreadLine, APP_AUTHOR, cancelStuckRequests, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
 import { withDaySteps } from "./quiet.js";
 import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
@@ -230,6 +230,8 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
         ? "their quiet hours"
         : "no fitting text came up";
   await expireRequests(db, tester, now, blockedBy);
+  // #188: a founder's text left "going out now" by a crash is let go and reported, never resent.
+  await cancelStuckRequests(db, tester, now);
   // While paused ZOH starts nothing: not its own texts, not the founders' (spec "Commands and safety", rule 1).
   if (pause) return { action: "none", reason: "paused" };
 
@@ -412,7 +414,7 @@ async function sendExact(
   const request = (await pendingExact(db, tester.id, now)).find((r) => r.sendNow || !quiet);
   if (!request) return false;
   // #155: claimed first, so a Cancel clicked from here on is refused rather than lost.
-  if (!(await claimRequest(db, request.id))) return false;
+  if (!(await claimRequest(db, request.id, now))) return false;
 
   // The slot counts toward the unanswered cap like any text ZOH starts, and claiming it means one send.
   const [claim] = await db
@@ -522,7 +524,7 @@ async function send(
     const previous = await lastSent(db, tester.id, nudge.moment);
     carry = given ?? (await carryFor(db, tester, nudge, now));
     // #155: a founder's request this text carries is claimed, so a Cancel can't race it.
-    if (carry && "requestId" in carry && !(await claimRequest(db, carry.requestId))) {
+    if (carry && "requestId" in carry && !(await claimRequest(db, carry.requestId, now))) {
       if (given) {
         await db.delete(nudges).where(eq(nudges.id, claim.id));
         return;

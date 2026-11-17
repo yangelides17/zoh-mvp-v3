@@ -2,7 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance, stepLog } from "../src/console/chat.js";
-import { addRequest, addThreadLine, APP_AUTHOR, COACH_AUTHOR, requestRef } from "../src/console/requests.js";
+import { addRequest, addThreadLine, APP_AUTHOR, claimRequest, COACH_AUTHOR, NOT_SENT_TOPIC, requestRef } from "../src/console/requests.js";
 import { createCoach } from "../src/coach/coach.js";
 import { buildStateBlock, FIXED_INSTRUCTIONS, fullVoiceInstructions, NUDGES, PLAN_AGREEMENT, TEAM } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
@@ -586,6 +586,44 @@ describe("send exactly this, through the nudge tick", () => {
     const decisions = await scheduler.tick(at(TUE, "12:01"));
     expect(sentTexts()).toEqual(["Welcome aboard"]);
     expect(decisions.get(tester.id)).toEqual({ action: "none", reason: "sent the team's text" });
+  });
+});
+
+describe("a request stuck going out (#188)", () => {
+  // The app died between claiming a request for the text going out and finishing the send: the claim is left.
+  async function stuck(tester: Tester, o: { exact: boolean; claimedAt: Date }) {
+    const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Hey Sam! Thought of you today", exact: o.exact, sendNow: false, at: now });
+    expect(await claimRequest(t.db, request.id, o.claimedAt)).toBe(true);
+    return request;
+  }
+  const status = async (id: string) => (await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, id)))[0]!.requestStatus;
+  const notSent = async (testerId: string) =>
+    (await thread(testerId)).filter((r) => r.kind === "alert" && r.topic === NOT_SENT_TOPIC);
+  const mayNot = async (testerId: string) => (await thread(testerId)).filter((r) => r.kind === "coach" && r.body.startsWith("May not have gone out"));
+
+  for (const exact of [true, false]) {
+    it(`${exact ? "a word-for-word text" : "a request the morning text carried"}: cancelled after 15 minutes, once, with a line and an alert`, async () => {
+      const tester = await seed();
+      const request = await stuck(tester, { exact, claimedAt: at(TUE, "12:00") });
+      await scheduler.tick(at(TUE, "12:16"));
+      expect(await status(request.id)).toBe("cancelled");
+      expect(await mayNot(tester.id)).toHaveLength(1);
+      expect((await mayNot(tester.id))[0]!.body).toBe("May not have gone out (the app stopped while sending it): check their messages and resend if needed: Hey Sam! Thought of you today");
+      expect(await notSent(tester.id)).toHaveLength(1);
+      expect(t.sendblue.sends).toEqual([]);
+      await scheduler.tick(at(TUE, "12:17"));
+      expect(await mayNot(tester.id)).toHaveLength(1);
+      expect(await notSent(tester.id)).toHaveLength(1);
+    });
+  }
+
+  it("one claimed a minute ago is still going out: left alone", async () => {
+    const tester = await seed();
+    const request = await stuck(tester, { exact: true, claimedAt: at(TUE, "12:00") });
+    await scheduler.tick(at(TUE, "12:01"));
+    expect(await status(request.id)).toBe("sending");
+    expect(await mayNot(tester.id)).toEqual([]);
+    expect(await notSent(tester.id)).toEqual([]);
   });
 });
 

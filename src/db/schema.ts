@@ -423,6 +423,8 @@ export const consoleMessages = pgTable(
     /** Requests: still pending after this, it's dropped with a note in the thread instead of sent late. */
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     doneAt: timestamp("done_at", { withTimezone: true }),
+    /** Requests (#188): when the text going out claimed it ("sending"), so one left by a crash can be let go. */
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
     /** Requests: the text to the tester that carried it. */
     messageId: uuid("message_id").references(() => messages.id, { onDelete: "set null" }),
     seenAt: timestamp("seen_at", { withTimezone: true }),
