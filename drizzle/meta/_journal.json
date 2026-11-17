@@ -176,6 +176,13 @@
       "when": 1794865964219,
       "tag": "0024_flippant_ikaris",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794950016774,
+      "tag": "0025_wandering_deadpool",
+      "breakpoints": true
     }
   ]
 }
