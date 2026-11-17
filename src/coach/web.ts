@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { ModelTool, WebActivity } from "../claude/replier.js";
-import type { VideoWatcher } from "../video/gemini.js";
+import { VideoWatchError, type VideoWatcher } from "../video/gemini.js";
 import { linkKey, youtubeId, type LinkAllowance } from "./links.js";
 
 /**
@@ -62,7 +62,7 @@ export async function runWatchVideo(
   watcher: VideoWatcher,
   rawInput: unknown,
   ctx: { budget: WebBudget; allowed: LinkAllowance; step?: string; onActivity?: (kind: WebActivity) => void },
-): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; message: string } | { ok: false; error: string; cause?: string }> {
   const parsed = watchInput.safeParse(rawInput ?? {});
   if (!parsed.success) return { ok: false, error: parsed.error.issues.map((i) => `${i.path.join(".") || "input"}: ${i.message}`).join("; ") };
   const { url, question } = parsed.data;
@@ -76,8 +76,10 @@ export async function runWatchVideo(
     const watched = await watcher.watch({ youtubeUrl: url, ...(ctx.step ? { step: ctx.step } : {}), ...(question ? { question } : {}) });
     ctx.allowed.watched.add(key);
     return { ok: true, message: `Watched ${url}:\n${watched.account}` };
-  } catch {
-    // Gemini couldn't open it (private, removed, region-locked, or down): say so, never pretend.
-    return { ok: false, error: `${url} couldn't be watched. Don't recommend or describe it as if you'd seen it; say plainly it wouldn't open if it matters.` };
+  } catch (err) {
+    // Gemini couldn't open it (private, removed, region-locked, or down): say so, never pretend. The cause is for the
+    // record, not the coach: a bad key or no credit looks the same to it as a private video.
+    const cause = err instanceof VideoWatchError ? `${err.reason}: ${err.message}` : err instanceof Error ? err.message : String(err);
+    return { ok: false, error: `${url} couldn't be watched. Don't recommend or describe it as if you'd seen it; say plainly it wouldn't open if it matters.`, cause };
   }
 }

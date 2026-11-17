@@ -247,6 +247,7 @@ export function createCoach(opts: CoachOptions): Replier {
           account(next);
           response = joinPaused(response, next);
         }
+        if (response.stopReason === "pause_turn") onLookup?.(`search still paused after ${MAX_CONTINUATIONS} continuations`);
         return response;
       }
 
@@ -341,7 +342,10 @@ export function createCoach(opts: CoachOptions): Replier {
             continue;
           }
           // Still there (or no round left to ask): it's taken out, never sent.
-          if (unseen.length) reply = withoutLinks(reply, unseen);
+          if (unseen.length) {
+            reply = withoutLinks(reply, unseen);
+            onLookup?.(`removed a link it never saw: ${unseen.join(" ")}`);
+          }
           if (!reply) {
             throw new NoReplyTextError(`Claude returned no text (stop_reason: ${response.stopReason}; rounds: ${trail.join(" | ") || "none"})`);
           }
@@ -358,7 +362,7 @@ export function createCoach(opts: CoachOptions): Replier {
               ? await runWatchVideo(opts.watcher, call.input, { budget: web, allowed, ...(onActivity ? { onActivity } : {}) })
               : ({ ok: false, error: "Videos can't be watched right now: say so if it matters." } as const);
             const url = String((call.input as { url?: unknown } | undefined)?.url ?? "");
-            onLookup?.(watchedNow.ok ? `watched ${url}` : `couldn't watch ${url} (${watchedNow.error.slice(0, 80)})`);
+            onLookup?.(watchedNow.ok ? `watched ${url}` : `couldn't watch ${url} (${(("cause" in watchedNow && watchedNow.cause) || watchedNow.error).slice(0, 120)})`);
             if (watchedNow.ok) {
               watched.push(url);
               const action = `watch_video (${watchedNow.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;

@@ -1739,11 +1739,25 @@
    "change": "unchanged"
   },
   {
+   "text": "search still paused after ${MAX_CONTINUATIONS} continuations",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > ask",
+   "kind": "coach note",
+   "change": "new"
+  },
+  {
    "text": "no blocks",
    "file": "src/coach/coach.ts",
    "where": "createCoach > reply > replyLoop",
    "kind": "not read by ZOH",
    "change": "unchanged"
+  },
+  {
+   "text": "removed a link it never saw: ${unseen.join(\" \")}",
+   "file": "src/coach/coach.ts",
+   "where": "createCoach > reply > replyLoop",
+   "kind": "coach note",
+   "change": "new"
   },
   {
    "text": "Videos can't be watched right now: say so if it matters.",
@@ -1760,7 +1774,7 @@
    "change": "new"
   },
   {
-   "text": "couldn't watch ${url} (${watchedNow.error.slice(0, 80)})",
+   "text": "couldn't watch ${url} (${((\"cause\" in watchedNow && watchedNow.cause) || watchedNow.error).slice(0, 120)})",
    "file": "src/coach/coach.ts",
    "where": "createCoach > reply > replyLoop",
    "kind": "coach note",
@@ -4570,6 +4584,13 @@
    "text": "Watched ${url}:",
    "file": "src/coach/web.ts",
    "where": "runWatchVideo > message",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "${err.reason}: ${err.message}",
+   "file": "src/coach/web.ts",
+   "where": "runWatchVideo > cause",
    "kind": "tool result",
    "change": "new"
   },

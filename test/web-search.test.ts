@@ -46,6 +46,12 @@ const toolResults = () =>
     .messages.flatMap((m) => (Array.isArray(m.content) ? m.content : []))
     .filter((b): b is Anthropic.ToolResultBlockParam => b.type === "tool_result");
 
+/** What the reply looked up, as recorded with their text. */
+async function lookups(): Promise<string[]> {
+  const [inbound] = await t.db.select().from(messages).where(eq(messages.direction, "inbound"));
+  return String((inbound!.timings as { lookups?: string }).lookups ?? "").split("\n").filter(Boolean);
+}
+
 beforeEach(async () => {
   const { db } = await makeDb();
   model = new FakeClaudeModel();
@@ -89,6 +95,8 @@ describe("searching and sending what it found", () => {
     expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("watch_video");
     expect(model.requests).toHaveLength(2);
     expect(replies()).toEqual(["Try this guide. Want to use it today?"]);
+    // Kept with their text, so a guard that fires often shows up as a prompt problem.
+    expect(await lookups()).toEqual(["removed a link it never saw: https://made.up/cold-calls"]);
   });
 
   it("lets through a link they sent, and their own earlier link from ZOH", async () => {
@@ -144,6 +152,8 @@ describe("YouTube", () => {
     expect(priv8).toMatchObject({ is_error: true, content: expect.stringContaining("couldn't be watched") });
     expect(watcher.requests).toEqual([{ youtubeUrl: "https://youtu.be/priv8" }]);
     expect(replies()).toEqual(["That one wouldn't play for me."]);
+    // Why it failed is kept with their text (a bad Gemini key looks like a private video to the coach).
+    expect((await lookups()).at(-1)).toBe("couldn't watch https://youtu.be/priv8 (failed: private video)");
   });
 
   it(`refuses the ${MAX_WATCHES + 1}rd watch in one reply`, async () => {
@@ -219,6 +229,7 @@ describe("a paused search (pause_turn)", () => {
     expect(model.requests[2]!.messages.at(-1)!.role).toBe("assistant");
     expect(model.requests[3]!.messages.at(-1)!.role).toBe("user");
     expect(replies()).toEqual(["Here's what I found so far."]);
+    expect(await lookups()).toContain("search still paused after 2 continuations");
   });
 });
 
