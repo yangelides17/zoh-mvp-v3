@@ -185,7 +185,7 @@ describe("the overnight pass", () => {
     const model = new FakeClaudeModel();
     await writeDay(t.db, model, mike, MON, at(TUE, "03:00"));
     await writeDay(t.db, model, mike, TUE, at(WED, "03:00"));
-    expect(JSON.stringify(model.requests[0]!.messages)).toContain('THE STEP THAT DAY: \\"20 pages\\", missed (they said: No proof sent)');
+    expect(JSON.stringify(model.requests[0]!.messages)).toContain('THE STEP THAT DAY: \\"20 pages\\", missed (ZOH\'s note: No proof sent)');
     expect(JSON.stringify(model.requests.at(-1)!.messages)).toContain("THE STEP THAT DAY: none recorded");
     expect(await dailyDocs(mike)).toHaveLength(2);
   });

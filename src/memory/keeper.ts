@@ -308,7 +308,7 @@ export function stepLine(row: StepDay | undefined): string {
   const labels: Record<string, string> = { done: "marked done", done_reduced: "marked done (a smaller version)", missed: "missed" };
   const status = (row.status && labels[row.status]) ?? "not marked done or missed";
   const proof = row.status && row.status !== "missed" && row.proofSeen ? `; the proof that counted: ${row.proofSeen}` : "";
-  const note = row.note ? ` (they said: ${row.note})` : "";
+  const note = row.note ? ` (ZOH's note: ${row.note})` : "";
   return `THE STEP THAT DAY: ${step}, ${status}${proof}${note}`;
 }
 
