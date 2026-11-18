@@ -11,6 +11,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
     bucket `zoh-media`.
   - `staging`: a duplicate with its own app (deploys `dev`), Postgres, Speaches and bucket; its own
     public domain. Never shares a database or bucket with production.
+  - Speaches (both apps) has `STT_MODEL_TTL=300` and `TTS_MODEL_TTL=0` (Nov 18): the Whisper model
+    unloads after 5 idle minutes instead of staying in memory (it held 0.9–1.4 GB all day, about
+    $23 a month for both). Idle it holds about 0.3 GB; the first voice note after a quiet spell
+    waits about 6 s more (model load 5.4 s on staging, warm transcription 1.4 s).
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`
   (who gets replies, nudges and memory; `*` means everyone, set on production at launch, Nov 3 2026),
