@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { consoleMessages, PLAN_ADJUST, SUGGESTION_KINDS, suggestions, type PlanChanges, type Suggestion } from "../db/schema.js";
+import { consoleMessages, PLAN_ADJUST, SUGGESTION_KINDS, suggestions, type PlanChanges, type RequestDelivery, type Suggestion } from "../db/schema.js";
 import { raiseAlert } from "./alerts.js";
 
 /**
@@ -64,6 +64,8 @@ export async function addFounderSuggestion(
     reasoning?: string;
     newGoalSlug?: string;
     planChanges?: PlanChanges;
+    /** #214: when ZOH raises it (natural unless the founders said morning or now). */
+    delivery?: RequestDelivery;
     by: string;
     at: Date;
   },
@@ -82,6 +84,7 @@ export async function addFounderSuggestion(
       reasoning: opts.reasoning?.trim() || null,
       newGoalSlug: opts.kind === "new_focus" ? opts.newGoalSlug : null,
       planChanges: opts.kind === PLAN_ADJUST ? opts.planChanges : null,
+      delivery: opts.delivery ?? "natural",
       decision: "approved",
       decidedBy: opts.by,
       decidedAt: opts.at,

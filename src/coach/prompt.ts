@@ -42,7 +42,8 @@ export const PROMPT_BUDGET_CHARS = {
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
   nextSteps: 1250,
   nextStepsTeam: 790,
-  team: 720,
+  // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
+  team: 750,
   memory: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
@@ -319,8 +320,17 @@ function suggestionWhat(s: CoachState, x: Suggestion): string {
   return `${approvedKind(x) === "adjust" ? "plan change" : approvedKind(x)}: ${approvedProposal(x)}${x.newGoalSlug ? ` (${goalTitle(s, x.newGoalSlug)})` : ""}`;
 }
 
-/** Next steps the team approved and not raised yet; a new focus waits silently while the tester is at the cap. */
-const raisable = (s: CoachState) => s.suggestions.filter((x) => readyToRaise(x) && (approvedKind(x) !== "new_focus" || fitsGoalCap(s, x.newGoalSlug ?? "")));
+/**
+ * Next steps the team approved and not raised yet; a new focus waits silently while the tester is at the cap. One
+ * the founders asked for the morning (#214) is only for the morning text that carries it.
+ */
+const raisable = (s: CoachState) =>
+  s.suggestions.filter(
+    (x) =>
+      readyToRaise(x) &&
+      (approvedKind(x) !== "new_focus" || fitsGoalCap(s, x.newGoalSlug ?? "")) &&
+      (x.delivery !== "morning" || (!!s.carry && "suggestionId" in s.carry && s.carry.suggestionId === x.id)),
+  );
 
 /** #110: last week's recap still owed from a silent Sunday. */
 const owesLastWeek = (s: CoachState) => !!s.lastWeek && !s.lastWeek.recapped;

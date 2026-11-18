@@ -3,19 +3,19 @@ import { and, asc, count, desc, eq, gt, gte, inArray, isNull, max, ne, sql } fro
 import { allowsEveryone } from "../config.js";
 import type { HeldNudge, Replier } from "../claude/replier.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
-import { approvedKind, dueCheckin, readyToRaise } from "../coach/next-steps.js";
+import { approvedKind, approvedProposal, dueCheckin, readyToRaise } from "../coach/next-steps.js";
 import { loadCurrentPlan, loadRecentDays, owedRecapShows } from "../coach/state.js";
 import { closedStepDays, giveOwedRecap, owedRecap } from "../coach/week.js";
-import { alertSecondMiss } from "../coach/tools.js";
+import { alertSecondMiss, fitsGoalCap } from "../coach/tools.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Tester } from "../db/schema.js";
+import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Suggestion, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
 import { addThreadLine, APP_AUTHOR, cancelStuckRequests, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
 import { withDaySteps } from "./quiet.js";
-import { loadCheckins, loadTesterGoals } from "../testers/goals.js";
+import { DEFAULT_GOAL_CAP, loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
 import { maskNumber, toTurns, type Logger } from "../pipeline/inbound.js";
 import type { SendblueClient } from "../sendblue/client.js";
@@ -68,6 +68,8 @@ export interface NudgeSchedulerDeps {
   lineNumber?: string;
   /** Staging and production (#82): only numbers this app owns get its texts. Production-only when missing. */
   routing?: Routing;
+  /** How many goals a tester can have (GOAL_CAP): a founder's new focus waits while they're at it (#214). */
+  goalCap?: number;
   now?: () => Date;
 }
 
@@ -232,6 +234,17 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
   await expireRequests(db, tester, now, blockedBy);
   // #188: a founder's text left "going out now" by a crash is let go and reported, never resent.
   await cancelStuckRequests(db, tester, now);
+  // #214: a founder's proposal to ask now goes as its own text, on the rules of the founders' own. One that can't go
+  // now isn't dropped: it waits for ZOH's next text, and the founders are told why.
+  let askNow = tester.stoppedAt ? undefined : await proposalToAskNow(db, tester);
+  if (askNow) {
+    const why = pause ? "they asked for a break" : !plan ? "no plan yet" : quiet ? "their quiet hours" : unanswered >= MAX_UNANSWERED ? `${MAX_UNANSWERED} texts from ZOH unanswered` : undefined;
+    const full = !why && !(await roomForNewFocus(deps, tester, askNow));
+    if (why || full) {
+      await askLater(db, tester, askNow, now, why ? `Couldn't text ${tester.name ?? "them"} now (${why}), so ZOH will ask in its next text to them` : atGoalLimit(tester));
+      askNow = undefined;
+    }
+  }
   // While paused ZOH starts nothing: not its own texts, not the founders' (spec "Commands and safety", rule 1).
   if (pause) return { action: "none", reason: "paused" };
 
@@ -247,6 +260,10 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
     if (request) {
       await send(deps, tester, { kind: `team:${request.id}`, moment: "team", date }, now, { requestId: request.id });
       return { action: "none", reason: "sent the team's nudge" };
+    }
+    if (askNow && !midConversation) {
+      await send(deps, tester, { kind: `team:${askNow.id}`, moment: "team", date }, now, { suggestionId: askNow.id });
+      return { action: "none", reason: "asked the team's proposal" };
     }
   }
 
@@ -460,25 +477,56 @@ async function sendExact(
   return true;
 }
 
+/** #214: the oldest founder proposal the founders asked ZOH to raise now, not raised yet. */
+async function proposalToAskNow(db: Db, tester: Tester): Promise<Suggestion | undefined> {
+  const rows = await db
+    .select()
+    .from(suggestions)
+    .where(and(eq(suggestions.testerId, tester.id), eq(suggestions.delivery, "own_text"), gte(suggestions.createdAt, tester.contextStartedAt)))
+    .orderBy(asc(suggestions.createdAt));
+  return rows.find(readyToRaise);
+}
+
+/** #214: a new focus fits under their goal cap (anything else always does). */
+async function roomForNewFocus(deps: NudgeSchedulerDeps, tester: Tester, s: Suggestion): Promise<boolean> {
+  if (approvedKind(s) !== "new_focus") return true;
+  return fitsGoalCap({ testerGoals: await loadTesterGoals(deps.db, tester.id), goalCap: deps.goalCap ?? DEFAULT_GOAL_CAP }, s.newGoalSlug ?? "");
+}
+
+const atGoalLimit = (tester: Tester) => `${tester.name ?? "They"} ${tester.name ? "is" : "are"} at their goal limit, so ZOH will ask once there's room`;
+
+/** #214: a proposal asked for now or for the morning that can't go then waits for ZOH's next text, and the founders hear why. */
+async function askLater(db: Db, tester: Tester, s: Suggestion, now: Date, why: string): Promise<void> {
+  await db.update(suggestions).set({ delivery: "natural", updatedAt: now }).where(eq(suggestions.id, s.id));
+  await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_now:${s.id}`, body: `${why}: ${approvedProposal(s)}`, at: now });
+}
+
 /**
  * What a morning text carries (spec #9, #10): a founder's request due now (kickoffs and the rest-day
- * text), else, on a step-day kickoff, an approved deepen or upgrade not raised yet, else one maintenance
- * check-in that's due. A new focus is raised in a reply instead, where the goal cap is checked.
+ * text), else a proposal not raised yet (on a step-day kickoff any approved deepen, upgrade or plan change;
+ * #214: one the founders asked for the morning, on the rest-day text too, a new focus included once it fits
+ * the goal cap), else, on a kickoff, one maintenance check-in that's due. Any other new focus is raised in a
+ * reply instead, where the goal cap is checked.
  */
-async function carryFor(db: Db, tester: Tester, nudge: DueNudge, now: Date): Promise<NudgeCarry | undefined> {
-  if (REQUEST_CARRYING_MOMENTS.includes(nudge.moment)) {
-    const [request] = await pendingRequests(db, tester.id, now, MORNING_CARRIES);
-    if (request) return { requestId: request.id };
-  }
-  if (!CARRYING_MOMENTS.includes(nudge.moment)) return undefined;
+async function carryFor(deps: NudgeSchedulerDeps, tester: Tester, nudge: DueNudge, now: Date): Promise<NudgeCarry | undefined> {
+  const { db } = deps;
+  if (!REQUEST_CARRYING_MOMENTS.includes(nudge.moment)) return undefined;
+  const [request] = await pendingRequests(db, tester.id, now, MORNING_CARRIES);
+  if (request) return { requestId: request.id };
+  const kickoff = CARRYING_MOMENTS.includes(nudge.moment);
   const date = nudge.date;
   const rows = await db
     .select()
     .from(suggestions)
     .where(and(eq(suggestions.testerId, tester.id), gte(suggestions.createdAt, tester.contextStartedAt)))
     .orderBy(asc(suggestions.createdAt));
-  const ready = rows.find((s) => readyToRaise(s) && approvedKind(s) !== "new_focus");
-  if (ready) return { suggestionId: ready.id };
+  for (const s of rows.filter((x) => readyToRaise(x) && (kickoff || x.delivery === "morning"))) {
+    if (approvedKind(s) !== "new_focus") return { suggestionId: s.id };
+    if (s.delivery !== "morning") continue;
+    if (await roomForNewFocus(deps, tester, s)) return { suggestionId: s.id };
+    await askLater(db, tester, s, now, atGoalLimit(tester));
+  }
+  if (!kickoff) return undefined;
   const [yesterday] = await db
     .select({ status: stepDays.status })
     .from(stepDays)
@@ -522,7 +570,7 @@ async function send(
   try {
     const history = await coachHistory(db, tester, now, COACH_HISTORY_CAP);
     const previous = await lastSent(db, tester.id, nudge.moment);
-    carry = given ?? (await carryFor(db, tester, nudge, now));
+    carry = given ?? (await carryFor(deps, tester, nudge, now));
     // #155: a founder's request this text carries is claimed, so a Cancel can't race it.
     if (carry && "requestId" in carry && !(await claimRequest(db, carry.requestId, now))) {
       if (given) {

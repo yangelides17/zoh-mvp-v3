@@ -693,7 +693,8 @@ describe("when a request goes: agreed in the console chat", () => {
     const state = coachModel.requests[0]!.system.at(-1)!.text;
     expect(state).toContain(`- the team's request [${requestRef(request.id)}] (the app records it): Ask how the new shoes feel`);
     expect(state).toContain("NUDGE MOMENT: team.");
-    expect(TEAM).toContain("NUDGE MOMENT team: a text they asked you to send. Its one job is the request, as your own idea; no step or proof push.");
+    // #214: the same text can carry a founder's next step or plan change instead.
+    expect(TEAM).toContain("NUDGE MOMENT team: a text they asked you to send. Its one job is the request or next step it carries, as your own idea; no step or proof push.");
   });
 
   it("follows the nudge rules: never after a stop or past 3 unanswered; dropped with a note when it's too late", async () => {
@@ -1225,7 +1226,14 @@ describe("#214: when ZOH asks about a founder's proposal", () => {
     expect(nudgeMoments()).toEqual([]);
   });
 
-  it("the team text's job is the request or the proposal it carries", () => {
-    expect(TEAM).toContain("NUDGE MOMENT team: a text they asked you to send. Its one job is what it carries (a request, or a next step or plan change to ask them about), as your own idea; no step or proof push.");
+  it("the texting coach is told the team text carries the team's next step, which it raises then", async () => {
+    const tester = await seed();
+    const s = await addFounderSuggestion(t.db, { testerId: tester.id, goalSlug: "reading", kind: "adjust", proposal: "step at 8:00 pm", planChanges: { stepTime: "20:00" }, delivery: "own_text", by: "Yanni", at: now });
+    const coachModel = new FakeClaudeModel("Sam, would 8 work better than 7 for reading?");
+    const coach = createCoach({ db: t.db, model: coachModel, voice: "v" });
+    await coach.nudge!({ tester, turns: [{ role: "user", text: "hi" }], now, moment: "team", carry: { suggestionId: s.id } });
+    const state = coachModel.requests[0]!.system.at(-1)!.text;
+    expect(state).toContain("NUDGE MOMENT: team.");
+    expect(state).toContain(`the next step the team approved [${s.id.slice(0, 8)}] (plan change: step at 8:00 pm)`);
   });
 });

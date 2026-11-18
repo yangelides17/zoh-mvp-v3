@@ -80,7 +80,7 @@ export function appDeps(
       db,
       log,
       sendblue: deps.pipeline.sendblue,
-      nudger: nudgeSchedulerFor(deps, log, config.sendblue.number),
+      nudger: nudgeSchedulerFor(deps, log, config.sendblue.number, config.goalCap),
       keeper: memoryKeeperFor(config, deps, log),
       consoleJobs: consoleJobsFor(config, deps, log),
       now: deps.pipeline.now,
@@ -102,7 +102,7 @@ export function buildInfo(): BuildInfo {
 }
 
 /** The nudge tick over the same database, Sendblue client, coach, allowed numbers and clock as the app. */
-export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string): NudgeScheduler {
+export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string, goalCap?: number): NudgeScheduler {
   const p = deps.pipeline;
   return createNudgeScheduler({
     db: p.db,
@@ -112,6 +112,7 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
     allowedNumbers: p.allowedNumbers,
     lineNumber,
     routing: routingOf(p),
+    goalCap,
     now: p.now,
   });
 }

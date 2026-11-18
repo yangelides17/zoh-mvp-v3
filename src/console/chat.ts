@@ -67,6 +67,7 @@ Answering the founders:
 - A request in your words that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't draft it. Say why in a line and offer a version that fits.
 - A different time, place, days, proof or length for their plan: propose_plan_change. You'll ask the tester; it changes only on their yes.
 - A next step they want (deepen, upgrade, a new focus): suggest_next_step once the goal and kind are clear (ask in a line if not).
+- When you ask the tester about either is the founders' call, as with a request: nothing said is naturally (your next fitting text), "in the morning" is morning, "now" or "asap" is now (its own text, on the same rules; if it can't go then, it waits for your next text and the founders are told).
 - Deciding a next step waiting for them ("reject it", "approve that"): decide_suggestion.
 - "Cancel that": cancel. Already raised with the tester: take_back.
 - An alert: explain it from the record (a plan to review is already active: they committed; reviewing it only records that a founder looked). Marking one handled: mark_alert.
@@ -115,6 +116,23 @@ const notPast = (when: Date | undefined, now: Date) => {
 const theirs = (d: Date, t: Tester) => `${localTime(d, t.timeZone)} their time`;
 const short = (s: string, n = 120) => (s.length > n ? `${s.slice(0, n - 3)}...` : s);
 const nameOf = (t: Tester) => t.name ?? "them";
+
+/** #214: when ZOH raises a founder's proposal, as agreed in the chat. */
+const PROPOSAL_WHEN = ["naturally", "morning", "now"] as const;
+const PROPOSAL_WHEN_DOC =
+  " when, as agreed with the founders: naturally (default: your next fitting text, the morning text or a reply), morning (only the morning text), now (its own text right away).";
+/** Where a proposal goes, and how the card says it. "Now" in their quiet hours waits for the next text instead. */
+async function proposalTiming(ctx: CapabilityContext, when: (typeof PROPOSAL_WHEN)[number] = "naturally"): Promise<{ delivery: RequestDelivery; how: string }> {
+  const t = ctx.tester;
+  if (when === "morning") {
+    if (t.phase !== "active") throw new CapabilityError(`They're in ${t.phase}: no morning texts yet. Use naturally or now.`);
+    return { delivery: "morning", how: "with the morning text" };
+  }
+  if (when === "now" && quietNow(ctx.now, await withDaySteps(ctx.db, t, ctx.now))) {
+    return { delivery: "natural", how: "in its next text to them (it's their quiet hours, so not its own text now)" };
+  }
+  return when === "now" ? { delivery: "own_text", how: "in its own text now" } : { delivery: "natural", how: "in its next text to them" };
+}
 
 /** Everything the console coach can do: each one is drafted, and happens only once a founder confirms it (#155). */
 export const CAPABILITIES: Record<string, Capability> = {
@@ -228,7 +246,7 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "suggest_next_step",
       description:
-        "Draft a next step the founders decided on for this tester (#63). Once confirmed it's approved by that founder; the texting coach brings it up as its own idea when it fits. goal: the goal it builds on (its name or slug). kind: deepen (more of the same habit; the streak carries on), upgrade (a harder or different version, incl. a different step; a new streak), new_focus (move the focus to another goal, named in new_goal). proposal: what to propose, in plain words. reasoning: their why, if they gave one. Only once the goal and kind are clear: ask the founders first if not. A different time, place, days, proof or length: propose_plan_change.",
+        "Draft a next step the founders decided on for this tester (#63). Once confirmed it's approved by that founder; the texting coach brings it up as its own idea when it fits. goal: the goal it builds on (its name or slug). kind: deepen (more of the same habit; the streak carries on), upgrade (a harder or different version, incl. a different step; a new streak), new_focus (move the focus to another goal, named in new_goal). proposal: what to propose, in plain words. reasoning: their why, if they gave one. Only once the goal and kind are clear: ask the founders first if not. A different time, place, days, proof or length: propose_plan_change." + PROPOSAL_WHEN_DOC,
       input_schema: {
         type: "object",
         properties: {
@@ -237,13 +255,16 @@ export const CAPABILITIES: Record<string, Capability> = {
           proposal: { type: "string" },
           reasoning: { type: "string" },
           new_goal: { type: "string" },
+          when: { type: "string", enum: [...PROPOSAL_WHEN] },
         },
         required: ["goal", "kind", "proposal"],
       },
     },
     async prepare(ctx, input) {
-      const { goal, kind, proposal, reasoning, new_goal } = parse(
-        z.object({ goal: text(80), kind: z.enum(SUGGESTION_KINDS), proposal: text(1000), reasoning: text(500).optional(), new_goal: text(80).optional() }).strict(),
+      const { goal, kind, proposal, reasoning, new_goal, when } = parse(
+        z
+          .object({ goal: text(80), kind: z.enum(SUGGESTION_KINDS), proposal: text(1000), reasoning: text(500).optional(), new_goal: text(80).optional(), when: z.enum(PROPOSAL_WHEN).optional() })
+          .strict(),
         input,
       );
       stopped(ctx.tester, "a next step can't reach them");
@@ -257,11 +278,12 @@ export const CAPABILITIES: Record<string, Capability> = {
       if (!base) throw new CapabilityError(`No goal "${goal}". Goals: ${known()}.`);
       const next = new_goal ? find(new_goal) : undefined;
       if (kind === "new_focus" && !next) throw new CapabilityError(`A new focus needs new_goal, the goal to move to. Goals: ${known()}.`);
+      const { delivery, how } = await proposalTiming(ctx, when);
       return {
-        summary: `File a next step for ${nameOf(ctx.tester)} (${kind.replace("_", " ")} on ${base.title}${next ? ` → ${next.title}` : ""}): "${proposal}". ZOH raises it as its own idea when it fits, and asks first.`,
+        summary: `File a next step for ${nameOf(ctx.tester)} (${kind.replace("_", " ")} on ${base.title}${next ? ` → ${next.title}` : ""}): "${proposal}". ZOH raises it as its own idea, ${how}, and asks first.`,
         apply: async () => {
-          const s = await addFounderSuggestion(ctx.db, { testerId: ctx.tester.id, goalSlug: base.slug, kind, proposal, reasoning, newGoalSlug: next?.slug, by: ctx.founder, at: ctx.now });
-          return `Filed [${suggestionRef(s.id)}], approved by ${ctx.founder}.`;
+          const s = await addFounderSuggestion(ctx.db, { testerId: ctx.tester.id, goalSlug: base.slug, kind, proposal, reasoning, newGoalSlug: next?.slug, delivery, by: ctx.founder, at: ctx.now });
+          return `Filed [${suggestionRef(s.id)}], approved by ${ctx.founder}: ZOH raises it ${how}.`;
         },
       };
     },
@@ -270,7 +292,7 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "propose_plan_change",
       description:
-        'Draft a change to the tester\'s plan for ZOH to ask them about: only what changes. time: their local 24-hour "HH:MM". days: step days (mon..sun). proof: photo, screenshot, voice, document or video (proof_note: which one). minutes: how long. why: the founders\' reason, if given. Nothing changes until the tester says yes; they can tweak it. A different step (more, harder, another activity): suggest_next_step.',
+        'Draft a change to the tester\'s plan for ZOH to ask them about: only what changes. time: their local 24-hour "HH:MM". days: step days (mon..sun). proof: photo, screenshot, voice, document or video (proof_note: which one). minutes: how long. why: the founders\' reason, if given. Nothing changes until the tester says yes; they can tweak it. A different step (more, harder, another activity): suggest_next_step.' + PROPOSAL_WHEN_DOC,
       input_schema: {
         type: "object",
         properties: {
@@ -281,6 +303,7 @@ export const CAPABILITIES: Record<string, Capability> = {
           proof_note: { type: "string" },
           minutes: { type: "integer" },
           why: { type: "string" },
+          when: { type: "string", enum: [...PROPOSAL_WHEN] },
         },
       },
     },
@@ -295,6 +318,7 @@ export const CAPABILITIES: Record<string, Capability> = {
             proof_note: text(120).optional(),
             minutes: z.number().int().min(1).max(600).optional(),
             why: text(500).optional(),
+            when: z.enum(PROPOSAL_WHEN).optional(),
           })
           .strict(),
         input,
@@ -320,11 +344,12 @@ export const CAPABILITIES: Record<string, Capability> = {
       if (!keys.length) throw new CapabilityError("That's their plan already: nothing would change.");
       const proposal = describeChanges(changes);
       const now = describeChanges(Object.fromEntries(keys.map((k) => [k, plan[k]])) as PlanChanges);
+      const { delivery, how } = await proposalTiming(ctx, p.when);
       return {
-        summary: `Propose to ${nameOf(t)}: ${proposal} (now: ${now}). ZOH asks them first; nothing changes until they say yes, and they can tweak it.`,
+        summary: `Propose to ${nameOf(t)}: ${proposal} (now: ${now}). ZOH asks them first, ${how}; nothing changes until they say yes, and they can tweak it.`,
         apply: async () => {
-          const s = await addFounderSuggestion(ctx.db, { testerId: t.id, goalSlug: plan.goalSlug, kind: PLAN_ADJUST, proposal, reasoning: p.why, planChanges: changes, by: ctx.founder, at: ctx.now });
-          return `Proposed [${suggestionRef(s.id)}]: ZOH raises it when it fits.`;
+          const s = await addFounderSuggestion(ctx.db, { testerId: t.id, goalSlug: plan.goalSlug, kind: PLAN_ADJUST, proposal, reasoning: p.why, planChanges: changes, delivery, by: ctx.founder, at: ctx.now });
+          return `Proposed [${suggestionRef(s.id)}]: ZOH raises it ${how}.`;
         },
       };
     },

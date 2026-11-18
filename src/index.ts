@@ -61,7 +61,7 @@ try {
 }
 
 // ZOH's own texts: one tick a minute, once the app is taking texts.
-nudger = nudgeSchedulerFor(deps, app.log, config.sendblue.number);
+nudger = nudgeSchedulerFor(deps, app.log, config.sendblue.number, config.goalCap);
 nudger.start();
 
 // Coach memory: each tester's day is filed overnight (3 am their time); checked once a minute.
