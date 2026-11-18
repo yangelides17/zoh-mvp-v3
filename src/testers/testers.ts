@@ -1,7 +1,6 @@
 import { eq, sql, type AnyColumn } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
-  DEFAULT_PUSHINESS,
   DEFAULT_QUIET_HOURS,
   consoleMessages,
   flags,
@@ -39,7 +38,6 @@ export type TesterPatch = Partial<
     | "quietHoursEnd"
     | "quietHoursChosen"
     | "quietHoursAskedFor"
-    | "pushiness"
     | "styleNotes"
     | "isTestUser"
     | "stoppedAt"
@@ -128,7 +126,6 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
     timeZoneStatus: status,
     quietHoursStart: DEFAULT_QUIET_HOURS.start,
     quietHoursEnd: DEFAULT_QUIET_HOURS.end,
-    pushiness: DEFAULT_PUSHINESS,
     styleNotes: "",
     stoppedAt: null,
     autoTextsPausedAt: null,

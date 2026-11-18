@@ -937,7 +937,7 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
   const questions = (await app.db.select().from(schema.consoleMessages).where(and(eq(schema.consoleMessages.testerId, tester.id), eq(schema.consoleMessages.question, true)))).filter(
     (q) => q.answerStatus,
   );
-  const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
+  const style = `Style now: ${tester.styleNotes ? `notes: ${tester.styleNotes}` : "no notes"}${tester.stoppedAt ? "; stopped" : ""}`;
   const lines = [
     ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
     ...paused.map((x) => `Pause: ${x.reason ?? "no reason"}${x.until ? `, back on ${x.until}` : ""}`),
