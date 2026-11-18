@@ -62,8 +62,24 @@
   },
   "testerLines": [
     "ugh I'm wiped from work, not feeling 3 rounds tonight",
-    "honestly I don't think I've got it in me today",
-    "ok yeah that works"
+    {
+      "say": "honestly I don't think I've got it in me today",
+      "means": "still can't do the full thing today",
+      "when": "after ZOH replies to not feeling 3 rounds",
+      "length": "short"
+    },
+    {
+      "say": "ok yeah that works",
+      "means": "agrees to the smaller version ZOH suggested",
+      "when": "after ZOH suggests a specific smaller version and asks if it works",
+      "length": "thin",
+      "lead": false
+    }
+  ],
+  "facts": [
+    "you're wiped from work",
+    "3 rounds won't happen tonight",
+    "you'd still go around the block at 7 if it were small"
   ],
   "whatWentWrong": "New case, not a past mistake: a smaller version ZOH comes up with is spelled out and offered, not set without a yes.",
   "shouldHaveHappened": "First ZOH holds the line once, warmly. When they still can't, it suggests a specific smaller version spelled out in one text (for example 1 round, 2 min jog and 1 min walk, around the block at 7, with the Strava screenshot) and ends with one 'work for you?'-style question; it doesn't say it's set before they agree. After 'ok yeah that works' it confirms in a line, with no new question.",

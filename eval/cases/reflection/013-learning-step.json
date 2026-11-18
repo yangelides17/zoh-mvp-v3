@@ -70,9 +70,31 @@
   },
   "testerLines": [
     "[voice: Okay done, finished chapter four.]",
-    "the habit stacking part, like tying a new habit to one you already do",
-    "yeah maybe after I brush my teeth I could stretch",
-    "ok cool"
+    {
+      "say": "the habit stacking part, like tying a new habit to one you already do",
+      "means": "habit stacking stuck: tying a new habit to one you already do",
+      "when": "after ZOH asks what stuck, clicked or what she learned",
+      "length": "short"
+    },
+    {
+      "say": "yeah maybe after I brush my teeth I could stretch",
+      "means": "she could stretch right after brushing her teeth",
+      "when": "after ZOH replies to what she said about habit stacking",
+      "length": "short"
+    },
+    {
+      "say": "ok cool",
+      "means": "agrees to the step ZOH proposed",
+      "when": "after ZOH proposes tomorrow's step and asks if it works",
+      "length": "thin",
+      "lead": false
+    }
+  ],
+  "facts": [
+    "chapter 4 went quickly; you read it in one go on the couch",
+    "the part that stuck: habit stacking, tying a new habit to one you already do",
+    "you'd use it by stretching right after you brush your teeth at night",
+    "8 pm on the couch works for chapter 5 tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake: a learning step's reflection starts with what landed, asked like a friend, not a test.",
   "shouldHaveHappened": "ZOH counts the voice note and celebrates. Maya hasn't said what she learned, so ZOH asks naturally what stuck or clicked (never a quiz like \"what are the four laws?\", never with the answer in the question). It follows her answer about habit stacking with a specific question (how she'd use it), one per text, then turns naturally to the next step, acknowledging her stretching idea, with the next step day's step fully defined (chapter 5, on the couch, 8 pm, about 20 minutes), possibly building the idea in, and asks if it works. After \"ok cool\" it confirms in a line with no new question.",

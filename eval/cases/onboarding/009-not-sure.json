@@ -4,10 +4,38 @@
   "origin": "Spec #75 (starters and the open door), \"Not sure\"",
   "testerLines": [
     "Start",
-    "Jordan. honestly not sure",
-    "I'm a nurse, I work night shifts",
-    "cards and poker with the crew on breaks, and I used to read a lot before nights",
-    "sleeping better would be huge honestly"
+    {
+      "say": "Jordan. honestly not sure",
+      "means": "gives the name Jordan and says they're not sure what to work on",
+      "when": "after ZOH's welcome asks their name or what they'd like to work on",
+      "length": "thin",
+      "fixed": true
+    },
+    {
+      "say": "I'm a nurse, I work night shifts",
+      "means": "nurse on night shifts",
+      "when": "after ZOH asks about their work or their days",
+      "length": "short"
+    },
+    {
+      "say": "cards and poker with the crew on breaks, and I used to read a lot before nights",
+      "means": "cards and poker with the crew on breaks; used to read a lot",
+      "when": "after ZOH asks what they enjoy or do outside work",
+      "length": "short"
+    },
+    {
+      "say": "sleeping better would be huge honestly",
+      "means": "sleeping better would help most",
+      "when": "after ZOH asks what they'd like to be better at or what would help",
+      "length": "short"
+    }
+  ],
+  "facts": [
+    "your name is Jordan",
+    "you're not sure what you'd like to work on",
+    "you're a nurse on night shifts",
+    "on breaks you play cards and poker with the crew; you used to read a lot before nights",
+    "sleeping better would be huge"
   ],
   "whatWentWrong": "New case, not a past mistake: the \"Not sure? Let's figure it out together\" starter.",
   "shouldHaveHappened": "After \"not sure\", ZOH says that's fine and gets to know Jordan with one question per text (work, hobbies and interests, what they'd like to be better at), about four at most, never re-asking what Jordan already said. Then it suggests 2 to 3 specific ideas that fit what Jordan said (night shifts, cards with the crew, reading, sleep), each clearly inside one of the starters, as a short • list, and asks which one grabs them. No form-like grilling, no generic ideas unrelated to Jordan.",

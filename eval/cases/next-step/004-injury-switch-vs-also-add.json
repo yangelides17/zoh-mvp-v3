@@ -7,16 +7,32 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 22,
-    "answers": { "what": "running", "where": "the park loop", "when": "6:30 pm", "how_long": "25 min" },
+    "answers": {
+      "what": "running",
+      "where": "the park loop",
+      "when": "6:30 pm",
+      "how_long": "25 min"
+    },
     "history": [
-      { "from": "zoh", "text": "Yo Leo! 2 miles around the park at 6:30. You in?" },
-      { "from": "tester", "text": "always" }
+      {
+        "from": "zoh",
+        "text": "Yo Leo! 2 miles around the park at 6:30. You in?"
+      },
+      {
+        "from": "tester",
+        "text": "always"
+      }
     ],
     "plan": {
       "step": "run 2 miles",
       "place": "the park loop",
       "time": "18:30",
-      "days": ["mon", "wed", "fri", "sat"],
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
       "proof": "screenshot",
       "proof_note": "Strava run",
       "reason": "Four runs a week builds the base without wrecking your legs.",
@@ -24,13 +40,40 @@
       "started_days_ago": 9
     },
     "step_days": [
-      { "days_ago": 1, "status": "done" }, { "days_ago": 3, "status": "done" }, { "days_ago": 5, "status": "done" }
+      {
+        "days_ago": 1,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "done"
+      },
+      {
+        "days_ago": 5,
+        "status": "done"
+      }
     ]
   },
   "testerLines": [
     "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
-    "could we do upper body stuff at home instead while it heals?",
-    "and separately I've been wanting to get my protein up too, like on top of the workouts"
+    {
+      "say": "could we do upper body stuff at home instead while it heals?",
+      "means": "asks to switch to upper-body workouts at home while the ankle heals",
+      "when": "after ZOH replies to the ankle news",
+      "length": "short"
+    },
+    {
+      "say": "and separately I've been wanting to get my protein up too, like on top of the workouts",
+      "means": "also wants to raise protein, on top of the workouts",
+      "when": "after ZOH replies to the upper-body idea",
+      "length": "short"
+    }
+  ],
+  "facts": [
+    "you rolled your ankle on yesterday's run; the doctor said no running for 6 weeks",
+    "you'd like upper-body workouts at home while it heals; you have a yoga mat and a pull-up bar",
+    "separately, you've been wanting to get your protein up, on top of the workouts",
+    "6:30 in the evening still works for workouts"
   ],
   "whatWentWrong": "New case, not a past mistake: telling a change from an add.",
   "shouldHaveHappened": "The ankle is handled right away as a change to his one goal: sympathy without medical advice (pointing back to his doctor is fine), then work on an adjusted exercise plan (upper body at home) starts with him right away (asking what it needs, or showing it), never sent off to be thought about. The protein target on top is an add: a warm \"let me think on it\" with no promise and no nutrition questions or plan. ZOH never mentions a team, founders or approval.",
