@@ -389,6 +389,9 @@ export type ConsoleKind = (typeof CONSOLE_KINDS)[number];
 export const REQUEST_STATUSES = ["pending", "sending", "sent", "done", "cancelled"] as const;
 /** #155: what the console chat proposes to do for a founder, until one confirms it. */
 export const DRAFT_STATUSES = ["draft", "confirmed", "cancelled", "failed"] as const;
+/** #169: what came of a team question ZOH asked: their answer, or they talked past it. */
+export const ANSWER_STATUSES = ["answered", "dodged"] as const;
+export type AnswerStatus = (typeof ANSWER_STATUSES)[number];
 export type DraftStatus = (typeof DRAFT_STATUSES)[number];
 
 /**
@@ -439,6 +442,24 @@ export const consoleMessages = pgTable(
     draftStatus: text("draft_status", { enum: DRAFT_STATUSES }),
     /** Drafts: what doing it did, or why it couldn't. */
     draftResult: text("draft_result"),
+    /** Requests (#169): a question for the tester, whose answer comes back to the founders. */
+    question: boolean("question").notNull().default(false),
+    /** Requests (#169): raise an alert when they answer, talk past it, or don't answer in a day. */
+    alertOnAnswer: boolean("alert_on_answer").notNull().default(true),
+    /** Requests (#169): their answer, close to their words, or (dodged) what they said instead. */
+    answer: text("answer"),
+    answerStatus: text("answer_status", { enum: ANSWER_STATUSES }),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    /** #168: a file the founders attached (their line, and the request it became), in the private bucket. */
+    mediaKey: text("media_key"),
+    mediaContentType: text("media_content_type"),
+    mediaName: text("media_name"),
+    /** #168: what the file shows or says, read once when it's attached (for the console coach). */
+    mediaAccount: text("media_account"),
+    /** #168: a video longer than ZOH watches: only its start was watched. */
+    mediaPartial: boolean("media_partial").notNull().default(false),
+    /** #168: the file on Sendblue's media host, uploaded at Do it, sent with the text. */
+    sendblueMediaUrl: text("sendblue_media_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -447,6 +468,7 @@ export const consoleMessages = pgTable(
     check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sending', 'sent', 'done', 'cancelled')`),
     check("console_messages_draft_status_check", sql`${t.draftStatus} in ('draft', 'confirmed', 'cancelled', 'failed')`),
     check("console_messages_delivery_check", sql`${t.delivery} in ('natural', 'morning', 'own_text')`),
+    check("console_messages_answer_status_check", sql`${t.answerStatus} in ('answered', 'dodged')`),
   ],
 );
 

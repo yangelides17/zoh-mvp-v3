@@ -1,0 +1,49 @@
+{
+  "id": "no-probing-over-texts",
+  "title": "Over a day of texts after she talked past a team question, ZOH never brings it back up",
+  "origin": "Yanni, Nov 18 (#169 sign-off): the question line must not lead ZOH to ask again or keep probing",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "Dune", "where": "on the couch", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[voice: chapter 6 done, the desert scenes are so good]" },
+      { "from": "zoh", "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7." },
+      { "from": "zoh", "text": "Morning Maya! Curious, what's made mornings the hardest part this week?" },
+      { "from": "tester", "text": "haha long story. anyway chapter 7 tonight!" },
+      { "from": "zoh", "text": "Chapter 7 at 9, the desert keeps getting better 📚" }
+    ],
+    "plan": {
+      "step": "Read one chapter of Dune",
+      "place": "on the couch",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "voice",
+      "proof_note": "a 30-second voice recap",
+      "reason": "A chapter a night keeps the story moving without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "step": "Read chapter 6 of Dune", "proof_seen": "voice recap of the desert scenes" },
+      { "days_ago": 2, "status": "done", "step": "Read chapter 5 of Dune" }
+    ],
+    "team": [
+      { "kind": "request", "body": "Ask what's made mornings hardest for her this week", "question": true, "hours_ago": 3, "asked_hours_ago": 2 }
+    ]
+  },
+  "testerLines": [
+    "lunch break, so tired today",
+    "advance to 18:30",
+    "heading home, still on for chapter 7",
+    "advance to 21:35",
+    "[voice: chapter 7 done, Paul and Jessica made it to the sietch]"
+  ],
+  "whatWentWrong": "New case, not a past mistake: guards against the question line making ZOH ask again or probe.",
+  "shouldHaveHappened": "Across every text ZOH stays with what she says (tired at lunch, heading home, then her chapter 7 recap with a real reaction and tomorrow's chapter 8). It never asks about mornings again, never hints at it (no 'still curious about mornings', no 'so what makes mornings hard?'), and never mentions the team. Recording that she talked past the question is fine; nothing else about it.",
+  "startTime": "10:00",
+  "timeZone": "America/New_York"
+}

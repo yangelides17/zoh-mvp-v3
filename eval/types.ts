@@ -83,10 +83,17 @@ export const seedSchema = z.object({
   team: z
     .array(
       z.object({
-        kind: z.enum(["note", "request"]),
+        /** #168: "file": a founder's line with a file already read (`name`, `content_type`, `account`: what's in it). */
+        kind: z.enum(["note", "request", "file"]),
         body: z.string().min(1),
         hours_ago: z.number().min(0).max(72).default(1),
         delivery: z.enum(REQUEST_DELIVERIES).default("natural"),
+        /** #169: a request that's a question; `asked_hours_ago`: ZOH already asked it then (put the asking in `history`). */
+        question: z.boolean().default(false),
+        asked_hours_ago: z.number().min(0).max(240).optional(),
+        name: z.string().optional(),
+        content_type: z.string().optional(),
+        account: z.string().optional(),
       }),
     )
     .default([]),

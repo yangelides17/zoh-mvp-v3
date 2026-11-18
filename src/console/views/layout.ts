@@ -103,9 +103,18 @@ a.tester { display: block; color: inherit; } a.tester:hover { text-decoration: n
 .event .head { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
 .idea { border-left: 4px solid var(--accent); } .idea.waiting { border-left-color: var(--warn); }
 .typing { color: var(--muted); font-size: 13px; margin: 6px 4px; min-height: 1em; }
-.composer { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
-.composer textarea { border-radius: 20px; padding: 9px 14px; }
-.composer button { border-radius: 20px; }
+/* #168: one rounded bar: + to attach on the left, the box, send on the right; a file dropped on the chat lands here. */
+.composer { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; padding: 6px; border: 1px solid var(--line); border-radius: 26px; background: var(--card); }
+.composer.drop { border-color: var(--accent); background: var(--chip); }
+.composer-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.composer textarea { border: none; background: transparent; min-height: 36px; padding: 8px 6px; resize: none; }
+.composer textarea:focus { outline: none; }
+.composer .attach, .composer .send { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; padding: 0; font-size: 20px; line-height: 1; cursor: pointer; }
+.composer .attach { border: 1px solid var(--line); color: var(--muted); }
+.composer .attach:hover { border-color: var(--muted); color: var(--fg); }
+.file-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 10px; border-radius: 999px; background: var(--chip); font-size: 13px; }
+.file-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-chip.bad { background: var(--warn-soft); color: var(--warn); }
 .options { margin: 6px 4px 0; font-size: 13px; color: var(--muted); }
 img.proof { max-width: 220px; max-height: 220px; border-radius: 14px; display: block; }
 a.media-download { display: block; font-size: 13px; margin-top: 2px; }
@@ -285,13 +294,64 @@ const SCRIPT = `(function () {
       setTimeout(function () { texts.scrollTop = target.offsetTop - texts.offsetTop - texts.clientHeight / 3; }, 0);
     });
   }
+  // #168: the chat box: Enter sends (Shift+Enter is a new line); + or a file dropped on the chat attaches one file.
+  var chatForm = document.getElementById("chat-form");
+  if (chatForm) {
+    var chatText = document.getElementById("chat-text"), chatFile = document.getElementById("chat-file");
+    var chip = document.getElementById("chat-chip"), chipName = document.getElementById("chat-chip-name");
+    var composer = document.getElementById("composer"), chatArea = document.getElementById("chat") || composer;
+    var MAX_FILE = 100 * 1024 * 1024;
+    var sending = false;
+    var showFile = function () {
+      var file = chatFile.files && chatFile.files[0];
+      chip.hidden = !file;
+      if (!file) return;
+      var mb = file.size / 1048576;
+      var tooBig = file.size > MAX_FILE;
+      chip.classList.toggle("bad", tooBig);
+      chipName.textContent = file.name + " (" + (mb < 1 ? Math.max(1, Math.round(file.size / 1024)) + " KB" : mb.toFixed(1) + " MB") + ")" + (tooBig ? ": over 100 MB, too big to send" : "");
+    };
+    var ready = function () {
+      var file = chatFile.files && chatFile.files[0];
+      return !sending && (chatText.value.trim() || (file && file.size <= MAX_FILE)) && !(file && file.size > MAX_FILE);
+    };
+    chatFile.addEventListener("change", showFile);
+    document.getElementById("chat-chip-clear").addEventListener("click", function () { chatFile.value = ""; showFile(); chatText.focus(); });
+    chatText.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
+      e.preventDefault();
+      if (ready()) { sending = true; chatForm.requestSubmit ? chatForm.requestSubmit() : chatForm.submit(); }
+    });
+    chatForm.addEventListener("submit", function (e) {
+      if (!ready()) { e.preventDefault(); return; }
+      sending = true;
+    });
+    ["dragenter", "dragover"].forEach(function (type) {
+      chatArea.addEventListener(type, function (e) {
+        if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types, "Files") < 0) return;
+        e.preventDefault();
+        composer.classList.add("drop");
+      });
+    });
+    chatArea.addEventListener("dragleave", function (e) { if (!chatArea.contains(e.relatedTarget)) composer.classList.remove("drop"); });
+    chatArea.addEventListener("drop", function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault();
+      composer.classList.remove("drop");
+      var one = new DataTransfer();
+      one.items.add(e.dataTransfer.files[0]);
+      chatFile.files = one.files;
+      showFile();
+      chatText.focus();
+    });
+  }
   // #214: a button's reload (Seen, Do it, a decision) comes back where the founder was reading: the window and each
   // scroll box, on this tester and tab only, once. Sending a chat line (the one form with a text box) still lands at
   // the newest line.
   var spot = "zoh-scroll:" + base + ":" + tab;
   document.addEventListener("submit", function (e) {
     var f = e.target;
-    if (!f || String(f.method).toLowerCase() !== "post" || f.querySelector("textarea")) return;
+    if (!f || String(f.method).toLowerCase() !== "post" || f.id === "chat-form") return;
     var keep = { at: Date.now(), y: window.scrollY, boxes: {} };
     boxes.forEach(function (b) { keep.boxes[b.dataset.kind] = b.scrollTop; });
     try { sessionStorage.setItem(spot, JSON.stringify(keep)); } catch (err) {}

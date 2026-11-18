@@ -19,7 +19,17 @@ export interface SendblueClient {
    * Only when they texted us again themselves. Throws if Sendblue refuses.
    */
   optIn(number: string): Promise<void>;
+  /**
+   * #168: puts a file on Sendblue's media host (at most `MAX_UPLOAD_BYTES`) and returns its media_url, to send with
+   * a text. Throws if Sendblue refuses.
+   */
+  uploadFile(file: { bytes: Uint8Array; contentType: string; name: string }): Promise<string>;
 }
+
+/** #168: Sendblue's upload limit (https://docs.sendblue.com/api-v2/media/: "Maximum file size: 100 MB"). */
+export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
+/** #168: an upload can take far longer than a send. */
+const UPLOAD_TIMEOUT_MS = 5 * 60_000;
 
 export class SendblueError extends Error {
   constructor(
@@ -84,6 +94,29 @@ export function createSendblueClient(opts: SendblueClientOptions): SendblueClien
         );
       }
       return { messageHandle: json?.message_handle, status: json?.status, raw: json };
+    },
+
+    async uploadFile({ bytes, contentType, name }) {
+      // https://docs.sendblue.com/api-v2/media/: multipart, the file in a field named "file".
+      const form = new FormData();
+      form.append("file", new Blob([bytes], { type: contentType }), name);
+      const res = await doFetch(`${opts.baseUrl}/api/upload-file`, {
+        method: "POST",
+        headers: { "sb-api-key-id": opts.apiKeyId, "sb-api-secret-key": opts.apiKeySecret },
+        body: form,
+        signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
+      });
+      const text = await res.text();
+      let json: { media_url?: string; error_message?: string; message?: string } = {};
+      try {
+        json = text ? (JSON.parse(text) as typeof json) : {};
+      } catch {
+        // Not JSON: handled below as a failure.
+      }
+      if (res.status < 200 || res.status >= 300 || !json.media_url) {
+        throw new SendblueError(`Sendblue upload failed (HTTP ${res.status}${json.error_message ? `, ${json.error_message}` : ""})`, res.status);
+      }
+      return json.media_url;
     },
 
     async optIn(number) {

@@ -1,0 +1,502 @@
+{
+  "feature": "console",
+  "id": "case:no-probing-over-texts",
+  "suite": "capability",
+  "storedAt": "2026-11-18T19:23:57.547Z",
+  "branch": "feature/169-168-questions-attachments",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1becca6a09b5",
+    "voice": "accb8d11133b",
+    "instructions": "c7348af58300",
+    "script": "0d7d8b98479b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:no-probing-over-texts#1",
+        "kind": "case",
+        "id": "no-probing-over-texts",
+        "suite": "capability",
+        "title": "Over a day of texts after she talked past a team question, ZOH never brings it back up",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T12:54:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T12:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning Maya! Curious, what's made mornings the hardest part this week?",
+          "at": "2026-11-02T12:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "haha long story. anyway chapter 7 tonight!",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 7 at 9, the desert keeps getting better 📚",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "lunch break, so tired today",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tired at lunch is rough, Maya. Tonight is still chapter 7 at 9 on the couch, and it's only 20 minutes. What's got you so drained today?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "heading home, still on for chapter 7",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Safe trip home, Maya. Couch, 9 o'clock, and then send me that 30-second recap 📚",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! It's almost 9, so get settled on the couch with Dune. Chapter 7 is up, about 20 minutes, then the 30-second voice recap. Phone on silent?",
+          "at": "2026-11-03T01:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! It's 9:25, so how did chapter 7 go? Send the 30-second voice recap whenever you're ready 📚",
+          "at": "2026-11-03T02:25:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "[voice: chapter 7 done, Paul and Jessica made it to the sietch]",
+          "at": "2026-11-03T02:35:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 7 done, and on a day you were running on empty. That's a win, Maya 🔥 What was it like to sit down tonight, tired as you were?",
+          "at": "2026-11-03T02:35:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished ch 7 after a tired day; recap says Paul and Jessica reached the sietch.\nTeam question \"Ask what's made mornings hardest for her this week\": recorded that they talked past it\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to her lunch-break tiredness and the chapter 7 at 9 on the couch plan, both from her history."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses her heading-home text and the saved 9 pm couch plan accurately."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Chapter 7, about 20 minutes, couch and Dune all match the saved plan details."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how chapter 7 went and references the 30-second voice recap she was given."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to her tiredness and the finished chapter, drawing on what she said in her own texts."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "No mornings question or hint and no team mention, but ZOH 5 never mentions tomorrow's chapter 8, which the case expects."
+          }
+        ],
+        "summary": "ZOH stayed with Maya's lunch tiredness, the heading-home text, and her chapter 7 recap without ever returning to mornings or mentioning the team. It missed the expected handoff to tomorrow's chapter 8 in its final text, which is the one clear gap in this regression case."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:no-probing-over-texts#2",
+        "kind": "case",
+        "id": "no-probing-over-texts",
+        "suite": "capability",
+        "title": "Over a day of texts after she talked past a team question, ZOH never brings it back up",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T12:54:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T12:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning Maya! Curious, what's made mornings the hardest part this week?",
+          "at": "2026-11-02T12:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "haha long story. anyway chapter 7 tonight!",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 7 at 9, the desert keeps getting better 📚",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "lunch break, so tired today",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Long day already, Maya. What's got you so tired?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "heading home, still on for chapter 7",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good, Maya. Couch, 9, chapter 7. Even tired, 20 minutes is all it takes. Send the 30-second voice recap when you're done 🎧",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! Ten minutes to Dune: couch, chapter 7, 20 minutes. Get settled now so you can sink right in, and after the last page send me that 30-second voice recap 🎧",
+          "at": "2026-11-03T01:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! 9:25 and the couch is calling. How did chapter 7 go?",
+          "at": "2026-11-03T02:25:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "[voice: chapter 7 done, Paul and Jessica made it to the sietch]",
+          "at": "2026-11-03T02:35:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Three days in a row, Maya 🔥 You pushed through a tired day to get Paul and Jessica to the sietch. How did it feel to read tonight, after being wiped at lunch?",
+          "at": "2026-11-03T02:35:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished chapter 7 after a tired day; recap sent.\nTeam question \"Ask what's made mornings hardest for her this week\": recorded that they talked past it\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the tester's lunch-break tiredness she just mentioned; nothing invented."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Couch, 9 pm, chapter 7 and 20 minutes all match the saved plan and what she said."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "Voice recap reminder is framed as a plain proof reminder in ZOH's voice, not a team request."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the saved step (couch, chapter 7, 20 minutes, voice recap) accurately."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the 9 pm couch time and asks about chapter 7, which is the step she is doing."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three days in a row and the sietch scene come from her recap and history; the question stays on tonight's reading."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "No mornings question, hint or team mention across all texts; it stays on lunch, home, chapter 7 and the recap."
+          },
+          {
+            "rule": "answer-recorded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Her lunch-break reply talked past the mornings question, which was recorded as a dodge and not re-asked."
+          },
+          {
+            "rule": "asks-once",
+            "pass": true,
+            "borderline": false,
+            "reason": "The team question was not repeated or attributed to the team in any text."
+          }
+        ],
+        "summary": "ZOH stayed with Maya's lunch-break tiredness, her heading-home message and her chapter 7 recap, and never returned to the mornings question or the team. The regression case passes, with the talk-past recorded as a dodge and not re-asked."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:no-probing-over-texts#3",
+        "kind": "case",
+        "id": "no-probing-over-texts",
+        "suite": "capability",
+        "title": "Over a day of texts after she talked past a team question, ZOH never brings it back up",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T12:54:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T12:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning Maya! Curious, what's made mornings the hardest part this week?",
+          "at": "2026-11-02T12:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "haha long story. anyway chapter 7 tonight!",
+          "at": "2026-11-02T12:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 7 at 9, the desert keeps getting better 📚",
+          "at": "2026-11-02T12:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "lunch break, so tired today",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Lunch break and running on empty, Maya, that's rough. What's been wearing you out?",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "heading home, still on for chapter 7",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Maya. Get home, get comfy, and chapter 7 is waiting on the couch at 9. Send me that 30-second voice recap when you're done 🎧",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! Chapter 7 of Dune is up in 10 minutes, so get comfy on the couch. Phone on silent, and I'll be waiting for that 30-second voice recap after. Ready?",
+          "at": "2026-11-03T01:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Maya! It's 9:25, so how did chapter 7 go? Send that 30-second voice recap whenever you're ready 🎧",
+          "at": "2026-11-03T02:25:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "[voice: chapter 7 done, Paul and Jessica made it to the sietch]",
+          "at": "2026-11-03T02:35:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 7 done, Maya, and after a tired lunch break you still showed up 🔥 Day 3 in the books. How did it feel sitting down tonight, and what stuck with you about Paul and Jessica reaching the sietch?",
+          "at": "2026-11-03T02:35:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished chapter 7, voice recap clear; said earlier she was tired at lunch but still did it.\nTeam question \"Ask what's made mornings hardest for her this week\": recorded that they talked past it\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "References the tester's lunch break and tiredness from her own text and asks what's wearing her out."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses her chapter 7 plan, the couch, the 9 pm time and the voice recap, all from saved state."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the saved chapter 7 at 9 pm, couch and 30-second recap details accurately."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to chapter 7 and the 30-second voice recap, both matching her plan."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "Recaps her lunch tiredness and chapter 7 accurately, but calls it 'Day 3', which the visible history doesn't confirm."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "No text mentions mornings, hints at them, or references the team; ZOH stays with lunch, home, and the chapter 7 recap."
+          },
+          {
+            "rule": "answer-recorded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Her lunch-tiredness reply talks past the mornings question, and it was recorded as a dodge without re-asking."
+          }
+        ],
+        "summary": "ZOH stayed with what Maya shared across every text (lunch tiredness, heading home, the chapter 7 recap and her reaction), never re-asking or hinting about mornings and never mentioning the team. The one soft spot is the unverified 'Day 3' in the final recap, plus a double question at the end."
+      }
+    }
+  ]
+}

@@ -22,7 +22,7 @@ import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
-import { addRequest, addThreadLine, COACH_AUTHOR } from "../src/console/requests.js";
+import { addRequest, addThreadLine, claimRequest, closeRequest, COACH_AUTHOR } from "../src/console/requests.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { startPause } from "../src/testers/pauses.js";
@@ -58,6 +58,10 @@ export class RecordingSendblue implements SendblueClient {
   }
   async optIn(number: string) {
     if (number !== this.allowed) throw new Error("Eval Sendblue only touches its own fake tester");
+  }
+  /** #168: a founder's file is never really uploaded in the eval. */
+  async uploadFile(file: { name: string }) {
+    return `https://cdn.sendblue.eval/${file.name}`;
   }
 }
 
@@ -620,7 +624,21 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   for (const t of seed.team) {
     const at = new Date(now.getTime() - t.hours_ago * 60 * 60_000);
     if (t.kind === "note") await addThreadLine(app.db, { testerId: tester!.id, kind: "note", author: "Yanni", body: t.body, at });
-    else await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at });
+    else if (t.kind === "file") {
+      // #168: as the console coach finds it once a founder's file has been read (the eval keeps no files).
+      const name = t.name ?? "file.txt";
+      const line = await addThreadLine(app.db, { testerId: tester!.id, kind: "founder", author: "Yanni", body: t.body, at, attachment: { key: `eval/${name}`, contentType: t.content_type ?? "text/plain", name } });
+      await app.db.update(schema.consoleMessages).set({ mediaAccount: t.account ?? "" }).where(eq(schema.consoleMessages.id, line.id));
+      await addThreadLine(app.db, { testerId: tester!.id, kind: "coach", author: COACH_AUTHOR, body: "Got it, I've read it.", at: new Date(at.getTime() + 1000) });
+    } else {
+      const request = await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at, question: t.question });
+      if (t.asked_hours_ago !== undefined) {
+        // #169: ZOH already asked it then, in a text that went out.
+        const asked = new Date(now.getTime() - t.asked_hours_ago * 60 * 60_000);
+        await claimRequest(app.db, request.id, asked);
+        await closeRequest(app.db, { request, status: "done", at: asked, line: "Done (seeded)" });
+      }
+    }
   }
   if (seed.pause) {
     const { started_hours_ago, until_days, reason } = seed.pause;
@@ -654,6 +672,10 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     context.push({ from: line.from, text: shown, at: at.toISOString() });
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
+  // #168: a founder's file, as the grader needs it to judge the line ZOH writes about it.
+  for (const t of seed.team.filter((x) => x.kind === "file")) {
+    context.push({ from: "founder", text: `Yanni attached "${t.name ?? "file.txt"}" (what's in it: ${t.account ?? "not read"})`, at: new Date(now.getTime() - t.hours_ago * 60 * 60_000).toISOString() });
+  }
   return context;
 }
 
@@ -908,6 +930,10 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
   const versions = fresh(await app.db.select().from(schema.plans).where(and(eq(schema.plans.testerId, tester.id), eq(schema.plans.status, "locked"))));
   const lessons = fresh(await app.db.select().from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id)));
   const days = await app.db.select().from(schema.stepDays).where(eq(schema.stepDays.testerId, tester.id)).orderBy(asc(schema.stepDays.date));
+  // #169: what ZOH recorded for the team's questions.
+  const questions = (await app.db.select().from(schema.consoleMessages).where(and(eq(schema.consoleMessages.testerId, tester.id), eq(schema.consoleMessages.question, true)))).filter(
+    (q) => q.answerStatus,
+  );
   const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
   const lines = [
     ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
@@ -918,6 +944,7 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
     // #160: what the step shows they can now do, and gaps, so the grader can check both against the conversation.
     ...days.flatMap((d) => [...(d.canDo ? [`Can now do (${d.date}): ${d.canDo}`] : []), ...(d.gaps ? [`Gaps (${d.date}): ${d.gaps}`] : [])]),
     ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
+    ...questions.map((q) => `Team question "${q.body}": ${q.answerStatus === "answered" ? `recorded their answer: ${q.answer}` : "recorded that they talked past it"}`),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");
 }

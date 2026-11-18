@@ -64,7 +64,8 @@ export async function memoryCards(db: Db, tester: Tester, now: Date): Promise<Me
   const sent = await db
     .select()
     .from(messages)
-    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl)));
+    // Theirs, and (#168) the founders' files ZOH sent them, labeled on the card.
+    .where(and(eq(messages.contactNumber, tester.phone), isNotNull(messages.mediaUrl)));
   const stepDates = new Set((await db.select({ date: stepDays.date }).from(stepDays).where(eq(stepDays.testerId, tester.id))).map((d) => d.date));
   const media = sent
     .map((message) => {

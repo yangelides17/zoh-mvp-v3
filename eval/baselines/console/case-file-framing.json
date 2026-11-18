@@ -1,0 +1,308 @@
+{
+  "feature": "console",
+  "id": "case:file-framing",
+  "suite": "capability",
+  "storedAt": "2026-11-18T19:00:48.089Z",
+  "branch": "feature/169-168-questions-attachments",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "45477a0175cc",
+    "voice": "accb8d11133b",
+    "instructions": "c7348af58300",
+    "script": "0c131a439ac8"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:file-framing#1",
+        "kind": "case",
+        "id": "file-framing",
+        "suite": "capability",
+        "title": "A founder's file goes on a word-for-word card with a line true to what's in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T11:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T11:58:00.000Z"
+        },
+        {
+          "from": "founder",
+          "text": "Yanni attached \"evening-hip-stretch.pdf\" (what's in it: 2 pages. Evening hip stretch for after sitting, about 2 minutes: kneel and shift forward, hold 30 seconds a side, then finish with 30 seconds of pigeon pose on each side.)",
+          "at": "2026-11-02T14:54:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: send this to Maya for after tonight's reading",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Text Maya word for word, as ZOH, within a minute of Do it, with \"evening-hip-stretch.pdf\": \"Hey Maya! A little something from the team for after tonight's Dune on the couch: a 2-minute evening hip stretch for after sitting. Kneel and shift forward, 30 seconds a side, then finish with 30 seconds of pigeon pose each side. Totally optional, just a nice way to close out the reading.\"",
+          "at": "2026-11-02T15:00:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted a text to Maya with the hip stretch PDF attached. When you click Do it, it goes out within a minute. It says the stretch is a totally optional way to close out tonight's Dune on the couch. I wrote the wording myself, so edit it on the card if you want it different. Nothing is sent yet.",
+          "at": "2026-11-02T15:00:00.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: step day, nothing recorded\nWed, Oct 28: step day, nothing recorded\nThu, Oct 29: step day, nothing recorded\nFri, Oct 30: step day, nothing recorded\nSat, Oct 31: done, step: Read chapter 5 of Dune\nSun, Nov 1 (yesterday): done, step: Read chapter 6 of Dune\nMon, Nov 2 (today): step day, not done yet at 21:00\nTue, Nov 3 (tomorrow): step day at 21:00\nWed, Nov 4: step day at 21:00\nThu, Nov 5: step day at 21:00\nFri, Nov 6: step day at 21:00\nSat, Nov 7: step day at 21:00\nSun, Nov 8: step day at 21:00\nMon, Nov 9: step day at 21:00",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 1 says the card will text Maya word for word within a minute of Do it; ZOH 2 says \"Nothing is sent yet\" and states what happens on click."
+          },
+          {
+            "rule": "file-framing",
+            "pass": true,
+            "borderline": false,
+            "reason": "The framing \"2-minute evening hip stretch for after sitting\" with kneel, 30 seconds a side and pigeon matches the PDF and ties to tonight's Dune on the couch."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Drafts a send card with the PDF and a voice line matching the file's length and content, tied to after tonight's reading, and doesn't claim it was sent."
+          }
+        ],
+        "summary": "ZOH handled the founder's file request well: it drafted the send card with wording that matches the PDF's 2-minute length and pigeon pose, tied to tonight's Dune reading on the couch. It told the founders plainly that nothing is sent until Do it is clicked, and the regression case passes."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:file-framing#2",
+        "kind": "case",
+        "id": "file-framing",
+        "suite": "capability",
+        "title": "A founder's file goes on a word-for-word card with a line true to what's in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T11:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T11:58:00.000Z"
+        },
+        {
+          "from": "founder",
+          "text": "Yanni attached \"evening-hip-stretch.pdf\" (what's in it: 2 pages. Evening hip stretch for after sitting, about 2 minutes: kneel and shift forward, hold 30 seconds a side, then finish with 30 seconds of pigeon pose on each side.)",
+          "at": "2026-11-02T14:54:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: send this to Maya for after tonight's reading",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Text Maya word for word, as ZOH, at Mon 9:30 PM their time, with \"evening-hip-stretch.pdf\": \"Hey Maya! After tonight's chapter, here's a 2-minute hip stretch for after all that couch time: kneel and shift forward, 30 seconds a side, then 30 seconds of pigeon pose on each side. Two pages, easy to follow 🙌\"",
+          "at": "2026-11-02T15:00:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "The draft is on your screen. When you click Do it, it will text Maya tonight at 9:30 PM with the hip stretch PDF attached and a short line about the 2-minute stretch. Nothing has gone out yet.",
+          "at": "2026-11-02T15:00:00.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: step day, nothing recorded\nWed, Oct 28: step day, nothing recorded\nThu, Oct 29: step day, nothing recorded\nFri, Oct 30: step day, nothing recorded\nSat, Oct 31: done, step: Read chapter 5 of Dune\nSun, Nov 1 (yesterday): done, step: Read chapter 6 of Dune\nMon, Nov 2 (today): step day, not done yet at 21:00\nTue, Nov 3 (tomorrow): step day at 21:00\nWed, Nov 4: step day at 21:00\nThu, Nov 5: step day at 21:00\nFri, Nov 6: step day at 21:00\nSat, Nov 7: step day at 21:00\nSun, Nov 8: step day at 21:00\nMon, Nov 9: step day at 21:00",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to tonight's chapter and couch time, both from saved state; the 2-minute, 30-second holds and pigeon pose match the file."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Reads in ZOH's voice at a natural post-reading moment, though it is a founder-requested send rather than ZOH's own suggestion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says what will happen (PDF plus a short line), when (tonight 9:30 PM), and that nothing has gone out yet."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "The console reply states exactly what the card will do and explicitly says nothing has been sent."
+          },
+          {
+            "rule": "file-framing",
+            "pass": true,
+            "borderline": false,
+            "reason": "Draft's 2-minute length, two pages, and holds match the PDF, and it ties to after tonight's chapter on the couch."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Drafted a send card with the file and one matching line tied to tonight's chapter, invented nothing, and did not claim it was sent."
+          }
+        ],
+        "summary": "ZOH handled the founder's file send well: the draft card's line matches the PDF's content and length, ties to tonight's couch reading, and the console confirmation says exactly what will happen without claiming it went out. No tester-facing issues were found; the only soft point is that the 'own idea' framing is thin because the send was founder-requested."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:file-framing#3",
+        "kind": "case",
+        "id": "file-framing",
+        "suite": "capability",
+        "title": "A founder's file goes on a word-for-word card with a line true to what's in it",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice: chapter 6 done, the desert scenes are so good]",
+          "at": "2026-11-02T11:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7.",
+          "at": "2026-11-02T11:58:00.000Z"
+        },
+        {
+          "from": "founder",
+          "text": "Yanni attached \"evening-hip-stretch.pdf\" (what's in it: 2 pages. Evening hip stretch for after sitting, about 2 minutes: kneel and shift forward, hold 30 seconds a side, then finish with 30 seconds of pigeon pose on each side.)",
+          "at": "2026-11-02T14:54:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: send this to Maya for after tonight's reading",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Text Maya word for word, as ZOH, at Mon 9:20 PM their time, with \"evening-hip-stretch.pdf\": \"Hey Maya! After tonight's Dune chapter on the couch, here's a quick 2-minute hip stretch for after sitting: kneel and shift forward, 30 seconds a side, then 30 seconds of pigeon pose each side. Two pages attached 🙌\"",
+          "at": "2026-11-02T15:00:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I drafted the hip stretch PDF to go to Maya tonight at 9:20 PM, right after her 9 pm reading. The message is in my own words, not yours. It will only send once you click Do it or tell me yes.",
+          "at": "2026-11-02T15:00:00.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: step day, nothing recorded\nWed, Oct 28: step day, nothing recorded\nThu, Oct 29: step day, nothing recorded\nFri, Oct 30: step day, nothing recorded\nSat, Oct 31: done, step: Read chapter 5 of Dune\nSun, Nov 1 (yesterday): done, step: Read chapter 6 of Dune\nMon, Nov 2 (today): step day, not done yet at 21:00\nTue, Nov 3 (tomorrow): step day at 21:00\nWed, Nov 4: step day at 21:00\nThu, Nov 5: step day at 21:00\nFri, Nov 6: step day at 21:00\nSat, Nov 7: step day at 21:00\nSun, Nov 8: step day at 21:00\nMon, Nov 9: step day at 21:00",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "The drafted message matches the PDF: kneel and shift forward 30 seconds a side, then 30 seconds of pigeon per side, about 2 minutes, and it ties to tonight's Dune chapter."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "The draft reads in ZOH's warm voice, but the send was requested by the founders, so it is borderline whether it reads as ZOH's own idea."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": false,
+                "reason": "Tells the founders what (the PDF to Maya) and when (tonight at 9:20 PM, after the 9 pm reading) in two sentences."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "The 9:20 PM timing matches the 9 pm reading and 20-minute length saved in state, and it says nothing was sent yet."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "The console says the draft will only send after Do it or a yes, and it does not claim the file was sent."
+          },
+          {
+            "rule": "file-framing",
+            "pass": true,
+            "borderline": false,
+            "reason": "The framing line matches the file's 2-minute, two-page contents and ties to tonight's chapter on the couch."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH drafted a send card with the file and an on-voice line matching the file, invented no length or content, and told the founders in a line it hasn't sent."
+          }
+        ],
+        "summary": "ZOH handled the founder's file send well: it drafted a card with the PDF and an accurate, on-voice line tied to tonight's reading. It told the founders exactly when it would go and that it only sends after their yes, with nothing claimed as sent."
+      }
+    }
+  ]
+}

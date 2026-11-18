@@ -413,7 +413,25 @@ export const FEATURES: Record<string, FeatureDef> = {
         label:
           "When ZOH texts first to raise a change to their plan or a next step, it asks their OK in its own voice as its own idea, reads naturally with nothing from them before it, and never says the plan already changed",
       },
+      // #169: a team question is asked once and listened for, not chased.
+      { id: "asks-once", scope: "conversation", group: "conversation", label: "ZOH asks a team question once, naturally, without saying it came from the team" },
+      {
+        id: "answer-recorded",
+        scope: "conversation",
+        group: "flow",
+        label:
+          "When they answer a team question, ZOH records it (close to their words); when they talk past it, ZOH records a dodge and doesn't re-ask; an unrelated text isn't recorded as an answer",
+      },
+      // #168: a founder's file goes out with a line true to what's in it.
+      {
+        id: "file-framing",
+        scope: "conversation",
+        group: "flow",
+        label: "The framing line matches what's actually in the file (nothing invented or contradicted, like its length; it needn't list every detail) and ties to their step",
+      },
     ],
+    // #169: the grader sees what ZOH recorded for the team's questions.
+    saved: true,
   },
   /** Commands and safety (#12): pause and feedback, cases only, each seeded with a locked plan. Target 80%. */
   commands: {

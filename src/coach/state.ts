@@ -28,7 +28,7 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
-import { claimedRequest, notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
+import { claimedRequest, listeningQuestions, notesForCoach, pendingRequests, REPLY_CARRIES, requestsClaimed } from "../console/requests.js";
 import { mediaKind, type MediaKind } from "../media/storage.js";
 
 /** What counts as proof: photos and voice notes, and documents and videos since #163. */
@@ -142,6 +142,8 @@ export interface CoachState {
   teamRequests: ConsoleMessage[];
   /** Requests marked done in this reply: this text must still carry them. */
   teamRequestsDone: ConsoleMessage[];
+  /** #169: team questions ZOH asked, listening for their answer (replies only). */
+  teamQuestions: ConsoleMessage[];
   /** Their latest text: what lock_plan checks the commitment against. */
   lastTesterText: string;
   /** #157: ZOH's last text before their latest: what a deepen or upgrade they agree to must have shown. */
@@ -165,6 +167,8 @@ export async function loadCoachState(
     nudgeMoment?: NudgeMoment;
     carry?: NudgeCarry;
     goalCap?: number;
+    /** #169: requests earlier (dropped) drafts of this reply claimed: this text must still carry them. */
+    carrying?: readonly string[];
   },
 ): Promise<CoachState> {
   // #48: their day (and its quiet hours) fits around the step: 12:30 am after an 11:50 pm step is still that night.
@@ -272,7 +276,8 @@ export async function loadCoachState(
       opts.carry && "requestId" in opts.carry
         ? await claimedRequest(db, tester.id, opts.carry.requestId)
         : await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
-    teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
+    teamRequestsDone: opts.nudgeMoment ? [] : await requestsClaimed(db, tester.id, { at: [opts.now], ids: opts.carrying }),
+    teamQuestions: opts.nudgeMoment ? [] : await listeningQuestions(db, tester, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
     lastZohText: opts.lastZohText ?? "",
     isFirstText: opts.isFirstText,

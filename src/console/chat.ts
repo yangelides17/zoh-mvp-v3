@@ -28,8 +28,12 @@ import {
   type Tester,
 } from "../db/schema.js";
 import { awaitingAnswer as raisedAwaiting, findSuggestion, readyToRaise, suggestionRef } from "../coach/next-steps.js";
-import { MAX_CONTINUATIONS, webBudget, webTools } from "../coach/web.js";
-import { mediaKind } from "../media/storage.js";
+import { MAX_CONTINUATIONS, runWatchVideo, WATCH_VIDEO_TOOL, webBudget, webTools } from "../coach/web.js";
+import { addSeen, allowance, linkKey, linksIn } from "../coach/links.js";
+import type { VideoWatcher } from "../video/gemini.js";
+import { fileRef, kindOf, readAttachment } from "./attachments.js";
+import { mediaKind, type MediaStore } from "../media/storage.js";
+import type { SendblueClient } from "../sendblue/client.js";
 import { MEMORY_TOOL_DEFINITIONS, runMemoryTool, type LookupBudget } from "../memory/coach-tools.js";
 import { coachHistory, memoryBlock, usesMemory } from "../memory/context.js";
 import { messageTime } from "../memory/store.js";
@@ -61,8 +65,9 @@ Answering the founders:
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess. Count misses and streaks from the state, never estimate them.
 - Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so, and don't ask whether to go ahead: the card's buttons ask. They want it different: a new draft with replaces = the old one's id.
 - Context for how to coach them ("traveling next week, go easy"): save_note.
-- Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
-- Asked to find something for them (a guide, an article, an answer): web search and open the best page, then plan_request it with the one link and a line on why it's for them. Only links you found; no videos (you can't watch them here).
+- Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. Asking them something: question, and their answer comes back as an alert (alert_on_answer false only if the founders say they don't need to hear). When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
+- Asked to find something for them (a guide, an article, an answer): web search and open the best page, then plan_request it with the one link and a line on why it's for them. A link in a request is one you opened or watched (watch_video, YouTube only) in this answer, theirs included, so it says what's really there.
+- A file they attached ([attached …, file id]: what's in it): send_text with file. Their words if they gave any; else one line in your voice, true to what's in it (its length, what it shows) and tied to their step. They can edit it on the card. A file you couldn't read: say so; never guess.
 - Their own words sent as written ("send her exactly…", "text him: …"): send_text, copied exactly, never reworded or judged; even_in_quiet_hours only if they say to send it now anyway.
 - A request in your words that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't draft it. Say why in a line and offer a version that fits.
 - A different time, place, days, proof or length for their plan: propose_plan_change. You'll ask the tester; it changes only on their yes.
@@ -83,6 +88,35 @@ export interface CapabilityContext {
   /** Requests still pending, for cancel. */
   open: ConsoleMessage[];
   budget: LookupBudget;
+  /** #168: where a founder's file is kept, and Sendblue, which hosts it for the text (uploaded at Do it). */
+  files?: { media?: MediaStore; sendblue?: SendblueClient };
+  /** #168: links the console coach opened (a page) or watched (a video) while drafting: a card in its words may carry only these. */
+  opened?: Set<string>;
+}
+
+/** #168: a file the founders attached in this tester's thread, by its ref. */
+async function attachedFile(db: Db, testerId: string, ref: string): Promise<ConsoleMessage | undefined> {
+  const wanted = ref.trim().toLowerCase().replace(/^\[|\]$/g, "").replace(/^file\s+/, "");
+  if (wanted.length < 8) return undefined;
+  const rows = await db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "founder")));
+  return rows.find((r) => r.mediaKey && r.id.startsWith(wanted));
+}
+
+/** #168: puts the founders' file on Sendblue's media host; a failure stops the Do it (the card says why). */
+async function uploadForSending(ctx: CapabilityContext, file: ConsoleMessage): Promise<{ key: string; contentType: string; name: string; account: string; partial: boolean; sendblueUrl: string }> {
+  const { media, sendblue } = ctx.files ?? {};
+  if (!media || !sendblue) throw new CapabilityError("Files can't be sent from this app (no bucket or Sendblue set up).");
+  const object = await media.get(file.mediaKey!);
+  if (!object) throw new CapabilityError("The file isn't in storage any more. Attach it again.");
+  const contentType = file.mediaContentType ?? object.contentType;
+  const name = file.mediaName ?? "file";
+  let sendblueUrl: string;
+  try {
+    sendblueUrl = await sendblue.uploadFile({ bytes: object.bytes, contentType, name });
+  } catch (err) {
+    throw new CapabilityError(`Couldn't upload the file to Sendblue (${err instanceof Error ? err.message.slice(0, 100) : "upload failed"}), so nothing was queued. Try Do it again.`);
+  }
+  return { key: file.mediaKey!, contentType, name, account: file.mediaAccount ?? "", partial: file.mediaPartial, sendblueUrl };
 }
 
 /** What a capability would do (#155): a line for the draft card, and the doing, run only once a founder confirms. */
@@ -157,11 +191,13 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "plan_request",
       description:
-        'Draft something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). when, as agreed with the founders: naturally (default: the morning text or your next reply), morning (only the morning text), own_text (its own text, a manual nudge; at: when, or now). at: their local "YYYY-MM-DD HH:MM" (own_text: when it goes; otherwise not before then). too_late_after: their local time after which it\'s dropped instead of sent late.',
+        'Draft something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). question: it asks them something whose answer the founders want back (alert_on_answer: false only if they say they don\'t need to hear). when, as agreed with the founders: naturally (default: the morning text or your next reply), morning (only the morning text), own_text (its own text, a manual nudge; at: when, or now). at: their local "YYYY-MM-DD HH:MM" (own_text: when it goes; otherwise not before then). too_late_after: their local time after which it\'s dropped instead of sent late.',
       input_schema: {
         type: "object",
         properties: {
           what: { type: "string" },
+          question: { type: "boolean" },
+          alert_on_answer: { type: "boolean" },
           when: { type: "string", enum: ["naturally", "morning", "own_text"] },
           at: { type: "string" },
           too_late_after: { type: "string" },
@@ -170,8 +206,17 @@ export const CAPABILITIES: Record<string, Capability> = {
       },
     },
     async prepare(ctx, input) {
-      const { what, when = "naturally", at, too_late_after } = parse(
-        z.object({ what: text(1000), when: z.enum(["naturally", "morning", "own_text"]).optional(), at: localStamp.optional(), too_late_after: localStamp.optional() }).strict(),
+      const { what, question = false, alert_on_answer = true, when = "naturally", at, too_late_after } = parse(
+        z
+          .object({
+            what: text(1000),
+            question: z.boolean().optional(),
+            alert_on_answer: z.boolean().optional(),
+            when: z.enum(["naturally", "morning", "own_text"]).optional(),
+            at: localStamp.optional(),
+            too_late_after: localStamp.optional(),
+          })
+          .strict(),
         input,
       );
       const t = ctx.tester;
@@ -197,10 +242,12 @@ export const CAPABILITIES: Record<string, Capability> = {
         delivery === "own_text"
           ? `as its own text, ${dueAt!.getTime() <= ctx.now.getTime() + 60_000 ? "within a minute of Do it" : `at ${theirs(dueAt!, t)}`}`
           : `${delivery === "morning" ? "with the morning text" : "in its next text to them that fits"}${dueAt ? `, not before ${theirs(dueAt, t)}` : ""}`;
+      // #169: a question's answer comes back as an alert, unless the founders switched it off.
+      const answers = question ? (alert_on_answer ? " A question: you'll get an alert when they answer (or don't)." : " A question: their answer is saved, with no alert.") : "";
       return {
-        summary: `ZOH brings this up with ${nameOf(t)} in its own words, ${where}: ${what}.${until}`,
+        summary: `ZOH ${question ? "asks" : "brings this up with"} ${nameOf(t)} in its own words, ${where}: ${what}.${until}${answers}`,
         apply: async () => {
-          const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now });
+          const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now, question, alertOnAnswer: alert_on_answer });
           return `Queued [${requestRef(row.id)}] ${where}.`;
         },
       };
@@ -210,17 +257,24 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "send_text",
       description:
-        'Draft a text in the founders\' exact words, sent as ZOH word for word (copy their words exactly; never reword them). at: their local "YYYY-MM-DD HH:MM" (default: right away). even_in_quiet_hours: only when the founders say to send it now even though it\'s late or early for them. Never past a stop or 3 unanswered texts; dropped at the end of that day if it couldn\'t go out.',
+        'Draft a text in the founders\' exact words, sent as ZOH word for word (copy their words exactly; never reword them). file: a file the founders attached ([file id] in the thread), sent with it; then words are theirs if they gave any, else your one line about it. at: their local "YYYY-MM-DD HH:MM" (default: right away). even_in_quiet_hours: only when the founders say to send it now even though it\'s late or early for them. Never past a stop or 3 unanswered texts; dropped at the end of that day if it couldn\'t go out.',
       input_schema: {
         type: "object",
-        properties: { words: { type: "string" }, at: { type: "string" }, even_in_quiet_hours: { type: "boolean" } },
+        properties: { words: { type: "string" }, file: { type: "string" }, at: { type: "string" }, even_in_quiet_hours: { type: "boolean" } },
         required: ["words"],
       },
     },
     async prepare(ctx, input) {
-      const { words, at, even_in_quiet_hours = false } = parse(z.object({ words: text(1000), at: localStamp.optional(), even_in_quiet_hours: z.boolean().optional() }).strict(), input);
+      const { words, file, at, even_in_quiet_hours = false } = parse(
+        z.object({ words: text(1000), file: text(40).optional(), at: localStamp.optional(), even_in_quiet_hours: z.boolean().optional() }).strict(),
+        input,
+      );
       const t = ctx.tester;
       stopped(t);
+      // #168: a founder's file goes with it: one they attached in this tester's thread, and one ZOH could read.
+      const attached = file ? await attachedFile(ctx.db, t.id, file) : undefined;
+      if (file && !attached) throw new CapabilityError(`No file ${file} in their thread.`);
+      if (attached?.mediaAccount?.startsWith("Couldn't")) throw new CapabilityError(`That file couldn't be read, so it can't be sent with a line about it: ${attached.mediaAccount} Tell the founders.`);
       const asked = at ? zoned(at, t.timeZone) : undefined;
       notPast(asked, ctx.now);
       const due = asked && asked > ctx.now ? asked : ctx.now;
@@ -234,9 +288,21 @@ export const CAPABILITIES: Record<string, Capability> = {
           ? `within a minute of Do it${quiet ? " (even in their quiet hours)" : ""}`
           : `${quiet && !even_in_quiet_hours ? "when their quiet hours end, " : ""}at ${theirs(first, t)}`;
       return {
-        summary: `Text ${nameOf(t)} word for word, as ZOH, ${when}: "${words}"`,
+        summary: `Text ${nameOf(t)} word for word, as ZOH, ${when}${attached ? `, with ${attached.mediaName ? `"${attached.mediaName}"` : "the file"}${attached.mediaPartial ? " (only partly watched or read)" : ""}` : ""}: "${words}"`,
         apply: async () => {
-          const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: words, exact: true, sendNow: even_in_quiet_hours, dueAt: asked && asked > ctx.now ? asked : undefined, expiresAt, at: ctx.now });
+          // #168: on Sendblue's media host before anything is queued, so a failed upload sends nothing.
+          const media = attached ? await uploadForSending(ctx, attached) : undefined;
+          const row = await addRequest(ctx.db, {
+            testerId: t.id,
+            author: ctx.founder,
+            body: words,
+            exact: true,
+            sendNow: even_in_quiet_hours,
+            dueAt: asked && asked > ctx.now ? asked : undefined,
+            expiresAt,
+            at: ctx.now,
+            ...(media ? { media } : {}),
+          });
           return `Queued word for word [${requestRef(row.id)}], ${when}, unless ZOH already has 3 texts they haven't answered.`;
         },
       };
@@ -519,7 +585,7 @@ function ampm(hhmm: string): string {
  */
 export async function confirmDraft(
   db: Db,
-  opts: { testerId: string; draftId: string; founder: string; now: Date },
+  opts: { testerId: string; draftId: string; founder: string; now: Date; files?: CapabilityContext["files"] },
 ): Promise<{ ok: true; result: string } | { ok: false; error: string }> {
   return db.transaction(async (tx) => {
     const [draft] = await tx
@@ -540,7 +606,15 @@ export async function confirmDraft(
     if (!capability || !tester) return fail("It can't be done any more.");
     // A transaction has the same query API as the database (drizzle's PgTransaction); the cast only hides its rollback().
     const txDb = tx as unknown as Db;
-    const ctx: CapabilityContext = { db: txDb, tester, founder: opts.founder, now: opts.now, open: await openRequests(txDb, tester.id), budget: { lookups: 0, searches: 0 } };
+    const ctx: CapabilityContext = {
+      db: txDb,
+      tester,
+      founder: opts.founder,
+      now: opts.now,
+      open: await openRequests(txDb, tester.id),
+      budget: { lookups: 0, searches: 0 },
+      ...(opts.files ? { files: opts.files } : {}),
+    };
     try {
       const result = await (await capability.prepare(ctx, draft.draftInput)).apply();
       const done = `${result} (${opts.founder}, ${founderTime(opts.now)})`;
@@ -551,6 +625,37 @@ export async function confirmDraft(
       throw err;
     }
   });
+}
+
+/**
+ * #169/#168: changes a draft before anyone confirms it (the answer-alert switch, an edit of its words). The new
+ * input is checked as the capability would check it, and the card's summary follows. Only while it's a draft.
+ */
+export async function editDraft(
+  db: Db,
+  opts: { testerId: string; draftId: string; founder: string; now: Date; change: (input: Record<string, unknown>) => Record<string, unknown> },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const [draft] = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.id, opts.draftId), eq(consoleMessages.testerId, opts.testerId), eq(consoleMessages.kind, "draft"), eq(consoleMessages.draftStatus, "draft")));
+  const capability = CAPABILITIES[draft?.draftAction ?? ""];
+  const [tester] = await db.select().from(testers).where(eq(testers.id, opts.testerId));
+  if (!draft || !capability || !tester) return { ok: false, error: "not a draft any more" };
+  const input = opts.change({ ...((draft.draftInput ?? {}) as Record<string, unknown>) });
+  const ctx: CapabilityContext = { db, tester, founder: opts.founder, now: opts.now, open: await openRequests(db, tester.id), budget: { lookups: 0, searches: 0 } };
+  try {
+    const prepared = await capability.prepare(ctx, input);
+    const [row] = await db
+      .update(consoleMessages)
+      .set({ draftInput: input, body: prepared.summary })
+      .where(and(eq(consoleMessages.id, draft.id), eq(consoleMessages.draftStatus, "draft")))
+      .returning({ id: consoleMessages.id });
+    return row ? { ok: true } : { ok: false, error: "not a draft any more" };
+  } catch (err) {
+    if (err instanceof CapabilityError) return { ok: false, error: err.message };
+    throw err;
+  }
 }
 
 /** Memory lookups, read-only: the console never saves preferences or forgets for a tester. */
@@ -569,6 +674,10 @@ export interface ConsoleCoachOptions {
   model: ClaudeModel;
   voice?: string;
   goalCap?: number;
+  /** #168: the founders' files (stored, read before answering, uploaded at Do it), and YouTube links it watches. */
+  media?: MediaStore;
+  sendblue?: SendblueClient;
+  watcher?: VideoWatcher;
 }
 
 export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
@@ -584,15 +693,24 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
   async function answer(testerId: string, now: Date): Promise<ConsoleMessage | undefined> {
     const [tester] = await db.select().from(testers).where(eq(testers.id, testerId));
     if (!tester) return undefined;
-    const thread = (await db.select().from(consoleMessages).where(eq(consoleMessages.testerId, testerId)).orderBy(asc(consoleMessages.createdAt))).slice(-THREAD_SHOWN);
-    const lastFounder = awaitingAnswer(thread);
+    const shown = (await db.select().from(consoleMessages).where(eq(consoleMessages.testerId, testerId)).orderBy(asc(consoleMessages.createdAt))).slice(-THREAD_SHOWN);
+    const lastFounder = awaitingAnswer(shown);
     if (!lastFounder) return undefined;
+    // #168: a file the founders attached is read once, before the coach answers, so it knows what's in it.
+    const thread: ConsoleMessage[] = [];
+    for (const m of shown) thread.push(m.kind === "founder" && m.mediaKey && !m.mediaAccount ? await readAttachment(db, { media: opts.media, model, watcher: opts.watcher }, m) : m);
+    const files = { media: opts.media, sendblue: opts.sendblue };
+    // #168: links it may put on a card in its words: only pages it opened or videos it watched in this answer.
+    const opened = new Set<string>();
+    const allowed = allowance();
+    addSeen(allowed, ...thread.map((m) => m.body));
 
     const budget: LookupBudget = { lookups: 0, searches: 0 };
     const memory = usesMemory(tester) ? await memoryBlock(db, tester) : undefined;
     const tools = [
       ...Object.values(CAPABILITIES).map((c) => withReplaces(c.tool)),
       CONFIRM_TOOL,
+      ...(opts.watcher ? [WATCH_VIDEO_TOOL] : []),
       ...(memory ? MEMORY_TOOL_DEFINITIONS.filter((t) => LOOKUPS.includes(t.name)) : []),
     ];
     // #162: the founders can ask it to find something for a tester; what it finds goes out only through a draft.
@@ -616,6 +734,8 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
       });
       web.searches += response.usage?.searches ?? 0;
       web.fetches += response.usage?.fetches ?? 0;
+      addSeen(allowed, ...(response.found ?? []));
+      for (const line of response.lookups ?? []) if (line.startsWith("opened ")) opened.add(linkKey(line.slice("opened ".length)));
       // A search that paused goes on where it stopped (not a round), at most twice.
       if (response.stopReason === "pause_turn" && continued < MAX_CONTINUATIONS) {
         continued++;
@@ -635,9 +755,16 @@ export function createConsoleCoach(opts: ConsoleCoachOptions): ConsoleCoach {
         return addThreadLine(db, { testerId, kind: "coach", author: COACH_AUTHOR, body, at: new Date(Math.max(now.getTime() + 1, lastFounder.createdAt.getTime() + 1)) });
       }
       if (reply) fallback = reply;
-      const ctx: CapabilityContext = { db, tester, founder: lastFounder.author ?? "Founder", now, open: await openRequests(db, testerId), budget };
+      const ctx: CapabilityContext = { db, tester, founder: lastFounder.author ?? "Founder", now, open: await openRequests(db, testerId), budget, files, opened };
       const results: Anthropic.ToolResultBlockParam[] = [];
       for (const call of calls) {
+        if (call.name === WATCH_VIDEO_TOOL.name && opts.watcher) {
+          // #168: a YouTube link watched here may go on a card.
+          const watched = await runWatchVideo(opts.watcher, call.input, { budget: web, allowed });
+          if (watched.ok) for (const key of allowed.watched) opened.add(key);
+          results.push({ type: "tool_result", tool_use_id: call.id, ...(watched.ok ? { content: watched.message } : { content: watched.error, is_error: true }) });
+          continue;
+        }
         results.push({ type: "tool_result", tool_use_id: call.id, ...(await runCapability(ctx, call.name, call.input, lastFounder.createdAt)) });
       }
       messages.push({ role: "assistant", content: settled(response.raw ?? (response.content as Anthropic.ContentBlockParam[])) });
@@ -672,10 +799,12 @@ export async function postFounderMessage(
     now: Date;
     /** Staging and production (#82): set when the other app owns this number, which this app never texts. */
     elsewhere?: AppEnv;
+    /** #168: a file they attached, already in the bucket. */
+    attachment?: { key: string; contentType: string; name: string };
   },
 ): Promise<{ needsAnswer: boolean }> {
   const { tester, founder, body, now } = opts;
-  await addThreadLine(db, { testerId: tester.id, kind: "founder", author: founder, body, at: now });
+  await addThreadLine(db, { testerId: tester.id, kind: "founder", author: founder, body, at: now, ...(opts.attachment ? { attachment: opts.attachment } : {}) });
   if (!opts.elsewhere) return { needsAnswer: true };
   await addThreadLine(db, {
     testerId: tester.id,
@@ -716,6 +845,13 @@ async function runCapability(ctx: CapabilityContext, name: string, input: unknow
     const capability = CAPABILITIES[name];
     if (!capability) return { content: `Unknown tool "${name}"`, is_error: true };
     const { replaces, ...rest } = (input ?? {}) as Record<string, unknown>;
+    // #168: a card in its own words carries only links it opened or watched while drafting (never one it guessed at).
+    if (name === "plan_request" && ctx.opened && typeof rest.what === "string") {
+      const unopened = linksIn(rest.what).filter((link) => !ctx.opened!.has(linkKey(link)));
+      if (unopened.length) {
+        throw new CapabilityError(`Open it first so the card says what's really there: ${unopened.join(", ")} (web_fetch for a page, watch_video for YouTube).`);
+      }
+    }
     const prepared = await capability.prepare(ctx, rest);
     if (typeof replaces === "string") {
       const old = await findDraft(ctx.db, ctx.tester.id, replaces);
@@ -740,7 +876,7 @@ async function confirmTyped(ctx: CapabilityContext, input: unknown, askedAt: Dat
   if (!draft) throw new CapabilityError("No open draft to do.");
   if (draft.draftStatus !== "draft") throw new CapabilityError(`That draft was already ${draft.draftStatus}${draft.draftResult ? ` (${draft.draftResult})` : ""}.`);
   if (draft.createdAt >= askedAt) throw new CapabilityError("Not yet: a draft is done only once they say so, after seeing it. Tell them what it'll do and wait for their yes.");
-  const done = await confirmDraft(ctx.db, { testerId: ctx.tester.id, draftId: draft.id, founder: ctx.founder, now: ctx.now });
+  const done = await confirmDraft(ctx.db, { testerId: ctx.tester.id, draftId: draft.id, founder: ctx.founder, now: ctx.now, ...(ctx.files ? { files: ctx.files } : {}) });
   if (!done.ok) throw new CapabilityError(`Couldn't do it: ${done.error}. Tell the founders.`);
   return `Done: ${done.result} Tell them in a line.`;
 }
@@ -752,12 +888,20 @@ function threadTurn(m: ConsoleMessage): Turn {
     case "coach":
       // "Done" and "couldn't send" lines are the app's, not answers: the coach reads them as the record.
       return m.author === APP_AUTHOR ? { role: "user", text: `[${at}, app] ${m.body}` } : { role: "assistant", text: m.body };
-    case "founder":
-      return { role: "user", text: `${m.author ?? "Founder"} (${at}): ${m.body}` };
+    case "founder": {
+      // #168: what's in a file they attached, read when it arrived.
+      const file = m.mediaKey
+        ? `\n[attached ${kindOf(m.mediaContentType ?? "", m.mediaName ?? "")} "${m.mediaName ?? "file"}", file ${fileRef(m)}${m.mediaPartial ? ", only partly watched or read" : ""}: ${m.mediaAccount ?? "not read yet"}]`
+        : "";
+      return { role: "user", text: `${m.author ?? "Founder"} (${at}): ${m.body}${file}` };
+    }
     case "note":
       return { role: "user", text: `[${at}, note saved for ${m.author ?? "the team"}] ${m.body}` };
-    case "request":
-      return { role: "user", text: `[${at}, request ${requestRef(m.id)} from ${m.author ?? "the team"}${m.exact ? ", word for word" : ""}, ${m.requestStatus}] ${m.body}` };
+    case "request": {
+      // #169: a question's answer (or that they talked past it), for "what did she say?".
+      const answer = m.answerStatus === "answered" ? ` → they answered: ${m.answer}` : m.answerStatus === "dodged" ? " → they talked past it" : "";
+      return { role: "user", text: `[${at}, ${m.question ? "question" : "request"} ${requestRef(m.id)} from ${m.author ?? "the team"}${m.exact ? ", word for word" : ""}, ${m.requestStatus}] ${m.body}${answer}` };
+    }
     case "alert":
       return { role: "user", text: `[${at}, alert ${m.id.slice(0, 8)}: ${m.topic ?? "alert"}${m.seenAt ? `, ${m.topic === PLAN_REVIEW_TOPIC ? "reviewed" : "seen"} by ${m.seenBy}` : ""}] ${m.body}${m.why ? ` (why: ${m.why})` : ""}` };
     case "summary":
