@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:app-unasked",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "d6f5d85688bf",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "89b5b947bce5"
   },
@@ -74,34 +74,34 @@
             "zohText": 1,
             "checks": [
               {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "The first text is exempt but carries the intro, stop line, style-change line and the name and goal question."
+              },
+              {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain intro with a bullet list of starters, no markdown or filler beyond the list."
+                "reason": "No markdown, hashtags or filler; the goal list is plain bullets, which is allowed."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic intro without overfamiliarity or emoji rows."
+                "reason": "Friendly and energetic without being overfamiliar, and no emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for name and goal, which is what the first text should do."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Nothing was given yet, so nothing is asked again."
+                "reason": "Asks for name and goal, the right questions for a first text."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Makes no claims beyond what the product does."
+                "reason": "Makes no invented claims about the tester."
               },
               {
                 "rule": "one-question",
@@ -118,43 +118,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, with one question at the end."
+                "reason": "Three short sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown, hashtags or filler."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief, with no emoji or affection."
+                "reason": "Warm and matched to a casual tester, with no emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about a typical day of eating, which fits the eat-better goal."
+                "reason": "Asks about a typical eating day, which fits the eat-better goal."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Nothing already clearly answered is asked again."
+                "reason": "Asks about the typical day and the desired change, neither of which the tester had answered yet."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the goal Lee gave."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No wake or sleep or pushiness questions."
+                "reason": "Makes no assumptions about the tester's cooking or habits."
               },
               {
                 "rule": "one-question",
@@ -171,43 +165,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question."
+                "reason": "Two short sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain wording with no markdown or filler."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm and warm, matching the casual tone."
+                "reason": "Casual and warm, matching the tester's tone."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks what Lee wants instead, following from the takeout answer."
+                "reason": "Builds on the takeout and no-cooking answer, with a question that follows from it."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": true,
-                "reason": "Repeats the earlier what-instead question, but Lee only answered the takeout part, so asking again is fine."
+                "reason": "Re-asks the desired-eating question from ZOH 2, but the tester's last reply didn't clearly answer it, so the repeat is allowed."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says 'no cooking needed', which matches what Lee said and does not assume they will cook."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No wake or sleep or pushiness questions."
+                "reason": "Uses only the takeout and no-cooking facts the tester gave."
               },
               {
                 "rule": "one-question",
@@ -224,43 +212,43 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Three short sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown, hashtags or filler."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Accepts the no-tracking answer warmly and stays measured."
+                "reason": "Warm and calm, respecting the tester's no-tracking request."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks when Lee orders, which follows from the takeout answer and fits the goal."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks a new question and does not repeat earlier ones."
+                "reason": "The question about when they order follows from the takeout answer."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what Lee said about takeout and not tracking."
+                "reason": "Says no tracking, as the tester asked, and invents nothing."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about meal timing, not wake or sleep or pushiness."
+                "reason": "Asks no wake or sleep question and no pushiness question."
+              },
+              {
+                "rule": "follows-style",
+                "pass": true,
+                "borderline": false,
+                "reason": "Honors the stated no-tracking preference and doesn't push tracking."
               },
               {
                 "rule": "one-question",
@@ -276,40 +264,46 @@
             "rule": "first-text",
             "pass": true,
             "borderline": false,
-            "reason": "Says it is ZOH, what it does, that stop works anytime, how to change coaching, and asks name and goal with the list."
+            "reason": "Says it's ZOH, what it does, that stop works anytime, that coaching style can change, and asks name and goal with the list."
           },
           {
             "rule": "nothing-twice",
             "pass": true,
-            "borderline": false,
-            "reason": "Each question is new or follows an unanswered part; nothing clearly answered is asked again."
+            "borderline": true,
+            "reason": "The desired-eating question appears twice, but the tester never answered it clearly, so the repeat is allowed."
           },
           {
             "rule": "tracking",
             "pass": true,
             "borderline": false,
-            "reason": "Never recommends a tracking app; after Lee says no tracking, ZOH drops it and does not push."
+            "reason": "Never recommends or asks about a tracking app, and drops tracking once Lee says no."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Eat better was taken from the starter list, so the goal is on-list."
           },
           {
             "rule": "style-offer",
             "pass": true,
             "borderline": false,
-            "reason": "The first text tells Lee they can change how ZOH coaches anytime."
+            "reason": "The first text tells Lee they can change coaching style anytime."
           },
           {
             "rule": "length",
             "pass": true,
             "borderline": false,
-            "reason": "Four ZOH texts, well under the limit."
+            "reason": "Four ZOH texts over a few minutes, well within the limit."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "No app, tracker or purchase is recommended, no tracking push, no cooking assumption, no restaurant names, and each question follows Lee's last text, one per text."
+            "reason": "No app, tracker, purchase or restaurant suggested, no cooking assumed, and no tracking pushed after Lee declined; each question follows Lee's last reply, one per text."
           }
         ],
-        "summary": "ZOH handled the regression case well: it respected Lee's no-tracking answer, made no app or purchase suggestions, and never assumed Lee cooks. Its questions followed from what Lee said, one per text, and stayed short, though the flow was not yet far enough along to judge wrap-up or covers-inputs."
+        "summary": "ZOH handled this regression case well: after Lee said no to tracking, it dropped tracking entirely, suggested no app or purchase, and assumed no cooking. Its questions followed from Lee's answers, one per text, and stayed short and warm."
       }
     }
   ]

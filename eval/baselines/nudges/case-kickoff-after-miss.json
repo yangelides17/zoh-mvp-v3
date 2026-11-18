@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:kickoff-after-miss",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "95073a6902ce",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "6018cdd644b1"
   },
@@ -70,49 +70,43 @@
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Morning, Morgan!' as an unprompted text."
+                "reason": "Opens with \"Morning, Morgan!\""
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "'Friday got swallowed by work' names the miss lightly with no shame or urgency."
+                "reason": "\"Friday got swallowed by work\" names the miss lightly with no guilt or urgency."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about five sentences plus a question, over the one-to-three-sentence limit for a kickoff, though it carries the step details."
+                "reason": "Runs about seven sentences with extra detail (\"That's only about 15 minutes\", \"keeps the mile by Nov 14 in reach\"), well over one to three sentences."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Ends with one ask, 'You in?', and states the already-set time rather than asking it."
+                "reason": "Ends with one question, \"You in?\", and does not ask about time."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what, where, when (6:30 pm) and how long (about 15 minutes) clearly."
-              },
-              {
-                "rule": "teaching-fits",
-                "pass": true,
-                "borderline": false,
-                "reason": "No teaching needed for a repeat of a known step; none is forced in."
+                "reason": "Gives what, where (around your block), when (6:30 pm) and how long (about 15 minutes)."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
+                "reason": "Plain text with no markdown or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pushy-level, warm and sincere with no emoji row or affection."
+                "reason": "Warm, direct and pushy-level without overfamiliarity."
               }
             ]
           },
@@ -123,25 +117,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question, well within the limit."
+                "reason": "Two sentences with no question, which fits the limit."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only encouragement, no guilt or urgency."
+                "reason": "Encouraging and free of guilt or pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, with a single emoji used as punctuation."
+                "reason": "Plain words with a single emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere with one emoji at the end."
+                "reason": "Warm and sincere, with a single emoji and no overfamiliarity."
               }
             ]
           }
@@ -149,42 +143,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Today's step is easier than Friday's (1.5/1.5 instead of 2/1, same 3 rounds), names the miss lightly, pushes for today, and asks only 'You in?'."
-          },
-          {
-            "rule": "step-progression",
-            "pass": true,
-            "borderline": false,
-            "reason": "After the missed Friday, the step is eased back to Wednesday's known level, not raised."
-          },
-          {
-            "rule": "miss-ladder",
-            "pass": true,
-            "borderline": true,
-            "reason": "Day after a miss opens with the full step and pushes for today, with a lighter step rather than a jump; the easier step is a reasonable reading of the ladder."
-          },
-          {
-            "rule": "daily-rhythm",
-            "pass": true,
-            "borderline": false,
-            "reason": "No step was done and no can't-today line appeared, so no extra texts were needed; ZOH sent only the kickoff and a reply."
-          },
-          {
-            "rule": "kickoff-not-repeated",
-            "pass": true,
-            "borderline": false,
-            "reason": "The morning chat did not cover today's step, so the kickoff was correctly sent."
-          },
-          {
-            "rule": "no-restating",
             "pass": false,
             "borderline": true,
-            "reason": "ZOH 2 restates the time (6:30 pm) and place (around the block) after the tester already said yes, though neither changed nor was asked about."
+            "reason": "The kickoff is correct: it eases to 1.5/1.5, names the miss lightly and asks only if they're in. But the reply restates \"6:30 pm, around the block\", which the regression case says should not happen after a short yes."
           }
         ],
-        "summary": "ZOH handled the post-miss kickoff well: it named Friday lightly, eased the step to Wednesday's level with a fully defined plan, and asked only one question. The main slips were a kickoff running longer than the short-text limit and a confirmation reply that restated the time and place."
+        "summary": "ZOH handled the regression well: the kickoff names the missed Friday lightly, eases the step below Friday's, and asks one thing, with no time re-asked. It falls short on length in the kickoff and restates the time and place in the reply to a short yes."
       }
     }
   ]

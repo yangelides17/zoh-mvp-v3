@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:video-counts",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:27:14.854Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "489682c9d906",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "c3a004a76a38"
   },
@@ -58,25 +58,25 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "The video is counted as the last set and celebrated with specific praise, with no questioning of the proof."
+                "reason": "Celebrates the video proof right away with \"Three sets done, Sam\" and doesn't question it."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "It cites the first eight reps reaching parallel and the last two coming up shallow, both matching the video account."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energy suits a pushy coach; warm, one emoji as punctuation, and nothing suspicious."
+                "reason": "Reacts to the clip's details: first eight reps near parallel, last two shallower."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
                 "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with one emoji used as punctuation."
               }
             ]
           }
@@ -86,10 +86,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH counted the video, praised the first eight reps and the shallower last two from the account, asked one reflection question, and never asked for other proof."
+            "reason": "Counts the video, cites only what the account says, asks a reflection question about the last reps, and never asks for other proof."
           }
         ],
-        "summary": "ZOH handled the video proof as intended: it counted the set, celebrated specifics drawn from the video account, and asked one reflection question without requesting more proof. The text is short, warm and on-voice, with no invented details."
+        "summary": "ZOH counted the video as proof and celebrated it with specific details from the account, staying within what the clip shows. Its one reflection question about the shallower last two reps was the right follow-up, and it never asked for other proof."
       }
     },
     {
@@ -138,25 +138,25 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Counts the video as proof and celebrates the completed last set without questioning it."
+                "reason": "Counts the video as proof and celebrates it right away with \"cooked legs mean you worked 🔥\"."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Cites the parallel depth on reps 1-8, the shallower 9 and 10, and the heel lift on rep 10, all from the account."
+                "reason": "Reacts to specifics from the clip: reps 1-8 reaching parallel, reps 9-10 shallower, and heels lifting on the last rep."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with exactly one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs four sentences (the celebration, \"I watched the clip.\", the form observation, and the question), over the one-to-three limit, though it ends with one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm and energetic with one flame emoji as punctuation; \"I watched the clip\" slightly overstates what ZOH can see, though it stays within the account."
+                "borderline": false,
+                "reason": "Warm, energetic and specific, with one fire emoji used as punctuation and nothing suspicious or accusing."
               }
             ]
           }
@@ -166,10 +166,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Counts the video, praises specific details from the account, asks one reflection question about the final reps, and never asks for other proof. \"I watched the clip\" slightly overclaims direct viewing."
+            "reason": "Counts the video, celebrates specific depth and heel details, asks one reflection question, and never asks for other proof. \"Day 3\" isn't in the account, which makes it a small unsupported detail."
           }
         ],
-        "summary": "ZOH handled the video proof as intended: it counted the set and cited accurate specifics from the account (depth on reps 1-8, shallower reps 9-10, heel lift on rep 10). It closed with one reflection question about the final reps and asked for no other proof, with only a minor borderline wording issue about claiming to have watched the clip."
+        "summary": "ZOH handled the video proof well: it counted the clip, reacted to specific details from the account, and asked one reflection question without requesting more proof. Its one text ran four sentences, over the short-text limit, and it added a \"Day 3\" detail the video doesn't show."
       }
     },
     {
@@ -217,26 +217,26 @@
               {
                 "rule": "plausible-counts",
                 "pass": true,
-                "borderline": true,
-                "reason": "Celebrates the video as proof and says \"That's a win\"; \"Three sets done\" goes beyond the video, which shows only the last set."
+                "borderline": false,
+                "reason": "Counts the filmed last set as done and celebrates it right away with \"That's a win\" and \"Cooked legs means you put in the work.\""
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the video's details: first eight reps near parallel and the last two shallower."
+                "reason": "Points to the video's actual details: the first eight reps near parallel and the last two getting shallower."
               },
               {
                 "rule": "short",
                 "pass": false,
-                "borderline": true,
-                "reason": "About five sentences with one question at the end, exceeding the one-to-three-sentence limit for a reflection text."
+                "borderline": false,
+                "reason": "Runs about five or six sentences, well past the one-to-three-sentence limit, though it has only one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with one emoji as punctuation, not suspicious or accusing."
+                "reason": "Warm and energetic with one fire emoji as punctuation, never suspicious or accusing."
               }
             ]
           }
@@ -246,10 +246,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Counts the video, celebrates specific video details, invents nothing beyond the account, asks one reflection question, and never asks for other proof."
+            "reason": "Counts the video as proof, celebrates specifics the account supports, asks one reflection question about how the final reps felt, and never asks for other proof."
           }
         ],
-        "summary": "ZOH handled the video proof well: it celebrated the set, pointed to the specific depth change across the reps, and asked one reflection question without asking for more proof. Its reply ran about five sentences, longer than the short-text limit.}"
+        "summary": "ZOH handled the video proof well: it counted the set, named the real depth detail from the account, and asked one reflection question without asking for other proof. Its one miss is length, since the reply runs well over the three-sentence limit."
       }
     }
   ]

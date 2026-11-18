@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:switch-before-agreeing",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:17:24.672Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "216cd9866f0c",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "2a82112a0484"
   },
@@ -78,7 +78,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences plus a question, within the limit for a non-plan text."
+                "reason": "Three short sentences, within the one-to-three limit."
               },
               {
                 "rule": "plain-words",
@@ -90,19 +90,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and encouraging with a single question at the end; no emoji row."
+                "reason": "Warm and steady, with no overfamiliarity or emoji row."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Makes no claims about the tester beyond what they said."
+                "reason": "Invents nothing about Sam; it asks where they want this to go and offers 'not sure yet'."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
                 "reason": "No step is given in this text."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save-only reply; it moves the conversation forward with a question."
               },
               {
                 "rule": "one-question",
@@ -119,31 +125,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 8 lines including the bullets, within the allowed plan length but near the top."
+                "reason": "A plan-presenting text may run about 8 lines; this runs about 8 lines including the opener and closing question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses plain • bullets with no markdown or hashtags."
+                "reason": "Plain • bullets with no markdown or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and specific to their tech and building interest, ending on one question."
+                "reason": "Warm and specific, reacting to the tech and building interest, with no emoji row."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the stated 4 pm, at home, 5 minutes and ZOH's own concrete discovery step."
+                "reason": "Uses only what Sam said (tech, building) plus ZOH's own suggestion of annoyances to note."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 says what (3 annoyances), where (home), when (4 pm) and how long (5 min)."
+                "reason": "Gives what (3 annoyances), where (at home), when (4 pm), how long (5 min) and proof."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a full plan and a question, not a save confirmation."
               },
               {
                 "rule": "one-question",
@@ -166,31 +178,31 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain wording with no formatting."
+                "reason": "No markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Direct but warm, and it doesn't pick apart their wording."
+                "reason": "Direct and warm, no pressure or affection."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates only the plan that was shown."
+                "reason": "Restates the plan it showed; invents no facts."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the day 1 step with time and place, which is already defined."
+                "reason": "Restates the steps with time and length, consistent with the shown plan."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it asks the commitment question."
+                "reason": "Asks the next question, so it carries a move forward."
               },
               {
                 "rule": "one-question",
@@ -206,64 +218,88 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "Only one light destination question came before the plan, and no 'that's everything' line was used."
+            "reason": "The one light destination question comes before the plan, and there is no 'that's everything' line."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Concrete day 1 step, 4 pm schedule, 5 minutes, at home, with a fitting screenshot or voice note proof."
+            "reason": "Concrete: 3 annoyances, 4 pm, at home, 5 min daily, with a screenshot or voice note proof that fits."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows the headed-for line, day 1 step, usual schedule, proof and a short progression line without a future-step list."
+            "reason": "Shows the direction, day 1's step, the daily schedule, proof and a line on how each day builds on the last, with no future-step list."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "One light destination ask was made, and the plan locked smoothly with a loose 'tech/building' destination."
+            "reason": "Asked once, lightly, and Sam's 'tech and building' answer was enough to proceed."
           },
           {
             "rule": "commitment",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Re-asks after the soft 'ok' in natural words, though 'real yes and not just a shrug' edges toward a stock line."
+            "reason": "Re-ask says 'not just a shrug' and points at the 'ok', picking apart the wording instead of re-asking in its own words."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today at 4 pm, not pushed to tomorrow."
+            "reason": "Day 1 is set for today at 4 pm."
           },
           {
             "rule": "quiet-hours",
             "pass": true,
             "borderline": false,
-            "reason": "The 4 pm step is outside default quiet hours, so no note is needed."
+            "reason": "4 pm is outside default quiet hours, so nothing is needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet hours are raised."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "No step falls inside tester-set quiet hours."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable to this goal."
           },
           {
             "rule": "goal-switch",
             "pass": true,
+            "borderline": true,
+            "reason": "Sam shifted to a tech/building side project with nothing committed yet, and ZOH takes it in stride without pushback, as the regression case asks."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
             "borderline": false,
-            "reason": "The tester's own switch to a side project was taken in stride with no push back."
+            "reason": "Keeps Sam's 4 pm, at home and 5 minutes when switching."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The new plan was shown unprompted as a • list ending with one question, and the old plan was not referenced."
+            "reason": "The new plan is shown unprompted as a • list ending with one question, and the commitment ask follows it."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "After the vague reply, ZOH shows a new plan with the same 4 pm, home and 5-minute setup and a concrete discovery step, not a bare save confirmation."
+            "reason": "No save-only reply: ZOH asks a light question, shows a new 4 pm, home, 5-minute plan with a discovery step and proof, and never points back to the old plan."
           }
         ],
-        "summary": "ZOH handled the regression well: after the tester's vague 'I don't know what to work on', it kept the 4 pm, home, 5-minute setup, showed a full new discovery plan as a list with a concrete day 1 step and proof, and asked one question. The commitment re-ask after the soft 'ok' was natural, though its 'shrug' phrasing is close to a stock line."
+        "summary": "ZOH handled the switch well, moving from the old AI plan to a new tech/building discovery plan with the same 4 pm, at-home, 5-minute frame and no save-only reply. The one clear miss is the commitment re-ask, which comments on Sam's 'ok' ('not just a shrug') rather than asking again in its own words."
       }
     }
   ]

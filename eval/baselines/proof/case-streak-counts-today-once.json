@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:streak-counts-today-once",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "3197497c4812",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "ce561ffcbf1b"
   },
@@ -58,25 +58,31 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "The voice note describing fifteen pages on the couch is plausible proof, and ZOH celebrates it with 'Day 6 in the books' and 'Page 94 is real momentum.'"
+                "reason": "The voice note of finishing fifteen pages is celebrated right away with no questioning of the proof."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "It reacts to the specific detail of being on page 94 rather than generic praise."
               },
               {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "It names a voice note as the proof kind and never suggests typed text."
+                "reason": "The only proof named is a voice note, not typed text."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four sentences, and the single question comes before the voice-note line rather than at the end."
+                "reason": "It runs four sentences, over the one-to-three limit, though the question is at the end and there is only one."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype-level energy with a single book emoji as punctuation and no suspicion."
+                "reason": "Warm, energetic, and sincere, with the emoji used as a single punctuation mark."
               }
             ]
           }
@@ -85,11 +91,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "It counts the voice note as proof and says 'Day 6', which is correct (five prior days plus today once). The celebration runs about three or four sentences, longer than the one or two specified."
+            "borderline": false,
+            "reason": "It counts today once as Day 6 (five prior nights plus today), not 7, and celebrates in short sentences without inventing numbers."
           }
         ],
-        "summary": "ZOH counted the voice note as proof and gave the correct count of 6 instead of repeating the earlier double-count of 7. Its celebration ran slightly long, with the question placed before the closing voice-note line."
+        "summary": "ZOH correctly accepted the voice note as proof, celebrated the specific page 94 detail, and avoided the double-counting bug by saying Day 6. Its one miss is length: at four sentences, it runs over the short-text limit even though it asks only one question."
       }
     }
   ]

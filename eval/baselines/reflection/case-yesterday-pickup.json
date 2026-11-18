@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:yesterday-pickup",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:18:35.351Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "01c05c5e9af2",
-    "voice": "fbc3a37c5b97",
+    "checks": "1676b3bc0750",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "334f656c8dba"
   },
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Morning, Kai! Quick fix: that voice note looks like it's from yesterday's standup, so today's is still open. Today's step is one follow-up question at 9:30, to something a teammate says, like \"How did you land on that?\" Voice note after. You in?",
+          "text": "Kalimera Kai! Today's twist: make your question a follow-up to something a teammate says. Listen for a detail you can dig into. Send a quick voice note after, and go get it 💪",
           "at": "2026-11-02T14:10:07.000Z"
         },
         {
@@ -54,12 +54,12 @@
         },
         {
           "from": "zoh",
-          "text": "A shaky voice and you asked anyway. That's the whole game, Kai. And if nobody noticed, the nerves were mostly yours to carry 💪 When did you feel it most: right before you spoke, or while the words were coming out?",
+          "text": "Thanks for telling me that, Kai. A shaky voice that nobody noticed still got your question out. What do you think the shake was about, in the moment right before you spoke?",
           "at": "2026-11-02T14:10:40.600Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-11-01: Asked about the release date in standup; voice shook a bit but nobody seemed to notice.\nStep set for 2026-11-02, agreed: At 9:30 work standup, ask one follow-up question to something a teammate says (e.g. \"How did you land on that?\"). Voice note after, about 5 min.\nStyle now: pushy",
+      "saved": "Reflection for 2026-11-01: Asked about the release date in standup; voice shook a bit but nobody seemed to notice.\nStep set for 2026-11-02, not agreed: Ask one question in standup at 9:30, about 5 minutes. This time, make it a follow-up to something a teammate says.\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -69,19 +69,19 @@
                 "rule": "kickoff-agreed",
                 "pass": false,
                 "borderline": true,
-                "reason": "The step was already agreed, but the text re-presents it in full and asks \"You in?\" instead of simply reminding him."
+                "reason": "The step was never agreed, so the kickoff should ask if he's in. ZOH presents the twist and ends with \"go get it 💪\" without a question."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Runs about five short beats with one question at the end, and the step detail is arguably a plan presentation that can run longer."
+                "borderline": false,
+                "reason": "Three short sentences with no question, within the limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Opens with a warm name greeting and a light energy line, but the energy is milder than a pushy standup send-off."
+                "borderline": false,
+                "reason": "Energetic and warm with one emoji at the end, not overfamiliar."
               }
             ]
           },
@@ -92,13 +92,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with a single question at the end, as required."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere energy with one emoji as punctuation, not overfamiliar."
+                "reason": "Warm and sincere, no overfamiliarity or emoji row."
               }
             ]
           }
@@ -108,10 +108,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "The morning text picks up yesterday once, in a line, and the shaky-voice reply asks one curious question about the moment rather than moving straight on; the reassurance comes before the question, which is borderline."
+            "reason": "ZOH's second text gets curious about the shaky moment with one question about what the shake was about, not a pure reassurance. It opens with \"A shaky voice that nobody noticed still got your question out\", which leans reassuring. It never chases yesterday again."
           }
         ],
-        "summary": "ZOH handled the regression well: it referenced yesterday once without chasing it and, when Kai said his voice shook, asked one curious question about that moment. The weak spots are that the morning kickoff re-asked \"You in?\" for an already agreed step and the reply leads with reassurance before its question."
+        "summary": "ZOH stayed warm and short, and when Kai shared that his voice shook it asked one curious question about the moment rather than moving straight on. The main miss is that the morning kickoff never asked whether he's in for a step that was not yet agreed, and the reply to the shake leans a little reassuring before the question."
       }
     },
     {
@@ -146,7 +146,7 @@
         },
         {
           "from": "zoh",
-          "text": "Morning, Kai! That release-date question counted for yesterday, so today's a fresh one. At 9:30, ask a follow-up about a teammate's update, something like \"how did you decide on that?\", then send me a quick voice note after. You in?",
+          "text": "Morning, Kai! Today's twist: ask a follow-up to something a teammate says, so listen for one thing that makes you curious. Standup at 9:30, voice note after. You've got this 💪",
           "at": "2026-11-02T14:10:07.000Z"
         },
         {
@@ -156,12 +156,12 @@
         },
         {
           "from": "zoh",
-          "text": "That takes guts, Kai. You asked anyway, with a shaky voice, and nobody noticed. What was going on for you right before you spoke up?",
+          "text": "Thanks for telling me that, Kai. A shaky voice that nobody noticed is a good sign. What was going on in the moment right before you spoke?",
           "at": "2026-11-02T14:10:40.600Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-11-01: Asked about the release date in standup; voice shook a bit but nobody seemed to notice.\nStep set for 2026-11-02, not agreed: At the 9:30 work standup, ask one question about a teammate's update (a follow-up like \"how did you decide on that?\"), then send a quick voice note after.\nStyle now: pushy",
+      "saved": "Reflection for 2026-11-01: Voice shook a bit when asking the release-date question in standup, but nobody seemed to notice.\nStep set for 2026-11-02, agreed: Ask one question in today's work standup at 9:30, about 5 minutes. Make it a follow-up to something a teammate says, not a prepared one.\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -171,19 +171,19 @@
                 "rule": "kickoff-agreed",
                 "pass": true,
                 "borderline": false,
-                "reason": "Step isn't agreed yet, so it presents the 9:30 step in full and asks \"You in?\" as required."
+                "reason": "Reminds of the agreed standup step (follow-up question, 9:30, voice note) without re-asking whether he's in."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "About four short sentences with one question at the end; slightly over the three-sentence guideline but still tight."
+                "reason": "Under four short sentences with no question, but the 'Standup at 9:30, voice note after.' fragment and the sign-off push the count to about four."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic, warm opener with name and no emoji row; sincere without being affectionate."
+                "reason": "Warm, energetic, and pushy-level; one emoji at the end as punctuation."
               }
             ]
           },
@@ -194,13 +194,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with a single question at the end."
+                "reason": "Three sentences with exactly one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere acknowledgment (\"That takes guts, Kai.\") without overfamiliarity or emoji."
+                "reason": "Warm and sincere, not overfamiliar, no emoji row."
               }
             ]
           }
@@ -210,10 +210,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Morning text picks up yesterday once in a line, then asks about the voice moment with one question rather than reassuring and moving on; but the extra talk about yesterday arguably delays today's standup."
+            "reason": "ZOH gets curious about the shaky-voice moment with one question about what was happening right before he spoke, not a bare reassurance. It opens with 'A shaky voice that nobody noticed is a good sign,' which leans toward reassurance, and yesterday is not re-raised."
           }
         ],
-        "summary": "ZOH handled the regression well: the morning text had energy and picked up yesterday's question once in passing, and when Kai said his voice shook it stayed curious about that moment with a single question. The only soft spot is that spending a second text on yesterday while standup was 20 minutes away edges toward holding up today."
+        "summary": "ZOH's morning text gave the standup energy and a clear reminder without re-asking, and it did not chase yesterday. When Kai said his voice shook, it asked one curious question about the moment, though it reassured him first."
       }
     },
     {
@@ -248,7 +248,7 @@
         },
         {
           "from": "zoh",
-          "text": "Morning, Kai! Yesterday you asked about the release date, so today try a new angle. Ask a follow-up to something a teammate says in their update, like \"how did you land on that?\" Same 9:30 standup, then send me a quick voice note after. You in?",
+          "text": "Kalimera Kai! Today's twist: build your question on something a teammate just said, so listen for one detail to grab. You've got this, go get it 💪",
           "at": "2026-11-02T14:10:07.000Z"
         },
         {
@@ -258,12 +258,12 @@
         },
         {
           "from": "zoh",
-          "text": "That shaky voice is totally normal, and you asked anyway. Good for you. When you noticed it shaking, what was going through your head?",
+          "text": "Kai, the shake is normal, and the fact that nobody noticed tells you it's smaller on the outside than it feels on the inside. What do you think helped you get the question out anyway?",
           "at": "2026-11-02T14:10:40.600Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-11-01: Asked about the release date; voice shook a bit but nobody seemed to notice\nStep set for 2026-11-02, not agreed: At the 9:30 standup, ask a follow-up question about a teammate's update (e.g. \"how did you land on that?\"), then send a quick voice note after.\nStyle now: pushy",
+      "saved": "Reflection for 2026-11-01: Voice shook a bit during yesterday's standup question, but nobody seemed to notice.\nCan now do (2026-11-01): Asked a question in front of the team despite nerves\nStep set for 2026-11-02, agreed: Ask one question in standup at 9:30, something about what a teammate just said, so it builds on their words. Send a quick voice note after.\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -273,19 +273,19 @@
                 "rule": "kickoff-agreed",
                 "pass": true,
                 "borderline": false,
-                "reason": "Step isn't agreed yet, so it presents the step in full and asks 'You in?'."
+                "reason": "Reminds Kai of today's agreed standup step with a twist and asks nothing, so it doesn't re-ask for agreement."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Two short sentences with no question, well within the length limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pushy energy with 'Morning, Kai!', warm and not overfamiliar, no emoji row."
+                "reason": "Energetic and warm, with the emoji used as punctuation at the end."
               }
             ]
           },
@@ -296,13 +296,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Two sentences with a single closing question, within the length limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, though 'Good for you' leans a little toward praise."
+                "reason": "Warm and sincere, not overfamiliar, with no emoji row."
               }
             ]
           }
@@ -312,10 +312,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Morning text gives energy and picks up yesterday once; ZOH asks about the shaky moment and doesn't chase it again. But it reassures ('totally normal', 'Good for you') before asking, which edges toward the reassure-then-move pattern."
+            "reason": "Morning text gives energy without a yesterday quiz, and the shake reply asks what helped him keep going, one question, not chasing yesterday. It opens with reassurance ('the shake is normal') before the curious question, which is close to the reassure-first pattern the rule warns against."
           }
         ],
-        "summary": "ZOH handled the regression well: the morning text kept energy for standup and mentioned yesterday only once. Its reply to the shaky voice opened with reassurance before asking one curious question about that moment, so it's mostly right but borderline on the 'question before reassurance' spirit."
+        "summary": "ZOH gave the morning standup energy without holding up the day and didn't revisit yesterday's reflection. When Kai said his voice shook, it asked one curious question about what helped him get the question out, though it reassured him first, which is the one soft spot."
       }
     }
   ]

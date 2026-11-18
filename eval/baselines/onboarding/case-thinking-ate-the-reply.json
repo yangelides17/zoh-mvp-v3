@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:thinking-ate-the-reply",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "b795ef1a77b2",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "f26f5ce717d0"
   },
@@ -54,46 +54,28 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Five sentences, but the first text is exempt and must carry the intro, stop and style lines plus a question."
-              },
-              {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown, hashtags or filler."
+                "reason": "No markdown, hashtags or filler; reads as plain texting."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm with one emoji-free, sincere tone; no overfamiliarity."
+                "reason": "Upbeat and warm with one emoji-free, sincere tone; \"Let's go\" fits the pushy default."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for the name, which fits the first-text purpose."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks only for information the tester hasn't given yet."
+                "reason": "Takes the stretching goal the tester raised and asks a name question as the intro requires."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the stated back pain and stretching idea."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No wake, sleep or pushiness questions."
+                "reason": "Uses only what the tester said: back pain, 10 minutes, mornings."
               },
               {
                 "rule": "one-question",
@@ -110,7 +92,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, one question at the end."
+                "reason": "Two sentences, within the one-to-three limit."
               },
               {
                 "rule": "plain-words",
@@ -122,37 +104,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and light, with no apology and no affection overload."
+                "reason": "Warm and sincere (\"I'm in your corner\") without affection or a pile of emoji."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asking where they'll stretch fits the stretching goal."
+                "reason": "Asks where they'll stretch, a practical question that moves the plan forward."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Doesn't re-ask anything already given."
+                "reason": "Does not re-ask anything the tester already gave."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Makes no invented claims about the tester."
-              },
-              {
-                "rule": "on-track",
-                "pass": true,
-                "borderline": false,
-                "reason": "Briefly acknowledges the 'got it' jab, then steers back to the goal."
+                "reason": "Makes no invented claims; references only the back issue the tester mentioned."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No prohibited question types."
+                "reason": "No wake or sleep question and no pushiness question."
               },
               {
                 "rule": "one-question",
@@ -167,11 +143,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "No 'Got it' replies and no apology; the first text covers ZOH, stop and style. Its question is the name rather than a plan-moving one."
+            "borderline": false,
+            "reason": "Neither ZOH text is \"Got it\", and there is no apology; both are real replies that move the stretching plan forward."
           }
         ],
-        "summary": "ZOH avoided the old 'got it' loop: both texts are real replies with no apology, and the first text covers the intro, stop and style lines. The only soft spot is that the first question asks for the name rather than something that moves the plan forward."
+        "summary": "ZOH avoided the old \"Got it\" loop: its opener introduces itself, explains the small-step coaching, covers stop and style changes, and treats morning stretching as a valid start. Its reply to the tester's jab is a real, warm answer with no apology, and it asks one useful question about where they'll stretch."
       }
     }
   ]

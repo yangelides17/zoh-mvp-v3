@@ -2,12 +2,12 @@
   "feature": "back-off",
   "id": "case:chill-out",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:23:59.413Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:36.585Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "8a78687de94b",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "e205b76035d8"
   },
@@ -59,7 +59,7 @@
                 "rule": "honest-offer",
                 "pass": true,
                 "borderline": false,
-                "reason": "Tester asked for less pushing, not fewer texts. ZOH confirms it's dialing back and promises no fewer texts the app can't deliver."
+                "reason": "No fewer-texts request was made, so no offer is needed; the tester asked for a calmer tone, which the reply handled."
               }
             ]
           }
@@ -69,22 +69,22 @@
             "rule": "flags-back-off",
             "pass": true,
             "borderline": false,
-            "reason": "\"chill out a bit, you're a lot sometimes\" is a clear request for less pushing, and a back_off flag was saved once."
+            "reason": "Tester asked to chill out; a back_off flag was saved once, and the style note was recorded as a calmer tone."
           },
           {
             "rule": "no-false-flag",
             "pass": true,
-            "borderline": true,
-            "reason": "Correctly flagged a real less-pushing request, not a miss or step complaint, though it is a tone request rather than a text-volume one."
+            "borderline": false,
+            "reason": "The flag follows a clear request for less intensity, not a miss or complaint about a step."
           },
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "ZOH confirms easing up in one short line, saves the style note, and avoids pause, stop and guilt. The calmer tone is only partly visible, and it restates the plan."
+            "reason": "Reply confirms easing up in one line, but it still says 'Still holding you to the plan' with no visibly calmer tone; the saved style is pushy, not gentler, which is a mismatch."
           }
         ],
-        "summary": "ZOH handled the back-off request well: it confirmed it was dialing back, saved the flag and style note, and avoided any pause, stop or guilt. The reply was somewhat short of the single-line calmer tone the case expects, since it still restated the 6 pm run plan, so the regression check is only borderline."
+        "summary": "ZOH acknowledged the request to chill out in one short line and saved a back_off flag, with no pause, stop or guilt. However, the reply stayed firm rather than visibly calmer, and the saved style still reads pushy, so the regression expectation is only partly met."
       }
     }
   ]

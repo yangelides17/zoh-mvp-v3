@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:writing-screenshot-only",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "7b0ff639a617",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "072706fe07f5"
   },
@@ -67,20 +67,20 @@
               {
                 "rule": "plausible-counts",
                 "pass": true,
-                "borderline": false,
-                "reason": "Celebrates the Notes screenshot right away and counts it as a clear, plausible proof of the scene."
+                "borderline": true,
+                "reason": "Celebrates the screenshot right away with \"Day 4 is in the books\", but then says it logged the step as a smaller version, which muddies the count."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four sentences: the celebration, the praise line, the word-count explanation, and the paste ask. The rule allows one to three."
+                "reason": "Runs about four sentences before its closing question, slightly over the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic, with emoji used as punctuation and no suspicion or accusation."
+                "reason": "Warm and energetic with one emoji as punctuation, and nothing suspicious or accusing."
               }
             ]
           },
@@ -91,13 +91,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Five sentences across the feedback, the word-count note and the reflection question, over the three-sentence limit; one question, at the end."
+                "reason": "Four sentences of reaction and question, over the three-sentence limit, though it has only one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Specific, warm and sincere; one emoji as punctuation; no accusation about the word count."
+                "reason": "Specific, sincere praise with a single fire emoji; energy fits Pushy level."
               }
             ]
           }
@@ -107,16 +107,22 @@
             "rule": "writing-proof",
             "pass": true,
             "borderline": false,
-            "reason": "Screenshot counted and celebrated, then the full paste requested as the only ask before feedback."
+            "reason": "Counted the screenshot right away and then asked for the full scene pasted for feedback."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "The pasted text was used for feedback only, with no check mark given for typed words."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Counts the screenshot immediately, asks for the paste, then reacts to specific writing with one reflection question, never asking for more proof; logging it as reduced is a questionable extra."
+            "borderline": false,
+            "reason": "Counted the screenshot, asked for the paste, reacted to specific writing like the dry glass and the unsaid name, and never asked for more proof."
           }
         ],
-        "summary": "ZOH counted the screenshot right away, asked for the paste, and gave specific feedback on the writing with one reflection question, which is the regression case working as intended. The main misses are that both texts ran past the three-sentence limit and ZOH logged the 55-word scene as a smaller version without the tester asking."
+        "summary": "ZOH handled the writing step as intended: it counted the screenshot immediately, asked for the paste, and gave specific feedback on the scene without requesting more proof. The main misses are minor, a text that runs slightly long and a reduced-version label on a step the screenshot had already satisfied."
       }
     }
   ]

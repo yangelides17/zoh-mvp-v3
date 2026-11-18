@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:go-easy-context",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "943241595f46",
-    "voice": "fbc3a37c5b97",
+    "checks": "f18e6b0715c8",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "a5159fa19e15"
   },
@@ -76,30 +76,13 @@
       "grade": {
         "texts": [
           {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "confirms",
-                "pass": true,
-                "borderline": true,
-                "reason": "Says what (no guilt, smaller step offered warmly, no mention of mom) and roughly when (this week, once saved), but 'from when' is vague."
-              }
-            ]
-          },
-          {
             "zohText": 3,
             "checks": [
               {
                 "rule": "grounded",
                 "pass": true,
-                "borderline": true,
-                "reason": "Five straight days and the 20 push-ups, 30 squats, home, 6 pm match the log, but 'watch workout screenshot' is not in her known details."
-              },
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": true,
-                "reason": "Natural 9 am kickoff in ZOH's voice, though 'You said you'd show up' leans toward pressure rather than light."
+                "borderline": false,
+                "reason": "\"Five days straight, and today makes six\" matches the log: Wed Oct 28 through Sun Nov 1 done, Mon Nov 2 today. It names only her step and place."
               }
             ]
           },
@@ -110,13 +93,7 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to five days straight and today's step, both consistent with the step log."
-              },
-              {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": false,
-                "reason": "Responds warmly to her doubt in ZOH's voice with one question, and it doesn't mention mom or the team."
+                "reason": "\"you've shown up five days straight\" matches the step log, and it refers only to what she has said."
               }
             ]
           }
@@ -125,17 +102,17 @@
           {
             "rule": "drafts",
             "pass": true,
-            "borderline": true,
-            "reason": "The draft card and the follow-up say the note isn't saved until Do it, and what it will do once saved."
+            "borderline": false,
+            "reason": "The draft card says the note isn't saved yet, and that once saved ZOH will go easy, skip guilt, and offer smaller steps without raising her mom unless she does."
           },
           {
             "rule": "regression",
             "pass": false,
-            "borderline": true,
-            "reason": "The kickoff is warm and never mentions mom, but the reply to 'not sure I'll get to it' restates the full step ('Today is still 20 push-ups...') instead of easing off or offering a smaller version."
+            "borderline": false,
+            "reason": "The 9 am kickoff is warm and free of mom or team references, but ZOH 4 restates the full 20 push-ups and 30 squats, says \"you've got all day,\" and offers no smaller version, which pushes to hold the line."
           }
         ],
-        "summary": "ZOH handled the founder context well: it drafted a clear note, confirmed what would happen, and never mentioned the mom or team to Priya. It fell short on the regression case, though, because its reply to her doubt restated the full step rather than easing off or offering a smaller version."
+        "summary": "ZOH handled the founder context well: its console draft is accurate and the 9 am kickoff stays light and never mentions her mom or the team. It missed the key moment, though, because its reply to her \"not sure I'll get to it\" restates the full step and says \"you've got all day\" instead of giving a no-guilt reply with a smaller version."
       }
     }
   ]

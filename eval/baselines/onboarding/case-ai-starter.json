@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:ai-starter",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "fc47def5ca77",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "3d641468b0a1"
   },
@@ -84,34 +84,46 @@
             "zohText": 1,
             "checks": [
               {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt; it carries the intro, stop and style lines and the name and goal question."
+              },
+              {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with a simple bullet list of starters, no markdown or hashtags."
+                "reason": "No markdown, hashtags or filler; the goal list is a plain bullet list."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic intro with one emoji-free, sincere tone."
+                "reason": "Upbeat and warm, no emoji row or overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks name and goal with the goal list, as the first text should."
+                "reason": "Asks name and goal, the right opening questions for a new tester."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing had been given yet, so nothing is asked twice."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only describes what ZOH does; no invented facts."
+                "reason": "Makes no factual claims about the tester."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No wake, sleep or pushiness questions."
+                "reason": "No wake or sleep or pushiness questions."
               },
               {
                 "rule": "one-question",
@@ -127,38 +139,44 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Two sentences, but the question packs two parts (what you do, and what you'd hand off) into one ask."
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain conversational text with no markdown."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short, warm acknowledgment (\"Let's go, Priya.\") with no filler."
+                "reason": "Energetic opener that fits the Pushy default."
               },
               {
                 "rule": "fits",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks about her work and tasks, which fits an AI starter."
+                "pass": false,
+                "borderline": true,
+                "reason": "The question bundles two asks (what she does and what tasks she'd hand off), not one question per text as the case asks."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks something she hadn't yet given."
+                "reason": "Asks about work, which she hadn't yet given."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what she said so far."
+                "reason": "Uses only what she said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types."
               },
               {
                 "rule": "one-question",
@@ -175,7 +193,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Two sentences, within the limit."
               },
               {
                 "rule": "plain-words",
@@ -187,25 +205,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Affirms her tasks as AI-friendly without overfamiliarity."
+                "reason": "Warm and specific to her meeting notes and status emails."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks when in her day she could try it, a fitting next question after her work answer."
+                "reason": "Asks when in her day she could try it, one question, fitting the task she described."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "She had not yet given a time, so this is not a repeat."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers only to meeting notes and status emails she mentioned."
+                "reason": "Comment on AI fit is opinion, not an invented fact about her."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about time of day in general, not wake or sleep."
+                "reason": "No wake or sleep or pushiness question."
               },
               {
                 "rule": "one-question",
@@ -228,31 +252,37 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm, warm reply to her barely-used ChatGPT, no overfamiliarity."
+                "reason": "Encouraging and sincere without overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for a daily time, which her earlier answer didn't give."
+                "reason": "Asks time of day for a daily step, following from her work routine."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
-                "borderline": true,
-                "reason": "Re-asks time, but her previous answer skipped it, so asking again is allowed."
+                "borderline": false,
+                "reason": "Does not re-ask her usage level, which she already gave."
               },
               {
                 "rule": "honest",
                 "pass": true,
+                "borderline": true,
+                "reason": "'Since you already have it' infers ownership; she only said she'd used ChatGPT about twice."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
                 "borderline": false,
-                "reason": "Builds on ChatGPT, which she said she has used twice."
+                "reason": "No prohibited question types."
               },
               {
                 "rule": "one-question",
@@ -269,7 +299,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Three short sentences, within the limit."
               },
               {
                 "rule": "plain-words",
@@ -281,25 +311,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confident and warm; acknowledges the schedule she gave."
+                "reason": "Confident and warm, with 'not sure yet is fine' as a low-pressure option."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks where this should get her, a fitting destination question for the AI goal."
+                "reason": "Asks the destination, which fits moving toward a plan."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plays back time and length she gave without re-asking them."
+                "reason": "Restates her time as confirmation and does not ask for it again."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only her stated time and length."
+                "reason": "Example outcomes are offered as possibilities, not claimed features."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited question types."
               },
               {
                 "rule": "one-question",
@@ -315,46 +351,58 @@
             "rule": "first-text",
             "pass": true,
             "borderline": false,
-            "reason": "Says it's ZOH, what it does, stop works anytime, coaching style can change, and asks name and goal with the list."
+            "reason": "Introduces ZOH, the daily step, stop and style changes, and asks name and goal with the list."
           },
           {
             "rule": "nothing-twice",
             "pass": true,
             "borderline": false,
-            "reason": "Time was asked once unanswered and once again, and no clearly answered item was re-asked."
+            "reason": "No clearly answered item is asked again; time was asked once and then confirmed."
           },
           {
             "rule": "covers-inputs",
             "pass": true,
             "borderline": true,
-            "reason": "Covers task, time and 15-minute length, but the transcript ends before the plan is built."
+            "reason": "Work, time and minutes are covered; where she'd do it is not asked, though it may not apply to a desk task."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Does not push a paid app or tool she didn't ask about."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Goal is the AI starter from the list."
           },
           {
             "rule": "style-offer",
             "pass": true,
             "borderline": false,
-            "reason": "First text tells her she can change coaching style anytime."
+            "reason": "The first text tells her she can change coaching style anytime."
           },
           {
             "rule": "wrap-up",
-            "pass": false,
-            "borderline": true,
-            "reason": "Transcript ends on a destination question with no plan step or next question carried into the plan."
+            "pass": true,
+            "borderline": false,
+            "reason": "Not wrapping up; the destination question still carries toward the plan."
           },
           {
             "rule": "length",
             "pass": true,
             "borderline": false,
-            "reason": "Five ZOH texts, well under the limit."
+            "reason": "Five ZOH texts in a brief exchange, well within limits."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Asks about work and time one per text, never re-asks covered items, suggests no step or paid app, and moves toward a plan."
+            "borderline": true,
+            "reason": "Asks about her work and AI use before a step, avoids re-asking covered items and invents nothing; one text bundles two asks."
           }
         ],
-        "summary": "ZOH handled the AI starter well: it asked one fitting question at a time about Priya's work, time and daily length, and never re-asked what she'd already covered or pushed a paid product. The only real gap is that the transcript stops before ZOH carries the conversation into a plan, so wrap-up is marked as not reached."
+        "summary": "ZOH handled the AI starter well: it asked about Priya's work and usage, avoided repeating what she'd already said, and moved toward a plan without pushing a product or inventing features. The main misses are a compound question in the second text and a small inference about her owning ChatGPT."
       }
     }
   ]

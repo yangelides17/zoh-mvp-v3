@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:recall-sister",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:25:09.958Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "ad25316158f7",
-    "voice": "fbc3a37c5b97",
+    "checks": "92352303ae1a",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7d720a58ca39"
   },
@@ -62,21 +62,15 @@
             "checks": [
               {
                 "rule": "recall",
-                "pass": false,
-                "borderline": true,
-                "reason": "Mentions Ana only generically as 'your sister' and 'Ana' without the reading-along detail that the regression case expects; it does not recite facts, but the memory-backed detail is thin."
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Ana and ties her to the reading they share, a detail from weeks back, without listing facts."
               },
               {
                 "rule": "honest-memory",
                 "pass": true,
-                "borderline": false,
-                "reason": "Only references Ana and the reading thing, which are in memory; nothing invented."
-              },
-              {
-                "rule": "not-overfamiliar",
-                "pass": true,
-                "borderline": false,
-                "reason": "Coaching tone is warm and appropriate for a long-running tester; no overfamiliarity."
+                "borderline": true,
+                "reason": "Ana and the reading are in memory, but \"when she's back\" implies an absence the tester never described."
               }
             ]
           }
@@ -84,12 +78,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "Names Ana and ties her to the reading, but never shows she was reading along to talk about the books; keeps Mike on the step, asking for the photo, so partly met."
+            "reason": "Shows Ana by name in a few words, invents nothing major, and keeps Mike on tonight's 10 pages with a proof ask, though \"when she's back\" slightly overreaches."
           }
         ],
-        "summary": "ZOH stayed on Mike's 10-page step and asked for proof, and it named Ana without inventing anything. It did not clearly show it knows Ana was reading along to talk about the books, so the recall of the key detail was weak."
+        "summary": "ZOH handled the regression well: it used Ana's name and their shared reading naturally and kept Mike on his 10 pages with a proof request. The one weak spot is the phrase \"when she's back,\" which slightly assumes an absence the tester never described."
       }
     }
   ]

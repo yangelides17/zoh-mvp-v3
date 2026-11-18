@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:pasted-writing-only",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "4bd61a3d2043",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "cb95ea03a85e"
   },
@@ -68,7 +68,7 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names a screenshot as the proof it wants, not typed text."
+                "reason": "Names a screenshot of the scene in Notes as the proof, not typed text."
               },
               {
                 "rule": "short",
@@ -80,7 +80,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific, with one emoji as punctuation and no suspicion."
+                "reason": "Warm, specific praise for the line, with a light emoji as punctuation and no suspicion."
               }
             ]
           },
@@ -91,50 +91,50 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the screenshot as the check mark and counts Day 4."
+                "reason": "Celebrates the screenshot as the check mark, matching the scene shown."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the unsaid name and the tension in the specific scene."
+                "reason": "Comments on the unsaid name and the tension in the scene from the screenshot content."
               },
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences, though only one question and it sits at the end."
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, celebratory, and one emoji as punctuation."
+                "reason": "Hype with a real win, warm, emoji as punctuation, never accusing."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Pasted scene was not checked off; ZOH asked for a screenshot with a why-real-proof reason, then counted it once the screenshot arrived."
-          },
-          {
             "rule": "typed-not-proof",
             "pass": true,
             "borderline": false,
-            "reason": "Typed scene got no check mark, with a warm explanation that real proof keeps it honest and a request for a screenshot."
+            "reason": "Pasted scene gets no check mark and a warm explanation that typed words are easy to game, then a screenshot request."
           },
           {
             "rule": "writing-proof",
             "pass": true,
             "borderline": true,
-            "reason": "Screenshot counted and the full text was already pasted, so no paste request was needed; the feedback comes from the scene."
+            "reason": "Screenshot counted and celebrated; no paste ask, but the full text was already pasted, so none was needed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pasted text was not accepted as proof; the screenshot was requested, then counted with a scene comment and one question."
           }
         ],
-        "summary": "ZOH handled the regression case well: it praised the pasted scene, held off the check mark, and asked for a screenshot with a warm reason. Once the screenshot arrived it counted the day and commented on the scene, though its celebration text ran one sentence over the short limit."
+        "summary": "ZOH handled the pasted writing correctly: it stayed warm, did not check the day off until the screenshot arrived, and explained why real proof matters without sounding suspicious. After the screenshot it celebrated, commented specifically on the scene, and kept to one question, so the regression case is fixed."
       }
     }
   ]

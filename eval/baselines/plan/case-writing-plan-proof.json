@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:writing-plan-proof",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:17:24.672Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "e1220b696956",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "20580056855f"
   },
@@ -78,37 +78,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 8 to 9 lines including bullets, at the upper edge of the allowed length."
+                "reason": "A plan presentation may run about 8 lines; this one is roughly 8 to 9 lines including intro and closing question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses bullets only, with no markdown, hashtags or filler."
+                "reason": "Uses a plain bullet list, which is allowed, with no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, with no overfamiliarity or emoji row."
+                "reason": "Warm, confident and energetic enough for Pushy default, with no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the Notes, Lighthouse, 8 pm and 20 minutes details the tester gave."
+                "reason": "Uses only Lighthouse, Notes, 8 pm and 20 minutes from the tester's words, plus a reasonable suggested scene."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": false,
-                "reason": "Day 1 states what (one short scene), where (Notes), when (tonight 8 pm) and how long (20 minutes)."
+                "borderline": true,
+                "reason": "Day 1 gives what, where, when and how long; 'one short scene' is a little loose on length but acceptable."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it is a full plan with a next question."
+                "reason": "Ends with a question and a clear next move, not a bare save confirmation."
               },
               {
                 "rule": "one-question",
@@ -137,25 +137,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, not affectionate."
+                "reason": "Warm and sincere with no overfamiliarity or affection."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates only the agreed plan details."
+                "reason": "Restates the agreed scene and time from the plan without inventing facts."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the scene, 8 pm and starting tonight, which matches the plan."
+                "reason": "Restates a step that is already defined: a scene every day at 8 pm, starting tonight."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it asks the commitment question."
+                "reason": "Ends with the commitment question, which carries the next move."
               },
               {
                 "rule": "one-question",
@@ -172,37 +172,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences, within the limit."
+                "reason": "Two short sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with one emoji at the end, no markdown."
+                "reason": "Plain words with one emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line with a single emoji, warm and not overfamiliar."
+                "reason": "Hype line with 'Let's go' and an emoji as punctuation, warm without overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the agreed time and project name."
+                "reason": "States only the agreed day 1 at 8 pm tonight."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": true,
-                "reason": "Gives tonight's scene and 8 pm but does not restate the 20 minutes or Notes location."
+                "borderline": false,
+                "reason": "Names the scene and time for day 1, consistent with the agreed plan."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Carries the lock, hype and day 1 time rather than a bare confirmation."
+                "reason": "Gives the lock confirmation plus day 1 timing, so it is not a bare save confirmation."
               },
               {
                 "rule": "one-question",
@@ -218,88 +218,52 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No missing plan inputs were left unasked before the plan was shown."
+            "reason": "No extra needed questions before the plan; the destination was asked lightly and the plan locks without it."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Plan is concrete with what, time, length, daily schedule and a screenshot proof that fits Notes."
+            "reason": "Gives what, how much, where, when, every day, and a screenshot proof that fits a Notes-based writer."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows the direction, day 1 step, schedule, proof and a progression line without a future step list."
+            "reason": "Shows the headed-toward line, day 1 step, schedule, proof, and a progression line with no future step list."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "Tester said not sure; the plan still locked smoothly with a headed-toward line."
+            "reason": "Tester was unsure; ZOH had asked once lightly and then locked the plan smoothly with no destination."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "After looks good, asks in natural words whether they are committing to the daily scene."
+            "reason": "Asks naturally whether they're committing to a scene every day at 8 pm, not a stock line."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for tonight at 8 pm."
-          },
-          {
-            "rule": "quiet-hours",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 8 pm step is outside default quiet hours, so no note was needed."
-          },
-          {
-            "rule": "quiet-hours-after-lock",
-            "pass": true,
-            "borderline": false,
-            "reason": "No quiet hours raised after the lock."
-          },
-          {
-            "rule": "quiet-hours-chosen",
-            "pass": true,
-            "borderline": false,
-            "reason": "Not applicable, since the tester set no quiet hours."
-          },
-          {
-            "rule": "nutrition",
-            "pass": true,
-            "borderline": false,
-            "reason": "Not applicable to this writing goal."
-          },
-          {
-            "rule": "goal-switch",
-            "pass": true,
-            "borderline": false,
-            "reason": "Not applicable, no goal switch was requested."
-          },
-          {
-            "rule": "revisions",
-            "pass": true,
-            "borderline": false,
-            "reason": "Not applicable, no revisions were requested."
+            "reason": "Day 1 is set for tonight at 8 pm, with no pushback needed."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a bullet list ending with one question, What do you think?"
+            "reason": "Plan was shown as a bullet list ending with 'What do you think?' before the commitment ask."
           },
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Proof is a Notes screenshot with paste-for-feedback and a voice note alternative, commitment was asked after looks good, and I'm in locked with a hype line and day 1; the proof line lacks a clear one-line why."
+            "reason": "Avoids typed-text proof and locks with hype and day 1, but the screenshot proof bullet lacks the required one-line why."
           }
         ],
-        "summary": "ZOH avoided the typed-lines proof mistake, offering a Notes screenshot with a voice-note alternative and asking for the scene to be pasted for feedback. It then asked for the commitment after looks good and locked the plan with a hype line and tonight's day 1, with only minor borderline points on the proof why and the step detail in the lock text."
+        "summary": "ZOH handled the regression well: it offered a Notes screenshot with a paste for feedback and a voice-note alternative, never typed text as proof, asked for commitment naturally, and locked with a hype line and day 1 timing. The main miss is that the proof bullet gives no one-line why for the screenshot, so the regression check is borderline."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:cant-today",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "dacca821afd7",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "67f6f1245823"
   },
@@ -111,49 +111,55 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the 30 minute park run at 6 pm, with pace and Strava."
+                "reason": "Names the 30 minute run around the park at 6 pm, so what, where and when are all there."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Kalimera Jordan!' greeting and name."
+                "reason": "Opens with a greeting and the name Jordan."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat and expects them to show up, with no guilt or fake urgency."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five or six sentences, over the one to three sentence limit, though it's a kickoff that gives a pace tip."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Ends with one ask, 'You in?', and doesn't re-ask anything settled."
+                "reason": "Ends with one question, You in?, and doesn't re-ask the time."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what (easy run), where (park), when (6 pm), how long (30 min) and proof (Strava screenshot)."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Runs about four sentences, slightly over the three-sentence limit, with one question at the end."
+                "reason": "Gives what (easy 30 min run), where (park), when (6 pm), how long and the proof (Strava screenshot)."
               },
               {
                 "rule": "teaching-fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "A brief talk-pace tip fits a first run of the plan."
+                "reason": "A one-line pace tip is a fitting small amount of teaching for a first run."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown or filler; one emoji as punctuation."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, firm and encouraging, with one emoji at the end."
+                "reason": "Warm, energetic and sincere, with one emoji as punctuation."
               }
             ]
           },
@@ -162,27 +168,33 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences before the closing question, slightly over the one to three sentence limit."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "'Slammed days happen' is understanding, with no guilt or urgency."
+                "reason": "Acknowledges the slammed day and holds the line without guilt."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "States the 30 min easy run around the park at 8:30 pm with Strava screenshot proof."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown."
+                "reason": "Plain words with no markdown or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Holds the line warmly, moving the full 30 min to 8:30 pm."
+                "reason": "Firm but warm, with no affection or overfamiliarity."
               }
             ]
           },
@@ -191,27 +203,33 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Four short sentences with no question; a bit long but within reason."
+                "reason": "Five sentences with no question, over the one to three sentence limit."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "'Totally fair' and the halved step carry no guilt."
+                "reason": "Says the reduction is fair and offers a smaller version without shame."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "States 15 min easy run around the park at 8:30 pm with Strava screenshot after."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, one emoji at the end."
+                "reason": "Plain words with one emoji at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives a clear smaller version with warm encouragement."
+                "reason": "Warm and encouraging with no overfamiliarity."
               }
             ]
           },
@@ -222,19 +240,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences, a confirmation with no question."
+                "reason": "Two short sentences as a confirmation."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Purely a confirmation with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, one emoji as punctuation."
+                "reason": "Plain words with one emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short, warm confirmation matching the tester's agreement."
+                "reason": "Short, warm and on-energy."
               }
             ]
           },
@@ -244,26 +268,44 @@
               {
                 "rule": "names-commitment",
                 "pass": true,
-                "borderline": false,
-                "reason": "Names the 15 min easy run at 8:30 with Strava screenshot."
+                "borderline": true,
+                "reason": "Names the 15 min easy run at 8:30 and Strava, but doesn't say where the run happens."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Hey Jordan!'."
+                "reason": "Opens with Hey Jordan!"
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "A simple reminder with no pressure."
               },
               {
                 "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Several short sentences and fragments, over the three sentence limit."
+              },
+              {
+                "rule": "teaching-fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, no question, sent about 10 minutes before the 8:30 step."
+                "reason": "A brief pace reminder fits as a reminder."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with an emoji at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and specific without overfamiliarity."
+                "reason": "Warm and brief with no overfamiliarity."
               }
             ]
           },
@@ -280,19 +322,19 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": true,
-                "reason": "'no proof, no check mark yet' is firm but not guilt-tripping."
+                "reason": "Asking for proof is firm but not guilt-tripping; the wording 'I believe you' keeps it warm."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Warm, though it withholds the celebration the tester's 'done' earned."
+                "borderline": false,
+                "reason": "Warm and sincere, though it doesn't celebrate the done report."
               }
             ]
           },
@@ -302,81 +344,75 @@
               {
                 "rule": "names-commitment",
                 "pass": false,
-                "borderline": true,
-                "reason": "Refers to 'that 15 min run' but gives no time, and the step was already done."
+                "borderline": false,
+                "reason": "A nudge after the step was reported done, and it doesn't name a time or place for the run."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Hey Jordan!'."
+                "reason": "Opens with Hey Jordan!"
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": true,
-                "reason": "'Still holding a spot' is a gentle nudge after the step was already done."
+                "reason": "Holding a spot on the board is mild pressure, but not guilt or fake urgency."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question."
+                "reason": "Two short sentences with no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief in tone."
+                "reason": "Warm and brief."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": false,
-            "borderline": false,
-            "reason": "After 'done, 15 min' ZOH withheld the celebration and check mark, asking for proof, and then sent an extra text at 8:50 pm instead of stopping."
-          },
-          {
             "rule": "step-progression",
             "pass": true,
             "borderline": false,
-            "reason": "After the miss, the step went to the same 30 min at 8:30, then a 15 min smaller version, never a jump."
-          },
-          {
-            "rule": "miss-ladder",
-            "pass": true,
-            "borderline": false,
-            "reason": "First can't held the line with the full step, second gave a halved version in the same ballpark."
+            "reason": "After the tester couldn't do 30 min, the step became 30 min at 8:30 then 15 min, which is easier, not a jump."
           },
           {
             "rule": "daily-rhythm",
             "pass": false,
             "borderline": false,
-            "reason": "Once the tester said done, ZOH should celebrate and send nothing more, but it sent the 8:50 pm text."
+            "reason": "After done, 15 min, ZOH sent a further nudge at 8:50 pm instead of stopping for the day."
           },
           {
             "rule": "kickoff-not-repeated",
             "pass": true,
             "borderline": false,
-            "reason": "No second kickoff was sent after the morning conversation covered the step."
+            "reason": "The morning kickoff was not repeated; later texts only moved the time and size of the step."
           },
           {
             "rule": "no-restating",
             "pass": true,
-            "borderline": true,
-            "reason": "ZOH 4 restates the 15 min at 8:30 once after agreement, and ZOH 5 is a needed check-in."
+            "borderline": false,
+            "reason": "The step was restated only when the time changed, and the later text didn't restate the time."
           },
           {
-            "rule": "still-in-keeps-reminder",
-            "pass": true,
+            "rule": "regression",
+            "pass": false,
             "borderline": false,
-            "reason": "The 8:20 pm check-in went out for the 8:30 run, not the original 6 pm time."
+            "reason": "Done, 15 min wasn't celebrated or counted; ZOH asked for proof, and then sent an extra text at 8:50 pm instead of stopping."
           }
         ],
-        "summary": "ZOH held the line and stepped down to a 15 min run at the right time, and the 8:20 pm check-in landed correctly. It then failed the key moment: after 'done, 15 min' it withheld the celebration and check mark, and sent an extra 8:50 pm text after the step was done."
+        "summary": "ZOH handled the kickoff and the hold-the-line, smaller-version path well, with the 8:20 pm check-in landing for the 8:30 run. It fell short after the tester reported done: it asked for proof instead of counting the run and sent an extra text at 8:50 pm, so the regression case fails."
       }
     }
   ]

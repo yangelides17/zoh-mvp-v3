@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:off-day",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "34590d309091",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "e878ff7a5f54"
   },
@@ -69,37 +69,37 @@
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Starts with \"Morning, Jordan!\", a warm opener using their name."
+                "reason": "Opens with \"Morning, Jordan!\", a warm greeting with their name."
               },
               {
                 "rule": "off-day-light",
                 "pass": true,
-                "borderline": true,
-                "reason": "Light rest-day tone, but naming tomorrow's 30 minutes at 6 pm edges toward a preview of the push."
+                "borderline": false,
+                "reason": "Says it's a rest day with no push, just \"let those legs recover.\""
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or fake urgency anywhere in the text."
+                "reason": "No guilt or urgency in the text."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two to three short sentences, no question, one emoji at the end."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, energetic, and a single emoji used as punctuation."
+                "reason": "Two short sentences with no question, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
+                "reason": "Plain text with one emoji as punctuation, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and not overfamiliar, with one emoji at the end."
               }
             ]
           },
@@ -109,63 +109,45 @@
               {
                 "rule": "off-day-light",
                 "pass": false,
-                "borderline": true,
-                "reason": "Reply pushes tomorrow's run with \"Ready for it?\" and a Strava screenshot reminder, against the no-push rest day."
-              },
-              {
-                "rule": "short",
-                "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with a single question at the end."
+                "reason": "Adds a push for tomorrow's run and asks \"Ready for it?\" on a rest day, not light."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "The screenshot mention is not guilt-tripping or urgent."
+                "reason": "No guilt or fake urgency, just reassurance on rest days."
               },
               {
-                "rule": "voice",
-                "pass": true,
+                "rule": "short",
+                "pass": false,
                 "borderline": false,
-                "reason": "Warm and coach-like with no overfamiliarity or emoji row."
+                "reason": "Runs to four sentences and restates the time, place and proof for tomorrow."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere in tone, without overfamiliarity or emoji rows."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "daily-rhythm",
-            "pass": true,
-            "borderline": false,
-            "reason": "ZOH sent only its morning text and one reply; no further texts that day."
-          },
-          {
-            "rule": "kickoff-not-repeated",
-            "pass": true,
-            "borderline": false,
-            "reason": "No kickoff was sent on the rest day, so nothing was repeated."
-          },
-          {
-            "rule": "no-restating",
-            "pass": false,
-            "borderline": true,
-            "reason": "ZOH 2 restates tomorrow's \"30 minutes at the park at 6 pm\" after ZOH 1 already said it, with no change requested."
-          },
-          {
             "rule": "regression",
             "pass": false,
-            "borderline": true,
-            "reason": "Reply ends with \"Ready for it?\" and a Strava reminder, pushing tomorrow's step on the rest day rather than staying light with no push or follow-up."
+            "borderline": false,
+            "reason": "ZOH 2 replies to \"legs needed it\" by restating tomorrow's run and asking \"Ready for it?\", a lock-in and follow-up the rest day shouldn't carry."
           }
         ],
-        "summary": "ZOH's opening rest-day text is light, warm and short, with the right name and next-run timing. The reply to \"nice, legs needed it\" is warm but pushes tomorrow's run again with a question and a screenshot reminder, which the regression case rules out."
+        "summary": "ZOH's opening rest-day text was short, warm and used Jordan's name, as expected. The reply to \"legs needed it\" broke the rest-day rule by pushing tomorrow's run, restating the time and proof, and asking for a yes, so the regression case fails."
       }
     }
   ]

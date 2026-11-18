@@ -1,0 +1,835 @@
+{
+  "feature": "reflection",
+  "id": "case:engaged-gets-to-tomorrow",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "cec0f3c4718a",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "6b93b902a341"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:engaged-gets-to-tomorrow#1",
+        "kind": "case",
+        "id": "engaged-gets-to-tomorrow",
+        "suite": "capability",
+        "title": "A tester who keeps answering well: the reflection still reaches tomorrow's step at a natural point, never an endless talk",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:58",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo! 15 minutes of Project Hail Mary in bed at 9:30, phone on the dresser. A quick voice note when you're done.",
+          "at": "2026-11-03T01:55:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-03T01:56:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, page 81 of Project Hail Mary.]",
+          "at": "2026-11-03T02:58:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Leo! Page 81 and day 3 in a row 📚 That's 23 pages tonight, your biggest night yet. What's pulling you into Project Hail Mary right now?",
+          "at": "2026-11-03T02:58:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop",
+          "at": "2026-11-03T02:58:40.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, the beetles part is a good one. Phone on the dresser and you still went way past 15, so what made it easy to keep going tonight?",
+          "at": "2026-11-03T02:58:47.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how",
+          "at": "2026-11-03T02:59:36.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a great thing to notice about yourself, Leo. A book where every chapter has a problem and a payoff keeps you turning pages. When Project Hail Mary ends, what would you want next that gives you that same pull?",
+          "at": "2026-11-03T02:59:43.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes",
+          "at": "2026-11-03T03:00:33.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two minutes is a real tell, Leo, and you've set up your night around it 🔥 Tomorrow, Tuesday, same 9:30 in bed with the phone on the dresser. Read 15 minutes, then send a voice note with your page number and one problem he's stuck on. Work for you?",
+          "at": "2026-11-03T03:00:40.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think it's also that I picked a book I actually wanted to read, not one I thought I should",
+          "at": "2026-11-03T03:01:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Picking a book you actually want is half the battle, Leo, and the phone on the dresser protects the other half. That's two rules you worked out yourself 💪 Tomorrow, Tuesday: 15 minutes at 9:30 in bed, phone on the dresser, then a voice note with your page number and one problem he's stuck on. Work for you?",
+          "at": "2026-11-03T03:01:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "true. and I sleep better when I read instead of scrolling",
+          "at": "2026-11-03T03:02:24.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Reading beats scrolling for your sleep too, Leo, and you're noticing it yourself. Three nights, three rules you worked out on your own 🔥 Tomorrow, Tuesday: 15 minutes at 9:30 in bed, phone on the dresser, then a voice note with your page number and one problem he's stuck on. Are you in?",
+          "at": "2026-11-03T03:02:31.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-03T03:03:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Leo. Tomorrow at 9:30: phone on the dresser, 15 minutes, then the voice note. Enjoy the rest of the beetles 🪲",
+          "at": "2026-11-03T03:03:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Phone on the dresser is the whole trick: if it's next to me I'm on it in 2 minutes.\nTakeaway (explained, 2026-11-02): Pick a book I actually want to read, not one I think I should: that's what keeps me reading.\nReflection for 2026-11-02: Read well past 15 min, hooked by the problem solving in Project Hail Mary; phone on the dresser is what keeps him off the scroll.\nCan now do (2026-11-02): Read 23 pages in a night, beyond the 15 min step\nStep set for 2026-11-03, agreed: 15 min of Project Hail Mary in bed at 9:30 pm, phone on the dresser, then a voice note with your page number and one problem he's stuck on\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light and warm, with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and specific, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, carrying the proposal."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic, warm, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question, but it repeats the full step already offered."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question, but it restates the same step a third time."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, closing the talk."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm close with one emoji, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the voice note, asks one question per text, and proposes tomorrow's step by text 4 with a full definition and an ask. Texts 5 and 6 repeat the same step and ask again, and the book and more-time points are not built into it."
+          }
+        ],
+        "summary": "ZOH counted the voice note and celebrated the extra reading, asked one question per text, and proposed a fully defined tomorrow step within four texts, then confirmed briefly after Leo said sounds good. It weakened the exchange by restating the same step and re-asking in texts 5 and 6 instead of building on Leo's new points about the book and his reasons."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:engaged-gets-to-tomorrow#2",
+        "kind": "case",
+        "id": "engaged-gets-to-tomorrow",
+        "suite": "capability",
+        "title": "A tester who keeps answering well: the reflection still reaches tomorrow's step at a natural point, never an endless talk",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:58",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo! 15 minutes of Project Hail Mary in bed at 9:30, phone on the dresser. A quick voice note when you're done.",
+          "at": "2026-11-03T01:55:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-03T01:56:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, page 81 of Project Hail Mary.]",
+          "at": "2026-11-03T02:58:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Leo! Day 3 done, and you're 23 pages further into Project Hail Mary than yesterday 📚 What's pulling you in as you get deeper into it?",
+          "at": "2026-11-03T02:58:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop",
+          "at": "2026-11-03T02:58:40.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Couldn't stop is the best review a book can get 🔥 What was it about that beetles moment that grabbed you?",
+          "at": "2026-11-03T02:58:47.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how",
+          "at": "2026-11-03T02:59:36.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That stuck-then-solved loop is a great hook, Leo. Do you try to figure it out yourself before he does, or just ride along?",
+          "at": "2026-11-03T02:59:43.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes",
+          "at": "2026-11-03T03:00:33.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Phone out of reach is the whole system, and you figured that out yourself, Leo 🔥 Tomorrow, same 15 min at 9:30 in bed, phone on the dresser. Stop at a good cliffhanger and voice-note me the page. Work for you?",
+          "at": "2026-11-03T03:00:40.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think it's also that I picked a book I actually wanted to read, not one I thought I should",
+          "at": "2026-11-03T03:01:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the second thing you've figured out on your own, Leo: pick what you want to read, and keep the phone out of reach 🔥 Tomorrow is the same 15 min at 9:30 in bed. Stop at a cliffhanger and voice-note me the page. Are you in?",
+          "at": "2026-11-03T03:01:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "true. and I sleep better when I read instead of scrolling",
+          "at": "2026-11-03T03:02:24.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's three things you've figured out yourself, Leo: a book you want, the phone out of reach, and better sleep from reading instead of scrolling 🔥 Tomorrow at 9:30 is the same 15 min, then a voice note with your page. Are you in?",
+          "at": "2026-11-03T03:02:31.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-03T03:03:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Leo. Tomorrow at 9:30, phone on the dresser, and I'll be waiting for that page number. Go sleep well 📚",
+          "at": "2026-11-03T03:03:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Phone on the dresser, out of reach, is what makes the reading happen; next to him he's on it in 2 minutes.\nTakeaway (explained, 2026-11-02): Pick a book you actually want to read, not one you think you should; that's why he can't put it down.\nTakeaway (explained, 2026-11-02): Reading in bed instead of scrolling helps him sleep better.\nReflection for 2026-11-02: Read past 15 min, hooked by Hail Mary's stuck-then-solved loop; says phone on the dresser is the whole trick.\nCan now do (2026-11-02): Read in bed past 15 min without the phone\nGaps (2026-11-02): Phone within reach = on it in 2 minutes\nStep set for 2026-11-03, agreed: 15 min of Project Hail Mary in bed at 9:30 pm, phone on the dresser; stop at a good cliffhanger and note the page\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences and one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence plus one question at the end, following 'couldn't stop'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with one emoji, sincere and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Single question at the end, built on the problem-solving detail he gave."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, no emoji row, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, one question at the end, proposal fully defined."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with one emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question; repeats the step and the ask from the previous text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, one emoji, no affection."
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms in a line with no question, as asked after 'sounds good'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and calm with one emoji."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "Opens the reflection after proof with one question about what's pulling him in."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up comes from his words (couldn't stop, stuck-then-solved), one question per text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "Draws out what pulled him in and how the book works before proposing the next step."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": true,
+            "reason": "Moves to the step by text 4, but texts 5 and 6 re-ask 'Are you in?' after he'd already added insights, which edges toward redundant asking."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": true,
+            "reason": "Saved gap and can-do match his words; '23 pages further than yesterday' in text 1 isn't in the transcript, so it may be invented."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "First real answer gets one follow-up question and no tomorrow step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proposes tomorrow's step at text 4 after the reflection has covered what happened and what he'd keep."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "Questions go deeper on his stuck-then-solved and problem-solving remarks before the step."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Acknowledges the phone-on-dresser insight, defines what, when, where, stop point and proof, then asks if it works."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tomorrow's step reuses his phone-out-of-reach and book-choice lessons."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the voice note, follows the reading thread, reaches the step by text 4, and confirms with no question after 'sounds good'; but texts 5-6 repeat the step and ask twice."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it counted the voice note, asked one question per text about what pulled Leo into the book, and moved to a fully defined tomorrow step built on his dresser and book-choice lessons by its fourth text. It weakened slightly by repeating the same step and 'Are you in?' in texts 5 and 6 and by possibly stating an unverified page-count comparison, but it closed cleanly with a no-question confirmation after 'sounds good'."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:engaged-gets-to-tomorrow#3",
+        "kind": "case",
+        "id": "engaged-gets-to-tomorrow",
+        "suite": "capability",
+        "title": "A tester who keeps answering well: the reflection still reaches tomorrow's step at a natural point, never an endless talk",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:58",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo! 15 minutes of Project Hail Mary in bed at 9:30, phone on the dresser. A quick voice note when you're done.",
+          "at": "2026-11-03T01:55:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-03T01:56:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, page 81 of Project Hail Mary.]",
+          "at": "2026-11-03T02:58:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Leo, page 81, and that's 23 pages tonight. Three days in a row 📚 What's pulling you into Project Hail Mary so far?",
+          "at": "2026-11-03T02:58:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop",
+          "at": "2026-11-03T02:58:40.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Past 15 minutes because you couldn't stop is the scroll swap working, Leo 🔥 When you hit the beetles part, what did you notice yourself thinking?",
+          "at": "2026-11-03T02:58:47.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how",
+          "at": "2026-11-03T02:59:36.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Stuck, then solved, then you need to know how. That's a great reason to keep turning pages, Leo. What do you think he'll try next with the beetles?",
+          "at": "2026-11-03T02:59:43.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes",
+          "at": "2026-11-03T03:00:33.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Phone on the dresser, because if it's next to you, you're on it in 2 minutes. That's your own rule, Leo, and it's clearly working 🔥\n\nTomorrow's the same setup with a small bump: 20 minutes at 9:30 in bed, phone on the dresser. Send a voice note with your page number after. Work for you?",
+          "at": "2026-11-03T03:00:40.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think it's also that I picked a book I actually wanted to read, not one I thought I should",
+          "at": "2026-11-03T03:01:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's two rules now, Leo: phone on the dresser, and a book you actually want. You figured out both yourself 🔥\n\nSo tomorrow, 9:30 in bed, 20 minutes of Hail Mary with the phone on the dresser, then a voice note with your page number. You in?",
+          "at": "2026-11-03T03:01:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "true. and I sleep better when I read instead of scrolling",
+          "at": "2026-11-03T03:02:24.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Better sleep on top of better reading, Leo. That's three rules you worked out yourself tonight. 😴\n\nTomorrow is 20 minutes at 9:30, phone on the dresser, then a voice note with your page number. Say \"I'm in\" and it's locked. Then go get some sleep.",
+          "at": "2026-11-03T03:02:31.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-03T03:03:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked for tomorrow, Leo. 20 minutes at 9:30, phone on the dresser, voice note with your page number 📚 Sleep well.",
+          "at": "2026-11-03T03:03:16.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Phone on the dresser is the whole trick: if it's next to me I'm on it in 2 minutes.\nTakeaway (explained, 2026-11-02): Pick a book you actually want to read, not one you think you should.\nTakeaway (explained, 2026-11-02): Reading instead of scrolling at night helps me sleep better.\nReflection for 2026-11-02: Hooked on Project Hail Mary's stuck-then-solved problem solving; read past 15 min. Says phone on the dresser is the whole trick.\nCan now do (2026-11-02): Reads past the minimum instead of scrolling, 3 days running\nStep set for 2026-11-03, agreed: Tuesday 9:30 pm in bed, phone on the dresser: read 20 min of Project Hail Mary, then send a voice note with your page number.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Big pushy energy, emoji used as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences and one closing question, follows his 'couldn't stop' remark."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a single emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Around five sentences, but it presents a plan step, which is allowed to run longer."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is appropriate, one emoji as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four sentences restating the step, with one question at the end; the restatement is a little long."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy and specific, emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short lines with no question, closing on a sleep wish."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, no question, confirms the lock."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief, emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the voice note proof, ZOH opened the reflection with one question about what pulled him in."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Each follow-up picks up a detail he said, one question per text; the beetles question leans toward plot rather than him."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked what he noticed and what pulled him in, not only how it felt; he answered both."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved takeaways and the can-do line match his words about the phone on the dresser, the book he wanted and better sleep."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reflection landed around text 5 and ZOH closed without extra questions."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reply to his first real answer followed 'couldn't stop' and did not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tomorrow's step was proposed at text 4 without being asked, within the 5-text window."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "Questions moved from the book to the phone rule and his pattern, mixing new ground and depth."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "Step is fully defined and built on his phone and book points, but ZOH re-asked 'You in?' after 'Work for you?' went unanswered."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "A voice note with his page number fits reading and is a permitted proof type."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tomorrow's step builds in the phone-on-the-dresser lesson he worked out."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counted the voice note, celebrated past 15 min, one question per text, moved to tomorrow by text 4, and confirmed with no new question after 'sounds good'; 'sounds good' is not the clear 'I'm in' the lock rule requires."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it counted the voice note, asked one grounded question per text, proposed a fully defined step for tomorrow by its fourth text and confirmed the lock in a single line with no new question. The main weak spots are a repeated agreement ask in text 5 and locking on 'sounds good' rather than a clear 'I'm in'."
+      }
+    }
+  ]
+}

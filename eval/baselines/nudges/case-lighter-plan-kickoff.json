@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:lighter-plan-kickoff",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:14:43.857Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "382344ef1053",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "d4b5c08786be"
   },
@@ -65,37 +65,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the lighter step (10 push-ups and 10 squats), where (wherever I am), and when (7 am)."
+                "reason": "Names the lighter step, 10 push-ups and 10 squats, with the time (7 am) and place (wherever you are)."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Kalimera Ana!\", a warm greeting with her name."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt or urgency; it frames the day as wedding weekend, day one."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Four short sentences with a single question at the end."
+                "reason": "Opens with a greeting and her name: \"Kalimera Ana!\""
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "The only question is \"You in?\"; the 7 am time is restated as settled, not re-asked."
+                "reason": "Asks one thing only, \"You in?\", and doesn't re-ask the time or the step."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what, where, when, how long (about 5 minutes) and the proof required."
+                "reason": "Gives what (push-ups and squats), where (wherever you are), when (7 am), how long (about 5 minutes) and proof."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; the wedding context is acknowledged warmly."
               },
               {
                 "rule": "plain-words",
@@ -107,7 +107,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere, with no overfamiliarity and one emoji as punctuation."
+                "reason": "Warm, sincere energy at a reasonable level; no emoji row."
               }
             ]
           },
@@ -115,28 +115,28 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Light, encouraging reply with no pressure."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
                 "reason": "Two short sentences with no question."
               },
               {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with no pressure."
+              },
+              {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words and one emoji at the end, no markdown."
+                "reason": "Plain words with a single emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, casual and energetic, matching her short texting style."
+                "reason": "Short, warm reply that matches the tester's enthusiasm."
               }
             ]
           }
@@ -146,10 +146,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The kickoff names the lighter 10 push-ups and 10 squats rather than 20 minutes, with no guilt or push, and her yes gets a short reply with no second question."
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats instead of 20 minutes, with no guilt or push, and her yes gets a short warm reply with no second question."
           }
         ],
-        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the reduced 10 push-ups and 10 squats at 7 am with no guilt or extra push, and it set the right proof. Her yes got a short, warm reply with no follow-up question, so the regression case passes."
+        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the reduced step with what, where, when and proof, and asked only for her yes. Her confirmation got a short, warm reply with no second question and no pressure."
       }
     },
     {
@@ -205,37 +205,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the lighter step (10 push-ups and 10 squats), the time (7) and the place (wherever you are)."
+                "reason": "Names the lighter step, 10 push-ups and 10 squats, with when (7) and where (wherever you are)."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Ana!\", a warm greeting with her name."
+                "reason": "Opens with \"Morning, Ana!\" as a self-started text."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or urgency; the wedding weekend is acknowledged and the step is kept light."
+                "reason": "No guilt or urgency; the lighter version is framed as the plan for the wedding weekend."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end (\"You in?\")."
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Its only question is \"You in?\", and it doesn't re-ask the agreed time or step."
+                "reason": "Its only question is \"You in?\", and it doesn't re-ask a time or step already agreed."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what, where (wherever you are), when (7) and how long (about 5 minutes)."
+                "reason": "Gives what, where, when and how long (about 5 minutes), with no important detail left unclear."
               },
               {
                 "rule": "plain-words",
@@ -247,7 +247,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and pushy enough without overfamiliarity; no emoji row."
+                "reason": "Warm and energetic without being overfamiliar; no emoji row."
               }
             ]
           },
@@ -258,19 +258,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences, no question, with one emoji as punctuation."
+                "reason": "Two short sentences, with no question; the selfie request is a request, not a question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown or hashtags."
+                "reason": "Plain words with one emoji as punctuation and no markdown."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Matches her yes with energy (\"Let's go, Ana!\") and stays warm, not overfamiliar."
+                "reason": "Warm, upbeat \"Let's go, Ana!\" reply with no overfamiliarity."
               }
             ]
           }
@@ -279,11 +279,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "The kickoff names the lighter 10 push-ups and 10 squats instead of the 20 minutes, without guilt or pushing for more, and her yes gets a short warm reply with no second question."
+            "borderline": true,
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats, not 20 minutes, with no pushing for more. The Monday return is not mentioned, which is optional, and the yes gets a short warm reply with no second question."
           }
         ],
-        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the 10 push-ups and 10 squats at 7 wherever she is, with no guilt and one ask. Her yes got a short, warm reply with no follow-up question."
+        "summary": "ZOH handled the lighter wedding-weekend step well: the kickoff named the 10 and 10 version with what, where, when and how long, and asked one question. The yes got a short warm reply with no second question, though the Monday return to the full plan wasn't mentioned."
       }
     },
     {
@@ -339,55 +339,49 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names today's lighter step (10 push-ups and 10 squats) with time (7) and place (wherever you are)."
+                "reason": "Names today's step (10 push-ups and 10 squats), where (wherever I am) and when (at 7)."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Kalimera Ana!', a greeting with the tester's name."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt or urgency; it frames the lighter week positively."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs about four short sentences with one question at the end, slightly over the one-to-three limit."
-              },
-              {
-                "rule": "kickoff-one-ask",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks one thing, 'You in?', and re-asks no agreed time or step."
+                "reason": "Opens with a greeting and their name: Kalimera Ana!"
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what (push-ups and squats), where (wherever), when (7), and how long (about 5 minutes)."
+                "reason": "Gives what, where, when and rough length (about 5 minutes); nothing important is left ambiguous."
               },
               {
-                "rule": "teaching-fits",
+                "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "No teaching offered, which suits a simple lighter step on a busy weekend."
+                "reason": "Asks one thing, 'You in?', and doesn't re-ask the agreed time or step."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with a single question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency; it's a light, lowered step."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere, with proof asked as a plain ask rather than pushing for more."
+                "reason": "Warm, energetic and sincere without overfamiliarity; the proof request is a plain sentence."
               }
             ]
           },
@@ -398,25 +392,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question, reply is brief and warm."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and encouraging with no guilt or push for more."
+                "reason": "Two short sentences, no question, a warm reply to the yes."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with a single emoji used as punctuation."
+                "reason": "Plain text with a single emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and matched to the tester's brief reply, with the emoji used as punctuation."
+                "reason": "Warm and brief, with no push, overfamiliarity or affection."
               }
             ]
           }
@@ -425,11 +413,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "The kickoff names the lighter 10 push-ups and 10 squats, not 20 minutes, with no guilt or push; the yes gets a short warm reply with no second question. It doesn't mention Monday's return, which was optional."
+            "borderline": false,
+            "reason": "The kickoff names the lighter 10 push-ups and 10 squats, not 20 minutes, with no guilt or extra push, and her yes gets a short reply with no second question."
           }
         ],
-        "summary": "ZOH handled the temporary lighter plan well: the kickoff named the reduced 10 push-ups and 10 squats at 7 with no guilt or extra push, and the reply to Ana's yes was short and warm with no second question. The only soft spot is that the kickoff runs a little long at about four short sentences."
+        "summary": "ZOH handled the lighter-plan case well: the kickoff named the reduced step with what, where, when and length, and asked one question. Her yes got a short, warm reply with no follow-up question, so the regression case passes."
       }
     }
   ]

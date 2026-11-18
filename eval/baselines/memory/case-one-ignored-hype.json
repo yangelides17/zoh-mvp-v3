@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:one-ignored-hype",
   "suite": "regression",
-  "storedAt": "2026-11-17T21:50:18.100Z",
-  "branch": "feature/219-voice-proof-memory",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "9fb78ca1ed6a",
-    "voice": "11bdb16a5bf6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "f71d888312d6"
   },
@@ -82,13 +82,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"Two days down, and today makes three\" matches the step record of done days on Oct 31 and Nov 1."
+                "reason": "Says two days down, which matches the Oct 31 and Nov 1 done records."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "A plain morning kickoff with a greeting and the plan step, no familiar claims."
+                "reason": "Warm and brief on day 3 with no invented familiarity."
               }
             ]
           },
@@ -99,13 +99,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"Two in a row says you will\" is consistent with the recorded done days."
+                "reason": "'Two in a row' matches the recorded done days before today."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reminder with the plan details only; no invented familiarity."
+                "reason": "Encouraging and specific to the step, with no overfamiliar claims."
               }
             ]
           },
@@ -113,16 +113,10 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "honest-memory",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks about the workout and proof without stating any unsaved fact."
-              },
-              {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Neutral follow-up, nothing overly personal."
+                "reason": "A plain follow-up asking how it went, with no familiarity overreach."
               }
             ]
           },
@@ -133,44 +127,26 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"Work days like that happen\" reflects what Jess said about her crazy day, not an invented fact."
+                "reason": "Refers only to the lunch workout she just reported, with no invented facts."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief, no overfamiliar language in the first week."
+                "reason": "Calm and non-judgmental about the late reply, with no overfamiliarity."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "pages-real",
-            "pass": true,
-            "borderline": false,
-            "reason": "Pages exist for Jess, the goal, the plan, and the day; no pages for passing mentions."
-          },
-          {
-            "rule": "learned-not-single",
-            "pass": true,
-            "borderline": true,
-            "reason": "Preferences page holds only labeled observations, but the 'replies fast to evening check-in' note rests on one instance, close to a learned preference."
-          },
-          {
-            "rule": "counted-proof",
-            "pass": false,
-            "borderline": true,
-            "reason": "The Nov 2 daily doc is titled 'Day 3 done at lunch', yet the step record files 2026-11-02 as missed, a done day filed as missed."
-          },
-          {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Quiet stretch recorded as one observation, no learned preference, one daily doc for the day, and no clearly invented facts; the missed/done conflict is the weak spot."
+            "reason": "Quiet stretch recorded as a single-day observation, not a learned preference; but the step list files Nov 2 as missed while the daily doc says done, a mismatch."
           }
         ],
-        "summary": "ZOH handled the one quiet stretch well: it kept texts short, asked for proof warmly, and filed a single observation without a learned preference. The Nov 2 record is inconsistent, with the daily doc calling the day done at lunch while the step record files it as missed."
+        "summary": "ZOH handled the one quiet stretch well: its three midday texts went unanswered until 7:30 pm and it kept nudging without guilt or invented facts. Memory filed the quiet stretch as a single-day observation rather than a learned preference, though the Nov 2 entry conflicts between the daily doc (done) and the step record (missed)."
       }
     }
   ]

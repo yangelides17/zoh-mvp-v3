@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:protein-target-delivered",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "ad6649958efc",
-    "voice": "fbc3a37c5b97",
+    "checks": "b8e735a11aa7",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "4f228d058419"
   },
@@ -71,19 +71,59 @@
       "grade": {
         "texts": [
           {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Cites the 6-day protein lunch streak, which matches the step log (Oct 27 to Nov 1 done)."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Card says ZOH raises it as its own idea and asks first, with no mention of the team as the source."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "The 6-day streak and the upgrade on Eat better both match the saved state and log."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says it will bring the idea up as its own once approved, so the framing is right."
+              },
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says what (about 100g target) and that nothing has gone out, but the when is only 'at a natural moment'."
+              }
+            ]
+          },
+          {
             "zohText": 3,
             "checks": [
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Six protein lunches and the 12:30 lunch at work match the step log and saved plan details."
+                "reason": "Six protein lunches in a row and the 12:30 work lunch match the log and saved plan."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Raises the 100g target as a question at a natural morning moment, with no mention of Yanni, the team or a founder suggestion."
+                "reason": "Raised in ZOH's voice as a morning idea tied to his lunch, with no mention of Yanni or the team."
               }
             ]
           }
@@ -91,24 +131,30 @@
         "conversation": [
           {
             "rule": "drafts",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Card and line say it will bring up the 100g target as its own idea and that nothing has gone out, but the timing is only 'at a natural moment', not the next morning text."
+            "reason": "Draft says what will happen but gives only 'when it fits' or 'a natural moment', not the next morning text or sooner if he texts first."
           },
           {
             "rule": "files-step",
             "pass": true,
             "borderline": false,
-            "reason": "Drafted it as an upgrade on Eat better with the goal named in one line, and the goal was clear so no question was needed."
+            "reason": "Drafted the protein target as an upgrade on Eat better and said so in a line."
+          },
+          {
+            "rule": "proposal-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "The morning text raises the idea in ZOH's voice, asks once, and does not say the plan already changed."
           },
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "After Do it, the 9 am text raises the protein target as ZOH's own idea, tied to the lunch streak, with one question and no team mention."
+            "pass": false,
+            "borderline": true,
+            "reason": "Morning text behaves as required, but the draft card and line to Yanni never state the next-morning timing."
           }
         ],
-        "summary": "ZOH handled the founder suggestion well: it drafted the upgrade with the goal named, said nothing had gone to Alex yet, and never claimed it was queued. The morning text raised the protein target in ZOH's voice tied to his real six-day lunch streak, with one question and no mention of the founders, though the draft's timing was vaguer than the 'next morning text' the case expected."
+        "summary": "ZOH handled the founder request well: it drafted the 100g protein target as an upgrade on Eat better, said nothing had gone to Alex, and the morning text raised it as its own idea, tied to his lunch streak, with one question. The one miss is the drafts, which said 'when it fits' or 'a natural moment' rather than naming the next morning text."
       }
     }
   ]

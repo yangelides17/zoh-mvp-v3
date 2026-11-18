@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:planning-city-ask",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:17:34.186Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "e893af010603",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "8efa08f59934"
   },
@@ -88,19 +88,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end."
+                "reason": "One sentence with a single question about the city."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown, hashtags or filler."
+                "reason": "Plain conversational text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific to yoga and her answer, with one clear question."
+                "reason": "Warm and light, with no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what she said about following YouTube videos."
               },
               {
                 "rule": "one-question",
@@ -117,25 +123,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, one light destination question with an easy out."
+                "reason": "Two sentences with one destination question, which the plan rules allow once."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain language, no formatting."
+                "reason": "No markdown or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Acknowledges Chicago naturally and keeps the energy warm."
+                "reason": "Acknowledges Chicago warmly and asks lightly, with a not-sure exit."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what she has said."
+                "reason": "Invents no facts about her."
               },
               {
                 "rule": "one-question",
@@ -152,31 +158,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 8 to 9 lines, which is within the allowed plan length."
+                "reason": "Plan text runs about 8 to 9 lines, which is at the edge of the allowed length for a plan."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Bullets are plain and no markdown headings are used."
+                "reason": "Uses a plain bullet list with no markdown headings."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, ties the plan to her stiffness reason and ends with one question."
+                "reason": "Warm and specific to her stated reason, with no overfamiliar lines."
               },
               {
                 "rule": "honest",
                 "pass": true,
-                "borderline": true,
-                "reason": "Uses her stated reason and ZOH's own suggestions; the hips and back focus is a reasonable suggestion, not a fact about her."
+                "borderline": false,
+                "reason": "Uses her stated goal, time and place, plus a general stretching rationale."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 gives what (30-minute flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+                "reason": "Day 1 gives what (30-minute flow), where (living room), when (6:30 pm today) and how long."
               },
               {
                 "rule": "one-question",
@@ -193,25 +199,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one commitment question."
+                "reason": "Two sentences with a single commitment question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain wording, no formatting."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, asks for commitment in its own words without showing the plan again."
-              },
-              {
-                "rule": "honest",
-                "pass": true,
-                "borderline": false,
-                "reason": "Restates only the plan details already agreed."
+                "reason": "Sincere and not affectionate, and the commitment ask is in its own words."
               },
               {
                 "rule": "one-question",
@@ -224,13 +224,49 @@
         ],
         "conversation": [
           {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The city and destination questions came before the plan, one at a time, with no extra questions after it."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete what, where, when, schedule and photo or video proof that fits a YouTube-following yoga routine."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination, day 1 step, schedule, proof and a short progression line without a list of future steps."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once, lightly, with a not-sure exit; the plan was built from the answer she gave."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks whether she is officially committing, in its own words, without re-showing the plan."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a bullet list ending with the question what do you think."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "City asked before the plan in ZOH 1, plan shown at 6:30 pm for 30 minutes, 'what do you think' asked, then commitment asked without re-showing the plan; saving the time zone can't be seen in the transcript."
+            "reason": "Asks city first, then destination, shows the 6:30 pm 30-minute plan, and asks for commitment after looks good; the time-zone save is not visible in the transcript."
           }
         ],
-        "summary": "ZOH handled this regression case well: it asked for her city before the plan, asked once and lightly about the destination, showed a concrete 6:30 pm, 30-minute plan with proof, and then asked for commitment without repeating the plan. The only gap is that the saved time zone isn't visible in the transcript, so that part is unverified."
+        "summary": "ZOH followed the regression script closely: it asked for her city before the plan, asked once and lightly about her destination, showed a concrete 6:30 pm, 30-minute plan with a photo proof, and then asked for commitment in its own words without repeating the plan. The only soft spots are that the plan text runs near the length limit and the time-zone save can't be confirmed from the transcript."
       }
     },
     {
@@ -309,7 +345,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Two short sentences, one question at the end."
               },
               {
                 "rule": "plain-words",
@@ -321,13 +357,13 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and steady, with no emoji, which suits the setting."
+                "reason": "Warm, direct and sincere, with no emoji row or overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what she said about YouTube videos."
+                "reason": "Uses only what she said about YouTube videos; invents nothing."
               },
               {
                 "rule": "one-question",
@@ -344,31 +380,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences, one question."
+                "reason": "Three short sentences, one question at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown."
+                "reason": "No markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct; the destination ask is light and allows 'not sure yet'."
+                "reason": "Warm and brief; the destination ask is light and notes that 'not sure yet' is fine."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms the city she gave and uses her 6:30 pm time."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms the Chicago save and carries on with the next question."
+                "reason": "Restates the confirmed city and time without inventing anything."
               },
               {
                 "rule": "one-question",
@@ -384,32 +414,38 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Plan presentation runs about 8 lines, at the allowed limit for a plan text."
+                "borderline": false,
+                "reason": "A plan-presenting text of about 8 lines, within the allowed length."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain • list with no markdown."
+                "reason": "Plain • list with no markdown; no hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific to her goal, and ends with a single question."
+                "reason": "Energy is steady and warm, with no overfamiliar language."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses her stiffness goal and the 6:30 pm, 30-minute details she gave."
+                "reason": "Plan uses her stated goal, living room, 6:30 pm and 30 minutes plus concrete suggestions."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 gives what (yoga flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+                "reason": "Day 1 gives what (30-minute flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan text carries the next move: a 'What do you think?' question."
               },
               {
                 "rule": "one-question",
@@ -426,25 +462,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "One sentence with one question."
+                "reason": "One sentence with a single question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Direct and warm, though 'officially committing' leans slightly stock."
+                "borderline": false,
+                "reason": "Asks for a real commitment in natural words without repeating the whole plan."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates only the plan details she already approved."
+                "reason": "Restates only the plan she already agreed to."
               },
               {
                 "rule": "one-question",
@@ -466,40 +502,82 @@
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Concrete on what, where, when and schedule, with a photo or voice note proof that fits a home yoga routine."
+            "reason": "Concrete what, how much, where, when and every day, with a photo or voice note proof that fits a YouTube workout."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows the destination, day 1 step, schedule, proof and a general progression line without a future-step list."
+            "reason": "Shows destination, day 1 step, schedule and proof, plus a short progression line with no future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "She gave a destination after one light ask, and the plan locks smoothly."
           },
           {
             "rule": "commitment",
             "pass": true,
-            "borderline": true,
-            "reason": "Asks for commitment in its own words after 'looks good!' without re-showing the plan."
+            "borderline": false,
+            "reason": "Asks 'are you officially committing' in natural words after 'looks good!', with nothing else in the text."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today, with no push to tomorrow."
+            "reason": "Day 1 is set for today, starting today."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 6:30 pm step is outside default quiet hours, so no note is needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Quiet hours are never raised after the plan is agreed."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "No tester-set quiet hours are involved."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Nutrition does not apply to this yoga plan."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": false,
+            "reason": "No goal switch happens in this conversation."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "No revisions are requested."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a • list ending with 'What do you think?'; it was not re-shown before commitment."
+            "reason": "Plan shown once as a • list ending in one question, and not shown again before the commitment ask."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Asks the city first on its own, saves Chicago, asks the destination once lightly, shows the 6:30 pm 30-minute plan, then asks for commitment without re-showing it."
+            "reason": "Asks for the city before the plan, saves time zone, asks one light destination question, shows the plan at 6:30 pm, then asks for commitment without re-showing it."
           }
         ],
-        "summary": "ZOH handled the regression case well: it asked for her city first, saved Chicago, asked about her destination once, showed a concrete 6:30 pm plan, and then asked for commitment without repeating the plan. The only minor softness is a slightly stock phrase in the commitment ask and a plan text at the upper edge of the length limit."
+        "summary": "ZOH handled the regression case well: it asked for Rosa's city before the plan, asked one light destination question, showed a concrete 6:30 pm, 30-minute plan with proof and a 'what do you think?' close, and then asked for commitment without repeating the plan. Every text stayed short, plain and warm, and nothing was invented about her."
       }
     },
     {
@@ -578,7 +656,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, within the one-to-three limit."
+                "reason": "Two short sentences with one question."
               },
               {
                 "rule": "plain-words",
@@ -590,13 +668,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and encouraging with no emoji row or overfamiliarity."
+                "reason": "Warm and encouraging with no overfamiliarity or emoji row."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers only to what she said about YouTube videos."
+                "reason": "Refers only to what she said about YouTube flows."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; asks a useful question."
               },
               {
                 "rule": "one-question",
@@ -613,25 +697,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, one question at the end."
+                "reason": "Two sentences with one question about the destination."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown."
+                "reason": "Plain text, no markdown."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and brief, with no pressure or affection."
+                "reason": "Warm and direct, not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the city she gave to set the 6:30 pm local time."
+                "reason": "Uses the city she gave and the 6:30 pm time already known."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges Chicago and moves the conversation forward."
               },
               {
                 "rule": "one-question",
@@ -648,31 +738,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 9 lines including the closing, near the 8-line limit."
+                "reason": "Plan presentation is allowed about 8 lines; this runs slightly longer with an opener and closing paragraph."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain bullets with no markdown headings or hashtags."
+                "reason": "Bullet list is plain; no markdown headings or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic with one emoji as punctuation; sincere, not affectionate."
+                "reason": "Energetic and warm with one emoji as punctuation."
               },
               {
                 "rule": "honest",
                 "pass": true,
-                "borderline": true,
-                "reason": "Search phrase is a ZOH suggestion; 'tight back and hips' goes slightly beyond her 'stiff' but is reasonable."
+                "borderline": false,
+                "reason": "Uses her goal, 6:30 pm, 30 minutes and the YouTube habit she described."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 gives what (yoga flow), where (living room), when (6:30 pm) and how long (30 minutes)."
+                "reason": "Day 1 gives what, where, when and how long."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Presents the plan and asks for her view."
               },
               {
                 "rule": "one-question",
@@ -689,25 +785,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question."
+                "reason": "Two short sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no formatting."
+                "reason": "Plain conversational text."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, no emoji or affection."
+                "reason": "Warm, brief and not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to the plan she approved, with no invented facts."
+                "reason": "Refers to the agreed time and start date only."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Moves straight to the commitment ask."
               },
               {
                 "rule": "one-question",
@@ -720,49 +822,55 @@
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "City asked first as one question, then destination asked once, plan shown at 6:30 pm for 30 minutes, then commitment asked without re-showing the plan."
-          },
-          {
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "City and destination questions both came before the plan, one at a time."
+            "reason": "Destination and city questions came before the plan, one at a time, with no closing line before it."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Concrete plan with what, where, when, schedule and a fitting photo or voice-note proof."
+            "reason": "Concrete: 30-minute flow, living room, 6:30 pm daily, with a photo or screenshot proof that fits YouTube."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows destination, day 1 step, schedule, proof and a line on how each day shapes the next."
+            "reason": "Shows destination, day 1, schedule, proof and a one-line progression note with no future step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Destination was given and asked once lightly before the plan, with a not-sure option."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "Asks in natural words whether she's committing every day at 6:30 pm starting today."
+            "reason": "Asks in her own words whether she's committing, every day at 6:30 pm starting today."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today."
+            "reason": "Day 1 is set for today at 6:30 pm."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "Plan shown as a bullet list before the 'looks good' reply, and not repeated after it."
+            "reason": "Plan shown as a bullet list ending with a question, and not shown again after looks good."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "City asked before the plan, time zone acknowledged, plan at 6:30 pm for 30 minutes, asks for thoughts, then commitment without re-showing the plan."
           }
         ],
-        "summary": "ZOH handled this regression case well: it asked for the city first, asked once about the destination, showed a concrete 6:30 pm plan, and asked for the commitment without re-showing the plan. The only soft spots are the plan text running near the length limit and a search phrase slightly beyond her wording."
+        "summary": "ZOH handled the regression well: it asked for her city before the plan, asked once about her destination, showed a concrete 6:30 pm, 30-minute plan with a fitting proof method, and then asked for commitment without repeating the plan. The only soft spot is that the plan text runs a bit long for the short-text rule, though plan presentations are allowed more room."
       }
     }
   ]

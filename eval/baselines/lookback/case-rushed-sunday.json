@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:rushed-sunday",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:22:44.023Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "ec8abc0b0559",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "02bbe1300e9f"
   },
@@ -91,13 +91,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end about copying people around them."
+                "reason": "Two sentences with one question at the end, as required."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and celebratory with one emoji as punctuation, no emoji row or affection."
+                "reason": "Warm and celebratory, with the 🙌 used as punctuation, not a row of emoji."
               }
             ]
           },
@@ -108,31 +108,37 @@
                 "rule": "recap",
                 "pass": true,
                 "borderline": true,
-                "reason": "Three backed bullets (5 full days, chapter 7 to 9, Nov 30 standing) then one question; the closing question is not very easy."
-              },
-              {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": false,
-                "reason": "Days count, voice recaps and topics all match the step log and proof record; misses left out."
+                "reason": "Three backed items framed as progress and one closing question, but the Nov 30 position is only loosely stated as 'chapter 9 is now behind you'."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "Lists recaps on topics without claiming understanding or application of any lesson."
+                "reason": "Claims no understanding; it lists recaps on topics rather than saying the lessons were mastered."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Five full days, voice recaps and chapter progression all match the step log and proof records."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording appears."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Recap list is about five short lines with one question; within the recap allowance."
+                "borderline": true,
+                "reason": "A brief acknowledgment, a short recap list and one question at the end; the recap runs about 6 lines, within the allowed range."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific acknowledgment of the long day with one flexed-arm emoji."
+                "reason": "Warm and encouraging with one 💪 as punctuation, not overfamiliar."
               }
             ]
           },
@@ -141,15 +147,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Three sentences, but the question is followed by a closing line rather than ending the text."
+                "reason": "Four sentences, with the question in the middle rather than at the end, exceeding the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm, warm and specific with one moon emoji; fits a tired tester."
+                "reason": "Light, warm and not overfamiliar, with a single 🌙."
               }
             ]
           },
@@ -160,13 +166,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Brief one-line-style confirmation with no question, as the case asked."
+                "reason": "One line confirming the lock, with no question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief with a single emoji; no overfamiliarity."
+                "reason": "Warm and brief, with a single emoji as punctuation."
               }
             ]
           }
@@ -176,28 +182,28 @@
             "rule": "natural-turn",
             "pass": true,
             "borderline": true,
-            "reason": "Turns to the week in the same text after a short acknowledgment, though 'Zooming out' is a little abrupt after a thin reply."
+            "reason": "After the thin 'long day' reply it acknowledges briefly and turns to the week, though the 'Zooming out' pivot is a bit abrupt."
           },
           {
             "rule": "reflection-first",
             "pass": true,
-            "borderline": true,
-            "reason": "Acknowledges the thin reflection briefly, but the week talk still adds a 'what to push on' question."
+            "borderline": false,
+            "reason": "It stops reflection questions after a thin answer and turns to the week without extra questions."
           },
           {
             "rule": "next-step",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Chapter 10, 8 pm, couch, phone in kitchen and voice recap are set and asked if it works, but the 20-minute length is only implied."
+            "reason": "The next step gives what, where, and when but omits how long, even though the saved step is about 20 minutes."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Voice note celebrated, recap turns to week without permission ask, next step asked; the closing question is not very easy and 'no need to answer' edges toward a permission framing."
+            "reason": "It celebrates the voice note, goes to the week without a permission ask, keeps the recap short, and ends with one question, though that question is not clearly easy."
           }
         ],
-        "summary": "ZOH celebrated the voice note, kept the reflection to one light question, and turned to a grounded three-bullet recap without an abrupt switch, following the regression guard against over-correcting. The weaker spots are the closing 'what do you want to push on next week' question after a tired reply and the next-step text leaving out the 20-minute length."
+        "summary": "ZOH handled the regression well: it kept the thin-reflection turn short, gave a grounded three-item recap, and confirmed the lock in one line. The main misses are a next-step text that omits the 20-minute length and a middle-of-text question that makes ZOH's reply run four sentences."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:kickoff-after-unrelated-chat",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "4fc6918febcf",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "d5f91b2ae8d9"
   },
@@ -58,19 +58,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four short sentences, including a fragment opener and a closing question; slightly over the one-to-three-sentence limit."
-              },
-              {
-                "rule": "step-defined",
-                "pass": false,
-                "borderline": true,
-                "reason": "Gives what (ten pages of Project Hail Mary), where (couch) and when (7), but leaves out how long (the known 20 minutes)."
+                "reason": "Four sentences including the closing 'You in?', slightly over the one-to-three limit for a reply that isn't teaching."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Acknowledges the rough night without guilt or fake urgency."
+                "reason": "Acknowledges the bad night with 'Even on three hours of sleep, ten pages is doable' and adds no pressure or guilt."
               },
               {
                 "rule": "plain-words",
@@ -82,7 +76,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confident, warm and pushy-level without overfamiliarity; no emoji row."
+                "reason": "Short, warm and direct with no emoji row or overfamiliarity."
               }
             ]
           }
@@ -92,10 +86,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH answers the coffee line briefly, puts tonight's step (ten pages on the couch at 7) in its reply, and no 9 am kickoff follows."
+            "reason": "The reply brings up tonight's step (ten pages of Project Hail Mary on the couch at 7), and no kickoff follows in the transcript, which is one of the two accepted outcomes."
           }
         ],
-        "summary": "ZOH handled the regression case as intended: it answered the coffee line briefly, carried today's step into its one reply, and did not send a repeat kickoff. The only issues are minor in that single text, which runs slightly long and leaves out the 20-minute length."
+        "summary": "ZOH met the coffee line briefly and did not rehash the bad night, and it put tonight's step in front of Jordan in the reply with no duplicate kickoff, which is the accepted outcome for this regression case. The one weak spot is that the reply runs to four sentences, slightly past the short-text limit."
       }
     }
   ]

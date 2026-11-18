@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:followup-no-proof",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:14:43.857Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "2ad6c6451902",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "3da436dd9d95"
   },
@@ -80,7 +80,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the run at 6 at the park, which is today's step and its time."
+                "reason": "Names the run at 6 and the park as the place to be, so today's step is clear."
               },
               {
                 "rule": "warm-open",
@@ -91,26 +91,32 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Four short sentences with one question at the end, and the teaching tip is allowed to run longer."
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "teaching-fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "The tip to start slower fits an easy-pace run and is grounded in the step."
+                "reason": "A single pacing tip for the run, which fits a first easy run."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and free of pressure or urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy is appropriate and warm, with no emoji row or affection."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain text with no markdown or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and energetic without being overfamiliar."
               }
             ]
           },
@@ -118,16 +124,16 @@
             "zohText": 2,
             "checks": [
               {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": true,
+                "reason": "A follow-up that refers to the run but does not restate what or where; borderline for a step-day nudge."
+              },
+              {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Jordan!\" and a check on the time."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Neutral check-in with no pressure or urgency."
+                "reason": "Opens with \"Hey Jordan!\""
               },
               {
                 "rule": "short",
@@ -136,16 +142,22 @@
                 "reason": "Two sentences with one question at the end."
               },
               {
-                "rule": "plain-words",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown."
+                "reason": "Asks how it went with no pressure."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and appropriately casual."
+                "reason": "Calm, warm follow-up with no emoji row."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown."
               }
             ]
           },
@@ -153,34 +165,28 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with the tester's name and celebrates the run."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short, with one ask at the end for the proof."
+                "reason": "Three short sentences; the proof ask is the closing line, with no question mark."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebratory with no guilt or urgency."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain text with one emoji as punctuation."
+                "reason": "Celebrates without guilt or pressure."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype is warm and suits the win, with one emoji."
+                "reason": "Real energy on \"did it!\" with one emoji at the end of a beat."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or hashtags."
               }
             ]
           },
@@ -188,28 +194,28 @@
             "zohText": 4,
             "checks": [
               {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": true,
-                "reason": "\"Words alone are too easy to game\" leans slightly toward suspicion, though it stays warm."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Three sentences with one question at the end, asking for anything else he can send."
               },
               {
-                "rule": "plain-words",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown."
+                "reason": "Says the miss happens and does not accuse him; the proof reason is stated plainly."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, matches the tone and says why proof matters without accusing."
+                "reason": "Warm and sincere, with playful \"skata\" as light texture."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
               }
             ]
           }
@@ -218,11 +224,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Check-in before 6, then a follow-up at 6:35 asking how it went. \"did it!\" got energy and a proof ask with no check mark, and the forgot-to-record reply stayed warm and asked for anything still sendable. It does not say \"today\" explicitly and the game line is slightly suspicious."
+            "borderline": false,
+            "reason": "Short 5:50 check-in, a 6:35 follow-up asking how it went, real energy on \"did it!\" with a proof ask, then a warm no-accusation ask for anything sendable, without counting it."
           }
         ],
-        "summary": "ZOH followed the regression script closely: a warm check-in before 6, a single follow-up at 6:35, real energy on \"did it!\", and proof asked for without counting the run. The main soft spots are the \"too easy to game\" wording and not explicitly asking for proof to be sent today."
+        "summary": "ZOH handled the regression well: the pre-run check-in, the follow-up at 6:35, and the \"did it!\" response all fit the expected flow. When Jordan forgot to record, it stayed warm, explained why proof matters, asked for alternatives, and did not count the run without proof."
       }
     },
     {
@@ -293,7 +299,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the run, the park, 6 pm and the 30 minutes of easy pace."
+                "reason": "Names today's step: the run at 6 in the park, 30 minutes easy."
               },
               {
                 "rule": "warm-open",
@@ -305,25 +311,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question."
+                "reason": "Three sentences with no question."
               },
               {
-                "rule": "step-defined",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what, where, when, how long and pace clearly."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energetic, sincere, one emoji as punctuation."
+                "reason": "Friendly reminder with no pressure or urgency."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown or filler."
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, and sincere."
               }
             ]
           },
@@ -334,7 +340,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": true,
-                "reason": "Names the run at the park but not the time or length, which a follow-up doesn't need."
+                "reason": "Names the run and the park but not the 6 pm time; it is a follow-up, not a kickoff."
               },
               {
                 "rule": "warm-open",
@@ -343,28 +349,28 @@
                 "reason": "Opens with \"Hey Jordan!\"."
               },
               {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks how it went with no pressure or urgency."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
                 "reason": "One sentence with one question at the end."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and neutral, no overfamiliarity."
+                "reason": "Asks how it went with no guilt or urgency."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain words, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and low-key, fitting a follow-up."
               }
             ]
           },
@@ -372,28 +378,34 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "no-guilt",
+                "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the run and asks for proof without shaming."
+                "reason": "Opens with the tester's name, \"Nice work, Jordan\"."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end."
+                "reason": "Two sentences with one question at the end."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Real energy on \"did it!\" with one emoji as punctuation."
+                "reason": "Celebrates the effort and asks for proof with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown or hashtags."
+                "reason": "Plain words with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Real energy on the \"did it!\" and a quick ask for the Strava screenshot."
               }
             ]
           },
@@ -401,28 +413,34 @@
             "zohText": 4,
             "checks": [
               {
-                "rule": "no-guilt",
+                "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and non-accusing about the forgotten Strava record."
+                "reason": "Opens warmly with \"Ah, that happens, Jordan.\""
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "borderline": true,
+                "reason": "Three sentences with one question, though the question runs long with examples."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and calm, sincere, no emoji row."
+                "reason": "Says it happens, not accusatory, and explains why proof matters without caving."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, asks for anything sendable today."
               }
             ]
           }
@@ -431,11 +449,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Sends a follow-up asking how it went, celebrates \"did it!\", asks for proof without a check mark, and explains why proof matters without caving; it doesn't say \"today\" in the proof ask."
+            "borderline": false,
+            "reason": "Follow-up asks how it went, \"did it!\" gets energy and a proof ask with no check mark, and the forgotten record gets a warm, non-accusing ask for anything sendable today with a brief why."
           }
         ],
-        "summary": "ZOH handled the follow-up well: it sent a warm check-in, a short how-it-went nudge, celebrated the \"did it!\" and asked for proof without counting the run. The only soft spot is that the final proof ask doesn't say the proof must come today, so the regression check is borderline."
+        "summary": "ZOH handled the regression well: it sent a short check-in before 6, a warm one-question follow-up, and energetic celebration on \"did it!\" with a proof ask and no check mark yet. When Jordan forgot to record, it stayed warm, explained why proof matters, and asked for alternatives without caving."
       }
     },
     {
@@ -506,31 +524,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the run at 6 at the park, which is today's step, and the time."
+                "reason": "Names the run and time (6) and the park, so today's step is clear."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Jordan!\""
+                "reason": "Opens with \"Hey Jordan!\" as a text ZOH starts itself."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Runs four short sentences with one question at the end, slightly over the limit."
+                "reason": "Runs about four sentences, but it teaches a pacing point for the step, which can run longer."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pure encouragement with no pressure or urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and energetic without being overfamiliar."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "No markdown, hashtags or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, direct, sincere, with no overfamiliarity."
               }
             ]
           },
@@ -538,16 +562,16 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"Hey Jordan!\""
-              },
-              {
                 "rule": "names-commitment",
                 "pass": false,
                 "borderline": true,
-                "reason": "Follow-up only says \"the run's either happening or just wrapped\" and never names the step again."
+                "reason": "Asks \"How did it go?\" without naming the run, distance or place; a follow-up with no word yet only asks how it went."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens \"Hey Jordan!\" as a self-started text."
               },
               {
                 "rule": "short",
@@ -559,13 +583,19 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or urgency; a simple check on how it went."
+                "reason": "Neutral check-in with no guilt or fake urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and casual, appropriate for a follow-up."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown."
+                "reason": "Plain text with no markdown or filler."
               }
             ]
           },
@@ -576,19 +606,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences, with no extra questions."
+                "reason": "Three short sentences with no extra question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": true,
-                "reason": "\"Nice work getting out there\" is warm but flat for a \"did it!\" win; the energy is low."
+                "reason": "Celebrates with one emoji, but \"Nice work\" is fairly mild for a \"did it!\" moment."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for proof without pressure or accusation."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words; the emoji sits at the end as punctuation."
+                "reason": "No markdown or hashtags."
               }
             ]
           },
@@ -596,28 +632,28 @@
             "zohText": 4,
             "checks": [
               {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "\"Ah, that stings, but it happens\" is kind, with no accusation."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and firm about proof without caving."
+                "reason": "Warm and sincere without accusing him or caving on proof."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Ah, that stings, but it happens\" is gentle and guilt-free."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no filler or markdown."
+                "reason": "Plain words with no formatting."
               }
             ]
           }
@@ -627,16 +663,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Check-in before 6, follow-up at 6:35 asking how it went, quick proof ask after \"did it!\", and warm, non-accusing refusal to count it. The \"did it!\" energy is modest and \"I'll log it\" is slightly loose."
-          },
-          {
-            "rule": "no-restating",
-            "pass": true,
-            "borderline": false,
-            "reason": "The step and time are not restated in the later replies to the tester."
+            "reason": "Check-in at 5:50, a self-started follow-up at 6:35, proof asked warmly with why, and no check mark without proof. Energy on \"did it!\" is mild and the follow-up doesn't name the run."
           }
         ],
-        "summary": "ZOH handled the regression well: it sent a warm check-in before 6, followed up at 6:35 without a lecture, and held firm on proof after the forgotten Strava recording, asking for alternatives and never counting it. The main weaknesses are that the follow-up doesn't name the step, and the reply to \"did it!\" was flatter than the win deserved."
+        "summary": "ZOH handled the regression well: a check-in before 6, a warm follow-up at 6:35, and a warm, non-accusing request for proof that didn't cave when Jordan forgot to record. The main misses are mild: the follow-up doesn't name the run, and the celebration of \"did it!\" could carry more energy."
       }
     }
   ]

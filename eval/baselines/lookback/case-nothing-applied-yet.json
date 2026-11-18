@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:nothing-applied-yet",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:22:44.023Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "db94275e7ffd",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "5cb63e682075"
   },
@@ -76,32 +76,38 @@
               {
                 "rule": "recap",
                 "pass": true,
-                "borderline": false,
-                "reason": "Lists two real wins from the record (Monday standup, Wednesday prep) plus a count line, framed as progress made, then one question."
+                "borderline": true,
+                "reason": "Two real wins (Monday standup, Wednesday prep) are backed by the record; the third bullet lists misses rather than progress, which is a borderline fit."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says she 'did it with your heart racing' and that prep 'helped a lot' without calling anything mastered or understood."
+                "reason": "Calls prep 'your best tool' and says 'prep helped a lot' without claiming she has mastered speaking up."
               },
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Days and counts match the log: Mon done, Tue froze, Wed prepped, Thu cancelled, two done in full."
+                "reason": "Monday standup, heart racing, Wednesday prep and Tuesday freeze all match the proof and step log."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording appears."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Recap list runs about 7 short lines with one question at the end, within the recap allowance."
+                "borderline": false,
+                "reason": "A short recap list plus about three sentences ending in one question, within the allowed length for a recap."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct with a 'Hey Priya!' opener, no overfamiliarity or emoji row."
+                "reason": "Warm and sincere with no emoji or overfamiliarity; energy is reasonable for Pushy."
               }
             ]
           },
@@ -118,13 +124,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm, warm acknowledgment that the cancelled meeting is not on her, with no guilt or hype."
-              },
-              {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": false,
-                "reason": "'Two steps done out of five days' matches the log for Nov 2 to 6."
+                "reason": "Warm and not overfamiliar; it acknowledges the slow week without guilt."
               }
             ]
           },
@@ -132,22 +132,22 @@
             "zohText": 3,
             "checks": [
               {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to Wednesday's prep, which is in the record, and makes no new factual claim."
+              },
+              {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Six sentences, but it is a fully defined step text, which may run longer; one question at the end."
+                "reason": "Several sentences, but a step-defining text may run longer, and it ends with one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and steady with 'No stress, Priya' and a clear push, not overfamiliar."
-              },
-              {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": false,
-                "reason": "Points to what worked on Wednesday (night-before prep) and the 10 am standup, both in the record."
+                "reason": "Warm and firm, with no guilt, fake urgency or emoji row."
               }
             ]
           }
@@ -155,12 +155,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "Recap is honest with no inflation or couldn't-before framing, but on 'felt slow' ZOH asked a question instead of naming the two real wins, and the step lands on Monday with a yes-check as expected."
+            "reason": "The recap is honest and not inflated, and Monday's step is fully defined and asked if it works; however, the slow-week reply has an extra question and never names the two wins explicitly."
           }
         ],
-        "summary": "ZOH's 6 pm recap avoided inflating a thin week: it named the real Monday and Wednesday wins, framed prep as useful without mastery, and raised the end-of-month goal lightly with one question. After 'felt slow' it asked what made the week slow rather than naming the two wins, but it did land a fully defined Monday step and asked if it works."
+        "summary": "ZOH's 6 pm recap stayed honest: it credited the two real wins, framed prep as a tool rather than mastery, and avoided guilt. The slow-week reply was warm and ended with a fully defined Monday step, though it asked an extra question after her thin reply and did not spell out both wins."
       }
     }
   ]

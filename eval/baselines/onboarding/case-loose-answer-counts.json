@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:loose-answer-counts",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "f2050ecfa8ff",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "198972761e8e"
   },
@@ -59,25 +59,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, brief opener with a name and no overfamiliarity."
+                "reason": "Warm and measured at Pushy-level energy, with no overfamiliarity or emoji issues."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks which book she's reading, a natural follow-up to her reading habit goal."
+                "reason": "Asking which book she is reading fits a reading habit and is a needed plan input."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks nothing she already gave: no time, place, length or goal repeated."
+                "reason": "Does not re-ask the time, place, length or routine she already gave."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only refers to Kindle, in bed, reading habit, all of which she said."
+                "reason": "Only refers to the Kindle, bed and nightly reading she mentioned."
               },
               {
                 "rule": "not-asked",
@@ -99,58 +99,58 @@
             "rule": "first-text",
             "pass": false,
             "borderline": false,
-            "reason": "Text 1 never says it's ZOH, what it does, that stop works anytime, or that coaching style can be changed."
+            "reason": "The first text never says it's ZOH, what it does, that stop works anytime, or that she can change coaching style."
           },
           {
             "rule": "nothing-twice",
             "pass": true,
             "borderline": false,
-            "reason": "Only one ZOH text, and it asks nothing she already answered."
+            "reason": "No clearly answered detail is asked again."
           },
           {
             "rule": "covers-inputs",
-            "pass": true,
+            "pass": false,
             "borderline": false,
-            "reason": "Her first message already gave what, where, when and how long, so nothing further was needed before the plan."
+            "reason": "The conversation ends after one text with the book still unknown and no plan questions finished."
           },
           {
             "rule": "tracking",
             "pass": true,
             "borderline": false,
-            "reason": "No app or tool question asked, and none pushed."
+            "reason": "No question about existing apps or tools, so nothing is pushed."
           },
           {
             "rule": "goal-list",
             "pass": true,
             "borderline": false,
-            "reason": "A daily reading habit is a starter goal and needed no narrowing."
+            "reason": "A reading habit is an on-list starter goal."
           },
           {
             "rule": "style-offer",
             "pass": false,
             "borderline": false,
-            "reason": "No line saying she can change how ZOH coaches anytime."
+            "reason": "Never tells her she can change how ZOH coaches anytime."
           },
           {
             "rule": "wrap-up",
             "pass": false,
             "borderline": false,
-            "reason": "Onboarding isn't finished: it asks about the book without carrying straight on into the plan."
+            "reason": "Onboarding was cut off before any plan was asked for or shown."
           },
           {
             "rule": "length",
             "pass": true,
             "borderline": false,
-            "reason": "A single short text, well within limits."
+            "reason": "One short text, well under the limit."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "It no longer asks for minutes, time, place or length again, but the intro is missing and the plan carry-on hasn't started."
+            "borderline": false,
+            "reason": "It does not re-ask how long, when, where or what; it asks only which book, a plan input she never gave."
           }
         ],
-        "summary": "ZOH avoided the regression: it didn't re-ask how long, when, where or what, and its single reply was short, warm and on-goal. It still misses the required intro (what ZOH is, stop anytime, change coaching style) and hasn't moved into the plan, so this text fails the first-text and style-offer checks."
+        "summary": "ZOH avoided the regression: it did not re-ask how many minutes, when or where, and it asked only for the book, which the plan needs. However, the single first text omitted the required intro (what ZOH is, stop anytime, changing coaching style), and the conversation ended before onboarding finished."
       }
     }
   ]

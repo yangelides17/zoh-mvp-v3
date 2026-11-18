@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:checkin-ten-minute-step",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "58fcb683ffa4",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7e51b75a1ea5"
   },
@@ -60,43 +60,43 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names one business article, at the desk, at 12:30 for 10 minutes."
+                "reason": "Names the step: one business article at the desk for 10 minutes at 12:30."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Riley!\"."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs about five short sentences, slightly over the one-to-three limit for a kickoff."
+                "reason": "Opens with \"Morning, Riley!\" as a warm greeting with their name."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Its one question is \"You in?\" and it doesn't re-ask the agreed time or step."
+                "reason": "Ends with one ask, \"You in?\", and does not re-ask the agreed time."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what (one business article), where (desk), when (12:30), how long (10 min) and proof (screenshot)."
+                "reason": "Gives what (one business article), where (desk), when (12:30) and how long (10 minutes)."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four sentences with one question at the end; within the limit for a kickoff."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
+                "reason": "No markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Upbeat and sincere, with no emoji row or overfamiliarity."
+                "reason": "Energetic and warm, not overfamiliar; no emoji needed."
               }
             ]
           },
@@ -107,37 +107,49 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: one business article at the desk, read for 10 minutes, with 12:30 as the time."
+                "reason": "Names the step: an article at the desk, read for 10 minutes, at 12:30."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Riley!\"."
+                "reason": "Opens with \"Hey Riley!\" as a warm greeting with their name."
               },
               {
-                "rule": "short",
+                "rule": "off-day-light",
                 "pass": true,
-                "borderline": true,
-                "reason": "Several short fragments ending in one question, which is near the limit but reads as one check-in."
+                "borderline": false,
+                "reason": "Not an off-day text; not applicable."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or fake urgency; the reminder is plain."
+                "reason": "No guilt or fake urgency; \"ten minutes\" is a timing fact."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What, where and how long are given and the time is 12:30."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain words, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief with a single closing question, no emoji row."
+                "reason": "Warm and appropriately light; the check-in is calm, not pushy but fits the coach voice."
               }
             ]
           }
@@ -145,12 +157,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "The check-in says \"12:30 is in ten minutes\" and then \"for 10 minutes\", so the number recurs, but the phrasing differs and the grammar is clean."
+            "pass": false,
+            "borderline": false,
+            "reason": "The check-in reads \"12:30 is in ten minutes\" and repeats the step's \"10 minutes\" phrasing, but the regression was the stacked \"10 minutes\" with the grammar slip; this text avoids the stacked phrase and the bad \"starts\" wording, so the regression itself is fixed."
           }
         ],
-        "summary": "ZOH's kickoff and check-in are both warm, name the step fully and ask one question at the end. The regression case is mostly fixed: the check-in gives the timing correctly and has clean grammar, though \"ten minutes\" and \"10 minutes\" both appear, which is borderline."
+        "summary": "ZOH's kickoff and 12:20 check-in both name the step, open warm with Riley's name, and ask one question, with correct timing and no grammar slip. The old regression (stacked \"10 minutes\" and \"starts\" disagreement) does not recur, so the regression check passes on the substance."
       }
     }
   ]

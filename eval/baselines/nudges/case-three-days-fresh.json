@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:three-days-fresh",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "f7043478bcce",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "38be12c22f5d"
   },
@@ -129,7 +129,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names tonight's 10 pages of Project Hail Mary, in bed at 9, with the page-photo proof."
+                "reason": "Names 10 pages of Project Hail Mary in bed at 9 tonight."
               },
               {
                 "rule": "warm-open",
@@ -138,40 +138,34 @@
                 "reason": "Opens with \"Morning, Mike!\"."
               },
               {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Upbeat with no guilt or fake urgency."
-              },
-              {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Four short sentences with one question at the end, slightly over the three-sentence guideline."
+                "reason": "Runs about four short sentences including the question, slightly over the one-to-three limit."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Its only question is \"You in?\"; it doesn't re-ask the time."
+                "reason": "Ends with a single ask, \"You in?\"."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": true,
-                "reason": "Gives what, when and where; the length of 10 pages is implied rather than stated."
+                "borderline": false,
+                "reason": "Gives what (10 pages), where (bed), when (9 pm) and the proof."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm without being overfamiliar."
+                "reason": "Energetic and warm, with a single emoji-free, sincere tone."
               }
             ]
           },
@@ -182,19 +176,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question."
+                "reason": "Two short sentences with an emoji at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text; one emoji used as punctuation."
+                "reason": "No markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms the step warmly with \"Let's go, Mike.\""
+                "reason": "Warm, brief acknowledgment in the coach voice."
               }
             ]
           },
@@ -205,7 +199,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names 10 pages of Project Hail Mary, in bed, at 9 tonight."
+                "reason": "Names 10 pages of Project Hail Mary tonight at 9."
               },
               {
                 "rule": "warm-open",
@@ -217,13 +211,13 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or urgency pressure."
+                "reason": "No guilt, just a reminder of the time."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question."
+                "reason": "Two sentences, with no question, as a reminder."
               },
               {
                 "rule": "plain-words",
@@ -235,7 +229,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and steady, appropriate energy."
+                "reason": "Warm and sincere, with one emoji as punctuation."
               }
             ]
           },
@@ -246,7 +240,7 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the 10 pages of Project Hail Mary and the proof request."
+                "reason": "Names 10 pages of Project Hail Mary and the photo proof."
               },
               {
                 "rule": "warm-open",
@@ -258,13 +252,36 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly check-in with no pressure."
+                "reason": "Friendly check, no pressure or urgency."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question."
+                "reason": "Two sentences, no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no extra question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for proof without blame."
               },
               {
                 "rule": "plain-words",
@@ -275,14 +292,131 @@
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Its proof request repeats the earlier text almost word for word."
+                "borderline": false,
+                "reason": "Warm and firm, not overfamiliar."
               }
             ]
           },
           {
-            "zohText": 5,
+            "zohText": 6,
             "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names 10 pages of Project Hail Mary in bed at 9 tonight."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Mike!\"."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the miss factually and moves on without blame."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, a little over the one-to-three limit."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "One ask, \"You in?\"."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and brief."
+              }
+            ]
+          },
+          {
+            "zohText": 8,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names 10 pages of Project Hail Mary at 9 with photo proof."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Yo Mike!\"."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to the miss lightly, with no shaming."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              }
+            ]
+          },
+          {
+            "zohText": 9,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names tonight's 10 pages and the photo step."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Mike,\"."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Offers a way to log today with no pressure."
+              },
               {
                 "rule": "short",
                 "pass": true,
@@ -298,190 +432,86 @@
             ]
           },
           {
-            "zohText": 6,
+            "zohText": 10,
             "checks": [
-              {
-                "rule": "names-commitment",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names 10 pages of Project Hail Mary, in bed at 9, with the photo as proof."
-              },
-              {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"Morning, Mike!\"."
-              },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": true,
-                "reason": "Mentions yesterday's missed check mark without shaming; leans slightly toward a reproach."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences, more than the one-to-three limit for a kickoff."
-              },
-              {
-                "rule": "kickoff-one-ask",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks only \"You in?\"; the time and step aren't re-asked as questions."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": false,
-                "reason": "States what, where, when and the proof."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energy matches the Pushy level."
-              }
-            ]
-          },
-          {
-            "zohText": 7,
-            "checks": [
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with no question."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and brief, emoji used as punctuation."
-              }
-            ]
-          },
-          {
-            "zohText": 8,
-            "checks": [
-              {
-                "rule": "names-commitment",
-                "pass": true,
-                "borderline": true,
-                "reason": "Names getting in bed with Project Hail Mary and the page photo, but the 10 pages aren't restated."
-              },
-              {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"Yo Mike!\"."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Refers to the miss lightly and moves on."
+                "reason": "Firm about the missing photo but not shaming; mildly pointed."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with no question."
+                "reason": "Four short sentences, one ask at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain text."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energetic and warm; the Ana reference is grounded in the record."
-              }
-            ]
-          },
-          {
-            "zohText": 9,
-            "checks": [
-              {
-                "rule": "names-commitment",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names the 10 pages of Project Hail Mary and the page-photo proof."
-              },
-              {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"Hey Mike,\"."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": true,
-                "reason": "\"There's still time before 10\" adds a little deadline pressure."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with no question."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain text with one emoji."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Steady and warm."
-              }
-            ]
-          },
-          {
-            "zohText": 10,
-            "checks": [
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Five sentences, over the three-sentence limit for a non-teaching text."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": true,
-                "reason": "\"Too easy to game\" reads suspicious, which the proof guidance says to avoid."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": true,
-                "reason": "Firm and not mean, but the suspicious tone is off-voice."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain text with one emoji."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Same step repeated after the miss, which is the same or easier as required."
+          },
+          {
+            "rule": "recommit-saved",
+            "pass": true,
+            "borderline": false,
+            "reason": "No day-3 recommit occurs in this exchange."
+          },
+          {
+            "rule": "still-in-keeps-reminder",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester said yep and ya, not still in; the 8:50 pm check-ins still went out."
+          },
+          {
+            "rule": "miss-ladder",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day after the miss names the miss and pushes the full step."
+          },
+          {
+            "rule": "daily-rhythm",
+            "pass": true,
+            "borderline": false,
+            "reason": "After done, ZOH sent no further starts that day."
+          },
+          {
+            "rule": "repeat-day-three",
+            "pass": true,
+            "borderline": false,
+            "reason": "No day-three check-in in this case."
+          },
+          {
+            "rule": "kickoff-not-repeated",
+            "pass": true,
+            "borderline": false,
+            "reason": "Kickoffs were correctly sent on each morning with no step already covered."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 restates the time and step right after the tester's yes, mildly repeating settled details."
+          },
+          {
             "rule": "regression",
             "pass": false,
-            "borderline": false,
-            "reason": "Only two morning kickoffs appear, not three, and both open with the identical \"Morning, Mike!\", so they read as a template."
+            "borderline": true,
+            "reason": "Kickoffs 1 and 6 open identically and share the same structure, so they read like a template, not varied memory-based texts."
           }
         ],
-        "summary": "ZOH named tonight's 10 pages and used the miss and streak details well in the second kickoff, but the regression case failed because only two morning kickoffs appear and both open with the same line. Several texts also ran over the sentence limit, and the no-photo reply's \"too easy to game\" reads as suspicious."
+        "summary": "ZOH stayed short, warm and proof-focused, and handled the miss with a full-step push and a clear ask. It fell short of the regression goal: the morning kickoffs reuse the same opener and structure, with little memory variety, and a couple of texts run slightly long."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:full-pushy-day",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "6682ee20332d",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "970b4243dca4"
   },
@@ -95,49 +95,43 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names today's step: 20 pages of Project Hail Mary on the couch at 7 pm."
+                "reason": "Names today's step: 20 pages of Project Hail Mary, on the couch, at 7 pm."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Kalimera Maya!\" as a warm greeting with her name."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Says \"I know you'll show up\" with no guilt or fake urgency."
+                "reason": "Opens with a Kalimera greeting and Maya's name."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "About four short sentences with one question at the end, slightly above the three-sentence limit."
+                "reason": "Runs about four short sentences but ends with a single question."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Its one ask is \"You in?\"; the agreed time and step are not re-asked."
+                "reason": "Asks one thing, 'You in?', and doesn't re-ask the agreed time."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what (20 pages), where (couch), when (7 pm) and the proof to send."
+                "reason": "Gives what, where, and when, and the 20-minute length is known from memory."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with a single emoji and no markdown or filler."
+                "reason": "No markdown or filler; the emoji is a single closing mark."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm, with one emoji as punctuation."
+                "reason": "Warm, energetic, and sincere, with one emoji used as punctuation."
               }
             ]
           },
@@ -148,25 +142,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short reply of one fragmented line with no question."
+                "reason": "A single short line with no question."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or pressure anywhere in the reply."
+                "reason": "Pure acknowledgement with no pressure or urgency."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown."
+                "reason": "Plain text with one emoji."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Upbeat and brief, matching the tester's casual tone."
+                "reason": "Upbeat and warm without being overfamiliar."
               }
             ]
           },
@@ -177,37 +171,43 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: twenty pages of Project Hail Mary, with the 7 pm time and couch set-up."
+                "reason": "Names the step: twenty pages of Project Hail Mary, the couch, and the 7 pm time."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Maya!\" as a warm greeting."
+                "reason": "Opens with 'Hey Maya!'."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Nudge is supportive with no guilt or urgency."
+                "reason": "Gets her set up with no pressure or guilt."
               },
               {
                 "rule": "short",
                 "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences with no question, slightly over the limit."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no question, within the limit."
+                "reason": "What, where, and when are all clear."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with one emoji and no markdown."
+                "reason": "No markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, pushy-level energy with appropriate punctuation."
+                "reason": "Friendly, firm, and energetic at Pushy level."
               }
             ]
           },
@@ -218,31 +218,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no extra question, as the push should be."
+                "reason": "Two short sentences with no question, a short push."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly send-off with no guilt or pressure."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Friendly send-off with no guilt or pressure."
+                "reason": "A light push with no guilt or urgency."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with one emoji and no markdown."
+                "reason": "Plain text with one emoji."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief, with one emoji as punctuation."
+                "reason": "Warm and brief, matching the request for a short push."
               }
             ]
           },
@@ -253,56 +247,50 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pure celebration with no guilt or pressure."
+                "reason": "Pure celebration with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with one emoji and no markdown or filler."
+                "reason": "No markdown or filler; a single emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Genuine hype (\"LFG Maya!!\") and a specific nod to chapter twelve, not overfamiliar."
+                "reason": "Specific, hype-level celebration that picks up the chapter-twelve detail from her voice note."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "still-in-keeps-reminder",
+            "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "After her \"yep, 7 tonight\" reply, the 6:50 pm check-in still went out."
+            "reason": "Kickoff at 9 am with Maya's name and commitment, a short reply, a 6:50 check-in naming the step, a short push, a specific celebration, and nothing afterward."
           },
           {
             "rule": "daily-rhythm",
             "pass": true,
             "borderline": false,
-            "reason": "After the done voice note, ZOH celebrated once and sent no further texts that evening."
+            "reason": "After the done text ZOH celebrates once and sends nothing more that evening."
           },
           {
-            "rule": "no-restating",
-            "pass": false,
-            "borderline": true,
-            "reason": "ZOH 2 and ZOH 4 restate the step and time/page target though she didn't ask for it."
-          },
-          {
-            "rule": "regression",
+            "rule": "kickoff-not-repeated",
             "pass": true,
             "borderline": false,
-            "reason": "Warm 9 am kickoff with name and commitment, short replies, 6:50 check-in naming the step, short couch push, specific celebration for done, no follow-up later, no guilt."
+            "reason": "The morning kickoff was the day's first contact, so sending it was correct."
           }
         ],
-        "summary": "ZOH handled the regression case well: the warm kickoff, the 6:50 pm check-in, the short couch push, and the specific celebration of the done voice note all landed, with no evening follow-up and no guilt. The main weakness is mild restating of the step and time in its replies, which is borderline on the no-restating rule."
+        "summary": "ZOH ran the Day 1 exchange as the regression case expected: a warm named kickoff, a short confirmation, a set-up check-in at 6:50, a short push with no extra question, and a specific celebration with no follow-up. The only soft spots are slight length in the kickoff and check-in and a restated time in the confirmation, none of which break the rule."
       }
     }
   ]

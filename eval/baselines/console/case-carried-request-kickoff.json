@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:carried-request-kickoff",
   "suite": "capability",
-  "storedAt": "2026-11-18T05:06:01.746Z",
-  "branch": "feature/214-drafts-needs-you",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "95d308d9f1f2",
-    "voice": "ab7df5083af6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7c9b4004f27b"
   },
@@ -64,19 +64,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses Maya's name and the known chapter, couch and 9 pm details from her history."
+                "reason": "Uses the desert-scenes detail, chapter 7, 9 pm and the couch, all from her history."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Audiobook offered as ZOH's own idea, in its voice, with no mention of team or founders."
-              },
-              {
-                "rule": "pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No request breaking voice rules to push back on in this text."
+                "reason": "The audiobook is offered as ZOH's own quick idea for her commute, with no mention of the team or a request."
               }
             ]
           },
@@ -87,19 +81,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates tonight's chapter 7, 9 pm, couch, 20 minutes and proof correctly from known state."
+                "reason": "Restates chapter 7, the couch, 9 pm, 20 minutes and the voice recap, all matching her saved plan."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Stays on tonight's chapter and answers the audiobook question naturally, no team mention."
-              },
-              {
-                "rule": "pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No request breaking voice rules to push back on."
+                "reason": "Answers her question about the audiobook naturally and stays on tonight's chapter, with no mention of the team."
               }
             ]
           }
@@ -109,10 +97,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Kickoff opens with name, names tonight's chapter 7 at 9 pm, weaves in audiobook as own idea with one question, and reply stays on tonight's step without team mention."
+            "reason": "Kickoff opens with Maya's name, names chapter 7 at 9, works in the audiobook as its own idea, has no proof ask, and never credits the team; the reply stays on tonight's chapter."
           }
         ],
-        "summary": "ZOH handled the kickoff-carried request well: warm opener, tonight's step named, audiobook offered as its own idea without attributing it to the team, and a single question. Its follow-up answered the audiobook question briefly and returned to tonight's chapter, though the 1-3 sentence limit was stretched slightly in the second text."
+        "summary": "ZOH handled the scripted kickoff well: it opened warm with Maya's name, named tonight's chapter 7 step at 9 pm, and offered the audiobook as its own idea without mentioning the team. Its reply to her question stayed on tonight's chapter and was natural, though it ran slightly long at three sentences."
       }
     },
     {
@@ -167,19 +155,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses known facts: Maya, Dune, couch, 9 pm, 20 minutes, and the desert-scenes detail from her earlier text."
+                "reason": "Uses Maya's name, Dune, chapter 7, 9 pm, the couch, 20 minutes and the desert scenes she mentioned, all consistent with what ZOH knows."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
-                "borderline": false,
-                "reason": "Audiobook raised as ZOH's own idea for her commute, with no mention of team or founders."
-              },
-              {
-                "rule": "pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No request breaking voice rules; check not applicable in substance but passes."
+                "borderline": true,
+                "reason": "The audiobook comes up as a commute option in ZOH's voice, not as a request, though its framing as a fit for the commute is close to a pitch."
               }
             ]
           },
@@ -190,19 +172,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Answers using known step details: chapter 7, couch, 9 pm, 20 minutes, voice recap."
+                "reason": "Restates chapter 7 on the couch at 9 for about 20 minutes plus a voice recap, matching the saved plan and step."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short natural reply staying on tonight's chapter; no mention of team or request source."
-              },
-              {
-                "rule": "pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No voice-rule-breaking request to push back on."
+                "reason": "Mentions the audiobook only as a backup in ZOH's voice, keeping tonight's step as the main point."
               }
             ]
           }
@@ -210,12 +186,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "Kickoff is warm with name, names tonight's step and audiobook, and asks one question, but it is two sentences with a question and the audiobook suggestion is slightly elaborated; reply stays on chapter 7 without team mention. Mostly meets the spec, but the kickoff's question about short days and its 'Short on time' framing is a mild miss on the 'as ZOH's own idea' wording."
+            "pass": true,
+            "borderline": false,
+            "reason": "The kickoff opens with Maya's name, names chapter 7 at 9 pm, works in the audiobook as its own idea in place of the usual question, and never mentions the team; the reply stays on tonight's chapter."
           }
         ],
-        "summary": "ZOH's kickoff and reply follow the regression spec closely: warm, grounded in Maya's history, names tonight's chapter 7 step, works in the audiobook without mentioning the team, and keeps the follow-up on the step. The one borderline point is the kickoff's question framing around short days, which reads slightly more like a prompt than a natural idea."
+        "summary": "ZOH handled the kickoff case well: it opened warm, named tonight's step, and raised the audiobook as its own commute idea with a single question. Its reply to Maya stayed on chapter 7 with no mention of the team or any request."
       }
     },
     {
@@ -270,13 +246,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Cites the chapter 6 desert scenes Maya mentioned and the correct chapter 7, 9 pm couch plan from her history."
+                "reason": "Cites chapter 6's desert scenes, chapter 7 tonight, and the 9 pm couch step, all from her history."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
-                "borderline": false,
-                "reason": "Offers the audiobook as its own backup idea at the kickoff with no mention of the team or anyone asking."
+                "borderline": true,
+                "reason": "Raises the audiobook as ZOH's own idea for busy days, though 'could be a good backup' reads a little like a pitch."
               }
             ]
           },
@@ -286,33 +262,21 @@
               {
                 "rule": "grounded",
                 "pass": true,
-                "borderline": true,
-                "reason": "Restates the 20-minute tonight step correctly, but the 30-second voice recap and the full-cast claim aren't clearly in saved history."
-              },
-              {
-                "rule": "own-idea",
-                "pass": true,
                 "borderline": false,
-                "reason": "Answers her reply naturally, keeps the audiobook as a backup idea, and returns to tonight's chapter in ZOH's voice."
+                "reason": "Restates tonight's plan (chapter 7, couch, 9 pm, 20 minutes, voice recap) from saved state."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "proposal-asks",
-            "pass": true,
-            "borderline": true,
-            "reason": "ZOH opens by raising the audiobook as a backup, not a plan change, and doesn't claim the plan already changed, though it's close to a next-step suggestion."
-          },
-          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The kickoff opens with Maya's name, names chapter 7 at 9 pm, offers the audiobook as its own idea with one question at most, and the reply stays on tonight's chapter with no team mention."
+            "reason": "Kickoff opens with her name, names tonight's chapter 7 at 9, works in the audiobook as its own idea, asks no proof question, and never mentions a team or request; her reply stays on tonight's chapter."
           }
         ],
-        "summary": "ZOH handled the regression case well: the kickoff was warm, grounded in her chapter 6 comment, and offered the audiobook as its own backup idea without mentioning the team. Its reply stayed on tonight's chapter, with only minor grounding uncertainty about the full-cast claim and voice recap detail."
+        "summary": "ZOH handled the regression case well: the 9 am kickoff opened warm with Maya's name, named tonight's chapter 7 step, and worked the Dune audiobook in as its own idea with no proof ask or team mention. Its reply to her question answered briefly and returned to tonight's plan, though it ran to three sentences and the audiobook suggestion leaned slightly toward a pitch."
       }
     }
   ]

@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:live-awkward-unseen-step",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "db9f54b81ef2",
-    "voice": "fbc3a37c5b97",
+    "checks": "03c7f3bbc0a6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "23acf81e9647"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:live-awkward-unseen-step",
+        "key": "case:live-awkward-unseen-step#1",
         "kind": "case",
         "id": "live-awkward-unseen-step",
+        "suite": "regression",
         "title": "Live Nov 6: asked agreement to a step the tester never saw",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "18:47",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -39,7 +39,7 @@
         },
         {
           "from": "zoh",
-          "text": "Day 4 done, Yanni! 🔥 \"No pitch, promise\" is a great line, because it makes the ask easy to say yes to. You said yesterday that reaching out feels a little intimidating. How did it feel to write a message to a real person this time?",
+          "text": "Yanni, that draft is clean. \"No pitch, promise\" takes the pressure off Alex, and the 10-minute ask is easy to say yes to. That's day 4 🔥 When you reread it, how does it feel to imagine hitting send?",
           "at": "2026-11-02T23:47:07.000Z"
         },
         {
@@ -49,7 +49,7 @@
         },
         {
           "from": "zoh",
-          "text": "Awkward makes sense, since it's a real person and not just a list. What part felt the most awkward: asking for his time, or the idea of him reading it?",
+          "text": "Awkward makes sense, since it's the first time this is going out to a real person. What part feels awkward when you picture Alex reading it?",
           "at": "2026-11-02T23:47:59.500Z"
         },
         {
@@ -59,12 +59,12 @@
         },
         {
           "from": "zoh",
-          "text": "Totally normal worry, Yanni. Asking for someone's time is the part most people hate. When you picture Alex reading it, what do you imagine him thinking?",
+          "text": "That's a really common worry, Yanni, and it usually says you respect his time. Picture the reverse: if a friend asked you for 10 minutes about something you know well, how would that land for you?",
           "at": "2026-11-02T23:48:33.700Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-10-30: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-10-31: Saying the three questions out loud felt okay.\nReflection for 2026-11-01: Five minutes was enough, felt easy; reaching out feels a little intimidating. Wants to keep tomorrow at 5 minutes.\nReflection for 2026-11-02: Drafting the message to Alex felt awkward, mainly asking for his time; worries it'll feel like bothering him.\nStyle now: pushy",
+      "saved": "Reflection for 2026-10-30: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-10-31: Saying the three questions out loud felt okay.\nReflection for 2026-11-01: Five minutes was enough, felt easy; reaching out feels a little intimidating. Wants to keep tomorrow at 5 minutes.\nReflection for 2026-11-02: Drafted the text to Alex; imagining sending felt awkward because asking for his time might feel like bothering him.\nGaps (2026-11-02): Hesitant to send the ask; fear of imposing on a contact\nStyle now: pushy; notes: none",
       "grade": {
         "texts": [
           {
@@ -72,15 +72,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Opens with two short sentences before one question at the end, though it runs slightly past three sentences."
+                "reason": "Four sentences with one question at the end; the opener and 'day 4' line push it past the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere, one emoji as punctuation, and fits the pushy energy without overfamiliarity."
+                "reason": "Upbeat, warm and sincere, with one emoji as punctuation and no overfamiliarity."
               }
             ]
           },
@@ -91,13 +91,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end, which follows what the tester just said."
+                "reason": "Two sentences with one question at the end, following the 'awkward' answer."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and plain, with no emoji or affection, and no overfamiliarity."
+                "reason": "Warm, plain and sincere with no emoji or affection."
               }
             ]
           },
@@ -108,13 +108,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and not overfamiliar; the reassurance is brief and not overdone."
+                "reason": "Warm and sincere, pitched at the worry without overfamiliarity."
               }
             ]
           }
@@ -124,34 +124,330 @@
             "rule": "reflection-ask",
             "pass": true,
             "borderline": false,
-            "reason": "After the draft photo, ZOH opened the reflection with one question about how writing it felt, and didn't chase it later."
+            "reason": "After the draft proof, ZOH opens the reflection with one question about how sending feels."
           },
           {
             "rule": "follow-ups",
             "pass": true,
             "borderline": false,
-            "reason": "Each follow-up builds on what the tester said, with one question per text and no list."
-          },
-          {
-            "rule": "thin-answer",
-            "pass": true,
-            "borderline": false,
-            "reason": "'A little awkward' got a proof-grounded follow-up asking what part felt awkward, with no guess at its meaning."
+            "reason": "Each follow-up uses the tester's own words (awkward, bothering him) with one question per text."
           },
           {
             "rule": "goes-deeper",
             "pass": true,
             "borderline": true,
-            "reason": "The worry about bothering Alex got a question about what he might think before any step; a short reassurance comes first."
+            "reason": "The bothering worry gets a question, but reassurance comes before it and the question is more a reframe than a deeper look."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to the first real answer follows one thing said and proposes no tomorrow step."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": false,
+            "reason": "'A little awkward' gets a grounded follow-up about what part feels awkward, with no guess at its meaning."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH goes deeper on the bothering worry with no next step and no agreement ask, though it reassures before asking."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "The saved gap 'hesitant to send the ask; fear of imposing' matches the tester's own words about bothering Alex."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester is still engaged and answering, so continuing with one question is right."
+          }
+        ],
+        "summary": "ZOH handled the reflection well: it followed the tester's own words from awkward to bothering Alex, asked one question per text, and avoided any step or agreement ask before the worry was explored. The main miss is that the first text ran a sentence over the short-text limit, and the worry question came after some reassurance."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-awkward-unseen-step#2",
+        "kind": "case",
+        "id": "live-awkward-unseen-step",
+        "suite": "regression",
+        "title": "Live Nov 6: asked agreement to a step the tester never saw",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:47",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! It's 6:40, so the Alex draft is up. Two lines is plenty. Send me a screenshot when it's written, and don't send it to him yet.",
+          "at": "2026-11-02T23:45:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo alex-draft.jpg: an unsent Notes draft to Alex asking for 10 minutes, no pitch]",
+          "at": "2026-11-02T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 4 in the books, Yanni 🔥 And the draft is tight: ten minutes, no pitch. Sending it yesterday felt intimidating, so how does it feel looking at it now, ready to send or still a bit scary?",
+          "at": "2026-11-02T23:47:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "It felt a little awkward",
+          "at": "2026-11-02T23:47:52.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Awkward is a real answer, Yanni, and honestly pretty normal when you're about to ask someone for their time. Which part felt awkward: writing it, or picturing Alex reading it?",
+          "at": "2026-11-02T23:47:59.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Asking for his time. I worry it’ll feel like I’m bothering him",
+          "at": "2026-11-02T23:48:26.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a really common worry, Yanni, and it says you respect his time. Think of the last time someone asked you for ten minutes to talk about your work. How did that land for you?",
+          "at": "2026-11-02T23:48:33.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-10-31: Saying the three questions out loud felt okay.\nReflection for 2026-11-01: Five minutes was enough, felt easy; reaching out feels a little intimidating. Wants to keep tomorrow at 5 minutes.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end; the 'Sending it yesterday' phrasing slightly misstates what the step was (a draft, not a send)."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with one emoji as punctuation; no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no emoji row, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and calm; no hype or affection problem."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the draft proof, ZOH opened the reflection with one question about how it feels now."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'A little awkward' got a grounded follow-up asking which part, with no guess at meaning, though offering two options edges toward a menu."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH's reply to the first real answer followed what they said and did not propose tomorrow's step."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The worry about bothering Alex got a question before any reassurance-plus-proposal; the reflection stays open."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH goes deeper on the bothering worry with one question and proposes no step or agreement ask, though it reassures briefly before asking."
+          }
+        ],
+        "summary": "ZOH handled this reflection well: it celebrated the draft, followed the 'awkward' answer with a grounded question, and then went deeper on the worry about bothering Alex without proposing a step or asking agreement. The main weaknesses are minor: the 'sending it yesterday' slip and a brief reassurance placed before the deeper question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-awkward-unseen-step#3",
+        "kind": "case",
+        "id": "live-awkward-unseen-step",
+        "suite": "regression",
+        "title": "Live Nov 6: asked agreement to a step the tester never saw",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:47",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! It's 6:40, so the Alex draft is up. Two lines is plenty. Send me a screenshot when it's written, and don't send it to him yet.",
+          "at": "2026-11-02T23:45:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo alex-draft.jpg: an unsent Notes draft to Alex asking for 10 minutes, no pitch]",
+          "at": "2026-11-02T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, that's a clean draft. \"No pitch, promise\" takes the pressure off Alex, and 10 minutes is an easy yes. Day 4 done 🔥 When you picture actually hitting send, how does it feel?",
+          "at": "2026-11-02T23:47:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "It felt a little awkward",
+          "at": "2026-11-02T23:47:52.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Awkward is normal for the first time you write to someone about this, Yanni. What part felt awkward: asking for the 10 minutes, or reaching out to Alex at all?",
+          "at": "2026-11-02T23:47:59.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Asking for his time. I worry it’ll feel like I’m bothering him",
+          "at": "2026-11-02T23:48:26.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That worry makes sense, and it comes from respecting his time. Think of a time someone asked you for 10 minutes to hear how you handle something in your work: how did that land for you?",
+          "at": "2026-11-02T23:48:33.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-10-31: Saying the three questions out loud felt okay.\nReflection for 2026-11-01: Five minutes was enough, felt easy; reaching out feels a little intimidating. Wants to keep tomorrow at 5 minutes.\nReflection for 2026-11-02: Draft to Alex felt awkward; worried that asking for his time feels like bothering him.\nGaps (2026-11-02): Confidence in actually reaching out and asking for someone's time\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences before the question ('Yanni, that's a clean draft.' and 'Day 4 done'), a little over the one-to-three-sentence limit, though it ends on one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and plain, with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and warm, with no affection or pressure beyond the tone."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the screenshot proof, ZOH opened the reflection with one question about how sending would feel."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up builds on the tester's own words (awkward, asking for his time, bothering him) and asks one question per text."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH stays on the bothering-Alex worry and asks a question about it before any proposal, though it offers reassurance ('it comes from respecting his time') before the question."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH went deeper on the bothering worry with a question, and proposed no next step or agreement request."
+            "reason": "ZOH goes deeper on the worry about bothering Alex, proposes no next step, and never asks agreement to a step the tester hasn't seen."
           }
         ],
-        "summary": "ZOH handled the reflection well: it asked one question after the draft, followed the tester's 'awkward' and worry about bothering Alex, and kept each text short with one question. It avoided the regression by staying on the worry and not proposing a step or asking for agreement."
+        "summary": "ZOH handled the reflection well: it celebrated the proof, followed tester's own words through awkward and the worry about bothering Alex, and avoided the earlier failure of asking agreement to an unseen step. The main weak spots are a slightly long opening text and reassurance placed just before the worry question rather than after it."
       }
     }
   ]

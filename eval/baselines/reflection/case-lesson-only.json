@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:lesson-only",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:11:03.764Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "1bf9e6153c97",
-    "voice": "c0dfbb42fd2a",
+    "checks": "b2a8f3aa5236",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "8baff5374aa1"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:lesson-only",
+        "key": "case:lesson-only#1",
         "kind": "case",
         "id": "lesson-only",
-        "title": "A lesson-only reply: a follow-up about how it went, tied to the lesson",
+        "suite": "regression",
+        "title": "A lesson-only reply: the lesson gets followed up, and how it went is still covered",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "19:20",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Nice work, Riley! Day 3 is done, and \"what's the hardest part of keeping members past month two?\" is a strong opener. It starts with their problem, just like you said it should. 🔥 How did this one feel? Was it easy to write, or did you have to work to keep the pitch out of it?",
+          "text": "Riley, day 3 in the books 🔥 And that question ties right back to the retention problem you flagged yesterday. When you pictured asking it to a gym owner, how did it feel?",
           "at": "2026-11-03T00:20:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "That awkward feeling is normal, Riley. You're writing for someone you haven't talked to yet. What do you think would make it feel less like guessing: hearing a real gym owner's answer, or having a few more questions ready?",
+          "text": "Awkward makes sense, Riley. You're writing for someone you haven't talked to yet. What would make it feel less like a guess: knowing more about the owner, or hearing how they'd answer?",
           "at": "2026-11-03T00:21:24.100Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's a real insight, Riley. Guessing is what a first draft feels like, and hearing a real owner's answer is what fixes it. So tomorrow we move toward that conversation:\n\n• Tue at 7 pm, at your desk, 15 min\n• Pick the gym owner you know best from your two gyms\n• Write a 2-3 line message asking for a 10-minute chat about keeping members past month two\n• Send it if you're ready, then send me a voice note reading it out\n\nWork for you?",
+          "text": "That's a good instinct, Riley. If you had ten minutes with an owner, what's the one thing you'd most want to hear them say?",
           "at": "2026-11-03T00:22:15.100Z"
         },
         {
@@ -74,12 +74,12 @@
         },
         {
           "from": "zoh",
-          "text": "Locked in, Riley. Tomorrow at 7 pm you're one step closer to a real owner's answer, and that's how you stop guessing. Talk then. 💪",
+          "text": "Fair enough, Riley, no need to overthink that one. Here's tomorrow: at 7 pm at your desk, pick one gym from your list of 5 and write a 2-sentence message asking the owner for a 10-minute chat. Then read it aloud in a voice note (15 min). Work for you?",
           "at": "2026-11-03T00:22:57.100Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Takeaway (explained, 2026-11-02): Discovery calls start with the prospect's problem, not your pitch\nReflection for 2026-11-02: Felt awkward writing the question, like guessing what the owner would say; thinks talking to a real owner would help.\nStep set for 2026-11-03, agreed: At your desk at 7 pm (15 min): pick the gym owner you know best, write a 2-3 line message asking for a 10-minute chat about keeping members past month two, send it if ready, and send a voice note reading it out.\nStyle now: pushy",
+      "saved": "Reflection for 2026-11-02: Wrote opening question; felt awkward, like guessing. Thinks talking to a real owner would help.\nCan now do (2026-11-02): Read the discovery-call article, took away problem-first openings, wrote a concrete opening question\nGaps (2026-11-02): Hasn't talked to a real owner yet\nStep set for 2026-11-03, not agreed: Pick one gym from your list of 5 and write a 2-sentence message asking the owner for a 10-minute chat, at your desk at 7 pm (15 min). Read it aloud in a voice note.\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -87,15 +87,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs about four or five sentences before its question, over the one-to-three-sentence limit, though it has one question at the end."
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end; the proof is celebrated and the question is on-topic."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and specific; one emoji used as punctuation."
+                "reason": "Energetic and warm with one emoji as punctuation; no overfamiliarity."
               }
             ]
           },
@@ -106,13 +106,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Two sentences, one question at the end, though it offers two options."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no overfamiliarity or emoji row."
+                "reason": "Calm, warm, sincere, no emoji needed."
               }
             ]
           },
@@ -122,14 +122,212 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "A plan text may run about 8 lines; this is a short intro, four bullets and a closing ask, with one question at the end."
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energy and tone fit Pushy level; no emoji row."
+                "reason": "Warm and specific with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A step proposal can run longer, but it opens with a filler-like line and ends with one question; it reads as slightly long."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and fitting for a pushy tester."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the proof, ZOH opened the reflection with one question about how the step felt and did not chase it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Follow-ups come from what Riley said, one per text, but the volunteered lesson about problem-first calls is never picked up."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved can-do and gap match Riley's words: took away problem-first openings, and hasn't talked to a real owner yet."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Riley stayed engaged; ZOH stopped after two follow-ups and moved on without a third push."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The first real answer about awkwardness got a follow-up with no tomorrow step proposed."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the awkwardness and owner-talk exchange, ZOH moved to the next step within three texts, without being asked."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The named awkwardness got one question before the proposal, then the next question went deeper on what would help."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "Acknowledges Riley's owner idea and gives a fully defined step at the desk at 7 pm for 15 min, asking after it; 'sounds good' was not a clear agreement, so the proposal landed slightly early."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Core fix holds (feelings covered before the step), but the lesson is not celebrated specifically and a new question follows 'sounds good' instead of a confirmation line."
+          }
+        ],
+        "summary": "ZOH handled the awkwardness well: it covered how the step felt, asked one question about what would help, and proposed a fully defined next step tied to talking to a real owner. It missed the regression's specific lesson celebration and followed 'sounds good' with a new question rather than a plain confirmation."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lesson-only#2",
+        "kind": "case",
+        "id": "lesson-only",
+        "suite": "regression",
+        "title": "A lesson-only reply: the lesson gets followed up, and how it went is still covered",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Tonight, Riley: 7 pm at your desk, 15 minutes. Read the discovery-call article and write one opening question for a gym owner. Send a screenshot or a quick voice note when it's done.",
+          "at": "2026-11-02T23:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T23:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done. I learned discovery calls should start with their problem, not my pitch. I wrote my question: what's the hardest part of keeping members past month two?]",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Riley, that's day 3 in the books 🔥 And your question ties straight back to the retention problem you spotted yesterday. When you pictured asking a gym owner that question, how did it feel?",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly it felt kind of awkward writing it, like I was guessing what they'd say",
+          "at": "2026-11-03T00:21:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Guessing is the right read on it, Riley. You've been working out what owners might say, and you haven't heard it from one yet. What would you most want to hear from a real owner that you can't figure out from your desk?",
+          "at": "2026-11-03T00:21:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I think talking to an actual owner would help",
+          "at": "2026-11-03T00:22:08.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Agreed, Riley. A real owner will tell you things your desk can't. Want to start that tomorrow at 7? You'd draft a 2-3 line message asking one gym owner for a 10-minute chat about keeping members, then send me a voice note reading it aloud. Work for you?",
+          "at": "2026-11-03T00:22:15.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-03T00:22:50.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Riley 💪 Tomorrow at 7 at your desk: a 2-3 line message asking one gym owner for a 10-minute chat about keeping members. Then send me a voice note reading it aloud. Talk then!",
+          "at": "2026-11-03T00:22:57.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Wrote opening question; felt awkward guessing owners' answers. Says talking to a real owner would help.\nCan now do (2026-11-02): Write a problem-first opening question for a gym owner\nGaps (2026-11-02): Hasn't yet contacted a real owner\nStep set for 2026-11-03, not agreed: Draft a 2-3 line message asking one gym owner for a 10-minute chat about keeping members, at your desk at 7 pm, then send a voice note reading it aloud (15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the length limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the voice note with an emoji as punctuation and a warm, non-gushing tone."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question, which picks up the awkwardness Riley named."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks two questions, 'Want to start that tomorrow at 7?' and 'Work for you?', and runs past three sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and pushy-level without overfamiliarity."
               }
             ]
           },
@@ -140,13 +338,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question after the sounds-good confirmation."
+                "reason": "Confirms the agreed step in a few sentences with no question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and firm, one emoji as punctuation."
+                "reason": "Energetic and warm with one emoji as punctuation."
               }
             ]
           }
@@ -156,34 +354,220 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Counts the voice note, celebrates the lesson, follows the awkwardness with one question, proposes a fully defined step and asks if it works; borderline on text length and the slightly invented 'your two gyms'."
+            "reason": "It asks how the step felt before tomorrow, follows the awkwardness, acknowledges Riley's owner-talk idea and proposes a step, then confirms with no question. Gaps: it never names the lesson specifically, and the proposal omits 'at your desk' and the 15 minutes."
+          }
+        ],
+        "summary": "ZOH avoided the earlier failure: it asked how the writing felt before proposing the next step, followed Riley's awkwardness, and built the owner-conversation idea into tomorrow's step. It fell short on specifics, since it didn't name Riley's lesson, left out the desk and 15-minute length in the proposal, and asked two questions in one text."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lesson-only#3",
+        "kind": "case",
+        "id": "lesson-only",
+        "suite": "regression",
+        "title": "A lesson-only reply: the lesson gets followed up, and how it went is still covered",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:20",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Tonight, Riley: 7 pm at your desk, 15 minutes. Read the discovery-call article and write one opening question for a gym owner. Send a screenshot or a quick voice note when it's done.",
+          "at": "2026-11-02T23:17:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T23:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done. I learned discovery calls should start with their problem, not my pitch. I wrote my question: what's the hardest part of keeping members past month two?]",
+          "at": "2026-11-03T00:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Riley, that's day 3 done 🔥 And your question ties straight back to the retention problem you spotted yesterday. How did it feel writing it, and was anything about starting with their problem new to you?",
+          "at": "2026-11-03T00:20:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly it felt kind of awkward writing it, like I was guessing what they'd say",
+          "at": "2026-11-03T00:21:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Awkward makes sense, Riley. You were writing one side of a conversation before the owner got to say anything. That's also why the question is open: it hands the guessing to them. When you picture a real owner answering it, what's the one thing you'd most want to hear?",
+          "at": "2026-11-03T00:21:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I think talking to an actual owner would help",
+          "at": "2026-11-03T00:22:08.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Agreed, Riley. A real owner will answer a lot faster than your guesses will. Which owner would you most want to sit down with, and what's your connection to them, if any?",
+          "at": "2026-11-03T00:22:15.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-03T00:22:50.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Riley, you've got something real going: three days in a row, and you're moving toward actual owners. Tomorrow at 7 pm, 15 min at your desk: pick one owner from your list of 5 and write a 2-sentence message asking for a 10-minute chat, using your retention question. Work for you?",
+          "at": "2026-11-03T00:22:57.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Wrote opening question on member retention; felt awkward guessing the owner's answer; thinks talking to a real owner would help.\nCan now do (2026-11-02): Can write an open discovery question starting from the owner's problem.\nGaps (2026-11-02): Hasn't picked a specific owner to approach yet\nStep set for 2026-11-03, not agreed: Pick one gym owner from your list of 5 and write a 2-sentence message asking for a 10-minute chat, using your retention question. At your desk at 7 pm (15 min).\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks two questions in one text: \"How did it feel writing it, and was anything about starting with their problem new to you?\" Short rule allows at most one."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific celebration with one emoji as punctuation; energy fits Pushy."
+              }
+            ]
           },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, following up the awkwardness."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no emoji row, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences, but the single question bundles two parts (which owner, and their connection), which is close to two questions."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, plain, no empty praise or emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the step is fully defined within that length."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Specific praise for three days in a row, energy appropriate, no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
           {
             "rule": "reflection-ask",
             "pass": true,
             "borderline": false,
-            "reason": "After proof with no word on how it went, it opened with one feelings question and never chased it later."
+            "reason": "After the screenshot and voice proof, ZOH opened the reflection with a question about how it felt."
           },
           {
             "rule": "follow-ups",
-            "pass": true,
-            "borderline": true,
-            "reason": "Follow-ups tie to the lesson and the awkward writing; the 'your two gyms' detail in the proposal goes beyond what Riley said."
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 asks two questions in one text, breaking the one-question-per-text rule."
           },
           {
-            "rule": "thin-answer",
+            "rule": "learning-ask",
             "pass": true,
             "borderline": false,
-            "reason": "Riley's answer was rich ('felt kind of awkward... like I was guessing'), so it was followed with one proof-grounded question before the next step."
+            "reason": "ZOH drew out the lesson and the writing experience, covering both feeling and what they noticed."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved can-do and gap match the proof: writing an open question, and not yet picking an owner."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester stayed engaged; ZOH asked a few targeted questions and then moved on without a third push."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the first real answer about awkwardness, ZOH followed it and did not propose tomorrow's step yet."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Once the tester said what helps, ZOH moved to the next step by its fourth text since proof."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH followed the awkwardness with a deeper question about what they'd want to hear from an owner."
           },
           {
             "rule": "next-step",
             "pass": true,
             "borderline": true,
-            "reason": "Acknowledges the guessing and the need for an owner, then shows the full step and asks only after it is laid out; 'from your two gyms' is not in what they said."
+            "reason": "Acknowledges the guessing, defines the step fully (desk, 7 pm, 15 min) and asks if it works, though 'sounds good' came before any proposal."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "The next step builds on the retention question Riley wrote, reusing the earlier lesson."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH covered how it felt before proposing the next step, avoiding the old bug, but the double question and the 'sounds good' handling are imperfect."
           }
         ],
-        "summary": "ZOH counted the voice note, celebrated the lesson specifically, and followed the awkward feeling with one question before proposing a fully defined step for tomorrow at 7 pm that builds on Riley's wish to talk to a real owner. Its weak spots are a first text a little over the length limit and a detail in the proposal ('your two gyms') that Riley never mentioned."
+        "summary": "ZOH avoided the old regression: it celebrated the voice proof and lesson, covered how the awkward writing felt, then proposed a fully defined next step built on Riley's retention question. The main miss is ZOH 1 asking two questions in one text, with a borderline double question in ZOH 3 and an ambiguous 'sounds good' handoff."
       }
     }
   ]

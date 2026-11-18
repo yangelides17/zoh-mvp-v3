@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:smaller-asked-with-reason",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "b115cb923a22",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "53cac30ccad4"
   },
@@ -58,38 +58,44 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a screenshot of the Notes writing as proof, with no typed text offered as proof."
+                "reason": "Names only a screenshot of the Notes writing as proof, never typed text."
               },
               {
                 "rule": "smaller-in-full",
                 "pass": true,
                 "borderline": false,
-                "reason": "Spells out what (opening of Scene 4), how much (about 60 words, 5-minute timer), when (start now) and proof (screenshot); not just 'set'."
+                "reason": "Confirms in one text: the opening of Scene 4 (about 60 words), a 5-minute timer, start now, and a screenshot as proof."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "The bullet list is fine, but about four sentences sit outside it (opener and closing), over the three-sentence limit."
+                "reason": "The list is allowed, but the prose around it runs about four sentences, over the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, acknowledges the sick kid without pushback, one emoji used as punctuation."
+                "reason": "Warm and encouraging with a single emoji at the end, no pressure or accusation."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": false,
+            "reason": "A real reason (sick kid at home) was given, so ZOH set the smaller version at once with no pushback."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "With a real reason (sick kid), ZOH doesn't push back, sets a smaller version in one text, and spells out what, how much, when and screenshot proof."
+            "reason": "Instead of just saying it's set, ZOH spelled out what, how much, when and the Notes screenshot proof, in one text."
           }
         ],
-        "summary": "ZOH handled the regression well: it accepted the real reason and spelled out a smaller Scene 4 step with what to write, how long, when to start and a Notes screenshot as proof, never just saying it was set. Its one weak spot is length, with a few sentences outside the bullet list that push past the short-text limit."
+        "summary": "ZOH handled the regression well: with a real reason it set a smaller version at once and spelled out the task, length, timing and screenshot proof instead of just saying it was set. The one miss is that the prose around its list runs slightly past the short-text limit."
       }
     }
   ]

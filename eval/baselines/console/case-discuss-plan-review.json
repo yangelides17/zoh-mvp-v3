@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:discuss-plan-review",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "20d15e9e1c97",
-    "voice": "fbc3a37c5b97",
+    "checks": "d8a29272fbbb",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7c7425d9b701"
   },
@@ -69,62 +69,28 @@
       "endedBy": "script",
       "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: rest day\nMon, Oct 26: done\nTue, Oct 27: rest day\nWed, Oct 28: done\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): rest day\nMon, Nov 2 (today): step day, not done yet at 18:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 18:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 18:00\nSat, Nov 7: step day at 18:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 18:00",
       "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plan details, step log counts (Oct 26, 28, 30, 31 done; Oct 23-24 nothing recorded) and proof type all match the record."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": false,
-                "reason": "Says the plan is already active, which matches the saved state and the earlier commitment."
-              }
-            ]
-          },
-          {
-            "zohText": 3,
-            "checks": [
-              {
-                "rule": "confirms",
-                "pass": true,
-                "borderline": true,
-                "reason": "Says the card is drafted and what Do it will do, but it is a draft status line, not a confirmation of a completed action."
-              }
-            ]
-          }
-        ],
+        "texts": [],
         "conversation": [
           {
-            "rule": "drafts",
+            "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH 3 states exactly what Do it will do and that nothing changes for Jordan; it does not claim the alert is already reviewed."
+            "reason": "ZOH 1 says the plan is already active, that Jordan committed, that reviewing only records a founder looked, and it offers the mark-reviewed step as a question; ZOH 3 says the card is drafted and not yet done."
           },
           {
             "rule": "alert-accurate",
             "pass": true,
-            "borderline": false,
-            "reason": "Explains the plan is already active from Jordan's 'I'm in' and never says it needs approval."
+            "borderline": true,
+            "reason": "ZOH 1 explains the alert from the saved plan and never says approval is needed, though 'is waiting for a founder to look at it' leans toward pending wording."
           },
           {
-            "rule": "regression",
+            "rule": "drafts",
             "pass": true,
-            "borderline": true,
-            "reason": "Covers committed plan v1, already active, and reviewing only records a look; 'no approval needed' is implied rather than stated outright. Marking reviewed is offered, then drafted only after Yanni's ask."
+            "borderline": false,
+            "reason": "ZOH 2's card and ZOH 3 say exactly what Do it will do (mark as reviewed, plan unchanged) and don't claim it's already done."
           }
         ],
-        "summary": "ZOH handled the regression case well: it explained that the plan is already active and that reviewing only records a founder's look, and it only drafted the mark-reviewed action after Yanni asked. The main weak spot is that it implied rather than stated that no approval is needed, which a reviewer could score either way."
+        "summary": "ZOH handled the regression well: it explained that Jordan's active plan needs no approval, that reviewing only records that a founder looked, and it kept the mark-reviewed step as a draft until Yanni confirmed. The only soft spot is 'waiting for a founder to look at it' in ZOH 1, which could read as pending even though it is explained correctly."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:kickoff-after-plan-lock",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:17:24.672Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "0e5816cadbe8",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "103500461920"
   },
@@ -84,7 +84,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "A plan-presenting text may run about 8 lines; this runs roughly 9 to 10 lines counting blanks, so it is at the edge."
+                "reason": "Plan text runs about 9 lines including the intro, goal, setup, day 1, schedule, proof, why and progression lines; close to the 8-line allowance."
               },
               {
                 "rule": "plain-words",
@@ -96,19 +96,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and confident, opens by reacting to the specific target starting from 3, with no overfamiliarity."
+                "reason": "Warm and direct, opens with a specific reaction to the 10 push-ups by Christmas goal from 3, with no overfamiliar lines."
               },
               {
                 "rule": "honest",
                 "pass": true,
-                "borderline": true,
-                "reason": "Uses Jordan's 10 push-ups, from 3, Monday to Saturday and the 6:30 pm usual, plus a suggested 9 pm day 1 time that Jordan never gave."
+                "borderline": false,
+                "reason": "Uses Jordan's goal, starting level, home setup and phone-camera proof, plus concrete incline-push-up suggestions."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": true,
-                "reason": "Day 1 gives what, where, when and length, but the 9 pm day-1 time conflicts with the 6:30 pm usual schedule given in the same plan."
+                "borderline": false,
+                "reason": "Day 1 gives what (incline sets, all-out set), where (home), when (9 pm) and how long (20 min)."
               },
               {
                 "rule": "one-question",
@@ -125,25 +125,19 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences, within the limit."
+                "reason": "Three short sentences."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain conversational text with no markdown or filler."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere; the commitment ask is in its own words, not a stock line."
-              },
-              {
-                "rule": "honest",
-                "pass": true,
-                "borderline": false,
-                "reason": "Restates the goal and schedule Jordan agreed to, with no invented facts."
+                "reason": "Warm and proportionate, with one clear question."
               },
               {
                 "rule": "one-question",
@@ -160,31 +154,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with a hype line and no question."
+                "reason": "Two short sentences plus an emoji, with no question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text; a single emoji used as punctuation."
+                "reason": "Plain text, no markdown."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line locks it in, warm and not overfamiliar, with one emoji at the end."
+                "reason": "Hype line is warm and energetic, with the emoji used as punctuation."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 Tuesday at 6:30 pm at home matches the usual schedule and Monday start context."
+                "reason": "Day 1 is tomorrow at 6:30 pm at home, matching the usual schedule and the tester's own request to start tomorrow."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": true,
-                "reason": "Gives when and where for day 1, but does not restate what the step is in this text."
+                "reason": "Gives day, time and place but not the 20-minute length in this text."
               },
               {
                 "rule": "one-question",
@@ -200,32 +194,32 @@
               {
                 "rule": "short",
                 "pass": false,
-                "borderline": true,
-                "reason": "Five sentences (greeting, day 1, step, setup, question), more than the one-to-three limit for a kickoff."
+                "borderline": false,
+                "reason": "About five sentences: greeting, day 1 line, step line, setup line and question, over the one-to-three limit for a nudge."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or hashtags."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, opens with Jordan's name, and ends with a light Still in? rather than a first-time ask."
+                "reason": "Warm, uses Jordan's name, with no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to Jordan's yes and the agreed step, with no invented facts."
+                "reason": "Refers to the agreed step and the yes Jordan actually gave."
               },
               {
                 "rule": "step-defined",
                 "pass": false,
-                "borderline": true,
-                "reason": "Says tonight but never gives the 6:30 pm time or the 20 min length, leaving when and how long unclear."
+                "borderline": false,
+                "reason": "Says 'Tonight' but never gives the 6:30 pm time or the 20-minute length, so when and how long are left out."
               },
               {
                 "rule": "one-question",
@@ -241,52 +235,58 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No extra questions were needed before the plan; the destination was given and the plan came straight after."
+            "reason": "The plan is shown with a single question at the end; no extra questions come before it."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": true,
-            "reason": "Concrete with what, how much, where, when, days and a photo or voice proof, though the day 1 time conflicts with the usual schedule."
+            "reason": "Concrete on what, how much, where, when and which days, with a photo proof, but close to the length limit."
           },
           {
             "rule": "first-plan",
             "pass": true,
-            "borderline": true,
-            "reason": "Shows the destination, day 1 step, usual schedule, proof and a progression line, but gives a day 1 time that differs from the schedule."
+            "borderline": false,
+            "reason": "Shows the Dec 25 goal, day 1 step, usual schedule, proof and a one-line progression note, with no list of future steps."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester named a destination, so the destination rule is met by the goal line in the plan."
           },
           {
             "rule": "commitment",
             "pass": true,
-            "borderline": false,
-            "reason": "After love it, ZOH asked in its own words whether Jordan is officially committing, and locked only on a clear yes."
+            "borderline": true,
+            "reason": "Asks in its own words whether Jordan is committing, though 'officially' edges toward a stock phrase."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Jordan pushed to start tomorrow and ZOH accepted it without argument."
+            "reason": "Pushes for tonight first, then accepts tomorrow once Jordan asked to start tomorrow."
           },
           {
             "rule": "quiet-hours-after-lock",
             "pass": true,
             "borderline": false,
-            "reason": "No quiet-hours question or change was raised after the plan was locked."
+            "reason": "No quiet-hours change raised after the lock."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a bullet list ending with one question, What do you think?"
+            "reason": "The plan was shown as a bullet list ending with one question before the commitment ask."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "The next morning's kickoff uses Jordan's name, restates the step and ends with Still in? instead of a first-time You in? with no time or commitment re-ask."
+            "borderline": true,
+            "reason": "Avoids the first-time 'You in?' with 'Still in?' and asks no time or commitment again, but leaves out the 6:30 pm time."
           }
         ],
-        "summary": "ZOH fixed the regression: the commitment ask, the lock with tomorrow's day 1 and the next morning's Still in? kickoff all behave as intended. The weak spots are the plan's conflicting 9 pm day-1 time against the 6:30 pm schedule, and the kickoff being too long and omitting the 6:30 pm time."
+        "summary": "ZOH handled the plan, commitment and lock well, with a warm plan built from Jordan's own goal and a clean hype line once locked. The next-morning kickoff fixed the earlier 'You in?' problem with 'Still in?', but it ran too long and left out the 6:30 pm time and 20-minute length."
       }
     }
   ]

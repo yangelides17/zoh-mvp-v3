@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:off-list-dating",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "c8e63962ada4",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "941cd48fbd14"
   },
@@ -56,44 +56,44 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "First text is exempt, but its intro, stop and style lines run to about four sentences plus the list."
+                "borderline": false,
+                "reason": "Intro is two short sentences plus the question and a short list, within the first-text exemption."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown, hashtags or filler; the bullet list is a plain goal list."
+                "reason": "No markdown, hashtags or filler; the list uses plain bullets."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic without being overfamiliar; no emoji row."
+                "reason": "Warm and energetic with no emoji row or overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for name and goal with the goal list, as the first text should."
+                "reason": "Asks for name and goal with the goal list, which fits a first text."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Nothing already given is asked for."
+                "reason": "Asks only for information not yet given."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Describes only what ZOH does, with no invented facts."
+                "reason": "States only what ZOH does, with no invented facts."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No wake/sleep, pushiness or city question."
+                "reason": "Asks no wake/sleep, pushiness or city questions."
               },
               {
                 "rule": "one-question",
@@ -109,8 +109,8 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences, within the limit."
+                "borderline": true,
+                "reason": "Three sentences, within the limit, though the first is a short greeting."
               },
               {
                 "rule": "plain-words",
@@ -122,37 +122,37 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, no affection or emoji row."
+                "reason": "Warm and sincere, no emoji or affectionate language."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "The offered route, Speak & connect, fits Chris's request about dating."
+                "reason": "Offers Speak & connect and the list, a close, on-list way forward for the dating ask."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the name Chris already gave and asks nothing repeated."
+                "reason": "Does not re-ask the name or goal already given."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Makes no invented claims about what ZOH can do beyond the Speak & connect scope."
+                "reason": "Says dating coaching is outside what it can do, with no invented claims."
               },
               {
                 "rule": "on-track",
                 "pass": true,
                 "borderline": false,
-                "reason": "Declines dating in a short line and steers back to the list and a close option."
+                "reason": "Declines dating coaching plainly and steers to a general skill without giving dating tips."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No prohibited question."
+                "reason": "Asks no prohibited questions."
               },
               {
                 "rule": "one-question",
@@ -168,16 +168,34 @@
             "rule": "first-text",
             "pass": true,
             "borderline": false,
-            "reason": "Says it is ZOH, what it does, that stop works anytime, that coaching style can change, and asks name and goal with the list."
+            "reason": "Says it's ZOH, what it does, that stop works anytime, that coaching style can change, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each detail is asked once and no answered item is asked again."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells Chris to say 'chill out' or 'push me harder' to change coaching."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Two ZOH texts, well under the length limit."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Says dating is outside what it can do without lecturing, offers Speak & connect and the list in one text, gives no dating tips, and asks one question; 'outside what I can do' is slightly less clearly 'not yet' than expected."
+            "borderline": false,
+            "reason": "Plainly says dating coaching is outside its reach without lecturing, offers Speak & connect and the list, gives no dating tips and asks one question."
           }
         ],
-        "summary": "ZOH handled Chris's dating request well: it declined plainly without lecturing, gave no dating tips, and offered the close Speak & connect route or the list in one text with a single question. The only soft spot is the first text running a bit long for its exemption, and the transcript ends before onboarding finishes, so the wrap-up and coverage rules were not scored."
+        "summary": "ZOH handled the off-list dating ask as intended: it declined dating coaching plainly and offered the close Speak & connect route or the list in one text with a single question. The onboarding first text covered what it needed to and the conversation was kept short."
       }
     }
   ]

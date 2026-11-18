@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:no-city-during-onboarding",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "f9c5fadac69a",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "2a42a05bfc21"
   },
@@ -76,8 +76,8 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "First text is exempt, though it runs five sentences and carries the required intro lines."
+                "borderline": false,
+                "reason": "Three sentences, which is fine for the exempt first text that carries the required lines."
               },
               {
                 "rule": "plain-words",
@@ -89,31 +89,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere with no overfamiliarity."
+                "reason": "Warm, energetic and sincere with no emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks what they're into or a book they've meant to read, which fits a reading goal."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks nothing the tester already gave."
+                "reason": "Asks what they're into or what book they're reading, which fits a reading goal."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what the tester said."
+                "reason": "Uses only what Jordan said."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No wake or sleep question and no city question."
+                "reason": "No city, wake or sleep question."
               },
               {
                 "rule": "one-question",
@@ -130,43 +124,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences."
+                "reason": "Two sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text only."
+                "reason": "Plain text."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific to the Kindle-in-bed detail."
+                "reason": "Warm and conversational."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks when they read, which is a reading onboarding question."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Time of reading was not yet given."
+                "reason": "Asks about bedtime, which fits a bedtime reading habit and is an allowed sleep-related question."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only references what the tester said."
+                "reason": "Refers only to the Kindle and reading in bed Jordan mentioned."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "Bedtime-style question is about reading, not a wake or sleep question."
+                "reason": "Bedtime is allowed in this rule."
               },
               {
                 "rule": "one-question",
@@ -195,31 +183,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and brief."
+                "reason": "Energy matches the default level."
               },
               {
                 "rule": "fits",
                 "pass": false,
                 "borderline": false,
-                "reason": "Asks what city they're in during onboarding, which reading's questions don't include; onboarding was already complete."
+                "reason": "Asks for city during onboarding when reading's questions were already answered; city is only for the plan."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "City was never given."
+                "reason": "Doesn't re-ask anything already answered."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only uses what was said."
+                "reason": "Nothing invented."
               },
               {
                 "rule": "not-asked",
                 "pass": false,
-                "borderline": true,
-                "reason": "City is allowed for non-Eastern numbers, but not during onboarding per the regression rule."
+                "borderline": false,
+                "reason": "Asks what city they're in during onboarding, which the rules bar for a non-Eastern number."
               },
               {
                 "rule": "one-question",
@@ -248,31 +236,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and calm."
+                "reason": "Warm and easy."
               },
               {
                 "rule": "fits",
                 "pass": false,
                 "borderline": false,
-                "reason": "Presses for the city again after the tester declined, when onboarding should already be finished."
+                "reason": "Presses for city again after Jordan declined, and onboarding is already complete."
               },
               {
                 "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Tester never gave a city, so asking again is allowed."
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks again for a location Jordan just declined to give."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "No invented facts."
+                "reason": "Nothing invented."
               },
               {
                 "rule": "not-asked",
                 "pass": false,
-                "borderline": true,
-                "reason": "Asks for city during onboarding, which is the forbidden location question."
+                "borderline": false,
+                "reason": "Asks for city during onboarding and mentions getting the timing right, which is a time zone reason."
               },
               {
                 "rule": "one-question",
@@ -288,43 +276,37 @@
             "rule": "first-text",
             "pass": true,
             "borderline": false,
-            "reason": "Says ZOH, what it does, stop anytime, change coaching, and skips name and goal already given."
+            "reason": "Says ZOH, what it does, stop anytime, coaching change, and asks the goal; skips the name and goal already given."
           },
           {
             "rule": "nothing-twice",
             "pass": true,
             "borderline": false,
-            "reason": "No clearly answered item was asked twice."
+            "reason": "Nothing answered was asked again; the city question was new, though it was then repeated."
           },
           {
             "rule": "covers-inputs",
             "pass": true,
             "borderline": false,
-            "reason": "Learned what (sci-fi), when (around 10) and how long (20 min) before the city question."
+            "reason": "What (sci-fi reading), when (bedtime around 10) and how long (20 min) were all captured."
           },
           {
             "rule": "tracking",
             "pass": true,
             "borderline": false,
-            "reason": "Never asked about an app or tool."
-          },
-          {
-            "rule": "goal-list",
-            "pass": true,
-            "borderline": false,
-            "reason": "Reading is a starter goal and was handled correctly."
-          },
-          {
-            "rule": "style-offer",
-            "pass": true,
-            "borderline": false,
-            "reason": "First text says the tester can change coaching style anytime."
+            "reason": "No app or tool was pushed."
           },
           {
             "rule": "wrap-up",
             "pass": false,
             "borderline": false,
-            "reason": "Onboarding questions were done after the 20-minute answer, but ZOH asked city instead of carrying into the plan."
+            "reason": "Onboarding questions were done after 20 minutes, but ZOH asked for city instead of carrying on into the plan."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Told them they can change coaching with phrases like chill out."
           },
           {
             "rule": "length",
@@ -336,10 +318,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "ZOH asked Jordan's city twice during onboarding, after the bedtime and length answers, which is the exact bug this case covers."
+            "reason": "ZOH asked for Jordan's city twice, including before the plan, the exact failure this case covers."
           }
         ],
-        "summary": "ZOH handled the opening well, with a warm intro and a good what/when/how-long sequence. It then repeated the forbidden city question during onboarding, failing the regression case and skipping the move into the plan."
+        "summary": "ZOH opened well and captured what, when and how long quickly, with a warm and plain tone. It then broke the regression by asking Jordan's city during onboarding, twice, after they had declined, rather than carrying straight into the plan."
       }
     }
   ]

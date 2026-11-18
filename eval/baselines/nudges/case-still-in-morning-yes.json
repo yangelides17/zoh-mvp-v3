@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:still-in-morning-yes",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "49e6242e5a02",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "d17584b15398"
   },
@@ -69,44 +69,44 @@
               {
                 "rule": "names-commitment",
                 "pass": true,
-                "borderline": true,
-                "reason": "Names the step (sharpen episodes, 10-name guest list, top 3) and the 8 pm time, though it doesn't say where."
+                "borderline": false,
+                "reason": "Names today's step (sharpen episodes, guest list, top 3) and the 8 pm time."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Yanni!\", warm and by name."
+                "reason": "Opens with a greeting and the name Yanni."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks one thing, whether they're still in, and doesn't re-ask the agreed time."
+                "reason": "Asks one thing only: whether they're still in."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "What and when are clear, but the desk location and 60-minute length are left out."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt or fake urgency."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energetic and warm, with one emoji as punctuation."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, not overfamiliar."
               }
             ]
           },
@@ -115,9 +115,9 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Three sentences with the one question in the middle, not at the end; the question about last night's hour is also not established in the transcript."
               },
               {
                 "rule": "plain-words",
@@ -126,10 +126,16 @@
                 "reason": "Plain words, no markdown or filler."
               },
               {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency."
+              },
+              {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Brief acknowledgement that fits, though the reflection question about last night is a small detour."
+                "borderline": false,
+                "reason": "Warm and brief, matching the energy."
               }
             ]
           },
@@ -140,50 +146,68 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step, where (at your desk), and the 8 pm start."
+                "reason": "Names the step (episodes, guest list, top 3), the desk and the 8 pm start."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Yanni!\"."
+                "reason": "Opens with Hey Yanni."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives what, where and when; the 60-minute length is not restated."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no question."
+                "reason": "Short, with no question, as a check-in should be."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or fake urgency; \"Ten minutes to go\" is a neutral heads-up."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and brief with a single emoji at the end."
+                "reason": "Urgency is only the time, with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown or hashtags."
+                "reason": "Plain words with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, not overfamiliar."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "still-in-keeps-reminder",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 7:50 pm check-in goes out after the 'still locked in' reply, and no text treats them as already started."
+          },
+          {
+            "rule": "no-restating",
+            "pass": true,
+            "borderline": false,
+            "reason": "The step and time are not restated in the morning reply; the 7:50 pm check-in is a reminder, not a repeat."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The 7:50 pm check-in went out, and the morning reply was brief with no re-asks. Nothing treats Yanni as already started, so the reminder was not cancelled."
+            "reason": "The morning reply is brief and asks nothing new, and the 7:50 pm check-in still goes out with no 'already started' framing."
           }
         ],
-        "summary": "ZOH handled the regression case correctly: the morning yes got a brief reply, and the 7:50 pm check-in went out with the step, desk and 8 pm start. Only minor borderline points came up (the reflection question in ZOH 2 and the step lacking an explicit place in ZOH 1)."
+        "summary": "ZOH handled the regression well: the morning yes was acknowledged without re-asking, and the 7:50 pm check-in went out with the step defined and no sign they were already starting. The main misses are minor: the morning reply's question sits mid-text and asks about an unestablished 'last night', and the kickoff omits the desk and length."
       }
     }
   ]

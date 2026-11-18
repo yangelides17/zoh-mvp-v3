@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:oct31-reflection-then-recap",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:22:44.023Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "6d03c69c327c",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "3b9cdad2fc55"
   },
@@ -91,13 +91,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four sentences plus a question ('Yanni, that's the move!', 'Swapping...', 'And the no-show follow-up...', 'How did it feel...'), slightly over the one-to-three sentence limit."
+                "reason": "Four sentences with a question, running a bit past the one-to-three sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific hype with one emoji as punctuation, not overfamiliar, and it celebrates the voice-note proof."
+                "reason": "Warm, celebrates the proof, one emoji at the end of a beat, no affection or overfamiliarity."
               }
             ]
           },
@@ -108,37 +108,37 @@
                 "rule": "recap",
                 "pass": true,
                 "borderline": true,
-                "reason": "Four progress bullets match the log and are framed as progress, but the destination line implies progress without plainly saying no real conversation has happened yet."
+                "reason": "Four bullets match the record and are framed as progress, but the destination line never plainly says practice so far with no real conversation yet."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only the explained lesson is described as 'starting to click', which is honest for a lesson explained but not yet applied."
+                "reason": "Calls the lesson starting to click, which is honest for an explained lesson, not understood or applied."
               },
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Counts, the Tuesday rewrite, the Thursday follow-ups and today's five questions all match the step log and saved reflections."
+                "reason": "Counts (4 full, 1 smaller, 1 missed), Tuesday and Thursday work, and today's questions all match the step log; no invented durations."
               },
               {
                 "rule": "no-unprompted",
                 "pass": true,
                 "borderline": false,
-                "reason": "No 'unprompted' or 'on your own' wording; the Monday and Tuesday recalls are not mentioned at all."
+                "reason": "No unprompted or on-your-own wording about recalled lessons."
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "The recap bullets fit the list allowance, but the extra destination paragraph makes the whole text long, with one closing question."
+                "reason": "Reflection reply plus turn plus four bullets plus a destination paragraph and question runs well past about 8 short lines."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Direct, warm coach tone with no emoji row and no overfamiliarity."
+                "reason": "Steady, warm and sincere with no emoji row or overfamiliar lines."
               }
             ]
           },
@@ -149,13 +149,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "A plan presentation may run longer; this is a short bulleted step with one closing question, 'Work for you?'."
+                "reason": "Two lead sentences, a three-line list, and one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pushy-level, direct and warm; the step is clear without extra hype or familiarity."
+                "reason": "Warm, direct and pushy-level without over-hyping or affection."
               }
             ]
           },
@@ -165,14 +165,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences confirming the lock with no question, as a one-line confirm after 'yeah that works'."
+                "borderline": true,
+                "reason": "Three sentences with no question; a confirm that runs slightly beyond one line."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and sincere with a single rocket emoji as punctuation."
+                "reason": "Energetic and warm with a single rocket emoji as punctuation."
               }
             ]
           }
@@ -182,28 +182,28 @@
             "rule": "natural-turn",
             "pass": true,
             "borderline": true,
-            "reason": "After answering the reflection, 'And zooming out, here's the progress...' bridges to the week, though the bullet list shifts somewhat abruptly."
+            "reason": "After a one-line reply the turn 'And zooming out' moves to the report, which is a bit abrupt but flows from the reflection."
           },
           {
             "rule": "reflection-first",
             "pass": true,
-            "borderline": false,
-            "reason": "Gives substance first ('Catching yourself mid-question is the skill... One follow-up is plenty') before the recap, with no stock 'Good catch'."
+            "borderline": true,
+            "reason": "Gives a brief substantive answer on the follow-up before the recap, though the substance is thin and generic."
           },
           {
             "rule": "next-step",
             "pass": true,
             "borderline": false,
-            "reason": "Monday step is fully defined (what, desk at 6 pm, 20 min, proof) and asked 'Work for you?', with the destination not pushed."
+            "reason": "Monday step is fully defined (where, when, how long, what, proof), asked if it works, and the destination is not pushed."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "The old failures are gone: no 'Good catch', no permission ask, no unprompted lessons, and no invented durations; only the destination wording is only partly explicit."
+            "reason": "Avoids Good catch, the unprompted claims and the invented durations, but still follows the old reflection-then-report structure with a long recap."
           }
         ],
-        "summary": "ZOH fixed the earlier failures: it answered the reflection with substance, the recap matches the record, and the next step is fully defined and confirmed. The remaining weak spots are that ZOH 1 runs four sentences and the destination line never plainly says no real conversation has happened yet."
+        "summary": "ZOH fixed the worst regression points: it dropped the stock Good catch, avoided the unprompted and three-minute claims, and gave a fully defined next step with a confirm. It still falls short on brevity and on stating plainly that no real conversation has happened yet, and the turn from reflection to the recap is somewhat abrupt."
       }
     }
   ]

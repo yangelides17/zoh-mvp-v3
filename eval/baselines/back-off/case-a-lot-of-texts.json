@@ -2,12 +2,12 @@
   "feature": "back-off",
   "id": "case:a-lot-of-texts",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:23:59.413Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:36.585Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "156c6297aa7a",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "05f0d55e1c62"
   },
@@ -69,7 +69,7 @@
                 "rule": "honest-offer",
                 "pass": true,
                 "borderline": false,
-                "reason": "Offers 4 or 5 run days a week, which meets the at-least-3 floor, and promises only what the app can do."
+                "reason": "Offers 4 or 5 run days a week, a lighter stretch, and honestly says it can't send fewer texts."
               }
             ]
           },
@@ -80,7 +80,7 @@
                 "rule": "honest-offer",
                 "pass": true,
                 "borderline": true,
-                "reason": "Thanks them and says the note went to the team, with no promise or fewer-texts offer, but never says the team's on it outright."
+                "reason": "Takes their keep-every-day answer, thanks them and passes the note to the team, promising no fewer texts; 'the team's on it' is implied rather than stated."
               }
             ]
           }
@@ -89,23 +89,23 @@
           {
             "rule": "flags-back-off",
             "pass": true,
-            "borderline": true,
-            "reason": "A back_off flag was saved for the message-volume complaint, though the second flag duplicates the same ask."
+            "borderline": false,
+            "reason": "The 'this is a lot of texts' request was saved as a back_off flag, as the regression case requires."
           },
           {
             "rule": "no-false-flag",
             "pass": true,
-            "borderline": false,
-            "reason": "No miss, step complaint or quiet-hours change was flagged; the only flag was for message volume."
+            "borderline": true,
+            "reason": "Flagging a clear complaint about text volume is correct; the message is only mildly phrased, so a reviewer could read it as a complaint rather than a request."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Flag saved, fewer run days offered in one line, then keep-every-day taken as feedback with thanks and no promise, though 'team's on it' is only implied."
+            "borderline": false,
+            "reason": "Flag saved, fewer step days offered first, then on 'keep every day' it thanked them, passed it to the team and made no promise or pause."
           }
         ],
-        "summary": "ZOH handled the back-off well: it offered 4 or 5 run days a week without guilt, then accepted the tester's choice to keep every day and passed the feedback on without promising anything. The only soft spot is that it said the note went to the team rather than explicitly saying the team's on it, and the back_off flag was saved twice for one ask."
+        "summary": "ZOH handled the back-off well: it saved the flag, offered fewer run days first, and treated the tester's choice to keep daily runs as feedback without promising fewer texts. The only soft spot is that the final text passes the note to the team without explicitly saying the team's on it."
       }
     }
   ]

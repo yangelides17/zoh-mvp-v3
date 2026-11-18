@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:day-after-a-miss",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "1f8d06d351e4",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7f6920761363"
   },
@@ -85,37 +85,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names today's step: ten pages of Dune on the couch at 7 tonight, with a voice note after."
+                "reason": "Names the step: ten pages of Dune, on the couch, at 7 tonight."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Sam!\"."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "About five sentences plus the question, more than the one-to-three-sentence limit, though it reads as a kickoff with one ask."
-              },
-              {
-                "rule": "kickoff-one-ask",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks one thing, \"You in?\", and doesn't re-ask the time."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": true,
-                "reason": "Gives what, where and when, but not how long; the 20-minute length from the plan isn't mentioned."
+                "reason": "Opens with Morning, Sam!"
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"Yesterday got away from us\" names the miss lightly with no guilt."
+                "reason": "Calls yesterday a slip that got away, with no blame."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "About five sentences with a voice-note instruction, more than the one-to-three limit."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its one question is You in?, and it doesn't re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "What, where and when are clear, but the length is only ten pages, not a time."
               },
               {
                 "rule": "plain-words",
@@ -127,7 +127,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pushy-level energy, warm and sincere, with no emoji row."
+                "reason": "Pushy-level energy, sincere, and no emoji row."
               }
             ]
           },
@@ -138,101 +138,151 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end."
+                "reason": "Two short sentences and one question at the end."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Accepts the miss as \"one miss is just a slip\" without guilt."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain words, no markdown or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and firm in tone, not overfamiliar."
+                "reason": "Totally fair, one miss is just a slip, with no guilt."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or urgency in the reply."
-              }
-            ]
-          },
-          {
-            "zohText": 3,
-            "checks": [
-              {
-                "rule": "names-commitment",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names the step: ten pages of Dune on the couch, \"Ten minutes to 7\"."
-              },
-              {
-                "rule": "warm-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"Hey Sam!\"."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Around four or five short sentences with one question, slightly over the limit for a check-in."
+                "reason": "Accepts the miss once and warmly, as required."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Light reminder with no guilt or pressure."
+                "reason": "Tone stays warm; no fake urgency."
               },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain words, no markdown or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, pushy-level energy, not affectionate."
-              }
-            ]
-          },
-          {
-            "zohText": 4,
-            "checks": [
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the win and frames the miss as behind them, with no guilt."
+                "reason": "No shaming or pressure in the reply."
               },
               {
-                "rule": "short",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Nothing guilt-inducing."
               },
               {
-                "rule": "plain-words",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "One 📚 used as punctuation, no markdown or filler."
+                "reason": "Nothing guilt-inducing."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype for a real win, specific and sincere, with a single emoji."
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing guilt-inducing."
               }
             ]
           }
@@ -242,34 +292,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Kickoff, reply, check-in and specific celebration all happen with nothing after the celebration, but ZOH 2 restates the step and time and asks about the miss rather than turning straight to tonight."
-          },
-          {
-            "rule": "step-progression",
-            "pass": true,
-            "borderline": false,
-            "reason": "After the miss the step stays the same ten pages, with no jump in difficulty."
-          },
-          {
-            "rule": "miss-ladder",
-            "pass": true,
-            "borderline": false,
-            "reason": "The day after the miss opens with the full step, names the slip without guilt, and pushes for the full ten pages."
-          },
-          {
-            "rule": "daily-rhythm",
-            "pass": true,
-            "borderline": false,
-            "reason": "After \"done, all 10 pages\" ZOH celebrates and sends nothing further that day."
-          },
-          {
-            "rule": "no-restating",
-            "pass": false,
-            "borderline": false,
-            "reason": "ZOH 2 restates the step and time (\"tonight at 7 it's you, Dune and the couch\") though neither changed."
+            "reason": "Kickoff names the slip lightly and pushes the full ten pages; the reply accepts it once and turns to tonight, though its question reopens yesterday."
           }
         ],
-        "summary": "ZOH recovered well after the miss: a warm, no-guilt kickoff, a 6:50 check-in, and a specific celebration with nothing after it. It slipped on the reply to \"yesterday got away from me\", restating the step and time and asking about the miss instead of turning straight to tonight, and the kickoff and check-in ran slightly long."
+        "summary": "ZOH handled the day after the miss well: the kickoff named the slip without guilt and pushed the full ten pages, and the 6:50 check-in and final celebration of the specific stopping point were on target. The main weaknesses are a kickoff that runs long and a reply that restates the step and time and then asks about yesterday again."
       }
     }
   ]

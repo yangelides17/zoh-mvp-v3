@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:owned-the-miss",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "2ea63770f557",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "23bfaaf2b1a4"
   },
@@ -53,25 +53,25 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"Yesterday's behind us\" acknowledges the miss without shame, guilt or fake urgency."
+                "reason": "Says \"Yesterday's behind us\" and moves on without blame or guilt about the miss."
               },
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Runs to four sentences (\"Love that, Sam.\" plus three more) where the limit is one to three."
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question; well within the one-to-three-sentence limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler; the emoji is used as punctuation."
+                "reason": "No markdown, hashtags or filler; a single emoji ends the message as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere, with a single emoji at the end rather than a row."
+                "reason": "Warm, upbeat and sincere at Pushy-level energy, not overfamiliar, with one emoji at the end."
               }
             ]
           }
@@ -81,10 +81,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH answers warmly, avoids guilt about yesterday, holds Sam to today's 30 push-ups at 6, and no after-miss kickoff appears later that morning."
+            "reason": "ZOH answers warmly with no guilt, holds Sam to today's 30 push-ups at 6, and no after-miss kickoff goes out at 9 am or later."
           }
         ],
-        "summary": "ZOH handled the regression case well: it answered warmly, avoided guilt about the miss, and held Sam to 30 push-ups at 6 without sending a later kickoff. The only issue is that its single reply runs to four sentences, slightly over the short-text limit."
+        "summary": "ZOH handled the regression well: it answered the tester's ready-to-go message warmly, without guilt about yesterday, and held them to 30 push-ups at 6 pm as one slip rather than two. No later after-miss kickoff appears in the transcript, so the scripted failure did not recur."
       }
     }
   ]

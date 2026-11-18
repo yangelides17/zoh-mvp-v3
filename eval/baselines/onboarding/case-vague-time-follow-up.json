@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:vague-time-follow-up",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "4f563174aa53",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "99216b8127d2"
   },
@@ -78,7 +78,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, within the limit."
+                "reason": "Two sentences, within the one-to-three limit."
               },
               {
                 "rule": "plain-words",
@@ -90,19 +90,37 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, direct and pushy enough, with no emoji or affection."
+                "reason": "Friendly and direct, with no overfamiliarity or emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asking how long a session lasts fits the lifting goal."
+                "reason": "Asks how long a session can be, which fits the lifting goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask anything the tester had already answered."
               },
               {
                 "rule": "honest",
-                "pass": false,
+                "pass": true,
+                "borderline": true,
+                "reason": "Locks in 6 pm from a bare 'Yea' that didn't clearly pick 6 over 5:30, which is an assumption rather than an invented fact."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
                 "borderline": false,
-                "reason": "\"I'll lock in 6 pm\" turns an ambiguous \"Yea\" into a fact the tester never confirmed."
+                "reason": "Stays on onboarding with no off-topic content."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing about wake, sleep or pushiness."
               },
               {
                 "rule": "one-question",
@@ -119,7 +137,7 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Four sentences, over the three-sentence limit."
+                "reason": "Four sentences, over the one-to-three limit."
               },
               {
                 "rule": "plain-words",
@@ -130,26 +148,38 @@
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Energy is fine, but the reply is tangled and reads as confused rather than coach-like."
+                "borderline": false,
+                "reason": "Warm enough and no emoji or overfamiliarity problems."
               },
               {
                 "rule": "fits",
                 "pass": false,
                 "borderline": true,
-                "reason": "Asks whether 6 meant minutes, which is a confusing question for a coach to ask about a session length."
+                "reason": "Asks whether 6 means minutes or the time, which confuses the duration question the tester had just answered."
               },
               {
                 "rule": "no-repeat",
                 "pass": false,
-                "borderline": true,
-                "reason": "Asks about session length again after the tester answered \"6\", though that answer was ambiguous."
+                "borderline": false,
+                "reason": "Asks again how long a session can be after the tester already answered '6' to that exact question."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "The 30 to 45 minute lifting figure is general knowledge, not an invented fact about the tester."
+                "reason": "The 30 to 45 minute figure is general guidance, not a fabricated fact."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
               },
               {
                 "rule": "one-question",
@@ -165,10 +195,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "After \"Yea\" ZOH locked in 6 pm instead of asking once more kindly, and after \"I would say 6\" it did not save 6 pm and move on."
+            "reason": "After 'Yea', ZOH locked in 6 pm and never asked which time works, with no reason for a set time, so the expected kind re-ask is missing."
           }
         ],
-        "summary": "ZOH repeated the regression: it treated the vague \"Yea\" as a confirmed 6 pm instead of asking gently once more, and when the tester said \"6\" it misread it as minutes and asked about session length again. The reply ran four sentences and the tangled question left the time unsettled."
+        "summary": "ZOH avoided the old teasing line but skipped the expected kind re-ask after 'Yea' and locked in 6 pm on an unclear answer. Its second text then re-asked the session length the tester had already answered and ran to four sentences with a confusing minutes-versus-time question."
       }
     }
   ]

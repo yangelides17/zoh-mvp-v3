@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:quiet-sunday-thin-week",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:22:44.023Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "7b0ac98d9eb2",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7d53cbabef05"
   },
@@ -85,13 +85,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Kickoff runs about 4 to 5 sentences (greeting, page recap, step, reason, question), over the 1 to 3 sentence limit, though it ends on one question."
+                "reason": "Kickoff runs about five short sentences (greeting, page recall, instructions, reassurance, question), more than the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, pushy-level energy with a sincere 'I know you will' and no emoji row."
+                "reason": "Pushy-level energy with a warm, sincere tone; no emoji row or overfamiliarity."
               }
             ]
           },
@@ -102,13 +102,13 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Check-in has about 4 short sentences; it ends on one question, but the set-up instructions push it past the limit."
+                "reason": "Check-in is a run of fragments (Ten minutes to 8, Grab The Martian, put your phone away, Ten pages tonight) before a single closing question; borderline on sentence count."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and direct with appropriate energy, no overfamiliarity."
+                "reason": "Direct, warm and pushy at the right level; no overfamiliarity."
               }
             ]
           },
@@ -117,15 +117,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "The one question ('how did the reading go tonight?') is mid-text, not at the end, and the text runs to about three sentences with a photo ask and a smaller-version note."
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, as a follow-up should be."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and non-judgmental follow-up with appropriate energy."
+                "reason": "Warm and firm; the smaller-version fallback keeps the energy without guilt."
               }
             ]
           },
@@ -135,44 +135,44 @@
               {
                 "rule": "recap",
                 "pass": true,
-                "borderline": true,
-                "reason": "Gives two evidenced points (4 days read, page 24 to 48, phone-out-of-reach lesson) then the step and one question; it does not separate the 2 full and 2 smaller days."
+                "borderline": false,
+                "reason": "Lists real progress from the record (4 days read, page 24 to 48, phone-out-of-reach lesson) and ends with one question."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "The phone trick is described as something they 'found', not called understood; nothing overclaimed."
+                "reason": "The phone trick is described as something they 'found', not called understood, which matches the record's explained status."
               },
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Days, pages and lesson all match the step log and saved reflection/lesson."
+                "reason": "The 4 days, page 24 to 48 and the lesson all match the step log and proof; no invented claims."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Prose runs about 5 to 6 sentences (recap, lesson, miss, step, reason, question), over the 1 to 3 sentence limit despite one question at the end."
+                "reason": "Prose recap plus step runs about seven sentences, well beyond the short limit, though it is not a list."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Pushy-level warmth and accountability, no emoji row or affection."
+                "reason": "Pushy and warm ('You said you'd do this and I know you will') without affection or emoji rows."
               },
               {
                 "rule": "monday-recap",
                 "pass": true,
-                "borderline": false,
-                "reason": "Evidenced recap of last week from the record, then a fully defined step and one question, with no question about the week."
+                "borderline": true,
+                "reason": "Evidenced recap from the record, then a defined step and one question about today; the step omits how long, and the 2-full/2-smaller split is not given."
               },
               {
                 "rule": "miss-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "Sunday's miss is named lightly as 'Yesterday got away from us, so today counts', not as a scolding headline."
+                "reason": "Sunday's miss is named lightly as 'Yesterday got away from us', not as a headline."
               }
             ]
           },
@@ -183,13 +183,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences confirming the step and time with no question."
+                "reason": "Two short sentences, no question, as a confirmation after 'ok' should be."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short, warm confirmation with one emoji as punctuation."
+                "reason": "Brief and energetic with a single book emoji as punctuation."
               }
             ]
           }
@@ -199,10 +199,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "No Sunday recap, check-ins at 7:50 and 8:20, one Monday 9 am recap plus step and question, and a short confirmation after ok; but it says 'phone in the kitchen' rather than the other room."
+            "reason": "Sunday had kickoff, 7:50 check-in and 8:20 follow-up with no recap; Monday 9 am gave one text with an accurate recap, light miss, full step, one question, then short confirmation. Minor gaps: no full/smaller split and no how-long."
           }
         ],
-        "summary": "ZOH avoided the regression: it sent no Sunday recap, kept the 7:50 and 8:20 check-ins, and sent a single Monday text with an accurate, non-inflated record and a fully defined step. Its weak spots are length (several texts run over three sentences), the mid-text question in the 8:20 follow-up, and the kitchen location that differs from the plan's other room."
+        "summary": "ZOH met the regression case: the Sunday texts were on schedule with no recap, and the Monday 9 am text gave an accurate, evidenced recap, named the miss lightly, defined the step and asked one question. The main misses are some over-length texts (the kickoff, check-in and Monday recap run past three sentences) and the Monday step left out how long it takes."
       }
     }
   ]

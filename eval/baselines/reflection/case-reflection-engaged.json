@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:reflection-engaged",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:11:03.764Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "cc37fe01edde",
-    "voice": "c0dfbb42fd2a",
+    "checks": "3e5ad32b2043",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "bb71770d30f2"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:reflection-engaged",
+        "key": "case:reflection-engaged#1",
         "kind": "case",
         "id": "reflection-engaged",
+        "suite": "regression",
         "title": "Proof and reflection in one voice note, then an engaged tester: real follow-ups, a natural wrap-up once ZOH has real insight",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "20:30",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Chapter 4 done, Maya, that's 4 days in a row. LFG 📚 Habit stacking is a great one to land on. Where do you see yourself stacking your reading onto something you already do every day, since the buzzing phone kept pulling you out?",
+          "text": "Four days in a row, Maya, and the habit stacking idea clicked 🔥 Where could you stack reading onto something you already do? And what would you do about that buzzing phone?",
           "at": "2026-11-03T01:30:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Dishes, then couch, then Atomic Habits. That's habit stacking in action, Maya. Your phone buzzing was the hard part tonight, so what's one thing you could do with it when you sit down, so it stops pulling you out?",
+          "text": "Dishes then couch is a solid stack, Maya, since it ties reading to something you already do every night. Now the phone: when it buzzed, did it pull you out of the chapter, or were you able to keep going?",
           "at": "2026-11-03T01:31:28.900Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "That makes sense, Maya. Work Slack at night is a tough one to ignore. So for tomorrow, let's build on what clicked: chapter 5 on the couch at 8 pm (about 20 min), right after the dishes. Before you sit down, pause Slack or turn on Do Not Disturb for those 20 minutes. Then send a voice recap like today. Work for you?",
+          "text": "Work Slack at night is a tough one, Maya. You could stack a second habit right onto the dishes: turn on Do Not Disturb (or mute Slack) as the last thing before you sit down. Or you could leave the phone in another room for the 20 minutes. Which one sounds more doable for you?",
           "at": "2026-11-03T01:32:14.500Z"
         },
         {
@@ -74,7 +74,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's even better than Do Not Disturb, Maya, because out of reach means out of mind. Tomorrow: dishes, phone on the charger in the kitchen, then chapter 5 on the couch at 8. Grab your phone after for the voice recap. You've got this 💪",
+          "text": "Charging it in the kitchen is the cleanest fix, Maya, because the phone can't buzz you from another room. 🔥 Tomorrow, same 8 pm: dishes, plug the phone in the kitchen, then chapter 5 on the couch for about 20 minutes and a voice recap. Work for you?",
           "at": "2026-11-03T01:32:55.600Z"
         },
         {
@@ -84,7 +84,7 @@
         },
         {
           "from": "zoh",
-          "text": "Maya, you actually wrote the sticky note! That takes the chapter off the page and puts it in your kitchen. 📝 Where did you stick it, so you'll see it right after the dishes?",
+          "text": "Writing the sticky note makes it real, Maya 🔥 Put it by the kitchen charger so you see it as you plug the phone in. Tomorrow is dishes, phone on the charger, then chapter 5 on the couch at 8 for about 20 minutes, plus a voice recap. Are you in?",
           "at": "2026-11-03T01:33:37.000Z"
         },
         {
@@ -94,12 +94,12 @@
         },
         {
           "from": "zoh",
-          "text": "Perfect, Maya. Tomorrow's set: dishes, phone on the charger, then chapter 5 on the couch at 8. Good work today 🙌",
+          "text": "Locked in, Maya 💪 Tomorrow at 8: dishes, phone on the kitchen charger, chapter 5 on the couch, then your voice recap. Enjoy the rest of tonight.",
           "at": "2026-11-03T01:34:35.500Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Takeaway (explained, 2026-11-02): Habit stacking: link a new habit to one you already do\nTakeaway (applied, 2026-11-02): Habit stacking: link a new habit to one you already do\nReflection for 2026-11-02: Habit stacking clicked; phone buzzing (work Slack, even at night) was the hard part. Plans to stack reading after dishes, leave phone charging in kitchen, and wrote a sticky note: \"after the dishes I read on the couch\".\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min), right after doing the dishes; leave your phone charging in the kitchen while you read; then grab it for a voice recap\nStyle now: pushy",
+      "saved": "Takeaway (explained, 2026-11-02): Habit stacking: link a new habit to one you already do (after dishes, read on the couch)\nTakeaway (applied, 2026-11-02): Habit stacking: link a new habit to one you already do (after dishes, read on the couch)\nReflection for 2026-11-02: Finished chapter 4; habit stacking clicked (read after dishes); work Slack buzzing at night interrupted; will charge phone in kitchen.\nCan now do (2026-11-02): Finish a chapter a day and recap it in her own words\nGaps (2026-11-02): Protecting reading time from phone interruptions\nStep set for 2026-11-03, agreed: Dishes, then plug phone in to charge in the kitchen, then chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -107,15 +107,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Four short sentences with one question at the end; slightly over the three-sentence norm but reads tight."
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks two questions in one text ('Where could you stack reading...?' and 'what would you do about that buzzing phone?'), breaking the one-question limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype with a real win, one emoji as punctuation."
+                "reason": "Warm, energetic celebration with one emoji as punctuation."
               }
             ]
           },
@@ -126,13 +126,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one closing question about the buzzing phone."
+                "reason": "Three sentences with one question at the end, following the buzzing phone she named."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": false,
-                "reason": "Warm and specific, no overfamiliarity or emoji row."
+                "borderline": true,
+                "reason": "Warm and specific; 'every night' adds a small detail she didn't say."
               }
             ]
           },
@@ -141,15 +141,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Proposal text with one question at the end, within the allowed longer length for presenting a plan."
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences with a two-option list and a question; close to the limit but offers real choices tied to her Slack problem."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Measured and warm, no pressure beyond the pushy level."
+                "reason": "Calm, sincere and specific to her situation."
               }
             ]
           },
@@ -160,13 +160,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the agreed setup in a few sentences with no question, which fits a settled plan."
+                "reason": "About three sentences with one question at the end, and the next step is clearly defined."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with one emoji at the end."
+                "reason": "Energetic and warm, with one emoji mid-text."
               }
             ]
           },
@@ -176,14 +176,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences, one question at the end about where the sticky note went."
+                "borderline": true,
+                "reason": "Three sentences with one question, but it restates the full settled step and asks 'Are you in?' again."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the note sincerely with one emoji as punctuation."
+                "reason": "Warm and hyped with a single emoji."
               }
             ]
           },
@@ -194,13 +194,559 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences confirming tomorrow's setup with no new question, as required after agreement."
+                "reason": "Short confirmation with no question, as the regression case requires."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm close with one emoji, not overfamiliar."
+                "reason": "Warm, with one emoji and a sincere send-off."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": false,
+            "borderline": true,
+            "reason": "The reflection opens with two questions in one text rather than one."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": false,
+            "borderline": true,
+            "reason": "Follow-ups are specific and build on her words, but the first text asks two questions at once."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved gap (phone interruptions) and can-do (finish a chapter and recap it) match her voice note."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Keeps going while she engages, then wraps up with a clear step and a short close."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": false,
+            "borderline": true,
+            "reason": "'I could leave it charging in the kitchen I guess' is a hedged answer, and ZOH moved on without a follow-up."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The first real answer got a reply that followed what she said without jumping to tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Moved to the next step by the fourth text after proof, once she'd said what happened."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked about the buzzing she named as the difficulty, then offered a concrete fix."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Step is fully defined (chapter 5, couch, 8 pm, about 20 min), uses the kitchen-charger cue, and asks if it works."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "Builds habit stacking into the next step as the dishes cue."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Mostly matches the expected flow, but the first text asks two questions, missing the one-question-at-a-time requirement."
+          }
+        ],
+        "summary": "ZOH counted the voice note as proof and reflection, followed her habit-stacking and phone-buzzing details, and reached a fully defined next step that used her kitchen-charger idea, then confirmed the agreement without a new question. The main miss is the first text, which asked two questions at once, and the late re-proposal and 'Are you in?' in the fifth text repeated what she hadn't yet agreed to."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:reflection-engaged#2",
+        "kind": "case",
+        "id": "reflection-engaged",
+        "suite": "regression",
+        "title": "Proof and reflection in one voice note, then an engaged tester: real follow-ups, a natural wrap-up once ZOH has real insight",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap.",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Okay, finished chapter four. Honestly the habit stacking idea clicked, like linking a new habit to one you already do. The hard part was my phone kept buzzing the whole time.]",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, day 4 done! 🔥 Habit stacking clicking is a good sign. Since your phone kept buzzing, what's one habit you already do that you could stack the reading onto, so it happens without the distractions?",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah like after I do the dishes I could just sit down and read",
+          "at": "2026-11-03T01:31:21.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dishes then couch is a clean trigger, Maya. Since the phone was the thing that buzzed through chapter 4, where could it be while you read so it doesn't pull you out?",
+          "at": "2026-11-03T01:31:28.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "the buzzing is mostly work slack, even at night",
+          "at": "2026-11-03T01:32:07.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Work Slack buzzing at night is a real one, Maya. Here's tomorrow: chapter 5 at 8 on the couch, right after the dishes, about 20 minutes. Mute Slack or put your phone on Do Not Disturb before you sit down, then send a voice recap like usual. Work for you?",
+          "at": "2026-11-03T01:32:14.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "I could leave it charging in the kitchen I guess",
+          "at": "2026-11-03T01:32:48.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Phone charging in the kitchen is better than my idea, Maya, because it's out of reach and not just muted. So it's locked: tomorrow at 8, dishes, then chapter 5 on the couch, then your voice recap. Go get it 💪",
+          "at": "2026-11-03T01:32:55.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch",
+          "at": "2026-11-03T01:33:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, you wrote the sticky note! That's habit stacking in action, and it's you using the chapter, not just reading it 🙌 Where's it going to live so you see it when the dishes are done?",
+          "at": "2026-11-03T01:33:37.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok that works",
+          "at": "2026-11-03T01:34:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, Maya. Sticky note by the sink, phone charging in the kitchen, chapter 5 at 8 tomorrow. That's a setup that works for you. Go enjoy the rest of your night 🙌",
+          "at": "2026-11-03T01:34:35.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Habit stacking: link a new habit to one you already do (e.g. read after the dishes).\nTakeaway (applied, 2026-11-02): Habit stacking: write a sticky note cue like \"after the dishes I read on the couch.\"\nReflection for 2026-11-02: Finished chapter 4; habit stacking clicked; work Slack buzzes even at night and distracts her; plans to read after dishes.\nGaps (2026-11-02): phone distractions while reading\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min) right after the dishes, with your phone left charging in the kitchen, then a voice recap\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end, as the rule asks."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, celebratory, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single closing question about where the phone could sit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A fully defined step with one question at the end; runs a little long but fits a plan-showing text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, no hype overload."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, closing the step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Calls the plan 'locked' after her hedged 'I guess'; energy is fine, but the lock is borderline."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, about the sticky note."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is earned by the sticky note, with a single emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, with no question, after she confirmed."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm sign-off with one emoji."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "The voice note counts and ZOH celebrates, then opens with one question about the buzzing phone."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up is specific to her words (habit stacking, dishes, buzzing, sticky note), one question per text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": true,
+            "reason": "She said what clicked and what distracted her, and ZOH asked about the cue and the buzzing before proposing."
+          },
+          {
+            "rule": "not-forced",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable as a routine step, and no forced learning question was asked."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved gap 'phone distractions while reading' and the reflection match her words."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'ok that works' ZOH confirms with no new question and lets the talk land."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "Her 'I could leave it charging in the kitchen I guess' is hedged, and ZOH accepted it without a grounded follow-up."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to her first real answer followed the habit stacking and buzzing points and did not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Within about three texts after proof the step was proposed once she'd said what happened and what she'd try."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The phone-buzzing difficulty got a question before the proposal, and the follow-ups went deeper on her cue."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The proposal acknowledges the buzzing, is fully defined (chapter 5, couch, 8 pm, dishes, 20 min) and asks 'Work for you?'."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "A voice recap fits reading, and it's a voice note, not typed text."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tomorrow's step builds habit stacking in with 'right after the dishes'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the proof and celebrates, asks a gap-grounded question first, and proposes a defined step with the phone cue; the wrap-up came a little quickly after her short Slack answer."
+          }
+        ],
+        "summary": "ZOH handled the first voice note well: it counted the proof, celebrated, asked grounded follow-ups about the buzzing phone and the dishes cue, then proposed a fully defined chapter 5 step and confirmed cleanly. The main soft spots are that it locked the phone-in-kitchen idea after a hedged 'I guess' and wrapped up a little quickly after a short answer about Slack."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:reflection-engaged#3",
+        "kind": "case",
+        "id": "reflection-engaged",
+        "suite": "regression",
+        "title": "Proof and reflection in one voice note, then an engaged tester: real follow-ups, a natural wrap-up once ZOH has real insight",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap.",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Okay, finished chapter four. Honestly the habit stacking idea clicked, like linking a new habit to one you already do. The hard part was my phone kept buzzing the whole time.]",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, day 4 in the books 📚 Habit stacking clicking is a good sign, since you're reading a habits book. What's one habit you'd stack onto something you already do?",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah like after I do the dishes I could just sit down and read",
+          "at": "2026-11-03T01:31:21.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dishes, then straight to the couch is a solid stack, Maya. Back to the phone buzzing: what was it that kept going off while you read?",
+          "at": "2026-11-03T01:31:28.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "the buzzing is mostly work slack, even at night",
+          "at": "2026-11-03T01:32:07.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Slack at night is a sneaky one, Maya. For tomorrow, how about chapter 5 at 8 on the couch, right after the dishes, with Slack muted or your phone on Do Not Disturb for the 20 minutes? Voice recap after, same as always. Work for you?",
+          "at": "2026-11-03T01:32:14.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "I could leave it charging in the kitchen I guess",
+          "at": "2026-11-03T01:32:48.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Phone charging in the kitchen is better than my idea, Maya, because Slack can't pull you in from another room. Tomorrow, chapter 5 at 8 on the couch. Do the dishes, leave the phone charging in the kitchen, read for 20 minutes, then send a voice recap. Work for you?",
+          "at": "2026-11-03T01:32:55.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch",
+          "at": "2026-11-03T01:33:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, writing the sticky note is the stack in action 🔥 Put it somewhere you'll see it while you're doing the dishes. So tomorrow is chapter 5 at 8 on the couch, phone charging in the kitchen, voice recap after. Are you in?",
+          "at": "2026-11-03T01:33:37.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok that works",
+          "at": "2026-11-03T01:34:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Tomorrow: dishes, phone charging in the kitchen, chapter 5 on the couch at 8, then your voice recap. Go enjoy the evening 💪",
+          "at": "2026-11-03T01:34:35.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Habit stacking: link a new habit to one you already do (after the dishes, sit down and read)\nTakeaway (applied, 2026-11-02): Habit stacking: link a new habit to one you already do (after the dishes, sit down and read)\nReflection for 2026-11-02: Finished chapter 4; habit stacking clicked (after dishes, read). Work Slack buzzes during reading, even at night.\nCan now do (2026-11-02): Explains a concept in her own words and applies it to her life\nGaps (2026-11-02): Phone interruptions from work Slack\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min): after the dishes, leave your phone charging in the kitchen, read, then send a voice recap\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy energy with an emoji as punctuation and a warm celebration of the proof."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question, about the buzzing she raised."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks two questions: 'how about chapter 5...?' and then 'Work for you?'. It is also longer than three sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question, though the step is restated in full."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, using her phone-in-kitchen idea."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end: 'Are you in?'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Emoji as punctuation and specific to the sticky note she mentioned."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question after the clear yes, as required."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is at the right level with a single emoji."
               }
             ]
           }
@@ -210,28 +756,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Counts the voice note as proof and celebrates without a reflection ask; follow-ups target habit stacking, buzzing and the sticky note, then it proposes chapter 5 fully defined with the kitchen-charger cue and confirms 'ok that works' with no question. The gap question on how the reading felt was only covered indirectly."
-          },
-          {
-            "rule": "follow-ups",
-            "pass": true,
-            "borderline": false,
-            "reason": "Each follow-up builds on something Maya said, one question per text, and none asks what she already told it."
-          },
-          {
-            "rule": "next-step",
-            "pass": true,
-            "borderline": false,
-            "reason": "The chapter 5 proposal uses the buzzing and dishes cue and is asked only after it is shown in full."
-          },
-          {
-            "rule": "stops-right",
-            "pass": true,
-            "borderline": false,
-            "reason": "Wraps up after the sticky note thread settles and ends on the agreed setup without pushing further."
+            "reason": "Treats the voice note as proof and reflection, asks about the buzzing and habit stacking, follows the phone and sticky note specifically, proposes a fully defined chapter 5 step, and confirms 'ok that works' with no question. It re-proposes the step several times before her yes and never asks what she noticed about the book itself."
           }
         ],
-        "summary": "ZOH handled the first voice note well: it counted and celebrated the proof, followed up on habit stacking, the buzzing phone and the sticky note one question at a time, then proposed a fully defined chapter 5 step built on the charger cue. After 'ok that works' it confirmed in one line with no new question, meeting the regression case, with the gap-on-reading question only covered indirectly."
+        "summary": "ZOH handled the regression well: it counted the voice note without a checkmark-style reflection request, followed up on habit stacking, the buzzing phone and the sticky note one question at a time, and locked in a fully defined chapter 5 step after her yes with no trailing question. The main misses are minor: it restated the step across several texts and its third text asked two questions."
       }
     }
   ]

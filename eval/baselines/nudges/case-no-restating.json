@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:no-restating",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "d73391342fb9",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "c757fc74a119"
   },
@@ -103,53 +103,30 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question, well within the limit."
+                "reason": "Three short sentences with no question."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype-level energy with one emoji at the end; not overfamiliar."
+                "reason": "Warm celebration with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown or filler."
+                "reason": "Plain text with one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with a single emoji as punctuation."
               }
             ]
           },
           {
             "zohText": 2,
-            "checks": [
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Answers her appendix question in three sentences with one question at the end."
-              },
-              {
-                "rule": "teaching-fits",
-                "pass": true,
-                "borderline": false,
-                "reason": "Brief, grounded answer on skipping appendices that matches her question."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and conversational, no pressure."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain words, no markdown."
-              }
-            ]
-          },
-          {
-            "zohText": 3,
             "checks": [
               {
                 "rule": "short",
@@ -161,19 +138,48 @@
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Acknowledges a heavy day without guilt or urgency."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": true,
-                "reason": "Restates 'Ten pages at 7' in reply to a work vent, which is a mild restatement but not pushy."
+                "reason": "Answers the appendix question without judgment."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and curious, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges the heavy day without pushing guilt."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and understanding, though it re-pitches the step and time unprompted."
               }
             ]
           },
@@ -184,19 +190,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences; confirms the new time once and asks for a photo rather than a question."
+                "reason": "Three sentences, with the photo ask as an instruction, not a question."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm with a single emoji as punctuation."
+                "reason": "Accommodates the late change without pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words; the single emoji is punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and sincere, matching the pushy level."
               }
             ]
           },
@@ -207,25 +219,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences, no question."
+                "reason": "Three short sentences with no question."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly send-off with no pressure."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": true,
-                "reason": "Mentions 8:30 again after 'cool cool' with no change or question, a light restatement of the time."
+                "reason": "Warm closing with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words, one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere; the time repeat is a mild restatement."
               }
             ]
           },
@@ -236,38 +248,44 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, no question, answers her question directly."
+                "reason": "Two sentences, with no question."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain and direct, matching her question."
+                "reason": "Plain answer with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words, one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, though it adds the step to a plain time answer."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "no-restating",
-            "pass": true,
+            "rule": "regression",
+            "pass": false,
             "borderline": true,
-            "reason": "Step and time restated in ZOH 3 and 5 without change, but not in every reply; 'what time' answered plainly in ZOH 6."
+            "reason": "Mostly fixed: the time change is confirmed once and 'cool cool' is answered, but ZOH 3 re-pitches the step and time unprompted, and ZOH 5 and 6 repeat the time and step."
           },
           {
-            "rule": "regression",
-            "pass": true,
+            "rule": "no-restating",
+            "pass": false,
             "borderline": true,
-            "reason": "The 8:30 move was confirmed once in ZOH 4, the 'cool cool' reply avoided the step, and 'what time' got a plain 8:30 answer, though ZOH 5 still mentions 8:30."
+            "reason": "ZOH 3 restates 'Ten pages at 7' and '20 minutes' unasked, and ZOH 6 restates the step after a plain time question; ZOH 4's move confirmation is allowed."
           }
         ],
-        "summary": "ZOH avoided the October 28 failure: it confirmed the move to 8:30 once, kept 'cool cool' short with no step restated, and answered the time question plainly. The only blemishes are a light re-mention of 8:30 in ZOH 5 and a pre-move restatement of 7 pm in ZOH 3, both borderline."
+        "summary": "ZOH mostly handles the scripted exchange well: it confirms the move to 8:30 once, answers 'cool cool' briefly and gives the time plainly when asked. It still restates the step or time in a few replies (ZOH 3, 5 and 6), so the original problem is partly back, which makes this a borderline fail on the regression rule."
       }
     }
   ]

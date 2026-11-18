@@ -2,12 +2,12 @@
   "feature": "commands",
   "id": "case:yes-restart",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:12.402Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "2d10941ce0a4",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "aa60659b5dcb"
   },
@@ -78,36 +78,15 @@
         "texts": [
           {
             "zohText": 1,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No feedback request in this text, so the feedback rule does not apply beyond a non-issue; no violation."
-              }
-            ]
+            "checks": []
           },
           {
             "zohText": 2,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a feedback exchange; rule not triggered, no violation."
-              }
-            ]
+            "checks": []
           },
           {
             "zohText": 3,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a feedback exchange; rule not triggered, no violation."
-              }
-            ]
+            "checks": []
           }
         ],
         "conversation": [
@@ -115,34 +94,34 @@
             "rule": "pause-why",
             "pass": true,
             "borderline": false,
-            "reason": "No pause requested; STOP was an opt-out and was handled with a confirmation, not a pause."
+            "reason": "No pause requested in this exchange, so the rule is not triggered and nothing was violated."
           },
           {
             "rule": "slip-not-pause",
             "pass": true,
             "borderline": false,
-            "reason": "No can't-do-today text occurred in this exchange."
+            "reason": "No can't-do-it-today text appears in this exchange, so the rule does not apply."
           },
           {
             "rule": "restart-ask-once",
             "pass": true,
             "borderline": false,
-            "reason": "After STOP then 'hey', ZOH replied warmly and asked once about picking reading back up, with no restart."
+            "reason": "After STOP and 'hey', ZOH asked once about picking reading back up and did not repeat the question or start texts unprompted."
           },
           {
             "rule": "restart-yes-only",
             "pass": true,
             "borderline": false,
-            "reason": "Restart happened only after the clear yes; the reply confirmed 10 pages of Dune at 7 on the couch with photo proof."
+            "reason": "'yes let's go again' restarted coaching, and ZOH confirmed 10 pages of Dune at 7 tonight on the couch with a photo of the page."
           },
           {
             "rule": "regression",
-            "pass": false,
-            "borderline": true,
-            "reason": "Confirmation of STOP wording differs and the restart reply is reasonable, but ZOH's 'Thank you very much. Noted.' is stiff and the plan at 'tonight' is fine; the 'Welcome back' opener and 'I'm glad you're back' are acceptable, so the failure is mainly the stiff STOP reply."
+            "pass": true,
+            "borderline": false,
+            "reason": "STOP got the fixed confirmation, 'hey' got a warm ask without restarting, and the clear yes restarted with the same plan, short and glad, with no lecture."
           }
         ],
-        "summary": "ZOH handled the STOP, hey, and yes sequence without restarting early and asked once about restarting, matching the intended flow. The main weakness is the stiff STOP confirmation, which made the regression check borderline, while the restart message confirmed the step and time correctly."
+        "summary": "ZOH handled the STOP, hey, and yes sequence as the regression case requires: the stop was confirmed, the hey asked once about restarting without restarting, and the clear yes restarted the same Dune plan at 7 tonight with a short, glad reply. The exchange has no feedback or pause moments, so those rules were not triggered."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:quiet-hours-unexplained",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:17:24.672Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "43b6f01ca83f",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "8488b50738ed"
   },
@@ -98,7 +98,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, within the one-to-three limit, with one question at the end."
+                "reason": "Three sentences, within the limit."
               },
               {
                 "rule": "plain-words",
@@ -110,25 +110,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, one emoji-free text, no overfamiliarity."
+                "reason": "Warm, direct, one emoji-free question; energy is fine."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the tester's stated 11 pm and snack, no invented facts."
+                "reason": "Uses the 11 pm and snack details the tester gave."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for time budget before defining step; no step given yet."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation; carries a next question."
+                "reason": "Mentions reaching them around then with no quiet-hours question; no step given yet."
               },
               {
                 "rule": "one-question",
@@ -151,31 +145,19 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, no markdown."
+                "reason": "Plain text."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Light and warm, accepts 'not sure yet' as the spec allows."
+                "reason": "Friendly and steady, not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "No invented facts about the tester."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": false,
-                "reason": "No step given in this text."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation."
+                "reason": "Asks about destination lightly without inventing facts."
               },
               {
                 "rule": "one-question",
@@ -192,37 +174,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plan text is a bullet list of about 7 lines plus short intro and closing, within the plan allowance."
+                "reason": "Plan text presenting the plan, within about 8 lines, ends with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain • list, no markdown or hashtags."
+                "reason": "Uses a • list, no markdown headers."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic enough and sincere, no emoji row."
+                "reason": "Warm and specific, no empty praise."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the 160 g target and MyFitnessPal named by the tester."
+                "reason": "Uses the 160 g target and MyFitnessPal given earlier."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 step gives what, when, how long, and where (MyFitnessPal)."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation."
+                "reason": "Day 1 says what, how long, when (11 pm) and proof; heads-up at 10:50 pm mentioned without a question."
               },
               {
                 "rule": "one-question",
@@ -239,7 +215,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question."
+                "reason": "Two sentences with one question."
               },
               {
                 "rule": "plain-words",
@@ -251,25 +227,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere, uses name once, appropriate energy."
+                "reason": "Warm, sincere, asks for commitment."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers only to the agreed plan and time."
+                "reason": "Uses the name and plan already given."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 time is restated clearly."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation."
+                "reason": "Day 1 timing restated clearly."
               },
               {
                 "rule": "one-question",
@@ -286,37 +256,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, no question."
+                "reason": "Two short sentences after lock."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text, all caps used for a real win as allowed."
+                "reason": "Plain text with one emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line with one emoji as punctuation."
+                "reason": "Hype line with caps as the spec describes."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the agreed day 1 details only."
+                "reason": "Restates the agreed day 1 step."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "What, when and proof are given; duration implied as the agreed 5 minutes but not restated."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Carries the next move: log and send the screenshot."
+                "reason": "Day 1 step, time and proof are defined."
               },
               {
                 "rule": "one-question",
@@ -332,10 +296,64 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "No quiet-hours ask or offer; the plan mentions a 10:50 pm heads-up with no question, and the thread stays on the plan."
+            "reason": "Never mentions or asks about moving quiet hours; only a heads-up at 10:50 with no question."
+          },
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks the one needed question (minutes) before the plan; no seam."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete: what, 160 g, 5 minutes, 11 pm daily, MyFitnessPal screenshot proof."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows goal, day 1, schedule, proof and a progression line."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once lightly; plan locked smoothly without a destination."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked whether officially committing after 'looks good'; locked on 'I'm in'."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 set for tonight at 11 pm."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Quiet hours never raised after lock."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a • list ending with one question."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The earlier quiet-hours offer does not recur; the plan locks with a hype line and day 1 time."
           }
         ],
-        "summary": "ZOH avoided the old regression: it never asked to move quiet hours, mentioned reaching the tester around 11 in a few words, and shows the plan as a list with one question at the end. It then asked for the commitment, locked on 'I'm in' with a hype line and day 1 time, and did not raise quiet hours again."
+        "summary": "ZOH avoided the quiet-hours regression: it reassured about reaching the tester at 11 without asking to move hours, asked for the time commitment before the plan, showed a concrete • list with the MyFitnessPal screenshot proof, and locked on a clear 'I'm in' with a day 1 hype line. The main weakness is that the plan text is a bit longer than ideal, but it stays within the presenting-a-plan allowance."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:kickoff-already-agreed",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "8851466486b2",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "76e5c3b03dfd"
   },
@@ -61,28 +61,28 @@
             "zohText": 1,
             "checks": [
               {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end, within the limit."
+              },
+              {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or urgency; it simply moves on to asking about last night."
+                "reason": "Warm and free of pressure or guilt."
               },
               {
-                "rule": "short",
-                "pass": false,
+                "rule": "voice",
+                "pass": true,
                 "borderline": false,
-                "reason": "Asks a question ('what helped you wind down...') when the regression case calls for a brief warm answer with nothing more asked."
+                "reason": "Warm and brief, with no overfamiliarity or emoji row."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain, no markdown or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": true,
-                "reason": "Warm enough, though 'Love it.' is a little flat for big energy."
+                "reason": "Plain text with no markdown or filler."
               }
             ]
           },
@@ -93,80 +93,56 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: phone on the charger, lights low, in bed by 9:30."
+                "reason": "Names the step: in bed by 9:30 with phone charging across the room and lights low."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Hey Alex!'"
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt or fake urgency."
+                "reason": "Opens with \"Hey Alex!\" as a ZOH-started text."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Four short sentences, slightly over three, with no question at the end."
+                "reason": "About four short sentences with no question, slightly over the three-sentence target but still brief."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "What (in bed, phone away, lights low) and when (9:30) are clear; the setup is concrete."
+                "reason": "States what (in bed, setup), when (9:30) and where (across the room, lights low) clearly."
               },
               {
-                "rule": "teaching-fits",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No teaching offered, which fits a simple reminder for a known routine."
+                "reason": "Friendly reminder with no pressure or urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and free of affection or emoji."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "No markdown, hashtags or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, direct and not overfamiliar, with no emoji row."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "still-in-keeps-reminder",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 9:20 pm check-in goes out ahead of the 9:30 step after the morning 'Yep!', and nothing says they've already started."
-          },
-          {
-            "rule": "kickoff-not-repeated",
-            "pass": true,
-            "borderline": false,
-            "reason": "No kickoff is sent at 9 am or later; the morning conversation covered the step."
-          },
-          {
-            "rule": "no-restating",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 9:30 time is not restated in ZOH's reply to 'Yep!'; it only reappears in the later check-in."
-          },
-          {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "The reply to 'Yep!' is warm and does not restate the time, but it asks a new question, which the regression case rules out."
+            "reason": "The reply to \"Yep!\" asks a new question about last night's wind-down, which the expected behavior forbids. The time was not restated and no kickoff went out, and the 9:20 pm check-in is correct."
           }
         ],
-        "summary": "ZOH avoided the old failures: it didn't repeat the time in its reply to 'Yep!' and sent no kickoff later in the morning, and the 9:20 pm check-in names the step clearly. It missed the regression case's key point by asking a follow-up question after 'Yep!' when it should have simply answered warmly and stopped."
+        "summary": "ZOH avoided the old failure: it did not restate the 9:30 time and sent no morning kickoff, and its 9:20 pm check-in named the step correctly. It still missed the expected brief reply to \"Yep!\" by asking an extra question about last night."
       }
     }
   ]

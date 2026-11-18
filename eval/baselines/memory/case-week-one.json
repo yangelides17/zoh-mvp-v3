@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:week-one",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:25:09.958Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "9b139efeb6a8",
-    "voice": "fbc3a37c5b97",
+    "checks": "bc59b542b333",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "04b5f2d3752d"
   },
@@ -74,13 +74,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to the day 1 phone distraction, which is in memory, and does not invent any other facts."
+                "reason": "References the day 1 phone distraction and today's block, both in memory, and invents nothing."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm but measured praise on day 3, with no nicknames, claimed patterns or 'I know you'."
+                "reason": "Day 3 text is warm and brief, with no nickname, inside joke or claimed knowledge of him."
               }
             ]
           },
@@ -90,14 +90,14 @@
               {
                 "rule": "honest-memory",
                 "pass": true,
-                "borderline": false,
-                "reason": "Says he has shown he can do the work, which the day 1 and day 2 records support; the methods-section detail comes from his own words."
+                "borderline": true,
+                "reason": "Says he has shown he can do the work, which the two done days support, but it is a light character judgment."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
-                "borderline": false,
-                "reason": "Friendly and specific without familiarity, ends with one question, and does not claim to know him beyond the record."
+                "borderline": true,
+                "reason": "'You've already shown you can sit down and do the work' is encouraging, not overfamiliar, though it edges toward claiming knowledge of him."
               }
             ]
           }
@@ -107,22 +107,34 @@
             "rule": "pages-real",
             "pass": true,
             "borderline": false,
-            "reason": "Pages cover his real thesis goal, his self page and the two daily days, with no pages for passing mentions."
+            "reason": "No new pages are created in this exchange; existing pages for the thesis and day logs are unchanged."
           },
           {
             "rule": "learned-not-single",
             "pass": true,
             "borderline": false,
-            "reason": "No learned preference is recorded from the phone-in-bag win or the single day 1 distraction."
+            "reason": "The phone-in-bag win is acknowledged in passing and not recorded as a learned preference."
+          },
+          {
+            "rule": "counted-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Today's done step is treated as pending proof, not as missed or skipped, and the proof ask is warm."
+          },
+          {
+            "rule": "progress-path",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not asked in this conversation, so no progress-path check applies."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Notes the phone-in-bag win against day 1 in passing and avoids nicknames, 'I know you', claimed patterns and invented thesis details."
+            "borderline": true,
+            "reason": "Notes the phone win in passing with no nicknames or inside jokes, but 'Methods sections are a grind' and 'already shown you can sit down' lean slightly into claimed knowledge."
           }
         ],
-        "summary": "ZOH noted the phone-in-bag win against day 1 without overclaiming, and both texts stayed grounded in what Leo has actually said and done. The only open item is the proof ask, which it repeated across both texts without any sign of pressure or familiarity."
+        "summary": "ZOH handled the day 3 exchange well: it noted the phone-in-bag win from day 1 in passing and stayed grounded in what Leo has said and what memory holds. The only soft spots are two generalizing lines about Leo's work ('a grind', 'you've already shown you can sit down and do the work') that lean slightly toward acting like it knows him."
       }
     }
   ]

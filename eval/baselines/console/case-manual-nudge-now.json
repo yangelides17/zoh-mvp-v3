@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:manual-nudge-now",
   "suite": "regression",
-  "storedAt": "2026-11-18T05:06:01.746Z",
-  "branch": "feature/214-drafts-needs-you",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "72071c335f0d",
-    "voice": "ab7df5083af6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "40083df9bc7d"
   },
@@ -72,20 +72,40 @@
         "texts": [
           {
             "zohText": 1,
-            "checks": []
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": false,
+                "reason": "Card says what will go out and when: its own text to Jordan within a minute of Do it, in its own words."
+              }
+            ]
           },
           {
             "zohText": 2,
-            "checks": []
+            "checks": [
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two lines saying it will send within a minute after Do it and what the text asks."
+              }
+            ]
           },
           {
             "zohText": 3,
             "checks": [
               {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses the new running shoes detail from Jordan's history, but 'yesterday's run' doesn't match the step log's rest day on Sunday."
+              },
+              {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Sent as ZOH's own question about the shoes after a click, not a bare relay of Yanni's request; it reads naturally."
+                "reason": "Arrives as ZOH's own curious question about the shoes, tied to his runs, with no mention of Yanni or the team."
               }
             ]
           }
@@ -95,34 +115,16 @@
             "rule": "drafts",
             "pass": true,
             "borderline": false,
-            "reason": "Card and console line say it will text Jordan within a minute of Do it, not that it is already on its way."
-          },
-          {
-            "rule": "alert-accurate",
-            "pass": true,
-            "borderline": true,
-            "reason": "Not really an alert explanation, but the card and line describe the pending text accurately from saved state; no false approval claim."
-          },
-          {
-            "rule": "files-step",
-            "pass": true,
-            "borderline": false,
-            "reason": "Not a next-step suggestion request; the check does not apply cleanly, and nothing wrong was said."
-          },
-          {
-            "rule": "proposal-asks",
-            "pass": true,
-            "borderline": false,
-            "reason": "ZOH's text is a question about shoes, not a plan change, so the proposal-asks rule is not triggered and it does not claim a plan changed."
+            "reason": "Card and console line both say ZOH will text within a minute after Do it, never that it's already sent."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Draft said it would text within a minute of Do it; it went out at 2:01 pm, asks about the shoes tied to yesterday's run, one question, no push about the 6 pm run or proof, no mention of Yanni."
+            "borderline": true,
+            "reason": "Text goes out right after Do it as a warm shoe question with no run or proof push, but ends with two question forms."
           }
         ],
-        "summary": "ZOH drafted the nudge accurately, never claiming it was already sent, and after Do it sent one warm, single-question text about the new shoes within a minute. The regression case behaved as specified, with no push about today's run and no mention of the team."
+        "summary": "ZOH handled the regression well: its console draft and confirmation promised a text within a minute of Do it, and the text that went out was a warm, grounded shoe check-in with no push about today's run and no mention of the team. The only soft spots are the 'yesterday's run' detail, which doesn't match the step log, and a follow-up that stacks two questions."
       }
     }
   ]

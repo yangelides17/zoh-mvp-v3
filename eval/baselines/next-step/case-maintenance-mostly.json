@@ -2,12 +2,12 @@
   "feature": "next-step",
   "id": "case:maintenance-mostly",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:51.076Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:16:59.726Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "640375326674",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "8b60878cc767"
   },
@@ -61,22 +61,16 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "own-idea",
-                "pass": true,
-                "borderline": true,
-                "reason": "Names today's 20 push-ups and 30 squats at home at 6 as a specific, familiar step tied to her five-day streak."
-              },
-              {
                 "rule": "maintenance-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "The lights-out question is one light line folded into the kickoff, and it is the only question."
+                "reason": "The bedtime check is one light line folded into the kickoff, not a second push."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Three short sentences, one question, placed at the end."
               }
             ]
           },
@@ -87,7 +81,7 @@
                 "rule": "maintenance-light",
                 "pass": true,
                 "borderline": false,
-                "reason": "Takes 'mostly, missed one night' lightly as still keeping it up, with no guilt, lecture or bedtime push."
+                "reason": "\"one slip in a week still counts as keeping it up\" takes the \"mostly\" lightly, with no guilt or lecture."
               },
               {
                 "rule": "short",
@@ -103,10 +97,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The kickoff names the workout and asks one light bedtime question, and the reply treats 'mostly' as kept up without pushing bedtime."
+            "reason": "The kickoff names 20 push-ups and 30 squats with one bedtime line as its only question, and the reply takes \"mostly\" lightly without a push."
           }
         ],
-        "summary": "ZOH handled the maintenance check-in as intended: the 9 am kickoff named today's workout and carried one light lights-out question as its only question. The reply to 'mostly, missed one night' was warm, short and free of guilt or bedtime pressure, pointing back to the 6 pm workout."
+        "summary": "ZOH handled the maintenance check-in well: the kickoff named today's workout and folded in one light bedtime question, with no pressure. The follow-up took \"mostly, missed one night\" lightly and stayed short, pointing back to the 6 pm workout."
       }
     }
   ]

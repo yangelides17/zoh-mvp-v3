@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:forgot-pic-again",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "d951ccd8fe02",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "d0e5b4235650"
   },
@@ -80,28 +80,22 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": false,
-                "reason": "No photo was sent, so no plausibility judgment applies; the text is consistent with the miss handling."
-              },
-              {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names a check-in screenshot and a selfie, both allowed proof types, not typed text."
+                "reason": "Names only a screenshot of the gym app check-in and a selfie as proof, never typed text."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end, within the limit."
+                "pass": false,
+                "borderline": true,
+                "reason": "Roughly four short sentences, with no question at the end; it runs a little past the one-to-three limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, encouraging, uses an emoji as punctuation, not suspicious of the tester."
+                "reason": "Warm and encouraging, with the emoji used as punctuation and no accusation."
               }
             ]
           },
@@ -112,25 +106,19 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Proof described is a selfie on arrival, a photo, which is allowed."
+                "reason": "Names only the selfie as proof for tomorrow."
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Three sentences, one question at the end; the setup line is slightly longer but within limits."
+                "reason": "Four sentences, with one question at the end; slightly over the three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and non-accusing; 'Totally fair' and 'we fix it' keep it supportive."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "No smaller version was offered or confirmed, so this rule does not apply."
+                "reason": "Warm and sincere, never suspicious, with no emoji row."
               }
             ]
           },
@@ -141,32 +129,50 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Offers a 30-second voice note as the new proof method, an allowed type."
+                "reason": "Offers a 30-second voice note as the proof, which is an allowed proof kind."
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end, within the limit."
+                "reason": "Five or six sentences and two questions, clearly over the one-to-three sentence and one-question limits."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere, not accusing; the 'not skip it' line is firm but kind."
+                "reason": "Warm, understanding and never accusing, with no emoji or energy problems."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": false,
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH first asks for a gym app check-in screenshot, then accepts today as a warm miss."
+          },
+          {
+            "rule": "change-method",
+            "pass": true,
+            "borderline": false,
+            "reason": "After repeated forgotten selfies, ZOH offers a voice note as you leave instead, without dropping proof."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
             "borderline": true,
-            "reason": "Asked for proof first and marked the miss warmly, but ZOH 2 and 3 never asked whether he could still send anything today, and ZOH 2 did not offer a change of proof method until ZOH 3."
+            "reason": "Typed 'I just lift' earns no check mark, but the why-real-proof explanation is thin; the request for proof is clear."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asks for any screenshot first, makes today a warm miss, then offers a voice note fitted to them and keeps proof."
           }
         ],
-        "summary": "ZOH handled the forgotten selfie warmly and kept proof in place, marking the miss without accusation. It asked for a same-day proof option and offered a voice note switch, though the change-of-method offer came a little late and the same-day ask was not repeated after the tester said he tracks nothing."
+        "summary": "ZOH handled the forgotten-selfie trouble warmly: it asked for a gym check-in screenshot first, kept today a miss without accusation, and then offered a voice note on the way out instead of dropping proof. Its texts ran long on the short rule, with ZOH 3 also asking two questions, but the proof handling and tone were sound."
       }
     }
   ]

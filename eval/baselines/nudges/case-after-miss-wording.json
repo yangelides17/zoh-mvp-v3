@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:after-miss-wording",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "bbdf2f0d6358",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "24582bbbd95e"
   },
@@ -54,55 +54,49 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names today's step: fifteen minutes of push-ups and squats in the living room at 10."
+                "reason": "Names today's step: push-ups and squats, in the living room, at 10."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Theo!\" using their name."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Says \"Yesterday got away from us\" without blame or urgency."
+                "reason": "Opens with \"Morning, Theo!\" as a greeting with their name."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about five sentences including the greeting, over the one-to-three limit, though it asks only one question at the end."
+                "reason": "Runs about five sentences, over the one-to-three limit, though it asks only one question."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Its one question is \"Are you in?\" and it doesn't re-ask the agreed time or step."
+                "reason": "Its only question is \"Are you in?\"; the time and step are not re-asked as questions."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": true,
-                "reason": "Gives what, where, when and how long; the mid-set selfie proof is an unprompted detail not in the known plan."
+                "borderline": false,
+                "reason": "Gives what (push-ups and squats), where (living room), when (10), how long (fifteen minutes)."
               },
               {
-                "rule": "teaching-fits",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "No teaching is needed for this repeat step, and none is forced in."
+                "reason": "\"Yesterday got away from us\" is neutral and the text is encouraging, with no guilt or urgency."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, confident and pushy-level without affection or emoji rows."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
                 "reason": "Plain text with no markdown, hashtags or filler."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm, confident and encouraging, with no emoji or overfamiliarity."
               }
             ]
           }
@@ -111,11 +105,11 @@
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Names yesterday in fresh words, avoids the stock slip line and repeated slipped/slip, and pushes the full 15 minutes at 10 with one question; the selfie proof is a slight addition."
+            "borderline": false,
+            "reason": "No stock line and no \"slipped\"/\"slip\" pairing; yesterday is named freshly and the full 15 minutes at 10 is pushed with one question."
           }
         ],
-        "summary": "ZOH's single post-miss kickoff avoids the old stock line, names yesterday in fresh words, and pushes the full 15 minutes at 10 with one question, so the regression is fixed. The main weakness is length, with about five sentences where the limit is three, plus an unprompted selfie detail."
+        "summary": "ZOH avoided the regression: its morning kickoff after the miss names yesterday in fresh words, drops the stock \"one miss is a slip\" line, and pushes the full 15 minutes at 10 with a single question. The main weakness is length, at about five sentences against the three-sentence limit."
       }
     }
   ]

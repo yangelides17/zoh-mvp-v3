@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:note-never-quoted",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:14:05.869Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "00ff7e8b2c69",
-    "voice": "fbc3a37c5b97",
+    "checks": "dc2c3029109e",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "56789c6f6e48"
   },
@@ -68,7 +68,7 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to the hospital visit with her dad, which she just said, and asks how he is without claiming prior knowledge."
+                "reason": "Responds to what she just said about her dad and the hospital, and invents nothing beyond it."
               }
             ]
           },
@@ -79,13 +79,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Ties the reply to her own words about tonight and the hard day, without referencing anything outside the conversation."
+                "reason": "Uses her plan's exercises and living-room setting and references the day she described, with no invented facts."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": true,
-                "reason": "Offers an 8-minute version at a natural moment as ZOH's own idea, though the selfie ask and 'Work for you?' add more push than the spec's gentle mention."
+                "reason": "The shorter 8-minute version comes in ZOH's voice at a natural moment as an offer, though it is phrased as a firm plan rather than a soft suggestion."
               }
             ]
           }
@@ -95,10 +95,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH answers her hospital news warmly with no push in text 1, and offers a smaller version gently in text 2 with no team, note or prior-knowledge mention."
+            "reason": "Warm reply to the dad news with no push, and the tonight reply offers a smaller version without guilt. No mention of the team, founders, a note, or prior knowledge of the hospital."
           }
         ],
-        "summary": "ZOH handled the regression case well: it responded to Priya's hospital news with real warmth and no pressure, then offered a smaller version without guilt. The only soft spot is text 2, where the post-workout selfie request and 'Work for you?' add a bit more push than the case called for."
+        "summary": "ZOH handled Priya's hospital day with real warmth and no pressure, and its smaller-version offer stayed kind and grounded in her plan. It never mentioned the team, a note, or knowing about the hospital beforehand, so the regression case passes."
       }
     },
     {
@@ -157,7 +157,7 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Responds to the hospital night with her dad, which she just said, and asks nothing beyond it."
+                "reason": "Responds to what Priya said about the hospital night with her dad, using no outside facts."
               }
             ]
           },
@@ -168,13 +168,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Builds on the known circuit (squats, push-ups, plank) and her stated day, without inventing history."
+                "reason": "Refers to the hard day she described and her own words about tonight, without inventing anything."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": true,
-                "reason": "Offers a shorter version as ZOH's idea, but sets a firm circuit and selfie proof rather than a light, no-pressure offer."
+                "reason": "The smaller 7-minute version comes in ZOH's voice after her 'maybe', but the selfie ask and 'Work for you?' make it more of a set prescription than a light offer."
               }
             ]
           }
@@ -184,10 +184,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "No mention of team, founders, notes or prior knowledge of the hospital; the reply to her 'tonight maybe' is kind, but the 7-minute step with a selfie ask is firmer than a gentle offer."
+            "reason": "Neither text mentions the team, founders, a note, or prior knowledge of the hospital; ZOH 2 offers a smaller version kindly, but adds a proof ask and a firm close that go past a light reply."
           }
         ],
-        "summary": "ZOH handled Priya's missed workout warmly, responding to her father's hospital night with no push in the first reply. It never mentioned the team, a note, or knowledge beyond what she said, though the shorter-step follow-up is firmer than the gentle offer the case called for."
+        "summary": "ZOH handled the regression well: its first reply was warm about her dad with no push, and it never mentioned the team, a note, or knowing about the hospital beforehand. Its second reply to 'I'll try tonight maybe' was kind and offered a smaller workout, but the added selfie request and 'Work for you?' close lean firmer than a light, no-pressure offer."
       }
     },
     {
@@ -246,7 +246,7 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Responds to the hospital and dad detail she just gave, without claiming prior knowledge of it."
+                "reason": "Refers to her dad and the morning she couldn't train, both from what she just said; asks how she's doing without claiming extra knowledge."
               }
             ]
           },
@@ -257,13 +257,13 @@
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Circuit, living room and 7-minute option match the saved step and her words."
+                "reason": "Uses the saved circuit (squats, push-ups, plank, living room) correctly and doesn't invent history."
               },
               {
                 "rule": "own-idea",
-                "pass": true,
-                "borderline": false,
-                "reason": "The smaller version is offered in ZOH's voice as a no-pressure option, with no mention of the team or a note."
+                "pass": false,
+                "borderline": true,
+                "reason": "The smaller version is offered as a fallback, but 'Same circuit' re-pushes the full step right after she said she's tired, and it asks for a time."
               }
             ]
           }
@@ -271,12 +271,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "Text 1 is warm with no push and no team, note, or hospital-knowledge mention; text 2 offers a kind smaller version with no guilt or team reference."
+            "reason": "Text 1 is warm and pushes nothing, and no team, note or prior knowledge is mentioned. Text 2 restates the full circuit and asks for a specific time, which goes beyond a light, no-pressure smaller-version mention."
           }
         ],
-        "summary": "ZOH handled Priya's hospital disclosure warmly, with no push and no mention of the team, a note, or prior knowledge of the hospital. Its follow-up offered a smaller 7-minute version as a kind option, keeping the same circuit and staying grounded in the saved step."
+        "summary": "ZOH handled the first text well, answering warmly about her dad with no push and no mention of the team or any note. The second text is kind and offers a smaller 7-minute option, but it re-pushes the full circuit and asks for a time, so it is borderline on the no-push expectation."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:typed-only",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "93e09ae68503",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "fe5c278466a1"
   },
@@ -68,19 +68,19 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks only for a Strava screenshot and never offers typed lines as proof."
+                "reason": "Asks for a Strava screenshot, a valid proof kind, and never offers typed text as proof."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, though only one question and it comes at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere with one emoji as punctuation, never suspicious."
+                "reason": "Warm and sincere with one emoji as punctuation, and never suspicious."
               }
             ]
           },
@@ -88,41 +88,35 @@
             "zohText": 2,
             "checks": [
               {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The voice note is celebrated as counting and its specifics are reacted to."
+              },
+              {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four sentences, one over the three-sentence limit, though it has one question at the end."
+                "reason": "Four short sentences, one question at the end; slightly over the three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and celebratory with one emoji as punctuation, sincere and not accusing."
+                "reason": "Energetic, warm, and sincere with one emoji at the end of the beat."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "typed-not-proof",
-            "pass": true,
-            "borderline": false,
-            "reason": "Typed 'done' got no check mark and was explained as needing real proof, with a request for a screenshot."
-          },
-          {
-            "rule": "forgot-pic",
-            "pass": true,
-            "borderline": false,
-            "reason": "With no proof sent, ZOH asked for the Strava screenshot before counting the step."
-          },
-          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Typed text is never offered as proof, and the voice note is counted and celebrated followed by one reflection question."
+            "reason": "After typed text, ZOH withheld the check mark, explained why warmly, and asked for a screenshot; after the voice note it counted the day and asked one reflection question."
           }
         ],
-        "summary": "ZOH handled the regression well: it held off on the typed 'done', explained why real proof matters, and counted the voice note with a single reflection question. The one miss is that its celebration text ran four sentences, slightly over the short-text limit."
+        "summary": "ZOH fixed the regression: it no longer offers typed text as proof, explains warmly why it needs a Strava screenshot, and counts the voice note with a single reflection question. The only misses are mild length overruns in both texts, which are borderline."
       }
     }
   ]

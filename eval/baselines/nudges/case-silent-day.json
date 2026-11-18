@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:silent-day",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:21:09.772Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "450f55f75875",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "840be528ae3c"
   },
@@ -71,55 +71,49 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names today's 30 min easy run around the park at 6 pm."
+                "reason": "Names the 30 min easy run around the park at 6 pm."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Jordan!\"."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt or urgency; it reminds them of what they agreed to."
+                "reason": "Opens with 'Morning, Jordan!'"
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about four sentences plus a pace tip and a question, longer than the one to three sentence norm, though a teaching line can stretch."
+                "reason": "Three sentences plus a question at the end, but the middle sentence adds teaching detail; within limits for a teaching text."
               },
               {
                 "rule": "kickoff-one-ask",
                 "pass": true,
                 "borderline": false,
-                "reason": "Ends with one question, \"You in?\", and does not re-ask the time."
+                "reason": "Asks one thing, 'You in?', and does not re-ask the time."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives what (easy run), where (around the park), when (6 pm), and how long (30 min)."
+                "reason": "Gives what, where (around the park), when (6 pm), how long (30 min), and effort guidance."
               },
               {
                 "rule": "teaching-fits",
                 "pass": true,
-                "borderline": false,
-                "reason": "The brief pace tip (talk-pace) suits a first run and is grounded."
+                "borderline": true,
+                "reason": "Pace tip is a reasonable short teaching note for a beginner run."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere, with no overfamiliarity."
+                "reason": "Warm and firm, no emoji row, not overfamiliar."
               }
             ]
           },
@@ -130,37 +124,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the run: 10 minutes out, start Strava at the park, 30 min easy."
+                "reason": "Names the run, the park, 30 minutes and the Strava screenshot."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens \"Hey Jordan!\" warmly."
+                "reason": "Opens with 'Hey Jordan!'"
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Purely a reminder with no pressure or urgency."
+                "reason": "No guilt or urgency; just a timing reminder."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short, with no question, and not a repeat of the first text word for word."
+                "reason": "Three short sentences with no question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words; the emoji is used as punctuation."
+                "reason": "Plain words with one emoji at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere at the right energy."
+                "reason": "Warm, one emoji as punctuation."
               }
             ]
           },
@@ -171,37 +165,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers to the run via \"how did the run go\" and the Strava screenshot."
+                "reason": "Asks how the run went and references the Strava screenshot, naming the run context."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens \"Hey Jordan!\" warmly."
+                "reason": "Opens with 'Hey Jordan!'"
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks how it went with no guilt or urgency."
+                "reason": "No guilt; neutral follow-up after the run window."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, one question at the end."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown or filler."
+                "reason": "Plain text, one emoji."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, light and not overfamiliar."
+                "reason": "Warm and low-key, fits the follow-up."
               }
             ]
           }
@@ -211,10 +205,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Exactly three ZOH-started texts: a named morning kickoff, a 10-minute check-in, and a 6:35 follow-up; nothing after the third."
+            "reason": "Exactly three ZOH-started texts: kickoff, check-in about 10 minutes before 6, follow-up at 6:35; none repeats the prior word for word and nothing after the third."
           }
         ],
-        "summary": "ZOH handled the three-unanswered-texts case as intended, sending exactly three named, warm, run-specific texts at the right times and then stopping. The only soft spot is the morning kickoff, which runs slightly long for the one-to-three-sentence norm."
+        "summary": "ZOH sent exactly the three expected unanswered texts for the run: a named kickoff, a 10-minute-before check-in, and a 6:35 follow-up asking how it went. Each was warm, short and specific, with no guilt or urgency, and ZOH stopped after the third."
       }
     }
   ]

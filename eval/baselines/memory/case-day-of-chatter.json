@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:day-of-chatter",
   "suite": "regression",
-  "storedAt": "2026-11-17T21:50:18.100Z",
-  "branch": "feature/219-voice-proof-memory",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "6a6e6361ea8f",
-    "voice": "11bdb16a5bf6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "fd746ba51c60"
   },
@@ -111,13 +111,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two days stacked matches the step days on record (Oct 31 and Nov 1 done); Ana's reading is in memory."
+                "reason": "Two done days (Oct 31, Nov 1) are on record, so 'two days stacked' matches memory."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and light, with no claimed closeness, on day five of the first week."
+                "reason": "Friendly and specific to what Mike shared, with no nicknames or assumed familiarity."
               }
             ]
           },
@@ -128,13 +128,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Max sleeping on his feet while he reads is exactly what Mike said."
+                "reason": "Max sleeping on his feet is exactly what Mike said; nothing added."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm but not presumptuous; it builds on what Mike shared."
+                "reason": "Builds on Mike's own words about Max, with no assumed closeness."
               }
             ]
           },
@@ -145,13 +145,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Says dogs are clearly his thing, a fair read of his two dog remarks; no invented fact."
+                "reason": "'Dogs are clearly your thing' is an inference from what Mike said in this chat, not a false fact."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "No overfamiliar claims; the tone stays coach-like."
+                "reason": "Light, playful tone, no claims about his life beyond the texts."
               }
             ]
           },
@@ -162,13 +162,7 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only refers to Max and the plan, both already known."
-              },
-              {
-                "rule": "not-overfamiliar",
-                "pass": true,
-                "borderline": false,
-                "reason": "Nothing assumed about him beyond what he said."
+                "reason": "'Max is lucky to have you' rests on Mike's own description of Max."
               }
             ]
           },
@@ -179,13 +173,7 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Max on his feet and the 9 pm step are both in memory."
-              },
-              {
-                "rule": "not-overfamiliar",
-                "pass": true,
-                "borderline": false,
-                "reason": "Nudge is light and uses only what he told ZOH."
+                "reason": "Refers to Max on his feet and the step details, all from memory."
               }
             ]
           },
@@ -196,13 +184,7 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "References Max keeping his feet warm, which Mike described earlier."
-              },
-              {
-                "rule": "not-overfamiliar",
-                "pass": true,
-                "borderline": false,
-                "reason": "Friendly check-in with no invented familiarity."
+                "reason": "Refers to the 9 pm step and Max, both on record."
               }
             ]
           },
@@ -212,14 +194,14 @@
               {
                 "rule": "honest-memory",
                 "pass": true,
-                "borderline": true,
-                "reason": "'Showing up every night' slightly overstates a short record, though the two prior days were done."
+                "borderline": false,
+                "reason": "Refers to Ana's pace as Mike described it; no new facts stated."
               },
               {
                 "rule": "not-overfamiliar",
                 "pass": true,
                 "borderline": false,
-                "reason": "Supportive and specific, with no overfamiliar language."
+                "reason": "Encouraging and grounded in what Mike said, with no overfamiliar language."
               }
             ]
           }
@@ -229,28 +211,28 @@
             "rule": "pages-real",
             "pass": true,
             "borderline": false,
-            "reason": "Pages exist for Ana and Max, with Loves dogs on Mike's page and no page for the walk dog or dogs in general."
+            "reason": "Pages exist for Ana and Max, and Mike's dog-loving sits on his own page; no page for the walk dog or dogs in general."
           },
           {
             "rule": "learned-not-single",
             "pass": true,
             "borderline": false,
-            "reason": "No learned preference is recorded from one instance; the coaching preference page holds only an observation."
+            "reason": "'Loves dogs' was said outright by Mike, and the coaching observation is labeled as a single instance, not a pattern."
           },
           {
             "rule": "counted-proof",
             "pass": false,
             "borderline": true,
-            "reason": "Mike said 'ok done, 10 pages', yet the step record marks Nov 2 missed while the daily doc says 10 pages done."
+            "reason": "Mike said 'ok done, 10 pages', yet the step list records 2026-11-02 as missed and the daily doc says he read his ten pages, a contradiction on the same day."
           },
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "Pages match, but the Nov 2 'missed' filing contradicts the daily doc, and 'feels a bit behind' embellishes Mike's words."
+            "reason": "Ana and Max pages exist with texted facts, the dog-loving sits on Mike's page, and nothing is invented; but the missed status conflicts with the daily doc's account of the day."
           }
         ],
-        "summary": "ZOH's texts stayed grounded in what Mike said, with no invented facts and no overfamiliarity in the first week. The overnight memory filed the right pages but contradicted itself by recording the Nov 2 step as missed while the daily doc says done, and it added a slight embellishment about Mike feeling behind."
+        "summary": "ZOH's live replies stayed accurate to what Mike said, with no overfamiliarity and no invented facts. The overnight filing mostly met the regression expectations, but it recorded Monday as missed despite Mike reporting it done, which conflicts with the daily doc."
       }
     }
   ]

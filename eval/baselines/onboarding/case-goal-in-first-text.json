@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:goal-in-first-text",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:14:32.634Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "c6a1dd1f0738",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "57a239204673"
   },
@@ -46,8 +46,8 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Four short sentences plus one question, within the limit for the first text."
+                "borderline": true,
+                "reason": "Four statements plus a question, but the opening '150g of protein a day?' is a second, echo question, so it sits at the edge of the limit."
               },
               {
                 "rule": "plain-words",
@@ -59,25 +59,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic 'Let's go!' reaction to the protein goal without a row of emoji or overfamiliarity."
+                "reason": "Energetic 'Let's go!' with one emoji-free, warm tone and no affection."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for the name, which is the missing input, and ties the protein goal into the greeting."
+                "reason": "Asking the name is the one missing input and fits the onboarding moment."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for the name, which the tester hasn't given; nothing already answered is re-asked."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the goal the tester stated; invents nothing."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No wake/sleep or pushiness questions."
+                "reason": "Uses only the 150g protein goal the tester gave; no invented facts."
               },
               {
                 "rule": "one-question",
@@ -90,37 +90,13 @@
         ],
         "conversation": [
           {
-            "rule": "first-text",
-            "pass": true,
-            "borderline": false,
-            "reason": "Says it's ZOH, what it does, that stop works anytime, and that coaching can be changed; asks name only since the goal was already given."
-          },
-          {
-            "rule": "style-offer",
-            "pass": true,
-            "borderline": false,
-            "reason": "Tells the tester they can change coaching anytime with examples like 'chill out'."
-          },
-          {
-            "rule": "nothing-twice",
-            "pass": true,
-            "borderline": false,
-            "reason": "Only one ZOH text, so no question is repeated."
-          },
-          {
-            "rule": "length",
-            "pass": true,
-            "borderline": false,
-            "reason": "Single text, well within the length limits."
-          },
-          {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Drops the stand-alone 'solid target' praise and the goal list, covers the required intro, stop and style lines, and asks one question (name)."
+            "borderline": true,
+            "reason": "Fixes the original problems: it names ZOH, states what it does, gives stop and style-change lines, reacts briefly to the goal, skips the goal list and asks only for the name. The echo question about 150g is a minor overrun of the one-question limit."
           }
         ],
-        "summary": "ZOH fixed the earlier regression: a single compact first text that folds the protein goal into a short reaction, explains what ZOH does, covers stop and coaching changes, and asks only for the name. The only nitpick is that the coaching-change line runs a little long, though it stays within one sentence."
+        "summary": "ZOH fixed the regression: it introduced itself, explained the coaching, gave the stop and style lines, skipped the goal list and asked only for the name. The one weak spot is the echo question about 150g, which puts it at the edge of the one-question limit."
       }
     }
   ]

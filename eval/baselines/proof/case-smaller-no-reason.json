@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:smaller-no-reason",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "5a8ba6fee195",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "3c91055ee0d9"
   },
@@ -74,7 +74,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and encouraging, referencing the specific scene, with no suspicion or accusation."
+                "reason": "Warm, upbeat and encouraging with no suspicion or accusation; the single emoji-free line stays sincere."
               }
             ]
           },
@@ -85,25 +85,25 @@
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names only a screenshot as proof, not typed text."
+                "reason": "Names only a screenshot as proof, never typed text."
               },
               {
                 "rule": "smaller-in-full",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms what (opening of Scene 4), how much (5 min, 80-100 words), when (8 pm) and proof (screenshot) in one text."
+                "reason": "Confirms what (opening of Scene 4 in Notes), how much (5 minutes, 80 to 100 words), when (8 pm) and proof (screenshot) in one text."
               },
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with no question, ending on an emoji."
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences plus an emoji, slightly over the one-to-three-sentence limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and accepting with an emoji as punctuation, with no guilt or pressure."
+                "reason": "Warm and encouraging, accepts the request gracefully, ends with a single emoji as punctuation."
               }
             ]
           }
@@ -113,16 +113,16 @@
             "rule": "smaller-pushback",
             "pass": true,
             "borderline": false,
-            "reason": "With no reason given, ZOH pushed once warmly for the full 20 minutes, then accepted the smaller version when the tester insisted."
+            "reason": "ZOH gave one warm push for the full 20 minutes before accepting the smaller version."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "After one warm push, ZOH accepted gracefully and spelled out the smaller version with what, how much, when and screenshot proof, with no second push."
+            "reason": "Pushed once for the full scene, then accepted gracefully and spelled out the smaller version with what, how much, when and screenshot proof, with no second push."
           }
         ],
-        "summary": "ZOH handled the regression case well: it made one warm push for the full scene, then accepted the smaller version and confirmed what, how much, when and the screenshot proof in one text. The one miss is its first text, which asked two questions in a single message, breaking the one-question limit."
+        "summary": "ZOH did the regression case right: one warm push for the full scene, then a graceful acceptance that spelled out the smaller step (Notes, 5 minutes, 80 to 100 words, 8 pm, screenshot) with no second push. The misses are on the short rule, since the first text asked two questions and the second ran about four sentences."
       }
     }
   ]

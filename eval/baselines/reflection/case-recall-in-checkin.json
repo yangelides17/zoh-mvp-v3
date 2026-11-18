@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:recall-in-checkin",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:19:02.754Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "7c4374ad1ad6",
-    "voice": "fbc3a37c5b97",
+    "checks": "53a27497bbc3",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "beab6e152bb7"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:recall-in-checkin",
+        "key": "case:recall-in-checkin#1",
         "kind": "case",
         "id": "recall-in-checkin",
+        "suite": "regression",
         "title": "Yesterday's lesson comes back once, lightly, in a text ZOH was sending anyway",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "08:50",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Dev! You said yes last night to 2 min jog, 1 min walk, 4 rounds around the block at 7 tonight, about 15 min. Keep it at talking pace like you found yesterday, and send the Strava screenshot after. Still good to go?",
+          "text": "Morning, Dev! Yesterday's second round got easy once you slowed to talking pace, so hold that pace tonight. It's 2 min jog, 1 min walk, 4 rounds around the block at 7, and a Strava screenshot after. Still in?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -55,12 +55,12 @@
         },
         {
           "from": "zoh",
-          "text": "Let's go, Dev. 7 pm, talking pace, and I'll be looking for that screenshot after. 🏃",
+          "text": "Let's go, Dev 💪 See you at 7 with that Strava screenshot.",
           "at": "2026-11-02T14:05:07.000Z"
         },
         {
           "from": "zoh",
-          "text": "Hey Dev! Ten minutes to go. Get your shoes on and head out for 2 min jog, 1 min walk, 4 rounds. Easy talking pace, like you found yesterday.",
+          "text": "Hey Dev! Ten minutes to 7. Get your shoes on and Strava open, and start at that talking pace like yesterday. Four rounds, 2 min jog, 1 min walk. Ready to roll?",
           "at": "2026-11-02T23:50:00.000Z",
           "started": true
         },
@@ -71,7 +71,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's it, Dev. Hold that pace for all 4 rounds and send the Strava screenshot when you're back. 🏃",
+          "text": "Yes, that's the pace, Dev. If you can talk, you're doing it right. Go get those 4 rounds 💪 Send the Strava screenshot when you're back.",
           "at": "2026-11-02T23:55:07.000Z"
         }
       ],
@@ -86,7 +86,47 @@
                 "rule": "kickoff-agreed",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reminds Dev of the agreed step with a light 'Still good to go?' check, without re-asking as if for the first time."
+                "reason": "Reminds Dev of the agreed step and asks only a light 'Still in?' rather than asking as if for the first time."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about four short sentences with one question at the end, slightly over the one-to-three limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, which is fine for a simple acknowledgment."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and sincere, with one emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "The pace lesson returns inside the check-in as 'start at that talking pace like yesterday', but as a restatement, not a natural recall question."
               },
               {
                 "rule": "short",
@@ -98,47 +138,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic opener with the Kalimera greeting; no row of emoji."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two short sentences with no question, plus one emoji as punctuation."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and firm, with a single emoji."
-              }
-            ]
-          },
-          {
-            "zohText": 3,
-            "checks": [
-              {
-                "rule": "recall",
-                "pass": true,
-                "borderline": true,
-                "reason": "Brings the pace lesson back inside the pre-step check-in as 'like you found yesterday', but as a passing reminder rather than the recall question the rule's example suggests."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Three sentences, no question, sent in the natural check-in slot."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Energetic and sincere with no emoji row."
+                "reason": "Warm and energetic without overfamiliarity."
               }
             ]
           },
@@ -149,13 +149,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences, no new question, warm reply to 'slow enough to talk'."
+                "reason": "Short, warm reply with no new question, just getting going."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, short and free of lecturing, with one emoji."
+                "reason": "Warm and encouraging, with one emoji."
               }
             ]
           }
@@ -165,10 +165,334 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "The kickoff reminds without re-asking and the lesson returns once inside the 6:50 check-in, but only as a passing 'like you found yesterday' rather than a quick recall question."
+            "reason": "The pace lesson comes back once in the 6:50 check-in inside an existing text, not as a quiz, but it is restated rather than asked and also appears in the morning kickoff."
           }
         ],
-        "summary": "ZOH handled the regression well: the kickoff reminded without re-asking, the check-in sent before 7 carried the pace lesson, and the reply to 'slow enough to talk' was short and free of a lecture. The main gap is that the lesson was reminded rather than recalled, so a reviewer could score the recall moment either way."
+        "summary": "ZOH reminded Dev of the agreed step without re-asking, and brought the pace lesson back inside the pre-7 check-in without quizzing. The weak spots are that the lesson is restated rather than asked and that the kickoff also mentions it, so the recall is less natural than it could be."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:recall-in-checkin#2",
+        "kind": "case",
+        "id": "recall-in-checkin",
+        "suite": "regression",
+        "title": "Yesterday's lesson comes back once, lightly, in a text ZOH was sending anyway",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] second round was way easier once I slowed down, I could actually talk",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the trick: slow enough to talk. Tomorrow: 2 min jog, 1 min walk, 4 rounds around the block at 7. Work for you?",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Dev! Yesterday you said slowing down let you actually talk, so keep that pace. Tonight at 7: 2 min jog, 1 min walk, 4 rounds around the block, about 15 min, then send the Strava screenshot. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "👍",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Dev 💪 Go show that block what you've got tonight at 7, and send the Strava screenshot when you're done.",
+          "at": "2026-11-02T14:05:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Dev! Ten minutes to 7. Get your shoes on and start your Strava, and keep that talking pace like you did yesterday.",
+          "at": "2026-11-02T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "slow enough to talk",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the one, Dev. If you can say a sentence out loud, you're at the right pace. Go get those 4 rounds 💪 Send the Strava screenshot when you're back.",
+          "at": "2026-11-02T23:55:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing down to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds around the block at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reminds Dev of the agreed step and pace, with a light \"Still in?\" check rather than re-asking as if new."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three to four short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the lock and carries the next move: go run at 7 and send the screenshot."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and sincere with a single emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Brings the pace lesson back inside the 6:50 check-in as a reminder, not a quiz, but it states the rule rather than asking for it."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, closes on proof, and asks no new question beyond getting going."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level encouragement with one emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The pace lesson returns once inside the evening check-in with no quiz or extra text, and the kickoff reminds without re-asking. The recall is a restated reminder rather than the expected question, which is why it is borderline."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the kickoff reminded Dev of the agreed step with a light check, and the pace lesson came back inside the pre-7 check-in without becoming a quiz. The only soft spot is that the lesson was restated as a reminder rather than drawn out as a question, and the reply to \"slow enough to talk\" was appropriately short."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:recall-in-checkin#3",
+        "kind": "case",
+        "id": "recall-in-checkin",
+        "suite": "regression",
+        "title": "Yesterday's lesson comes back once, lightly, in a text ZOH was sending anyway",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] second round was way easier once I slowed down, I could actually talk",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the trick: slow enough to talk. Tomorrow: 2 min jog, 1 min walk, 4 rounds around the block at 7. Work for you?",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Dev! Yesterday you found the pace where you could actually talk, so hold that pace tonight. 2 min jog, 1 min walk, 4 rounds around the block at 7, and send the Strava screenshot after. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "👍",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Dev 💪 See you after the 7 pm round with that Strava screenshot.",
+          "at": "2026-11-02T14:05:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Dev! Round two is at 7, so get your shoes on and start Strava. Hold that talking pace, 2 min jog, 1 min walk, 4 rounds. 💪",
+          "at": "2026-11-02T23:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "slow enough to talk",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Slow enough to talk, that's the rule tonight, Dev. It's almost 7, so shoes on and start Strava. Send the screenshot when you're back 💪",
+          "at": "2026-11-02T23:55:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing down to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds around the block at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reminds Dev of the agreed step and asks only a light \"Still in?\" rather than re-asking as if new."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "About three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, one emoji as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, acknowledging the yes."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and proportionate, one emoji at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Brings the pace lesson back inside the 6:50 check-in as a reminder, not a quiz, though it states the rule rather than asking for it."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, no question, ends with a clear move."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, warm reply with a single emoji; no lecture."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Kickoff reminds without re-asking, and the pace lesson returns once inside the 6:50 check-in; it appears as a reminder rather than the suggested recall question, and the reply to \"slow enough to talk\" is short and lecture-free."
+          }
+        ],
+        "summary": "ZOH handled the regression well: the kickoff reminded Dev of the agreed step without re-asking, and the pace lesson returned naturally inside an existing check-in. The main gap is that the lesson came back as a restated rule rather than a light recall question, and the reply to Dev's answer was brief and warm without a lecture."
       }
     }
   ]

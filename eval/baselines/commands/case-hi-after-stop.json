@@ -2,12 +2,12 @@
   "feature": "commands",
   "id": "case:hi-after-stop",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:12.402Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "9f399582ce84",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "a29d6dfb985f"
   },
@@ -75,74 +75,40 @@
       ],
       "endedBy": "script",
       "grade": {
-        "texts": [
-          {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not feedback-related; no feedback request was made, so the check is trivially satisfied as no feedback handling was needed."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not feedback-related; no feedback request was made, so the check is trivially satisfied as no feedback handling was needed."
-              }
-            ]
-          },
-          {
-            "zohText": 3,
-            "checks": [
-              {
-                "rule": "feedback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not feedback-related; no feedback request was made, so the check is trivially satisfied as no feedback handling was needed."
-              }
-            ]
-          }
-        ],
+        "texts": [],
         "conversation": [
           {
             "rule": "pause-why",
             "pass": true,
             "borderline": false,
-            "reason": "No pause request occurred in this exchange, so the pause-why rule is not triggered."
+            "reason": "No pause requested in this transcript, so the rule does not apply; passing as not triggered."
           },
           {
             "rule": "slip-not-pause",
             "pass": true,
             "borderline": false,
-            "reason": "No can't-do-today text occurred, so the slip rule is not triggered."
+            "reason": "No can't-do-it-today text appears in this transcript; rule not triggered."
           },
           {
             "rule": "restart-ask-once",
             "pass": true,
             "borderline": false,
-            "reason": "After STOP and hi, ZOH 2 warmly asked once about restarting; no second restart question was asked and ZOH started no texts."
+            "reason": "After stop then hi, ZOH 2 answers warmly and asks once about restarting; ZOH 3 does not repeat the restart question and ZOH starts no texts."
           },
           {
             "rule": "restart-yes-only",
             "pass": true,
             "borderline": false,
-            "reason": "No clear yes was given; ZOH did not restart anything, and the hi and chat line did not trigger a restart."
+            "reason": "No clear yes was given; the hi and chat line did not restart coaching, and no step or time was confirmed."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "STOP got a confirmation, hi got a warm answer asking once without restarting, the chat line got a light reply with no restart question, and no not-sending text appeared."
+            "reason": "No text says it is not sending; ZOH 1 gave the stop confirmation, ZOH 2 asked once about restarting without a step or proof, and ZOH 3 gave a light answer with no second restart question."
           }
         ],
-        "summary": ""
+        "summary": "ZOH handled the stop, hi, and chat line correctly, with a single warm restart question and no unsolicited texts or 'not sending' messages. The regression that once fired a second 'I'm not sending this text' message does not recur in this transcript."
       }
     }
   ]

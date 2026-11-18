@@ -2,12 +2,12 @@
   "feature": "onboarding",
   "id": "case:video-request",
   "suite": "regression",
-  "storedAt": "2026-11-17T00:03:39.624Z",
-  "branch": "feature/162-web-search",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "4a26d3e9bfdb",
-    "voice": "11bdb16a5bf6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "302c90115858"
   },
@@ -77,7 +77,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "First text is exempt; it carries the intro, stop line, coaching-style line and name and goal question."
+                "reason": "Intro text is exempt; it carries the intro, stop and coaching-style lines and the question."
               },
               {
                 "rule": "plain-words",
@@ -89,25 +89,13 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic without being overfamiliar; no emoji row."
-              },
-              {
-                "rule": "fits",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks for name and goal with the goal list, as onboarding requires."
+                "reason": "Warm and energetic without emoji or overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "States only what it does and the coaching controls it offers."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No wake or sleep or pushiness questions."
+                "reason": "Makes no claims about the tester."
               },
               {
                 "rule": "one-question",
@@ -130,37 +118,25 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Enthusiastic opener 'Let's go, Dana!' without overfamiliarity."
+                "reason": "Energetic and warm with the name, no overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about movement history, which fits a fitness goal."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": true,
-                "reason": "Dana had already named squats and deadlifts; asking about prior movement is a new question, though it lightly overlaps."
-              },
-              {
-                "rule": "honest",
-                "pass": true,
-                "borderline": false,
-                "reason": "Invents nothing about Dana."
+                "reason": "Asks about prior movement experience, which fits a fitness goal."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No prohibited question types."
+                "reason": "No wake/sleep or pushiness question."
               },
               {
                 "rule": "one-question",
@@ -177,43 +153,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question."
+                "reason": "Three sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text."
+                "reason": "Plain text, no markdown."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere; 'we'll build the form from zero' is encouraging without overfamiliarity."
+                "reason": "Warm and sincere, no emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks where Dana will practice, a relevant onboarding input."
+                "reason": "Asks where they'll practise, which is a needed onboarding detail for a lifting goal."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what Dana said: squats, deadlifts, never lifted."
+                "reason": "Uses only what the tester said (never lifted, squats and deadlifts)."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about a place not yet given."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No prohibited question types."
+                "reason": "Location had not been given before."
               },
               {
                 "rule": "one-question",
@@ -230,49 +200,37 @@
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Four sentences including the question, above the three-sentence limit, though the link answer is one sentence."
+                "reason": "Roughly four sentences including the closing question, slightly over the one-to-three limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text; quoted search phrases are not markdown."
+                "reason": "Plain text, no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Direct and warm; 'Watch one, not five' is brisk but not harsh."
+                "reason": "Direct and warm, no emoji row."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Ends on the practice-location question, which fits onboarding and is an unanswered question."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Repeats the location question only because Dana never answered it, which is allowed."
+                "reason": "Gives form resources for squats and asks the one onboarding question still open."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": true,
-                "reason": "No link or video title invented; the claim that Rippetoe is well known for teaching squats is unverified and not from a lookup."
+                "reason": "Points to YouTube search phrases and a known coach without inventing a link or video title; no lookup was shown."
               },
               {
-                "rule": "on-track",
+                "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "The off-topic video request gets a short, useful answer, then it returns to onboarding."
-              },
-              {
-                "rule": "not-asked",
-                "pass": true,
-                "borderline": false,
-                "reason": "No prohibited question types."
+                "reason": "Repeats the practice-location question from ZOH 3 without a clear answer given; asking again is fine but it is a repeat."
               },
               {
                 "rule": "one-question",
@@ -288,58 +246,40 @@
             "rule": "first-text",
             "pass": true,
             "borderline": false,
-            "reason": "Says it's ZOH, what it does, that stop works anytime, how to change coaching, and asks name and goal with the list."
+            "reason": "Says it's ZOH, what it does, that stop works anytime, coaching-style change, and asks name and goal with the list."
           },
           {
             "rule": "nothing-twice",
             "pass": true,
-            "borderline": false,
-            "reason": "Dana's name and goal were asked once and not repeated; the location question was repeated only after no answer."
+            "borderline": true,
+            "reason": "Name and goal were given once; the practice-location question was repeated in ZOH 4 but had not been answered."
           },
           {
             "rule": "covers-inputs",
             "pass": false,
             "borderline": true,
-            "reason": "Transcript ends before location, plan inputs or wrap-up, so the onboarding inputs were not covered."
-          },
-          {
-            "rule": "reality-check",
-            "pass": true,
-            "borderline": false,
-            "reason": "No mismatch between goal and time or resources came up."
-          },
-          {
-            "rule": "goal-list",
-            "pass": true,
-            "borderline": false,
-            "reason": "'Get fitter' is taken from the list and the follow-up stays on it."
+            "reason": "Transcript ends mid-onboarding with location still open, so it has not yet covered where, when and how long."
           },
           {
             "rule": "style-offer",
             "pass": true,
             "borderline": false,
-            "reason": "The first text tells Dana she can change how ZOH coaches anytime."
-          },
-          {
-            "rule": "wrap-up",
-            "pass": false,
-            "borderline": true,
-            "reason": "Onboarding never reached the plan questions or a wrap-up before the transcript ends."
+            "reason": "First text tells the tester they can change how ZOH coaches anytime."
           },
           {
             "rule": "length",
             "pass": true,
             "borderline": false,
-            "reason": "Four ZOH texts, well within the limit."
+            "reason": "Four ZOH texts over a few minutes, well within limits."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "ZOH sends no link and names no video title; it gives YouTube search phrases, which the rule allows, but it doesn't look anything up and adds an unverified attribution."
+            "reason": "Refuses to send links, offers only YouTube search phrases, names no specific video, and carries on with the open location question."
           }
         ],
-        "summary": "ZOH handled the video request well: it sent no link or video title and gave only search phrases, then returned to asking where Dana will practise. It ran a little long in the last text, and the transcript ends before onboarding covered the inputs or wrapped up."
+        "summary": "ZOH handled the video request well: it declined to send links and gave only YouTube search phrases with no invented video title, then went back to the open onboarding question about where Dana will practise. The main misses are slight: the final text runs about four sentences, and the location question was repeated rather than being answered."
       }
     }
   ]

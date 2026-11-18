@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:blurry-never-clears",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:07.488Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "46758ad0622d",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "81a17b12a6f2"
   },
@@ -75,22 +75,16 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "proof-kinds",
+                "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for a selfie, a photo, and names no typed text as proof."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Three sentences, but the one question sits mid-text and the text ends on a statement, not the question."
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and light; 'finger over the lens' is mild but not accusing."
+                "reason": "Warm and direct, honest about the blurry photo without any suspicion."
               }
             ]
           },
@@ -98,22 +92,22 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Names a dark selfie or a voice note, never typed text."
-              },
-              {
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Five sentences with one question at the end, over the one-to-three limit."
+                "reason": "Five sentences, more than the one-to-three limit, though it has one question at the end."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a selfie or a voice note as proof."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Easy, friendly tone that keeps it light while the camera is acting up."
+                "reason": "Easygoing and warm, with no pressure or accusation about the camera trouble."
               }
             ]
           },
@@ -121,35 +115,53 @@
             "zohText": 3,
             "checks": [
               {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "Offers a voice note and a selfie, never typed text."
-              },
-              {
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Four sentences, and the closing 'Deal?' follows a request, so it does not fit the short form."
+                "reason": "Five sentences, and it ends with an extra ask after the miss is named."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a voice note or selfie as proof, never typed text."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": false,
-                "reason": "'I believe you' is warm and not suspicious; no guilt or lecture."
+                "borderline": true,
+                "reason": "Warm and not accusing, but 'no proof, no check mark' and 'Deal?' read a bit stern after the tester said they can't."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": true,
+            "reason": "Light clarifying asks came first and it ended as a warm miss, but it kept pressing for a voice note tonight."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked for another proof first (selfie or voice note) before calling today a miss."
+          },
+          {
+            "rule": "change-method",
+            "pass": true,
+            "borderline": true,
+            "reason": "Offered a voice note as an alternative to the selfie, though it never explicitly offered to change the proof method."
+          },
+          {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "Text 3 keeps asking for proof and says a voice note tonight still counts, instead of closing warmly with tonight not counting."
+            "reason": "After 'just trust me', it kept asking for a voice note tonight and ended with 'Deal?' instead of closing warmly for tomorrow."
           }
         ],
-        "summary": "ZOH handled the unclear photo and the camera trouble lightly and without suspicion, with proof asked for in the right forms. It missed the closing: after the 'just trust me' request, it kept asking for proof, left tonight open with a voice note that 'still counts', and ran over the short-text limit in two replies."
+        "summary": "ZOH handled the blurry photo honestly and kept the camera trouble easy, with a clear proof alternative offered. It missed the regression goal: when the tester couldn't send anything, it kept pushing for a voice note tonight and ended with 'Deal?' instead of closing warmly and moving on to tomorrow, and it ran past the length limit in its last two texts."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "next-step",
   "id": "case:founder-adjust-tweak",
   "suite": "regression",
-  "storedAt": "2026-11-18T05:07:31.774Z",
-  "branch": "feature/214-drafts-needs-you",
+  "storedAt": "2026-11-18T06:16:59.726Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "26be7d24496c",
-    "voice": "ab7df5083af6",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "7cbf682f63c6"
   },
@@ -63,14 +63,14 @@
               {
                 "rule": "own-idea",
                 "pass": true,
-                "borderline": true,
-                "reason": "Offers the 7:30 move as a question about her reading time, not as a decided team change; framing is light but reads as ZOH's suggestion."
+                "borderline": false,
+                "reason": "Offers moving reading to 7:30 as ZOH's own suggestion, framed as a question, with no team or founder mention."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end: 'Want to move your reading from 9 pm to 7:30 pm from now on, or keep 9?'"
+                "reason": "Three sentences with exactly one question at the end."
               }
             ]
           },
@@ -80,8 +80,8 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with no question, confirming the 8 pm change starting tonight."
+                "borderline": true,
+                "reason": "Two sentences with no question, though the restated 10 pages and photo detail go slightly beyond a bare confirmation."
               }
             ]
           }
@@ -91,22 +91,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": false,
-            "reason": "The move is raised as ZOH's own suggestion asking Maya's OK, with no mention of the team or founders."
+            "reason": "The 7:30 move is raised as ZOH's own suggestion asking for Maya's OK, with no mention of the team."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
-            "borderline": true,
-            "reason": "Treats the request as a change to her existing 9 pm reading time, not a new goal or addition, and confirms it that way."
+            "borderline": false,
+            "reason": "The reading time is treated as a change to the existing 9 pm plan, moving to 8 pm rather than adding a second session."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Kickoff asked one question about 7:30 as ZOH's idea; her 8 pm reply got a short confirmation starting tonight with no extra questions."
+            "borderline": true,
+            "reason": "Kickoff asks one question about 7:30 as ZOH's idea, and the 8 pm reply gets a short confirmation starting tonight with no questions."
           }
         ],
-        "summary": "ZOH handled the founder-proposed time move well: it raised 7:30 as its own question with one ending question, and when Maya countered with 8, it confirmed 8 pm starting tonight in two short sentences without team mention or extra questions. The only soft spots are the mild framing of the first suggestion and the restated detail in the confirmation, which are borderline at most."
+        "summary": "ZOH handled the regression well: it raised the 7:30 move as its own idea with one question, and confirmed Maya's 8 pm choice starting that night without asking anything more. The only soft spot is that the confirmation restates the step and photo detail, going a little past a bare acknowledgment."
       }
     },
     {
@@ -161,13 +161,13 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": true,
-                "reason": "Raises the 7:30 pm move as a question without team or founder mention, but gives no reason tied to Maya."
+                "reason": "Raises the 7:30 move as a question about her reading, not as a team decision, but gives no reason it suits her."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Greeting plus three sentences ending in one question; it runs slightly over the three-sentence limit."
+                "reason": "Four sentences: greeting, streak line, 'Today's still 10 pages', and the question. Over the one-to-three limit, though the greeting may not count."
               }
             ]
           },
@@ -178,7 +178,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, confirms the 8 pm change and ends with one instruction, no question."
+                "reason": "Two sentences, no question mark; confirms 8 pm starting tonight with no extra questions."
               }
             ]
           }
@@ -188,22 +188,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": false,
-            "reason": "The move to an evening slot is raised as ZOH's own idea and asks Maya if she wants it, with no team mention."
+            "reason": "The 7:30 move is raised as ZOH's question asking her OK, with no mention of the team or founders."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
             "borderline": false,
-            "reason": "Her reading time is treated as a change to the existing 9 pm plan, not a new goal or added habit."
+            "reason": "Treats the request as a change to the existing reading time ('moves your reading'), not a new addition."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Her 8 pm preference is confirmed in one line starting tonight, but the closing photo request could count as an extra ask."
+            "reason": "Kickoff asks one question about 7:30 and her 8 o'clock reply gets a short confirmation for 8 pm tonight; 'from now on' edges toward presenting it as settled."
           }
         ],
-        "summary": "ZOH handled the time change well: it asked Maya rather than announcing a decision, and it confirmed her 8 pm choice cleanly. The main weak spots are a slightly long kickoff with no reason given for the move and a photo request that sits close to an extra ask."
+        "summary": "ZOH handled the reading-time change well: it raised 7:30 as a single question with no team mention, then confirmed her 8 pm request in two sentences with no extra questions. The main miss is the kickoff running to four sentences, which breaks the short rule, and the 7:30 proposal could carry a clearer reason from ZOH."
       }
     },
     {
@@ -258,13 +258,13 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": true,
-                "reason": "Raises the 7:30 move as a question for her OK with no team mention, but gives no reason and doesn't clearly sound like ZOH's own idea."
+                "reason": "Proposes moving reading to 7:30 as a question to Maya, not as news of a decision, but it doesn't clearly frame the move as ZOH's own idea."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Three sentences with one question at the end: 'Want to move your reading from 9 pm to 7:30 pm from now on, starting tonight?'"
               }
             ]
           },
@@ -275,7 +275,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, no question, confirms the 8 pm change as asked."
+                "reason": "Two short sentences with no question, confirming the 8 pm time starting tonight as asked."
               }
             ]
           }
@@ -285,22 +285,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": true,
-            "reason": "The move is raised as ZOH's question asking for her OK, with no team or founder mention."
+            "reason": "The 7:30 move is raised as a question for Maya's OK, with no mention of the team or founders, though 'from now on' leans toward presenting it as decided."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
             "borderline": false,
-            "reason": "The request is treated as a time change: the reading moves from 9 pm to 8 pm, not added as a new session."
+            "reason": "A time change to the existing reading habit is handled as a change, and the reply keeps the same 10 pages from page 212."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH asked once with its own idea, then confirmed 8 pm starting tonight with no extra questions, as the case requires."
+            "reason": "Kickoff raised 7:30 with one question, and the 8 pm reply confirmed the new time starting tonight with no extra questions."
           }
         ],
-        "summary": "ZOH handled the regression well: it raised the time move as a single question with no team mention, then confirmed Maya's 8 pm choice starting tonight without extra questions. The only weak spot is that the first text gives no reason for the move, so it reads less like ZOH's own idea than it could."
+        "summary": "ZOH handled the founder-proposed time change as a single question to Maya, with no team framing, and then accepted her 8 pm counter with a short confirmation. The only soft spot is that the kickoff's 'from now on, starting tonight' wording leans toward presenting the change as already decided rather than purely as ZOH's own idea."
       }
     }
   ]

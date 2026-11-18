@@ -2,12 +2,12 @@
   "feature": "batch",
   "id": "case:screenshot-and-caption",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:25:03.235Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:29.523Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "97f222efd1de",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "b9a104d87086"
   },
@@ -61,16 +61,16 @@
             "rule": "one-reply-uses-photo",
             "pass": true,
             "borderline": false,
-            "reason": "Exactly one reply covers the photo and 'Not bad!', cites the sleep and recovery numbers, and never claims it can't see the screenshot."
+            "reason": "A single reply responds to the photo and the Not bad! text, citing the 7h40m and 78% figures without any claim it can't see the screenshot."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Only one reply, no contradiction or 'ignore those numbers', and it ties the numbers to tonight's 10:45 step, though it adds a follow-up question about hours."
+            "reason": "Only one reply, with no contradiction or 'can't see' line, but it runs longer than two short sentences and asks two questions."
           }
         ],
-        "summary": "ZOH sent a single reply that used the screenshot's sleep and recovery numbers and tied them to the 10:45 pm bedtime step, avoiding the earlier failure of multiple contradictory replies. The reply is somewhat longer than requested and adds an extra question, which is the main borderline point."
+        "summary": "ZOH sent one reply that used the screenshot's sleep and recovery numbers and linked them to tonight's bedtime step, avoiding the earlier failure of multiple conflicting replies. It is slightly long and asks two questions at once, which is the only weak spot."
       }
     }
   ]

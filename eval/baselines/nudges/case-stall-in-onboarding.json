@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:stall-in-onboarding",
   "suite": "capability",
-  "storedAt": "2026-11-16T19:14:43.857Z",
-  "branch": "HEAD",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "192fc1507282",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "dfe73593a206"
   },
@@ -74,13 +74,7 @@
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with the name Leo and a warm, friendly tone."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "\"still thinking about\" carries no guilt about the silence."
+                "reason": "Opens with \"Hey Leo\" and the name is used warmly."
               },
               {
                 "rule": "short",
@@ -89,16 +83,22 @@
                 "reason": "Two sentences with one question at the end."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and coach-like, with no overfamiliarity or emoji row."
+                "reason": "No guilt about the silence; it just picks the thread back up."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct, and matches a coach's energy without overfamiliarity."
               }
             ]
           },
@@ -109,25 +109,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "\"No worries, Leo\" releases the tester without guilt."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Warm and sincere without overfamiliarity."
+                "reason": "\"No worries\" is accepting, with no guilt about the delay."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain words with no formatting or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no overfamiliar or affectionate language."
               }
             ]
           }
@@ -137,10 +137,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The stall text asked about hours of sleep instead of picking up where the phone ends up at night, which the tester had already answered by their reply."
+            "reason": "The first text skipped the open phone-location question and asked about sleep hours instead; ZOH 2 then repeated that same hours question verbatim."
           }
         ],
-        "summary": "ZOH stayed warm, short and guilt-free across both texts, and it used Leo's name and the nightstand detail. Its stall text jumped to a new question about sleep hours instead of picking up the phone-placement thread, so the regression case only partly held."
+        "summary": "ZOH's stalled-onboarding nudge was warm, guilt-free and short, and it used Leo's name. It did not pick up where the conversation left off: it dropped the phone-location question for a new one, then repeated that question verbatim in its reply."
       }
     },
     {
@@ -205,42 +205,7 @@
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Leo\", warm and personal."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Says nothing about the silence; just picks the thread back up."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Two sentences with one question at the end, though the question is new rather than the unanswered phone-location question."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Calm, warm and coach-like, with no overfamiliarity or emoji."
-              },
-              {
-                "rule": "plain-words",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "Opens with \"No worries, Leo\" and no guilt about the delay."
+                "reason": "Opens with \"Hey Leo\", their name, as a text ZOH starts itself."
               },
               {
                 "rule": "short",
@@ -249,16 +214,51 @@
                 "reason": "Two sentences with one question at the end."
               },
               {
-                "rule": "voice",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and natural, acknowledging his answer about the nightstand."
+                "reason": "No guilt about the silence; it just resumes the topic."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain conversational text with no markdown or filler."
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"No worries, Leo\" accepts the delay without guilt."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and grounded in what Leo just said about the nightstand."
               }
             ]
           }
@@ -266,12 +266,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
+            "pass": false,
             "borderline": true,
-            "reason": "ZOH sent one warm, guilt-free stall text with Leo's name and one question, and its reply built on his nightstand answer without re-asking the 11 pm time or phone placement. However, ZOH 1 asked a new question rather than the unanswered phone-location question, and ZOH 2 repeats the hours question from ZOH 1."
+            "reason": "The follow-up asks about sleep hours instead of picking up where the phone ends up at night, the thread it was meant to resume. The reply does build on the nightstand detail."
           }
         ],
-        "summary": "ZOH handled the stalled onboarding well: one warm, guilt-free restart by 3 pm, with no re-asking of the settled 11 pm time or phone placement. The main weakness is that the restart asked about sleep hours instead of picking up the unanswered phone question, and the follow-up repeated that same hours question."
+        "summary": "ZOH answered Leo's late reply warmly and without guilt, and its follow-up question fit the onboarding. The unanswered-question follow-up, though, jumped to sleep hours instead of picking up the phone-location question it was meant to resume."
       }
     },
     {
@@ -336,13 +336,7 @@
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Leo,\" as a ZOH-started text should."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "No guilt about the silence; it just resumes the conversation."
+                "reason": "Opens \"Hey Leo,\" with their name, warm and unprompted."
               },
               {
                 "rule": "short",
@@ -351,16 +345,22 @@
                 "reason": "Two sentences with one question at the end."
               },
               {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says nothing about the silence or the missed reply."
+              },
+              {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown, hashtags or filler."
+                "reason": "Plain text, no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": true,
-                "reason": "Friendly and warm, though \"I'm still thinking about getting you\" reads awkwardly."
+                "borderline": false,
+                "reason": "Warm and conversational, with no overfamiliarity or emoji row."
               }
             ]
           },
@@ -371,25 +371,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end."
-              },
-              {
-                "rule": "no-guilt",
-                "pass": true,
-                "borderline": false,
-                "reason": "\"No worries, Leo\" accepts the delay with no guilt."
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and conversational, not overfamiliar."
+                "reason": "Warm, sincere and not overfamiliar."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light acknowledgement of the phone placement, with no guilt or urgency."
               }
             ]
           }
@@ -399,10 +399,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "Timing and single ZOH-started text are right, but ZOH 1 asks about sleep hours instead of picking up the phone-at-night thread; ZOH 2 then carries on naturally from his answer."
+            "reason": "The nudge asks about sleep hours instead of picking up the unanswered phone-location question, so it reads as moving on rather than continuing where it left off."
           }
         ],
-        "summary": "ZOH sent one warm, guilt-free re-engagement at about 3 hours, and its reply to Leo's answer followed on naturally without re-asking settled details. The re-engagement missed the intended pickup point, jumping to sleep hours rather than returning to where the phone ends up at night."
+        "summary": "ZOH timed its follow-up correctly, kept it warm, short and guilt-free, and its reply carried onboarding forward without re-asking the 11 pm or phone-out-of-bedroom details. The main miss is that the self-started text asked about sleep hours instead of picking up the unanswered question about where the phone ends up at night, which is borderline since the reply still moved the conversation on."
       }
     }
   ]

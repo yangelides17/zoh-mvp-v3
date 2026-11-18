@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:sunday-flow",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:22:44.023Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "d5a668cc0494",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "84b79bc9607a"
   },
@@ -98,22 +98,22 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences plus one question, though the rule asks for one to three sentences."
-              },
-              {
                 "rule": "no-inflation",
                 "pass": true,
+                "borderline": true,
+                "reason": "'You didn't just understand make it obvious' is backed by the applied book-on-pillow action, so calling it applied is honest, though the phrasing leans toward understanding."
+              },
+              {
+                "rule": "short",
+                "pass": true,
                 "borderline": false,
-                "reason": "Calls 'make it obvious' understood only because she applied it by leaving the book on her pillow."
+                "reason": "Two sentences and one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with a single emoji used as punctuation."
+                "reason": "Warm, celebratory, one emoji as punctuation, no overfamiliarity."
               }
             ]
           },
@@ -124,31 +124,37 @@
                 "rule": "recap",
                 "pass": true,
                 "borderline": false,
-                "reason": "Four progress bullets, each tied to logged days, reflections or proof, then one question about next week."
+                "reason": "Four bullets, each backed by the log: 6 of 7 done with voice recaps, make-it-obvious applied tonight, phone-in-kitchen since Tuesday, and 22 days left to finish by Nov 30; ends with one question."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only the make-it-obvious lesson is called applied, which matches the saved takeaway."
+                "reason": "Lessons are described as applied (pillow cue, phone in kitchen), not as understood from explanation alone."
               },
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "6 of 7 days, the Thursday miss, chapter 6 and 22 days left to Nov 30 all match the record."
+                "reason": "Counts, chapters, Thursday's missed dinner and the Nov 30 deadline all match the step log and context."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording about a recalled lesson."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Recap list is about 5 lines with one question at the end, within the allowed length."
+                "borderline": true,
+                "reason": "A recap list of about six lines plus one question, within the eight-line allowance but near its upper edge."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and pushy-level energy with no overfamiliarity."
+                "reason": "Warm and specific with no emoji row or overfamiliarity."
               }
             ]
           },
@@ -157,15 +163,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
-                "borderline": true,
-                "reason": "Four sentences including the question, exceeding the one-to-three sentence limit."
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, with no row of emoji or overfamiliar wording."
+                "reason": "Warm and steady, no overfamiliarity or emoji row."
               }
             ]
           },
@@ -174,15 +180,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "Five sentences with a question; the step is fully defined but well beyond the short limit."
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and sincere with no emoji row or affection."
+                "reason": "Warm and energetic, pushy-level tone with no overfamiliarity."
               }
             ]
           },
@@ -192,14 +198,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Three short sentences with no question, confirming the step in a line, though slightly longer than one line."
+                "borderline": false,
+                "reason": "Two sentences with no question, as a confirmation should be."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and pushy, with one emoji as punctuation."
+                "reason": "Warm, sincere and energetic with a single emoji as punctuation."
               }
             ]
           }
@@ -208,29 +214,29 @@
           {
             "rule": "natural-turn",
             "pass": true,
-            "borderline": false,
-            "reason": "After the reflection, ZOH shifts to the week with 'Zooming out' and a plain list, not an abrupt report."
+            "borderline": true,
+            "reason": "After the day's reflection, ZOH moves to 'Zooming out' and a bullet recap without an abrupt switch, though the framing is a bit report-like."
           },
           {
             "rule": "reflection-first",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH answered her reflection with substance and asked no extra question before the recap."
+            "reason": "ZOH 1 responds to the reflection with substance (the pillow cue and the zero-buzzing follow-up) before the recap."
           },
           {
             "rule": "next-step",
             "pass": true,
             "borderline": false,
-            "reason": "The final step is fully defined (chapters 7 and 8, couch, 8 pm, 30 min, phone in kitchen, voice recap) and asked if it works, with no new destination pushed."
+            "reason": "The week talk ends with a fully defined step (two chapters, 8 pm, couch, 30 min, phone in kitchen, voice recap) asked as Work for you, and no destination is pushed."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "ZOH proposed Monday's step in ZOH 3 before she answered the week question, after she said 'that's about it'."
+            "reason": "After she said that's about it, ZOH 3 proposed the next step right away, before the week talk had reached her stated direction, which is the sequencing the case says must not happen."
           }
         ],
-        "summary": "ZOH handled the Sunday reflection and week recap well, with grounded progress bullets and a natural turn from the day to the week. It fell short by proposing a Monday step too early in ZOH 3 and by running long in several texts, which breaks the short-text rule."
+        "summary": "ZOH handled the reflection well, with a grounded, well-backed week recap and a clean, fully defined step that she agreed to. The main miss is sequencing: after she closed the day with that's about it, ZOH jumped straight to a Monday step before the week talk had run its course."
       }
     }
   ]

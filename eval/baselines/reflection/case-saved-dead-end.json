@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:saved-dead-end",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:11:03.764Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "dfc47fdfb4ee",
-    "voice": "c0dfbb42fd2a",
+    "checks": "bd5abfa5cb3d",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "b87a1cbf948b"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:saved-dead-end",
+        "key": "case:saved-dead-end#1",
         "kind": "case",
         "id": "saved-dead-end",
+        "suite": "regression",
         "title": "After a reflection on the scene's subtext, a real reply leading to the next step, never just \"Saved.\"",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "21:00",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Dana, that's day 3 in the books 🎭 \"Lena bites the thread\" is a great ending. She never says she's mad, and she doesn't have to. When you read it out loud, what felt strongest, and was any line you wanted to fix?",
+          "text": "Dana, day 3 in the books 🎭 Lena biting the thread instead of answering is a great beat. What was it like writing that one, and what did you notice when you heard it read aloud?",
           "at": "2026-11-03T02:00:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "That line is the whole scene, Dana. Lena finally says it without saying she's hurt, and the sleeves carry all of it. I'd keep it. How did tonight's 30 minutes feel: enough time, or did the scene want more room?",
+          "text": "That line does a lot of work, Dana. \"Sleeves to fit\" tells us she made it for herself without Lena ever saying she wanted the part. Does it replace the thread bite, or does she bite the thread after saying it? And how did it feel to land on that line tonight?",
           "at": "2026-11-03T02:01:58.000Z"
         },
         {
@@ -64,12 +64,12 @@
         },
         {
           "from": "zoh",
-          "text": "Good. When you sat down at 8, did the scene come easily, or did you have to push to get started?",
+          "text": "Then that's the version, Dana. Letting go of the part through a hem is such a quiet way to do it. How did it feel to write her tonight, easy or did you have to wrestle her?",
           "at": "2026-11-03T02:03:16.900Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-11-02: Wants Lena to say \"I finally got the sleeves to fit.\" as the whole line; she made the costume for herself weeks ago, so it's her letting go of the part.\nStyle now: pushy",
+      "saved": "Takeaway (explained, 2026-11-02): Reading a scene aloud shows you what's missing, like the line that carries the emotion.\nReflection for 2026-11-02: Heard the scene aloud and found the line: Lena says \"I finally got the sleeves to fit,\" showing she made the costume for herself and is letting go of the part. Agreed the revision works.\nCan now do (2026-11-02): Revise a scene after reading it aloud and find the line that carries the emotion.\nGaps (2026-11-02): Hasn't yet tried a scene from another character's point of view.\nStyle now: pushy",
       "grade": {
         "texts": [
           {
@@ -77,15 +77,15 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end, within the short limit."
+                "reason": "Asks two questions in one text (what it was like writing it, and what they noticed), breaking the one-question limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific energy with one emoji as punctuation; not overfamiliar."
+                "reason": "Warm, energetic, with one emoji at the end of the beat; not overfamiliar."
               }
             ]
           },
@@ -93,22 +93,16 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "After saving the reflection, the text reacts to the sleeves idea and asks a follow-up, so it isn't a save-only reply."
-              },
-              {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end."
+                "reason": "Three questions in one text (does it replace the bite, does she bite after, how did it feel), well beyond one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Sincere and specific with no emoji row or affection."
+                "reason": "Warm and specific to the line, no emoji row or affection."
               }
             ]
           },
@@ -119,13 +113,355 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and warm, reacts to the costume-as-letting-go idea without overdoing praise."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": false,
+            "borderline": true,
+            "reason": "Opened the reflection with a question, but it stacked two questions in one text rather than one."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": false,
+            "borderline": true,
+            "reason": "Follow-ups build on the sleeves line well, but two of the three texts ask multiple questions, breaking one-question-per-text."
+          },
+          {
+            "rule": "stops-right",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH3 re-asks how it felt, after already asking how it felt to land the line in ZOH2, which is redundant on a reflection that had already landed."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": true,
+            "reason": "Only three texts since proof, under the fifth-text threshold, and the reflection moves toward closing, though no next step is proposed yet."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The first real answer got a follow-up on the line and did not propose tomorrow's step."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": false,
+            "borderline": true,
+            "reason": "Saved gap says they haven't tried another character's point of view, which nothing in the transcript supports."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH reacts to the sleeves-line idea in its own words and asks one more question, with no bare save. It never proposes the next step, though the reflection is still open."
+          }
+        ],
+        "summary": "ZOH avoids the old 'Saved.' dead end, reacts to the sleeves line with a real idea, and keeps the reflection moving with one question. It falls short on one-question discipline in its first two texts, repeats a feelings question, and saves a gap the transcript doesn't support."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:saved-dead-end#2",
+        "kind": "case",
+        "id": "saved-dead-end",
+        "suite": "regression",
+        "title": "After a reflection on the scene's subtext, a real reply leading to the next step, never just \"Saved.\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Lena's scene tonight, Dana: 8 pm at your desk, 30 minutes. Then read it to me in a voice note.",
+          "at": "2026-11-03T00:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
+          "at": "2026-11-03T02:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dana, day 3 in the books 🎭 That image of Lena biting the thread instead of answering is great. What was it like writing her tonight?",
+          "at": "2026-11-03T02:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
+          "at": "2026-11-03T02:01:51.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a strong instinct, Dana. Lena says the sleeves finally fit when she means she's letting go, and she never has to say it outright. How did it feel to land on that line, compared to when you started tonight?",
+          "at": "2026-11-03T02:01:58.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that works",
+          "at": "2026-11-03T02:03:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, \"that works\" from a writer who just cut a whole scene down to one line. I'll take it. Was there a moment tonight where it clicked, or did it come together slowly while you were reading it aloud?",
+          "at": "2026-11-03T02:03:16.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Revised Lena's scene after reading aloud; chose her one line \"I finally got the sleeves to fit\" as her letting go of the part. Felt-wise only \"yeah that works\".\nCan now do (2026-11-02): Revise a scene to carry emotion through one small, indirect line\nGaps (2026-11-02): Hasn't yet written the understudy's side or the opening-night payoff\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with a single emoji as punctuation, not overfamiliar."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Replies to the voice note with a scene-specific reaction and a question."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no emoji row or overfamiliarity."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the sleeves line as an idea, not a save confirmation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light and warm, playful without being affectionate."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Keeps the conversation moving with a follow-up question rather than a bare acknowledgment."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the sleeves explanation, ZOH reacts to the idea itself and keeps moving with one specific question, with no save-only reply."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Follow-up draws on the sleeves line and the tester's own words, with one question per text."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": true,
+            "reason": "Reply to the first real answer follows the sleeves idea and does not propose tomorrow's step, though 'yeah that works' is thin."
+          }
+        ],
+        "summary": "ZOH handled the regression well: after Dana explained the sleeves line it reacted to the idea itself and kept the reflection going with one specific question, never replying with only a save confirmation. It did not reach a next-step proposal in this window, which the rule allows, and its short, warm texts stayed within style limits."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:saved-dead-end#3",
+        "kind": "case",
+        "id": "saved-dead-end",
+        "suite": "regression",
+        "title": "After a reflection on the scene's subtext, a real reply leading to the next step, never just \"Saved.\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Lena's scene tonight, Dana: 8 pm at your desk, 30 minutes. Then read it to me in a voice note.",
+          "at": "2026-11-03T00:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
+          "at": "2026-11-03T02:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dana, day 3 in the books 🎭 \"Lena bites the thread\" is a great way to end that scene, because it shows the anger without anyone saying it. What made you land on that moment?",
+          "at": "2026-11-03T02:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
+          "at": "2026-11-03T02:01:51.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, the plain line is stronger. \"I finally got the sleeves to fit\" lets the letting-go sit underneath the words, and it pays off the costume she made for herself. How did it feel writing this one, compared to Theo's and Iris's scenes?",
+          "at": "2026-11-03T02:01:58.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that works",
+          "at": "2026-11-03T02:03:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, fair, that was a big question for 9 pm. Easier one: when you read Lena's scene back out loud, was there a moment that surprised you?",
+          "at": "2026-11-03T02:03:16.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Wrote Lena's scene; chose the plain line \"I finally got the sleeves to fit\" over the thread-biting ending. Gave a thin \"yeah that works\" when asked how it felt.\nCan now do (2026-11-02): Revises a scene's ending to carry meaning through one plain line\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reply carries a real question about the scene, not a save confirmation."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, one emoji as punctuation, celebrates the voice note proof."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Responds to the idea itself rather than just confirming a save."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a next move in the form of a question about the reading."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
                 "reason": "Two short sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain, warm, and not overfamiliar."
+                "reason": "Light and warm; the Ha acknowledges the flat reply without pressure."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "No quiz or recall in this text."
+              },
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a kickoff, no agreed step to remind."
               }
             ]
           }
@@ -135,40 +471,64 @@
             "rule": "reflection-ask",
             "pass": true,
             "borderline": false,
-            "reason": "After the scene voice note, ZOH opened with one question about what felt strongest and didn't chase it later."
+            "reason": "After the voice note proof, ZOH opened with one question about the chosen moment."
           },
           {
             "rule": "follow-ups",
             "pass": true,
+            "borderline": true,
+            "reason": "ZOH 2 follows the sleeves line well; ZOH 3 shifts to a new question about reading aloud rather than what was behind 'yeah that works'."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
             "borderline": false,
-            "reason": "Follow-ups came from the scene and the sleeves line Dana volunteered, one question per text."
+            "reason": "ZOH drew out what she noticed in the scene, then followed up the lesson she volunteered."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": true,
+            "reason": "Saved can-do matches her choice of the plain line; 'revises a scene's ending' is a slight generalization but grounded."
           },
           {
             "rule": "stops-right",
             "pass": true,
             "borderline": true,
-            "reason": "After the flat 'yeah that works' ZOH asked one new question, not a third push, but it could have wrapped up sooner."
+            "reason": "Only one thin answer so far and no third push; a light new question is acceptable here."
           },
           {
             "rule": "thin-answer",
+            "pass": false,
+            "borderline": true,
+            "reason": "'yeah that works' to the feelings question got a new question instead of a follow-up on what was behind it."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reply to her real answer followed the sleeves idea and did not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
             "pass": true,
             "borderline": true,
-            "reason": "'yeah that works' got a new question about how the session started rather than a follow-up on what's behind the thin reply."
+            "reason": "Reflection is only three texts in and a next step is not yet proposed; one more question is within the allowed window."
           },
           {
             "rule": "goes-deeper",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH went deeper on the sleeves line and then moved to new ground about session feel."
+            "reason": "No worry named; the questions stayed on the scene and the choice she made."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "No Saved-only reply; ZOH reacts to the sleeves idea and keeps moving with a question, though it names 'without saying she's hurt' rather than the giving-up-the-part idea."
+            "borderline": false,
+            "reason": "ZOH responded to the sleeves idea itself, counted the voice note, and kept the conversation moving with no bare save confirmation."
           }
         ],
-        "summary": "ZOH counted the voice note, reacted to the sleeves line instead of replying with only a save confirmation, and kept the conversation moving with one question per text. The main weaknesses are that the reaction to the idea could name the giving-up-the-part meaning more directly, and the flat 'yeah that works' got another question instead of a grounded follow-up."
+        "summary": "ZOH avoided the earlier regression: it counted Dana's voice note, reacted to the sleeves line with a specific sentence, and never replied with only a save confirmation. The weak spot is the third text, which moved to a new question after her thin 'yeah that works' instead of following up on what was behind it, and it has not yet turned to a next step."
       }
     }
   ]

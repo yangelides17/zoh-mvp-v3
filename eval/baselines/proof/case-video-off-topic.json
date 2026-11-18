@@ -2,12 +2,12 @@
   "feature": "proof",
   "id": "case:video-off-topic",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:27:14.854Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "96cd96107ad3",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "6aa85003437f"
   },
@@ -65,52 +65,28 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "plausible-counts",
+                "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Kitten video is not a plausible reading photo, so no celebration; it correctly withholds credit."
-              },
-              {
-                "rule": "kind-pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "Gently says it can't count the video as Atomic Habits, warm and not accusing."
+                "reason": "Reacts to the kitten chasing the laser and names it, without counting it as reading."
               },
               {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names a voice note as the proof to send, not typed text."
-              },
-              {
-                "rule": "file-specific",
-                "pass": true,
-                "borderline": false,
-                "reason": "Reacts lightly to the kitten video specifically, enjoying it without inventing details."
-              },
-              {
-                "rule": "file-cant-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Video opened and was understood; the rule does not apply."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "No smaller version offered; rule does not apply."
+                "reason": "Asks for a voice note about the pages, which is an allowed proof type."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, one question at the end."
+                "reason": "Three sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, light, emoji used as punctuation, not suspicious."
+                "reason": "Warm and playful with one emoji as punctuation; no accusation about the wrong video."
               }
             ]
           },
@@ -121,37 +97,13 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Voice note names the pages and the two-minute rule; ZOH celebrates it as day 3 done."
-              },
-              {
-                "rule": "kind-pushback",
-                "pass": true,
-                "borderline": false,
-                "reason": "No contradiction, so no pushback needed."
-              },
-              {
-                "rule": "proof-kinds",
-                "pass": true,
-                "borderline": false,
-                "reason": "No proof method stated in this text."
+                "reason": "Counts the voice note about the pages and celebrates it as day 3 done."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts specifically to the two-minute rule from the voice note without inventing content."
-              },
-              {
-                "rule": "file-cant-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "Voice note was understood; rule does not apply."
-              },
-              {
-                "rule": "smaller-in-full",
-                "pass": true,
-                "borderline": false,
-                "reason": "No smaller version involved."
+                "reason": "Reacts to the two-minute rule and chapter four named in the voice note."
               },
               {
                 "rule": "short",
@@ -163,20 +115,26 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype for a real win with a book emoji, warm and sincere."
+                "reason": "Energetic and warm with a book emoji as punctuation; nothing invented."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "file-mismatch",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kitten video was not counted, ZOH stayed warm, and it asked for the proper voice note instead."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Kitten video withheld from counting, voice note requested kindly, and voice note counted with a specific reaction to the two-minute rule."
+            "reason": "Kitten video enjoyed but not counted, voice note asked for, then counted and reacted to specifically without invented details."
           }
         ],
-        "summary": "ZOH handled the wrong video well: it enjoyed the kitten lightly, refused to count it, and asked for the voice note without suspicion. It then counted the voice note and reacted specifically to the two-minute rule, matching the expected regression behavior."
+        "summary": "ZOH handled the wrong video well: it enjoyed the kitten without counting it, asked kindly for the voice note, and then counted the voice note and reacted to the two-minute rule. The exchange is short and on-voice with no invented details, so it passes the regression case cleanly."
       }
     },
     {
@@ -232,63 +190,22 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "file-specific",
-                "pass": true,
-                "borderline": false,
-                "reason": "Reacts to the kitten video specifically, calling out the kitten and that it isn't reading."
-              },
-              {
-                "rule": "file-cant-open",
-                "pass": true,
-                "borderline": false,
-                "reason": "The video was playable and described; no file-open issue arises."
-              },
-              {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": false,
-                "reason": "Correctly does not count the mismatched video; no celebration of it."
-              },
-              {
                 "rule": "kind-pushback",
                 "pass": true,
                 "borderline": false,
-                "reason": "Kindly redirects that the video isn't the reading proof, with no suspicion."
+                "reason": "The kitten video contradicts the step, and ZOH pushes back warmly with 'that kitten is adorable... but it's not Atomic Habits 😄'."
               },
               {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names a voice note as the proof, not typed text."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with one question at the end."
-              },
-              {
-                "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Playful, warm, emoji as punctuation, not accusing."
-              }
-            ]
-          },
-          {
-            "zohText": 2,
-            "checks": [
-              {
-                "rule": "plausible-counts",
-                "pass": true,
-                "borderline": false,
-                "reason": "Counts the voice note naming the pages and two-minute rule and celebrates it."
+                "reason": "Names only a voice note as the proof for today's step, never typed text."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts specifically to the two-minute rule mentioned in the voice note."
+                "reason": "Reacts to the specific content of the video, the kitten, without inventing anything."
               },
               {
                 "rule": "short",
@@ -300,20 +217,55 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype-appropriate, emoji as punctuation, no invented details."
+                "reason": "Warm, light energy with one emoji as punctuation, not suspicious or accusing."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The voice note names the pages and the two-minute rule, and ZOH celebrates it with 'Day 3 in the books'."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the two-minute rule the tester named, not a generic line."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four short sentences ('Ha, kitten video aside...', 'Day 3...', 'The two-minute rule...', 'Where...'), over the one-to-three limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and upbeat with one emoji as punctuation, no suspicion or accusation."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "file-mismatch",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kitten video isn't the reading step, so ZOH treats it like a mismatched photo: enjoys it, doesn't count it, and asks for the voice note."
+          },
+          {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Kitten video is lightly enjoyed but not counted, voice note is asked for kindly, and the counted voice note reacts to the two-minute rule without inventing details."
+            "reason": "The kitten video isn't counted, ZOH asks kindly for the voice note, and it counts the voice note and reacts to the pages and two-minute rule without inventing details."
           }
         ],
-        "summary": "ZOH handled the mismatched kitten video well: it enjoyed it lightly, didn't count it, and asked kindly for the voice note. It then counted the voice note and reacted specifically to the two-minute rule without inventing anything."
+        "summary": "ZOH handled the wrong video well: it enjoyed the kitten without counting it, asked kindly for the voice note, and then counted and reacted to the real proof. The one miss is that the final text runs four short sentences, slightly over the three-sentence limit."
       }
     },
     {
@@ -369,16 +321,16 @@
             "zohText": 1,
             "checks": [
               {
-                "rule": "file-specific",
-                "pass": true,
-                "borderline": false,
-                "reason": "Reacts to the kitten video specifically (\"that kitten is adorable\") and says it doesn't show reading."
-              },
-              {
                 "rule": "proof-kinds",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names voice note or photo as proof, never typed text."
+                "reason": "Names only a voice note or photo of the page as proof, never typed text."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the specific kitten video, calling it adorable, before explaining it doesn't show reading."
               },
               {
                 "rule": "short",
@@ -390,7 +342,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, light and not suspicious; the emoji is punctuation."
+                "reason": "Warm and light with an emoji as punctuation, with no suspicion or accusation."
               }
             ]
           },
@@ -401,44 +353,44 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the voice note as proof and counts it as day 3 done."
+                "reason": "Celebrates the voice note that names the pages and the two-minute rule as proof and counts it."
               },
               {
                 "rule": "file-specific",
                 "pass": true,
                 "borderline": false,
-                "reason": "Reacts to the specific content: ten pages, chapter four, two-minute rule."
+                "reason": "Reacts to the specific chapter four, ten pages, and the two-minute rule from the voice note."
               },
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "borderline": true,
+                "reason": "Three short sentences with one question at the end, though the middle line is a fragment."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and sincere, with emoji as punctuation and no accusation."
+                "reason": "Energetic and warm, with a fitting emoji and a light nod to the kitten."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Kitten video enjoyed lightly but not counted, voice note asked for, and the voice note counted and reacted to without invented details."
-          },
-          {
             "rule": "file-mismatch",
             "pass": true,
             "borderline": false,
-            "reason": "The off-topic kitten video was handled like a mismatched photo: no check mark, a light redirect to the reading proof."
+            "reason": "The kitten video was not the step, so ZOH didn't count it and asked for a voice note or photo instead."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH enjoyed the kitten lightly, did not count it, then counted the voice note and reacted to the pages and two-minute rule without inventing details."
           }
         ],
-        "summary": "ZOH handled the wrong kitten video well: it enjoyed the video lightly, refused to count it, and asked kindly for proof of the reading. When the voice note arrived it counted the step and reacted to its specific content, with no invented detail or suspicion."
+        "summary": "ZOH handled the wrong video well: it stayed warm about the kitten, didn't count it, and asked for proof kindly. It then counted the voice note and reacted specifically to the pages and the two-minute rule."
       }
     }
   ]

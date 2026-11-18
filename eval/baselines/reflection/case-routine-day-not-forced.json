@@ -1,0 +1,289 @@
+{
+  "feature": "reflection",
+  "id": "case:routine-day-not-forced",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "30537913bc3b",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "a2fab5f24088"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:routine-day-not-forced#1",
+        "kind": "case",
+        "id": "routine-day-not-forced",
+        "suite": "capability",
+        "title": "A settled bedtime habit, \"same as always\": no question about what they learned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Same as always tonight, Rosa: phone down, lights out by 10:45. A quick pic when you're in.",
+          "at": "2026-11-03T02:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo dark-selfie.jpg: a dark, flash-lit selfie in bed, no phone in hand] done 👍 same as always",
+          "at": "2026-11-03T03:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rosa, that squint says it all 😄 Four nights in a row, lights out right on time. How many hours of sleep are you aiming for each night?",
+          "at": "2026-11-03T03:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "night!",
+          "at": "2026-11-03T03:50:56.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Kalinixta, Rosa 😴 Same plan tomorrow: phone down and lights out by 10:45, with a quick pic. Work for you?",
+          "at": "2026-11-03T03:51:03.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Easy now, falls asleep faster\nReflection for 2026-10-31: Same as usual, automatic\nReflection for 2026-11-02: Done again, routine night, \"same as always\"; said night and headed to sleep.\nStep set for 2026-11-03, not agreed: In bed with the phone down and lights off by 10:45 pm, in your bedroom, photo in bed with lights off\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the short-text limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with a single emoji used as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Goodnight plus restated plan and one question at the end, short overall."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short warm goodnight with a single emoji; no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No learning or noticing question after the routine photo; ZOH celebrates briefly and says a short goodnight, though the sleep-hours question on a rushed night is a bit of fishing and 'four nights in a row' isn't verifiable from the shown state."
+          }
+        ],
+        "summary": "ZOH avoided the regression: it celebrated the routine photo without asking what Rosa learned or noticed, and closed with a short goodnight plus tomorrow's plan. The one soft spot is a sleep-hours question asked right after a rushed 'night!', and the 'four nights' count can't be checked against the state shown."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:routine-day-not-forced#2",
+        "kind": "case",
+        "id": "routine-day-not-forced",
+        "suite": "capability",
+        "title": "A settled bedtime habit, \"same as always\": no question about what they learned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Same as always tonight, Rosa: phone down, lights out by 10:45. A quick pic when you're in.",
+          "at": "2026-11-03T02:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo dark-selfie.jpg: a dark, flash-lit selfie in bed, no phone in hand] done 👍 same as always",
+          "at": "2026-11-03T03:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rosa, that squint says lights out and you mean it 😄 Four in a row. It's late, so one quick question: how many hours of sleep are you aiming for each night?",
+          "at": "2026-11-03T03:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "night!",
+          "at": "2026-11-03T03:50:56.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Night, Rosa! Four in a row 😴 Tomorrow we pick up right where we left off. Sleep well.",
+          "at": "2026-11-03T03:51:03.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Easy now, falls asleep faster\nReflection for 2026-10-31: Same as usual, automatic\nReflection for 2026-11-02: Done, said same as always; routine and automatic. Says goodnight.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end, but the question is a new topic on a routine sleep step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and playful with one emoji as punctuation; not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A short goodnight with no question, though it runs to four short sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and brief, with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The photo is counted and praised briefly, and no learning question is asked. The sleep-hours question is one light question, but it is a new topic on a routine step."
+          }
+        ],
+        "summary": "ZOH counted the routine proof warmly and asked no learning or noticing question, which avoids the regression. The one sleep-hours question and the unverified 'four in a row' count are the only things a reviewer could score the other way."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:routine-day-not-forced#3",
+        "kind": "case",
+        "id": "routine-day-not-forced",
+        "suite": "capability",
+        "title": "A settled bedtime habit, \"same as always\": no question about what they learned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Same as always tonight, Rosa: phone down, lights out by 10:45. A quick pic when you're in.",
+          "at": "2026-11-03T02:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo dark-selfie.jpg: a dark, flash-lit selfie in bed, no phone in hand] done 👍 same as always",
+          "at": "2026-11-03T03:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rosa! Day 4 in the bed, lights out right on time 🌙 That scrunched face says a lot. What's going on there, is that how the day felt or just a good selfie?",
+          "at": "2026-11-03T03:50:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "night!",
+          "at": "2026-11-03T03:50:56.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Night, Rosa! Four nights in a row, lights out right on time 🌙 Sleep well.",
+          "at": "2026-11-03T03:51:03.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Easy now, falls asleep faster\nReflection for 2026-10-31: Same as usual, automatic\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic with one emoji as punctuation, though 'that scrunched face' describes a detail the proof note doesn't mention."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, a clean goodnight."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and brief with one emoji as punctuation; not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The photo is counted warmly and briefly, and there is no question about learning or noticing. The one light question asks how the day felt, which is allowed, though it still follows a routine 'same as always' step."
+          }
+        ],
+        "summary": "ZOH handled the routine bedtime step well: it counted the photo warmly and briefly, and it closed with a short goodnight once Rosa said night. Its one light question about how the day felt is allowed under the regression case, though it's borderline on a routine step and the 'scrunched face' detail is not in the proof note."
+      }
+    }
+  ]
+}

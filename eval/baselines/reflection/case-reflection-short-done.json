@@ -2,27 +2,27 @@
   "feature": "reflection",
   "id": "case:reflection-short-done",
   "suite": "regression",
-  "storedAt": "2026-11-18T05:08:34.960Z",
-  "branch": "feature/211-reflect-first",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "345a42a40563",
-    "voice": "2da0416a0038",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "daace7d248f3"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:reflection-short-done",
+        "key": "case:reflection-short-done#1",
         "kind": "case",
         "id": "reflection-short-done",
+        "suite": "regression",
         "title": "A short reflection and a tester who's done talking: no dragging it out, straight to the next step",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "18:55",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Nice, Theo! Day 3 done, and you went up to 8 push-ups and 12 squats 💪 How did those sets feel? Was the last set of push-ups a grind, or did you have more in the tank?",
+          "text": "Theo, that's 3 days in a row, and you went up to 8 push-ups and 12 squats today 💪 How did those eight feel compared to yesterday's seven?",
           "at": "2026-11-02T23:55:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Tired legs on the last set is normal, and it tells me something useful. Did your push-ups feel steady all three sets, or did they start to slow down too?",
+          "text": "Tired legs on that last set is the work doing its job, Theo. When you picture tomorrow's session, does it feel like you've got room for a bit more, or would you rather hold at 8 and 12 for one more day?",
           "at": "2026-11-02T23:55:52.600Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "Got it, Theo. Since your legs were feeling it, tomorrow we hold steady: 3 sets of 8 push-ups and 12 squats in the living room at 6:30 pm, same as today. Let your body lock this level in before we go up. Work for you?",
+          "text": "Got it, Theo. Tomorrow we hold at 3 sets of 8 push-ups and 12 squats, living room, 6:30. Same load lets your legs catch up. Work for you?",
           "at": "2026-11-02T23:56:32.800Z"
         },
         {
@@ -74,34 +74,28 @@
         },
         {
           "from": "zoh",
-          "text": "Locked in, Theo. Tomorrow at 6:30 pm, living room, same 3 sets. Rest those legs tonight, and send me the voice note when you're done 💪",
+          "text": "Locked in, Theo. Tomorrow at 6:30, 3 sets of 8 push-ups and 12 squats, then a voice note. See you then 💪",
           "at": "2026-11-02T23:57:03.700Z"
         }
       ],
       "endedBy": "script",
-      "saved": "Reflection for 2026-11-02: Did 3x8 push-ups and 12 squats; \"fine\", legs tired on the last set. Nothing more to add.\nStep set for 2026-11-03, agreed: 3 sets of 8 push-ups and 12 squats in the living room at 6:30 pm (about 15 min), same as today\nStyle now: pushy",
+      "saved": "Reflection for 2026-11-02: Did 3x8 push-ups and 12 squats; said it was fine, legs tired on last set. Wrapped up the chat.\nGaps (2026-11-02): Legs tire by the last set\nStep set for 2026-11-03, agreed: 3 sets of 8 push-ups and 12 squats in the living room at 6:30 pm (about 15 min), voice note after\nStyle now: pushy",
       "grade": {
         "texts": [
           {
             "zohText": 1,
             "checks": [
               {
-                "rule": "recall",
+                "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "No recall used here, and none was needed for a proof reply."
-              },
-              {
-                "rule": "short",
-                "pass": false,
-                "borderline": false,
-                "reason": "Asks two questions in one text: \"How did those sets feel?\" and \"Was the last set of push-ups a grind...\", breaking the one-question limit."
+                "reason": "Two sentences with one question at the end, as the rule asks."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, celebratory energy with one emoji at the end; sincere and not overfamiliar."
+                "reason": "Warm, pushy-level energy with a single emoji as punctuation."
               }
             ]
           },
@@ -112,13 +106,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with one question at the end, grounded in the tired legs they named."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm and warm, no emoji row, not overfamiliar."
+                "reason": "Warm and calm, with no emoji row or overfamiliarity."
               }
             ]
           },
@@ -129,13 +123,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end, \"Work for you?\"."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and firm, acknowledges their tired legs without guilt."
+                "reason": "Warm and firm, matching the pushy default."
               }
             ]
           },
@@ -146,13 +140,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Confirms the lock-in briefly with no question at all."
+                "reason": "Two sentences with no question, after the lock, which is acceptable."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype-level energy with one emoji at the end."
+                "reason": "Sincere, with one emoji as punctuation."
               }
             ]
           }
@@ -162,10 +156,328 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Stops digging after \"nah that's it\", proposes tomorrow's step acknowledging tired legs, asks if it works, and confirms \"let's go\" with no new question. The proposal omits how long the step runs, so it isn't fully defined."
+            "reason": "Counts the voice note, asks how it went, then after 'nah that's it' proposes the day's step with a where and when, and after 'let's go' confirms with no new question. The proposal omits how long, and the one follow-up about tomorrow's load is close to proposing the step early."
+          },
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the proof, ZOH opened with one question about how the eight reps felt and did not chase it afterward."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'nah that's it' ZOH stopped digging and moved to the next step without a further question about the tired legs."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH's reply to 'legs were tired' follows that detail, but it asks a choice about tomorrow's load rather than holding tomorrow back entirely."
           }
         ],
-        "summary": "ZOH counted the voice note, asked one follow-up about the tired legs, then stopped digging and proposed a sensible same-level step for tomorrow. Its main misses are a double question in the first text and a proposal that leaves out the step's length."
+        "summary": "ZOH handled this regression well: it celebrated the voice-note proof, asked one question, stopped digging when the tester wrapped up, and confirmed the lock in one line without a new question. The main gap is that the proposed next step omits how long it takes (about 15 min), and the one follow-up edged toward tomorrow's step early."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:reflection-short-done#2",
+        "kind": "case",
+        "id": "reflection-short-done",
+        "suite": "regression",
+        "title": "A short reflection and a tester who's done talking: no dragging it out, straight to the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:55",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Starts in 10, Theo! 3 sets of 8 push-ups and 12 squats in the living room at 6:30.",
+          "at": "2026-11-02T22:52:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T22:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, three sets of eight push-ups and twelve squats.]",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Theo! Day 3 done, and you stepped it up to 8 push-ups and 12 squats. 🔥 How did those sets feel compared to yesterday's?",
+          "at": "2026-11-02T23:55:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "it was fine, legs were tired on the last set",
+          "at": "2026-11-02T23:55:45.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tired legs on the last set means you're working them right, Theo. When it got hard, did you slow down, or did you push straight through it?",
+          "at": "2026-11-02T23:55:52.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah that's it",
+          "at": "2026-11-02T23:56:25.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Theo. Tomorrow: 3 sets of 9 push-ups and 12 squats, same 6:30 spot in the living room, voice note after. Squats stay put since your legs were tired. Work for you?",
+          "at": "2026-11-02T23:56:32.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T23:56:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Theo. Tomorrow at 6:30 it's 9 push-ups and 12 squats, voice note after. Rest up tonight 💪",
+          "at": "2026-11-02T23:57:03.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Fine overall; legs tired on last set.\nCan now do (2026-11-02): 3 sets of 8 push-ups and 12 squats\nGaps (2026-11-02): Legs fatigue on the last set of squats\nStep set for 2026-11-03, agreed: 3 sets of 9 push-ups and 12 squats in the living room at 6:30 pm (about 15 min), voice note after\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with a single specific follow-up question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy-level warmth with no emoji or affection issues."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short lines with no question, as required after a lock."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH asked one short follow-up, then stopped after 'nah that's it', acknowledged tired legs, proposed a modest next step and asked 'Work for you?'. It confirmed 'let's go' in one line with no question. The proposal omits how long the step takes, so it's not fully defined."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: it asked a single follow-up, stopped digging when the tester closed the talk, and proposed a modest next step that acknowledged tired legs. The one gap is that the proposed step never states its length, so it isn't quite fully defined."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:reflection-short-done#3",
+        "kind": "case",
+        "id": "reflection-short-done",
+        "suite": "regression",
+        "title": "A short reflection and a tester who's done talking: no dragging it out, straight to the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:55",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Starts in 10, Theo! 3 sets of 8 push-ups and 12 squats in the living room at 6:30.",
+          "at": "2026-11-02T22:52:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T22:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, three sets of eight push-ups and twelve squats.]",
+          "at": "2026-11-02T23:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Theo, that's 3 days straight, and the reps went up again: 8 push-ups today after 6 and 7 🔥 How did those last few reps feel compared to yesterday?",
+          "at": "2026-11-02T23:55:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "it was fine, legs were tired on the last set",
+          "at": "2026-11-02T23:55:45.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tired legs on the last set means the squats are doing their job, Theo. When your legs got heavy, did you push straight through, or take a bit longer between sets?",
+          "at": "2026-11-02T23:55:52.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah that's it",
+          "at": "2026-11-02T23:56:25.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Theo. Tomorrow, same spot at 6:30: 3 sets of 9 push-ups and 12 squats. One more push-up, squats stay put since your legs were heavy. Work for you?",
+          "at": "2026-11-02T23:56:32.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T23:56:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Theo. Tomorrow at 6:30, 3 sets of 9 push-ups and 12 squats, voice note after. Go rest those legs 💪",
+          "at": "2026-11-02T23:57:03.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Day 3 done, 3x8 push-ups and 12 squats. Fine, legs tired on last set.\nGaps (2026-11-02): Leg endurance on last set of squats\nStep set for 2026-11-03, agreed: 3 sets of 9 push-ups and 12 squats in the living room at 6:30 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, after counting the voice note."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic with one fire emoji as punctuation; \"3 days straight\" and \"after 6 and 7\" go beyond what the transcript shows, so they may be unverified detail."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single specific follow-up question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, plain and sincere with no emoji or overfamiliar wording."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four short sentences with one question at the end; the step definition makes it run slightly long for the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and warm, acknowledges \"nah that's it\" without pressure, and matches the tester's tone."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short confirmation with no new question, as required after \"let's go\"."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and sincere with one emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counts the voice note and asks one short follow-up, stops digging after \"nah that's it\", proposes a sensible next step that acknowledges tired legs, and confirms \"let's go\" with no new question. Duration is not stated in the proposal."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: it counted the voice note, asked one specific follow-up, stopped digging when the tester wanted to stop, and gave a modest next step that respected tired legs. The main weaknesses are minor, with a possibly unverified streak and reps detail in the first text and a proposal that doesn't state the duration."
       }
     }
   ]

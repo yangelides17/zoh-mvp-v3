@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:progress-path",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:25:09.958Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "fd88390517dc",
-    "voice": "fbc3a37c5b97",
+    "checks": "b748b8625cb8",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "cbff746465ab"
   },
@@ -74,13 +74,13 @@
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only references the 15 pages just reported and the proof request; nothing outside memory is stated."
+                "reason": "Only states the 15 pages and the tester's own done report; nothing invented."
               },
               {
-                "rule": "recall",
+                "rule": "what-you-know",
                 "pass": true,
-                "borderline": true,
-                "reason": "Refers to tonight's 15 pages only; no detail from a week or more back is used."
+                "borderline": false,
+                "reason": "Not applicable here; the text makes no claims about what ZOH knows about her."
               }
             ]
           },
@@ -88,47 +88,41 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "honest-memory",
-                "pass": true,
-                "borderline": true,
-                "reason": "Dates match the daily pages except the 15-page move, given as Oct 29 here but Oct 28 in the step path."
-              },
-              {
                 "rule": "recall",
                 "pass": true,
-                "borderline": true,
-                "reason": "Weaves in the Oct 13 start and the not-reading-in-two-years detail, though as a bulleted recap rather than natural mention."
+                "borderline": false,
+                "reason": "Brings back the Oct 13 start from over a week earlier, woven into the progress list without reciting it."
+              },
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Dates, page counts, the reduced day, and the first-week streak all match the memory pages."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "pages-real",
+            "rule": "counted-proof",
             "pass": true,
             "borderline": false,
-            "reason": "No new pages are created or referenced in this exchange; the reading goal is discussed in its existing context."
-          },
-          {
-            "rule": "learned-not-single",
-            "pass": true,
-            "borderline": false,
-            "reason": "No learned preference is recorded or claimed in this exchange."
+            "reason": "Today's 'done' is treated as done and the proof ask is light; the reduced day is correctly described as done, not missed."
           },
           {
             "rule": "progress-path",
             "pass": true,
             "borderline": true,
-            "reason": "Traces 5 to 10 to 15 pages with accurate step-day counts, but omits the bedtime-goal start and gives the 15-page move as Oct 29 against the Oct 28 step path."
+            "reason": "Traces 5, 10, 15 pages accurately from Oct 13, but never names the original sleep goal, only the switch from bedtime."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Traces the path accurately with recent done days and no invented facts, but the bullet list runs longer than the short text or two requested and the bedtime start is only implied."
+            "reason": "Traces the path accurately with no invented facts and mentions recent done days, but omits the bedtime-goal start and runs longer than a short text or two."
           }
         ],
-        "summary": "ZOH answered the progress question with an accurate path from 5 to 10 to 15 pages and correctly described the recent run of step days, with no invented facts. Its main weaknesses are a longer list than the requested short text, a one-day date discrepancy for the 15-page move, and no explicit mention of the original bedtime goal."
+        "summary": "ZOH traced the reading progress accurately from October 13 through the 5, 10 and 15 page steps, and mentioned the recent done days, including the one reduced day, without inventing anything. Its main gap is that it did not name the original bedtime goal as the true starting point, and the answer ran longer than the requested short text or two."
       }
     }
   ]

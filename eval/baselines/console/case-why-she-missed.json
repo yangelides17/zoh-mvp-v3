@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:why-she-missed",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "a42eeec0e8e2",
-    "voice": "fbc3a37c5b97",
+    "checks": "bf94fc842669",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "0a66180e2435"
   },
@@ -74,10 +74,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH 1 cites her 10:57 pm Sunday text for work running till 10 and being wiped, notes all 7 prior days done, and says they'll pick up tonight on page 212. ZOH 2 says it doesn't know, invents no sister or visit, and offers to save a note or ask."
+            "reason": "ZOH 1 gives the work-until-10 and wiped reason from her 10:57 pm text, notes the 7 prior days done, and is plain. ZOH 2 says nothing in her texts or notes mentions a sister or visit and offers to save a note or ask her, without inventing one."
           }
         ],
-        "summary": "ZOH answered both console questions accurately from the tester's own text and the step log, with no invented details. Its second answer honestly said it didn't know about a sister or visit and offered concrete next steps."
+        "summary": "ZOH handled both console questions as the regression case expects: it grounded the missed night in her own 10:57 pm text and the seven completed days before it, and it did not invent a sister or visit when the record had none. Both answers were short, plain, and addressed to Yanni."
       }
     }
   ]

@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:ambiguous-step",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:17:24.672Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "c3dc736fae0c",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "22126abaae59"
   },
@@ -93,37 +93,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "A plan presentation may run about 8 lines; this one is a few bullets with an intro and closing, so it sits near the limit."
+                "reason": "Plan presentation runs about 8 lines, which is within the allowed length for presenting a plan."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain bullet list with no markdown, hashtags or filler."
+                "reason": "Uses plain • bullets with no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and encouraging, with no overfamiliarity or emoji row."
+                "reason": "Warm, confident and not overfamiliar, with no emoji row."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the Apple Watch and the outside-or-treadmill setup they described, plus ZOH's own suggestions."
+                "reason": "Uses the Apple Watch they mentioned and concrete suggestions, with no invented facts about them."
               },
               {
                 "rule": "step-defined",
-                "pass": false,
+                "pass": true,
                 "borderline": true,
-                "reason": "Day 1 says 'outside if it's dry, otherwise the treadmill' with no outside route or treadmill settings, and never asks which one, leaving the place unresolved."
+                "reason": "Day 1 is named as outside if dry, otherwise treadmill, with pace guidance, but outside details are left general and the place is only conditionally settled."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it carries the plan and a question."
+                "reason": "Not a save confirmation; the text carries the plan and a question."
               },
               {
                 "rule": "one-question",
@@ -139,38 +139,38 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "A plan change can run to about 8 lines; this is a 5-bullet plan with a short closing line."
+                "borderline": false,
+                "reason": "Updated plan is a short list of about 7 lines, appropriate for changing a plan."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain bullet list, no markdown or filler."
+                "reason": "Plain bullets and sentences with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Upbeat and specific ('good call with the rain') without overfamiliarity."
+                "reason": "Brief, warm acknowledgment of the rain choice; no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the building gym treadmill they mentioned earlier, nothing invented."
+                "reason": "Treadmill location matches what the tester said about their building gym."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Today's step is fully defined for the treadmill: 20 minutes at 6 pm, easy pace where they can talk, walk breaks allowed."
+                "reason": "Today's step is fully defined for the treadmill: 20 minutes, 6 pm, building gym, easy pace where they can still talk."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Carries the updated plan and a question, not a bare save."
+                "reason": "Carries the updated plan and a question, not a bare save confirmation."
               },
               {
                 "rule": "one-question",
@@ -193,31 +193,31 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no formatting or filler."
+                "reason": "Plain text with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, not affectionate."
+                "reason": "Warm and sincere without being affectionate."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers only to the plan and the treadmill run they chose."
+                "reason": "References only the treadmill run at 6 pm that the plan states."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the treadmill run today at 6 pm, which is fully defined in the prior text."
+                "reason": "Names the treadmill run today at 6 pm, consistent with the defined step."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks for the commitment with a clear next move."
+                "reason": "Not a save confirmation; it asks for the commitment."
               },
               {
                 "rule": "one-question",
@@ -233,88 +233,64 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No missing plan questions were left; the plan was presented with nothing still to ask."
+            "reason": "No extra plan question was left unasked before the plan was shown and the commitment was requested."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Concrete on what, how long, when and schedule, with an Apple Watch screenshot as proof that fits their tracking."
+            "reason": "Plan gives what, how long, where, when, days and an Apple Watch screenshot proof that fits how they track."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows day 1's step, schedule, proof, and a short line that each run shapes the next one."
+            "reason": "Shows the goal, day 1's step, the schedule and proof, plus a general line that each run shapes the next."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "After 'not really' ZOH did not push for a destination and locked the plan without one."
+            "reason": "One light destination ask was made earlier; after 'not really' ZOH didn't push and the plan locked smoothly."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "Asks in natural words whether they're committing to the plan, starting today's run."
+            "reason": "Asks plainly whether they are committing to the plan, starting with today's run."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today at 6 pm on the treadmill."
-          },
-          {
-            "rule": "quiet-hours",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 6 pm step is outside default quiet hours, so no note is needed."
+            "reason": "Pushes for the treadmill run today at 6 pm."
           },
           {
             "rule": "quiet-hours-after-lock",
             "pass": true,
             "borderline": false,
-            "reason": "No quiet-hours change raised."
-          },
-          {
-            "rule": "quiet-hours-chosen",
-            "pass": true,
-            "borderline": false,
-            "reason": "The tester set no quiet hours, so this does not apply."
-          },
-          {
-            "rule": "nutrition",
-            "pass": true,
-            "borderline": false,
-            "reason": "Nutrition does not apply here."
-          },
-          {
-            "rule": "goal-switch",
-            "pass": true,
-            "borderline": false,
-            "reason": "No goal switch occurred."
+            "reason": "No quiet hours were raised."
           },
           {
             "rule": "revisions",
             "pass": true,
             "borderline": false,
-            "reason": "The treadmill revision changed only today's location and kept the schedule, proof and why."
+            "reason": "The revision changed only today's location and kept goal, schedule, proof and why."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "Each plan was shown as a bullet list and ended with a question."
+            "reason": "Both plan versions were shown as • lists, each ending with 'What do you think?'"
           },
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "ZOH neither asked once about outside versus treadmill nor defined both; it left the place conditional until the tester chose the treadmill, after which the step was fully defined."
+            "reason": "After the treadmill choice, day 1 is fully defined at 6 pm with no invented details and one question per text, though the outside option was only conditionally named."
           }
         ],
-        "summary": "ZOH recovered once the tester picked the treadmill, giving a fully defined 6 pm step with proof and a clear commitment ask. The first plan left the day-1 location conditional on weather instead of asking once or defining both options, which is the regression to flag."
+        "summary": "ZOH handled the outside-versus-treadmill ambiguity well: it named both options with the usual schedule, then fully defined the treadmill run for today once the tester chose it. It asked one question per text, did not push for a destination after 'not really', and moved to a clear commitment ask."
       }
     }
   ]

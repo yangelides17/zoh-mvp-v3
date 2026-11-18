@@ -2,12 +2,12 @@
   "feature": "commands",
   "id": "case:cant-today-is-a-slip",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:12.402Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "b5b3b7955682",
-    "voice": "fbc3a37c5b97",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "a8738f13ceb1"
   },
@@ -73,25 +73,25 @@
         ],
         "conversation": [
           {
-            "rule": "slip-not-pause",
-            "pass": true,
-            "borderline": false,
-            "reason": "After 'can't do it today', ZOH pushed the step and offered a smaller version without offering or confirming a pause."
-          },
-          {
             "rule": "pause-why",
             "pass": true,
             "borderline": true,
-            "reason": "Tester said 'need a break', but ZOH never paused and never asked why as if a pause were requested, so no pause was granted or refused."
+            "reason": "Tester said \"need a break\" but ZOH never paused or asked why, treating it as a slip; a reviewer could argue it should have asked what's going on first."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "\"can't do it today\" got the slip treatment: a smaller 15-minute version, with no pause offered or confirmed."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH treated the skipped day as a slip, acknowledged the work pressure, offered a halved run today with the screenshot still counting, and did not pause or ask why for a break."
+            "reason": "ZOH acknowledged the slammed week, offered a halved step without guilt, didn't mention pausing, and asked one question."
           }
         ],
-        "summary": "ZOH handled the skipped day as a slip rather than a pause, acknowledging the busy week and offering a smaller run today without offering or confirming a break. The only soft spot is that the tester's 'need a break' wasn't addressed directly, though it never became a pause."
+        "summary": "ZOH handled the skipped day as a slip rather than a pause, offering a warm, halved step with no guilt and no pause offer or why-question. The one soft spot is that it went straight to the smaller version without first holding the full run, and it never asked what was behind the requested break."
       }
     }
   ]

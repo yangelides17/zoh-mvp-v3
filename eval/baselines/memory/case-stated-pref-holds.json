@@ -2,12 +2,12 @@
   "feature": "memory",
   "id": "case:stated-pref-holds",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:25:09.958Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "e6d7e135f487",
-    "voice": "fbc3a37c5b97",
+    "checks": "608b36d28f77",
+    "voice": "b413875b3c11",
     "instructions": "c7348af58300",
     "script": "dde6e3371430"
   },
@@ -73,14 +73,14 @@
               {
                 "rule": "stated-pref",
                 "pass": true,
-                "borderline": true,
-                "reason": "No emojis, caps or exclamation points, as Priya asked. The praise ('worth noting') is calm but lukewarm for a fastest-pace win."
+                "borderline": false,
+                "reason": "No emojis, caps or exclamation points, honoring Priya's stated preference for calm texts."
               },
               {
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only refers to the Strava screenshot and today's run, both consistent with the plan and memory."
+                "reason": "Refers only to today's run and the Strava proof request, with nothing invented."
               }
             ]
           },
@@ -91,13 +91,13 @@
                 "rule": "stated-pref",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm and warm with no emojis, caps or exclamation points, following the calmer-texts preference."
+                "reason": "Calm and warm with no emojis, caps or exclamation points, as Priya asked six days earlier."
               },
               {
                 "rule": "honest-memory",
                 "pass": true,
                 "borderline": false,
-                "reason": "'A week of showing up' matches the step days on record (Oct 31 and Nov 1 done) and the day-9 context."
+                "reason": "\"A week of showing up\" fits the recorded run days; no fact is invented."
               }
             ]
           }
@@ -107,22 +107,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "ZOH celebrated the fastest pace without emojis, caps or exclamation points, but the praise is restrained and not very specific."
-          },
-          {
-            "rule": "pages-real",
-            "pass": true,
-            "borderline": false,
-            "reason": "No new pages were made; existing pages cover the real goal, run, and calmer-texts preference."
-          },
-          {
-            "rule": "learned-not-single",
-            "pass": true,
-            "borderline": false,
-            "reason": "No learned preference was recorded from a single instance; the calm-tone preference was stated outright."
+            "reason": "ZOH celebrates the pace calmly with no emojis, caps or exclamation points, and the second text is warm and specific. The first text's \"worth noting\" is understated enough that a reviewer could call the celebration thin."
           }
         ],
-        "summary": "ZOH kept Priya's stated preference for calm texts over six days on, with no emojis, caps or exclamation points, and it gave a sincere reply to her fastest-pace run. The praise was a bit flat in the first text, so the warmth and specificity could have been stronger."
+        "summary": "ZOH followed Priya's six-day-old request for calm texts, with no emojis, caps or exclamation points in either reply. The second text is warm and specific about the fastest pace, while the first is somewhat flat, which keeps the regression check a borderline pass."
       }
     }
   ]
