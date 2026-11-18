@@ -478,7 +478,8 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
   {
     name: "record_team_answer",
-    description: "A FROM THE TEAM question you asked: answered (answer: theirs, close to their words) or dodged (they talked past it).",
+    description:
+      "The team is waiting on a FROM THE TEAM question you already asked: in the reply to their text about it, answered (answer: theirs, close to their words) or dodged (they talked past it).",
     input_schema: {
       type: "object",
       properties: { question: { type: "string" }, outcome: { type: "string", enum: [...ANSWER_STATUSES] }, answer: { type: "string" } },

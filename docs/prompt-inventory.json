@@ -1550,7 +1550,7 @@
    "change": "new"
   },
   {
-   "text": "FROM THE TEAM, question [${requestRef(q.id)}], already asked ${day(q.doneAt!)}${past}: ${q.body}. Their answer, or talking past it → record_team_answer.",
+   "text": "FROM THE TEAM, question [${requestRef(q.id)}] you already asked ${day(q.doneAt!)}${past}, the team waiting on their answer (the team's note: ${q.body}). Their answer, or talking past it → record_team_answer.",
    "file": "src/coach/prompt.ts",
    "where": "threadLines",
    "kind": "status sheet",
@@ -2271,7 +2271,7 @@
    "change": "unchanged"
   },
   {
-   "text": "A FROM THE TEAM question you asked: answered (answer: theirs, close to their words) or dodged (they talked past it).",
+   "text": "The team is waiting on a FROM THE TEAM question you already asked: in the reply to their text about it, answered (answer: theirs, close to their words) or dodged (they talked past it).",
    "file": "src/coach/tools.ts",
    "where": "TOOL_DEFINITIONS > record_team_answer > description",
    "kind": "tool description",

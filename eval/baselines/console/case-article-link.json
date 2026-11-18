@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:article-link",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:17:24.737Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T19:00:34.406Z",
+  "branch": "feature/169-168-questions-attachments",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "06a61bc4534f",
-    "voice": "b413875b3c11",
+    "checks": "f4fd9d20342b",
+    "voice": "accb8d11133b",
     "instructions": "c7348af58300",
     "script": "de3de782b030"
   },
@@ -87,13 +87,13 @@
                 "rule": "own-idea",
                 "pass": false,
                 "borderline": true,
-                "reason": "Sent as a bare URL with no ZOH voice, no tie to his 10:30 bedtime, and no framing as ZOH's own find."
+                "reason": "Bare link with no ZOH voice and no tie to his 10:30 bedtime, though the founder asked for word-for-word, so the miss is partly the requested draft."
               },
               {
-                "rule": "grounded",
+                "rule": "pushback",
                 "pass": true,
-                "borderline": true,
-                "reason": "The link is the approved team find, sent exactly as given; the text makes no claims about Sam's history."
+                "borderline": false,
+                "reason": "No request to push back on; the link text is a plain send."
               }
             ]
           },
@@ -103,14 +103,20 @@
               {
                 "rule": "grounded",
                 "pass": true,
-                "borderline": false,
-                "reason": "Ties to his 10:30 lights-out plan and his stated 3am scrolling; the screen-time proof ask matches his usual routine."
+                "borderline": true,
+                "reason": "Ties to his 10:30 lights out and the 3am scrolling; 'screen time screenshot like usual' isn't in the known facts, so it is borderline."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Phone-charging suggestion arrives in ZOH's voice as its own idea, answering his 3am text warmly and briefly with one question."
+                "reason": "The phone-charging step arrives as ZOH's own coaching in its voice, tied to what he said about 3am."
+              },
+              {
+                "rule": "pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No pushback request; the reply is warm and short with one question at the end."
               }
             ]
           }
@@ -119,17 +125,23 @@
           {
             "rule": "drafts",
             "pass": true,
-            "borderline": false,
-            "reason": "Console drafts say the link sends word for word within a minute of Do it, and it did go out at 9:31 as described."
+            "borderline": true,
+            "reason": "The card says the link will send within a minute of Do it, and ZOH's line matches that; it doesn't mention the morning text or his reply as the timing."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The link went out exactly as given with no team mention and the 3am reply was warm with one question, but the link was not tied to his 10:30 bedtime or framed as ZOH's own find."
+            "reason": "ZOH never disowns or retracts the link and answers the 3am text warmly, but the link goes out bare, not tied to his 10:30 bedtime or as ZOH's own find."
+          },
+          {
+            "rule": "answer-recorded",
+            "pass": true,
+            "borderline": false,
+            "reason": "No team question was asked, so nothing is recorded and no dodge occurs."
           }
         ],
-        "summary": "ZOH handled the regression's core failure well: it never disowned the link, sent it exactly as given, and gave Sam a warm, short 3am reply with one question. It missed the expected framing, sending the bare URL without tying it to his 10:30 bedtime or presenting it as ZOH's own find."
+        "summary": "ZOH handled the regression well: the drafts were accurate, it never retracted the link, and its reply to the 3am text was warm and short with one question. The main miss is that the link went out bare, with no tie to his 10:30 bedtime and no ZOH framing, which the founder's word-for-word request only partly explains."
       }
     }
   ]

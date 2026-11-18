@@ -654,7 +654,7 @@ function threadLines(s: CoachState, plan: Plan | undefined): string[] {
     // #169: asked once; the answer is listened for, never chased.
     for (const q of s.teamQuestions) {
       const past = q.answerStatus === "dodged" ? ", they talked past it" : "";
-      lines.push(`FROM THE TEAM, question [${requestRef(q.id)}], already asked ${day(q.doneAt!)}${past}: ${q.body}. Their answer, or talking past it → record_team_answer.`);
+      lines.push(`FROM THE TEAM, question [${requestRef(q.id)}] you already asked ${day(q.doneAt!)}${past}, the team waiting on their answer (the team's note: ${q.body}). Their answer, or talking past it → record_team_answer.`);
     }
   }
   if (!plan) return lines;

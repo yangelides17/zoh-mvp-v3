@@ -178,7 +178,9 @@ describe("an answer to a team question (#169)", () => {
 
     const later = new Date(now.getTime() + 2 * 24 * HOUR);
     const sheet = buildStateBlock(await loadCoachState(t.db, tester, { now: later, isFirstText: false }));
-    expect(sheet).toContain(`FROM THE TEAM, question [${requestRef(q.id)}], already asked Nov 3, they talked past it: Ask what's made mornings hardest this week.`);
+    expect(sheet).toContain(
+      `FROM THE TEAM, question [${requestRef(q.id)}] you already asked Nov 3, they talked past it, the team waiting on their answer (the team's note: Ask what's made mornings hardest this week).`,
+    );
     expect((await record(tester, q, later, { outcome: "answered", answer: "the alarm" })).ok).toBe(true);
     expect((await alerts(tester.id)).map((a) => a.topic)).toEqual([UNANSWERED_ALERT, ANSWER_ALERT]);
   });
