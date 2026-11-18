@@ -22,10 +22,10 @@ import { evidenceText, type WeekLookback } from "./week.js";
 // #201: core and voice raised for weighing their idea and no assumptions in questions (a line each, with reasons),
 // and the voice's "make it harder" example made a contrasting pair.
 // #160: voice +100 for what they did and noticed beside how it felt, in Proof's reflection line.
-// #164/#165 (Yanni, Nov 18: prioritize it working, lean, trim later in #231): todaysStep +900 for how any step is
+// #164/#165 (Yanni, Nov 18: prioritize it working, lean, trim later in #231): todaysStep +980 for how any step is
 // chosen (five practices, each with its reason) and the near goal it heads toward, which has to live here because
 // plan agreement isn't loaded after lock; plan +240 for the destination as a near goal; nextStep +80 for pointing
-// to TODAY'S STEP and the obstacle; weekLookback +100 for weighing the destination each week.
+// to TODAY'S STEP and the obstacle; weekLookback +130 for weighing the destination each week, before the next step, saved once they agree.
 export const PROMPT_BUDGET_CHARS = {
   core: 5280,
   onboarding: 3700,
@@ -43,10 +43,10 @@ export const PROMPT_BUDGET_CHARS = {
   // #211: the next step's lines left proof for their own section (loaded once a reflection lands); +560 between
   // them for what to go deeper on, when it has landed and a rushed tester leaving with the next step; +10 each for
   // the pointers that now name it.
-  todaysStep: 2800,
+  todaysStep: 2880,
   proof: 3600,
   nextStep: 640,
-  weekLookback: 2500,
+  weekLookback: 2530,
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
   nextSteps: 1250,
   // #211: +10 for "once today's talk has landed".
