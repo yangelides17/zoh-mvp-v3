@@ -2,7 +2,7 @@
   "feature": "nudges",
   "id": "case:checkin-ten-minute-step",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:14:29.872Z",
+  "storedAt": "2026-11-18T06:43:07.494Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -14,15 +14,15 @@
   "runs": [
     {
       "plan": {
-        "key": "case:checkin-ten-minute-step",
+        "key": "case:checkin-ten-minute-step#1",
         "kind": "case",
         "id": "checkin-ten-minute-step",
+        "suite": "regression",
         "title": "Check-in for a 10 minute step: no \"10 minutes starts in about 10 minutes\"",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "08:30",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -39,13 +39,13 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Morning, Riley! You got Sunday done, so let's stack another. Today at 12:30 it's one business article at your desk for 10 minutes, on a topic you're curious about. Then send me a screenshot of it. You in?",
+          "text": "Kalimera Riley! You got Sunday done, so today's day 2. Read 10 minutes of business articles at your desk at 12:30, then send a screenshot of the article with one idea that stuck with you. You in?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
         {
           "from": "zoh",
-          "text": "Hey Riley! 12:30 is in ten minutes: get set up at your desk and pick one business article that actually interests you. Read it for 10 minutes, then send me a screenshot of it. Ready?",
+          "text": "Hey Riley! 10 minutes of business articles at 12:30, and you're at your desk in 10. Have your article open and ready, and pick the one idea that stuck with you when you send the screenshot 📰",
           "at": "2026-11-02T17:20:00.000Z",
           "started": true
         }
@@ -60,31 +60,31 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: one business article at the desk for 10 minutes at 12:30."
+                "reason": "Names the step: 10 minutes of business articles, at the desk, at 12:30."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Morning, Riley!\" as a warm greeting with their name."
-              },
-              {
-                "rule": "kickoff-one-ask",
-                "pass": true,
-                "borderline": false,
-                "reason": "Ends with one ask, \"You in?\", and does not re-ask the agreed time."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": false,
-                "reason": "Gives what (one business article), where (desk), when (12:30) and how long (10 minutes)."
+                "reason": "Opens with \"Kalimera Riley!\", their name in a warm greeting."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Four sentences with one question at the end; within the limit for a kickoff."
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, \"You in?\", and doesn't re-ask the agreed time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where, when, how long, and the proof to send."
               },
               {
                 "rule": "plain-words",
@@ -96,7 +96,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and warm, not overfamiliar; no emoji needed."
+                "reason": "Warm, energetic, and not overfamiliar."
               }
             ]
           },
@@ -107,25 +107,160 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: an article at the desk, read for 10 minutes, at 12:30."
+                "reason": "Names the step: 10 minutes of business articles at 12:30, with the desk as the place."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with \"Hey Riley!\" as a warm greeting with their name."
+                "reason": "Opens with \"Hey Riley!\", their name."
               },
               {
-                "rule": "off-day-light",
+                "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not an off-day text; not applicable."
+                "reason": "Short, with no question; a light closing line fits a check-in."
               },
               {
-                "rule": "no-guilt",
+                "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "No guilt or fake urgency; \"ten minutes\" is a timing fact."
+                "reason": "What, where, when and length are all stated; the article and the idea to pick are clear."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler; one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with a single emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The check-in says \"at 12:30\" and \"you're at your desk in 10\", with no stacked \"10 minutes\", no grammar slip, and no claim that the step is now."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the kickoff and the check-in both read naturally, and the check-in avoids the stacked \"10 minutes\" phrasing and says the step is coming up rather than already running. The only minor softness is that \"in 10\" leaves the unit implicit, but it reads clearly in context."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:checkin-ten-minute-step#2",
+        "kind": "case",
+        "id": "checkin-ten-minute-step",
+        "suite": "regression",
+        "title": "Check-in for a 10 minute step: no \"10 minutes starts in about 10 minutes\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Riley! 10 minutes of business articles at your desk at 12:30 tomorrow. Locked in.",
+          "at": "2026-11-01T17:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-01T17:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Riley! You got day 1 done yesterday, so let's make it two. At 12:30 at your desk, pick one business article on a company or idea that interests you and read it start to finish, about 10 minutes. Send a screenshot after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Riley! 12:30 is ten minutes out, so get set up at your desk and pick your article now. Start to finish, then send me a screenshot of it. What company or idea are you leaning toward?",
+          "at": "2026-11-02T17:20:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: a business article, at the desk, at 12:30, about 10 minutes."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Riley!\"."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its only question is \"You in?\", and it doesn't re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (one business article), where (desk), when (12:30) and how long (about 10 minutes)."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about five short sentences, over the one-to-three limit, though it carries one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct energy with no emoji row or overfamiliar lines."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step (pick an article, read start to finish, screenshot) and the time (12:30 is ten minutes out)."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Riley!\"."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What, where (desk), when (12:30) and proof are clear; the length is not restated, which is fine for a check-in."
               },
               {
                 "rule": "short",
@@ -134,10 +269,10 @@
                 "reason": "Three short sentences with one question at the end."
               },
               {
-                "rule": "step-defined",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "What, where and how long are given and the time is 12:30."
+                "reason": "No guilt or fake urgency."
               },
               {
                 "rule": "plain-words",
@@ -149,7 +284,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and appropriately light; the check-in is calm, not pushy but fits the coach voice."
+                "reason": "Warm and energetic with no emoji row and no overfamiliarity."
               }
             ]
           }
@@ -157,12 +292,147 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": false,
+            "pass": true,
             "borderline": false,
-            "reason": "The check-in reads \"12:30 is in ten minutes\" and repeats the step's \"10 minutes\" phrasing, but the regression was the stacked \"10 minutes\" with the grammar slip; this text avoids the stacked phrase and the bad \"starts\" wording, so the regression itself is fixed."
+            "reason": "The check-in says \"12:30 is ten minutes out\", with \"ten minutes\" used only for lead time and not repeated for the length. It has no grammar slips and doesn't claim the step has started."
           }
         ],
-        "summary": "ZOH's kickoff and 12:20 check-in both name the step, open warm with Riley's name, and ask one question, with correct timing and no grammar slip. The old regression (stacked \"10 minutes\" and \"starts\" disagreement) does not recur, so the regression check passes on the substance."
+        "summary": "ZOH's regression case passes: the check-in no longer stacks \"10 minutes\" for both length and lead time, and its timing is correct with clean grammar. The one weak spot is the morning kickoff, which runs over the three-sentence limit even though it asks one clear question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:checkin-ten-minute-step#3",
+        "kind": "case",
+        "id": "checkin-ten-minute-step",
+        "suite": "regression",
+        "title": "Check-in for a 10 minute step: no \"10 minutes starts in about 10 minutes\"",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Riley! 10 minutes of business articles at your desk at 12:30 tomorrow. Locked in.",
+          "at": "2026-11-01T17:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-01T17:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Riley! You got Sunday done, so today's a twist: 10 minutes of business articles at your desk at 12:30, and pick one on a topic that's new to you. Screenshot it when you're done. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Riley! 10 minutes of business articles at 12:30, and pick one on a topic that's new to you. Get your screenshot ready and settle in at your desk 📰",
+          "at": "2026-11-02T17:20:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: 10 minutes of business articles at the desk at 12:30."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with Kalimera Riley, warm and by name."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only whether they're in, and doesn't re-ask the agreed time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where, when and how long, plus the screenshot proof."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with a Greek greeting used once."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step, the 12:30 time and the desk setting."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with Hey Riley!"
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, which suits a reminder."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief, with no guilt or push."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The check-in no longer says \"10 minutes\" twice or claims the step has started; it gives the 12:30 time and 10 minutes once each."
+          }
+        ],
+        "summary": "ZOH's kickoff and the 12:20 check-in both name the step, time and place warmly, and the regression is fixed. The check-in avoids the doubled \"10 minutes\" and any claim that the step has started, though it repeats the full step text, which is a minor point."
       }
     }
   ]

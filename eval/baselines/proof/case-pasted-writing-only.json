@@ -2,7 +2,7 @@
   "feature": "proof",
   "id": "case:pasted-writing-only",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:20:54.661Z",
+  "storedAt": "2026-11-18T06:48:30.587Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -14,15 +14,15 @@
   "runs": [
     {
       "plan": {
-        "key": "case:pasted-writing-only",
+        "key": "case:pasted-writing-only#1",
         "kind": "case",
         "id": "pasted-writing-only",
+        "suite": "regression",
         "title": "Writing pasted with no screenshot: warm about the writing, no check mark yet, asks for the screenshot",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "20:25",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "Jordan, \"Neither of them said the name\" is a great line, and the lamp turning over is a nice way to mark time. 🔦 Typed words alone are easy to game, so real proof keeps it honest. Can you send a screenshot of the scene in Notes so I can give it the check mark?",
+          "text": "Jordan, \"You kept the second chair\" is a great line, and the lamp turning over on the harbor is a nice touch. Words alone can't get the check mark, though. Real proof keeps it honest. Can you send a screenshot of the scene in Notes? If that's still a work in progress, finish out the 200 words first, then send it 💪",
           "at": "2026-11-03T01:25:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "That's the check mark, Jordan. Day 4 is in the books. 📓 Theo and Mara sitting there with the name unsaid is the kind of tension that pulls a reader forward. How did tonight's scene feel to write: did it come easy, or did you have to fight for it?",
+          "text": "Day 4 in the books, Jordan 🔥 That screenshot is exactly what I needed. \"Neither of them said the name\" says a lot without spelling it out. How did writing this one feel compared to the earlier scenes?",
           "at": "2026-11-03T01:27:04.000Z"
         }
       ],
@@ -72,15 +72,15 @@
               },
               {
                 "rule": "short",
-                "pass": true,
+                "pass": false,
                 "borderline": false,
-                "reason": "Three sentences with one question at the end."
+                "reason": "Five sentences, including a praise line, the why, the ask and a conditional follow-up, so it exceeds three sentences."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, specific praise for the line, with a light emoji as punctuation and no suspicion."
+                "reason": "Warm and specific to the scene, not suspicious, with the emoji used as punctuation."
               }
             ]
           },
@@ -91,13 +91,126 @@
                 "rule": "plausible-counts",
                 "pass": true,
                 "borderline": false,
-                "reason": "Celebrates the screenshot as the check mark, matching the scene shown."
+                "reason": "Accepts the Notes screenshot as proof, counts the day and celebrates it right away."
               },
               {
-                "rule": "file-specific",
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four short sentences with one question at the end, just over the three-sentence limit."
+              },
+              {
+                "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Comments on the unsaid name and the tension in the scene from the screenshot content."
+                "reason": "Hype is warm and sincere, reacts to a specific line from the scene, with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "writing-proof",
+            "pass": true,
+            "borderline": true,
+            "reason": "Screenshot counted as proof; the full text was already pasted, so no separate paste ask was needed."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says 'Words alone can't get the check mark' and asks for a Notes screenshot, with the why given."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Pasted scene is not checked off; it asks for a screenshot with a warm why, then counts and celebrates once it arrives. The 'easy to game' reason is not stated."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it praised the scene, withheld the check mark for pasted text, asked for a Notes screenshot with a warm why, and counted the day once the screenshot arrived. Its main miss is length, with both texts running past the three-sentence limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:pasted-writing-only#2",
+        "kind": "case",
+        "id": "pasted-writing-only",
+        "suite": "regression",
+        "title": "Writing pasted with no screenshot: warm about the writing, no check mark yet, asks for the screenshot",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "here's tonight's scene:\n\nTheo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Jordan, \"the harbor went white and dark again\" is a great line. Theo sitting in the second chair while neither says the name does a lot of work in a few words 🔥 Can you send a screenshot of it in Notes? That's what makes today's check mark real.",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
+          "at": "2026-11-03T01:26:57.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Four days in a row, Jordan! The screenshot matches the scene you sent, so that's a clean check mark ✅ Scene 4 has the two of them circling the name without saying it. What were you going for with that silence?",
+          "at": "2026-11-03T01:27:04.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a screenshot in Notes, naming only an acceptable proof kind, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one request at the end; no stray questions."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the scene, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Screenshot matches the pasted scene, so it is celebrated and checked off."
               },
               {
                 "rule": "short",
@@ -107,9 +220,9 @@
               },
               {
                 "rule": "voice",
-                "pass": true,
-                "borderline": false,
-                "reason": "Hype with a real win, warm, emoji as punctuation, never accusing."
+                "pass": false,
+                "borderline": true,
+                "reason": "Claims 'Four days in a row' with no streak shown in the transcript, which reads as an unverified fact."
               }
             ]
           }
@@ -118,23 +231,148 @@
           {
             "rule": "typed-not-proof",
             "pass": true,
-            "borderline": false,
-            "reason": "Pasted scene gets no check mark and a warm explanation that typed words are easy to game, then a screenshot request."
+            "borderline": true,
+            "reason": "Pasted scene gets no check mark; the 'makes today's check mark real' line is a thin why-real-proof explanation."
           },
           {
             "rule": "writing-proof",
             "pass": true,
             "borderline": true,
-            "reason": "Screenshot counted and celebrated; no paste ask, but the full text was already pasted, so none was needed."
+            "reason": "Screenshot is the proof and is checked off; the full text was already pasted, so no paste ask was needed."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": false,
-            "reason": "Pasted text was not accepted as proof; the screenshot was requested, then counted with a scene comment and one question."
+            "borderline": true,
+            "reason": "Writing wasn't accepted as proof; ZOH asked for the screenshot first, though the why was thin and not in its own words."
           }
         ],
-        "summary": "ZOH handled the pasted writing correctly: it stayed warm, did not check the day off until the screenshot arrived, and explained why real proof matters without sounding suspicious. After the screenshot it celebrated, commented specifically on the scene, and kept to one question, so the regression case is fixed."
+        "summary": "ZOH handled the Nov 1 writing regression correctly: it praised the pasted scene, withheld the check mark until the Notes screenshot arrived, and then counted the day with a specific scene comment. The weak spots are a thin explanation of why real proof matters in the first text and an unsupported 'four days in a row' streak claim in the second."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:pasted-writing-only#3",
+        "kind": "case",
+        "id": "pasted-writing-only",
+        "suite": "regression",
+        "title": "Writing pasted with no screenshot: warm about the writing, no check mark yet, asks for the screenshot",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "here's tonight's scene:\n\nTheo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Jordan, \"You kept the second chair\" is a great line, and that unsaid name is doing a lot of work. 🔥 Words alone can't give you the check mark, so can you screenshot the scene in Notes and send it? Then I'll give you real feedback on it.",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
+          "at": "2026-11-03T01:26:57.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LFG Jordan, scene 4 and four days straight 🔥 What worked: Mara wiping a glass that's already dry shows her nerves without you saying a word, and the lamp turning over ties the harbor to the mood. One to try: \"Neither of them said the name\" tells us what to feel, so a small gesture could carry it instead. How did writing this one feel compared to the earlier scenes?",
+          "at": "2026-11-03T01:27:04.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a screenshot as the proof and does not suggest typed text as proof."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the scene, with one emoji as punctuation and no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The Notes screenshot plausibly shows the scene, so the day is counted and celebrated."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to specific details: the glass already dry and the lamp turning over the harbor."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about three to four sentences of feedback, though it ends with a single question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with LFG and one flame emoji as punctuation, warm and never accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Text was not checked off on paste, a screenshot was asked for, and the scene was commented on after it arrived; the why is thin ('Words alone can't give you the check mark')."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pasted scene text alone got no check mark and a request for a screenshot instead."
+          },
+          {
+            "rule": "writing-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Screenshot counted as proof and the scene's feedback came from the already-pasted text."
+          }
+        ],
+        "summary": "ZOH handled the writing regression well: it withheld the check mark on the pasted scene, asked for a screenshot, then counted the day and gave specific, warm feedback. The only soft spot is that the reason for needing a screenshot is brief rather than the fuller explanation of why real proof matters."
       }
     }
   ]

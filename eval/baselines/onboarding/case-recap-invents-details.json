@@ -2,7 +2,7 @@
   "feature": "onboarding",
   "id": "case:recap-invents-details",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:12:10.992Z",
+  "storedAt": "2026-11-18T06:46:06.363Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -14,15 +14,15 @@
   "runs": [
     {
       "plan": {
-        "key": "case:recap-invents-details",
+        "key": "case:recap-invents-details#1",
         "kind": "case",
         "id": "recap-invents-details",
+        "suite": "regression",
         "title": "Recap added a detail the tester never gave, and the coaching-style line was missing",
         "persona": "chatty",
         "areaCode": "212",
         "startTime": "18:30",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [],
       "transcript": [
@@ -33,7 +33,7 @@
         },
         {
           "from": "zoh",
-          "text": "Hey Sam, I'm ZOH! I'll help you get back into books with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" Getting back after two years? Let's go. What kind of stuff do you like to read, or is there a book you've been meaning to get to?",
+          "text": "Hey Sam, I'm ZOH, and I'm glad you're here. I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder\". Getting back into reading after two years? Let's go! When you did read, what kind of books pulled you in?",
           "at": "2026-11-02T23:30:07.000Z"
         },
         {
@@ -42,8 +42,18 @@
           "at": "2026-11-02T23:30:58.200Z"
         },
         {
+          "from": "lookup",
+          "text": "searched \"best fast-paced thrillers for fans of Gone Girl to get back into reading\": https://celadonbooks.com/booklists/books-like-gone-girl/ https://shereads.com/thrillers-like-gone-girl/ https://whatshotblog.com/books-like-gone-girl/ https://www.goodreads.com/list/user_votes/123819340-jp https://www.goodreads.com/list/user_vote/7694924 https://www.goodreads.com/list/book/66559 https://www.goodreads.com/author_blog_posts/11978269-hccfrenzy-if-you-re-a-fan-of-fast-paced-thrillers-we-250?tab=book https://www.goodreads.com/topic/show/2376518-need-something-unputdownable-well-written-but-not-too-descriptive https://www.aol.com/30-best-thriller-books-read-145800564.html",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
           "from": "zoh",
-          "text": "Gone Girl fan, so you want fast and twisty. Something like The Girl on the Train by Paula Hawkins or The Silent Patient by Alex Michaelides would pull you right back in. We'll lock in the pick in your plan. When in your day could you read, like a set time that's yours?",
+          "text": "looking that up 🔎",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Gone Girl fans get pointed to \nThe Silent Patient, a twisty psychological thriller\n, and The Couple Next Door is another fast one with big twists. For getting back into the habit, I'd start with The Silent Patient, because short, punchy chapters make it easy to say \"one more.\" How many minutes a day can you realistically give it?",
           "at": "2026-11-02T23:31:05.200Z"
         },
         {
@@ -53,7 +63,7 @@
         },
         {
           "from": "zoh",
-          "text": "Library card is perfect, that means a free copy of The Silent Patient or Girl on the Train. Where do you want this to get you, like finishing a whole book in a couple of weeks? Totally fine if you're not sure yet.",
+          "text": "Twenty to thirty minutes after 9 is plenty to get back into a thriller. Where do you picture yourself reading: in bed, on the couch, somewhere else?",
           "at": "2026-11-02T23:31:53.500Z"
         }
       ],
@@ -67,7 +77,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Five sentences, but this is the first text, which is exempt from the limit."
+                "reason": "Opening text runs a few sentences, which the first-text exemption allows."
               },
               {
                 "rule": "plain-words",
@@ -79,31 +89,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic with a single exclamation, no row of emoji."
+                "reason": "Warm and energetic with one emoji-free exclamation, not overfamiliar."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks what Sam likes to read, which fits the reading goal."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks nothing Sam had already answered."
+                "reason": "Asks what books pulled Sam in, which fits getting back into reading."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only what Sam said."
+                "reason": "Uses only what Sam said: back into reading after two years."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "No wake or sleep or pushiness questions."
+                "reason": "No wake, sleep or pushiness questions."
               },
               {
                 "rule": "one-question",
@@ -120,49 +124,96 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, answering the book question briefly."
+                "reason": "A single short line."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown."
+                "reason": "Plain text with one emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and matches Sam's enthusiasm."
+                "reason": "Casual and brief, with one emoji."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Book suggestions match the thriller taste Sam mentioned via Gone Girl, and the time question fits onboarding."
-              },
-              {
-                "rule": "no-repeat",
-                "pass": true,
-                "borderline": false,
-                "reason": "Asks a new question about when Sam can read."
+                "reason": "Acknowledges Sam's book request before answering."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Both named books are real thrillers."
+                "reason": "Says it is looking it up, which matches the real search."
               },
               {
                 "rule": "on-track",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short answer to the book question, then back to onboarding."
+                "reason": "Book question is answered briefly and the coach returns to onboarding."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences, though the book answer and the next question run close to the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with no affection or emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recommends a Gone Girl-style thriller and then asks about daily time, which fits the goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about daily minutes, which Sam had not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Claims about short punchy chapters are unsourced beyond the search; it names books the search could support."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "The book answer is short and light, then it returns to onboarding."
               },
               {
                 "rule": "not-asked",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about the time of day for reading, not wake or sleep."
+                "reason": "No prohibited questions."
               },
               {
                 "rule": "one-question",
@@ -173,43 +224,43 @@
             ]
           },
           {
-            "zohText": 3,
+            "zohText": 4,
             "checks": [
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences."
+                "reason": "Two sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and conversational."
+                "reason": "Warm and calm, no overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about the destination, a fitting next onboarding question."
+                "reason": "Asks where Sam reads, which is the next onboarding question for the plan."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks something new and nothing already answered."
+                "reason": "Does not re-ask the minutes or the evening time Sam already gave."
               },
               {
                 "rule": "honest",
                 "pass": true,
-                "borderline": true,
-                "reason": "Asserts the library has a free copy of each book, which Sam never said."
+                "borderline": false,
+                "reason": "Adds no detail Sam never gave; does not say at home."
               },
               {
                 "rule": "not-asked",
@@ -228,13 +279,610 @@
         ],
         "conversation": [
           {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says ZOH, what it does, stop anytime and how to change coaching; skips the name and goal Sam already gave."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks about books, minutes and location once each; no clearly answered item is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": true,
+            "reason": "Case ends mid-onboarding after learning books and time, before the where and how-long plan inputs are complete."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "No app or tool question was asked, and none was pushed."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is a starter goal, and the book question is answered within it."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells Sam to say chill out or push harder to change coaching."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": true,
+            "reason": "Onboarding is unfinished at the cut-off, so the plan carry-through is not reached."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts, well under the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Book question gets a short answer, the style line appears once, and no 'at home' or recap of the plan is added."
+          }
+        ],
+        "summary": "ZOH avoided the known failures: it answered the book question briefly, gave the coaching-change line once, and added no 'at home' or invented detail. The case ends mid-onboarding, so the coverage and wrap-up checks fail by design, and the only soft spot is the short 'Twenty to thirty minutes after 9 is plenty' line that echoes Sam's answer."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:recap-invents-details#2",
+        "kind": "case",
+        "id": "recap-invents-details",
+        "suite": "regression",
+        "title": "Recap added a detail the tester never gave, and the coaching-style line was missing",
+        "persona": "chatty",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey! I'm Sam. I haven't read a book in like two years and I want to get back into it, a little every day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam, I'm ZOH, and I'll help you get back into reading with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" Two years off and you still want it back, so let's go! What's a book you've meant to read, or a topic you've been curious about?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "thrillers mostly, I loved Gone Girl. what's the best one to start with?",
+          "at": "2026-11-02T23:30:58.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Gone Girl fans usually fly through Sharp Objects. It's by the same author, it's short, and it's dark and twisty. That's a good way back in after two years off. Have you read it already, or does it sound like your next one?",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "evenings after 9, like 20 to 30 min. I've got a library card",
+          "at": "2026-11-02T23:31:46.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sharp Objects with a library card is an easy way back in. Evenings after 9 for 20 to 30 minutes is plenty. Where do you want this to get you? Finishing Sharp Objects, a book a month, or just not sure yet?",
+          "at": "2026-11-02T23:31:53.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "First text is exempt from the length limit, and it carries the intro, stop line, coaching-change line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one exclamation point and no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a book or topic they've been curious about, which fits a reader returning to books."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for what Sam hasn't given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Sam said, such as two years off and wanting to get back into it."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep questions and no pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences: 'Gone Girl fans…', 'It's by the same author…', 'That's a good way back…', 'Have you read it…'. The third one could be dropped."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confident and warm, with no overfamiliarity or emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the book question with one suggestion and asks whether Sam has read it, which follows the book they raised."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Doesn't re-ask anything Sam already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Same author and short are fair claims about Sharp Objects, and nothing about Sam is invented."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "A short, on-goal book answer, then back to onboarding with a question."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences, though the last is a question list, so it sits near the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Calm and plain, with less energy than the Pushy default, but not off."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where Sam wants this to get them, which is the next onboarding question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Doesn't ask again for the evenings or the time Sam already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only what Sam said (library card, evenings after 9, 20 to 30 minutes), and adds no 'at home'."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that stop works anytime and that Sam can change the coaching; Sam's name and goal were already given, so it moves on."
+          },
+          {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "Avoids 'at home' and states the change-coaching line in text 1, but text 2 says 'We'll lock in the pick in your plan,' a plan-is-coming line the case forbids."
+            "reason": "Sam's 'no at home' error is avoided and the coaching-change line appears in text 1, but text 3 restates Sam's answers ('Evenings after 9 for 20 to 30 minutes is plenty'), which the case says should not happen."
           }
         ],
-        "summary": "ZOH avoided the two known failures: it added no invented 'at home' detail and told Sam once in its first text that it can change how it coaches. It slipped in text 2 with a plan-is-coming line ('We'll lock in the pick in your plan'), and text 3's claim that the library has free copies is a small unstated fact."
+        "summary": "ZOH handled the regression well: the book question got a short answer, the coaching-change line came in the first text, and nothing invented like 'at home' appeared. It missed in two places: text 2 runs four sentences, and text 3 recaps Sam's time answer instead of moving straight on."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:recap-invents-details#3",
+        "kind": "case",
+        "id": "recap-invents-details",
+        "suite": "regression",
+        "title": "Recap added a detail the tester never gave, and the coaching-style line was missing",
+        "persona": "chatty",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey! I'm Sam. I haven't read a book in like two years and I want to get back into it, a little every day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam, I'm ZOH, and I'm so glad you're here! I'll help you get better at one thing with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\"\n\nBack into books after two years? Let's go. What's a book you've meant to read, or a topic you've been curious about?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "thrillers mostly, I loved Gone Girl. what's the best one to start with?",
+          "at": "2026-11-02T23:30:58.200Z"
+        },
+        {
+          "from": "lookup",
+          "text": "searched \"best thrillers for fans of Gone Girl fast-paced to get back into reading\": https://www.slashfilm.com/1917765/best-books-like-gillian-flynn-gone-girl/ https://celadonbooks.com/booklists/books-like-gone-girl/ https://thereadingnook.com.au/best-thriller-books/ https://whatshotblog.com/books-like-gone-girl/ https://shereads.com/thrillers-like-gone-girl/ https://www.goodreads.com/list/user_votes/123819340-jp https://www.goodreads.com/list/user_vote/7694924 https://www.goodreads.com/list/book/66559 https://www.goodreads.com/list/book/18812405",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "looking that up 🔎",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sharp Objects is a good one to start with. It's by Gillian Flynn, who wrote Gone Girl. It's short, dark and hard to put down, so it should be easy to get back into reading with. Want that one, or should I give you a couple more options? Either way, when in your day could you fit about 15 minutes of reading?",
+          "at": "2026-11-02T23:31:05.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "evenings after 9, like 20 to 30 min. I've got a library card",
+          "at": "2026-11-02T23:31:46.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Library card, so Sharp Objects costs you nothing. 20 to 30 minutes after 9 is plenty to get you hooked. Where do you want this to get you: finishing Sharp Objects, or being a person who reads every night again?",
+          "at": "2026-11-02T23:31:53.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; reads as plain texting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar; no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what book or topic they want, which fits the reading goal they named."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing it was already told; the name and goal were given in their first text."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Invents no facts about Sam."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question, and no city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single short line."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Casual and light; a single emoji used as punctuation."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no claim."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks nothing."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences across the book answer and two questions, well over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no overfamiliar lines."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recommends a thriller by the author they named and asks about daily reading time, which fits."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Calls Sharp Objects short, dark and easy to get into; the search listed links but the claims are not clearly backed by them."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about time of day, which Sam had not yet answered."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the book question briefly and then moves to onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question, and no city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific and sincere; no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where the reading should lead, which fits the goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says Sharp Objects costs nothing from the library card, an inference that is slightly beyond what Sam said."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the library card and the evening time Sam gave without asking again."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question, and no city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": true,
+            "reason": "Says it's ZOH, what it does, that stop works anytime and that coaching can change; skips the name and goal since Sam gave both."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each question asks for something new; nothing Sam clearly answered is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": false,
+            "reason": "The case ends mid-onboarding, so what, where, when and how long are not all covered."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks whether Sam already uses an app or tool."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading is on the starter list and the book question stays on it."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Text 1 says Sam can tell ZOH to coach differently anytime, with examples."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": false,
+            "reason": "Onboarding is unfinished, so the wrap-up condition is not met."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts over a few minutes, well within the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "No 'at home' was added and the style line appears early, but the book answer in text 3 runs long and asks two questions."
+          }
+        ],
+        "summary": "ZOH avoided the old regression: it added no 'at home', it stated the style-change option in its first text, and it moved on to the next onboarding question after the book answer. Its weak spots are text 3, which runs five sentences and asks two questions, and the unsupported 'short, dark' and 'costs you nothing' claims."
       }
     }
   ]

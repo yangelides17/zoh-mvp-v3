@@ -2,7 +2,7 @@
   "feature": "plan",
   "id": "case:quiet-hours-unexplained",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:13:13.096Z",
+  "storedAt": "2026-11-18T06:47:33.582Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -14,15 +14,15 @@
   "runs": [
     {
       "plan": {
-        "key": "case:quiet-hours-unexplained",
+        "key": "case:quiet-hours-unexplained#1",
         "kind": "case",
         "id": "quiet-hours-unexplained",
+        "suite": "regression",
         "title": "An 11 pm step inside default quiet hours: no offer or question, a few words that ZOH's texts will still reach them",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "19:00",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "11 pm it is. Logging the snack too keeps the day honest, and I'll still reach you around then. How many minutes a day can you give this for logging and checking your protein? Five, ten?",
+          "text": "Late-night snack counts, Yanni, so we'll log it too. I'll still reach you around 11 for the log. How many minutes a day can you give to logging and checking you're on track for 160 g?",
           "at": "2026-11-03T00:00:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Five minutes works, since logging in MyFitnessPal is quick. Is there somewhere you want this to get you, like a body goal or a feeling you're after? \"Not sure yet\" is a fine answer too.",
+          "text": "Five minutes is plenty for that, Yanni. Is there a bigger reason behind the 160 g, like a body goal or a number you're building toward? Totally fine if you're not sure yet.",
           "at": "2026-11-03T00:01:08.500Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "Hitting about 160 g most days is a clear target, and your nightly snack fits right into it. Here's the plan:\n\n• Goal: hit about 160 g of protein most days\n• Day 1 is tonight: log everything you ate, snack included, in MyFitnessPal and check your protein total against 160 g\n• Time: 11 pm, 5 minutes, every day. I'll text you a heads-up at 10:50 pm.\n• Proof: a screenshot of your MyFitnessPal daily summary showing the protein number\n• Easy alternative: a voice note telling me your total and how close you got\n• Why: seeing the number every night shows you what to adjust the next day\n\nEach day shapes the next step. If you're short on protein, we'll work on where to fit it in. What do you think?",
+          "text": "Hitting 160 g most days, with the late snack built in, is a solid target, Yanni. Here's the plan:\n• Goal: hit about 160 g of protein most days\n• Day 1 (tonight): log everything you eat in MyFitnessPal, snack included\n• Send a screenshot of your day's protein total vs 160 g\n• Every day at 11 pm, about 5 minutes\n• I'll text you a heads-up at 10:50 pm, so you'll hear from me then\n• Why a screenshot: it shows exactly how close you got. Easy alternative: a voice note reading your totals.\n\nEach day's log shows us where the gaps are, and that shapes the next step. Maybe a protein-heavy snack, or a tweak to dinner. What do you think?",
           "at": "2026-11-03T00:01:39.700Z"
         },
         {
@@ -74,7 +74,7 @@
         },
         {
           "from": "zoh",
-          "text": "Glad it feels right, Yanni. Tonight at 11 pm is day 1. Are you officially committing to this, every night, snack and all?",
+          "text": "Love that, Yanni. Are you officially committing to this plan, starting tonight?",
           "at": "2026-11-03T00:02:19.600Z"
         },
         {
@@ -84,7 +84,7 @@
         },
         {
           "from": "zoh",
-          "text": "LET'S GO, Yanni! 💪 Day 1 is tonight at 11 pm: log everything, snack included, and send me that protein screenshot.",
+          "text": "Locked in, Yanni! 💪 Day 1 is tonight: log everything in MyFitnessPal, snack included, and send me that protein screenshot at 11 pm. Let's go.",
           "at": "2026-11-03T00:02:49.600Z"
         }
       ],
@@ -98,7 +98,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, within the limit."
+                "reason": "Three sentences with one question at the end, within the limit."
               },
               {
                 "rule": "plain-words",
@@ -110,25 +110,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, direct, one emoji-free question; energy is fine."
+                "reason": "Warm and direct, with a name and no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the 11 pm and snack details the tester gave."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": false,
-                "reason": "Mentions reaching them around then with no quiet-hours question; no step given yet."
+                "reason": "Uses the late-night snack the tester mentioned and invents nothing."
               },
               {
                 "rule": "one-question",
-                "pass": false,
+                "pass": true,
                 "borderline": false,
-                "reason": "2 questions in one text (counted in code)"
+                "reason": "one question (counted in code)"
               }
             ]
           },
@@ -139,25 +133,25 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question."
+                "reason": "Three sentences with one question, offering a light out."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text."
+                "reason": "Plain text throughout."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Friendly and steady, not overfamiliar."
+                "reason": "Warm and not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks about destination lightly without inventing facts."
+                "reason": "Asks about a possible reason rather than assuming one."
               },
               {
                 "rule": "one-question",
@@ -172,33 +166,39 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plan text presenting the plan, within about 8 lines, ends with one question."
+                "pass": false,
+                "borderline": true,
+                "reason": "Plan text runs about 10 lines including intro and outro, slightly over the roughly 8-line allowance."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a • list, no markdown headers."
+                "reason": "Uses • bullets only, no markdown or hashtags."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and specific, no empty praise."
+                "reason": "Warm and energetic enough, with no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the 160 g target and MyFitnessPal given earlier."
+                "reason": "Uses the 160 g target, MyFitnessPal and the late snack the tester gave, plus concrete suggestions."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 says what, how long, when (11 pm) and proof; heads-up at 10:50 pm mentioned without a question."
+                "reason": "Day 1 gives what (log in MyFitnessPal), where, when (tonight) and the 5-minute 11 pm routine."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; ends with a question about the plan."
               },
               {
                 "rule": "one-question",
@@ -227,19 +227,749 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere, asks for commitment."
+                "reason": "Warm and sincere."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the name and plan already given."
+                "reason": "Refers only to the plan shown."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, with a hype line and day 1 timing."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with an emoji and a warm sign-off."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed day 1 step."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 timing restated clearly."
+                "reason": "Day 1 states what (log, snack included), where (MyFitnessPal), when (tonight, screenshot at 11 pm)."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Lock confirmation carries day 1 and the proof, so it isn't a bare save."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks the minutes and reason questions one at a time before the plan, with no 'that's everything' line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete on what, how much, where, when and which days, with a screenshot proof, but slightly over about 8 lines."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1, the 11 pm schedule, the screenshot proof and a short line on how logs shape next steps, with no future list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks one light question about a bigger reason, the tester says not sure, and the plan locks smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks 'Are you officially committing to this plan, starting tonight?' after 'looks good', which feels like a real commitment."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is tonight and the tester isn't pushed back on it."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it will reach them around 11 and a 10:50 heads-up in a few words, with no question about quiet hours."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the lock, ZOH never raises quiet hours."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks for the target first; the tester already has 160 g, so no number is suggested."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a • list and ends with one question, 'What do you think?'"
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asks about or offers to move quiet hours, shows the plan with the 11 pm schedule and screenshot proof, gives a 10:50 heads-up with no question, and locks on 'I'm in' without raising quiet hours."
+          }
+        ],
+        "summary": "ZOH avoided the old regression: it never asked about moving quiet hours, mentioned reaching Yanni around 11 and a 10:50 heads-up in a few words, and showed a concrete plan with the MyFitnessPal screenshot proof. The main weakness is that the plan text runs a bit longer than the roughly 8-line guideline."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:quiet-hours-unexplained#2",
+        "kind": "case",
+        "id": "quiet-hours-unexplained",
+        "suite": "regression",
+        "title": "An 11 pm step inside default quiet hours: no offer or question, a few words that ZOH's texts will still reach them",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I log everything in MyFitnessPal",
+          "at": "2026-11-02T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect. What time are you usually done eating for the day? That's when you'll send me your log.",
+          "at": "2026-11-02T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "I think I should be done eating for the day around 11pm because usually I like to have a late night snack every day",
+          "at": "2026-11-03T00:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Late-night snack included, that works, Yanni. I'll still reach you before 11 so you're ready. How many minutes a day can you give logging and checking you hit your 160 g?",
+          "at": "2026-11-03T00:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "like 5 minutes",
+          "at": "2026-11-03T00:01:01.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Five minutes is plenty for a screenshot. Where do you want this protein target to get you, Yanni? Maybe more muscle, better recovery, or just hitting the number consistently. \"Not sure yet\" works too.",
+          "at": "2026-11-03T00:01:08.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "not sure yet, just want to hit it most days",
+          "at": "2026-11-03T00:01:32.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hitting 160 g with a late-night snack built in is a smart way to do it, Yanni. Here's the plan:\n\n• Headed for: hitting your protein target most days\n• Day 1 is tonight: log everything in MyFitnessPal, then screenshot your protein total (goal about 160 g)\n• Every day at 11 pm, about 5 minutes\n• Proof: a screenshot of your MyFitnessPal daily summary showing protein. That keeps the number honest. A photo of the screen works too.\n• I'll still reach you with a heads-up at 10:50 pm.\n\nEach day's log shapes the next step. If 160 g is too much or too little, we adjust it together. What do you think?",
+          "at": "2026-11-03T00:01:39.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-03T00:02:12.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, are you committing to this plan: logging in MyFitnessPal and sending your protein screenshot every night at 11 pm, starting tonight?",
+          "at": "2026-11-03T00:02:19.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-03T00:02:42.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Yanni! 💪 Day 1 is tonight at 11 pm: log it all, snack included, and send me that protein screenshot. I know you'll hit it.",
+          "at": "2026-11-03T00:02:49.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus one question, within the one-to-three sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct with no overfamiliarity or emoji row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the 11 pm late-night snack the tester mentioned and the 160 g target from memory."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question about the destination."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language with no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and direct, not overfamiliar."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where the goal leads rather than assuming a destination."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text is roughly 9 to 10 lines including the bullets, slightly over the about-8-line limit for plan texts."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm without overfamiliarity; emoji-free and not a row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan uses the MyFitnessPal tracking, 160 g target and 11 pm snack timing given by the tester."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 states what (log, screenshot protein total), where (MyFitnessPal), when (tonight at 11 pm) and how long (about 5 minutes)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording with no filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct, real commitment ask using the tester's name."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it carries the commitment ask."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a hype line and day 1 timing, no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic with one emoji used as punctuation."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed plan details."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what, when (11 pm tonight) and proof (protein screenshot)."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Locks the plan and states when day 1 is, so the text carries a next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan-needed questions (minutes, destination) came before the plan, one per text."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan has what, how much, where, when and a MyFitnessPal screenshot proof that fits how the tester tracks."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination given as not sure, day 1, the 11 pm schedule and proof, plus a line on progression."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once lightly, accepted 'not sure yet', and the plan locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'looks good' ZOH asked for a real commitment, and 'I'm in' locked it."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight with no pushback needed."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 11 pm step gets a short heads-up line about a 10:50 pm reach-out and no question."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet-hours mention after lock; the final text is a hype line with day 1 timing."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable: the tester set no quiet hours, so no question was owed."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester gave the 160 g target, so no suggestion was needed and none was made."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a • list and ended with one question, 'What do you think?'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH never asks about or offers to move quiet hours; it gives only a heads-up at 10:50 with no question, and no set-up claim."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it never raised quiet hours, mentioned the 10:50 pm heads-up in a few words with no question, and locked the plan cleanly after 'I'm in'. The only soft spot is that the plan text runs slightly past the roughly 8-line guideline."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:quiet-hours-unexplained#3",
+        "kind": "case",
+        "id": "quiet-hours-unexplained",
+        "suite": "regression",
+        "title": "An 11 pm step inside default quiet hours: no offer or question, a few words that ZOH's texts will still reach them",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I log everything in MyFitnessPal",
+          "at": "2026-11-02T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect. What time are you usually done eating for the day? That's when you'll send me your log.",
+          "at": "2026-11-02T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "I think I should be done eating for the day around 11pm because usually I like to have a late night snack every day",
+          "at": "2026-11-03T00:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Late-night snack counts, Yanni, so 11 pm it is and I'll still reach you then. How many minutes a day can you give this for logging and checking your protein, like 5 or 10?",
+          "at": "2026-11-03T00:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "like 5 minutes",
+          "at": "2026-11-03T00:01:01.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, 5 minutes is plenty for logging and a protein check. Is there somewhere you want this 160 g a day to get you, like building muscle or just feeling better? \"Not sure yet\" is totally fine.",
+          "at": "2026-11-03T00:01:08.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "not sure yet, just want to hit it most days",
+          "at": "2026-11-03T00:01:32.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hitting 160 g of protein most days is a clear target, Yanni, and a late-night snack fits right into it. Here's the plan:\n• Goal: hit about 160 g of protein most days\n• Day 1 is tonight: after your snack, finish logging in MyFitnessPal and check your protein total against 160 g\n• Every day at 11 pm, about 5 minutes, and I'll still reach you with a heads-up at 10:50 pm\n• Proof: a screenshot of your MyFitnessPal daily summary showing protein. It shows me the real number and helps you see where you land. If that's a hassle, a photo of the diary page works too.\n\nEach day's result shapes the next step, like what to add if you came up short. What do you think?",
+          "at": "2026-11-03T00:01:39.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-03T00:02:12.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, since you're locking this in, are you officially committing to this plan: 160 g of protein, logged and screenshotted at 11 pm, starting tonight?",
+          "at": "2026-11-03T00:02:19.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-03T00:02:42.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Yanni! 💪 Day 1 is tonight at 11 pm: log your late-night snack, check your protein against 160 g, and send me the screenshot.",
+          "at": "2026-11-03T00:02:49.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct, emoji not used but energy fits."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the tester's stated late-night snack and 11 pm timing."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Time and reach-you line are clear; no step given yet."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks next question, no save-only reply."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and neutral."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only stated facts."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "No step given yet."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a next question."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan presentation with list is within about 8 lines."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy and tone are appropriate."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses stated 160 g target and snack timing."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 step, time, length and proof are all stated."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries the plan and a question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for commitment sincerely."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the plan's own terms."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates defined step."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a commitment question."
               },
               {
                 "rule": "one-question",
@@ -262,25 +992,31 @@
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with one emoji as punctuation."
+                "reason": "Plain words."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line with caps as the spec describes."
+                "reason": "Hype line with one emoji."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the agreed day 1 step."
+                "reason": "Restates agreed day 1 details."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 step, time and proof are defined."
+                "reason": "Day 1 time and action are clear."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives day 1 next move after locking."
               },
               {
                 "rule": "one-question",
@@ -293,40 +1029,34 @@
         ],
         "conversation": [
           {
-            "rule": "regression",
-            "pass": true,
-            "borderline": false,
-            "reason": "Never mentions or asks about moving quiet hours; only a heads-up at 10:50 with no question."
-          },
-          {
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "Asks the one needed question (minutes) before the plan; no seam."
+            "reason": "Only one question asked before plan; no 'that's everything' line."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Concrete: what, 160 g, 5 minutes, 11 pm daily, MyFitnessPal screenshot proof."
+            "reason": "Concrete plan with goal, day 1, time, and MyFitnessPal screenshot proof."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows goal, day 1, schedule, proof and a progression line."
+            "reason": "Shows destination, day 1, schedule and proof with a progression line."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "Asked once lightly; plan locked smoothly without a destination."
+            "reason": "Asked destination once and accepted 'not sure yet' smoothly."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "Asked whether officially committing after 'looks good'; locked on 'I'm in'."
+            "reason": "Asked a real commitment question, not a casual one."
           },
           {
             "rule": "day-one",
@@ -335,25 +1065,55 @@
             "reason": "Day 1 set for tonight at 11 pm."
           },
           {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "Heads-up at 10:50 pm mentioned in a few words with no question about quiet hours."
+          },
+          {
             "rule": "quiet-hours-after-lock",
             "pass": true,
             "borderline": false,
-            "reason": "Quiet hours never raised after lock."
+            "reason": "No quiet hours raised after lock."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable; tester set no quiet hours."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": true,
+            "reason": "Target was given by the tester, so no suggestion needed; borderline as the protein target was known earlier."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": false,
+            "reason": "No goal switch occurred."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "No revisions requested."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "Plan shown as a • list ending with one question."
+            "reason": "Plan shown as a • list ending with a question."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The earlier quiet-hours offer does not recur; the plan locks with a hype line and day 1 time."
+            "reason": "No quiet-hours question or offer to move; plan shown with 11 pm, screenshot proof and a reach-you note; locks on 'I'm in' without quiet hours."
           }
         ],
-        "summary": "ZOH avoided the quiet-hours regression: it reassured about reaching the tester at 11 without asking to move hours, asked for the time commitment before the plan, showed a concrete • list with the MyFitnessPal screenshot proof, and locked on a clear 'I'm in' with a day 1 hype line. The main weakness is that the plan text is a bit longer than ideal, but it stays within the presenting-a-plan allowance."
+        "summary": "ZOH avoided the prior quiet-hours regression: it reached them at 11 pm with a brief heads-up note, never asked about moving quiet hours, and locked the plan cleanly after a real commitment ask. The one soft spot is that it showed the plan without a 'the plan is set' problem but the flow was tight and concise throughout."
       }
     }
   ]

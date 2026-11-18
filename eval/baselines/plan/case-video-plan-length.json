@@ -2,7 +2,7 @@
   "feature": "plan",
   "id": "case:video-plan-length",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:13:13.096Z",
+  "storedAt": "2026-11-18T06:47:33.582Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -44,7 +44,7 @@
         },
         {
           "from": "zoh",
-          "text": "A full-minute clean cascade is a great target, Riley, and 15 minutes a day is enough to get there.\n\n• Goal: a clean 3-ball cascade for a full minute\n• Setup today: grab three balls (rolled-up socks work too) and stand over a bed or couch so drops are easy to grab\n• Day 1, 6 pm, 15 min: toss one ball hand to hand in an arc to eye level, 20 times. Then do the two-ball swap. Finish with a few three-ball starts\n• Schedule: Mon to Fri, 6 pm, 15 minutes\n• Proof: a 1 to 2 min phone video of your best attempt. A short clip of a few throws is fine\n• Why: the video shows you your throws, and it tracks your progress toward that minute\n\nEach day's step builds on how the last one went, and it all points at that minute. What do you think?",
+          "text": "Riley, a full-minute clean cascade is a great target, and weekdays leave the weekends to rest. Here's the plan:\n• Goal: a clean 3-ball cascade for 60 seconds\n• Today's step: 15 min of one-ball tosses hand to hand, peaking at eye height, then two balls. Film the last 2 minutes.\n• Schedule: Mon to Fri at 6 pm, 15 min, in an open spot at home\n• Proof: a 1-2 min video of you juggling, so we can both see your progress. If filming is a hassle, a voice note on how it went works too.\n\nEach day builds on how the last one went. We'll move to three balls once the throws feel steady, then count catches toward that full minute. What do you think?",
           "at": "2026-11-02T17:00:07.000Z"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "from": "zoh",
-          "text": "Riley, are you committing to this plan: juggling Mon to Fri at 6 pm, 15 minutes, with a video each day, aiming for that full-minute cascade?",
+          "text": "Riley, glad it feels right. Are you officially committing to this plan: juggling Mon to Fri at 6 pm, starting today?",
           "at": "2026-11-02T17:00:53.500Z"
         },
         {
@@ -64,7 +64,7 @@
         },
         {
           "from": "zoh",
-          "text": "Locked in, Riley! 🔥 Day 1 is today at 6 pm. Grab those three balls and get over the couch. I'll see your video after.",
+          "text": "Let's go, Riley! 🤹 Day 1 is today at 6 pm: 15 minutes of one-ball tosses, then two balls, and film the last 2 minutes.",
           "at": "2026-11-02T17:01:23.500Z"
         }
       ],
@@ -78,7 +78,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "A plan presentation may run about 8 lines; this is roughly 9 short lines including bullets, which is at the edge."
+                "reason": "Plan presentation runs about 7 lines, within the roughly 8-line allowance for a plan text."
               },
               {
                 "rule": "plain-words",
@@ -90,25 +90,19 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic, with one emoji-free sentence and no overfamiliarity."
+                "reason": "Warm, energetic and specific to Riley's goal without overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the tester's stated goal, 15 minutes and weekdays, plus ZOH's own suggestions like rolled-up socks."
+                "reason": "Uses the tester's stated goal, place, time and filming choice, plus ZOH's own progression suggestions."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": true,
-                "reason": "Day 1 says what, when, how long and where, but 'a few three-ball starts' is vague about how many."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Plan text carries a clear next move and asks for feedback."
+                "reason": "Day 1 gives what, how long, when and where, but 'film the last 2 minutes' conflicts with the later '1-2 min video' proof line."
               },
               {
                 "rule": "one-question",
@@ -125,25 +119,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "One sentence with one question."
+                "reason": "A single question sentence plus a brief lead-in."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain wording with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Direct and warm, uses the tester's name, no overfamiliarity."
+                "reason": "Warm and direct, not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates only the plan the tester already approved."
+                "reason": "Restates only the plan the tester already saw."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "No new step is given in this text."
               },
               {
                 "rule": "one-question",
@@ -160,31 +160,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question, as the lock line should be."
+                "reason": "Two short sentences after lock, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words; one emoji used as punctuation."
+                "reason": "Plain text with one emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line for the lock, warm and not affectionate."
+                "reason": "Hype line for the lock, warm and not over the top."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 time and steps match the agreed plan."
+                "reason": "Repeats the agreed step details without adding new facts."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Restates day 1 but does not repeat the living room location, which was already known."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Gives day 1 timing and says it will check the video after, so the next move is clear."
+                "reason": "After locking, the text carries day 1's time and step."
               },
               {
                 "rule": "one-question",
@@ -200,64 +206,52 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No missing plan inputs; the plan was shown and locked without extra questions."
+            "reason": "No extra questions are asked before the plan; it moves straight to 'What do you think?'."
           },
           {
             "rule": "plan-shape",
             "pass": true,
-            "borderline": false,
-            "reason": "Concrete what, how much, where, when, days, and a fitting 1 to 2 minute video proof."
+            "borderline": true,
+            "reason": "Concrete what, how much, where, when and which days, with a video proof that fits juggling; the 1-2 min versus 2 min wording is slightly inconsistent."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows the goal, day 1 step, schedule, proof and a general progression line with no future-step list."
-          },
-          {
-            "rule": "destination",
-            "pass": true,
-            "borderline": false,
-            "reason": "Destination was given and shown, and the plan locked smoothly."
+            "reason": "Shows the destination, day 1 step, schedule, proof and a short progression line with no future-step list."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "After 'looks good', asks naturally whether they are committing, then locks on 'I'm in'."
+            "reason": "After 'looks good' it asks naturally whether Riley is committing, and does not re-show the plan."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today at 6 pm."
-          },
-          {
-            "rule": "quiet-hours",
-            "pass": true,
-            "borderline": false,
-            "reason": "The 6 pm step is outside default quiet hours, so no note is needed."
+            "reason": "Day 1 is set for today at 6 pm with no pushback needed."
           },
           {
             "rule": "quiet-hours-after-lock",
             "pass": true,
             "borderline": false,
-            "reason": "No quiet hours raised after lock."
+            "reason": "No quiet-hours change is raised after the lock."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "Plan was shown as a bullet list ending with 'What do you think?'."
+            "reason": "The plan is shown as a • list and ends with one question, 'What do you think?'."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Video proof has a 1 to 2 minute length, a why, a clip alternative and no typed text; commitment and lock with hype and day 1 timing all meet the spec."
+            "reason": "Video proof has a 1-2 min length, a one-line why and a voice-note alternative, and it locks with a hype line and day 1 time after 'I'm in'."
           }
         ],
-        "summary": "ZOH handled the regression case well: the plan gave a 1 to 2 minute video proof with a why and an easy alternative, asked for the commitment naturally after 'looks good', and locked with a hype line and today's day 1 time. The main soft spots are that the plan runs near the length limit and 'a few three-ball starts' is vague."
+        "summary": "ZOH handled the regression well: it proposed a concrete juggling plan with a 1-2 minute video proof, a why and a voice-note fallback, asked for commitment naturally after 'looks good', and locked with a hype line and day 1 time after 'I'm in'. The main soft spot is a minor inconsistency between the 2-minute filming in the step and the 1-2 minute proof length."
       }
     },
     {
@@ -292,7 +286,7 @@
         },
         {
           "from": "zoh",
-          "text": "Juggling a clean one-minute cascade is a great target, Riley, and it's very doable in 15 minutes a day.\n\n• Goal: a clean 3-ball cascade for a full 60 seconds\n• Day 1 (today, 6 pm): one ball, tossing hand to hand in a smooth arc to eye height, 20 catches each way. Then the two-ball exchange: throw the second ball as the first reaches its peak.\n• Schedule: Mon to Fri, 6 pm, 15 minutes\n• Proof: a 1 to 2 minute video of your best run. A shorter clip works too if filming's a hassle.\n• Why: arc height and rhythm matter most, and the video lets us see what to fix.\n\nEach day's video shapes the next step. We'll build from two balls to your first 3-ball throws, then to longer runs. What do you think?",
+          "text": "Riley, a full-minute clean cascade is a great target, and filming yourself will show you how fast you're improving. Here's the plan:\n• Goal: a clean three-ball cascade for a full minute\n• Day 1 (today, 6 pm, 15 min): toss one ball in an arc from hand to hand, peaking at eye level. Do 20 catches each direction, then two balls if it feels easy.\n• Where: at home, standing over a bed or couch so drops don't roll away\n• Schedule: Mon to Fri, 6 pm, about 15 min\n• Proof: a 1-2 min phone video of your practice. It lets you see your own progress, and a voice note works if you can't film.\n\nEach day's step builds on how the last one went, moving toward that minute-long cascade. What do you think?",
           "at": "2026-11-02T17:00:07.000Z"
         },
         {
@@ -302,7 +296,7 @@
         },
         {
           "from": "zoh",
-          "text": "Riley, are you committing to this plan? Juggling Monday to Friday at 6 pm, 15 minutes a day, with a video of your best run each day. Starting today.",
+          "text": "Riley, so you're committing to this: juggling practice Mon to Fri at 6 pm, 15 minutes, filmed, starting today? Are you in?",
           "at": "2026-11-02T17:00:53.500Z"
         },
         {
@@ -312,7 +306,7 @@
         },
         {
           "from": "zoh",
-          "text": "You're locked in, Riley! 🔥 Day 1 is today at 6 pm. Grab your ball and let's get that arc dialed in.",
+          "text": "Locked in, Riley! 🔥 Day 1 is today at 6 pm: one-ball tosses, then two balls if it feels easy. Film it and send it over.",
           "at": "2026-11-02T17:01:23.500Z"
         }
       ],
@@ -326,37 +320,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 8 non-blank lines, within the allowed length for presenting a plan."
+                "reason": "Plan-presenting text runs about 8 lines, within the allowed plan length, though the opener and closers add some bulk."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses plain bullets with no markdown, hashtags or filler."
+                "reason": "Plain bullets with no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and specific to Riley's goal, with no overfamiliarity."
+                "reason": "Warm and energetic with a single emoji-free, sincere tone; no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the stated goal, schedule and remembered details, plus ZOH's own suggested drills."
+                "reason": "Uses the tester's stated goal, time, length and location plus concrete suggestions like the bed or couch."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
-                "borderline": true,
-                "reason": "Day 1 names what, when and how many catches, but the living room is not restated and the two-ball part has no duration."
+                "borderline": false,
+                "reason": "Day 1 gives what (one-ball tosses, 20 catches each way), where (at home over a bed or couch), when (6 pm) and how long (15 min)."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it carries the plan and asks for feedback."
+                "reason": "Not a save confirmation; the plan text carries the next move and asks for a reaction."
               },
               {
                 "rule": "one-question",
@@ -373,25 +367,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences asking for the commitment."
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no formatting."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Direct, sincere commitment ask with no stock line."
+                "reason": "Calm and sincere; not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Repeats only the agreed plan details."
+                "reason": "Recaps only the schedule and length the tester agreed to."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "No new step given; the recap restates the agreed schedule, time and length."
               },
               {
                 "rule": "one-question",
                 "pass": false,
                 "borderline": false,
-                "reason": "the question isn't at the end (counted in code)"
+                "reason": "2 questions in one text (counted in code)"
               }
             ]
           },
@@ -402,19 +408,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with a hype line and day 1 timing."
+                "reason": "Three short sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype energy with one emoji as punctuation, no question, no overfamiliarity."
+                "reason": "Hype line with one emoji as punctuation; warm and not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 at 6 pm matches the agreed plan."
+                "reason": "Uses only the agreed plan details."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 is set for 6 pm with what to do and the proof to send."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Locks the plan and carries the next move: day 1 timing and proof."
               },
               {
                 "rule": "one-question",
@@ -430,25 +454,31 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "All needed details were already known or given, and no extra question came before the plan."
+            "reason": "All plan inputs were already known, so no extra questions were needed before the plan was shown."
           },
           {
             "rule": "plan-shape",
             "pass": true,
-            "borderline": true,
-            "reason": "Concrete on what, how much, when and days with a fitting video proof, but the plan never says where to practise."
+            "borderline": false,
+            "reason": "Concrete goal, amount, place, schedule and a 1-2 minute video proof that fits juggling."
           },
           {
             "rule": "first-plan",
-            "pass": false,
-            "borderline": true,
-            "reason": "The progression line lists future steps (two balls, then 3-ball throws, then longer runs), which the rule forbids."
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the goal, day 1 step, usual schedule and proof, plus a line on how each day builds on the last."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Destination was given (a one-minute clean cascade) and is shown in the plan."
           },
           {
             "rule": "commitment",
             "pass": true,
-            "borderline": false,
-            "reason": "After 'looks good' it asks in natural words whether Riley is committing, and asks nothing else."
+            "borderline": true,
+            "reason": "Asks for commitment after 'looks good' in natural words, though ending with 'Are you in?' leans toward a stock line."
           },
           {
             "rule": "day-one",
@@ -457,19 +487,31 @@
             "reason": "Day 1 is set for today at 6 pm."
           },
           {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 6 pm step is outside default quiet hours, so no note is needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet hours raised after lock."
+          },
+          {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a bullet list ending with 'What do you think?'."
+            "reason": "The plan was shown as a bullet list before the commitment ask."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Video proof has a 1 to 2 minute length, a one-line why, an easy shorter alternative, and locks with a hype line and day 1 timing after 'I'm in'."
+            "reason": "Video proof of 1-2 min with a why and a voice-note alternative, not typed text; after 'looks good' it asks the commitment, and after 'I'm in' it locks with a hype line and day 1 timing."
           }
         ],
-        "summary": "ZOH handled the video-proof regression well: it gave a concrete 1 to 2 minute video with a one-line why and a shorter alternative, asked for commitment naturally after 'looks good', and locked with a hype line and day 1 timing after 'I'm in'. The main miss is that the progression line previews a path of future steps, and the plan never says where to practise."
+        "summary": "ZOH handled the regression case well: it proposed a concrete juggling plan with a 1-2 minute video proof and an easy voice-note alternative, and asked for the commitment naturally after 'looks good'. After 'I'm in' it locked the plan with a hype line and told Riley day 1 is today at 6 pm, with only minor wording borderline on the commitment ask."
       }
     },
     {
@@ -504,7 +546,7 @@
         },
         {
           "from": "zoh",
-          "text": "A full-minute cascade is a great target, Riley, and 15 minutes a day gets you there. Here's the plan:\n\n• Goal: a clean 3-ball cascade for a full minute\n• Setup today: grab three similar balls (beanbags or rolled-up socks work, since they don't roll away)\n• Day 1, 6 pm: 15 minutes in a clear spot with room around you. Toss one ball hand to hand in an arc up to eye level for 3 minutes, then the two-ball pattern, then try three\n• Schedule: Mon to Fri, 6 pm, 15 minutes\n• Proof: a 1 to 2 minute video of your best run (a quick voice note about how it went works too)\n• Why: filming lets you see your own pattern, and that's how you spot what to fix\n\nEach day's step builds on how the last one went, so we move toward that full minute. What do you think?",
+          "text": "Riley, a full-minute cascade is a great target, and filming yourself will show your progress. Here's the plan:\n• Headed for: a clean three-ball cascade for a full minute\n• Today's setup: grab three balls (rolled-up socks work) before 6 pm\n• Day 1 at 6 pm: 50 one-ball tosses each direction, arcing hand to hand at eye height, then try two balls. Stand over a bed or couch so drops are easy to grab.\n• Mon to Fri, 6 pm, about 15 minutes\n• Proof: a 1-2 min video of you juggling, so you can see your own progress. If filming isn't possible, send a short voice note.\n\nEach day's step builds on how the last one went, working toward that minute. What do you think?",
           "at": "2026-11-02T17:00:07.000Z"
         },
         {
@@ -514,7 +556,7 @@
         },
         {
           "from": "zoh",
-          "text": "Glad it works for you, Riley. Are you committing to this plan, starting today at 6 pm?",
+          "text": "Love it, Riley. So are you officially committing to this plan: three-ball juggling, weekdays at 6 pm, starting today?",
           "at": "2026-11-02T17:00:53.500Z"
         },
         {
@@ -524,7 +566,7 @@
         },
         {
           "from": "zoh",
-          "text": "You're locked in, Riley! Day 1 is today at 6 pm. Go get those three balls moving 🤹",
+          "text": "Let's go, Riley! 🤹 Day 1 is today at 6 pm: grab your three balls or socks before then, and I'll be here for the video.",
           "at": "2026-11-02T17:01:23.500Z"
         }
       ],
@@ -538,37 +580,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Plan presentation runs about 8 to 10 lines including blanks, at the edge of the roughly 8-line allowance."
+                "reason": "Plan text runs about 8 to 9 short lines, at the upper edge of the allowed length for presenting a plan."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain • list with no markdown, hashtags or filler."
+                "reason": "Uses plain • bullets with no markdown, hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic and specific to Riley's goal, with no emoji row or overfamiliarity."
+                "reason": "Warm, energetic and specific to juggling, with no overfamiliarity."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only Riley's stated goal, the living room, 6 pm, 15 minutes and Mon to Fri, plus concrete suggestions."
+                "reason": "Uses the stated goal, 15 minutes, 6 pm and weekdays, plus concrete suggestions like socks and a bed or couch."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 gives what (juggling pattern), where (clear spot in the living room), when (6 pm), and how long (15 minutes)."
+                "reason": "Day 1 gives what (50 one-ball tosses each way, then two balls), where (couch or bed), when (6 pm) and how long (about 15 minutes)."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Carries the next move with the question \"What do you think?\"."
+                "reason": "Not a save confirmation; it presents the plan and asks for a response."
               },
               {
                 "rule": "one-question",
@@ -585,31 +627,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences."
+                "reason": "Two sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain wording with no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and direct, not overfamiliar."
+                "reason": "Warm and direct, with no affection beyond coaching tone."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Refers only to the plan and start time already given."
+                "reason": "Restates only the agreed plan details."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the agreed what, when and start point without leaving key details open."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks a single commitment question that carries the next move."
+                "reason": "Asks for the commitment; no save confirmation is involved."
               },
               {
                 "rule": "one-question",
@@ -626,37 +674,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with a hype line and day 1 time."
+                "reason": "Two sentences, within the limit."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "No markdown or filler; the emoji is used as punctuation."
+                "reason": "Plain text with a single emoji as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line is energetic, with one emoji at the end and no row."
+                "reason": "Hype line with one emoji, warm and not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "States only the locked plan and today's 6 pm start."
+                "reason": "Uses only details the tester gave: three balls or socks, 6 pm, today."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 time is restated as the existing step, with no new unstated details."
+                "reason": "Day 1 is clear: today at 6 pm, with the balls ready beforehand."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Locks the plan with a hype line and the day 1 time, which carries the next move."
+                "reason": "After locking, it carries the next move: prepare the balls and be ready for the video at 6 pm."
               },
               {
                 "rule": "one-question",
@@ -672,52 +720,70 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No extra questions were needed before the plan, and none are asked after the lock."
+            "reason": "No extra plan questions are asked before or after the lock; the only question is the commitment ask."
           },
           {
             "rule": "plan-shape",
             "pass": true,
             "borderline": false,
-            "reason": "Goal, setup, day 1 steps, schedule, 1 to 2 minute video proof and why are all concrete."
+            "reason": "Concrete plan with what, how much, where, when and days, plus a video proof that fits filming."
           },
           {
             "rule": "first-plan",
             "pass": true,
             "borderline": false,
-            "reason": "Shows the destination, day 1 step, schedule, proof and a general line on how each day builds on the last."
+            "reason": "Shows the destination, day 1 step, weekday schedule and proof, with a one-line progression note and no list of future steps."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "Riley gave a destination (a clean full-minute cascade), so this does not apply."
+            "reason": "Destination was given, so the no-destination rule doesn't apply; the plan still reflects it."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "Asks \"Are you committing to this plan, starting today at 6 pm?\" after \"looks good\", which feels like a real commitment."
+            "reason": "Asks whether they are officially committing in natural words, not a casual question."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for today at 6 pm with no pushback needed."
+            "reason": "Day 1 is set for today at 6 pm, which is the same day as the plan."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 6 pm step is outside default quiet hours, so no note is needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Quiet hours are never raised after the lock."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester set no quiet hours, so the rule does not apply."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a • list and ended with \"What do you think?\"."
+            "reason": "The plan was shown as a • list ending with a question, and the commitment was asked later as its own text."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Video proof gets a 1 to 2 minute length with a why and a voice-note alternative, then \"I'm in\" locks with a hype line and the day 1 time."
+            "reason": "Video proof has a 1 to 2 minute length, a one-line why, and a voice note alternative. It asks for commitment after 'looks good' and locks after 'I'm in' with a hype line and day 1 time."
           }
         ],
-        "summary": "ZOH handled this regression case well: the plan's video proof has a fitting 1 to 2 minute length, a one-line why and an easy voice-note alternative, and it never asks for typed text. The commitment ask and the lock with a hype line and day 1 time both follow the expected flow, with only the length of the plan presentation sitting at the edge of the limit."
+        "summary": "ZOH handled the regression well: the plan gave a 1 to 2 minute video proof with a why and a voice note alternative, and it asked for commitment naturally after 'looks good'. After 'I'm in' it locked with a hype line and the day 1 time, with no seams or invented details."
       }
     }
   ]

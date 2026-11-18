@@ -2,7 +2,7 @@
   "feature": "onboarding",
   "id": "case:goal-in-first-text",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:12:10.992Z",
+  "storedAt": "2026-11-18T06:46:06.363Z",
   "branch": "dev",
   "producer": {
     "grader": "claude-haiku-5-5",
@@ -14,15 +14,15 @@
   "runs": [
     {
       "plan": {
-        "key": "case:goal-in-first-text",
+        "key": "case:goal-in-first-text#1",
         "kind": "case",
         "id": "goal-in-first-text",
+        "suite": "regression",
         "title": "Goal given in the first text: long intro, generic praise, two questions",
         "persona": "terse",
         "areaCode": "212",
         "startTime": "18:30",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [],
       "transcript": [
@@ -33,7 +33,7 @@
         },
         {
           "from": "zoh",
-          "text": "150g of protein a day? Let's go! I'm ZOH, and I'll help you get better at this one thing with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" What's your name?",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with one small step a day, and 150g of protein is a great one to start with. Text \"stop\" anytime, and you can change how I coach whenever you want, like \"chill out\" or \"push me harder\". What's your name, and what does a typical day of eating look like for you right now?",
           "at": "2026-11-02T23:30:07.000Z"
         }
       ],
@@ -46,8 +46,125 @@
               {
                 "rule": "short",
                 "pass": true,
+                "borderline": false,
+                "reason": "Four sentences including the single question block, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
                 "borderline": true,
-                "reason": "Four statements plus a question, but the opening '150g of protein a day?' is a second, echo question, so it sits at the edge of the limit."
+                "reason": "Energetic and warm; 'a great one to start with' is short praise inside the greeting, which is acceptable."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking about eating fits the protein goal, and the name is a reasonable ask."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not ask about the goal the tester already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the tester's stated protein goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question, and no city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, stop anytime and how to change coaching; goal given so the list is skipped."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Nothing already given is asked again."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tells the tester they can change how ZOH coaches whenever they want."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "A single short text, well within limits."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Asks two things (name and what a typical day of eating looks like) when the expected behavior is exactly one question, the name."
+          }
+        ],
+        "summary": "ZOH's single opening text covers the intro, stop and style lines, and skips the goal list correctly, with short, plain, warm wording. It still misses the regression fix: it asks two questions instead of one, so the name-only ask that was supposed to replace the protein-tracker question is not what it sent."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:goal-in-first-text#2",
+        "kind": "case",
+        "id": "goal-in-first-text",
+        "suite": "regression",
+        "title": "Goal given in the first text: long intro, generic praise, two questions",
+        "persona": "terse",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey wanna hit 150g protein a day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder\". 150g a day? Let's go! What's your name, and what does a typical day of eating look like for you right now?",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Carries two questions, '150g a day?' and 'What's your name, and what does a typical day of eating look like...?', beyond the one question allowed."
               },
               {
                 "rule": "plain-words",
@@ -59,25 +176,31 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic 'Let's go!' with one emoji-free, warm tone and no affection."
+                "reason": "Upbeat 'Let's go!' energy with no row of emoji and no overfamiliarity."
               },
               {
                 "rule": "fits",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asking the name is the one missing input and fits the onboarding moment."
+                "reason": "Asking about a typical day of eating fits a protein goal, and the name is a reasonable ask."
               },
               {
                 "rule": "no-repeat",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks only for the name, which the tester hasn't given; nothing already answered is re-asked."
+                "reason": "Does not re-ask the goal, which the tester already gave."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the 150g protein goal the tester gave; no invented facts."
+                "reason": "Only reflects the 150g protein goal the tester stated."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep or pushiness questions and no city question."
               },
               {
                 "rule": "one-question",
@@ -90,13 +213,142 @@
         ],
         "conversation": [
           {
-            "rule": "regression",
+            "rule": "first-text",
             "pass": true,
-            "borderline": true,
-            "reason": "Fixes the original problems: it names ZOH, states what it does, gives stop and style-change lines, reacts briefly to the goal, skips the goal list and asks only for the name. The echo question about 150g is a minor overrun of the one-question limit."
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that 'stop' works anytime and that coaching can be changed; the goal is given, so the goal list is correctly skipped."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Nothing already answered is asked again."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Explicitly tells the tester they can change how ZOH coaches with 'chill out' or 'push me harder'."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Does not ask whether the tester already uses an app or tracker."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "One text, well within the onboarding length limits."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Should ask exactly one thing (name), but it adds a second question about a typical day of eating, and the protein reaction uses a separate question mark."
           }
         ],
-        "summary": "ZOH fixed the regression: it introduced itself, explained the coaching, gave the stop and style lines, skipped the goal list and asked only for the name. The one weak spot is the echo question about 150g, which puts it at the edge of the one-question limit."
+        "summary": "ZOH's opener covers the intro, stop and coaching-change lines and skips the goal list correctly, with no invented facts and no app-tracking question. It misses the regression fix: it asks two things at once (name plus eating habits) and uses a second question mark on the protein goal, so it fails the one-question limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:goal-in-first-text#3",
+        "kind": "case",
+        "id": "goal-in-first-text",
+        "suite": "regression",
+        "title": "Goal given in the first text: long intro, generic praise, two questions",
+        "persona": "terse",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey wanna hit 150g protein a day",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder\". 150g a day? Let's go! What's your name, and what does a typical day of eating look like for you right now?",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four short sentences plus one question, within the four-sentence limit for the first text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with a single exclamation, and no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "The eating question relates directly to the protein goal the tester named."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not ask for anything the tester already gave; the goal is not re-asked."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the 150g protein goal the tester actually stated."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question and no pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that stop works anytime, and that the coaching style can be changed; the goal is already given so it is skipped."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Asks two things, name and a description of a typical day of eating, instead of exactly one, so the required single-question fix did not happen."
+          }
+        ],
+        "summary": "ZOH fixed most of the original problems: the greeting now covers what ZOH is, stop, and style changes, the goal is reacted to briefly, and the goal list is skipped. It still missed the key requirement, though, by asking for the name and a day of eating in one text instead of the single question the regression case calls for."
       }
     }
   ]
