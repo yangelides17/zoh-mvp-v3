@@ -1,0 +1,60 @@
+{
+  "id": "three-threads",
+  "suite": "capability",
+  "title": "One answer with a worry, a win and a side detail: ZOH follows what matters, lets the rest go, and moves on at a natural point",
+  "origin": "Issue #211 (Yanni: it shouldn't ask about every open thing before moving on)",
+  "seed": {
+    "name": "Maya",
+    "goal": "side_project",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "finish the first draft of my short story",
+      "where": "at the kitchen table",
+      "when": "8 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Evening, Maya! Tonight: 20 minutes on the opening scene at the kitchen table at 8. A screenshot of where you got to when you're done."
+      },
+      {
+        "from": "tester",
+        "text": "on it"
+      }
+    ],
+    "plan": {
+      "step": "20 min writing the story at the kitchen table",
+      "destination": "a finished first draft by the end of the month",
+      "place": "at the kitchen table",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu"],
+      "proof": "screenshot",
+      "proof_note": "a screenshot of where you got to",
+      "reason": "Twenty minutes a night adds up to a draft without needing a free weekend.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      { "days_ago": 6, "status": "done", "step": "20 min outlining the story", "proof_seen": "screenshot: a one-page outline" },
+      { "days_ago": 5, "status": "done", "step": "20 min writing character notes", "proof_seen": "screenshot: notes on two characters" }
+    ],
+    "today_step": {
+      "step": "20 min writing the opening scene at the kitchen table at 8 pm",
+      "agreed_hours_ago": 1
+    }
+  },
+  "testerLines": [
+    "[photo draft.png: a screenshot of a document titled \"Chapter 1\", about 300 words of a scene in a train station]",
+    "Wrote 300 words of the opening! Felt so good to finally start. I'm kind of nervous it's garbage though. Also my tea went cold because I forgot about it lol",
+    "I guess I keep comparing it to the books I love, and mine sounds clunky next to them",
+    "yeah that helps. I think I just need to keep going and fix it later",
+    "works for me"
+  ],
+  "whatWentWrong": "New for #211: the risk is that holding the next step makes ZOH ask about every thread they mention (the nerves, the win, the cold tea) before it moves on.",
+  "shouldHaveHappened": "ZOH counts the screenshot and celebrates finally starting. From the first answer it follows what matters for her (the worry that it's garbage, or what made starting feel good), lightly nods to the rest or lets it go (never a question about the cold tea), and doesn't propose tomorrow in that reply. Once she's said she compares it to books she loves and decided to keep going and fix it later, the talk has landed: ZOH moves to tomorrow's step built on that (keep going, no editing yet; fully defined, asked if it works), never a question per thread. After \"works for me\" it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "20:24",
+  "timeZone": "America/New_York"
+}
