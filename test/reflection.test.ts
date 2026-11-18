@@ -488,3 +488,35 @@ describe("#160: what each step shows they can now do, and gaps", () => {
     expect(await row(WED)).toMatchObject({ step: NEXT });
   });
 });
+
+describe("#211: reflect before the next step", () => {
+  /** The real coach on a scripted model, answering their text at `now`. */
+  async function coachAt(now: Date): Promise<FakeClaudeModel> {
+    await t.close();
+    const model = new FakeClaudeModel();
+    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }), now: () => now });
+    return model;
+  }
+  async function text(content: string) {
+    await postWebhook(t, inboundEvent({ content, from_number: ME, number: ME }));
+    await t.queue.idle();
+  }
+
+  it("bug: in the reply to their first real answer, tomorrow's step isn't saved", async () => {
+    const model = await coachAt(at(MON, "19:33"));
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    model.script(
+      {
+        tools: [
+          { name: "save_reflection", input: { summary: "Hill in round 3 was hard", how_it_went: true, take: "Full step." } },
+          { name: "set_today_step", input: { step: NEXT, kind: "same", day: "next", reason: "Hill was hard" } },
+        ],
+      },
+      "What happened on the hill?",
+    );
+    await text("harder than I thought, the hill in round 3 was rough");
+    expect(await row(WED)).toBeUndefined();
+  });
+});
