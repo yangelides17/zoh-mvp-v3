@@ -404,6 +404,14 @@ export const FEATURES: Record<string, FeatureDef> = {
         group: "flow",
         label: "Asked to suggest a next step, ZOH drafts it and says in a line what and which goal; asks first if the goal or kind is unclear",
       },
+      {
+        // #214: a founder's proposal sent "now" is ZOH's own text, with nothing from the tester before it.
+        id: "proposal-asks",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "When ZOH texts first to raise a change to their plan or a next step, it asks their OK in its own voice as its own idea, reads naturally with nothing from them before it, and never says the plan already changed",
+      },
     ],
   },
   /** Commands and safety (#12): pause and feedback, cases only, each seeded with a locked plan. Target 80%. */

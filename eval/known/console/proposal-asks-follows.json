@@ -1,0 +1,22 @@
+{
+  "id": "proposal-asks-follows",
+  "rule": "proposal-asks",
+  "expect": "pass",
+  "why": "ZOH texts first, out of nowhere, to float a new time for the step: it asks, as its own idea, and the plan changes only on the tester's yes.",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥" },
+      { "from": "zoh", "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪" }
+    ],
+    "plan": { "step": "a 20 minute run", "place": "the park", "time": "18:00", "days": ["mon", "wed", "fri", "sat"], "proof": "screenshot", "reason": "Twenty minutes after work, before dinner.", "minutes": 20 }
+  },
+  "transcript": [
+    { "from": "zoh", "text": "Hey Jordan, a thought on your runs: would 7 am at the park, before work, suit you better than 6 pm? Totally your call." },
+    { "from": "tester", "text": "hmm 7:30 would be better" },
+    { "from": "zoh", "text": "7:30 am it is, starting Wednesday. Same park, same 20 minutes 🏃" }
+  ]
+}

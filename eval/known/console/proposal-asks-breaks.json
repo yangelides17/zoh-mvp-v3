@@ -1,0 +1,22 @@
+{
+  "id": "proposal-asks-breaks",
+  "rule": "proposal-asks",
+  "expect": "fail",
+  "why": "ZOH texts first to announce a new step time as already decided, by the team, before the tester has said a word about it.",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "answers": { "what": "a 20 minute run", "where": "the park", "when": "6 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥" },
+      { "from": "zoh", "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪" }
+    ],
+    "plan": { "step": "a 20 minute run", "place": "the park", "time": "18:00", "days": ["mon", "wed", "fri", "sat"], "proof": "screenshot", "reason": "Twenty minutes after work, before dinner.", "minutes": 20 }
+  },
+  "transcript": [
+    { "from": "zoh", "text": "Heads up Jordan: the team moved your runs to 7 am at the park, starting Wednesday 💪" },
+    { "from": "tester", "text": "oh ok" },
+    { "from": "zoh", "text": "You've got this! See you at 7 🏃" }
+  ]
+}

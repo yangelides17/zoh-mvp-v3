@@ -2,27 +2,27 @@
   "feature": "next-step",
   "id": "case:founder-adjust-tweak",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:20:51.076Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T05:07:31.774Z",
+  "branch": "feature/214-drafts-needs-you",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "26be7d24496c",
-    "voice": "fbc3a37c5b97",
+    "voice": "ab7df5083af6",
     "instructions": "c7348af58300",
     "script": "7cbf682f63c6"
   },
   "runs": [
     {
       "plan": {
-        "key": "case:founder-adjust-tweak",
+        "key": "case:founder-adjust-tweak#1",
         "kind": "case",
         "id": "founder-adjust-tweak",
+        "suite": "regression",
         "title": "A founder's plan change is raised as ZOH's question, and the tester's tweak is what's saved",
         "persona": "scripted",
         "areaCode": "212",
         "startTime": "08:55",
-        "timeZone": "America/New_York",
-        "suite": "regression"
+        "timeZone": "America/New_York"
       },
       "context": [
         {
@@ -39,7 +39,7 @@
       "transcript": [
         {
           "from": "zoh",
-          "text": "Kalimera Maya! Fourteen days straight with The Overstory, and today is 10 more pages in bed. Here's an idea for your usual plan from now on: move the step from 9 pm to 7:30 pm. Would that work for you?",
+          "text": "Kalimera Maya! Fourteen days in a row, and tonight it's ten more pages of The Overstory from page 212. Want to move your reading from 9 pm to 7:30 pm from now on, or keep 9?",
           "at": "2026-11-02T14:00:00.000Z",
           "started": true
         },
@@ -50,7 +50,7 @@
         },
         {
           "from": "zoh",
-          "text": "Done, Maya: your reading time moves to 8 pm, every day, starting today. Same 10 pages in bed, and I'll still want a photo of the page you stop on.",
+          "text": "Done, Maya: reading moves to 8 pm from now on, starting tonight. Same 10 pages from page 212, with a photo of the page you stop on. 📚",
           "at": "2026-11-02T14:05:07.000Z"
         }
       ],
@@ -64,7 +64,201 @@
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": true,
-                "reason": "Framed as 'Here's an idea' from ZOH with no team or founder mention, and asks if it works for her."
+                "reason": "Offers the 7:30 move as a question about her reading time, not as a decided team change; framing is light but reads as ZOH's suggestion."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end: 'Want to move your reading from 9 pm to 7:30 pm from now on, or keep 9?'"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, confirming the 8 pm change starting tonight."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "founder-proposal",
+            "pass": true,
+            "borderline": false,
+            "reason": "The move is raised as ZOH's own suggestion asking Maya's OK, with no mention of the team or founders."
+          },
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": true,
+            "reason": "Treats the request as a change to her existing 9 pm reading time, not a new goal or addition, and confirms it that way."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Kickoff asked one question about 7:30 as ZOH's idea; her 8 pm reply got a short confirmation starting tonight with no extra questions."
+          }
+        ],
+        "summary": "ZOH handled the founder-proposed time move well: it raised 7:30 as its own question with one ending question, and when Maya countered with 8, it confirmed 8 pm starting tonight in two short sentences without team mention or extra questions. The only soft spots are the mild framing of the first suggestion and the restated detail in the confirmation, which are borderline at most."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:founder-adjust-tweak#2",
+        "kind": "case",
+        "id": "founder-adjust-tweak",
+        "suite": "regression",
+        "title": "A founder's plan change is raised as ZOH's question, and the tester's tweak is what's saved",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:55",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "10 down, page 212",
+          "at": "2026-11-02T01:52:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚",
+          "at": "2026-11-02T01:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Maya! Fourteen days straight, and you're past page 212 of The Overstory. Today's still 10 pages in bed at 9. Would you want to move your reading to 7:30 pm from now on?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "7:30 is tight with dinner, 8 would be better",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, Maya: reading moves to 8 pm, starting tonight, still 10 pages in bed. Send me a photo of the page you stop on 📚",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Raises the 7:30 pm move as a question without team or founder mention, but gives no reason tied to Maya."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Greeting plus three sentences ending in one question; it runs slightly over the three-sentence limit."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, confirms the 8 pm change and ends with one instruction, no question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "founder-proposal",
+            "pass": true,
+            "borderline": false,
+            "reason": "The move to an evening slot is raised as ZOH's own idea and asks Maya if she wants it, with no team mention."
+          },
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": false,
+            "reason": "Her reading time is treated as a change to the existing 9 pm plan, not a new goal or added habit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Her 8 pm preference is confirmed in one line starting tonight, but the closing photo request could count as an extra ask."
+          }
+        ],
+        "summary": "ZOH handled the time change well: it asked Maya rather than announcing a decision, and it confirmed her 8 pm choice cleanly. The main weak spots are a slightly long kickoff with no reason given for the move and a photo request that sits close to an extra ask."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:founder-adjust-tweak#3",
+        "kind": "case",
+        "id": "founder-adjust-tweak",
+        "suite": "regression",
+        "title": "A founder's plan change is raised as ZOH's question, and the tester's tweak is what's saved",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:55",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "10 down, page 212",
+          "at": "2026-11-02T01:52:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚",
+          "at": "2026-11-02T01:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Maya! 14 days straight, and tonight's 10 pages pick up from page 212 of The Overstory, in bed at 9. Want to move your reading from 9 pm to 7:30 pm from now on, starting tonight?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "7:30 is tight with dinner, 8 would be better",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, Maya: reading moves to 8 pm, starting tonight. Same 10 pages from page 212, in bed, with a photo of the page you stop on. Talk then 📚",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": true,
+                "reason": "Raises the 7:30 move as a question for her OK with no team mention, but gives no reason and doesn't clearly sound like ZOH's own idea."
               },
               {
                 "rule": "short",
@@ -81,7 +275,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences, no question, confirming the 8 pm change from today."
+                "reason": "Three sentences, no question, confirms the 8 pm change as asked."
               }
             ]
           }
@@ -91,22 +285,22 @@
             "rule": "founder-proposal",
             "pass": true,
             "borderline": true,
-            "reason": "The 7:30 pm move is raised as ZOH's idea with her OK requested, with no team or founders mentioned."
+            "reason": "The move is raised as ZOH's question asking for her OK, with no team or founder mention."
           },
           {
             "rule": "change-vs-add",
             "pass": true,
             "borderline": false,
-            "reason": "A time change to the existing reading plan is treated as a change, not an added goal."
+            "reason": "The request is treated as a time change: the reading moves from 9 pm to 8 pm, not added as a new session."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "The kickoff raised 7:30 as ZOH's idea with one question, and her 8 o'clock reply got a short confirmation of 8 pm starting today with no extra questions."
+            "reason": "ZOH asked once with its own idea, then confirmed 8 pm starting tonight with no extra questions, as the case requires."
           }
         ],
-        "summary": "ZOH handled the regression case well: it raised the 7:30 pm move as its own idea, asked one question, and confirmed her 8 pm tweak briefly without mentioning the team. The only soft spot is the phrase 'from now on' in the kickoff, which is borderline on whether it reads as ZOH's own suggestion."
+        "summary": "ZOH handled the regression well: it raised the time move as a single question with no team mention, then confirmed Maya's 8 pm choice starting tonight without extra questions. The only weak spot is that the first text gives no reason for the move, so it reads less like ZOH's own idea than it could."
       }
     }
   ]
