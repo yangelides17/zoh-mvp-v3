@@ -1216,6 +1216,20 @@ describe("#214: when ZOH asks about a founder's proposal", () => {
     expect((await thread(tester.id)).findLast((r) => r.kind === "alert")!.body).toContain("goal limit");
   });
 
+  for (const how of ["held", "failed"] as const) {
+    it(`"now" whose text is ${how === "held" ? "held by the coach" : "not sent"}: it waits for the next text, and the founders are told`, async () => {
+      const tester = await seed();
+      if (how === "held") t.replier.holdNudges = ["team"];
+      else t.sendblue.failSend = true;
+      const { suggestion } = await propose(tester, { time: "20:00", when: "now" });
+      await scheduler.tick(new Date(now.getTime() + 60_000));
+      expect(nudgeMoments()).toEqual(["team"]);
+      // Not left as "now": today's slot is used up, so it would hold back their other texts all day.
+      expect((await t.db.select().from(suggestions).where(eq(suggestions.id, suggestion.id)))[0]).toMatchObject({ delivery: "natural", outcome: null });
+      expect((await thread(tester.id)).findLast((r) => r.kind === "alert" && r.topic === NOT_SENT_TOPIC)!.body).toContain("ZOH will ask in its next text");
+    });
+  }
+
   it("a stopped tester: it can't be drafted, and one queued before the stop never sends", async () => {
     const stopped = await seed({ stopped: true });
     model.script({ tools: [{ name: "propose_plan_change", input: { time: "20:00", when: "now" } }] }, "Can't.");

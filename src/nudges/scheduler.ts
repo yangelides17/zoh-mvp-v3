@@ -262,8 +262,17 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
       return { action: "none", reason: "sent the team's nudge" };
     }
     if (askNow && !midConversation) {
-      await send(deps, tester, { kind: `team:${askNow.id}`, moment: "team", date }, now, { suggestionId: askNow.id });
-      return { action: "none", reason: "asked the team's proposal" };
+      const kind = `team:${askNow.id}`;
+      await send(deps, tester, { kind, moment: "team", date }, now, { suggestionId: askNow.id });
+      const [after] = await db.select({ outcome: suggestions.outcome }).from(suggestions).where(eq(suggestions.id, askNow.id));
+      if (after?.outcome === "delivered") return { action: "none", reason: "asked the team's proposal" };
+      // Held by the coach or not sent: today's slot is used up, so it waits for ZOH's next text (never a stuck
+      // "now" that holds back the tester's other texts), and the founders are told.
+      const [slot] = await db.select({ status: nudges.status }).from(nudges).where(and(eq(nudges.testerId, tester.id), eq(nudges.date, date), eq(nudges.kind, kind)));
+      if (slot?.status === "held" || slot?.status === "failed") {
+        const why = slot.status === "held" ? "ZOH held the text" : "the text didn't send";
+        await askLater(db, tester, askNow, now, `Couldn't text ${tester.name ?? "them"} now (${why}), so ZOH will ask in its next text to them`);
+      }
     }
   }
 
