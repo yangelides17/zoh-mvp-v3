@@ -59,6 +59,10 @@ export class RecordingSendblue implements SendblueClient {
   async optIn(number: string) {
     if (number !== this.allowed) throw new Error("Eval Sendblue only touches its own fake tester");
   }
+  /** #168: a founder's file is never really uploaded in the eval. */
+  async uploadFile(file: { name: string }) {
+    return `https://cdn.sendblue.eval/${file.name}`;
+  }
 }
 
 /** Fake number in the reserved 555-01xx range, with the scenario's area code. */

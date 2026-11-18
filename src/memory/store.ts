@@ -362,7 +362,8 @@ export async function timeline(db: Db, tester: Tester, limit = 30): Promise<Time
   const media = await db
     .select()
     .from(messages)
-    .where(and(eq(messages.contactNumber, tester.phone), isNotNull(messages.mediaUrl), gte(messages.createdAt, memoryStart(tester))))
+    // Their files (#168: a founder's file ZOH sent isn't one of theirs).
+    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl), gte(messages.createdAt, memoryStart(tester))))
     .orderBy(desc(sentTime), desc(messages.id))
     .limit(limit);
   const items: TimelineItem[] = [

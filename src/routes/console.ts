@@ -41,6 +41,9 @@ import { consoleMessages, SUGGESTION_KINDS, testers, type Tester } from "../db/s
 import { testerNow } from "../testers/clock.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
+import { MAX_UPLOAD_BYTES, type SendblueClient } from "../sendblue/client.js";
+import multipart from "@fastify/multipart";
+import { storeAttachment } from "../console/attachments.js";
 import type { TaskQueue } from "../pipeline/task-queue.js";
 
 /**
@@ -52,6 +55,8 @@ import type { TaskQueue } from "../pipeline/task-queue.js";
 export interface ConsoleRouteOptions extends ConsoleConfig {
   db: Db;
   media?: MediaStore;
+  /** #168: a founder's file goes to Sendblue's media host at Do it. */
+  sendblue?: SendblueClient;
   /** The console chat's coach; without it, the chat says it isn't set up. */
   chat?: ConsoleCoach;
   /** Where the coach's answer runs, after the page has redirected; without one, before. */
@@ -61,6 +66,9 @@ export interface ConsoleRouteOptions extends ConsoleConfig {
   build?: BuildInfo;
   now?: () => Date;
 }
+
+/** #168: a file from the chat box. */
+type UploadedFile = { bytes: Uint8Array; contentType: string; name: string };
 
 /** Longest message the chat box takes. */
 export const MAX_CHAT_CHARS = 2000;
@@ -81,6 +89,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.addContentTypeParser("application/x-www-form-urlencoded", { parseAs: "string" }, (_req, body, done) => {
     done(null, Object.fromEntries(new URLSearchParams(body as string)));
   });
+  // #168: the chat box can carry one file, at most Sendblue's limit.
+  await app.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 4 } });
 
   const routing = opts.routing ?? PRODUCTION_ONLY;
   const html = (reply: FastifyReply, page: string, code = 200) =>
@@ -129,16 +139,13 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   };
 
   /** A founder's line in the console chat, answered by the console coach in the background (spec 4). */
-  const chatLine = async (request: FastifyRequest, reply: FastifyReply, tester: Tester, name: string, body: string) => {
+  const chatLine = async (request: FastifyRequest, reply: FastifyReply, tester: Tester, name: string, body: string, file?: UploadedFile) => {
     const id = tester.id;
     const now = testerNow(tester, clock());
-    const { needsAnswer } = await postFounderMessage(opts.db, {
-      tester,
-      founder: name,
-      body,
-      now,
-      elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
-    });
+    const elsewhere = owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route);
+    // #168: kept in our private bucket on their line (never for a number this app doesn't text).
+    const attachment = file && !elsewhere && opts.media ? { key: await storeAttachment(opts.media, id, file), contentType: file.contentType, name: file.name } : undefined;
+    const { needsAnswer } = await postFounderMessage(opts.db, { tester, founder: name, body, now, elsewhere, ...(attachment ? { attachment } : {}) });
     if (needsAnswer) {
       const answer = async () => {
         try {
@@ -329,11 +336,31 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.post("/console/testers/:id/chat", action(async (request, reply, name) => {
     const { id } = request.params;
     if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
-    const body = request.body?.text?.trim();
-    if (!body || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters is needed` });
+    // #168: with a file, the form is multipart; the file alone is a message too.
+    let text = request.body?.text;
+    let file: UploadedFile | undefined;
+    if (request.isMultipart()) {
+      try {
+        for await (const part of request.parts()) {
+          if (part.type === "file") {
+            const bytes = await part.toBuffer();
+            if (part.filename && bytes.length) file = { bytes: new Uint8Array(bytes), contentType: part.mimetype || "application/octet-stream", name: part.filename };
+          } else if (part.fieldname === "text") text = String(part.value);
+        }
+      } catch (err) {
+        if (err instanceof app.multipartErrors.RequestFileTooLargeError) {
+          const why = "That file is over 100 MB, Sendblue's limit, so it wasn't attached.";
+          return (await testerHtml(reply, id, "console", name, `Not sent: ${why}`, 413)) ?? reply.code(413).send({ error: why });
+        }
+        throw err;
+      }
+    }
+    const body = text?.trim() ?? "";
+    if ((!body && !file) || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters, or a file, is needed` });
+    if (file && !opts.media) return reply.code(503).send({ error: "files can't be attached here (no bucket set up)" });
     const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
     if (!tester) return reply.code(404).send({ error: "not found" });
-    return chatLine(request, reply, tester, name, body);
+    return chatLine(request, reply, tester, name, body, file);
   }));
 
   // #155: a founder confirms what the console chat drafted. It happens once, re-checked as things stand now.
@@ -346,7 +373,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't act for them.`;
       return (await testerHtml(reply, id, "console", name, `Not done: ${why}`, 409)) ?? reply.code(409).send({ error: why });
     }
-    const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()) });
+    const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()), files: { media: opts.media, sendblue: opts.sendblue } });
     if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not done: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
     return back(reply, id, "chat");
   }));
@@ -359,6 +386,34 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     const done = await editDraft(opts.db, { testerId: id, draftId: did, founder: name, now: await nowFor(id), change: (input) => ({ ...input, alert_on_answer: on }) });
     if (!done.ok) return reply.code(409).send({ error: done.error });
     return back(reply, id, "chat");
+  }));
+
+  // #168: a founder edits a card's words before Do it (a word-for-word text, or what ZOH brings up).
+  app.post("/console/testers/:id/drafts/:did/edit", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const words = request.body?.text?.trim();
+    if (!words || words.length > 1000) return reply.code(400).send({ error: "1 to 1000 characters are needed" });
+    const [draft] = await opts.db.select().from(consoleMessages).where(and(eq(consoleMessages.id, did), eq(consoleMessages.testerId, id), eq(consoleMessages.kind, "draft")));
+    const field = draft?.draftAction === "send_text" ? "words" : draft?.draftAction === "plan_request" ? "what" : undefined;
+    if (!field) return reply.code(409).send({ error: "only a text's or a request's words can be edited here" });
+    const done = await editDraft(opts.db, { testerId: id, draftId: did, founder: name, now: await nowFor(id), change: (input) => ({ ...input, [field]: words }) });
+    if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not saved: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
+    return back(reply, id, "chat");
+  }));
+
+  // #168: a file the founders attached in the chat, streamed from our private bucket.
+  app.get("/console/testers/:id/files/:mid", action(async (request, reply) => {
+    const { id, mid: fid } = request.params;
+    if (!isUuid(id) || !isUuid(fid) || !opts.media) return reply.code(404).send({ error: "not found" });
+    const [line] = await opts.db.select().from(consoleMessages).where(and(eq(consoleMessages.id, fid), eq(consoleMessages.testerId, id)));
+    const object = line?.mediaKey ? await opts.media.get(line.mediaKey) : undefined;
+    if (!line || !object) return reply.code(404).send({ error: "not found" });
+    return reply
+      .header("cache-control", "private, no-store")
+      .header("content-disposition", `inline; filename="${(line.mediaName ?? "file").replace(/["\\\r\n]/g, "_")}"`)
+      .type(line.mediaContentType ?? object.contentType)
+      .send(Buffer.from(object.bytes));
   }));
 
   app.post("/console/testers/:id/drafts/:did/cancel", action(async (request, reply, name) => {

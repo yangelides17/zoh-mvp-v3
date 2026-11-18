@@ -457,11 +457,15 @@ async function sendExact(
   }
   const logCtx = { contact: maskNumber(tester.phone), kind: EXACT_MOMENT };
   try {
-    const sent = await deps.sendblue.sendMessage({ number: tester.phone, content: request.body });
+    // #168: a founder's file goes with it, from Sendblue's media host (uploaded at Do it).
+    const sent = await deps.sendblue.sendMessage({ number: tester.phone, content: request.body, ...(request.sendblueMediaUrl ? { mediaUrl: request.sendblueMediaUrl } : {}) });
     const message = await insertOutbound(db, {
       contactNumber: tester.phone,
       lineNumber: deps.lineNumber ?? null,
       content: request.body,
+      ...(request.sendblueMediaUrl
+        ? { mediaUrl: request.sendblueMediaUrl, mediaKey: request.mediaKey, mediaContentType: request.mediaContentType, description: request.mediaAccount?.slice(0, 500) ?? null }
+        : {}),
       sendblueHandle: sent.messageHandle ?? null,
       status: sent.status ?? null,
       inReplyTo: null,

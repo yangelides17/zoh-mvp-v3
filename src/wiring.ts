@@ -13,7 +13,7 @@ import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
 import { HOLDING_AFTER_MS, routingOf, type Logger } from "./pipeline/inbound.js";
-import { createSendblueClient } from "./sendblue/client.js";
+import { createSendblueClient, type SendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
 import { ReplyLines } from "./pipeline/conversation.js";
@@ -40,6 +40,7 @@ export function appDeps(
   const media = pick("media", () => makeMedia(config));
   // One video watcher: the pipeline watches new videos, the coach re-watches one with a question (#163).
   const watcher = pick("watcher", () => (config.gemini.apiKey ? createGeminiWatcher({ apiKey: config.gemini.apiKey, model: config.gemini.model }) : undefined));
+  const sendblue = pick("sendblue", () => makeSendblue(config));
   const deps: AppDeps = {
     pipeline: {
       ...overrides,
@@ -51,7 +52,7 @@ export function appDeps(
       build: pick("build", buildInfo),
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       lines: pick("lines", () => new ReplyLines({ holdMs: config.typingHoldSeconds * 1000, graceMs: Math.round(config.replyGraceSeconds * 1000) })),
-      sendblue: pick("sendblue", () => makeSendblue(config)),
+      sendblue,
       replier: pick("replier", () => makeCoach(config, db, media, watcher)),
       media,
       watcher,
@@ -63,7 +64,7 @@ export function appDeps(
     },
     webhookSecret: config.sendblue.webhookSecret,
     console: config.console,
-    consoleCoach: makeConsoleCoach(config, db),
+    consoleCoach: makeConsoleCoach(config, db, { media, sendblue, watcher }),
     missingSettings: () => missingSettings(config),
     logger: {
       level: config.logLevel,
@@ -192,10 +193,11 @@ function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watche
 }
 
 /** The console chat's coach: the texting coach's model and effort. */
-function makeConsoleCoach(config: Config, db: Db) {
+function makeConsoleCoach(config: Config, db: Db, files: { media?: MediaStore; sendblue?: SendblueClient; watcher?: VideoWatcher }) {
   return config.claude.apiKey
     ? createConsoleCoach({
         db,
+        ...files,
         goalCap: config.goalCap,
         model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium", timeoutMs: WEB_TIMEOUT_MS }),
       })

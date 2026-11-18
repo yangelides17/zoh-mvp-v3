@@ -41,11 +41,12 @@ export const findRequest = (list: ConsoleMessage[], ref: string): ConsoleMessage
 /** One line in a tester's console thread. */
 export async function addThreadLine(
   db: Db,
-  line: { testerId: string; kind: "founder" | "coach" | "note"; author: string; body: string; at: Date },
+  line: { testerId: string; kind: "founder" | "coach" | "note"; author: string; body: string; at: Date; attachment?: { key: string; contentType: string; name: string } },
 ): Promise<ConsoleMessage> {
+  const file = line.attachment ? { mediaKey: line.attachment.key, mediaContentType: line.attachment.contentType, mediaName: line.attachment.name } : {};
   const [row] = await db
     .insert(consoleMessages)
-    .values({ testerId: line.testerId, kind: line.kind, author: line.author, body: line.body, createdAt: line.at })
+    .values({ testerId: line.testerId, kind: line.kind, author: line.author, body: line.body, createdAt: line.at, ...file })
     .returning();
   return row!;
 }
@@ -66,6 +67,8 @@ export async function addRequest(
     /** #169: a question whose answer comes back to the founders (an alert unless `alertOnAnswer` is false). */
     question?: boolean;
     alertOnAnswer?: boolean;
+    /** #168: a founder's file sent with it (word for word only), already on Sendblue's media host. */
+    media?: { key: string; contentType: string; name: string; account: string; partial: boolean; sendblueUrl: string };
   },
 ): Promise<ConsoleMessage> {
   const [row] = await db
@@ -74,6 +77,16 @@ export async function addRequest(
       testerId: opts.testerId,
       question: opts.question ?? false,
       alertOnAnswer: opts.alertOnAnswer ?? true,
+      ...(opts.media
+        ? {
+            mediaKey: opts.media.key,
+            mediaContentType: opts.media.contentType,
+            mediaName: opts.media.name,
+            mediaAccount: opts.media.account,
+            mediaPartial: opts.media.partial,
+            sendblueMediaUrl: opts.media.sendblueUrl,
+          }
+        : {}),
       kind: "request",
       author: opts.author,
       body: opts.body,
