@@ -144,6 +144,13 @@ describe("which parts each reply loads (#200)", () => {
     expect(FIXED_INSTRUCTIONS).toContain(GUIDANCE["Plan agreement"]);
   });
 
+  it("a reply that can propose the next step also reads today's step, where it's chosen (#164)", () => {
+    for (const { name, state: s, reach } of CASES.filter((c) => !c.state.nudgeMoment)) {
+      const parts = partsFor(s, reach);
+      if (parts.includes("nextStep")) expect(parts, name).toContain("todaysStep");
+    }
+  });
+
   it("every moment that applies has its guidance in what loads", () => {
     for (const { name, state: s, reach } of CASES) {
       const text = read(s, reach);

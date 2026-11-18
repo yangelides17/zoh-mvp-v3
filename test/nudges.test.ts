@@ -767,7 +767,7 @@ describe("the state block for an active tester", () => {
     const block = buildStateBlock(state);
     expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
     // #199: picking it and saving it is TODAY'S STEP's guidance, not the sheet's.
-    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
+    expect(TODAYS_STEP).toContain("Today's: the first time you talk about today");
     expect(TODAYS_STEP).toContain("set_today_step saves it");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
     await doneWithPhoto("full", at(MON, "20:40"), "10 pages");

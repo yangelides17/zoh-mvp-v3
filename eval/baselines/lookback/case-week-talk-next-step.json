@@ -2,12 +2,12 @@
   "feature": "lookback",
   "id": "case:week-talk-next-step",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:19:56.692Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T18:37:34.852Z",
+  "branch": "feature/164-165-next-step-week-goal",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "9d00d75f8fec",
-    "voice": "b413875b3c11",
+    "voice": "5f06fba6ce15",
     "instructions": "c7348af58300",
     "script": "9db8f52cf2ec"
   },
@@ -91,31 +91,31 @@
                 "rule": "recap",
                 "pass": true,
                 "borderline": false,
-                "reason": "Four backed pieces: all 6 days done, white cross to middle layer edges, best time 4:10 to 3:05, Saturday without the guide. Framed as progress, ends with one question."
+                "reason": "Four progress bullets (6 days in full, white cross to middle layer edges, best time 4:10 to 3:05, edge insert applied without the guide), then one question."
               },
               {
                 "rule": "no-inflation",
                 "pass": true,
                 "borderline": false,
-                "reason": "Only the edge insert is called applied. The solved-layer-on-bottom lesson is not claimed as understood."
+                "reason": "Says the edge insert 'finally makes sense' after applying it; does not claim the solved-layer lesson as understood."
               },
               {
                 "rule": "grounded",
                 "pass": true,
                 "borderline": false,
-                "reason": "Every number and day matches the step log and proof record."
-              },
-              {
-                "rule": "short",
-                "pass": true,
-                "borderline": false,
-                "reason": "A recap list of about 6 short lines with one closing question, within the recap allowance."
+                "reason": "Day count, step sequence and times all match the step log."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, energetic, one emoji as punctuation, no row."
+                "reason": "Warm and energetic with a single emoji at the end of a line."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Recap list of four short lines plus one closing question, within the recap allowance."
               }
             ]
           },
@@ -123,22 +123,22 @@
             "zohText": 2,
             "checks": [
               {
-                "rule": "grounded",
-                "pass": true,
-                "borderline": true,
-                "reason": "The next step matches the saved step; the destination is restated as 'by Saturday Nov 14' without a saved change_plan."
-              },
-              {
                 "rule": "short",
                 "pass": true,
                 "borderline": true,
-                "reason": "Several sentences plus a warm-up instruction, but it is one defined step with one question at the end."
+                "reason": "Runs about five sentences, but it presents a defined step, which allows a longer text; one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic and specific, one emoji, no overfamiliarity."
+                "reason": "Warm, specific, with one emoji as punctuation; no overfamiliarity."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "Adopts the tester's whole-cube-by-Saturday idea as 'That's the goal' without saving it as a destination or checking it with them."
               }
             ]
           },
@@ -149,13 +149,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences ending with one question."
+                "reason": "Three short sentences ending in one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm reply to the juggling idea with one emoji. 'Let me think on it' fits."
+                "reason": "Warm 'Love that' with a single emoji; the juggling deferral is friendly."
               }
             ]
           },
@@ -166,38 +166,32 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "One confirmation line with no question, as requested after 'yeah ok'."
+                "reason": "Two short sentences with no question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, hype-level energy, one emoji."
+                "reason": "Brief, hype-appropriate confirmation with one emoji."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "natural-turn",
-            "pass": true,
-            "borderline": false,
-            "reason": "The recap answers the tester's 'how'd I do this week' directly, so the switch into the week feels natural."
-          },
-          {
             "rule": "next-step",
             "pass": true,
             "borderline": true,
-            "reason": "Ends with a fully defined Monday step (yellow cross, 9 pm, desk, 15 min, screenshot) and asks if it works; the warm-up adds some extra detail."
+            "reason": "Monday's step is fully defined (yellow cross, 9 pm, desk, 15 min, timer screenshot) and asked if it works, but the same reply pushes the destination."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "Juggling was not passed to the team: no suggest_next_step was saved. ZOH 3 also re-asks the step question and restates 'finish the last layer by Saturday', leaning toward pushing the destination."
+            "reason": "Juggling got 'let me think on it' but no suggest_next_step was saved, and ZOH pushed the 'finish by Saturday' destination in ZOH 3."
           }
         ],
-        "summary": "ZOH gave an accurate, well-grounded week recap with no inflated claims and a fully defined Monday step that the tester confirmed. It handled the juggling idea warmly but never passed it to the team, and it restated the destination deadline and repeated the step question, so the regression case fails."
+        "summary": "ZOH gave a solid, grounded recap with four real pieces of progress and one question, and set a fully defined Monday step that the tester confirmed. It missed the regression case: the juggling idea was never passed to the team and the Saturday goal was pushed rather than taken lightly."
       }
     }
   ]

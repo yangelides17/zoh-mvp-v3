@@ -1,0 +1,46 @@
+{
+  "id": "struggle-targeted-help",
+  "suite": "capability",
+  "title": "Done, but the hard part didn't work: the next step holds the level, with help aimed at that part and another try",
+  "origin": "Issue #164 (a well-defined next step), walkthrough case 2",
+  "seed": {
+    "name": "Theo",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "learn piano, I can read music a little", "where": "at my keyboard", "when": "7 pm", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Evening Theo! Tonight: the first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7. Voice note of you playing when you're done." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Practice Gymnopédie No. 1, slow, 15 min",
+      "destination": "play the first 16 bars of Gymnopédie No. 1 hands together, slowly, by Sunday",
+      "place": "at the keyboard",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+      "proof": "voice",
+      "proof_note": "a voice note of you playing",
+      "reason": "Hearing yourself back is how you catch what to fix.",
+      "minutes": 15,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 4, "status": "done", "step": "First 8 bars, right hand only, slow, 15 min", "proof_seen": "voice: right hand, steady" },
+      { "days_ago": 3, "status": "done", "step": "First 8 bars, left hand only, slow, 15 min", "proof_seen": "voice: left hand, a few stops at the jumps" },
+      { "days_ago": 2, "status": "done", "step": "First 4 bars hands together, slow, 15 min", "proof_seen": "voice: bars 1 to 4 hands together, steady", "reflection": "hands together felt weird at first, then clicked" }
+    ],
+    "today_step": { "step": "The first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7 pm", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "[voice: (piano) bars 1 to 4 hands together, steady; at bar 5 the left hand jumps and misses, stops, restarts bar 5, stops again, then plays 6 to 8 unevenly] done, bar 5 keeps falling apart though",
+    "I think the left hand jump is too far and I kind of panic before it",
+    "yeah that's probably it",
+    "ok yeah"
+  ],
+  "whatWentWrong": "New case, not a past mistake (#164).",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates bars 1 to 4 holding up hands together. It's curious about bar 5 and hears that the left-hand jump feels too far and he panics before it. Since the recording shows bars 5 to 8 aren't there yet, the next step doesn't move up (no bars 9 to 16 yet): it's another try at the same passage, with help aimed at the jump (for example practicing just the jump on its own, eyes on the landing note, or bar 5 slower than the rest before playing 1 to 8). Warm, no blame, fully defined, asked if it works. After 'ok yeah' a short confirmation.",
+  "areaCode": "212",
+  "startTime": "19:30",
+  "timeZone": "America/New_York"
+}

@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:routine-day-not-forced",
   "suite": "capability",
-  "storedAt": "2026-11-18T06:22:28.633Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T18:35:10.394Z",
+  "branch": "feature/164-165-next-step-week-goal",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "30537913bc3b",
-    "voice": "b413875b3c11",
+    "voice": "81c33e6b3872",
     "instructions": "c7348af58300",
     "script": "a2fab5f24088"
   },
@@ -64,13 +64,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end, within the short-text limit."
+                "reason": "Two short sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, pushy-level energy with a single emoji used as punctuation, not overfamiliar."
+                "reason": "Warm, playful energy with a single emoji as punctuation."
               }
             ]
           },
@@ -81,13 +81,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Goodnight plus restated plan and one question at the end, short overall."
+                "reason": "Two short lines with one question at the end, and the step isn't agreed yet, so asking is fine."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short warm goodnight with a single emoji; no overfamiliarity."
+                "reason": "Warm goodnight with one emoji and a light Greek sign-off."
               }
             ]
           }
@@ -95,12 +95,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "No learning or noticing question after the routine photo; ZOH celebrates briefly and says a short goodnight, though the sleep-hours question on a rushed night is a bit of fishing and 'four nights in a row' isn't verifiable from the shown state."
+            "pass": false,
+            "borderline": false,
+            "reason": "After 'night!' the reply should be a short goodnight, but ZOH 2 adds a plan recap and a 'Work for you?' question. ZOH 1's sleep-hours question is a light question, not a learning question, so the photo handling itself is fine."
           }
         ],
-        "summary": "ZOH avoided the regression: it celebrated the routine photo without asking what Rosa learned or noticed, and closed with a short goodnight plus tomorrow's plan. The one soft spot is a sleep-hours question asked right after a rushed 'night!', and the 'four nights' count can't be checked against the state shown."
+        "summary": "ZOH counted the dark selfie warmly, didn't ask what Rosa learned, and kept its first reply light. It missed the regression case's core: after 'night!' it should have said a short goodnight, not restated tomorrow's plan and asked for agreement."
       }
     },
     {
@@ -154,14 +154,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "Three sentences with one question at the end, but the question is a new topic on a routine sleep step."
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": false,
-                "reason": "Warm and playful with one emoji as punctuation; not overfamiliar."
+                "borderline": true,
+                "reason": "Warm and brief with one emoji as punctuation, though 'that squint' describes the dark selfie a little loosely."
               }
             ]
           },
@@ -171,14 +171,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "A short goodnight with no question, though it runs to four short sentences."
+                "borderline": false,
+                "reason": "Short goodnight with no question, as the 'night!' moment calls for."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and brief, with one emoji as punctuation."
+                "reason": "Warm, sincere and one emoji; no overfamiliarity."
               }
             ]
           }
@@ -188,10 +188,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "The photo is counted and praised briefly, and no learning question is asked. The sleep-hours question is one light question, but it is a new topic on a routine step."
+            "reason": "Photo counted and celebrated briefly, with no learned or noticed question. One sleep-hours question was asked at bedtime, which is within the one-light-question allowance but was not needed."
           }
         ],
-        "summary": "ZOH counted the routine proof warmly and asked no learning or noticing question, which avoids the regression. The one sleep-hours question and the unverified 'four in a row' count are the only things a reviewer could score the other way."
+        "summary": "ZOH counted the photo warmly and kept the reply brief, avoiding the 'what did you learn?' trap the regression case warned about. Its one bedtime question about sleep hours was a light extra at a moment when the tester was heading to sleep, and the final goodnight was short."
       }
     },
     {
@@ -246,13 +246,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with one question at the end, within the limit."
+                "reason": "Two sentences with one question at the end, within the short-text limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": true,
-                "reason": "Warm and energetic with one emoji as punctuation, though 'that scrunched face' describes a detail the proof note doesn't mention."
+                "reason": "Warm and energetic with one emoji as punctuation. 'That scrunched face' describes something the photo note doesn't mention."
               }
             ]
           },
@@ -263,13 +263,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences with no question, a clean goodnight."
+                "reason": "Two short sentences, no question, a brief goodnight after 'night!'."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere and brief with one emoji as punctuation; not overfamiliar."
+                "reason": "Warm, sincere and short, with one emoji as punctuation."
               }
             ]
           }
@@ -279,10 +279,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "The photo is counted warmly and briefly, and there is no question about learning or noticing. The one light question asks how the day felt, which is allowed, though it still follows a routine 'same as always' step."
+            "reason": "Photo counted and celebrated briefly, with no learning question and a short goodnight. Borderline: the feel question and 'scrunched face' go beyond the photo note, and the 'Day 4' count can't be checked."
           }
         ],
-        "summary": "ZOH handled the routine bedtime step well: it counted the photo warmly and briefly, and it closed with a short goodnight once Rosa said night. Its one light question about how the day felt is allowed under the regression case, though it's borderline on a routine step and the 'scrunched face' detail is not in the proof note."
+        "summary": "ZOH counted the routine step, asked one light question without chasing it, and closed with a short goodnight, which is the behavior this regression case expects. The main weak spots are an unsupported detail about the selfie's face and a slightly awkward 'Day 4 in the bed' phrasing."
       }
     }
   ]

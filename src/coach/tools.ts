@@ -478,7 +478,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
 
 function planProperties(): Record<string, unknown> {
   return {
-    destination: { type: "string", description: 'Where they\'re headed, if they have somewhere ("run a mile without stopping by Nov 14"); empty removes it' },
+    destination: { type: "string", description: 'Where they\'re headed: a near goal, about 3 to 7 steps out ("jog 5 minutes without stopping by Sunday"); empty removes it' },
     setup_step: { type: "string", description: "One-time step for day 1, only when it helps" },
     step: { type: "string", description: "Day 1's step: what, how much, where when it matters, specific enough to just do it" },
     place: { type: "string" },
