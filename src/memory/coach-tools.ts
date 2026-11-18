@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
+import { clearCoaching, dropStyleNote, markOverridden } from "../coaching/coaching.js";
 import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, type MemoryFact, type Message, type Tester } from "../db/schema.js";
 import { localDate } from "../coach/state.js";
 import { readDocument } from "../media/documents.js";
@@ -25,7 +26,7 @@ export const MAX_SEARCHES = 2;
 const text = (max: number) => z.string().trim().min(1).max(max);
 
 const schemas = {
-  save_preference: z.object({ preference: text(160), replaces: z.array(text(40)).max(5).optional() }).strict(),
+  save_preference: z.object({ preference: text(160), replaces: z.array(text(40)).max(5).optional(), overrides_guidance: z.array(text(40)).max(5).optional() }).strict(),
   open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS) }).strict(),
   search_memory: z.object({ query: text(120) }).strict(),
   open_file: z.object({ ref: text(40), question: text(300).optional() }).strict(),
@@ -48,10 +49,14 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_preference",
     description:
-      'Save something they say about how they want to be coached (style, nudging, proof, timing: "no emojis", "chill out", "voice notes instead of photos"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides.',
+      'Save something they say about how they want to be coached (style, nudging, proof, timing: "no emojis", "chill out", "voice notes instead of photos"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides. overrides_guidance: refs of team guidance lines it goes against (they win; the team is told).',
     input_schema: {
       type: "object",
-      properties: { preference: { type: "string" }, replaces: { type: "array", items: { type: "string" }, description: "f: refs" } },
+      properties: {
+        preference: { type: "string" },
+        replaces: { type: "array", items: { type: "string" }, description: "f: refs" },
+        overrides_guidance: { type: "array", items: { type: "string" }, description: "g: refs" },
+      },
       required: ["preference"],
     },
   },
@@ -122,22 +127,31 @@ export async function runMemoryTool(
 
   switch (name as MemoryToolName) {
     case "save_preference": {
-      const { preference, replaces } = parsed.data as z.infer<typeof schemas.save_preference>;
+      const { preference, replaces, overrides_guidance } = parsed.data as z.infer<typeof schemas.save_preference>;
       const { preferences } = await ensureCorePages(db, tester, at);
-      await addFact(db, preferences, { text: preference, sourceMessageId: ctx.sourceMessageId ?? null, section: "stated", day: localDate(at, tester.timeZone) }, at);
+      await addFact(db, preferences, { text: preference, sourceMessageId: ctx.sourceMessageId ?? null, section: "stated", day: localDate(at, tester.timeZone) }, at, "tester");
       const dropped: MemoryFact[] = [];
       for (const ref of replaces ?? []) {
         const f = await findFact(db, tester.id, ref);
         // Only a learned preference gives way; a stated one stays until they change it themselves.
         if (f?.section === "learned" && f.pageId === preferences.id) {
-          await removeFact(db, f, at);
+          await removeFact(db, f, at, "tester");
           dropped.push(f);
         }
       }
       // Also kept on the tester for the state block, which every phase reads.
       const notes = tester.styleNotes ? `${tester.styleNotes}; ${preference}` : preference;
       const updated = await updateTester(db, tester.id, { styleNotes: notes });
-      const extra = dropped.length ? ` Dropped the learned preference it overrides: ${dropped.map((f) => f.text).join("; ")}.` : "";
+      // #158: their word beats the team's guidance; the line is marked and the founders are told.
+      const clashed: string[] = [];
+      for (const ref of overrides_guidance ?? []) {
+        const line = await markOverridden(db, tester, ref, preference, at);
+        if (line) clashed.push(line.text);
+      }
+      const extra = [
+        dropped.length ? ` Dropped the learned preference it overrides: ${dropped.map((f) => f.text).join("; ")}.` : "",
+        clashed.length ? ` Follow it over the team's guidance: ${clashed.join("; ")}.` : "",
+      ].join("");
       return { ok: true, message: `Preference saved: ${preference}.${extra}`, tester: updated, memoryChanged: true };
     }
 
@@ -183,6 +197,8 @@ export async function runMemoryTool(
         await db.delete(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
         // From here memory reads nothing older, and the overnight pass doesn't refile it.
         const updated = await updateTester(db, tester.id, { memorySince: at, styleNotes: "" });
+        // #158: the team's guidance is often about them too, and the history would keep the old wording.
+        await clearCoaching(db, tester.id, "they asked ZOH to forget everything", at);
         return { ok: true, message: "Forgot everything: memory is empty and older texts won't be read again.", tester: updated, memoryChanged: true };
       }
       if (!facts?.length && !pages?.length && !note) return { ok: false, error: "Give the facts' or pages' refs, a note, or everything: true." };
@@ -205,7 +221,9 @@ export async function runMemoryTool(
       for (const ref of facts ?? []) {
         const f = await findFact(db, tester.id, ref);
         if (!f) return { ok: false, error: `No fact ${ref} for this tester.` };
-        await removeFact(db, f, at);
+        await removeFact(db, f, at, "tester");
+        // #158: a style request also lives on the tester (what onboarding reads): it goes there too.
+        if (f.section === "stated") tester = await dropStyleNote(db, tester, f.text);
         if (f.sourceMessageId) {
           await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: f.sourceMessageId }).onConflictDoNothing();
         }

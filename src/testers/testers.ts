@@ -2,6 +2,8 @@ import { eq, sql, type AnyColumn } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import {
   DEFAULT_QUIET_HOURS,
+  coachingChanges,
+  coachingGuidance,
   consoleMessages,
   flags,
   jumps,
@@ -108,6 +110,9 @@ export async function resetTester(db: Db, tester: Tester, at: Date): Promise<Tes
   if (moved) await moveHistoryBack(db, tester, moved);
   const { timeZone, status } = guessTimeZone(tester.phone);
   await db.delete(memoryFacts).where(eq(memoryFacts.testerId, tester.id));
+  // #158: a fresh start: the team's guidance and its history go too.
+  await db.delete(coachingGuidance).where(eq(coachingGuidance.testerId, tester.id));
+  await db.delete(coachingChanges).where(eq(coachingChanges.testerId, tester.id));
   await db.delete(memoryPages).where(eq(memoryPages.testerId, tester.id));
   await db.delete(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
   await db.delete(planInputs).where(eq(planInputs.testerId, tester.id));

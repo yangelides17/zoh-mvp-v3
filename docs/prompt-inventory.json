@@ -1515,6 +1515,27 @@
    "change": "new"
   },
   {
+   "text": "- [${guidanceRef(x.id)}] ${x.text}${x.overriddenBy ? ` (overridden: they asked \"${x.overriddenBy}\", which wins)` : \"\"}",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines > g",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "(overridden: they asked \"${x.overriddenBy}\", which wins)",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines > g",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "FROM THE TEAM, guidance (lasting, how to coach them where it applies):",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
    "text": "FROM THE TEAM, notes:",
    "file": "src/coach/prompt.ts",
    "where": "threadLines",
@@ -3601,11 +3622,11 @@
    "change": "unchanged"
   },
   {
-   "text": "Save something they say about how they want to be coached (style, nudging, proof, timing: \"no emojis\", \"chill out\", \"voice notes instead of photos\"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides.",
+   "text": "Save something they say about how they want to be coached (style, nudging, proof, timing: \"no emojis\", \"chill out\", \"voice notes instead of photos\"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides. overrides_guidance: refs of team guidance lines it goes against (they win; the team is told).",
    "file": "src/memory/coach-tools.ts",
    "where": "MEMORY_TOOL_DEFINITIONS > save_preference > description",
    "kind": "tool description",
-   "change": "unchanged"
+   "change": "new"
   },
   {
    "text": "f: refs",
@@ -3613,6 +3634,13 @@
    "where": "MEMORY_TOOL_DEFINITIONS > save_preference > description",
    "kind": "tool description",
    "change": "unchanged"
+  },
+  {
+   "text": "g: refs",
+   "file": "src/memory/coach-tools.ts",
+   "where": "MEMORY_TOOL_DEFINITIONS > save_preference > description",
+   "kind": "tool description",
+   "change": "new"
   },
   {
    "text": "Read memory pages in full (p: refs from the index). Up to ${MAX_LOOKUPS} lookups a reply.",
@@ -3685,6 +3713,13 @@
    "change": "unchanged"
   },
   {
+   "text": "Follow it over the team's guidance: ${clashed.join(\"; \")}.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > extra",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
    "text": "Preference saved: ${preference}.${extra}",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > message",
@@ -3718,6 +3753,13 @@
    "where": "runMemoryTool > error",
    "kind": "tool error",
    "change": "unchanged"
+  },
+  {
+   "text": "they asked ZOH to forget everything",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool",
+   "kind": "tool result",
+   "change": "new"
   },
   {
    "text": "Forgot everything: memory is empty and older texts won't be read again.",
@@ -5812,7 +5854,7 @@
    "reason": "what they tell you is kept so they never have to say it twice"
   },
   {
-   "text": "Style requests and other coaching preferences (\"no emojis\", \"chill out\", \"push me harder\", \"voice notes instead of photos\") change your style immediately: confirm in one short line, save them with save_preference, and follow them from then on. Saved style notes override everything about style.",
+   "text": "Style requests and other coaching preferences (\"no emojis\", \"chill out\", \"push me harder\", \"voice notes instead of photos\") change your style immediately: confirm in one short line, save them with save_preference, and follow them from then on. Saved style notes override everything about style, team guidance included: name the line it overrides in overrides_guidance.",
    "file": "docs/coach-voice.md",
    "where": "Saving, style and requests (rules: tools)",
    "kind": "rule",
@@ -6676,7 +6718,7 @@
    "reason": "You're their one point of contact, as you will be when you run on your own"
   },
   {
-   "text": "- A note is context: let it shape how you coach; never quote it or say where it came from.",
+   "text": "- Notes and guidance are context: let them shape how you coach where they apply, never the topic of a text; never quote them or say where they came from.",
    "file": "docs/coach-voice.md",
    "where": "The team (rules: team)",
    "kind": "rule",

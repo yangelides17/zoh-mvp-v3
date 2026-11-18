@@ -1,5 +1,6 @@
 import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
+import { guidanceRef } from "../coaching/guidance.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState, type ReflectionClose } from "./state.js";
@@ -32,7 +33,8 @@ export const PROMPT_BUDGET_CHARS = {
   examples: 800,
   /** The voice page without its rule sections. #211: +150 for why ZOH reflects (Proof). */
   voice: 26_900,
-  tools: 2800,
+  // #158: +60 for their style request beating team guidance, naming the line it overrides.
+  tools: 2860,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
   // #201 review: +160 for rest days where the step needs recovery (Yanni, Nov 16).
@@ -53,7 +55,8 @@ export const PROMPT_BUDGET_CHARS = {
   nextStepsTeam: 800,
   // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
   // #169: +100 for the team question line (ask once, listen, never chase).
-  team: 850,
+  // #158: +50 for guidance alongside notes: where it applies, never the topic of a text.
+  team: 900,
   memory: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
@@ -306,7 +309,7 @@ export function moments(s: CoachState): Moment[] {
       m.push("Next steps and maintenance");
     }
   }
-  if (s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
+  if (s.guidance.length || s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
   // Paused or stopped: the guidance for both is in the saving rules, read in every phase (onboarding too).
   if (s.pause || s.stopped) m.push("Saving, style and requests");
   return m;
@@ -647,6 +650,10 @@ function weekProgress(w: WeekLookback, plan: Plan, which: string): string[] {
 function threadLines(s: CoachState, plan: Plan | undefined): string[] {
   const lines: string[] = [];
   const day = (at: Date) => new Intl.DateTimeFormat("en-US", { timeZone: s.tester.timeZone, month: "short", day: "numeric" }).format(at);
+  if (s.guidance.length) {
+    const g = s.guidance.map((x) => `- [${guidanceRef(x.id)}] ${x.text}${x.overriddenBy ? ` (overridden: they asked "${x.overriddenBy}", which wins)` : ""}`);
+    lines.push(`FROM THE TEAM, guidance (lasting, how to coach them where it applies):\n${g.join("\n")}`);
+  }
   if (s.teamNotes.length) lines.push(`FROM THE TEAM, notes:\n${s.teamNotes.map((n) => `- ${day(n.createdAt)}: ${n.body}`).join("\n")}`);
   const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
   if (!s.nudgeMoment) {

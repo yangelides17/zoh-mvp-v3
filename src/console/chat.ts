@@ -8,6 +8,8 @@ import { buildStateBlock } from "../coach/prompt.js";
 import { loadCoachState, localTime } from "../coach/state.js";
 import { loadVoiceDoc, splitVoicePage } from "../coach/voice.js";
 import type { Db } from "../db/client.js";
+import { addGuidance } from "../coaching/coaching.js";
+import { GUIDANCE_MAX_CHARS, GUIDANCE_MAX_LINES, listGuidance } from "../coaching/guidance.js";
 import {
   consoleMessages,
   MIN_DAYS_PER_WEEK,
@@ -64,7 +66,7 @@ Answering the founders:
 - Plain and short: a line or two (a few for a real question). No markdown.
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess. Count misses and streaks from the state, never estimate them.
 - Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so, and don't ask whether to go ahead: the card's buttons ask. They want it different: a new draft with replaces = the old one's id.
-- Context for how to coach them ("traveling next week, go easy"): save_note.
+- Context for now ("traveling next week, go easy"): save_note. How to coach them from now on ("remember to push her harder on weekends", "more curious with him"): add_guidance, one short line; if it goes against something they asked for themselves (their preferences in memory), say so in the draft: their request wins.
 - Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. Asking them something: question, and their answer comes back as an alert (alert_on_answer false only if the founders say they don't need to hear). When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
 - Asked to find something for them (a guide, an article, an answer): web search and open the best page, then plan_request it with the one link and a line on why it's for them. A link in a request is one you opened or watched (watch_video, YouTube only) in this answer, theirs included, so it says what's really there.
 - A file they attached ([attached …, file id]: what's in it): send_text with file. Their words if they gave any; else one line in your voice, true to what's in it (its length, what it shows) and tied to their step. They can edit it on the card. A file you couldn't read: say so; never guess.
@@ -183,6 +185,27 @@ export const CAPABILITIES: Record<string, Capability> = {
         apply: async () => {
           await addThreadLine(ctx.db, { testerId: ctx.tester.id, kind: "note", author: ctx.founder, body: note, at: ctx.now });
           return "Note saved.";
+        },
+      };
+    },
+  },
+  add_guidance: {
+    tool: {
+      name: "add_guidance",
+      description: `Draft a lasting guidance line for how to coach this tester ("more curious with her: ask what she noticed"), at most ${GUIDANCE_MAX_CHARS} characters. Once confirmed it's on their Coaching card and the texting coach reads it on every text, never quoting it. clashes_with: their own request it goes against, if any (theirs wins).`,
+      input_schema: { type: "object", properties: { line: { type: "string" }, clashes_with: { type: "string" } }, required: ["line"] },
+    },
+    async prepare(ctx, input) {
+      const { line, clashes_with } = parse(z.object({ line: text(GUIDANCE_MAX_CHARS), clashes_with: text(200).optional() }).strict(), input);
+      if ((await listGuidance(ctx.db, ctx.tester.id)).length >= GUIDANCE_MAX_LINES) {
+        throw new CapabilityError(`They already have ${GUIDANCE_MAX_LINES} guidance lines: the founders should edit or remove one on the Coaching card first.`);
+      }
+      const clash = clashes_with ? ` Note: they asked "${clashes_with}" themselves, and their request wins.` : "";
+      return {
+        summary: `Add to ${nameOf(ctx.tester)}'s team guidance (ZOH reads it on every text, never quotes it): "${line}".${clash}`,
+        apply: async () => {
+          await addGuidance(ctx.db, ctx.tester, line, ctx.founder, ctx.now);
+          return "Added to their guidance.";
         },
       };
     },
