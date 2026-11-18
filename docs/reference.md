@@ -115,6 +115,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   "Send exactly this" and "Send now" boxes are gone: word-for-word texts go through a draft too. A
   founder's change to the tester's plan is only a proposal ZOH raises; the plan changes on the tester's
   yes (with their tweak), with no plan-review alert. A stop cancels queued texts and open proposals.
+  Since #214 a draft also shows under Needs You until it's confirmed or cancelled (reversing #155's "a
+  draft lives only in chat"), and a founder's proposal (plan change or next step) goes on ZOH's next text
+  (default), with the morning text, or now as ZOH's own text; a "now" that can't go waits for the next text
+  and the founders get an alert.
   The console chat reads only the voice page's voice, not its rule sections (#196, Yanni, Nov 16): if it seems
   confused about why ZOH did something in practice, that may be why (see the note in `src/console/chat.ts`).
 - Pause (#12): a break the tester asks for, kept in `pauses` (separate from the automatic pause after
