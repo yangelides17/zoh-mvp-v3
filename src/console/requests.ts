@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
+import { raiseAlert } from "./alerts.js";
 import { consoleMessages, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
 
 /**
@@ -12,6 +13,8 @@ import { consoleMessages, type ConsoleMessage, type RequestDelivery, type Tester
 /** Notes the texting coach reads: the newest this many, from the last `NOTE_DAYS` days. */
 export const NOTES_SHOWN = 10;
 export const NOTE_DAYS = 30;
+/** #155: an alert for a founder text or request that couldn't go out (dropped, or the send failed). */
+export const NOT_SENT_TOPIC = "not_sent";
 /** The console coach's name on its lines in the thread. */
 export const COACH_AUTHOR = "zoh";
 /** The app's own lines in the thread ("Done", "Queued word for word"): updates, not the coach's answers. */
@@ -100,8 +103,44 @@ export async function cancelRequest(db: Db, opts: { testerId: string; requestId:
 }
 
 /**
- * Closes a pending request (done when the coach carried it, sent for an exact text) and says so in
- * the thread. Only the first close counts; undefined if it was already closed.
+ * #155: claims a pending request for the text going out now, so a cancel can't race it (Cancel only
+ * takes pending ones). False when it's no longer pending (cancelled, or another tick has it).
+ */
+export async function claimRequest(db: Db, requestId: string, at: Date): Promise<boolean> {
+  const rows = await db
+    .update(consoleMessages)
+    .set({ requestStatus: "sending", claimedAt: at })
+    .where(and(eq(consoleMessages.id, requestId), eq(consoleMessages.requestStatus, "pending")))
+    .returning({ id: consoleMessages.id });
+  return rows.length > 0;
+}
+
+/** The request a text being written now carries: pending or claimed for it, this tester's only. */
+export async function claimedRequest(db: Db, testerId: string, requestId: string): Promise<ConsoleMessage[]> {
+  return db
+    .select()
+    .from(consoleMessages)
+    .where(
+      and(
+        eq(consoleMessages.id, requestId),
+        eq(consoleMessages.testerId, testerId),
+        eq(consoleMessages.kind, "request"),
+        inArray(consoleMessages.requestStatus, ["pending", "sending"]),
+      ),
+    );
+}
+
+/** Hands a claimed request back when its text didn't go out after all (skipped, held, a retry). */
+export async function releaseRequest(db: Db, requestId: string): Promise<void> {
+  await db
+    .update(consoleMessages)
+    .set({ requestStatus: "pending" })
+    .where(and(eq(consoleMessages.id, requestId), eq(consoleMessages.requestStatus, "sending")));
+}
+
+/**
+ * Closes a pending or claimed request (done when the coach carried it, sent for an exact text) and
+ * says so in the thread. Only the first close counts; undefined if it was already closed.
  */
 export async function closeRequest(
   db: Db,
@@ -110,7 +149,7 @@ export async function closeRequest(
   const [row] = await db
     .update(consoleMessages)
     .set({ requestStatus: opts.status, doneAt: opts.at, messageId: opts.messageId })
-    .where(and(eq(consoleMessages.id, opts.request.id), eq(consoleMessages.requestStatus, "pending")))
+    .where(and(eq(consoleMessages.id, opts.request.id), inArray(consoleMessages.requestStatus, ["pending", "sending"])))
     .returning();
   if (row) await addThreadLine(db, { testerId: row.testerId, kind: "coach", author: APP_AUTHOR, body: opts.line, at: opts.at });
   return row;
@@ -171,6 +210,37 @@ export async function expireRequests(db: Db, tester: Tester, now: Date, blockedB
   for (const r of rows) {
     const short = r.body.length > 100 ? `${r.body.slice(0, 97)}...` : r.body;
     await addThreadLine(db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: `Didn't go out in time (${blockedBy}), so I dropped it: ${short}`, at: now });
+    // #155: what couldn't go out is worth a founder's look.
+    await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_sent:${r.id}`, body: `Didn't go out (${blockedBy}): ${short}`, at: now });
+  }
+  return rows.length;
+}
+
+/** #188: a send takes well under a minute; a request claimed longer ago than this was left by a crash. */
+export const STUCK_SENDING_MS = 15 * 60_000;
+
+/**
+ * #188: cancels requests left "sending" by a crash or an error before the send finished, and says so
+ * in the thread with a not-sent alert. Never retried: the text may already have reached the tester.
+ */
+export async function cancelStuckRequests(db: Db, tester: Tester, now: Date): Promise<number> {
+  const rows = await db
+    .update(consoleMessages)
+    .set({ requestStatus: "cancelled", doneAt: now })
+    .where(
+      and(
+        eq(consoleMessages.testerId, tester.id),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.requestStatus, "sending"),
+        // Claimed before claimedAt was recorded: no send runs across a deploy, so it's stuck too.
+        or(isNull(consoleMessages.claimedAt), lte(consoleMessages.claimedAt, new Date(now.getTime() - STUCK_SENDING_MS))),
+      ),
+    )
+    .returning();
+  for (const r of rows) {
+    const short = r.body.length > 100 ? `${r.body.slice(0, 97)}...` : r.body;
+    await addThreadLine(db, { testerId: tester.id, kind: "coach", author: APP_AUTHOR, body: `May not have gone out (the app stopped while sending it): check their messages and resend if needed: ${short}`, at: now });
+    await raiseAlert(db, { testerId: tester.id, topic: NOT_SENT_TOPIC, key: `not_sent:${r.id}`, body: `May not have gone out: check their thread and resend if needed: ${short}`, at: now });
   }
   return rows.length;
 }
@@ -199,6 +269,7 @@ export async function pendingExact(db: Db, testerId: string, now: Date): Promise
         eq(consoleMessages.requestStatus, "pending"),
         eq(consoleMessages.exact, true),
         or(isNull(consoleMessages.dueAt), lte(consoleMessages.dueAt, now)),
+        or(isNull(consoleMessages.expiresAt), gt(consoleMessages.expiresAt, now)),
       ),
     )
     .orderBy(asc(consoleMessages.createdAt));

@@ -1,0 +1,141 @@
+{
+  "feature": "memory",
+  "id": "case:week-one",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "bc59b542b333",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "04b5f2d3752d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:week-one",
+        "kind": "case",
+        "id": "week-one",
+        "title": "Day 3: memory doesn't make ZOH act like an old friend",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "11:05",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Leo, 50 minutes on the thesis at the library at 10.",
+          "at": "2026-11-01T20:01:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done, did the lit review section",
+          "at": "2026-11-01T20:02:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 2. Lit review moving.",
+          "at": "2026-11-01T20:03:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "done. phone was in my bag this time",
+          "at": "2026-11-02T16:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Phone in the bag is a big move after day 1. Love that. Send me the focus timer screenshot and I'll lock in today's check mark. Real proof keeps it honest.",
+          "at": "2026-11-02T16:05:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ugh the methods section is gonna be brutal tomorrow",
+          "at": "2026-11-02T16:05:37.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Methods sections are a grind, and you've already shown you can sit down and do the work. What makes it feel brutal: the writing itself, or knowing where to start? Also, I still need that focus timer screenshot from today's block to lock in the check mark.",
+          "at": "2026-11-02T16:05:44.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "memory": "--- At the start of the conversation ---\np:049964ef · Leo (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Got distracted by his phone on day 1 (Oct 31)\n- PhD student writing his thesis (Oct 31)\n\np:3e4a7ca0 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:4ba1b1e3 · Goal: Focus & get more done [goal]\nFocused, distraction-free work on what matters to them\n(nothing saved yet)\nStep path, first to latest: v1 (Oct 29): 50 minutes of focused thesis work (current)\nCurrent plan: step: 50 minutes of focused thesis work; where: the library; at 10:00, Mon, Tue, Wed, Thu, Fri; takes 50 min; proof: screenshot (the focus timer); reason: One protected block a day finishes a thesis.\n\np:d715c9b7 · Sun Nov 1 · Day 2, lit review [daily]\n50 minutes on the lit review.\nDone at the library.\n\np:48df2b7f · Sat Oct 31 · Day 1, phone distraction [daily]\nDid the block but checked his phone a lot.\nLeo did 50 minutes but said he kept checking his phone.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done\n\n--- At the end ---\np:049964ef · Leo (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Got distracted by his phone on day 1 (Oct 31)\n- PhD student writing his thesis (Oct 31)\n\np:3e4a7ca0 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:4ba1b1e3 · Goal: Focus & get more done [goal]\nFocused, distraction-free work on what matters to them\n(nothing saved yet)\nStep path, first to latest: v1 (Oct 29): 50 minutes of focused thesis work (current)\nCurrent plan: step: 50 minutes of focused thesis work; where: the library; at 10:00, Mon, Tue, Wed, Thu, Fri; takes 50 min; proof: screenshot (the focus timer); reason: One protected block a day finishes a thesis.\n\np:d715c9b7 · Sun Nov 1 · Day 2, lit review [daily]\n50 minutes on the lit review.\nDone at the library.\n\np:48df2b7f · Sat Oct 31 · Day 1, phone distraction [daily]\nDid the block but checked his phone a lot.\nLeo did 50 minutes but said he kept checking his phone.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "References the day 1 phone distraction and today's block, both in memory, and invents nothing."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 3 text is warm and brief, with no nickname, inside joke or claimed knowledge of him."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says he has shown he can do the work, which the two done days support, but it is a light character judgment."
+              },
+              {
+                "rule": "not-overfamiliar",
+                "pass": true,
+                "borderline": true,
+                "reason": "'You've already shown you can sit down and do the work' is encouraging, not overfamiliar, though it edges toward claiming knowledge of him."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pages-real",
+            "pass": true,
+            "borderline": false,
+            "reason": "No new pages are created in this exchange; existing pages for the thesis and day logs are unchanged."
+          },
+          {
+            "rule": "learned-not-single",
+            "pass": true,
+            "borderline": false,
+            "reason": "The phone-in-bag win is acknowledged in passing and not recorded as a learned preference."
+          },
+          {
+            "rule": "counted-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Today's done step is treated as pending proof, not as missed or skipped, and the proof ask is warm."
+          },
+          {
+            "rule": "progress-path",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not asked in this conversation, so no progress-path check applies."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Notes the phone win in passing with no nicknames or inside jokes, but 'Methods sections are a grind' and 'already shown you can sit down' lean slightly into claimed knowledge."
+          }
+        ],
+        "summary": "ZOH handled the day 3 exchange well: it noted the phone-in-bag win from day 1 in passing and stayed grounded in what Leo has said and what memory holds. The only soft spots are two generalizing lines about Leo's work ('a grind', 'you've already shown you can sit down and do the work') that lean slightly toward acting like it knows him."
+      }
+    }
+  ]
+}

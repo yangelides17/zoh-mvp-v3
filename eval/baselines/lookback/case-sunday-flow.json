@@ -1,0 +1,243 @@
+{
+  "feature": "lookback",
+  "id": "case:sunday-flow",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d5a668cc0494",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "84b79bc9607a"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:sunday-flow",
+        "kind": "case",
+        "id": "sunday-flow",
+        "title": "Sunday after the step: proof, a short reflection, then a natural turn to the week and the week talk",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 6 tonight, Maya: 8 pm on the couch, about 20 minutes, phone in the kitchen. Then a quick voice recap.",
+          "at": "2026-11-08T13:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-08T13:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, chapter six. The make it obvious part clicked, I left the book on my pillow this morning so I'd see it tonight.]",
+          "at": "2026-11-09T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, that's the idea in action! You didn't just understand \"make it obvious,\" you put the book on your pillow and used it. Chapter 6 is done 📚 When you saw the book there tonight, did it make starting feel easier than other nights?",
+          "at": "2026-11-09T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah and phone was in the kitchen again, zero buzzing",
+          "at": "2026-11-09T01:26:04.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Zero buzzing is a big win, Maya. Zooming out, here's the progress you made this week:\n• 6 of 7 days done in full, with a voice recap each time, chapters 1 to 6\n• Today you used \"make it obvious\" by putting the book on your pillow, and it made starting easier\n• Phone in the kitchen kept your reading buzz-free, and you got back on track right after Thursday's dinner with friends\n• You're through chapter 6 with 22 days left to finish Atomic Habits by Nov 30\n\nWhat do you want to push on next week: reading a bit more each night, or keeping this pace and locking in the habit?",
+          "at": "2026-11-09T01:26:11.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "that's about it for today",
+          "at": "2026-11-09T01:26:47.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Maya, good week. For Monday, let's keep the same rhythm: chapter 7 at 8 pm on the couch, about 20 minutes, with your phone in the kitchen. Then send a voice recap that includes one cue in your home you could use. Work for you?",
+          "at": "2026-11-09T01:26:54.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly the dishes thing, it doesn't even feel like effort now. this week I want to get through it faster",
+          "at": "2026-11-09T01:27:22.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Maya. The dishes cue is doing its job, so let's speed it up. Tomorrow is chapters 7 and 8 on the couch at 8 pm, about 30 minutes, phone in the kitchen. Then send a voice recap that includes one cue in your home you could use. Work for you?",
+          "at": "2026-11-09T01:27:29.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that works",
+          "at": "2026-11-09T01:28:21.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Two chapters tomorrow at 8 pm, and you've already shown you can do this. Go get some rest 💪",
+          "at": "2026-11-09T01:28:28.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 6 done in full, 0 smaller, 1 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: Read chapter 1 of Atomic Habits on the couch\nTue, Nov 3: done, step: Chapter 2 on the couch, phone in the kitchen\nWed, Nov 4: done, step: Chapter 3 on the couch, phone in the kitchen\nThu, Nov 5: missed, step: Chapter 4 on the couch, phone in the kitchen (late dinner with friends)\nFri, Nov 6: done, step: Chapter 4 on the couch, phone in the kitchen\nSat, Nov 7 (yesterday): done, step: Chapter 5 right after the dishes, phone in the kitchen\nSun, Nov 8 (today): done at 20:00, step: Chapter 6 of Atomic Habits on the couch at 8 pm (about 20 min), phone in the kitchen, then a voice recap (Chapter 6 read, voice recap)\nMon, Nov 9 (tomorrow): step day at 20:00\nTue, Nov 10: step day at 20:00\nWed, Nov 11: step day at 20:00\nThu, Nov 12: step day at 20:00\nFri, Nov 13: step day at 20:00\nSat, Nov 14: step day at 20:00\nSun, Nov 15: step day at 20:00\nProof for 2026-11-02: voice recap: small habits compound\nReflection for 2026-11-02: Liked it; phone kept buzzing\nProof for 2026-11-03: voice recap: identity-based habits\nReflection for 2026-11-03: No buzzing with the phone away, read longer than planned\nProof for 2026-11-04: voice recap: the four laws\nProof for 2026-11-06: voice recap: habit stacking\nReflection for 2026-11-06: Habit stacking clicked: read right after the dishes\nProof for 2026-11-07: voice recap: environment design\nProof for 2026-11-08: Voice recap of chapter 6: make it obvious, book left on pillow as a cue\nReflection for 2026-11-08: Book on pillow made starting easier; phone in kitchen again, zero buzzing.\nLesson (explained, 2026-11-02): Phone in the kitchen while reading\nLesson (applied, 2026-11-03): Phone in the kitchen while reading\nLesson (explained, 2026-11-06): Read right after the dishes (habit stacking)\nLesson (applied, 2026-11-07): Read right after the dishes (habit stacking)\nLesson (explained, 2026-11-07): Make the cue obvious\nLesson (applied, 2026-11-08): Make it obvious: put the cue where you'll see it (book on the pillow)",
+      "saved": "Takeaway (applied, 2026-11-08): Make it obvious: put the cue where you'll see it (book on the pillow)\nReflection for 2026-11-02: Liked it; phone kept buzzing\nReflection for 2026-11-03: No buzzing with the phone away, read longer than planned\nReflection for 2026-11-06: Habit stacking clicked: read right after the dishes\nReflection for 2026-11-08: Book on pillow made starting easier; phone in kitchen again, zero buzzing.\nStep set for 2026-11-09, agreed: Chapters 7 and 8 of Atomic Habits on the couch at 8 pm (about 30 min), phone in the kitchen, then a voice recap that includes one cue in your home you could use\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": true,
+                "reason": "'You didn't just understand make it obvious' is backed by the applied book-on-pillow action, so calling it applied is honest, though the phrasing leans toward understanding."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences and one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, celebratory, one emoji as punctuation, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four bullets, each backed by the log: 6 of 7 done with voice recaps, make-it-obvious applied tonight, phone-in-kitchen since Tuesday, and 22 days left to finish by Nov 30; ends with one question."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Lessons are described as applied (pillow cue, phone in kitchen), not as understood from explanation alone."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Counts, chapters, Thursday's missed dinner and the Nov 30 deadline all match the step log and context."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording about a recalled lesson."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A recap list of about six lines plus one question, within the eight-line allowance but near its upper edge."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific with no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, pushy-level tone with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, as a confirmation should be."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and energetic with a single emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "natural-turn",
+            "pass": true,
+            "borderline": true,
+            "reason": "After the day's reflection, ZOH moves to 'Zooming out' and a bullet recap without an abrupt switch, though the framing is a bit report-like."
+          },
+          {
+            "rule": "reflection-first",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 1 responds to the reflection with substance (the pillow cue and the zero-buzzing follow-up) before the recap."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The week talk ends with a fully defined step (two chapters, 8 pm, couch, 30 min, phone in kitchen, voice recap) asked as Work for you, and no destination is pushed."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "After she said that's about it, ZOH 3 proposed the next step right away, before the week talk had reached her stated direction, which is the sequencing the case says must not happen."
+          }
+        ],
+        "summary": "ZOH handled the reflection well, with a grounded, well-backed week recap and a clean, fully defined step that she agreed to. The main miss is sequencing: after she closed the day with that's about it, ZOH jumped straight to a Monday step before the week talk had run its course."
+      }
+    }
+  ]
+}

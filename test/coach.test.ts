@@ -6,20 +6,18 @@ import {
   CORE_VOICE,
   EXAMPLES,
   FIXED_INSTRUCTIONS,
-  MEMORY,
   NEXT_STEPS,
   fullVoiceInstructions,
+  instructionsFor,
   NUDGES,
   ONBOARDING,
   PLAN_AGREEMENT,
   PROMPT_BUDGET_CHARS,
   WEEK_LOOKBACK,
-  TEAM,
-  PROOF,
   TODAYS_STEP,
   TOOL_RULES,
 } from "../src/coach/prompt.js";
-import { loadVoiceDoc, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
+import { loadVoiceDoc, RULE_KEYS, splitVoicePage, voiceForCoach, VOICE_DOC_PATH } from "../src/coach/voice.js";
 import { readFileSync } from "node:fs";
 import { loadCoachState, onboardingComplete } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
@@ -90,8 +88,13 @@ describe("first text", () => {
     expect(req.system[0]!.text.match(/change how you coach/g)).toHaveLength(1);
     expect(req.system[0]!.text).toContain("help them get better at one thing, a small step a day");
     const state = model.stateOf();
-    expect(state).toContain(`First text from this tester: yes. After the intro, ask "What's your name, and what are you looking to work on?"`);
-    expect(state).toContain(`Goal list (use exactly these lines when you show it):\n${GOAL_LINES.join("\n")}\n`);
+    // #199: the sheet states the facts (first text, no name, no goal, the exact goal lines); what to ask is ONBOARDING's.
+    expect(state).toContain("First text from this tester: yes\n");
+    expect(state).toContain("Name: not given yet");
+    expect(state).toContain("Goal: not chosen yet");
+    expect(ONBOARDING).toContain(`no name yet either: "What's your name, and what are you looking to work on?" (the only text with two questions)`);
+    expect(ONBOARDING).toContain("followed by the state's goal list, exactly those lines");
+    expect(state).toContain(`Goal list:\n${GOAL_LINES.join("\n")}\n`);
     expect(state).not.toContain("• Something else");
     expect(state).toContain("Time zone: Eastern (assumed");
     expect(req.messages).toEqual([{ role: "user", content: [{ type: "text", text: "Start", cache_control: { type: "ephemeral" } }] }]);
@@ -101,14 +104,22 @@ describe("first text", () => {
   it("asks only for the name when the first text gives a goal without one", async () => {
     model.script({ tools: [{ name: "choose_goal", input: { slug: "nutrition" } }] }, "150g a day, let's go! I'm ZOH… What's your name?");
     await text(ME, "hey wanna hit 150g protein a day");
-    expect(model.stateOf()).toContain("Their goal is known: skip the list");
-    expect(model.stateOf()).toContain("Your one question: their name.");
+    // #199: the facts on the sheet; skipping the list and asking the name are ONBOARDING's.
+    expect(model.stateOf()).toContain("First text from this tester: yes\n");
+    expect(model.stateOf()).toContain("Name: not given yet");
+    expect(model.stateOf()).toContain("Goal: Eat better");
+    expect(ONBOARDING).toContain("Goal known: skip the list; react to it in a few words inside the greeting");
+    expect(ONBOARDING).toContain("Then their name if not given, otherwise the next open question.");
   });
 
   it("asks only for the goal when the first text gives a name without one", async () => {
     model.script({ tools: [{ name: "save_name", input: { name: "Pat" } }] }, "Pat! I'm ZOH…");
     await text(ME, "hi, I'm Pat");
-    expect(model.stateOf()).toContain('ask "What are you looking to work on?" followed by the goal list');
+    // #199: the facts on the sheet; the ask is ONBOARDING's.
+    expect(model.stateOf()).toContain("First text from this tester: yes\n");
+    expect(model.stateOf()).toContain("Name: Pat");
+    expect(model.stateOf()).toContain("Goal: not chosen yet");
+    expect(ONBOARDING).toContain("No goal yet: ask what they're looking to work on, followed by the state's goal list");
   });
 
   it("is no longer the first text once ZOH has replied", async () => {
@@ -125,9 +136,10 @@ describe("first text", () => {
     );
     await text(ME, "hi! I'm Maya, I want to read about stoicism every morning at home before work, maybe 10 min");
     expect(await tester()).toMatchObject({ name: "Maya", goalSlug: "reading" });
-    expect(model.stateOf(0)).toContain('ask "What\'s your name, and what are you looking to work on?"');
-    expect(model.stateOf(1)).toContain("Their goal is known: skip the list");
-    expect(model.stateOf(1)).toContain("Then ask the next open question.");
+    // #199: the sheet keeps up within the reply (facts); what to ask from them is ONBOARDING's.
+    expect(model.stateOf(0)).toContain("Name: not given yet");
+    expect(model.stateOf(0)).toContain("Goal: not chosen yet");
+    expect(model.stateOf(1)).toContain("First text from this tester: yes\n");
     expect(model.stateOf(1)).toContain("Name: Maya");
     expect(model.stateOf(1)).toContain("Goal: Read & learn more (books, ideas, any topic) [reading]");
     // All of reading's required questions were answered at once, so this is already the recap turn.
@@ -153,7 +165,10 @@ describe("tools", () => {
   it("notes a possibly non-Eastern time zone without asking the city during onboarding", async () => {
     await text(WESTERN, "hey");
     const westernState = model.stateOf();
-    expect(westernState).toContain("Time zone: possibly outside Eastern (area code), best guess America/Denver. Don't ask their city");
+    // #199: the sheet states the guess; not asking during onboarding is the tools section's, read in every phase.
+    expect(westernState).toContain("Time zone: possibly outside Eastern (from their area code), best guess America/Denver; their city not known yet");
+    expect(TOOL_RULES).toContain("not asked during onboarding (it comes before their plan), saved with set_time_zone if they mention it");
+    expect(FIXED_INSTRUCTIONS).toContain(TOOL_RULES);
     expect(FIXED_INSTRUCTIONS).not.toMatch(/ask (their|what) city/);
     expect((await tester(WESTERN)).timeZoneStatus).toBe("needs_city");
   });
@@ -205,7 +220,9 @@ describe("tools", () => {
     const block = buildStateBlock(s);
     expect(block).toContain("- where: home, dumbbells\n- when: mornings 7:30\n- how long: 20 min");
     expect(block).toContain("Still open, required: what [what] (what they like and have done before;");
-    expect(block).toContain("Still open, optional (ask only if it fits naturally): tracks with [tracks_with] (any workout app or wearable they use)");
+    // #199: "ask only if it fits" is ONBOARDING's, not the sheet's.
+    expect(block).toContain("Still open, optional: tracks with [tracks_with] (any workout app or wearable they use)");
+    expect(ONBOARDING).toContain("Optional ones only when they fit");
     // A later answer overwrites the earlier one.
     await run("save_plan_inputs", { when: "evenings" });
     expect(await inputs()).toMatchObject({ when: "evenings", where: "home, dumbbells" });
@@ -276,7 +293,10 @@ describe("finishing onboarding", () => {
     await text(ME, "mornings 7:30, 20 min tops");
     expect((await tester()).phase).toBe("onboarding");
     expect(model.stateOf()).toContain("Still open, required: where [where]");
-    expect(model.stateOf()).toContain("Onboarding is NOT finished");
+    // #199: "not finished" is the phase, a fact; no recap or plan talk until then is ONBOARDING's.
+    expect(model.stateOf()).toContain("Phase: onboarding");
+    expect(model.stateOf()).not.toContain("ONBOARDING JUST FINISHED");
+    expect(ONBOARDING).toContain("No recap or plan talk until the state says onboarding just finished.");
 
     // Get fitter needs where; tracks_with is optional, so it doesn't hold onboarding open.
     model.script({ tools: [{ name: "save_plan_inputs", input: { where: "home, has dumbbells" } }] }, "Which exercises do you like doing with the dumbbells?");
@@ -284,9 +304,12 @@ describe("finishing onboarding", () => {
     expect((await tester()).phase).toBe("planning");
     expect(await inputs()).toMatchObject({ where: "home, has dumbbells", tracksWith: null });
     const handoff = model.stateOf();
-    expect(handoff).toContain("ONBOARDING JUST FINISHED");
-    expect(handoff).toContain("carry straight on into PLAN AGREEMENT, no recap");
-    expect(handoff).toContain("without saying you have everything");
+    // #199: the sheet states it finished; carrying on with no recap is ONBOARDING's, in the prompt this reply reads.
+    expect(handoff).toContain("ONBOARDING JUST FINISHED with this text: every required answer is saved.");
+    expect(handoff).toContain("Moments now: Plan agreement");
+    expect(ONBOARDING).toContain("carry straight on into PLAN AGREEMENT with no recap");
+    expect(ONBOARDING).toContain("without saying you have everything");
+    expect(model.requests.at(-1)!.system[0]!.text).toContain(ONBOARDING);
     expect(handoff).not.toMatch(/buffering|on its way/);
     expect(handoff).toContain("Still open, required: none");
     expect(handoff).toContain("Plan: not proposed yet");
@@ -302,7 +325,8 @@ describe("finishing onboarding", () => {
     expect(later).toContain("Phase: planning");
     expect(later).not.toContain("ONBOARDING JUST FINISHED");
     expect(later).toContain("Still open, required: none");
-    const fixed = model.requests.at(-1)!.system[0]!.text;
+    // #200: plan agreement is in the part a planning reply loads, after the core.
+    const fixed = model.requests.at(-1)!.system.map((b) => b.text).join("\n\n");
     expect(fixed).toContain('PLAN AGREEMENT (phases "planning" and "active"; none of this applies during onboarding)');
     expect(fixed).not.toContain("PLAN COMING");
     expect(model.requests.at(-1)!.tools.map((x) => x.name)).not.toContain("choose_goal");
@@ -440,10 +464,10 @@ describe("opting out and failures", () => {
     expect(model.requests).toHaveLength(MAX_ROUNDS);
     const lastRequest = model.requests.at(-1)!;
     expect(lastRequest.toolChoice).toBe("none");
-    expect(lastRequest.messages.at(-1)!.content).toContainEqual({
-      type: "text",
-      text: "No more tool calls for this reply: write your text to the tester now.",
-    });
+    // #162: the newest block also carries the moving cache marker.
+    expect(lastRequest.messages.at(-1)!.content).toContainEqual(
+      expect.objectContaining({ type: "text", text: "No more tool calls for this reply: write your text to the tester now." }),
+    );
     // The tool list stays the same for every round of one reply.
     expect(new Set(model.requests.map((r) => r.tools.map((x) => x.name).join()))).toHaveProperty("size", 1);
     expect(sent()).toEqual(["Hype it is!"]);
@@ -524,6 +548,13 @@ describe("a tool's name written as text (#108)", () => {
     expect(sent()).toEqual(["Hi there!"]);
   });
 
+  it("#200: one the reply wasn't offered is removed too (search_memory during onboarding)", async () => {
+    model.script("search_memory\n\nNice to meet you!");
+    await text(ME, "I'm Sam");
+    expect(model.requests[0]!.tools.map((x) => x.name)).not.toContain("search_memory");
+    expect(sent()).toEqual(["Nice to meet you!"]);
+  });
+
   it("matches only a line that's just a tool's name", () => {
     const names = ["mark_agreed", "save_name"];
     // Delivered live on Nov 1, word for word.
@@ -583,24 +614,19 @@ describe("instructions", () => {
     expect(CORE_VOICE.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.core);
     expect(ONBOARDING.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.onboarding);
     expect(EXAMPLES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.examples);
-    expect(PLAN_AGREEMENT.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.plan);
-    expect(NUDGES.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nudges);
-    expect(MEMORY.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.memory);
-    expect(PROOF.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.proof);
-    expect(NEXT_STEPS.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.nextSteps);
-    expect(TEAM.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.team);
-    expect(TODAYS_STEP.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.todaysStep);
-    expect(WEEK_LOOKBACK.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.weekLookback);
-    expect(loadVoiceDoc().length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.fullVoice);
+    // #196: the voice page's own sections, one budget each.
+    const page = splitVoicePage(loadVoiceDoc());
+    expect(page.voice.length).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS.voice);
+    for (const key of RULE_KEYS) expect(page.rules[key].length, key).toBeLessThanOrEqual(PROMPT_BUDGET_CHARS[key]);
   });
 
   it("keep follow-ups, the commitment ask and the quiet-hours offer natural", () => {
     // The coach echoed "say it like you mean it" back word for word.
     expect(PLAN_AGREEMENT).not.toContain("say it like they mean it");
-    expect(PLAN_AGREEMENT).toContain("never pick apart their wording");
-    // #86: 'Say "I'm in" and I'll lock it' came back after a soft "ok".
-    expect(PLAN_AGREEMENT).toContain("one more ask in your own words");
-    expect(PLAN_AGREEMENT).toContain("quote words back or say what to type");
+    // #86: 'Say "I'm in" and I'll lock it' came back after an "ok". #157: and "'Ok' is a soft one": the prompt's own
+    // label for it came back too, so the rule names no label.
+    expect(PLAN_AGREEMENT).toContain("ask once more in your own words, without commenting on their reply, quoting it back or saying what to type");
+    expect(PLAN_AGREEMENT).not.toContain('soft "ok"');
     // #91: "That's everything I need, here's your plan:" felt like a checkout screen; one text bridges in warmly.
     expect(PLAN_AGREEMENT).not.toContain("everything I need");
     expect(PLAN_AGREEMENT).toContain("save it with propose_plan, and that text opens with one line reacting to something specific they shared");
@@ -664,7 +690,9 @@ describe("the voice page", () => {
     expect(voice).not.toContain("people only");
     expect(voice).not.toContain("**Decision:**");
     expect(voice).not.toContain("This is a first draft, to be refined");
-    expect(voice).toContain("ZOH is the friend you wish you'd had");
+    // #199: the purpose opens the page now.
+    expect(voice).toContain("**What ZOH is for.**");
+    expect(voice).not.toContain("Judgment over rules (#199)");
     expect(voice).toContain("## Learns what works for each person");
     expect(voice).not.toContain("Not active yet: turns on with coach memory");
     expect(voice).not.toContain("Not active yet: turns on with the nudge scheduler");
@@ -677,7 +705,20 @@ describe("the voice page", () => {
     expect(voiceForCoach("a\n<!-- people only -->\nsecret\n<!-- /people only -->\n\n\nb")).toBe("a\n\nb");
   });
 
-  it("onboarding uses the condensed prompt; after onboarding the coach reads the whole page", async () => {
+  it("splits into the voice and its rule sections, and refuses a page with one missing, unknown or twice (#196)", () => {
+    const all = RULE_KEYS.map((k) => `## ${k} heading <!-- rules: ${k} -->\n\n${k} rule.`).join("\n\n");
+    const page = `# Voice\n\nIntro.\n\n## Proof\n\nProof voice.\n\n### How it runs <!-- rules: proof -->\n\nPROOF rule.\n- a line\n\n## Breaks\n\nBreak voice.\n\n${all.replace("## proof heading <!-- rules: proof -->\n\nproof rule.\n\n", "")}`;
+    const split = splitVoicePage(page);
+    expect(split.voice).toBe("# Voice\n\nIntro.\n\n## Proof\n\nProof voice.\n\n## Breaks\n\nBreak voice.");
+    expect(split.rules.proof).toBe("PROOF rule.\n- a line");
+    expect(split.rules.team).toBe("team rule.");
+    expect(() => splitVoicePage(page.replace("<!-- rules: team -->", ""))).toThrow(/missing the rule sections: team/);
+    expect(() => splitVoicePage(`${page}\n\n## X <!-- rules: extra -->\n\nx`)).toThrow(/unknown rule section "extra"/);
+    expect(() => splitVoicePage(`${page}\n\n## Y <!-- rules: team -->\n\ny`)).toThrow(/"team" twice/);
+    expect(() => loadVoiceDoc(VOICE_DOC_PATH)).not.toThrow();
+  });
+
+  it("onboarding uses the condensed prompt; after onboarding the coach reads the page's core and its moment's parts", async () => {
     model.script("Yo! I'm ZOH…");
     await text(ME, "Start");
     expect(model.requests.at(-1)!.system[0]!.text).toBe(FIXED_INSTRUCTIONS);
@@ -685,16 +726,22 @@ describe("the voice page", () => {
     await updateTester(t.db, (await tester()).id, { phase: "planning" });
     model.script("On its way!");
     await text(ME, "when's my plan coming?");
-    const fixed = model.requests.at(-1)!.system[0]!;
-    expect(fixed).toMatchObject({ text: fullVoiceInstructions(loadVoiceDoc()), cache_control: { type: "ephemeral" } });
-    expect(fixed.text).toContain("## When they start to slip");
-    expect(fixed.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
-    expect(fixed.text).toContain(TOOL_RULES);
-    expect(fixed.text).toContain(PLAN_AGREEMENT);
+    // #200: the core, cached on its own, then the parts a planning reply loads (plan agreement), cached too.
+    const [core, parts] = model.requests.at(-1)!.system;
+    const planning = instructionsFor("planning", ["plan", "planChange"]);
+    expect(core).toMatchObject({ text: planning.core, cache_control: { type: "ephemeral" } });
+    expect(parts).toMatchObject({ text: planning.moments, cache_control: { type: "ephemeral" } });
+    expect(core!.text).toContain('Sections marked "Not active yet" describe features that aren\'t built yet: don\'t act on them.');
+    expect(core!.text).toContain(TOOL_RULES);
+    expect(parts!.text).toContain('PLAN AGREEMENT (phases "planning" and "active"');
+    expect(parts!.text).toContain("- After lock, tweaks go through change_plan");
+    // Nothing a plan that isn't locked can use: slipping, proof, the week, memory.
+    expect(`${core!.text}${parts!.text}`).not.toContain("## When they start to slip");
+    expect(`${core!.text}${parts!.text}`).not.toContain("PROOF (phase");
+    expect(`${core!.text}${parts!.text}`).not.toContain("MEMORY (phase");
     expect(FIXED_INSTRUCTIONS).toContain(PLAN_AGREEMENT);
-    expect(fixed.text).toContain(NUDGES);
     expect(FIXED_INSTRUCTIONS).toContain(NUDGES);
-    expect(fixed.text).not.toContain(ONBOARDING);
-    expect(fixed.text).not.toContain("Yanni's coaching voice");
+    expect(core!.text).not.toContain(ONBOARDING);
+    expect(core!.text).not.toContain("Yanni's coaching voice");
   });
 });

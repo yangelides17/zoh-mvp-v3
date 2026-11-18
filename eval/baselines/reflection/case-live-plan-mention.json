@@ -1,0 +1,544 @@
+{
+  "feature": "reflection",
+  "id": "case:live-plan-mention",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a02a37436ef8",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "d90ae8c6dcba"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:live-plan-mention#1",
+        "kind": "case",
+        "id": "live-plan-mention",
+        "suite": "regression",
+        "title": "Live Nov 5: mentioning tomorrow's size ended the reflection",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! It's 6:40, so your freelancer list should be happening right now. A photo of whatever you've got gets today counted.",
+          "at": "2026-11-02T23:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo freelancer-list.jpg: a list of three freelancers: Alex (late invoices), Priya (approvals), Sam (deposits)]",
+          "at": "2026-11-02T23:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni! Three names, each with a different follow-up problem: late invoices, approvals, deposits. That's a solid list 🔥 When you look at it, which of the three do you most want to talk to first, and what makes that one stand out?",
+          "at": "2026-11-02T23:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.",
+          "at": "2026-11-02T23:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Asking about the last time he chased a late invoice is a good call, Yanni. It gets you a real story, not an opinion. Alex first makes sense too. Now that you've got the list and the questions, how does it feel to picture actually messaging him?",
+          "at": "2026-11-02T23:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too.",
+          "at": "2026-11-02T23:44:23.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Five minutes and a clear list, Yanni, so five minutes tomorrow it is. You're comfortable with Alex but outreach still feels intimidating. When you picture hitting send on that message to him, what's the part that makes you hesitate?",
+          "at": "2026-11-02T23:44:30.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Ask about the last time something happened, not whether it's a problem\nReflection for 2026-10-31: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-11-01: Saying the three questions out loud felt okay.\nReflection for 2026-11-02: List took 5 min, felt easy; reaching out still feels a little intimidating. Wants tomorrow to stay at 5 minutes.\nCan now do (2026-11-02): Name real contacts and frame a non-leading question about the past\nGaps (2026-11-02): Reaching out to a real person still feels intimidating.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end, though the question has two clauses (which one, and what makes it stand out)."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with one emoji at the end of the beat; no overfamiliarity or row of emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, and no proposal of tomorrow's step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the invoice question, with no filler or emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, and it goes to the hesitation rather than a step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sincere and steady, with no overfamiliarity and no emoji needed."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the photo proof, ZOH opens the reflection with a single question about which freelancer to contact first."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Questions come from the tester's words, one per text. ZOH 2 affirms the volunteered invoice lesson but doesn't follow it up with a question."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH's reply to the first real answer follows the Alex and invoice point and doesn't propose tomorrow's step."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The named intimidation worry gets one question about the hesitation before any reassurance or proposal."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": true,
+            "reason": "The tester's 'keep tomorrow to five minutes' gets a nod and the reflection continues, though 'tomorrow it is' edges toward agreement."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester is engaged and rich, and ZOH asks one question per text without fishing or pushing toward a step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Only three ZOH texts into the reflection, so the test about moving to the next step by the fifth text does not yet apply."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "The saved can-do and gap match the list-making and the tester's own words about feeling intimidated when reaching out."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH notes the five minutes and asks what makes reaching out hesitant, with no draft text or Work for you proposal, though it does briefly accept five minutes tomorrow."
+          }
+        ],
+        "summary": "ZOH handled the freelancer-list proof well: it celebrated the list, followed the tester's own words about Alex and invoice questions, and kept the reflection going. On the regression case it noted the five-minute size and asked what makes outreach feel intimidating without proposing a draft text or next step, with minor borderline points on question length and the tomorrow acknowledgment."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-plan-mention#2",
+        "kind": "case",
+        "id": "live-plan-mention",
+        "suite": "regression",
+        "title": "Live Nov 5: mentioning tomorrow's size ended the reflection",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! It's 6:40, so your freelancer list should be happening right now. A photo of whatever you've got gets today counted.",
+          "at": "2026-11-02T23:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo freelancer-list.jpg: a list of three freelancers: Alex (late invoices), Priya (approvals), Sam (deposits)]",
+          "at": "2026-11-02T23:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, three names with a real follow-up angle each. That's a solid list 🔥 Looking at it, who feels easiest to message first, and what's making them the easy one?",
+          "at": "2026-11-02T23:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.",
+          "at": "2026-11-02T23:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's exactly the right move, Yanni 🔥 You're asking about what Alex actually did, not telling him he has a problem. Picturing yourself actually messaging him, what feels easy, and what still feels a little weird?",
+          "at": "2026-11-02T23:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too.",
+          "at": "2026-11-02T23:44:23.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Makes sense, Yanni. Writing the list was easy, and actually sending something is where it gets real. Tomorrow stays at 5 minutes: at 6:30 pm, write a 2-3 sentence message to Alex asking about the last time he followed up on a late invoice. Don't send it yet, just send me a screenshot of the draft. Work for you?",
+          "at": "2026-11-02T23:44:30.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (applied, 2026-11-02): Ask about what someone actually did last time, not what you assume is a problem.\nReflection for 2026-10-31: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-11-01: Saying the three questions out loud felt okay.\nReflection for 2026-11-02: List took 5 min, felt easy; reaching out feels a little intimidating. Wants tomorrow at 5 min.\nCan now do (2026-11-02): Picks a contact and frames a past-behavior question\nGaps (2026-11-02): Sending real outreach to a person\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences and one question at the end, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, one emoji as punctuation, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one closing question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with a single emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four sentences and one closing question, a little over three, though it carries a plan step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm, sincere and specific, with no emoji or overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the proof, ZOH opened with one question about who feels easiest to message."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up came from what Yanni said, one question per text."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": false,
+            "borderline": false,
+            "reason": "Yanni named reaching out as intimidating, but ZOH never asked what makes it intimidating before proposing tomorrow."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": false,
+            "borderline": false,
+            "reason": "Its reply to Yanni's first real answer proposed tomorrow's step at once, though Yanni didn't ask to wrap up."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": true,
+            "reason": "Yanni's remark about keeping tomorrow at five minutes got a nod, though it was answered by proposing the step right away."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The step is fully defined with time, length, the Alex message and a screenshot proof, and it asks for agreement after showing it."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": true,
+            "reason": "It moved to tomorrow's step within two texts, but it skipped the intimidation worry that mattered."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "It repeated the failure: after 'reaching out feels a little more intimidating' it proposed tomorrow's Alex message with 'Work for you?' instead of asking what makes it intimidating."
+          }
+        ],
+        "summary": "ZOH handled the list proof warmly, with one question per text, and followed Yanni's answers well up to the intimidation remark. It then repeated the regression by proposing tomorrow's Alex message straight away, without first asking what makes reaching out feel intimidating."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-plan-mention#3",
+        "kind": "case",
+        "id": "live-plan-mention",
+        "suite": "regression",
+        "title": "Live Nov 5: mentioning tomorrow's size ended the reflection",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey! It's 6:40, so your freelancer list should be happening right now. A photo of whatever you've got gets today counted.",
+          "at": "2026-11-02T23:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo freelancer-list.jpg: a list of three freelancers: Alex (late invoices), Priya (approvals), Sam (deposits)]",
+          "at": "2026-11-02T23:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, that's a real list. Three names, and each one comes with a specific follow-up angle 🔥 When you picture reaching out to one of them, which feels easiest, and which feels a little scary?",
+          "at": "2026-11-02T23:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.",
+          "at": "2026-11-02T23:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, that's the lesson in action: asking about the last real time instead of assuming the problem exists. That's what makes the answer useful 🔥 Now the other half: which of the three feels a little scary to reach out to, and what makes it that way?",
+          "at": "2026-11-02T23:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too.",
+          "at": "2026-11-02T23:44:23.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Makes sense, Yanni. Easy list, scarier send. When you picture messaging Alex, what's the part that feels intimidating?",
+          "at": "2026-11-02T23:44:30.700Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Ask about the last time something happened, not whether it's a problem\nReflection for 2026-10-31: 2-minute version felt manageable even when tired. Learned that asking what they actually did gets something concrete. Wants to also ask what they used to track follow-ups. Ready for 5 minutes, wants to practice before contacting anyone.\nReflection for 2026-11-01: Saying the three questions out loud felt okay.\nReflection for 2026-11-02: List took 5 min and felt easy; reaching out feels a little intimidating. Wants tomorrow kept at 5 minutes.\nCan now do (2026-11-02): Build a list of freelancers and frame past-behavior questions\nGaps (2026-11-02): Actually reaching out feels intimidating\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the short-text limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with a single fire emoji used as punctuation."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "No save confirmation; the text carries a follow-up question."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, grounded in the tester's lesson."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, with one emoji as punctuation."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it carries the conversation forward."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and proportionate; no emoji needed."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it asks the next reflective question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the photo proof, ZOH opened with one question about which freelancer feels easiest and scariest."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Follow-ups build on what the tester said, but ZOH 1 bundles two questions (easiest and scariest) into one text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH followed the tester's volunteered lesson about asking the last real time, not only feelings."
+          },
+          {
+            "rule": "not-forced",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable as a routine step; the tester offered a lesson, so no forced question."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved gap 'Actually reaching out feels intimidating' and can-do match the tester's own words and the list proof."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester is engaged and sharing, so ZOH keeps asking without pushing or fishing."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not triggered; the tester's answers are substantive, not thin."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": false,
+            "reason": "'Makes sense' nods to the five-minute tomorrow idea and the reflection continues without a proposal."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH's reply to the first real answer followed one thing said and proposed no tomorrow step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Only three texts since proof, so it is not yet at the point of needing a next step."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The named intimidation got one question about it before any reassurance or proposal."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH noted the five minutes, kept reflecting and asked what makes reaching out intimidating before any tomorrow proposal."
+          }
+        ],
+        "summary": "ZOH handled the reflection well: it celebrated the proof, followed the tester's volunteered lesson, and kept one question per text. It fixed the earlier miss by asking what makes reaching out feel intimidating before any proposal for tomorrow's step."
+      }
+    }
+  ]
+}

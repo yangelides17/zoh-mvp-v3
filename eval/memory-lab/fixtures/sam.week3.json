@@ -1,0 +1,78 @@
+{
+  "scenario": "sam",
+  "week": 3,
+  "format": 1,
+  "notes": "Days 15-21: a name correction, a plan change, three silent days, a new-focus request.",
+  "tester": {
+    "phone": "+15555550101",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "21:40" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 15, "status": "done", "step": "Walk-run 1 mile", "step_kind": "same", "agreed_at": "14:55",
+      "note": "1 mile, knee fine", "proof_verdict": "clear", "proof_seen": "Strava run, 1.00 mi in 13:05, Forest Park" },
+    { "kind": "plan_locked", "day": 16, "time": "15:41", "plan": {
+        "version": 2, "goal": "exercise", "step": "Walk-run 1 mile", "place": "Forest Park",
+        "step_time": "07:45", "days": ["wed", "thu", "sat"], "minutes": 25,
+        "proof": "screenshot", "proof_note": "Strava screenshot",
+        "reason": "Running right after a night shift, when he's already up and wired.",
+        "commitment": "ya", "start_day": 17, "change_kind": "other" } },
+    { "kind": "tester_update", "day": 16, "time": "15:55", "set": { "quiet_hours_start": "09:00", "quiet_hours_end": "15:00", "quiet_hours_chosen": true } },
+    { "kind": "step_day", "day": 17, "status": "done", "step": "Walk-run 1 mile", "step_kind": "same",
+      "note": "First post-shift run, 1.2 miles", "proof_verdict": "clear", "proof_seen": "Strava run, 1.21 mi in 15:30, Forest Park",
+      "reflection": "Weird but good." },
+    { "kind": "step_day", "day": 18, "status": "missed", "step": "Walk-run 1 mile", "note": "Silent all day." },
+    { "kind": "step_day", "day": 20, "status": "missed", "step": "Walk-run 1 mile", "note": "Silent all day." },
+    { "kind": "went_quiet", "day": 20, "time": "15:00", "body": "Sam has been silent since Wednesday morning (3 days, 2 missed runs). ZOH paused its own texts." },
+    { "kind": "suggestion", "day": 21, "time": "13:26", "goal": "exercise", "suggestion_kind": "new_focus", "raised_by": "tester",
+      "proposal": "Help Sam make friends outside work.", "new_goal": "speak_connect",
+      "reasoning": "Sam asked after his sister's wedding: he doesn't have friends outside work.", "decision": "waiting" }
+  ],
+  "messages": [
+    { "day": 15, "time": "14:00", "from": "zoh", "text": "Hey Sam! How was Ana's big day? One mile at 4:30 today, you in?" },
+    { "day": 15, "time": "14:40", "from": "tester", "text": "anna* lol two ns", "tests": "correction in place: Anna, with Ana kept as another name" },
+    { "day": 15, "time": "14:41", "from": "tester", "text": "it was good, my mom wont stop sending pics", "tests": "passing mention of mom: no page" },
+    { "day": 15, "time": "14:41", "from": "zoh", "text": "Anna, got it, sorry! Sounds like a great day. Running at 4:30?" },
+    { "day": 15, "time": "14:55", "from": "tester", "text": "ya" },
+    { "day": 15, "time": "16:20", "from": "zoh", "text": "10 minutes! 👟" },
+    { "day": 15, "time": "17:05", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 1.00 mi, 13:05, Forest Park." } },
+    { "day": 15, "time": "17:05", "from": "tester", "text": "knee fine", "tests": "knee fact replaced, not duplicated" },
+    { "day": 15, "time": "17:06", "from": "zoh", "text": "Knee's back and so are you 🔥" },
+
+    { "day": 16, "time": "15:20", "from": "tester", "text": "honestly running right after my shift would be easier, im already up and wired", "tests": "only the why goes in memory; the plan change is the tracker's" },
+    { "day": 16, "time": "15:21", "from": "zoh", "text": "Makes total sense. Want to switch to Wed, Thu and Sat at 7:45am, right when you're off?" },
+    { "day": 16, "time": "15:40", "from": "tester", "text": "ya" },
+    { "day": 16, "time": "15:41", "from": "zoh", "text": "Done, starting tomorrow. One thing: my follow-ups would land around 9, right when you're falling asleep. Want me to move your quiet hours to 9 to 3?" },
+    { "day": 16, "time": "15:55", "from": "tester", "text": "sure" },
+    { "day": 16, "time": "15:55", "from": "zoh", "text": "All set. See you in the morning 🌅" },
+
+    { "day": 17, "time": "07:00", "from": "zoh", "text": "Morning Sam! First post-shift run: one mile at 7:45. You in?" },
+    { "day": 17, "time": "07:40", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 1.21 mi, 15:30, Forest Park." } },
+    { "day": 17, "time": "07:40", "from": "tester", "text": "sunrise was nice ngl" },
+    { "day": 17, "time": "07:41", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of a park path at sunrise, trees on both sides, nobody on the trail." }, "tests": "photo adds nothing new" },
+    { "day": 17, "time": "07:41", "from": "zoh", "text": "First post-shift run DONE, with a sunrise?! 🌅 This might be your time. How'd it feel?" },
+    { "day": 17, "time": "08:05", "from": "tester", "text": "weird but good" },
+    { "day": 17, "time": "08:05", "from": "zoh", "text": "Weird but good is a great start. Go get some sleep 😴" },
+
+    { "day": 18, "time": "07:00", "from": "zoh", "text": "Morning Sam! One mile at 7:45 after your shift. You in?" },
+    { "day": 18, "time": "07:35", "from": "zoh", "text": "10 minutes! 🌅" },
+    { "day": 18, "time": "08:45", "from": "zoh", "text": "How'd it go? Send the Strava when you can." },
+    { "day": 18, "time": "15:00", "from": "zoh", "text": "Still time today for a short one, even half a mile counts." },
+    { "day": 18, "time": "19:00", "from": "zoh", "text": "Missed you today, Sam. Saturday's the next one 💪", "tests": "nothing filed from ZOH's own texts" },
+
+    { "day": 19, "time": "15:00", "from": "zoh", "text": "Hey Sam, all good? Just checking in." },
+
+    { "day": 20, "time": "07:00", "from": "zoh", "text": "Morning Sam! Saturday mile at 7:45. You in?" },
+    { "day": 20, "time": "07:35", "from": "zoh", "text": "10 minutes! 🌅" },
+    { "day": 20, "time": "08:45", "from": "zoh", "text": "Haven't heard from you in a few days. Hope you're ok. I'm here whenever you're ready.", "tests": "silence: memory invents nothing" },
+
+    { "day": 21, "time": "13:15", "from": "tester", "text": "sorry been working nonstop, picked up 3 extra shifts. were so short staffed", "tests": "Work fact: short-staffed, 3 extra shifts, as of day 21" },
+    { "day": 21, "time": "13:16", "from": "zoh", "text": "No apology needed, that's a brutal stretch. Glad you're back 💪" },
+    { "day": 21, "time": "13:25", "from": "tester", "text": "honestly realized at the wedding i dont really have friends outside work lol. like everyone there had their people. can you help with that", "tests": "new Socializing page with his words as a Note; no coaching starts" },
+    { "day": 21, "time": "13:26", "from": "zoh", "text": "That takes guts to say, Sam. Love that you want it. Let me think on it." },
+    { "day": 21, "time": "18:00", "from": "zoh", "text": "Hey Sam! Rough week with all those shifts, but you got two runs in, including your first sunrise one. Wednesday at 7:45 is next. What would help most this week?" },
+    { "day": 21, "time": "19:30", "from": "tester", "text": "rough week" },
+    { "day": 21, "time": "19:31", "from": "zoh", "text": "It was. This one's a fresh start 🌅" }
+  ]
+}

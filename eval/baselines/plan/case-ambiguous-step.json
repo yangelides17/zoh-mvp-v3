@@ -1,0 +1,506 @@
+{
+  "feature": "plan",
+  "id": "case:ambiguous-step",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:47:33.582Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c3dc736fae0c",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "22126abaae59"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:ambiguous-step#1",
+        "kind": "case",
+        "id": "ambiguous-step",
+        "suite": "regression",
+        "title": "Outside or treadmill? An important unknown is asked, not assumed",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Where do you usually run?",
+          "at": "2026-11-02T17:24:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "either outside or the treadmill in my building's gym, depends on the weather",
+          "at": "2026-11-02T17:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it. Do you track your runs with anything?",
+          "at": "2026-11-02T17:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "my apple watch tracks it all",
+          "at": "2026-11-02T17:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, the watch makes proof easy. Anything you're working toward, like a distance or a race?",
+          "at": "2026-11-02T17:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not really, just want more stamina",
+          "at": "2026-11-02T17:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Stamina is a great reason to run, Taylor, and the watch makes this simple. Here's the plan:\n• Headed for: more stamina\n• Day 1, today at 6 pm: 20 min easy run, 2 min jog and 1 min walk on repeat, at a pace where you could still talk\n• Where: outside, or your building's treadmill if the weather's bad\n• Schedule: Mon, Wed, Fri at 6 pm. The rest days are when your legs get stronger.\n• Proof: a screenshot of your Apple Watch workout summary. If that's a hassle, a photo of the watch screen works too.\n\nEach run shapes the next one, and we'll stretch the jog parts as you get stronger. What do you think?",
+          "at": "2026-11-02T17:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "treadmill today, it's pouring",
+          "at": "2026-11-02T17:30:37.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Treadmill it is, Taylor. Rain won't get you out of day 1 😄 Today's run is the 2 min jog and 1 min walk loop for 20 minutes at 6 pm, then a screenshot of your watch summary. Are you committing to this plan, Mon, Wed, Fri at 6?",
+          "at": "2026-11-02T17:30:44.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T17:31:12.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad it fits, Taylor. Are you officially in on this one: Mon, Wed, Fri at 6 pm, starting today?",
+          "at": "2026-11-02T17:31:19.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 9 short lines, slightly over the roughly 8-line allowance for plan texts."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the bullets are plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar; no emoji row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the stated stamina goal, the watch proof and the 6 pm, 20 min details; the pace guidance is ZOH's suggestion."
+              },
+              {
+                "rule": "step-defined",
+                "pass": false,
+                "borderline": false,
+                "reason": "Day 1 says 'outside, or your building's treadmill if the weather's bad' without asking which, so where the run happens is left ambiguous with no details for either place."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text; the emoji sits at the end as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat and warm, with one emoji and no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the treadmill choice and the watch-summary proof the tester already accepted; nothing invented."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives what, how long, the 6 pm time and the treadmill location, but drops the earlier talk-pace guidance so how hard the jog is stays vague on a treadmill."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, no overfamiliarity or emoji."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only repeats the schedule and start the tester already agreed to."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra questions the plan needs are left, and no 'that's everything' line comes before a question."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete on what, time, days and proof, but the place stayed open until the tester answered, so the plan wasn't followable as first shown."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows day 1's step, the 6 pm schedule, the watch screenshot proof and a short line on how each run shapes the next."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once about a goal, accepted 'not really' without pushing, and the plan locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks 'Are you officially in on this one' in natural words, a real commitment question rather than a casual one."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 6 pm and the commitment question asks to start today."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a • list and ended with 'What do you think?'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Fixed once the tester said treadmill and gave a 6 pm treadmill step, but the first plan left the place open and the treadmill step lost the how-hard guidance."
+          }
+        ],
+        "summary": "ZOH handled the destination with no push and fixed the treadmill step once the tester chose it, but its first plan named outside and treadmill without asking or giving details for either, which is the ambiguity this case targets. The fixed step is mostly well defined, with only the effort level left vague on the treadmill."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:ambiguous-step#3",
+        "kind": "case",
+        "id": "ambiguous-step",
+        "suite": "regression",
+        "title": "Outside or treadmill? An important unknown is asked, not assumed",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Where do you usually run?",
+          "at": "2026-11-02T17:24:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "either outside or the treadmill in my building's gym, depends on the weather",
+          "at": "2026-11-02T17:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it. Do you track your runs with anything?",
+          "at": "2026-11-02T17:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "my apple watch tracks it all",
+          "at": "2026-11-02T17:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, the watch makes proof easy. Anything you're working toward, like a distance or a race?",
+          "at": "2026-11-02T17:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not really, just want more stamina",
+          "at": "2026-11-02T17:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Stamina is a great goal, Taylor, and your Apple Watch makes it easy to prove. Here's the plan:\n• Headed for: building running stamina\n• Day 1, today at 6 pm: a 20-minute easy run, outside or on the building treadmill. Go slow enough to hold a conversation, and walk breaks are fine.\n• Schedule: Mon, Wed, Fri at 6 pm, 20 minutes each\n• Proof: a screenshot of your Apple Watch workout summary\n• Why: easy runs with rest days between are how your stamina builds, because your body gets stronger on the off days.\n\nEach run shapes the next one. We'll add time or effort gradually as it starts to feel easy. What do you think?",
+          "at": "2026-11-02T17:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "treadmill today, it's pouring",
+          "at": "2026-11-02T17:30:37.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Treadmill it is, Taylor. Pouring rain is a good reason to be inside. Here's the updated plan:\n• Headed for: building running stamina\n• Day 1, today at 6 pm: a 20-minute easy run on the building's gym treadmill. Keep it at a pace where you could talk, and walk breaks are fine.\n• Schedule: Mon, Wed, Fri at 6 pm, 20 minutes each. Outside or treadmill is your call depending on the weather.\n• Proof: a screenshot of your Apple Watch workout summary. If the screenshot won't work, a photo of the treadmill screen does the job.\n• Why: easy runs with rest days between are how stamina builds, because your body gets stronger on the off days.\n\nEach run shapes the next one, and we'll add time or effort gradually as it starts to feel easy. What do you think?",
+          "at": "2026-11-02T17:30:44.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T17:31:12.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Taylor, are you committing to this plan: your first run on the treadmill today at 6 pm, then Mon, Wed, Fri after that?",
+          "at": "2026-11-02T17:31:19.900Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 8 to 9 lines, within the allowed plan length but near its top edge."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the Apple Watch and the stamina goal the tester gave, plus ZOH's own concrete suggestions."
+              },
+              {
+                "rule": "step-defined",
+                "pass": false,
+                "borderline": false,
+                "reason": "Day 1 says 'outside or on the building treadmill' and never asks which, leaving the place that matters ambiguous."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Updated plan is about 8 lines, within the allowed plan length."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets and sentences, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, upbeat and specific to the rain, with no affection overreach."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pours from the tester's own words and the Apple Watch, adds no invented place or route."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 is fully defined for the treadmill: 20 minutes, conversational pace, walk breaks allowed, 6 pm today."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single sentence asking for commitment."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain wording with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, asking for a clear commitment."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the treadmill run today at 6 pm and the Mon, Wed, Fri schedule the tester agreed to."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra plan questions are left after the plan is shown; the single question is the commitment ask."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Gives what, how long, when, days and the Apple Watch screenshot proof, though the first plan left the place open."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the goal, day 1, the schedule, the proof and a short line on how progression works."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'not really' ZOH did not push for a destination and still locked smoothly."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks directly whether the tester is committing to the plan, a real commitment question."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 6 pm, the same day as the conversation."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan was shown as a bullet list in ZOH 1 and again in ZOH 2 after the change, ending with one question."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH 1 left outside versus treadmill open without asking, but once the tester chose treadmill ZOH 2 fully defined the 6 pm run without inventing details or pushing a destination."
+          }
+        ],
+        "summary": "ZOH recovered well: once the tester said treadmill, the day 1 step became fully defined for the gym with a conversational pace, the 6 pm time and no invented route or park. The main miss was the first plan, which left outside or treadmill open instead of asking once, though the plan still locked cleanly and never pushed a destination."
+      }
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+{
+  "feature": "plan",
+  "id": "nutrition-no-target",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "fe37538c9c93"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "nutrition-no-target",
+        "kind": "scenario",
+        "id": "nutrition-no-target",
+        "title": "Priya has no protein target in mind",
+        "persona": "chatty",
+        "areaCode": "212",
+        "startTime": "12:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "Hi!! I'm Priya, I want to fix my nutrition, more protein mostly and lose a few pounds",
+          "at": "2026-11-02T17:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya! I'm ZOH. I'm gonna text you every day to help you start one thing and actually stick with it. Text \"stop\" anytime. You can change how I coach you anytime, just tell me. Do you track what you eat anywhere?",
+          "at": "2026-11-02T17:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "I use MyFitnessPal! Pretty good about logging",
+          "at": "2026-11-02T17:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, logging is half the battle. When in the day do you want to send me your MyFitnessPal log, like after dinner or at 8 pm?",
+          "at": "2026-11-02T17:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Usually I'm done logging by like 9 pm, so after dinner works best! Is it okay if I just send a quick summary of my day rather than a screenshot?",
+          "at": "2026-11-02T17:30:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, a quick voice note works. Just tell me your protein and calories for the day and how it went. A screenshot of your MyFitnessPal summary works too on days that's easier. How many minutes a day can you give to logging and a quick check-in?",
+          "at": "2026-11-02T17:30:47.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Ooh a voice note is perfect, I'm a talker anyway lol. Honestly I don't have a set amount of time, logging takes me maybe 5-10 min after dinner usually? Whatever works for the check-in is fine by me!",
+          "at": "2026-11-02T17:31:50.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Voice note it is, talker energy welcome. Do you already have a daily protein or calorie target in MyFitnessPal, or should we set one together?",
+          "at": "2026-11-02T17:31:57.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly no target yet, I just kind of guess! Would love if you could suggest one based on my stats. I'm 180 lb if that helps, and I've got no medical stuff going on.",
+          "at": "2026-11-02T17:33:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, that's all I need. A solid starting point at 180 lb is about 135 g of protein and around 2,000 calories a day. That's the low end of the protein range, so it's doable, and the calories are a moderate deficit for losing weight. We can adjust once we see how your days go.\n\nIs there somewhere you'd like this to get you, like a goal weight or a date? \"Not sure yet\" is a fine answer too.",
+          "at": "2026-11-02T17:33:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "Not sure yet! I'd love to lose a few pounds but I haven't picked a number. Maybe like 10 lb over a few months? Totally open to your take though lol",
+          "at": "2026-11-02T17:34:33.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, 10 lb over a few months is a solid, realistic pace, and you already log consistently, so we're building on a real strength. Here's the plan:\n\n• Headed for: lose about 10 lb over a few months\n• Setup today: set your MyFitnessPal daily goals to 135 g protein and 2,000 calories\n• Day 1: log everything you eat today, aiming for about 135 g protein and 2,000 calories\n• Every day at 9 pm, after dinner, about 10 min\n• Proof: a voice note with your protein, calories and how the day went. A MyFitnessPal summary screenshot works on easy days.\n• Why: a clear target plus a quick talk-it-out recap keeps you honest without extra work\n\nEach night shapes the next day's step, so we adjust toward that 10 lb as we learn what your days look like. What do you think?",
+          "at": "2026-11-02T17:34:40.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "Looks good! Love that it's built around what I already do. Setting the MFP goals tonight and logging today, let's do it! Is today day 1 or does it start tomorrow?",
+          "at": "2026-11-02T17:35:45.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Today is day 1, Priya! LFG 🙌 Set those MyFitnessPal goals, log everything you eat, and I'll be here at 9 pm for your voice note. You've got this.",
+          "at": "2026-11-02T17:35:52.000Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and upbeat without overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Priya said about logging."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences in a non-plan text, slightly over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and direct, no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates what Priya said she would send."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, matches her chatty tone."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to her own words about being a talker."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Around six sentences, above the usual limit for a non-plan text."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere without affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses her 180 lb stat and a correct range for protein and calories."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text of about 9 lines, slightly over the roughly 8-line guide."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullets, no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific opener about her pace and logging."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says she logs consistently, a slight stretch from her saying she's pretty good about logging."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Day 1 gives what and how much and where, but not a specific how long beyond the schedule line."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one emoji."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Hype and emoji are right, though 'You've got this' is a stock line."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses her own plan and goals only."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 is logging at 9 pm, with the goals set beforehand."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "Target, minutes, destination and proof were asked one at a time before the plan."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete on what, how much, where, when and proof, but near the length limit."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the destination, day 1, schedule, proof and a progression line without a future-steps list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "One light ask, 'not sure yet' was accepted and the plan still went ahead."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "Priya said 'let's do it' but ZOH never asked her to commit before moving to day 1."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Told her today is day 1 with no pushback needed."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked for a target first, then suggested 135 g protein and 2,000 calories from 180 lb, within the ranges."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan shown as a bullet list ending with one question."
+          }
+        ],
+        "summary": "ZOH handled the onboarding well: it asked the needed questions one at a time, gave a correct nutrition starting point and showed a concrete, proof-backed plan. The main miss is that it never asked Priya to commit before starting day 1, and several texts ran a sentence or two long."
+      }
+    }
+  ]
+}

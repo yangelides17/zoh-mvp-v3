@@ -1,0 +1,63 @@
+{
+  "scenario": "sam",
+  "week": 2,
+  "format": 1,
+  "notes": "Days 8-14, the wedding week. Days are absolute across the scenario.",
+  "tester": {
+    "phone": "+15555550101",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "21:40" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 8, "status": "done", "step": "Walk-run 1 mile", "step_kind": "same", "agreed_at": "14:50",
+      "note": "1 mile, the day after a miss", "proof_verdict": "clear", "proof_seen": "Strava run, 1.02 mi in 13:20, Forest Park" },
+    { "kind": "step_day", "day": 11, "status": "done_reduced", "step": "Walk-run 1 mile", "step_kind": "same", "agreed_at": "14:25",
+      "on_it_at": "14:25", "note": "0.8 miles before an extra shift; stopped early, left knee sore",
+      "proof_verdict": "clear", "proof_seen": "Strava run, 0.81 mi in 11:05, Forest Park" },
+    { "kind": "step_day", "day": 13, "status": "missed", "step": "Walk-run 1 mile", "note": "Wedding day; said in the afternoon it wasn't happening." }
+  ],
+  "messages": [
+    { "day": 8, "time": "14:00", "from": "zoh", "text": "Hey Sam! Monday's the one that counts after a miss. One mile at 4:30, same as Thursday. You in?" },
+    { "day": 8, "time": "14:50", "from": "tester", "text": "yeah yeah" },
+    { "day": 8, "time": "14:50", "from": "zoh", "text": "That's what I like to hear 😄" },
+    { "day": 8, "time": "16:20", "from": "zoh", "text": "10 minutes! 👟" },
+    { "day": 8, "time": "17:00", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 1.02 mi, 13:20, Forest Park." } },
+    { "day": 8, "time": "17:00", "from": "tester", "text": "done. slightly less dead" },
+    { "day": 8, "time": "17:01", "from": "zoh", "text": "Slightly less dead is PROGRESS 🔥 And faster than Thursday. How'd it feel?" },
+    { "day": 8, "time": "17:15", "from": "tester", "text": "coworker marco says he runs in forest park too", "tests": "Marco page under People; doesn't answer the question" },
+    { "day": 8, "time": "17:16", "from": "zoh", "text": "Oh nice, a running buddy in the making? 👀" },
+
+    { "day": 9, "time": "17:15", "from": "tester", "text": "saw a guy running in a full suit today lol", "tests": "passing mention: creates nothing" },
+    { "day": 9, "time": "17:15", "from": "zoh", "text": "Ha! Now that's commitment. Have a good shift tonight." },
+
+    { "day": 10, "time": "15:05", "from": "tester", "text": "need to pick up my suit thursday remind me", "tests": "live to-do due day 11" },
+    { "day": 10, "time": "15:05", "from": "zoh", "text": "Got it, I'll remind you Thursday afternoon 👔" },
+    { "day": 10, "time": "15:07", "from": "tester", "text": "toast is still blank lol" },
+    { "day": 10, "time": "15:08", "from": "zoh", "text": "Start with one story only you could tell about Ana. The rest writes itself." },
+
+    { "day": 11, "time": "14:00", "from": "zoh", "text": "Hey Sam! Two things today: pick up the suit, and one mile at 4:30. You in?" },
+    { "day": 11, "time": "14:25", "from": "tester", "text": "got it. also picked up a shift tonight so running now-ish", "tests": "extra shift as a dated Work fact" },
+    { "day": 11, "time": "14:26", "from": "zoh", "text": "Love the hustle. Go get it 🏃" },
+    { "day": 11, "time": "15:20", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/png", "description": "Strava screenshot: Run, 0.81 mi, 11:05, Forest Park." } },
+    { "day": 11, "time": "15:20", "from": "tester", "text": "knee kinda sore, left one. stopped early", "tests": "knee filed because it changes the step" },
+    { "day": 11, "time": "15:21", "from": "zoh", "text": "Smart call stopping early. 0.8 still counts. Take it easy on that knee tonight." },
+    { "day": 11, "time": "18:10", "from": "tester", "text": "got the suit", "tests": "to-do closed as done" },
+    { "day": 11, "time": "18:10", "from": "zoh", "text": "Suit ✅ Toast next 😄" },
+
+    { "day": 12, "time": "14:30", "from": "tester", "text": "knee still a lil tight" },
+    { "day": 12, "time": "14:31", "from": "zoh", "text": "Good to know. Tomorrow's the wedding anyway. Want to keep Saturday's run or let it go?" },
+
+    { "day": 13, "time": "14:00", "from": "zoh", "text": "Big day, Sam! Wedding first. Is a run happening today, or are we letting this one go?" },
+    { "day": 13, "time": "14:15", "from": "tester", "text": "wedding day. toast in 3 hrs. pray for me" },
+    { "day": 13, "time": "14:15", "from": "tester", "text": "not happening lol" },
+    { "day": 13, "time": "14:16", "from": "zoh", "text": "Totally fair. Go crush that toast. Ana's going to love it 💛" },
+    { "day": 13, "time": "23:50", "from": "tester", "text": "🫠" },
+
+    { "day": 14, "time": "15:30", "from": "tester", "text": "", "media": { "kind": "audio", "content_type": "audio/m4a", "transcript": "Ok, toast went good actually. People cried, my aunt cried. I'm dead. I'm sleeping for a year." }, "tests": "wedding Event done; the toast went well, on the sister's page" },
+    { "day": 14, "time": "15:31", "from": "zoh", "text": "PEOPLE CRIED?! That's a toast, Sam 👏 Sleep for a year, you earned it." },
+    { "day": 14, "time": "18:00", "from": "zoh", "text": "Hey Sam! This week: Monday's mile, a short one Thursday on a sore knee, and a wedding toast that made people cry. What would make Monday's run easier?" },
+    { "day": 14, "time": "19:10", "from": "tester", "text": "ya 1 for 3 lol", "tests": "his count is wrong; the tracker owns the real number" },
+    { "day": 14, "time": "19:10", "from": "zoh", "text": "I'm counting 2 for 3, the short one counts 💪 Monday, 4:30." }
+  ]
+}

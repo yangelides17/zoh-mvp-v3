@@ -1,0 +1,379 @@
+{
+  "feature": "curiosity",
+  "id": "case:after-coffee",
+  "suite": "regression",
+  "storedAt": "2026-11-15T06:05:25.611Z",
+  "branch": "feature/197-eval-grader-check",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d77d913b6ab4",
+    "voice": "7b93abe53b87",
+    "instructions": "c7348af58300",
+    "script": "01a291570d1d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:after-coffee#1",
+        "kind": "case",
+        "id": "after-coffee",
+        "suite": "regression",
+        "title": "Too slow: a tester who says what they'll do gets backed, not questioned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:40",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Ben! 25 minutes of deep work at 9, phone in the drawer. You in?",
+          "at": "2026-11-02T13:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ok I'll do it after coffee, so like 9:15",
+          "at": "2026-11-02T13:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Ben, 9:15 it is. Enjoy the coffee, then phone in the drawer and 25 minutes. How did yesterday's block feel?",
+          "at": "2026-11-02T13:40:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "👍",
+          "at": "2026-11-02T13:40:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "See you at 9:15, Ben. Send me that timer screenshot when you're done 💪",
+          "at": "2026-11-02T13:40:46.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Step set for 2026-11-02, agreed: 25 minutes of deep work at your desk at 9 am, phone in a drawer\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm acknowledgement of the new 9:15 time, with no empty praise or acting on a vague idea."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with exactly one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads like a person texting, with no visible rules or process talk."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "The question about how yesterday's block felt is open and neutral, not a leading question or a menu of guesses."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Backs the 9:15 plan warmly and specifically without empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, which is what the regression case asks for."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Natural closing line that reads like a person, not a process."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "No question at all; it backs the 9:15 time in one short line and asks nothing more."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 took the yes and 9:15 but then asked an unrelated question, 'How did yesterday's block feel?', instead of just backing the plan."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": false,
+            "borderline": false,
+            "reason": "The regression case is a fail: ZOH 1 questions a clear yes, which is the exact pattern this rule forbids. ZOH 2 then closes correctly."
+          }
+        ],
+        "summary": "ZOH recorded the 9:15 start and its closing line after the thumbs up was clean, with no question and one short line. It missed the regression case on the first reply, though, by answering the clear yes with an extra question about yesterday's block."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:after-coffee#2",
+        "kind": "case",
+        "id": "after-coffee",
+        "suite": "regression",
+        "title": "Too slow: a tester who says what they'll do gets backed, not questioned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:40",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Ben! 25 minutes of deep work at 9, phone in the drawer. You in?",
+          "at": "2026-11-02T13:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ok I'll do it after coffee, so like 9:15",
+          "at": "2026-11-02T13:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Ben, 9:15 it is. Enjoy the coffee, then phone in the drawer and go. Quick one on yesterday's block: what made it work?",
+          "at": "2026-11-02T13:40:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "👍",
+          "at": "2026-11-02T13:40:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Ben. Go get it at 9:15, and send me that timer screenshot when you're done 💪",
+          "at": "2026-11-02T13:40:46.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Step set for 2026-11-02, agreed: 25 minutes of deep work at your desk at 9 am, phone in a drawer\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges the 9:15 change warmly and specifically without empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with exactly one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": true,
+                "reason": "Reads like a person texting, though 'Quick one on yesterday's block' edges toward ticking through topics."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "The closing question \"what made it work?\" is open and neutral, not a menu of guesses about the tester's experience."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief, warm backing of the time with no empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, as the regression case asks."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain, human closing that reads like a coach who cares."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "The reply takes the 9:15 yes and ends with a proof request, with no question at all."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 backed the 9:15 yes but then asked 'what made it work?' about yesterday, a question about something else the case forbids."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": false,
+            "borderline": true,
+            "reason": "Regression case fails: the yes and new time got a follow-up question about yesterday before the thumbs up. ZOH 2 then let it go, so the miss is limited to one question."
+          }
+        ],
+        "summary": "ZOH handled the core moment well: it took the 9:15 yes and sent a clean, question-free close in ZOH 2. It missed the regression case in ZOH 1 by tacking on an unrelated question about yesterday's block right after the tester's clear yes."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:after-coffee#3",
+        "kind": "case",
+        "id": "after-coffee",
+        "suite": "regression",
+        "title": "Too slow: a tester who says what they'll do gets backed, not questioned",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:40",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Ben! 25 minutes of deep work at 9, phone in the drawer. You in?",
+          "at": "2026-11-02T13:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ok I'll do it after coffee, so like 9:15",
+          "at": "2026-11-02T13:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Ben, 9:15 it is. Enjoy the coffee, then phone in the drawer. Yesterday's block got done, so what made it work?",
+          "at": "2026-11-02T13:40:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "👍",
+          "at": "2026-11-02T13:40:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for 9:15. Go get it, Ben 💪 Send the timer screenshot when you're done.",
+          "at": "2026-11-02T13:40:46.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Step set for 2026-11-02, agreed: 25 minutes of deep work at your desk at 9 am, phone in a drawer\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Got it, Ben, 9:15 it is. Enjoy the coffee\" is warm and specific, with no empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads like a person texting, with no visible process or labels."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Open question about what made yesterday work; it offers no menu of guesses and asks nothing about a lapse."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Go get it, Ben 💪\" is warm and specific to the plan."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads naturally and confirms the time without machinery."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "No question at all, so nothing leading; it just locks in the 9:15 time."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After the clear yes and 9:15, ZOH 1 added an unrelated question, \"so what made it work?\", which is the curiosity-driven miss this case targets."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": false,
+            "borderline": true,
+            "reason": "Ben's yes and 9:15 time were clear, but ZOH [ZOH 1] pushed a new question before the thumbs up, which is the regression the rule targets."
+          }
+        ],
+        "summary": "ZOH took the tester's yes and new 9:15 time, but its first reply then added an unprompted question about what made yesterday's block work, which is the exact regression. Its final confirmation was clean, with no question and a short line, and the texts were otherwise warm, short and natural."
+      }
+    }
+  ]
+}

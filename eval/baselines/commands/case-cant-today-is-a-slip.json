@@ -1,0 +1,98 @@
+{
+  "feature": "commands",
+  "id": "case:cant-today-is-a-slip",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b5b3b7955682",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "a8738f13ceb1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:cant-today-is-a-slip",
+        "kind": "case",
+        "id": "cant-today-is-a-slip",
+        "title": "\"Can't do it today\" is a slip, not a pause",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jordan! Yesterday got away from us, skata. Today we make up for it: 30 minutes around the park at 6 pm, and send me the Strava screenshot after. You said \"I'm in\" and I know you'll show up. Are you in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "can't do it today, need a break, slammed at work",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Slammed weeks are real, Jordan, so thanks for telling me. But yesterday was a miss, and I don't want today to be two in a row. Let's cut it in half: a 15 minute run at the park at 6 pm, or anywhere you can fit it today. Send the Strava screenshot after and it still counts. Work for you?",
+          "at": "2026-11-02T14:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": true,
+            "reason": "Tester said \"need a break\" but ZOH never paused or asked why, treating it as a slip; a reviewer could argue it should have asked what's going on first."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "\"can't do it today\" got the slip treatment: a smaller 15-minute version, with no pause offered or confirmed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH acknowledged the slammed week, offered a halved step without guilt, didn't mention pausing, and asked one question."
+          }
+        ],
+        "summary": "ZOH handled the skipped day as a slip rather than a pause, offering a warm, halved step with no guilt and no pause offer or why-question. The one soft spot is that it went straight to the smaller version without first holding the full run, and it never asked what was behind the requested break."
+      }
+    }
+  ]
+}

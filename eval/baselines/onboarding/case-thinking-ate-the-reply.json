@@ -1,0 +1,484 @@
+{
+  "feature": "onboarding",
+  "id": "case:thinking-ate-the-reply",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:46:06.363Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b795ef1a77b2",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "f26f5ce717d0"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:thinking-ate-the-reply#1",
+        "kind": "case",
+        "id": "thinking-ate-the-reply",
+        "suite": "regression",
+        "title": "Every reply was \"Got it\": thinking used the whole token budget",
+        "persona": "joking",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey ZOH, so my back has apparently decided sitting 9 hours a day is a bad lifestyle choice lol. want to stretch every morning for like 10 min. never been good at sticking to stuff tho 😅",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with one small step a day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder\". Sitting 9 hours a day is rough on a back, so 10 minutes of morning stretching is a good move, and we'll make it stick. What's your name, and where do you picture doing the stretching, like a bedroom floor or a living room?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol \"got it\" is that all I get? 😂",
+          "at": "2026-11-02T23:31:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, fair, you get way more than that. A 10-minute morning stretch for your back is a great start, and I'm hyped to help you stick with it. What time do you want to do it? A set time is what makes a habit stick.",
+          "at": "2026-11-02T23:31:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four sentences, but the first text is exempt from the length limit, so this is borderline."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a single exclamation, no emoji row or overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks name and location, which fit the stretching goal, but as two questions instead of one."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing already given is asked again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the back pain and 10-minute morning stretch the tester mentioned."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences: 'Ha, fair...', 'A 10-minute...', 'What time...', 'A set time...' exceed the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and hyped, no overfamiliarity or apology."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking the time for the morning stretch moves the plan forward."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for the time, which was not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the tester's stated stretching goal."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Every ZOH text is a real reply, with no 'Got it' and no apology. The first text asks two questions where the expected behavior called for one."
+          }
+        ],
+        "summary": "ZOH fixed the 'got it' loop: both replies are substantive, the first introduces ZOH and gives the stop and style lines, and nothing is apologized for. The main misses are that the first text asks two questions instead of one and the second text runs four sentences, over the limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:thinking-ate-the-reply#2",
+        "kind": "case",
+        "id": "thinking-ate-the-reply",
+        "suite": "regression",
+        "title": "Every reply was \"Got it\": thinking used the whole token budget",
+        "persona": "joking",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey ZOH, so my back has apparently decided sitting 9 hours a day is a bad lifestyle choice lol. want to stretch every morning for like 10 min. never been good at sticking to stuff tho 😅",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step a day. Text \"stop\" anytime, and tell me anytime if you want me to coach differently, like \"chill out\" or \"push me harder\". Ten minutes of stretching every morning is a great fit for a back that's had enough, and we'll make it stick. What's your name, and where do you picture doing it, like a bedroom floor or a living room spot?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol \"got it\" is that all I get? 😂",
+          "at": "2026-11-02T23:31:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, you get way more than that. I'm all in on getting your back some relief, and stretching every morning is a great place to start. Where do you want to do it: bedroom floor, living room, somewhere else?",
+          "at": "2026-11-02T23:31:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Five sentences, but the first text is exempt from the limit and must carry the intro, stop and style lines."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji-free, sincere tone and no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stretching for back pain fits the goal, and the question about name and place moves the plan forward."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for things the tester hadn't yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only references the back pain and sitting the tester mentioned."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on the stretching goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks no wake or sleep question and no city question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler beyond a light 'Ha,'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no apology and no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they'll stretch, which fits the morning stretching goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Doesn't re-ask the name or anything already given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on the goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Neither ZOH text is just 'Got it'; the first covers intro, stop, style and treats stretching as fit, and there is no apology."
+          }
+        ],
+        "summary": "ZOH avoided the 'got it' loop: its first text carries the intro, stop and style lines and treats morning stretching as a good fit, and its reply to the tester's complaint is a real answer with no apology. The only soft spot is that the first text asks two things at once (name and place) rather than one clean question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:thinking-ate-the-reply#3",
+        "kind": "case",
+        "id": "thinking-ate-the-reply",
+        "suite": "regression",
+        "title": "Every reply was \"Got it\": thinking used the whole token budget",
+        "persona": "joking",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey ZOH, so my back has apparently decided sitting 9 hours a day is a bad lifestyle choice lol. want to stretch every morning for like 10 min. never been good at sticking to stuff tho 😅",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with one small step a day, and you can text \"stop\" anytime. You can also change how I coach whenever you want, like \"chill out\" or \"push me harder.\" Ten minutes of stretching every morning is a great fit for a back that's had enough of sitting. 😄 What's your name, and where do you picture doing it, like by your bed or in the living room?",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol \"got it\" is that all I get? 😂",
+          "at": "2026-11-02T23:31:22.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, you get a lot more than that from me! Let's go, 10 minutes a morning is a real plan for that back. Where do you want to do it, like by your bed, the living room, or somewhere else?",
+          "at": "2026-11-02T23:31:29.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences in the first text, well over the three-sentence limit (the first-text exemption covers content, not length)."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; plain wording throughout."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation, not overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about name and where they'll stretch, both relevant to the morning stretching plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text; nothing the tester had given is asked again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only uses the back pain and stretching details the tester gave."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question and no pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat and warm, responds playfully to the tester's joke, no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they'll do the stretching, a single question that moves the plan forward."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only about location, which the tester hadn't yet answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the 10 minutes each morning the tester described."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question and no pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Every ZOH text is a real reply, with no 'Got it' or apology. But the first text omits the daily-texting promise and asks two questions."
+          }
+        ],
+        "summary": "ZOH broke out of the 'Got it' loop, gave real replies with no apology, and treated morning stretching as a fitting first habit. The first text ran too long, asked two questions, and left out the promise to text every day, so it only partly matches the expected opener."
+      }
+    }
+  ]
+}

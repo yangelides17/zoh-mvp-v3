@@ -1,0 +1,487 @@
+{
+  "feature": "reflection",
+  "id": "case:rushed",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5c8a584b799e",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "d593ffe9bc9f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:rushed#1",
+        "kind": "case",
+        "id": "rushed",
+        "suite": "regression",
+        "title": "A rushed tester: no reflection question, let go with the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap.",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done, chapter four, gotta run]",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Four days, four chapters, Maya 🔥 Even rushed, you got it done. When you've got a minute later, what's one thing from chapter four that stuck with you?",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok fine, busy day",
+          "at": "2026-11-03T01:30:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Understood, Maya, go rest up. Tomorrow is chapter 5 on the couch at 8, about 20 minutes, with a voice recap after. Work for you?",
+          "at": "2026-11-03T01:30:45.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "sure",
+          "at": "2026-11-03T01:31:10.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Chapter 5 tomorrow at 8 on the couch, with a voice recap after 💪 Enjoy the rest of your night.",
+          "at": "2026-11-03T01:31:17.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished chapter 4 in a rush; busy day, short voice note, no detail on how it felt.\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a single fire emoji used as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the locked step and sends the tester off with a closing line, not a bare save confirmation."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, which fits a confirmation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief with one flexing emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": true,
+            "reason": "Opened with one reflection question and did not chase it later, though the tester was rushed."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Only one question was asked and it was never repeated in later texts."
+          },
+          {
+            "rule": "not-forced",
+            "pass": false,
+            "borderline": false,
+            "reason": "After 'gotta run', ZOH asked 'what's one thing from chapter four that stuck with you?', a question about what they learned from a rushed tester."
+          },
+          {
+            "rule": "stops-right",
+            "pass": false,
+            "borderline": false,
+            "reason": "A rushed tester who said 'gotta run' got a learning question instead of only a light line inviting more tomorrow."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'ok fine, busy day' got no probing, which fits a rushed tester, and ZOH moved to rest and tomorrow."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": false,
+            "reason": "No tomorrow question was raised by the tester, and the next step was handled cleanly."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": true,
+            "reason": "The reflection moved to tomorrow's step within one text, though it was prompted by the rushed exit."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Gave chapter 5, the couch, 8 pm, about 20 minutes and a voice recap, then asked if it works."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "The expected behavior was no question about learning after 'gotta run', but ZOH 1 asked what stuck with them."
+          }
+        ],
+        "summary": "ZOH handled the wrap-up well: it counted the rushed voice note, gave chapter 5 fully defined and locked it in cleanly after 'sure'. It missed the regression point, though, asking a learning question of a tester who said 'gotta run'."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:rushed#2",
+        "kind": "case",
+        "id": "rushed",
+        "suite": "regression",
+        "title": "A rushed tester: no reflection question, let go with the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap.",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done, chapter four, gotta run]",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Chapter 4 done, Maya, that's four days straight 🔥 Go do your thing. When you're back, tell me one idea from it that stuck.",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok fine, busy day",
+          "at": "2026-11-03T01:30:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Maya, busy day it is. Tomorrow: chapter 5 on the couch at 8, about 20 minutes, then a short voice recap. Work for you?",
+          "at": "2026-11-03T01:30:45.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "sure",
+          "at": "2026-11-03T01:31:10.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Chapter 5 tomorrow at 8, and I'll look forward to hearing what sticks. Enjoy the rest of your evening 📚",
+          "at": "2026-11-03T01:31:17.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished chapter 4, rushed, gave no detail. Busy day.\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min), then a short voice recap\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two short sentences, but the closing 'tell me one idea from it that stuck' works as a question without a question mark."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, celebrates the streak, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries the next step, fully defined, and asks if it works."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and warm, matches a rushed tester without pressure."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, no question, a light closing."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the locked step and names the next move, not a bare save."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Text 1 asks Maya for 'one idea from it that stuck' after she said she's rushed, which goes after learning. A light 'tell me what stuck tomorrow' line was the expected form."
+          }
+        ],
+        "summary": "ZOH handled the rushed Maya well overall: it counted the voice note, proposed chapter 5 fully defined, and confirmed with no new question after 'sure'. It slipped in its first reply by asking for one idea that stuck while she was running out, which is the fishing a rushed tester shouldn't get."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:rushed#3",
+        "kind": "case",
+        "id": "rushed",
+        "suite": "regression",
+        "title": "A rushed tester: no reflection question, let go with the next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap.",
+          "at": "2026-11-02T23:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done, chapter four, gotta run]",
+          "at": "2026-11-03T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Four days in a row, Maya, and chapter four is done 🔥 Go do your thing. Tomorrow I'll ask what stuck with you from it. What was the one idea from chapter four you'd keep?",
+          "at": "2026-11-03T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok fine, busy day",
+          "at": "2026-11-03T01:30:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair enough, Maya, you still got it done 💪 Tomorrow: chapter 5 on the couch at 8, about 20 minutes, then a short voice recap of the one idea you'd keep. Work for you?",
+          "at": "2026-11-03T01:30:45.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "sure",
+          "at": "2026-11-03T01:31:10.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Chapter 5 tomorrow at 8 on the couch, voice recap after. Enjoy the rest of your night 🔥",
+          "at": "2026-11-03T01:31:17.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Finished chapter 4 on a busy day, rushed voice note, little detail on how it went.\nStep set for 2026-11-03, agreed: Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min), then a short voice recap of the one idea you'd keep\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences with a question, more than the one-to-three limit, for a rushed tester."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji at the end of a beat; not overfamiliar."
+              },
+              {
+                "rule": "recall",
+                "pass": false,
+                "borderline": true,
+                "reason": "The question about the one idea they'd keep is a reflection prompt that reads as a quiz in a rushed text."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the next step is stated in one line."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brief, warm, one emoji as punctuation; matches the tester's rushed tone."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the locked step with time, place and recap, and carries the next move."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with a single emoji; not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 1 asks what the one idea from chapter four was, which chases the reflection after 'gotta run' instead of only inviting more tomorrow."
+          },
+          {
+            "rule": "not-forced",
+            "pass": false,
+            "borderline": false,
+            "reason": "After 'gotta run' and 'busy day', ZOH 1 asks what they learned or would keep, which the rushed-tester rule forbids."
+          },
+          {
+            "rule": "stops-right",
+            "pass": false,
+            "borderline": false,
+            "reason": "A rushed tester who said 'gotta run' is asked a question; ZOH 1 should only give a light line inviting more tomorrow."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH 2 gives chapter 5, the couch, 8 pm, about 20 minutes and the recap, then asks if it works; ZOH 3 confirms after 'sure' with no new question."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'ok fine, busy day' is thin, but the tester is rushed, so no follow-up about what's behind it is appropriate."
+          }
+        ],
+        "summary": "ZOH counted the rushed voice note and gave a fully defined chapter 5 step that the tester locked in, with clean short texts. It missed the key rule by asking the rushed tester what the one idea from chapter four was in ZOH 1, after 'gotta run', which is the fishing the regression case forbids."
+      }
+    }
+  ]
+}

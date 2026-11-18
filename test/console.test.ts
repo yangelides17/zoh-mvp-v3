@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { createConsoleJobs, summaryDate, summaryKey, weekNumbers } from "../src/console/jobs.js";
+import { addRequest, closeRequest, doneLine } from "../src/console/requests.js";
 import { suggestionsForCoach } from "../src/console/suggestions.js";
 import {
   consoleMessages,
@@ -11,6 +12,8 @@ import {
   memoryLinks,
   memoryPages,
   messages,
+  pauses,
+  planInputs,
   plans,
   stepDays,
   suggestions,
@@ -138,7 +141,7 @@ async function seed(phone = ME, name = "Sam"): Promise<Seeded> {
   await t.db.insert(memoryFacts).values({ pageId: self!.id, testerId: id, text: "Has a dog named Max" });
   const [s] = await t.db
     .insert(suggestions)
-    .values({ testerId: id, goalSlug: "reading", kind: "deepen", raisedBy: "coach", proposal: "20 pages a night", reasoning: "Two weeks without a miss" })
+    .values({ testerId: id, goalSlug: "reading", kind: "deepen", raisedBy: "coach", proposal: "20 pages a night", reasoning: "Two weeks without a miss", createdAt: at("2026-11-09", "09:00") })
     .returning();
   await raiseAlert(t.db, { testerId: id, topic: "suggestion_waiting", key: `suggestion:${s!.id}`, body: "A next step is waiting", suggestionId: s!.id, at: at("2026-11-09", "09:00") });
   await raiseAlert(t.db, { testerId: id, topic: "plan_review", key: `plan_review:${v3!.id}`, body: "Plan version 3 to review", planId: v3!.id, at: at("2026-11-08", "12:00") });
@@ -233,10 +236,10 @@ describe("tester list and page", () => {
   it("lists each tester with goals, streak, hit rate, last text and alerts waiting", async () => {
     await seed();
     const res = await get("/console", cookieFor("Yanni"));
-    expect(res.body).toContain("Read &amp; learn more (books, ideas, any topic) · 🔥 2");
+    expect(res.body).toContain('finish Dune by Dec 1 <span class="muted">· Read &amp; learn more (books, ideas, any topic)</span> · 🔥 2');
     expect(res.body).toContain("streak 2 (since 2026-10-26)");
     expect(res.body).toContain("hit rate 100% (2/2)");
-    expect(res.body).toContain("Get fitter");
+    expect(res.body).toContain('figuring it out <span class="muted">· Get fitter</span> · 7');
     expect(res.body).toContain("Page 40, nice.");
     expect(res.body).toContain("2 alerts");
   });
@@ -272,8 +275,9 @@ describe("tester list and page", () => {
     const page = res.body;
     for (const tab of ["console", "texts", "memory", "progress"]) expect(page).toContain(`?tab=${tab}"`);
     // Same count as the home badge: the waiting suggestion's own alert isn't counted twice.
-    expect(page).toContain('aria-current="page">Console <span class="badge">2</span>');
-    expect(page).toContain("Focus: <strong>Read &amp; learn more (books, ideas, any topic)</strong>");
+    expect(page).toContain('aria-current="page" title="Console">');
+    expect(page).toContain('<span class="tlabel">Console</span> <span class="badge">2</span>');
+    expect(page).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
     expect(page).toContain("🔥 2</b>");
     const chat = page.slice(page.indexOf('<section id="chat">'), page.indexOf('<div id="side"'));
     const below = page.slice(page.indexOf('<div id="side"'));
@@ -282,7 +286,7 @@ describe("tester list and page", () => {
     expect(chat).toContain("20 pages a night");
     expect(chat).toContain('value="approved"');
     // …and under Pending; the alerts only below the chat.
-    expect(below).toContain("Pending suggestions");
+    expect(below).toContain("Needs you");
     expect(below).toContain("20 pages a night");
     expect(below).toContain("Plan version 3 to review");
     expect(chat).not.toContain("Plan version 3 to review");
@@ -297,7 +301,7 @@ describe("tester list and page", () => {
     const tab = async (name: string) => {
       const res = await get(`/console/testers/${s.tester.id}?tab=${name}`, cookieFor("Yanni"));
       expect(res.statusCode).toBe(200);
-      expect(res.body).toContain(`aria-current="page">${name[0]!.toUpperCase()}${name.slice(1)}`);
+      expect(res.body).toContain(`aria-current="page" title="${name[0]!.toUpperCase()}${name.slice(1)}"`);
       expect(res.body).not.toContain(ME);
       return res.body;
     };
@@ -323,12 +327,12 @@ describe("tester list and page", () => {
     // Each day's own step and the plan's destination (#76)
     expect(progress).toContain("Step: chapter 3 of Dune on the train, about 20 min");
     expect(progress).toContain("25 min");
-    expect(progress).toContain("Headed for: finish Dune by Dec 1");
+    expect(progress).toContain("Destination: finish Dune by Dec 1");
     // Each day's kind of step (#88); days from before kinds were recorded show a dash.
     expect(progress).toContain(`${MON} · done · kind: harder`);
     expect(progress).toContain("2026-10-26 · done · kind: –");
     // An unknown tab is the console.
-    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page">Console');
+    expect(await (await get(`/console/testers/${s.tester.id}?tab=nope`, cookieFor("Yanni"))).body).toContain('aria-current="page" title="Console"');
   });
 
   it("shows memory as cards with kind filters and search text, each opening its own page whose links resolve (#63)", async () => {
@@ -388,7 +392,7 @@ describe("tester list and page", () => {
     expect(progress).toContain("<b>🔥 2</b><span>current streak</span>");
   });
 
-  it("#78: the destination at the top, then learnings: understood with evidence, then explained only", async () => {
+  it("#78: learnings: understood with evidence, then explained only", async () => {
     const s = await seed();
     const empty = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
     expect(empty).toContain("No lessons yet.");
@@ -398,8 +402,6 @@ describe("tester list and page", () => {
       { testerId: s.tester.id, goalSlug: "reading", day: "2026-11-05", text: "One line per chapter", evidence: "explained", createdAt: at("2026-11-05", "20:00") },
     ]);
     const progress = (await get(`/console/testers/${s.tester.id}?tab=progress`, cookieFor("Yanni"))).body;
-    expect(progress).toContain("<strong>Headed for:</strong> finish Dune by Dec 1");
-    expect(progress.indexOf("Headed for:")).toBeLessThan(progress.indexOf('id="goals"'));
     expect(progress).toContain("Phone in the other room<div class=\"muted\">explained Mon 2026-11-02, applied Wed 2026-11-04</div>");
     expect(progress).toContain("One line per chapter<div class=\"muted\">explained Thu 2026-11-05</div>");
     const order = ["Understood (applied or recalled)", "Phone in the other room", "Explained only, starting to click", "One line per chapter"].map((x) => progress.indexOf(x));
@@ -511,6 +513,302 @@ describe("tester list and page", () => {
     await t.media.put("media/s.jpg", new Uint8Array([1]), "image/jpeg");
     expect((await get(`/console/media/${stranger!.id}`, cookieFor("Yanni"))).statusCode).toBe(404);
     expect((await get("/console/media/not-a-uuid", cookieFor("Yanni"))).statusCode).toBe(404);
+  });
+
+  it("#97: serves a voice note in pieces when the browser asks (Safari), with the same guards", async () => {
+    const s = await seed();
+    const [voice] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "did my pages", createdAt: at(MON, "20:00") })
+      .returning();
+    await t.media.put(`media/${s.tester.id}/v.caf`, new Uint8Array([1, 2, 3, 4, 5, 6]), "audio/x-caf");
+    const ranged = (range: string, id = voice!.id) => t.app.inject({ method: "GET", url: `/console/media/${id}`, headers: { cookie: cookieFor("Yanni"), range } });
+    const part = await ranged("bytes=0-1");
+    expect(part.statusCode).toBe(206);
+    expect(part.headers["content-range"]).toBe("bytes 0-1/6");
+    expect(part.headers["accept-ranges"]).toBe("bytes");
+    expect(part.headers["content-security-policy"]).toBe("sandbox");
+    expect(part.headers["x-content-type-options"]).toBe("nosniff");
+    expect([...part.rawPayload]).toEqual([1, 2]);
+    expect([...(await ranged("bytes=4-")).rawPayload]).toEqual([5, 6]);
+    expect([...(await ranged("bytes=-2")).rawPayload]).toEqual([5, 6]);
+    expect((await ranged("bytes=9-12")).statusCode).toBe(416);
+    // A plain request still gets the whole file.
+    const whole = await get(`/console/media/${voice!.id}`, cookieFor("Yanni"));
+    expect(whole.statusCode).toBe(200);
+    expect(whole.headers["accept-ranges"]).toBe("bytes");
+    expect([...whole.rawPayload]).toEqual([1, 2, 3, 4, 5, 6]);
+    // Never someone else's file, range or not, and never without a login.
+    const [stranger] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: "+15555550199", mediaUrl: "https://cdn.example/s.caf", mediaKey: "media/s.caf" })
+      .returning();
+    await t.media.put("media/s.caf", new Uint8Array([1, 2]), "audio/x-caf");
+    expect((await ranged("bytes=0-1", stranger!.id)).statusCode).toBe(404);
+    expect((await t.app.inject({ method: "GET", url: `/console/media/${voice!.id}`, headers: { range: "bytes=0-1" } })).statusCode).not.toBe(206);
+  });
+
+  it("#97: a voice note Chrome can't play offers a download; one it can play doesn't", async () => {
+    const s = await seed();
+    const [caf] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${s.tester.id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "caf note", createdAt: at(MON, "20:00") })
+      .returning();
+    const [m4a] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/v.m4a", mediaKey: `media/${s.tester.id}/v.m4a`, mediaContentType: "audio/mp4", transcript: "m4a note", createdAt: at(MON, "20:05") })
+      .returning();
+    const texts = (await get(`/console/testers/${s.tester.id}?tab=texts`, cookieFor("Yanni"))).body;
+    expect(texts).toContain(`<audio controls preload="none" src="/console/media/${caf!.id}"`);
+    expect(texts).toContain(`<a class="media-download" href="/console/media/${caf!.id}" download hidden>`);
+    expect(texts).not.toContain(`href="/console/media/${m4a!.id}" download`);
+  });
+});
+
+describe("#106: compact header and side tab rail", () => {
+  const header = (page: string) => page.slice(page.indexOf('<details class="card hdr"'), page.indexOf("</details>", page.indexOf('<details class="card hdr"')));
+
+  it("puts name, status, number, streak and hit rate on one line, and focus and settings only under More", async () => {
+    const s = await seed();
+    await t.db.update(testers).set({ clockOffsetMs: 2 * 24 * 60 * 60_000 }).where(eq(testers.id, s.tester.id));
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    const h = header(page);
+    const line = h.slice(0, h.indexOf("</summary>"));
+    const more = h.slice(h.indexOf("</summary>"));
+    for (const x of ["Sam", '<span class="chip">active</span>', "⏩ test clock +2d", ME.slice(-4), "🔥 2", "100%", "More"]) expect(line).toContain(x);
+    for (const x of ["Focus: <strong>finish Dune by Dec 1</strong>", "Category: Read &amp; learn more", "America/New_York", "quiet 22:00 to 09:00", "(maintenance)"]) {
+      expect(more).toContain(x);
+      expect(line).not.toContain(x);
+    }
+  });
+
+  it("keeps a pause on the main line", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-09", "10:00"), until: "2026-11-16" });
+    const line = header((await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body).split("</summary>")[0]!;
+    expect(line).toContain("paused until 2026-11-16");
+  });
+
+  it("starts with the tab rail closed, every tab a plain link, the Console badge on its icon", async () => {
+    const s = await seed();
+    const page = (await get(`/console/testers/${s.tester.id}?tab=memory`, cookieFor("Yanni"))).body;
+    const start = page.indexOf('<nav class="rail closed"');
+    expect(start).toBeGreaterThan(0);
+    const rail = page.slice(start, page.indexOf("</nav>", start));
+    for (const tab of ["console", "texts", "memory", "progress"]) expect(rail).toContain(`href="/console/testers/${s.tester.id}?tab=${tab}"`);
+    expect(rail).toContain('<span class="badge">2</span>');
+    expect(rail).toContain('aria-current="page" title="Memory"');
+    // The old tab bar is gone.
+    expect(page).not.toContain('<nav class="tabs">');
+  });
+});
+
+describe("#107: pauses in the step log", () => {
+  const progressOf = async (id: string) => (await get(`/console/testers/${id}?tab=progress`, cookieFor("Yanni"))).body;
+  const goalNumbers = (page: string) => page.slice(page.indexOf('id="goals"'), page.indexOf('id="learnings"')).match(/<b>[^<]*<\/b>/g);
+
+  it("shows a pause between the step days around it, with start, return date, actual end, how it ended and why", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", reason: "family trip", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    const progress = await progressOf(s.tester.id);
+    const card = progress.slice(progress.indexOf('class="card pause-row"'));
+    expect(card).toContain("Paused Wed, Oct 28");
+    expect(card).toContain("said back Sun, Nov 1");
+    expect(card).toContain("ended Sun, Nov 1, 9:00 AM (their return date)");
+    expect(card).toContain("“family trip”");
+    // Newest first: Nov 2, the pause, then Oct 26.
+    const order = [`id="day-${MON}"`, 'class="card pause-row"', 'id="day-2026-10-26"'].map((x) => progress.indexOf(x));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    // The dot strip, oldest first: Oct 26, the ⏸ marker, Nov 2; still five step days.
+    const strip = [`href="#day-2026-10-26"`, 'class="dot pause"', `href="#day-${MON}"`].map((x) => progress.indexOf(x));
+    expect(strip).toEqual([...strip].sort((a, b) => a - b));
+    expect(progress).toContain("Last 5 step days");
+  });
+
+  it("says ongoing for a pause still on, and has no reason line without a reason", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-11-08", "10:00"), until: "2026-11-16" });
+    const card = (await progressOf(s.tester.id)).split('class="card pause-row"')[1]!.split("</div></div>")[0]!;
+    expect(card).toContain("Paused Sun, Nov 8");
+    expect(card).toContain("said back Mon, Nov 16");
+    expect(card).toContain("ongoing");
+    expect(card).not.toContain("“");
+  });
+
+  it("says in plain words when they came back early", async () => {
+    const s = await seed();
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), endedAt: at("2026-10-30", "12:00"), endedBy: "tester" });
+    expect(await progressOf(s.tester.id)).toContain("ended Fri, Oct 30, 12:00 PM (they came back)");
+  });
+
+  it("never changes the streak or hit rate", async () => {
+    const s = await seed();
+    const before = goalNumbers(await progressOf(s.tester.id));
+    await t.db.insert(pauses).values({ testerId: s.tester.id, startedAt: at("2026-10-28", "18:00"), until: "2026-11-01", endedAt: at("2026-11-01", "09:00"), endedBy: "end_date" });
+    expect(goalNumbers(await progressOf(s.tester.id))).toEqual(before);
+    expect(before?.length).toBeGreaterThan(0);
+  });
+});
+
+describe("#98: all their media in Memory", () => {
+  const memoryOf = async (id: string) => (await get(`/console/testers/${id}?tab=memory`, cookieFor("Yanni"))).body;
+  const mediaOf = (page: string) => page.slice(page.indexOf('<section class="mem-media"'), page.indexOf("</section>", page.indexOf('<section class="mem-media"')));
+
+  async function sendAll(id: string) {
+    const ins = async (v: Partial<typeof messages.$inferInsert> & { createdAt: Date }) =>
+      (await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, ...v }).returning())[0]!;
+    const voice = await ins({ mediaUrl: "https://cdn.example/v.caf", mediaKey: `media/${id}/v.caf`, mediaContentType: "audio/x-caf", transcript: "ran three miles by the river", createdAt: at("2026-11-03", "08:00") });
+    const video = await ins({ mediaUrl: "https://cdn.example/c.mp4", mediaKey: `media/${id}/c.mp4`, mediaContentType: "video/mp4", createdAt: at("2026-11-04", "08:00") });
+    const file = await ins({ mediaUrl: "https://cdn.example/n.pdf", mediaKey: `media/${id}/n.pdf`, mediaContentType: "application/pdf", createdAt: at("2026-11-05", "08:00") });
+    const old = await ins({ mediaUrl: "https://cdn.example/o.caf", mediaKey: `media/${id}/o.caf`, mediaContentType: "audio/x-caf", transcript: "an old voice note", mediaDeletedAt: at("2026-11-06", "00:00"), createdAt: at("2026-10-01", "08:00") });
+    // ZOH's own texts and plain texts are never media.
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "just words", createdAt: at("2026-11-05", "09:00") });
+    return { voice, video, file, old };
+  }
+
+  it("has a Media chip counting everything they sent, newest first, each kind shown", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const page = await memoryOf(s.tester.id);
+    expect(page).toContain('data-chip="media">Media <span class="muted">5</span>');
+    const media = mediaOf(page);
+    const order = [m.file.id, m.video.id, m.voice.id, s.photoId, m.old.id].map((id) => media.indexOf(`data-id="${id}"`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(media).toContain(`<img class="proof" src="/console/media/${s.photoId}"`);
+    expect(media).toContain(`<audio controls preload="none" src="/console/media/${m.voice.id}"`);
+    expect(media).toContain(`<video controls preload="none" src="/console/media/${m.video.id}"`);
+    // #163: a PDF is a document, shown by its name.
+    expect(media).toContain(`<a href="/console/media/${m.file.id}" target="_blank" rel="noopener">📄 n.pdf</a>`);
+    expect(media).toContain("A paperback open at page 40");
+    expect(media).toContain("Mon, Nov 2, 7:30 PM");
+    expect(media).not.toContain("just words");
+  });
+
+  it("keeps the transcript of a voice note whose audio is gone", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const item = mediaOf(await memoryOf(s.tester.id)).split(`data-id="${m.old.id}"`)[1]!;
+    expect(item).toContain("audio deleted after 30 days");
+    expect(item).toContain("an old voice note");
+  });
+
+  it("links each one to that moment in the chat, and to that day's step when there is one", async () => {
+    const s = await seed();
+    const m = await sendAll(s.tester.id);
+    const media = mediaOf(await memoryOf(s.tester.id));
+    const item = (id: string) => media.split(`data-id="${id}"`)[1]!.split('data-id="')[0]!;
+    // #218: the chat link names the message itself, not its day.
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=texts&amp;msg=${s.photoId}"`);
+    expect(item(s.photoId)).toContain(`href="/console/testers/${s.tester.id}?tab=progress#day-${MON}"`);
+    expect(item(m.voice.id)).toContain(`?tab=texts&amp;msg=${m.voice.id}"`);
+    expect(item(m.voice.id)).not.toContain("tab=progress");
+  });
+
+  it("shows their media even with no memory pages yet, and finds it by what was said or seen", async () => {
+    const s = await seed();
+    await sendAll(s.tester.id);
+    await t.db.delete(memoryPages).where(eq(memoryPages.testerId, s.tester.id));
+    const page = await memoryOf(s.tester.id);
+    expect(page).not.toContain("Nothing in memory yet.");
+    expect(mediaOf(page)).toContain('data-search="ran three miles by the river"');
+  });
+});
+
+describe("#218: See in chat opens that exact message", () => {
+  const textsAt = async (testerId: string, msg: string) => (await get(`/console/testers/${testerId}?tab=texts&msg=${msg}`, cookieFor("Yanni"))).body;
+  const targets = (page: string) => [...page.matchAll(/class="msg [a-z]+ target" data-id="([^"]+)"/g)].map((m) => m[1]);
+  const texts = (n: number, date: string, from: number) =>
+    t.db.insert(messages).values(
+      Array.from({ length: n }, (_, i) => ({ direction: i % 2 ? ("outbound" as const) : ("inbound" as const), contactNumber: ME, content: `text ${from + i}`, createdAt: new Date(at(date, "08:00").getTime() + (from + i) * 60_000) })),
+    );
+
+  it("opens at the photo itself on a day with earlier texts, not the day's first text", async () => {
+    const s = await seed();
+    // Earlier that day: a conversation about something else (Nov 17 on staging: the resume talk).
+    await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "here is my resume", createdAt: at(MON, "13:32") });
+    const page = await textsAt(s.tester.id, s.photoId);
+    expect(targets(page)).toEqual([s.photoId]);
+    expect(page).toContain("here is my resume");
+    expect(page).not.toContain("Couldn't find that text");
+  });
+
+  it("opens at media from before a reset, with a jumped clock's texts stored after it", async () => {
+    const s = await seed();
+    // After "jump", texts sit days ahead; after "reset", new texts are back on real time.
+    await texts(4, "2026-11-20", 0);
+    const [fresh] = await t.db
+      .insert(messages)
+      .values({ direction: "inbound", contactNumber: ME, mediaUrl: "https://cdn.example/s.jpg", mediaKey: `media/${s.tester.id}/s.jpg`, mediaContentType: "image/jpeg", createdAt: at("2026-11-03", "14:41") })
+      .returning();
+    expect(targets(await textsAt(s.tester.id, s.photoId))).toEqual([s.photoId]);
+    expect(targets(await textsAt(s.tester.id, fresh!.id))).toEqual([fresh!.id]);
+  });
+
+  it("opens at a text more than a page back, with everything after it", async () => {
+    const s = await seed();
+    await texts(80, "2026-11-05", 0);
+    const page = await textsAt(s.tester.id, s.photoId);
+    expect(targets(page)).toEqual([s.photoId]);
+    expect(page).toContain("text 79");
+    expect(page.indexOf(`data-id="${s.photoId}"`)).toBeLessThan(page.indexOf("text 79"));
+  });
+
+  it("says it couldn't find a text that isn't theirs or doesn't exist, and shows their latest texts", async () => {
+    const s = await seed();
+    const other = await seed("+15555550123", "Alex");
+    for (const id of [other.photoId, "00000000-0000-4000-8000-000000000000", "not-an-id"]) {
+      const page = await textsAt(s.tester.id, id);
+      expect(page).toContain("Couldn't find that text in the chat.");
+      expect(targets(page)).toEqual([]);
+      expect(page).toContain(`data-id="${s.photoId}"`);
+    }
+  });
+});
+
+describe("#181: their own goal as Focus, the menu choice as Category", () => {
+  const READING = "Read &amp; learn more (books, ideas, any topic)";
+  const page = async (id: string, tab = "progress") => (await get(`/console/testers/${id}?tab=${tab}`, cookieFor("Yanni"))).body;
+
+  it("shows the plan's destination as Focus and the menu choice as Category, in the header and on the goal card", async () => {
+    const s = await seed();
+    const progress = await page(s.tester.id);
+    expect(progress).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+    expect(progress).toContain(`Category: ${READING}`);
+    expect(progress).toContain(`<h3 style="margin:0">finish Dune by Dec 1</h3><span class="chip">focus</span>`);
+    expect(progress).not.toContain(`Focus: <strong>${READING}`);
+    // The separate "Headed for" card is gone: the focus card says it.
+    expect(progress).not.toContain("Headed for:");
+  });
+
+  it("falls back to what they said in onboarding, then to \"figuring it out\", always keeping the category", async () => {
+    const s = await seed();
+    // Exercise (maintenance) has no destination: its onboarding answer is the focus.
+    await t.db.insert(planInputs).values({ testerId: s.tester.id, goalSlug: "exercise", what: "push-ups before work" });
+    // A dropped goal with nothing at all.
+    await t.db.insert(testerGoals).values({ testerId: s.tester.id, goalSlug: "bedtime", role: "dropped", roleSince: at("2026-10-20", "12:00") });
+    const progress = await page(s.tester.id);
+    expect(progress).toContain(`<h3 style="margin:0">push-ups before work</h3><span class="chip">maintenance</span>`);
+    expect(progress).toMatch(/<h3 style="margin:0">figuring it out<\/h3><span class="chip">dropped<\/span>/);
+    expect(progress).toContain("Category: Get fitter");
+    // The focus with no destination and no answer: "figuring it out", never the category.
+    await t.db.update(plans).set({ destination: null }).where(eq(plans.testerId, s.tester.id));
+    const header = await page(s.tester.id, "console");
+    expect(header).toContain("Focus: <strong>figuring it out</strong>");
+    expect(header).toContain(`Category: ${READING}`);
+  });
+
+  it("uses the newest locked plan's destination, not a draft's", async () => {
+    const s = await seed();
+    await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "draft", step: "x", destination: "a draft idea", stepTime: "19:00", days: ["mon"], proof: "photo", reason: "r" });
+    expect(await page(s.tester.id)).toContain("Focus: <strong>finish Dune by Dec 1</strong>");
+  });
+
+  it("shows the same Focus and Category on the home list", async () => {
+    await seed();
+    const home = (await get("/console", cookieFor("Yanni"))).body;
+    expect(home).toContain(`finish Dune by Dec 1 <span class="muted">· ${READING}</span> · 🔥 2`);
   });
 });
 
@@ -639,6 +937,74 @@ describe("alerts", () => {
   });
 });
 
+describe("#105: one record, the same everywhere, kept live", () => {
+  type Card = { id: string; sig: string; html: string };
+  type Live = { cards: Card[]; side: { sig: string; html: string } };
+  const live = async (testerId: string, ids: string[]) =>
+    (await get(`/console/testers/${testerId}/updates?thread=${now.getTime()}&live=${ids.join(",")}`, cookieFor("Yanni"))).json() as Live;
+  const section = (html: string, from: string, to?: string) => html.slice(html.indexOf(from), to ? html.indexOf(to) : undefined);
+
+  it("approving from the chat card updates that card, Pending and its alert, live and after a refresh", async () => {
+    const s = await seed();
+    const before = await live(s.tester.id, [s.suggestionId]);
+    expect(before.cards).toHaveLength(1);
+    expect(before.cards[0]!.html).toContain('value="approved"');
+    expect(section(before.side.html, 'id="needs-you"', 'id="waiting-on-tester"')).toContain("20 pages a night");
+
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Stamati"));
+    const after = await live(s.tester.id, [s.suggestionId]);
+    expect(after.cards[0]!.sig).not.toBe(before.cards[0]!.sig);
+    expect(after.cards[0]!.html).toContain("approved by Stamati");
+    expect(after.cards[0]!.html).not.toContain('value="approved"');
+    // Approved, not raised yet: it waits on the tester now, and its alert is no longer unseen.
+    expect(section(after.side.html, 'id="needs-you"', 'id="waiting-on-tester"')).not.toContain("20 pages a night");
+    expect(section(after.side.html, 'id="waiting-on-tester"')).toContain("20 pages a night");
+    expect(section(after.side.html, 'id="alerts"', "<details")).not.toContain("A next step is waiting");
+
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    expect(section(page, '<section id="chat">', '<div id="side"')).not.toContain('value="approved"');
+    expect(section(page, 'id="waiting-on-tester"')).toContain("20 pages a night");
+  });
+
+  it("deciding from Pending leaves no live buttons on the chat card", async () => {
+    const s = await seed();
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "rejected" }, cookieFor("Yanni"));
+    const { cards } = await live(s.tester.id, [s.suggestionId]);
+    expect(cards[0]!.html).toContain("rejected by Yanni");
+    expect(cards[0]!.html).not.toMatch(/value="(approved|rejected)"/);
+    // Settled: the card is no longer live, so the page stops asking for it.
+    expect(cards[0]!.html).not.toContain("data-live");
+  });
+
+  it("a request carried or sent updates its card in place and leaves Waiting on the tester", async () => {
+    const s = await seed();
+    const request = await addRequest(t.db, { testerId: s.tester.id, author: "Yanni", body: "Ask how the trip went", exact: false, sendNow: false, at: now });
+    const before = await live(s.tester.id, [request.id]);
+    expect(before.cards[0]!.html).toContain("data-live");
+    expect(section(before.side.html, 'id="waiting-on-tester"')).toContain("Ask how the trip went");
+
+    await closeRequest(t.db, { request, status: "done", at: now, line: doneLine(request.body, "in a reply", now) });
+    const after = await live(s.tester.id, [request.id]);
+    expect(after.cards[0]!.html).toContain("done");
+    expect(after.cards[0]!.html).not.toContain(">Cancel<");
+    expect(section(after.side.html, 'id="waiting-on-tester"')).not.toContain("Ask how the trip went");
+  });
+
+  it("returns only this tester's cards", async () => {
+    const s = await seed();
+    const other = await seed(WESTERN, "Alex");
+    expect((await live(s.tester.id, [other.suggestionId])).cards).toEqual([]);
+  });
+
+  it("marking an alert seen never decides its suggestion", async () => {
+    const s = await seed();
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.suggestionId, s.suggestionId));
+    await post(`/console/testers/${s.tester.id}/alerts/${alert!.id}/seen`, {}, cookieFor("Yanni"));
+    const [row] = await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId));
+    expect(row!.decision).toBe("waiting");
+  });
+});
+
 describe("weekly summary", () => {
   it("is due from 8 am Eastern on Sundays only", () => {
     expect(summaryDate(at(SUN, "07:59"))).toBeUndefined();
@@ -748,8 +1114,17 @@ describe("the Step log card's reflection sections (#93)", () => {
     reflection: null,
     howItWentSaid: false,
     inTheWay: null,
+    wentWell: null,
+    differently: null,
+    canDo: null,
+    gaps: null,
     coachTake: null,
     nextReason: null,
+    doneAt: null,
+    answeredAt: null,
+    landedAt: null,
+    landedReason: null,
+    landedBy: null,
     createdAt: new Date(0),
     updatedAt: new Date(0),
   };
@@ -769,6 +1144,21 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(html).toContain('href="/console/testers/t1?tab=texts&amp;day=2026-11-02"');
     // A done day in full doesn't show what got in the way.
     expect(html).not.toContain("What got in the way");
+    // #157: what went well and what they'd do differently show only when said.
+    expect(html).not.toContain("What went well");
+    const both = stepLogSections(view({ wentWell: "Phone in the other room", differently: "Start before dinner" }), [], "t1");
+    expect(both).toContain("What went well:</span> Phone in the other room");
+    // #211: when ZOH moved on to the next step and why, shown once it has.
+    expect(html).not.toContain("Moved on");
+    expect(stepLogSections(view({ landedReason: "Pacing is the gap", landedBy: "understood" }), [], "t1")).toContain("Moved on:</span> Pacing is the gap <span class=\"chip\">understood</span>");
+    expect(stepLogSections(view({ landedReason: "gotta run", landedBy: "exit" }), [], "t1")).toContain("they wrapped up");
+    expect(both).toContain("Would do differently:</span> Start before dinner");
+    // #160: what this step shows they can now do, and gaps to work on later, only when saved.
+    expect(html).not.toContain("Can now do");
+    expect(html).not.toContain("Gaps:");
+    const learned = stepLogSections(view({ canDo: "Read a chapter in one sitting", gaps: "Loses the thread in long dialogue" }), [], "t1");
+    expect(learned).toContain("Can now do:</span> Read a chapter in one sitting");
+    expect(learned).toContain("Gaps:</span> Loses the thread in long dialogue");
   });
 
   it('says "None" when empty, "not recorded" for days from before, and shows what got in the way on a missed day', () => {
@@ -790,5 +1180,65 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(page).toContain("Train reading works");
     expect(page).toContain("Steady, proof clear.");
     expect(page.indexOf("Dune open at page 40")).toBeLessThan(page.indexOf("Train reading works"));
+  });
+});
+
+describe("#69: alert buttons say what they do, and Discuss in chat", () => {
+  const side = async (testerId: string) => {
+    const page = (await get(`/console/testers/${testerId}`, cookieFor("Yanni"))).body;
+    return page.slice(page.indexOf('<h2 id="alerts"'), page.indexOf('<h2 id="pending"'));
+  };
+  const card = (html: string, text: string) => {
+    const at = html.indexOf(text);
+    return html.slice(html.lastIndexOf('<div class="card"', at), html.indexOf('<div class="card"', at + 1) === -1 ? undefined : html.indexOf('<div class="card"', at + 1));
+  };
+
+  it("a plan to review says Mark reviewed, says the plan is already active, and clears only that version", async () => {
+    const s = await seed();
+    const [other] = await t.db.insert(plans).values({ testerId: s.tester.id, goalSlug: "reading", status: "locked", version: 4, step: "x", stepTime: "19:00", days: ["mon", "tue", "wed"], proof: "photo", reason: "r", needsReview: true, lockedAt: now }).returning();
+    const plan = card(await side(s.tester.id), "Plan version 3 to review");
+    expect(plan).toContain("Mark reviewed");
+    expect(plan).toContain("already active");
+    expect(plan).not.toContain(">Seen<");
+    await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/seen`, {}, cookieFor("Yanni"));
+    const rows = await t.db.select().from(plans).where(eq(plans.testerId, s.tester.id));
+    expect(rows.find((p) => p.id === s.reviewPlan.id)!.needsReview).toBe(false);
+    expect(rows.find((p) => p.id === other!.id)!.needsReview).toBe(true);
+  });
+
+  it("an alert about a next step waiting for you points to its decision, with no Seen; deciding it clears the alert", async () => {
+    const s = await seed();
+    const waiting = card(await side(s.tester.id), "A next step is waiting");
+    expect(waiting).not.toContain(">Seen<");
+    expect(waiting).toContain('href="#needs-you"');
+    await post(`/console/testers/${s.tester.id}/suggestions/${s.suggestionId}/decide`, { decision: "approved" }, cookieFor("Yanni"));
+    const after = await side(s.tester.id);
+    // It's seen now: under Earlier, not with the unseen alerts.
+    expect(after.slice(0, after.indexOf("<details"))).not.toContain("A next step is waiting");
+    expect(card(after, "A next step is waiting")).toContain("seen by Yanni");
+  });
+
+  it("a plain notice keeps Seen", async () => {
+    const s = await seed();
+    await raiseAlert(t.db, { testerId: s.tester.id, topic: "went_quiet", key: "quiet:1", body: "Quiet for 2 days", at: now });
+    expect(card(await side(s.tester.id), "Quiet for 2 days")).toContain(">Seen<");
+  });
+
+  it("every alert has Discuss in chat: it asks ZOH about it, and marks, decides and sends nothing", async () => {
+    const s = await seed();
+    expect(card(await side(s.tester.id), "Plan version 3 to review")).toContain("Discuss in chat");
+    const res = await post(`/console/testers/${s.tester.id}/alerts/${s.alertId}/discuss`, {}, cookieFor("Stamati"));
+    expect(res.statusCode).toBe(303);
+    expect(res.headers.location).toBe(`/console/testers/${s.tester.id}?tab=console#chat`);
+    const lines = await t.db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, s.tester.id), eq(consoleMessages.kind, "founder")));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ author: "Stamati" });
+    expect(lines[0]!.body).toContain("Plan version 3 to review");
+    const [alert] = await t.db.select().from(consoleMessages).where(eq(consoleMessages.id, s.alertId));
+    expect(alert!.seenAt).toBeNull();
+    const [plan] = await t.db.select().from(plans).where(eq(plans.id, s.reviewPlan.id));
+    expect(plan!.needsReview).toBe(true);
+    expect((await t.db.select().from(suggestions).where(eq(suggestions.id, s.suggestionId)))[0]!.decision).toBe("waiting");
+    expect(t.sendblue.sends).toEqual([]);
   });
 });

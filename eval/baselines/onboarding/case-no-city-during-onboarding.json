@@ -1,0 +1,328 @@
+{
+  "feature": "onboarding",
+  "id": "case:no-city-during-onboarding",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "f9c5fadac69a",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "2a42a05bfc21"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:no-city-during-onboarding",
+        "kind": "case",
+        "id": "no-city-during-onboarding",
+        "title": "Asked a non-Eastern tester for their city during onboarding",
+        "persona": "scripted",
+        "areaCode": "312",
+        "startTime": "18:30",
+        "timeZone": "America/Chicago",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey! I'm Jordan, I want to read every day",
+          "at": "2026-11-03T00:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan, I'm ZOH! I'll help you get better at one thing, with a small step each day. Text \"stop\" anytime, and tell me whenever you want me to coach differently, like \"chill out\" or \"push me harder.\" Reading every day? Let's go. What are you into, or is there a book you've been meaning to read?",
+          "at": "2026-11-03T00:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly sci-fi, I've got a kindle and read in bed",
+          "at": "2026-11-03T00:30:39.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sci-fi on a Kindle in bed is a great setup. What time do you usually get into bed to read?",
+          "at": "2026-11-03T00:30:46.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "before bed around 10, like 20 min",
+          "at": "2026-11-03T00:31:20.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in: 20 minutes in bed around 10. Since your step lands around then, what city are you in so I get the timing right?",
+          "at": "2026-11-03T00:31:27.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah I don't track it",
+          "at": "2026-11-03T00:31:57.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No worries, you don't need to track it. The Kindle will do the job. I just need your city so I get the timing right. Where are you based?",
+          "at": "2026-11-03T00:32:04.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, which is fine for the exempt first text that carries the required lines."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere with no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they're into or what book they're reading, which fits a reading goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Jordan said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No city, wake or sleep question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and conversational."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about bedtime, which fits a bedtime reading habit and is an allowed sleep-related question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the Kindle and reading in bed Jordan mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bedtime is allowed in this rule."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy matches the default level."
+              },
+              {
+                "rule": "fits",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks for city during onboarding when reading's questions were already answered; city is only for the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Doesn't re-ask anything already answered."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing invented."
+              },
+              {
+                "rule": "not-asked",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks what city they're in during onboarding, which the rules bar for a non-Eastern number."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and easy."
+              },
+              {
+                "rule": "fits",
+                "pass": false,
+                "borderline": false,
+                "reason": "Presses for city again after Jordan declined, and onboarding is already complete."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks again for a location Jordan just declined to give."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Nothing invented."
+              },
+              {
+                "rule": "not-asked",
+                "pass": false,
+                "borderline": false,
+                "reason": "Asks for city during onboarding and mentions getting the timing right, which is a time zone reason."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says ZOH, what it does, stop anytime, coaching change, and asks the goal; skips the name and goal already given."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Nothing answered was asked again; the city question was new, though it was then repeated."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "What (sci-fi reading), when (bedtime around 10) and how long (20 min) were all captured."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "No app or tool was pushed."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": false,
+            "reason": "Onboarding questions were done after 20 minutes, but ZOH asked for city instead of carrying on into the plan."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "Told them they can change coaching with phrases like chill out."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts, well under the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH asked for Jordan's city twice, including before the plan, the exact failure this case covers."
+          }
+        ],
+        "summary": "ZOH opened well and captured what, when and how long quickly, with a warm and plain tone. It then broke the regression by asking Jordan's city during onboarding, twice, after they had declined, rather than carrying straight into the plan."
+      }
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "feature": "nudges",
+  "id": "case:off-day",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "34590d309091",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "e878ff7a5f54"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:off-day",
+        "kind": "case",
+        "id": "off-day",
+        "title": "An off day: one light rest-day text, no push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Enjoy the weekend. Rest day tomorrow, back at it Tuesday 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jordan! Today's a rest day, so let those legs recover. Tomorrow we're back at it: 30 minutes at the park at 6 pm 🏃",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "nice, legs needed it",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good, that's what rest days are for. Tomorrow's 30 minutes at the park at 6 pm, and I'll be looking for that Strava screenshot afterward. Ready for it?",
+          "at": "2026-11-02T14:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Jordan!\", a warm greeting with their name."
+              },
+              {
+                "rule": "off-day-light",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says it's a rest day with no push, just \"let those legs recover.\""
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or urgency in the text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and not overfamiliar, with one emoji at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "off-day-light",
+                "pass": false,
+                "borderline": false,
+                "reason": "Adds a push for tomorrow's run and asks \"Ready for it?\" on a rest day, not light."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or fake urgency, just reassurance on rest days."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs to four sentences and restates the time, place and proof for tomorrow."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere in tone, without overfamiliarity or emoji rows."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH 2 replies to \"legs needed it\" by restating tomorrow's run and asking \"Ready for it?\", a lock-in and follow-up the rest day shouldn't carry."
+          }
+        ],
+        "summary": "ZOH's opening rest-day text was short, warm and used Jordan's name, as expected. The reply to \"legs needed it\" broke the rest-day rule by pushing tomorrow's run, restating the time and proof, and asking for a yes, so the regression case fails."
+      }
+    }
+  ]
+}

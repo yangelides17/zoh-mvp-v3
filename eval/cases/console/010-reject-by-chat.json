@@ -1,0 +1,79 @@
+{
+  "id": "reject-by-chat",
+  "title": "\"Reject it\" in the chat is drafted, then a typed yes rejects it, and only then is it called done",
+  "origin": "#105 Oct 31 live test (a chat rejection never reached the card) and #155",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "a 20 minute run",
+      "where": "the park",
+      "when": "6 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥"
+      },
+      {
+        "from": "zoh",
+        "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪"
+      }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "done"
+      },
+      {
+        "days_ago": 5,
+        "status": "done"
+      },
+      {
+        "days_ago": 7,
+        "status": "done"
+      }
+    ],
+    "suggestions": [
+      {
+        "kind": "new_focus",
+        "raised_by": "tester",
+        "proposal": "Learn to solve a Rubik's cube",
+        "reasoning": "he asked to switch to the cube",
+        "new_goal": "reading",
+        "decision": "waiting"
+      }
+    ]
+  },
+  "testerLines": [
+    "console Yanni: reject his request to switch, he should stick with running for now",
+    "console Yanni: yes do it"
+  ],
+  "whatWentWrong": "Oct 31: a rejection typed in the console chat only queued wording; the request stayed waiting.",
+  "shouldHaveHappened": "ZOH drafts a rejection of the switch request with Yanni's reason (stick with running); the card and its line say what will happen and that it won't reach Jordan, without claiming it's rejected yet. After \"yes do it\", it confirms the draft and tells Yanni in a line that it's rejected. Nothing is texted to Jordan.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}

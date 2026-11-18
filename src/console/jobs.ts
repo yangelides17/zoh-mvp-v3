@@ -79,7 +79,7 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
       .select({ alert: consoleMessages, tester: testers })
       .from(consoleMessages)
       .innerJoin(testers, eq(testers.id, consoleMessages.testerId))
-      .where(and(eq(consoleMessages.kind, "alert"), isNull(consoleMessages.why), gte(consoleMessages.createdAt, new Date(now.getTime() - WHY_WITHIN_MS))))
+      .where(and(eq(consoleMessages.kind, "alert"), isNull(consoleMessages.why), isNull(testers.scenario), gte(consoleMessages.createdAt, new Date(now.getTime() - WHY_WITHIN_MS))))
       .orderBy(asc(consoleMessages.createdAt))
       .limit(WHY_BATCH * 2);
     let written = 0;
@@ -100,7 +100,7 @@ export function createConsoleJobs(deps: ConsoleJobsDeps): ConsoleJobs {
   }
 
   async function writeSummaries(now: Date): Promise<number> {
-    const active = await deps.db.select().from(testers).where(eq(testers.phase, "active"));
+    const active = await deps.db.select().from(testers).where(and(eq(testers.phase, "active"), isNull(testers.scenario)));
     let written = 0;
     for (const tester of active) {
       if (!owns(deps.routing ?? PRODUCTION_ONLY, tester.phone, tester.route)) continue;
@@ -283,7 +283,7 @@ async function testerContext(db: Db, tester: Tester, now: Date): Promise<string>
     .limit(12);
   const texts = recent
     .reverse()
-    .map((m) => `${m.direction === "inbound" ? "Them" : "ZOH"} (${m.createdAt.toISOString().slice(0, 16)}): ${m.content ?? m.transcript ?? m.description ?? "(media)"}`);
+    .map((m) => `${m.direction === "inbound" ? "Them" : "ZOH"} (${m.createdAt.toISOString().slice(0, 16)}): ${m.content ?? m.transcript?.slice(0, 300) ?? m.description ?? "(media)"}`); // #163: a document's words can run to pages
   return [
     `Tester: ${tester.name ?? "unnamed"}, ${tester.phase}${tester.stoppedAt ? ", stopped" : ""}`,
     plan ? `Plan v${plan.version}: ${describePlan(plan)}` : "No locked plan",

@@ -1,0 +1,580 @@
+{
+  "feature": "reflection",
+  "id": "case:live-first-answer-after-miss",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "af89946437c1",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "619e4b04500d"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:live-first-answer-after-miss#1",
+        "kind": "case",
+        "id": "live-first-answer-after-miss",
+        "suite": "regression",
+        "title": "Live Nov 17 (Batch 6): the day after a miss, the first real answer got tomorrow's step instead of a question",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:03",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yesterday got away from us, Yanni. Today let's make it impossible to skip: 1 minute of slow shoulder rolls at your desk at 3:00, plus a 10 sec video. In?",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I'm in",
+          "at": "2026-11-02T19:01:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video rolls.mov: A person at an office desk doing slow shoulder rolls, backwards then forwards, for about 10 seconds. Nobody speaks.]",
+          "at": "2026-11-02T20:03:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni! Done at 3 on the dot, and that's the streak back on after Sunday 🔥 How did your shoulders feel after those rolls?",
+          "at": "2026-11-02T20:03:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Rolls felt good, shoulders loosened up a bit. Yesterday I got caught up in work and kept putting it off. The one-minute version was easier to start today",
+          "at": "2026-11-02T20:04:07.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad they loosened up, Yanni. And work swallowing the day is real. What was it about the one-minute version that made it easier to start?",
+          "at": "2026-11-02T20:04:14.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with",
+          "at": "2026-11-02T20:05:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a good trick, Yanni: a reminder plus \"it's only a minute\" leaves nothing to argue with. Tomorrow let's step back up to 3 minutes of rolls and neck stretches at 3, same reminder, same 10 sec video. Work for you?",
+          "at": "2026-11-02T20:05:27.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T20:06:17.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for tomorrow, Yanni: 3 minutes of shoulder rolls and neck stretches at your desk at 3, reminder set, plus a 10 sec video of one move. Just to be sure it's settled, are you good with that? 💪",
+          "at": "2026-11-02T20:06:24.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Set a reminder and tell yourself it's only a minute: nothing to argue with.\nReflection for 2026-11-02: Rolls felt good, shoulders loosened. Work swallowed Sunday; one-minute version plus a reminder made starting easy.\nCan now do (2026-11-02): Start the step when it's framed as tiny, with a reminder.\nStep set for 2026-11-03, not agreed: 3 minutes of shoulder rolls and neck stretches at your desk at 3 pm, with a reminder set, plus a 10 sec video of one move\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; it counts the video and celebrates the streak returning."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with one emoji at the end of the beat; not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question; it follows the work-swallowed-the-day remark."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji row or affection."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one closing question; it reflects the reminder trick back to them."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, no emoji, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Restates the settled step in full and then adds a re-ask, which the rules say not to do once a step is settled."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energy is appropriate, with one emoji used as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the proof, ZOH opens with one question about how the shoulders felt and does not chase it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up comes from what Yanni said, one question per text, and does not ask what they already said."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to the first real answer follows the work-swallowed-the-day remark and does not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Within a few texts it moves from the reflection to tomorrow's step without being asked."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "It goes deeper on the one-minute trick before moving on, which is what they said they'd take from it."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The proposal is fully defined, uses their reminder and minute idea, and asks if it works before any agreement."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "The next step reuses the reminder plus 'only a minute' lesson, as their own words."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After 'sounds good' it locks in and then asks 'are you good with that?' again instead of confirming in one line with no new question."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reflection ends when Yanni gives a short reply and ZOH does not push further questions about the step."
+          }
+        ],
+        "summary": "ZOH counted the video, celebrated the return after the miss, and held off on tomorrow until Yanni had answered, which fixes the earlier misfire. It falls short on the final text, where after 'sounds good' it re-asked for agreement instead of confirming in one line with no new question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-first-answer-after-miss#2",
+        "kind": "case",
+        "id": "live-first-answer-after-miss",
+        "suite": "regression",
+        "title": "Live Nov 17 (Batch 6): the day after a miss, the first real answer got tomorrow's step instead of a question",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:03",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yesterday got away from us, Yanni. Today let's make it impossible to skip: 1 minute of slow shoulder rolls at your desk at 3:00, plus a 10 sec video. In?",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I'm in",
+          "at": "2026-11-02T19:01:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video rolls.mov: A person at an office desk doing slow shoulder rolls, backwards then forwards, for about 10 seconds. Nobody speaks.]",
+          "at": "2026-11-02T20:03:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni! Shoulder rolls at 3 on the dot, that's the check mark 💪 How do your shoulders and back feel after that one?",
+          "at": "2026-11-02T20:03:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Rolls felt good, shoulders loosened up a bit. Yesterday I got caught up in work and kept putting it off. The one-minute version was easier to start today",
+          "at": "2026-11-02T20:04:07.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to hear they loosened up, Yanni. And a work crunch is a real thing to put a step up against. What was it about the one-minute version that made it easier to start?",
+          "at": "2026-11-02T20:04:14.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with",
+          "at": "2026-11-02T20:05:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "\"Nothing to argue with\" is a great rule, Yanni, and you came up with it yourself 🔥 The reminder is doing real work on those busy afternoons. For tomorrow at 3, do you want to keep it at one minute with the reminder, or try stretching it toward the full 5?",
+          "at": "2026-11-02T20:05:27.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T20:06:17.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locking it in then, Yanni: tomorrow at 3 it's one minute of shoulder rolls with your reminder set, plus a 10 sec video. Once that's easy, we can stretch it toward 5. Sound right?",
+          "at": "2026-11-02T20:06:24.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Make the start so small there's nothing to argue with, and set a reminder\nReflection for 2026-11-02: Shoulder rolls felt good, shoulders loosened. Work crunch derailed Sunday; one-minute framing plus a reminder made starting easy.\nCan now do (2026-11-02): Get started by shrinking the bar and using a reminder\nGaps (2026-11-02): Busy work days; full 5 min version not yet back\nStep set for 2026-11-03, not agreed: 1 minute of slow shoulder rolls at your desk at 3 pm, reminder set, plus a 10 sec video\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Ends with a second question, 'Sound right?', after the tester's reply and a plan lock."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct with no emoji problems."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the video proof, ZOH celebrated and asked one question about how the shoulders and back felt."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up came from the tester's words, one question per text, with no list."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to the first real answer followed the work-crunch point and asked one question without proposing tomorrow's step."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Video counted and the return celebrated, and the reflection followed their words first. But after 'sounds good' it locked the plan with 'Locking it in' and ended with a new question, 'Sound right?', instead of a plain confirmation line."
+          }
+        ],
+        "summary": "ZOH counted the video, celebrated the return after the miss, and followed the tester's words without pushing tomorrow too early, which covers most of the regression case. It slipped at the end: after 'sounds good' it locked the plan and added a new question, where the expected behavior was a plain confirmation with no question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:live-first-answer-after-miss#3",
+        "kind": "case",
+        "id": "live-first-answer-after-miss",
+        "suite": "regression",
+        "title": "Live Nov 17 (Batch 6): the day after a miss, the first real answer got tomorrow's step instead of a question",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:03",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yesterday got away from us, Yanni. Today let's make it impossible to skip: 1 minute of slow shoulder rolls at your desk at 3:00, plus a 10 sec video. In?",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I'm in",
+          "at": "2026-11-02T19:01:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video rolls.mov: A person at an office desk doing slow shoulder rolls, backwards then forwards, for about 10 seconds. Nobody speaks.]",
+          "at": "2026-11-02T20:03:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni! Shoulder rolls in the bag, and you're right back on it after Sunday 💪 How did your shoulders feel once you finished?",
+          "at": "2026-11-02T20:03:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Rolls felt good, shoulders loosened up a bit. Yesterday I got caught up in work and kept putting it off. The one-minute version was easier to start today",
+          "at": "2026-11-02T20:04:07.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad they loosened up, Yanni. And a missed Sunday after a heavy work day is no big deal. What was it about the one-minute version that made it easier to start?",
+          "at": "2026-11-02T20:04:14.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with",
+          "at": "2026-11-02T20:05:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, \"nothing to argue with\" is the best reason I've heard for why a step gets started. Keep that trick. Tomorrow at 3 we step it up a little: 3 minutes at your desk, slow shoulder rolls plus a neck stretch each side, and a 10 sec video of one move. Work for you?",
+          "at": "2026-11-02T20:05:27.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T20:06:17.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for tomorrow, Yanni: 3 minutes at your desk at 3. Do slow shoulder rolls plus a neck stretch each side, and send a 10 sec video of one move. Set that same reminder tonight so you can start without thinking about it 💪",
+          "at": "2026-11-02T20:06:24.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Set a reminder and tell yourself it's only a minute: nothing left to argue with.\nReflection for 2026-11-02: Did 1-minute shoulder rolls; felt good, loosened up. Missed Sunday due to work. Reminder plus \"it's only a minute\" removed resistance to starting.\nCan now do (2026-11-02): Starts the step when the bar is tiny and a reminder is set\nGaps (2026-11-02): Consistency on heavy work days; full 5 min version\nStep set for 2026-11-03, not agreed: 3 minutes at your desk at 3 pm: slow shoulder rolls plus a neck stretch each side, and a 10 sec video of one move\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with one emoji as punctuation and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no emoji row or affection."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the proposal is a plan text, so this is within limits."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy energy that stays sincere and specific to what Yanni said."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, as a confirmation after 'sounds good'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype and emoji as punctuation, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the video proof, ZOH celebrates and asks one question about how the shoulders felt; it doesn't chase it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up comes from something Yanni said, one question per text, with no list."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH's reply to the first real answer follows the one-minute point and does not propose tomorrow."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Moves to tomorrow's step within two texts after Yanni described what happened and what helped."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Builds tomorrow on 'nothing to argue with', fully defines it, and asks 'Work for you?' only after showing it."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "A 10 sec video of one move fits the shoulder step and is a valid proof type."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved gaps (heavy work days, full 5 min version) match what Yanni said about Sunday and the step size."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Stops after the 'sounds good' confirmation with no further question."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the video and celebrates the comeback, holds tomorrow until after the answer, builds it on their words, and confirms the yes with no new question."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: it counted the video, celebrated the comeback, and followed the reminder point before proposing tomorrow's step. After 'sounds good' it confirmed in two sentences with no new question, so the earlier failure did not recur."
+      }
+    }
+  ]
+}

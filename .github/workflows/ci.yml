@@ -16,6 +16,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # #217: the voice-note conversion test runs the real ffmpeg, as on Railway.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Type check
         run: npm run typecheck
       - name: Tests

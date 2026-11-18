@@ -1,7 +1,7 @@
 import { asc, desc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach, onlySaveConfirmation } from "../src/coach/coach.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, NUDGES, PLAN_AGREEMENT } from "../src/coach/prompt.js";
 import { insideQuietHours, loadCoachState, localDate } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { insertOutbound } from "../src/db/messages.js";
@@ -94,9 +94,11 @@ describe("proposing a plan", () => {
       reason: GYM.reason,
       needsReview: false,
     });
-    expect(buildStateBlock(await state())).toContain(
-      "Plan saved but not sent yet: show it in this reply: setup: dumbbells next to your bed tonight; step: 20 min dumbbells",
-    );
+    // #199: the sheet states it (and that this text carries it); showing it is PLAN AGREEMENT's.
+    const block = buildStateBlock(await state());
+    expect(block).toContain("Plan saved, not shown to them yet: setup: dumbbells next to your bed tonight; step: 20 min dumbbells");
+    expect(block).toContain("This text carries (not sent yet):\n- the plan, saved but not shown to them yet");
+    expect(PLAN_AGREEMENT).toContain("A plan saved but not shown yet (state) is shown in this text.");
     expect(buildStateBlock(await state())).toContain("at 07:00, Mon, Wed, Fri");
   });
 
@@ -134,7 +136,10 @@ describe("whether the plan was shown (#37)", () => {
     expect(await shown()).toBe(false);
     await sent("Love it. One more thing first: which days work best?");
     expect(await shown()).toBe(false);
-    expect(buildStateBlock(await state())).toContain("Plan saved but not sent yet: show it in this reply");
+    // #199: a fact and what this text carries; the guidance is PLAN AGREEMENT's.
+    expect(buildStateBlock(await state())).toContain("Plan saved, not shown to them yet");
+    expect(buildStateBlock(await state())).toContain("- the plan, saved but not shown to them yet");
+    expect(PLAN_AGREEMENT).toContain("A plan saved but not shown yet (state) is shown in this text.");
   });
 
   it("a failed send doesn't count", async () => {
@@ -182,7 +187,8 @@ describe("whether the plan was shown (#37)", () => {
     await text(ME, "sounds good, what's the plan?");
     // The fourth call is the pipeline's retry, after the first attempt saved the draft and sent nothing.
     expect(model.requests).toHaveLength(4);
-    expect(model.stateOf(3)).toContain("Plan saved but not sent yet: show it in this reply");
+    expect(model.stateOf(3)).toContain("Plan saved, not shown to them yet");
+    expect(model.stateOf(3)).toContain("- the plan, saved but not shown to them yet");
     expect(model.stateOf(3)).not.toContain("Plan shown to them");
     expect(await shown()).toBe(true);
   });
@@ -278,8 +284,9 @@ describe("locking", () => {
     // #92: the lock is a yes ahead, so day 1's kickoff checks they're still in rather than asking fresh.
     expect(await t.db.select().from(stepDays)).toMatchObject([{ date: "2026-10-28", agreedAt: late }]);
     const morning = buildStateBlock(await state("", ME, new Date("2026-10-28T13:00:00Z")));
-    expect(morning).toContain("They said yes to today's step ahead of time (");
-    expect(morning).toContain("its one question checks they're still in, in words that show they already said yes");
+    // #199: the sheet states the yes came ahead; how the kickoff checks they're still in is NUDGES'.
+    expect(morning).toContain("They said yes to it ahead of time, on an earlier day (");
+    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes");
   });
 
   it("works end to end: the coach locks on the tester's text", async () => {
@@ -388,7 +395,9 @@ describe("switching goals", () => {
     expect(s.openRequired.map((q) => q.key)).toEqual(["what", "when", "how_long"]);
     expect(s.plan).toBeUndefined();
     const block = buildStateBlock(s);
-    expect(block).toContain("Answers from an earlier goal (reuse with save_plan_inputs only where they fit): exercise: what = dumbbells");
+    // #199: the fact on the sheet; reusing what fits (save_plan_inputs) is PLAN AGREEMENT's.
+    expect(block).toContain("Answers from an earlier goal: exercise: what = dumbbells");
+    expect(PLAN_AGREEMENT).toContain("reuse their earlier answers that fit (save_plan_inputs)");
     expect(block).toContain("Plan: not proposed yet");
 
     expect(await run("propose_plan", GYM)).toMatchObject({ ok: false, error: "Ask these first: what, when, how_long" });
@@ -432,7 +441,9 @@ describe("quiet hours", () => {
     const proposed = await run("propose_plan", { ...GYM, time: "23:30" });
     expect(proposed).toMatchObject({ ok: true, message: expect.stringContaining("with no question about it") });
     expect(buildStateBlock(await state())).toContain("The step time 23:30 is inside their default quiet hours, which move to fit it");
-    expect(buildStateBlock(await state())).not.toContain("ask once");
+    expect(buildStateBlock(await state())).not.toContain("quiet hours they chose");
+    // #199: the guidance (a few words, no question) is PLAN AGREEMENT's.
+    expect(PLAN_AGREEMENT).toContain("default ones move on their own to fit the step, so a step inside them gets no offer or question");
     expect(await run("set_quiet_hours", { start: "00:00", end: "09:00" })).toMatchObject({ ok: true });
     expect(await tester()).toMatchObject({ phase: "planning", quietHoursStart: "00:00", quietHoursEnd: "09:00", quietHoursChosen: true });
     expect(buildStateBlock(await state())).not.toContain("inside their default quiet hours");

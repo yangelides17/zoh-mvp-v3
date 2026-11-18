@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { FastifyBaseLogger } from "fastify";
-import { DraftDroppedError, NoReplyTextError, type DroppedDraft, type Turn, type Replier } from "../claude/replier.js";
+import { DraftDroppedError, NoReplyTextError, type DroppedDraft, type Turn, type Replier, type WebActivity } from "../claude/replier.js";
 import { ReplyLines, type PendingText, type PreparedMedia, type ReplyLine } from "./conversation.js";
 import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
@@ -9,7 +9,11 @@ import { coachHistory } from "../memory/context.js";
 import { messages, type Message, type Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
-import { extensionOf, mediaKind, type MediaFetcher, type MediaStore } from "../media/storage.js";
+import { MAX_DOCUMENT_PAGES, readDocument, type ReadDocument } from "../media/documents.js";
+import type { AudioRewrapper } from "../media/rewrap.js";
+import { todaysStepLine } from "../coach/state.js";
+import { MAX_WATCH_SECONDS, VideoWatchError, type VideoWatcher, type Watched } from "../video/gemini.js";
+import { extensionOf, MAX_MEDIA_BYTES, MediaTooBigError, mediaKind, type DownloadedMedia, type MediaFetcher, type MediaStore } from "../media/storage.js";
 import type { SendblueClient } from "../sendblue/client.js";
 import type { Transcriber } from "../transcription/speaches.js";
 import { isAllowed } from "../config.js";
@@ -50,6 +54,10 @@ export interface PipelineDeps {
   replier?: Replier;
   media?: MediaStore;
   transcriber?: Transcriber;
+  /** #185: rewraps iPhone voice notes so Chrome plays them; missing: kept as .caf. */
+  rewrapper?: AudioRewrapper;
+  /** #163: watches videos (Gemini); missing when GEMINI_API_KEY isn't set: the coach is told it can't watch them. */
+  watcher?: VideoWatcher;
   fetchMedia: MediaFetcher;
   /** Describes photos as they arrive, for coach memory; missing when Claude isn't configured. */
   describer?: MediaDescriber;
@@ -58,6 +66,68 @@ export interface PipelineDeps {
   retryDelaysMs?: number[];
   /** #16: every tester's reply line (one draft at a time, typing holds); the app makes one. */
   lines?: ReplyLines;
+  /** #163: a video or document still being read this long after it arrived gets a holding text; off when missing (tests, the eval). */
+  holdingAfterMs?: number;
+}
+
+/**
+ * #163: when the holding text goes for a video or document they sent. #162 (Yanni, Nov 16): at once, like the status
+ * texts, rather than after 10 seconds.
+ */
+export const HOLDING_AFTER_MS = 0;
+
+/** #162: what ZOH says the moment it starts something slow; fixed, so it goes at once with no Claude call. */
+export const STATUS_TEXTS: Record<WebActivity, string> = { search: "looking that up 🔎", reading: "reading it now 📖", watching: "watching it now 👀" };
+
+/** #163: what ZOH says while it watches or reads a file they sent (the same as #162's status texts). */
+export const HOLDING_TEXTS = { video: STATUS_TEXTS.watching, document: STATUS_TEXTS.reading } as const;
+
+/** #162: status texts per reply, the holding text for a file they sent included. */
+export const MAX_STATUS_TEXTS = 2;
+
+/** #162: what a reply looked up, kept in its timings (and the reply's own) for the console's cost line. */
+export const LOOKUP_TIMINGS = ["web_searches", "web_pages", "video_watches"] as const;
+/** #162: the record of what a reply looked up is cut here, so a runaway reply can't bloat the row. */
+const LOOKUPS_MAX_CHARS = 4_000;
+
+/**
+ * Sends the holding text for a video or document still being read, unless "stop" or "reset" came in
+ * meanwhile. Recorded with `holding` in its timings, so it's never counted as one of ZOH's texts since the proof.
+ */
+async function sendHolding(deps: PipelineDeps, sendblue: SendblueClient, tester: Tester, inbound: Message, timings: Record<string, string | number>): Promise<void> {
+  const line = linesOf(deps).line(inbound.contactNumber);
+  if (line.cancelled || line.cancelledPending.some((p) => p.inbound.id === inbound.id)) return;
+  // Known once it's downloaded; before that, from the link (a slow download is a big file).
+  const kind = String(timings.media_kind ?? mediaKind(undefined, inbound.mediaUrl ?? ""));
+  if (kind === "image" || kind === "audio") return;
+  const activity: WebActivity = kind === "video" ? "watching" : "reading";
+  // #162: it counts toward the reply's status texts, so the coach's own watch or read doesn't say it again.
+  timings.holding_kind = activity;
+  await sendStatus(deps, sendblue, tester, inbound, STATUS_TEXTS[activity]);
+  timings.holding_sent_at = (deps.now ?? (() => new Date()))().toISOString();
+}
+
+/**
+ * #162: a status text ("looking that up 🔎"), or #163's holding text: sent and recorded with `holding` in its timings,
+ * so it's never one of ZOH's real texts in its state, then the typing bubble again for the real reply.
+ */
+async function sendStatus(deps: PipelineDeps, sendblue: SendblueClient, tester: Tester, inbound: Message, content: string): Promise<void> {
+  const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content });
+  const at = (deps.now ?? (() => new Date()))();
+  await insertOutbound(deps.db, {
+    contactNumber: inbound.contactNumber,
+    lineNumber: inbound.lineNumber,
+    content,
+    sendblueHandle: sent.messageHandle ?? null,
+    status: sent.status ?? null,
+    inReplyTo: inbound.id,
+    sentAt: testerNow(tester, at),
+    createdAt: onTesterClock(tester, testerNow(tester, at)),
+    timings: { holding: 1 },
+    raw: sent.raw as object,
+  });
+  // A sent text ends the typing bubble: show it again while the real reply is written.
+  if (deps.typingIndicator) await sendblue.sendTypingIndicator(inbound.contactNumber, "start");
 }
 
 /** Lines for pipelines built without one (direct callers in tests): one per pipeline object. */
@@ -121,13 +191,28 @@ export async function processInbound(deps: PipelineDeps, stored: Message): Promi
   }
 
   // 2. Media: keep a private copy; transcribe voice notes. Started now, so a draft waits for it rather than starting without it.
-  const prepared: Promise<PreparedMedia | undefined> = inbound.mediaUrl
-    ? handleMedia(deps, inbound, timings).catch((err: unknown) => {
+  const handled: Promise<PreparedMedia | undefined> = inbound.mediaUrl
+    ? handleMedia(deps, tester, inbound, timings).catch((err: unknown) => {
         errors.push(`media: ${errorMessage(err)}`);
         log.error({ ...ctx, err: safeError(err) }, "Media handling failed");
         return undefined;
       })
     : Promise.resolve(undefined);
+  // #163: a video or document still being read after a while gets one "watching it now" first.
+  let holding: Promise<void> = Promise.resolve();
+  const hold = () => {
+    holding = sendHolding(deps, sendblue, tester, inbound, timings).catch((err: unknown) => {
+      log.error({ ...ctx, err: safeError(err) }, "Sending the holding text failed");
+    });
+  };
+  // #162: no delay means at once, never racing a quick download.
+  if (inbound.mediaUrl && deps.holdingAfterMs === 0) hold();
+  const timer = inbound.mediaUrl && deps.holdingAfterMs ? setTimeout(hold, deps.holdingAfterMs) : undefined;
+  const prepared = handled.then(async (media) => {
+    clearTimeout(timer);
+    await holding;
+    return media;
+  });
 
   // 3. #16: one reply at a time per tester. A draft already running for them is interrupted and answers this text too.
   const line = linesOf(deps).line(inbound.contactNumber);
@@ -164,6 +249,8 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
   let batch: PendingText[] = [];
   let dropped: DroppedDraft = { actions: [] };
   let draftsDropped = 0;
+  /** #162: the status texts sent for the reply being written, across its redrafts (one per kind, at most two). */
+  let status = new Set<WebActivity>();
   for (;;) {
     if (line.cancelled) {
       for (const p of [...batch, ...line.cancelledPending.splice(0)]) {
@@ -173,6 +260,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
       batch = [];
       dropped = { actions: [] };
       draftsDropped = 0;
+      status = new Set();
       line.cancelled = false;
     }
     batch.push(...line.pending.splice(0));
@@ -188,9 +276,11 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     if (line.interrupted) continue;
     // Fresh each round: a dropped draft may already have saved answers or moved them on.
     const tester = (await getTester(db, first.id)) ?? first;
-    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal);
+    // #162: a holding text already sent for a file they sent counts as that kind's status text.
+    for (const p of batch) if (p.timings.holding_kind) status.add(p.timings.holding_kind as WebActivity);
+    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal, status);
     if (outcome.kind === "dropped") {
-      dropped = { actions: [...dropped.actions, ...outcome.draft.actions], ...((outcome.draft.text ?? dropped.text) ? { text: outcome.draft.text ?? dropped.text } : {}) };
+      dropped = mergeDropped(dropped, outcome.draft);
       draftsDropped++;
       log.info({ ...ctx, actions: outcome.draft.actions.length }, "Draft dropped: they texted again before it was sent");
       continue;
@@ -199,7 +289,7 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     if (line.cancelled) continue;
     if (line.interrupted || line.pending.length) {
       // #132: what it saved stays saved; the redraft is told it and the unsent words, so it doesn't redo them.
-      dropped = { actions: [...dropped.actions, ...outcome.actions], text: outcome.text };
+      dropped = { ...mergeDropped(dropped, { actions: outcome.actions }), text: outcome.text };
       draftsDropped++;
       log.info({ ...ctx, actions: outcome.actions.length }, "Draft dropped before sending: they texted again");
       continue;
@@ -210,7 +300,21 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     batch = [];
     dropped = { actions: [] };
     draftsDropped = 0;
+    status = new Set();
   }
+}
+
+/** What every dropped draft of one reply did (#16), plus (#162) the links they found and videos they watched. */
+function mergeDropped(had: DroppedDraft, more: DroppedDraft): DroppedDraft {
+  const text = more.text ?? had.text;
+  const found = [...(had.found ?? []), ...(more.found ?? [])];
+  const watched = [...(had.watched ?? []), ...(more.watched ?? [])];
+  return {
+    actions: [...had.actions, ...more.actions],
+    ...(text ? { text } : {}),
+    ...(found.length ? { found } : {}),
+    ...(watched.length ? { watched } : {}),
+  };
 }
 
 /** A finished draft carries the actions it took (#132), handed on if it's dropped before sending. */
@@ -228,6 +332,7 @@ async function draftReply(
   media: (PreparedMedia | undefined)[],
   dropped: DroppedDraft,
   signal: AbortSignal,
+  status: Set<WebActivity>,
 ): Promise<DraftOutcome> {
   const { db, log } = deps;
   const now = deps.now ?? (() => new Date());
@@ -240,9 +345,32 @@ async function draftReply(
     return { kind: "text", text: FALLBACK_REPLY, actions: [] };
   }
   const replier = deps.replier;
+  const sendblue = deps.sendblue;
   const interrupted = () => line.interrupted || line.cancelled;
   const current = new Map(batch.map((p, i) => [p.inbound.id, media[i] ?? {}]));
-  const handedOn = dropped.actions.length || dropped.text ? dropped : undefined;
+  const handedOn = dropped.actions.length || dropped.text || dropped.found?.length || dropped.watched?.length ? dropped : undefined;
+  /** #162: status texts on their way; the reply waits for them, so it never arrives first. */
+  const statusSends: Promise<void>[] = [];
+  const onActivity = (kind: WebActivity) => {
+    // One per kind and at most two per reply, redrafts included; none once they've texted again.
+    if (!sendblue || status.has(kind) || status.size >= MAX_STATUS_TEXTS || interrupted()) return;
+    status.add(kind);
+    timings.status_texts = status.size;
+    statusSends.push(
+      sendStatus(deps, sendblue, tester, latest.inbound, STATUS_TEXTS[kind]).catch((err: unknown) => {
+        log.error({ ...ctx, err: safeError(err) }, "Sending a status text failed");
+      }),
+    );
+  };
+  /** #162: a reply that has searched, opened a page or watched a video isn't retried (each try can take minutes). */
+  let searched = false;
+  try {
+    return await attempts();
+  } finally {
+    await Promise.all(statusSends);
+  }
+
+  async function attempts(): Promise<DraftOutcome> {
   const claudeStart = now();
   /** Actions finished by this draft's attempts, so far. */
   const actions: string[] = [];
@@ -265,11 +393,25 @@ async function draftReply(
         signal,
         onAction: (a) => actions.push(a),
         ...(handedOn ? { dropped: handedOn } : {}),
+        // #200: media loads the proof rules; the parts it loaded are kept with the message, so a wrong pick can be traced.
+        media: batch.some((p) => p.inbound.mediaUrl),
+        onSections: (s) => (timings.coach_sections = s.join(",")),
+        onActivity,
+        // #162: what it searched, opened and watched, kept with their text (the eval's grader reads it too).
+        onLookup: (l) => {
+          const lines = timings.lookups ? `${timings.lookups}\n${l}` : l;
+          timings.lookups = lines.slice(0, LOOKUPS_MAX_CHARS);
+        },
         onUsage: (u) => {
           timings.claude_input_tokens = Number(timings.claude_input_tokens ?? 0) + u.input;
           timings.claude_cache_read_tokens = Number(timings.claude_cache_read_tokens ?? 0) + u.cacheRead;
           timings.claude_cache_write_tokens = Number(timings.claude_cache_write_tokens ?? 0) + u.cacheWrite;
           timings.claude_output_tokens = Number(timings.claude_output_tokens ?? 0) + u.output;
+          // #162: for the console's cost line.
+          for (const [key, n] of [["web_searches", u.searches], ["web_pages", u.fetches], ["video_watches", u.watches]] as const) {
+            if (n) timings[key] = Number(timings[key] ?? 0) + n;
+          }
+          if (u.searches || u.fetches || u.watches) searched = true;
         },
       });
       break;
@@ -289,7 +431,7 @@ async function draftReply(
         log.warn({ ...ctx, err: safeError(err) }, "Claude returned no text again; sending fallback");
         break;
       }
-      const delay = delays[failures++];
+      const delay = searched ? undefined : delays[failures++];
       if (delay === undefined) {
         replyText = SYSTEM_DOWN_REPLY;
         log.error({ ...ctx, err: safeError(err) }, "Claude reply failed after retries; sending the system-down reply");
@@ -305,6 +447,7 @@ async function draftReply(
   }
   timings.claude_ms = now().getTime() - claudeStart.getTime();
   return { kind: "text", text: replyText, actions };
+  }
 }
 
 /**
@@ -414,6 +557,8 @@ async function sendReply(
     if (inbound.sentAt) timings.received_to_reply_sent_ms = sentAt.getTime() - inbound.sentAt.getTime();
     const started = Date.parse(String(timings.processing_started_at));
     if (Number.isFinite(started)) timings.processing_ms = realSentAt.getTime() - started;
+    // #162: the reply carries what it looked up, for the console's cost line beside it.
+    const lookups = Object.fromEntries(LOOKUP_TIMINGS.filter((k) => timings[k]).map((k) => [k, Number(timings[k])]));
     await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
@@ -423,6 +568,7 @@ async function sendReply(
       inReplyTo: inbound.id,
       sentAt,
       createdAt: onTesterClock(tester, sentAt),
+      ...(Object.keys(lookups).length ? { timings: lookups } : {}),
       raw: sent.raw as object,
     });
   } catch (err) {
@@ -443,7 +589,7 @@ async function sendReply(
 
   // 5. Media into memory right away, after the reply so it never adds to the wait.
   for (const [i, p] of batch.entries()) {
-    if (p.inbound.mediaUrl) await describeMedia(deps, p.inbound, media[i]?.image, p.timings);
+    if (p.inbound.mediaUrl) await describeMedia(deps, p.inbound, media[i], p.timings);
   }
 
   for (const p of batch) {
@@ -459,23 +605,31 @@ async function sendReply(
 }
 
 /**
- * Saves a one-line description of a photo (from Claude) or a video (its caption) so memory can
- * search it at once. Voice notes already have their transcript. Failures are logged, never sent.
+ * Saves a one-line description of a photo or document (from Claude) or a video (its caption) so memory
+ * can search it at once. Voice notes already have their transcript. Failures are logged, never sent.
  */
 async function describeMedia(
   deps: PipelineDeps,
   inbound: Message,
-  image: ClaudeImage | undefined,
+  prepared: PreparedMedia | undefined,
   timings: Record<string, string | number>,
 ): Promise<void> {
   const kind = mediaKind(inbound.mediaContentType ?? undefined, inbound.mediaUrl ?? "");
   const caption = inbound.content?.trim();
+  const image = prepared?.image;
+  const doc = prepared?.document;
   try {
     let description: string | undefined;
+    const t0 = Date.now();
     if (image && deps.describer) {
-      const t0 = Date.now();
       description = await deps.describer.describe(image, caption);
       timings.describe_ms = Date.now() - t0;
+    } else if (doc && doc.kind !== "unsupported" && deps.describer) {
+      description = await deps.describer.describeDocument(doc.kind === "pdf" ? { pdf: doc.pdf } : { text: doc.text }, caption);
+      timings.describe_ms = Date.now() - t0;
+    } else if (prepared?.video && "summary" in prepared.video && prepared.video.summary) {
+      // #163: Gemini's one line, written while it watched.
+      description = prepared.video.summary;
     } else if (kind === "video") {
       description = caption ? `A video: ${caption}` : "A video (not watchable here)";
     }
@@ -625,23 +779,45 @@ async function sendCommandReply(deps: PipelineDeps, inbound: Message, content: s
 
 async function handleMedia(
   deps: PipelineDeps,
+  tester: Tester,
   inbound: Message,
   timings: Record<string, string | number>,
-): Promise<{ transcript?: string; image?: ClaudeImage }> {
+): Promise<PreparedMedia> {
   const url = inbound.mediaUrl!;
-  const downloaded = await deps.fetchMedia(url);
+  let downloaded: DownloadedMedia;
+  try {
+    downloaded = await deps.fetchMedia(url);
+  } catch (err) {
+    if (!(err instanceof MediaTooBigError)) throw err;
+    timings.media_too_big = 1;
+    return { tooBig: true };
+  }
   const kind = mediaKind(downloaded.contentType, url);
   const ext = extensionOf(url) || "bin";
-  const key = `media/${inbound.contactNumber.replace(/\D/g, "")}/${inbound.id}.${ext}`;
   timings.media_kind = kind;
   timings.media_bytes = downloaded.bytes.byteLength;
 
+  // #185: an iPhone voice note (.caf) is kept in a box Chrome plays too; Speaches still gets the original.
+  let stored = { bytes: downloaded.bytes, ext, contentType: downloaded.contentType };
+  if (kind === "audio" && isCaf(ext, downloaded.contentType) && deps.rewrapper) {
+    try {
+      const t0 = Date.now();
+      const { codec, ...rewrapped } = await deps.rewrapper.rewrap(downloaded.bytes);
+      stored = rewrapped;
+      timings.rewrap_ms = Date.now() - t0;
+      timings.rewrap_codec = codec;
+    } catch (err) {
+      timings.rewrap_error = errorMessage(err).slice(0, 200);
+      deps.log.warn({ messageId: inbound.id, err: safeError(err) }, "Rewrapping a voice note failed; keeping the .caf");
+    }
+  }
+  const key = `media/${inbound.contactNumber.replace(/\D/g, "")}/${inbound.id}.${stored.ext}`;
   if (deps.media) {
-    await deps.media.put(key, downloaded.bytes, downloaded.contentType);
-    await updateMessage(deps.db, inbound.id, { mediaKey: key, mediaContentType: downloaded.contentType });
+    await deps.media.put(key, stored.bytes, stored.contentType);
+    await updateMessage(deps.db, inbound.id, { mediaKey: key, mediaContentType: stored.contentType });
     timings.media_stored_at = new Date().toISOString();
   } else {
-    await updateMessage(deps.db, inbound.id, { mediaContentType: downloaded.contentType });
+    await updateMessage(deps.db, inbound.id, { mediaContentType: stored.contentType });
   }
 
   if (kind === "audio" && deps.transcriber) {
@@ -651,16 +827,79 @@ async function handleMedia(
     await updateMessage(deps.db, inbound.id, { transcript });
     return { transcript };
   }
-  if (kind === "audio" || kind === "video") return {};
+  if (kind === "video") return { video: await watchVideo(deps, tester, inbound, stored, timings) };
+  if (kind === "audio") return {};
+  if (kind === "document") return { document: await prepareDocument(deps, inbound, downloaded, ext, timings) };
 
   // Anything else may be a photo, whatever the CDN labels it: check the bytes.
   const t0 = Date.now();
   const image = await prepareImageForClaude(downloaded.bytes);
-  if (!image) return {};
+  if (!image) {
+    // Or a document with no telling name (a PDF says so in its first bytes); otherwise one it can't open.
+    return { document: await prepareDocument(deps, inbound, downloaded, ext, timings) };
+  }
   timings.image_format = image.format;
   timings.image_prep_ms = Date.now() - t0;
   if (kind !== "image") await updateMessage(deps.db, inbound.id, { mediaContentType: `image/${image.format}` });
   return { image };
+}
+
+const isCaf = (ext: string, contentType: string) => ext === "caf" || /x-caf/i.test(contentType);
+
+/**
+ * #163: Gemini watches the video against today's step; its account is kept where a transcript goes (memory
+ * search, later replies). Can't be watched: the coach is told so; a key or credit problem also alerts the founders.
+ */
+async function watchVideo(
+  deps: PipelineDeps,
+  tester: Tester,
+  inbound: Message,
+  file: { bytes: Uint8Array; contentType: string },
+  timings: Record<string, string | number>,
+): Promise<Watched | { unwatched: true }> {
+  if (!deps.watcher) return { unwatched: true };
+  const now = (deps.now ?? (() => new Date()))();
+  const t0 = Date.now();
+  try {
+    const step = await todaysStepLine(deps.db, tester, testerNow(tester, now));
+    const watched = await deps.watcher.watch({
+      video: file.bytes,
+      contentType: file.contentType,
+      ...(step ? { step } : {}),
+      ...(inbound.content?.trim() ? { caption: inbound.content.trim() } : {}),
+    });
+    timings.watch_ms = Date.now() - t0;
+    if (watched.clipped) timings.watch_clipped = 1;
+    await updateMessage(deps.db, inbound.id, { transcript: watched.account });
+    return watched;
+  } catch (err) {
+    timings.watch_error = errorMessage(err).slice(0, 200);
+    deps.log.error({ messageId: inbound.id, contact: maskNumber(inbound.contactNumber), err: safeError(err) }, "Watching a video failed");
+    if (err instanceof VideoWatchError && err.reason === "key_or_credit") {
+      await alertFailure(deps.db, tester.id, "A video couldn't be watched: check the Gemini key and credits (GEMINI_API_KEY)", now);
+    }
+    return { unwatched: true };
+  }
+}
+
+/** #163: reads a document and keeps its words (memory search, later replies) where a transcript goes. */
+async function prepareDocument(
+  deps: PipelineDeps,
+  inbound: Message,
+  downloaded: DownloadedMedia,
+  ext: string,
+  timings: Record<string, string | number>,
+): Promise<ReadDocument> {
+  const t0 = Date.now();
+  const doc = await readDocument(downloaded.bytes, ext, downloaded.contentType);
+  timings.document_ms = Date.now() - t0;
+  timings.document_read = doc.kind;
+  if (doc.kind === "unsupported") return doc;
+  if (doc.pages) timings.document_pages = doc.pages;
+  // A PDF that arrived unlabeled is labeled now, so later replies and the console know what it is.
+  const contentType = doc.kind === "pdf" && mediaKind(downloaded.contentType, inbound.mediaUrl!) !== "document" ? "application/pdf" : undefined;
+  await updateMessage(deps.db, inbound.id, { ...(doc.text ? { transcript: doc.text } : {}), ...(contentType ? { mediaContentType: contentType } : {}) });
+  return doc;
 }
 
 /**
@@ -680,13 +919,60 @@ export function toTurns(history: Message[], current: ReadonlyMap<string, Prepare
       else if (now?.image) parts.push("[Sent a photo]");
       else if (kind === "image" && !isCurrent) parts.push(m.description ? `[Sent a photo earlier: ${m.description}]` : "[Sent a photo earlier]");
       else if (kind === "image") parts.push("[Sent a photo that couldn't be opened]");
+      else if (now?.tooBig) parts.push(`[Sent a ${kind === "other" ? "file" : kind} too big to open (over ${MAX_MEDIA_BYTES / 1024 / 1024} MB): a shorter or smaller one would work]`);
+      else if (kind === "video") parts.push(videoLine(m, now?.video));
+      else if (now?.document || kind === "document" || (kind === "other" && !isCurrent)) parts.push(documentLine(m, now?.document));
       else parts.push(`[Sent a ${kind} attachment]`);
     }
     if (m.content?.trim()) parts.push(m.content.trim());
     const turn: Turn = { role, text: parts.join("\n") };
     if (now?.image) turn.image = { mediaType: now.image.mediaType, data: now.image.data };
+    if (now?.document?.kind === "pdf") turn.pdf = now.document.pdf;
     return turn;
   });
+}
+
+/**
+ * A document within the conversation's window stays readable, like a pasted text (#163, Yanni): the one
+ * being answered in full (a PDF also as the file itself), earlier ones up to this many characters.
+ */
+export const HISTORY_DOCUMENT_CHARS = 40_000;
+
+/** #163: a document as the coach reads it. `read` is set for the texts being answered. */
+function documentLine(m: Message, read: ReadDocument | undefined): string {
+  const name = fileName(m.mediaUrl ?? "");
+  if (read?.kind === "unsupported") return `[Sent ${read.reason}${name ? ` (${name})` : ""}, which couldn't be opened: a PDF, screenshot or voice note would work]`;
+  const pages = read?.pages ? `, ${read.pages} page${read.pages === 1 ? "" : "s"}` : "";
+  if (read?.kind === "pdf") return `[Sent a document: ${name || "a PDF"}${pages}; the file is attached]`;
+  if (read?.kind === "text") {
+    const clipped = read.clipped ? `\n(Only the first ${read.pages ? `${MAX_DOCUMENT_PAGES} pages` : "part"} was read: it's longer than that.)` : "";
+    return `[Sent a document: ${name || "a file"}${pages}]\n<document>\n${read.text}\n</document>${clipped}`;
+  }
+  // An earlier one: its words, kept when it arrived, or what it was.
+  if (!m.transcript) return m.description ? `[Sent a document earlier: ${m.description}]` : "[Sent a file earlier that couldn't be opened]";
+  const text = m.transcript.length > HISTORY_DOCUMENT_CHARS ? `${m.transcript.slice(0, HISTORY_DOCUMENT_CHARS)}\n(…the rest: open_file reads all of it)` : m.transcript;
+  return `[Sent a document earlier: ${name || m.description || "a file"}]\n<document>\n${text}\n</document>`;
+}
+
+/** #163: a video as the coach reads it: Gemini's account of it (the one being answered, or an earlier one), or that it couldn't be watched. */
+function videoLine(m: Message, watched: PreparedMedia["video"]): string {
+  if (watched && "unwatched" in watched) return "[Sent a video that couldn't be watched: a photo or voice note would work]";
+  if (watched) {
+    const clipped = watched.clipped ? ` (over ${MAX_WATCH_SECONDS / 60} minutes: the first ${MAX_WATCH_SECONDS / 60} were watched)` : "";
+    return `[Sent a video${clipped}. Watched for you, what it shows:]\n${watched.account}`;
+  }
+  if (!m.transcript) return m.description ? `[Sent a video earlier: ${m.description}]` : "[Sent a video earlier that couldn't be watched]";
+  return `[Sent a video earlier. What it showed:]\n${m.transcript.slice(0, HISTORY_DOCUMENT_CHARS)}`;
+}
+
+/** The file's name from its link, when it has a telling one. */
+function fileName(url: string): string {
+  try {
+    const last = decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "");
+    return /\.[a-z0-9]{2,8}$/i.test(last) ? last : "";
+  } catch {
+    return "";
+  }
 }
 
 export function maskNumber(n: string): string {

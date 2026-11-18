@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { checkinOwed, dueCheckin, suggestionRef } from "../src/coach/next-steps.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, NEXT_STEPS, NUDGES } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import {
@@ -22,6 +22,7 @@ import type { Logger } from "../src/pipeline/inbound.js";
 import { loadTesterGoals, setFocusGoal } from "../src/testers/goals.js";
 import { getTester } from "../src/testers/testers.js";
 import { createCoach } from "../src/coach/coach.js";
+import { addFounderSuggestion } from "../src/console/suggestions.js";
 import { FakeClaudeModel, LINE, ME, makeApp, type TestApp } from "./helpers.js";
 
 /**
@@ -94,9 +95,12 @@ async function say(tester: Tester, direction: "inbound" | "outbound", when: Date
   await t.db.insert(messages).values({ direction, contactNumber: tester.phone, content, createdAt: when, sentAt: when });
 }
 
-async function state(tester: Tester, now: Date, lastTesterText = "", goalCap?: number) {
-  return loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now, isFirstText: false, lastTesterText, goalCap });
+async function state(tester: Tester, now: Date, lastTesterText = "", goalCap?: number, lastZohText = "") {
+  return loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now, isFirstText: false, lastTesterText, lastZohText, goalCap });
 }
+/** #157: a reply to their latest text, after ZOH's last one. */
+const replyTool = async (tester: Tester, name: string, input: unknown, now: Date, lastZohText: string, lastTesterText: string) =>
+  runTool(t.db, await state(tester, now, lastTesterText, undefined, lastZohText), name, input, now);
 const block = async (tester: Tester, now: Date, goalCap?: number) => buildStateBlock(await state(tester, now, "", goalCap));
 const tool = async (tester: Tester, name: string, input: unknown, now: Date, lastTesterText = "", goalCap?: number) =>
   runTool(t.db, await state(tester, now, lastTesterText, goalCap), name, input, now);
@@ -184,15 +188,26 @@ describe("rule 1: no next step reaches a tester before the team approves it", ()
 });
 
 describe("what testers ask for (spec cases 4 to 6)", () => {
-  it("a deepen or upgrade they ask for is made right away, flagged for review, and recorded as their own next step", async () => {
+  it("#157: a deepen or upgrade they ask for is made only once they've seen it and said yes; then flagged for review and recorded as their own", async () => {
     const tester = await setup();
-    const asked = "can we bump it to 15 pages?";
-    const deepen = await tool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: "bump it to 15 pages" }, at(MON, "20:00"), asked);
+    const kickoff = "Yo Sam! 10 pages of Dune at 9 tonight. You in?";
+    // The reply that first hears it: not saved, whatever ZOH passes as shown (it wasn't in its last text).
+    const ask = "I want it harder";
+    for (const shown of [undefined, "harder", "15 pages of Dune every night"]) {
+      const first = await replyTool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: ask, ...(shown ? { shown } : {}) }, at(MON, "20:00"), kickoff, ask);
+      expect(first).toMatchObject({ ok: false, error: expect.stringContaining("only once they've seen it") });
+    }
+    expect(await allPlans()).toHaveLength(1);
+    expect(await allSuggestions()).toHaveLength(0);
+    // ZOH asked what harder means, then showed the new version; their yes makes it.
+    const offer = "Love it. How about 15 pages of Dune every night at 9, same couch? Work for you?";
+    const yes = "yes let's do 15";
+    const deepen = await replyTool(tester, "change_plan", { step: "15 pages of Dune", kind: "deepen", asked: yes, shown: "15 pages of Dune every night at 9" }, at(MON, "20:10"), offer, yes);
     expect(deepen).toMatchObject({ ok: true });
     const [, v2] = await allPlans();
     expect(v2).toMatchObject({ version: 2, changeKind: "deepen", needsReview: true, step: "15 pages of Dune" });
     expect(await allSuggestions()).toMatchObject([
-      { kind: "deepen", raisedBy: "tester", reasoning: "bump it to 15 pages", decision: "approved", decidedBy: "zoh", outcome: "agreed", planId: v2!.id },
+      { kind: "deepen", raisedBy: "tester", reasoning: yes, decision: "approved", decidedBy: "zoh", outcome: "agreed", planId: v2!.id },
     ]);
     // suggest_next_step points their own deepen back to change_plan.
     expect(
@@ -225,7 +240,9 @@ describe("an approved next step", () => {
     // The team changed it: an upgrade to lifting, not more pages.
     const s = await suggestion(tester, { kind: "deepen", proposal: "15 pages", decision: "changed", decidedKind: "upgrade", decidedProposal: "20 min of lifting" });
     const ref = suggestionRef(s.id);
-    expect(await block(tester, at(MON, "10:00"))).toContain(`Next step the team approved, not raised yet [${ref}] (upgrade: 20 min of lifting): raise it as your own idea`);
+    // #199: the sheet lists it; raising it as your own idea, then record_next_step delivered, is NEXT STEPS'.
+    expect(await block(tester, at(MON, "10:00"))).toContain(`Next step the team approved, not raised yet [${ref}] (upgrade: 20 min of lifting).`);
+    expect(NEXT_STEPS).toContain("A next step the state lists as approved: raise it at a natural moment (once today's talk has landed, or when they talk about how it's going) as your own idea, specific to them, then record_next_step delivered.");
 
     expect(await tool(tester, "record_next_step", { suggestion: ref, outcome: "delivered" }, at(MON, "20:00"))).toMatchObject({ ok: true });
     const raised = await block(tester, at(MON, "20:01"));
@@ -369,7 +386,7 @@ describe("maintenance check-ins (rule 7)", () => {
     const [ask] = await t.db.select().from(maintenanceCheckins);
     const [sent] = await t.db.select().from(messages).where(and(eq(messages.direction, "outbound"), eq(messages.content, "Yo, kickoff text")));
     expect(ask).toMatchObject({ goalSlug: "bedtime", date: MON, answer: null, messageId: sent!.id });
-    expect(await block(tester, at(MON, "09:30"))).toContain("You asked about Sleep better (maintenance) on 2026-11-02, no answer yet: when they answer, record_checkin.");
+    expect(await block(tester, at(MON, "09:30"))).toContain("Check-in on Sleep better (maintenance) asked 2026-11-02, no answer yet: their answer → record_checkin.");
 
     expect(await tool(tester, "record_checkin", { goal: "reading", answer: "kept_up" }, at(MON, "09:30"))).toMatchObject({ ok: false });
     expect(await tool(tester, "record_checkin", { goal: "bedtime", answer: "mostly" }, at(MON, "09:30"))).toMatchObject({ ok: true });
@@ -392,7 +409,10 @@ describe("maintenance check-ins (rule 7)", () => {
     await t.db.insert(plans).values({ testerId: tester.id, goalSlug: "bedtime", status: "locked", version: 0, ...DUNE, days: [...DUNE.days], step: "in bed by 10:30", startDate: "2026-10-01" });
     await t.db.insert(testerGoals).values({ testerId: tester.id, goalSlug: "bedtime", role: "maintenance", nudges: false, proof: false, checkinsPerWeek: 2 });
     const s = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { checkinGoal: "bedtime" } });
-    expect(buildStateBlock(s)).toContain("THIS TEXT ALSO ASKS a maintenance check-in on Sleep better (in bed by 10:30): one light line in place of the kickoff's question (its only question); the whole text stays 1 to 3 sentences, no proof ask. The app records it: no tool call.");
+    // #199: the sheet says this text carries it and that the app records it; how it's asked is NUDGES' and NEXT STEPS'.
+    expect(buildStateBlock(s)).toContain("This text carries (not sent yet):\n- a maintenance check-in on Sleep better (in bed by 10:30) (the app records it)");
+    expect(NUDGES).toContain("What a text carries (state): in place of its usual question, as its only one, and as your own idea; 1 to 3 sentences, no proof ask.");
+    expect(NEXT_STEPS).toContain("Maintenance check-in: one light line in place of the kickoff's question, never a second push");
   });
 
   it("two unanswered: the next reply asks it on its own once", async () => {
@@ -403,9 +423,11 @@ describe("maintenance check-ins (rule 7)", () => {
       { testerId: tester.id, goalSlug: "bedtime", date: "2026-10-27", messageId: m!.id },
       { testerId: tester.id, goalSlug: "bedtime", date: "2026-10-30", messageId: m!.id },
     ]);
-    expect(await block(tester, at(MON, "12:00"))).toContain("Maintenance check-in owed on Sleep better: their last 2 went unanswered. Ask it on its own in this reply");
+    // #199: this reply carries it (a fact, with the tool to call); asking it on its own is NEXT STEPS'.
+    expect(await block(tester, at(MON, "12:00"))).toContain("- a maintenance check-in on Sleep better, owed: their last 2 went unanswered (you call record_checkin asked)");
+    expect(NEXT_STEPS).toContain("an owed one (their last 2 unanswered) is asked on its own");
     expect(await tool(tester, "record_checkin", { goal: "bedtime", answer: "asked" }, at(MON, "12:00"))).toMatchObject({ ok: true });
-    expect(await block(tester, at(MON, "12:01"))).not.toContain("check-in owed");
+    expect(await block(tester, at(MON, "12:01"))).not.toContain("check-in on Sleep better, owed");
   });
 
   it("two 'stopped' in a row raise one alert", async () => {
@@ -432,7 +454,7 @@ describe("kickoffs carry an approved next step", () => {
     expect((await allSuggestions())[0]).toMatchObject({ outcome: "delivered", deliveredAt: at(MON, "09:00") });
     expect(await t.db.select().from(maintenanceCheckins)).toEqual([]);
     const carried = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { suggestionId: s.id } });
-    expect(buildStateBlock(carried)).not.toContain("THIS TEXT ALSO RAISES"); // already delivered now
+    expect(buildStateBlock(carried)).not.toContain("the next step the team approved"); // already delivered now
   });
 
   it("with the real coach, the kickoff is written with the step in its state, and goes out", async () => {
@@ -443,7 +465,7 @@ describe("kickoffs carry an approved next step", () => {
     await real.tick(at(MON, "09:00"));
     await real.stop();
     expect(t.sendblue.sends.map((x) => x.content)).toEqual(["Yo Sam! Fifteen pages tonight?"]);
-    expect(model.stateOf()).toContain(`THIS TEXT ALSO RAISES the next step the team approved [${suggestionRef(s.id)}]`);
+    expect(model.stateOf()).toContain(`This text carries (not sent yet):\n- the next step the team approved [${suggestionRef(s.id)}]`);
     expect((await allSuggestions())[0]).toMatchObject({ outcome: "delivered" });
   });
 
@@ -451,7 +473,9 @@ describe("kickoffs carry an approved next step", () => {
     const tester = await setup();
     const s = await suggestion(tester, { kind: "deepen", proposal: "15 pages a night", decision: "approved" });
     const carried = await loadCoachState(t.db, tester, { now: at(MON, "09:00"), isFirstText: false, nudgeMoment: "kickoff", carry: { suggestionId: s.id } });
-    expect(buildStateBlock(carried)).toContain(`THIS TEXT ALSO RAISES the next step the team approved [${suggestionRef(s.id)}] (deepen: 15 pages a night): as your own idea`);
+    // #199: the sheet says this text carries it; "as your own idea" is NUDGES' and NEXT STEPS'.
+    expect(buildStateBlock(carried)).toContain(`- the next step the team approved [${suggestionRef(s.id)}] (deepen: 15 pages a night) (the app records it)`);
+    expect(NUDGES).toContain("What a text carries (state): in place of its usual question, as its only one, and as your own idea");
   });
 });
 
@@ -478,5 +502,91 @@ describe("alerts for the founders", () => {
     await say(tester, "inbound", at(addDays(MON, 2), "12:00"), "sorry, rough couple of days");
     await scheduler.tick(at(addDays(MON, 3), "12:00"));
     expect(await alerts()).toHaveLength(2);
+  });
+});
+
+describe("#155: a founder's plan change, raised by ZOH and made on the tester's yes", () => {
+  /** Founders proposed mornings at 7:30 at the gym (confirmed in the console chat). */
+  async function proposal(tester: Tester): Promise<Suggestion> {
+    return addFounderSuggestion(t.db, {
+      testerId: tester.id,
+      goalSlug: "reading",
+      kind: "adjust",
+      proposal: "Step at 7:30 am at the gym",
+      planChanges: { stepTime: "07:30", place: "the gym" },
+      by: "Yanni",
+      at: at(MON, "08:00"),
+    });
+  }
+  /** ZOH raised it at 8 pm; they answered at 8:03. */
+  async function raised(tester: Tester, s: Suggestion, answer: string) {
+    expect(await tool(tester, "record_next_step", { suggestion: suggestionRef(s.id), outcome: "delivered" }, at(MON, "20:00"))).toMatchObject({ ok: true });
+    await say(tester, "inbound", at(MON, "20:03"), answer);
+  }
+  const answers = async () => (await alerts()).filter((a) => a.topic === "next_step_answer").map((a) => a.body);
+
+  it("shows as a plan change to raise; their yes makes it, with no plan review, and the founders hear their answer", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    const ref = suggestionRef(s.id);
+    expect(await block(tester, at(MON, "10:00"))).toContain(`[${ref}] (plan change: Step at 7:30 am at the gym)`);
+    await raised(tester, s, "sure, mornings work");
+    expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "20:04"), "sure, mornings work")).toMatchObject({ ok: true });
+    const [, v2] = await allPlans();
+    expect(v2).toMatchObject({ stepTime: "07:30", place: "the gym", step: DUNE.step, changeKind: "other", needsReview: false });
+    expect((await alerts()).some((a) => a.topic === "plan_review")).toBe(false);
+    expect((await allSuggestions())[0]).toMatchObject({ outcome: "agreed", planId: v2!.id, outcomeNote: null });
+    expect(await answers()).toEqual(["Sam agreed: Step at 7:30 am at the gym"]);
+  });
+
+  it("their tweak is what's saved, and the card and alert say what they changed", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    await raised(tester, s, "8 would be better");
+    expect(await tool(tester, "change_plan", { suggestion: suggestionRef(s.id), time: "08:00" }, at(MON, "20:04"), "8 would be better")).toMatchObject({ ok: true });
+    const [, v2] = await allPlans();
+    expect(v2).toMatchObject({ stepTime: "08:00", place: "the gym", needsReview: false });
+    expect((await allSuggestions())[0]!.outcomeNote).toBe("time 08:00, not 07:30");
+    expect(await answers()).toEqual(["Sam agreed, changed: time 08:00, not 07:30"]);
+  });
+
+  it("is never made in the text that raises it: only on their answer after it", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    const ref = suggestionRef(s.id);
+    // Not raised yet.
+    expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "10:00"))).toMatchObject({ ok: false, error: expect.stringContaining("raise it first") });
+    // Raised, but nothing from them since.
+    expect(await tool(tester, "record_next_step", { suggestion: ref, outcome: "delivered" }, at(MON, "20:00"))).toMatchObject({ ok: true });
+    expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "20:00"))).toMatchObject({ ok: false, error: expect.stringContaining("their answer") });
+    // Raised in this very reply to an unrelated text: still not their answer to it.
+    expect(await tool(tester, "change_plan", { suggestion: ref }, at(MON, "20:00"), "how's it going?")).toMatchObject({ ok: false, error: expect.stringContaining("their answer") });
+    expect(await allPlans()).toHaveLength(1);
+  });
+
+  it("while it waits on their answer, a plain plan change is refused", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    await raised(tester, s, "hmm let me think");
+    const res = await tool(tester, "change_plan", { time: "07:30" }, at(MON, "20:04"));
+    expect(res).toMatchObject({ ok: false, error: expect.stringContaining(suggestionRef(s.id)) });
+    expect(await allPlans()).toHaveLength(1);
+  });
+
+  it("declined: the plan stays, the founders hear it, and it isn't raised again", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    await raised(tester, s, "nah, evenings are better for me");
+    expect(await tool(tester, "record_next_step", { suggestion: suggestionRef(s.id), outcome: "declined" }, at(MON, "20:04"))).toMatchObject({ ok: true });
+    expect(await allPlans()).toHaveLength(1);
+    expect(await answers()).toEqual(["Sam said no: Step at 7:30 am at the gym"]);
+    expect(await block(tester, at(MON, "20:05"))).not.toContain(suggestionRef(s.id));
+  });
+
+  it("a kickoff can raise it, like any approved next step", async () => {
+    const tester = await setup();
+    const s = await proposal(tester);
+    await scheduler.tick(at(MON, "09:00"));
+    expect(t.replier.nudges.map((n) => n.carry)).toEqual([{ suggestionId: s.id }]);
   });
 });

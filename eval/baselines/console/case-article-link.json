@@ -1,0 +1,136 @@
+{
+  "feature": "console",
+  "id": "case:article-link",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "06a61bc4534f",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "de3de782b030"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:article-link",
+        "kind": "case",
+        "id": "article-link",
+        "title": "A link from the founders is worked into the reply to his next text, as ZOH's idea",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "09:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "lights out 10:32 lol close enough",
+          "at": "2026-11-02T02:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Close enough counts, Sam. Kalinixta 🌙",
+          "at": "2026-11-02T02:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Stamati: send him this, it fits his 10:30 bedtime: https://www.sleepfoundation.org/sleep-hygiene",
+          "at": "2026-11-02T14:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Text Sam word for word, as ZOH, within a minute of Do it: \"https://www.sleepfoundation.org/sleep-hygiene\"",
+          "at": "2026-11-02T14:30:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted a text to Sam that contains only the link, with no other words, and it sends as soon as a founder clicks Do it. Since you said \"send him this,\" I used your exact words. If you'd like a line of intro with it, tell me and I'll redraft.",
+          "at": "2026-11-02T14:30:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Stamati clicks Do it on: Text Sam word for word, as ZOH, within a minute of Do it: \"https://www.sleepfoundation.org/sleep-hygiene\"",
+          "at": "2026-11-02T14:30:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "https://www.sleepfoundation.org/sleep-hygiene",
+          "at": "2026-11-02T14:31:30.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ugh I keep waking up at 3am and scrolling",
+          "at": "2026-11-02T14:32:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ugh, the 3am scroll is brutal, and it's fixable. Tonight's step is the same 10:30 lights out, plus the phone charges across the room before you get in bed. If it's not within reach, there's nothing to scroll. Then send me your screen time screenshot like usual. Where does it charge right now?",
+          "at": "2026-11-02T14:32:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: before this plan\nSat, Oct 24: before this plan\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: done\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): done\nMon, Nov 2 (today): step day, not done yet at 22:30\nTue, Nov 3 (tomorrow): step day at 22:30\nWed, Nov 4: step day at 22:30\nThu, Nov 5: step day at 22:30\nFri, Nov 6: step day at 22:30\nSat, Nov 7: step day at 22:30\nSun, Nov 8: step day at 22:30\nMon, Nov 9: step day at 22:30",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "own-idea",
+                "pass": false,
+                "borderline": true,
+                "reason": "Sent as a bare URL with no ZOH voice, no tie to his 10:30 bedtime, and no framing as ZOH's own find."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "The link is the approved team find, sent exactly as given; the text makes no claims about Sam's history."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ties to his 10:30 lights-out plan and his stated 3am scrolling; the screen-time proof ask matches his usual routine."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "Phone-charging suggestion arrives in ZOH's voice as its own idea, answering his 3am text warmly and briefly with one question."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "Console drafts say the link sends word for word within a minute of Do it, and it did go out at 9:31 as described."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The link went out exactly as given with no team mention and the 3am reply was warm with one question, but the link was not tied to his 10:30 bedtime or framed as ZOH's own find."
+          }
+        ],
+        "summary": "ZOH handled the regression's core failure well: it never disowned the link, sent it exactly as given, and gave Sam a warm, short 3am reply with one question. It missed the expected framing, sending the bare URL without tying it to his 10:30 bedtime or presenting it as ZOH's own find."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "feature": "back-off",
+  "id": "case:leave-me-alone-till-monday",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:18:36.585Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7737ece39bd7",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "5dd9417faaf2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:leave-me-alone-till-monday",
+        "kind": "case",
+        "id": "leave-me-alone-till-monday",
+        "title": "\"Leave me alone till Monday\" is a pause, not a stop or a back-off flag",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! 30 minutes around the park at 6 today. What's the plan to make it happen?",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "6 works",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "can you leave me alone till Monday",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan, I can do a break. What's going on this week? Travel, a crunch at work, or something else?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "visiting my parents this weekend, back monday",
+          "at": "2026-11-02T17:00:37.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Jordan. Enjoy your time with your parents. I'll stay quiet until Monday, Nov 9, and then we're back to the park runs. 🙌",
+          "at": "2026-11-02T17:00:44.200Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Pause: visiting parents this weekend, back on 2026-11-09\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": true,
+                "reason": "Treated \"leave me alone till Monday\" as a pause and offered no fewer-texts option, which fits; \"leave me alone\" could be read as a back-off ask."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "honest-offer",
+                "pass": true,
+                "borderline": true,
+                "reason": "Accepted the pause until Monday with no fewer-texts offer or promise, matching the pause path; the request's wording is close to a back-off ask."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "flags-back-off",
+            "pass": true,
+            "borderline": false,
+            "reason": "No back_off flag was saved; the request was handled as a pause, as the rules require."
+          },
+          {
+            "rule": "no-false-flag",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester raised no miss, step complaint or quiet-hours change, and ZOH flagged nothing."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked why first, accepted the real travel reason, paused until Monday Nov 9, and gave no opt-out or back_off flag."
+          }
+        ],
+        "summary": "ZOH handled the \"leave me alone till Monday\" request as the pause path it should be: it asked what was going on, accepted the visit-parents reason, and paused until Monday Nov 9 without an opt-out or back_off flag. The only soft spot is that the tester's wording sat close to a back-off request, but ZOH's response matched the pause rules."
+      }
+    }
+  ]
+}

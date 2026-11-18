@@ -1,0 +1,157 @@
+{
+  "feature": "onboarding",
+  "id": "case:loose-answer-counts",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "f2050ecfa8ff",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "198972761e8e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:loose-answer-counts",
+        "kind": "case",
+        "id": "loose-answer-counts",
+        "title": "Asked for minutes after the tester said \"20 pages or 25 min\"",
+        "persona": "all-at-once",
+        "areaCode": "212",
+        "startTime": "23:05",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hi, I'm Priya, one of the beta testers. I want to build a daily reading habit. I read a few books a year but want it consistent. I read on my Kindle in bed at home, every night around 10:30 before sleep, about 20 pages or 25 min.",
+          "at": "2026-11-03T04:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome, Priya! Nightly Kindle reading in bed is a solid spot for this. Which book are you reading right now, or starting?",
+          "at": "2026-11-03T04:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and measured at Pushy-level energy, with no overfamiliarity or emoji issues."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking which book she is reading fits a reading habit and is a needed plan input."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the time, place, length or routine she already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only refers to the Kindle, bed and nightly reading she mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question and no pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": false,
+            "borderline": false,
+            "reason": "The first text never says it's ZOH, what it does, that stop works anytime, or that she can change coaching style."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "No clearly answered detail is asked again."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": false,
+            "reason": "The conversation ends after one text with the book still unknown and no plan questions finished."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "No question about existing apps or tools, so nothing is pushed."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "A reading habit is an on-list starter goal."
+          },
+          {
+            "rule": "style-offer",
+            "pass": false,
+            "borderline": false,
+            "reason": "Never tells her she can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": false,
+            "borderline": false,
+            "reason": "Onboarding was cut off before any plan was asked for or shown."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "One short text, well under the limit."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "It does not re-ask how long, when, where or what; it asks only which book, a plan input she never gave."
+          }
+        ],
+        "summary": "ZOH avoided the regression: it did not re-ask how many minutes, when or where, and it asked only for the book, which the plan needs. However, the single first text omitted the required intro (what ZOH is, stop anytime, changing coaching style), and the conversation ended before onboarding finished."
+      }
+    }
+  ]
+}

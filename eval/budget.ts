@@ -3,12 +3,14 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 /**
- * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $1 per issue
- * the branch builds, up to $3 for a group (Yanni, Oct 29; $1 per branch since Oct 27): run only
- * the cases a change touches (--case); bugs beyond that get found live and in the beta.
+ * Eval spend per branch, kept in eval/reports/spend.json (gitignored). The budget is $1 per issue the
+ * branch builds, up to $3 for a group (Yanni, Nov 14, #197; was $0.50 / $1.50): enough to run the cases a
+ * change touches once each against the stored baseline, then rerun the ones that did worse 3 times.
  */
 export const BUDGET_PER_ISSUE_USD = 1;
 export const MAX_BUDGET_USD = 3;
+/** One full comparison and baseline refresh at each release (`npm run eval -- all`), on its own (Yanni, Nov 14). */
+export const RELEASE_BUDGET_USD = 4.5;
 
 export type Ledger = Record<string, { spentUsd: number; runs: number }>;
 

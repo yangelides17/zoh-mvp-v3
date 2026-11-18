@@ -16,17 +16,20 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
 import { loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
-import { COACH_AUTHOR } from "../src/console/requests.js";
+import { addRequest, addThreadLine, COACH_AUTHOR } from "../src/console/requests.js";
+import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
+import { startPause } from "../src/testers/pauses.js";
 import { evalApiKey } from "./cli.js";
 import { EvalClock, evalDay, zonedDate } from "./clock.js";
-import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "./media.js";
+import { billedDollars, type BilledUsage } from "./cost.js";
+import { evalMediaFetcher, evalTranscriber, evalWatcher, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
 import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
@@ -81,13 +84,81 @@ export function evalConfig(env: NodeJS.ProcessEnv, phone: string): Config {
   });
 }
 
+/** #162: Anthropic's web search fee, per search ($10 per 1,000); opened pages cost only their tokens. */
+export const SEARCH_DOLLARS = 0.01;
+
+interface MessageUsage {
+  model?: string;
+  usage?: {
+    input_tokens?: number;
+    cache_read_input_tokens?: number | null;
+    cache_creation_input_tokens?: number | null;
+    output_tokens?: number;
+    server_tool_use?: { web_search_requests?: number } | null;
+  };
+}
+
+/**
+ * #162: a streamed response's model and final usage: `message_start` carries the model and the input side,
+ * `message_delta` the final counts (output, and searches made), which win where both have one.
+ */
+export function usageFromStream(text: string): MessageUsage | undefined {
+  let out: MessageUsage | undefined;
+  for (const line of text.split("\n")) {
+    if (!line.startsWith("data: ")) continue;
+    const event = JSON.parse(line.slice(6)) as { type?: string; message?: MessageUsage; usage?: Record<string, unknown> };
+    if (event.type === "message_start" && event.message) out = { model: event.message.model, usage: { ...event.message.usage } };
+    else if (event.type === "message_delta" && event.usage && out) {
+      const set = Object.fromEntries(Object.entries(event.usage).filter(([, v]) => v !== null && v !== undefined));
+      out.usage = { ...out.usage, ...set };
+    }
+  }
+  return out;
+}
+
 /** Blocks any request to Sendblue from this process, as a second lock behind the fake client. */
-export function guardFetch(): () => void {
+/** What a run's Claude calls really cost (the app's coach and memory pass, the grader, the simulator), as billed. */
+export interface Meter {
+  dollars: number;
+  byModel: Record<string, BilledUsage>;
+}
+
+export function createMeter(): Meter {
+  return { dollars: 0, byModel: {} };
+}
+
+/**
+ * Blocks Sendblue for the run. With a meter, every Claude response is billed from the usage it reports: the
+ * coach runs inside the app, so this is the only place its real cost (cache writes included) can be seen.
+ */
+export function guardFetch(meter?: Meter): () => void {
   const real = globalThis.fetch;
   globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (/sendblue/i.test(new URL(url).hostname)) throw new Error("The eval must never call Sendblue");
-    return real(input, init);
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+    if (/sendblue/i.test(url.hostname)) throw new Error("The eval must never call Sendblue");
+    const res = await real(input, init);
+    if (meter && res.ok && url.hostname === "api.anthropic.com" && url.pathname === "/v1/messages") {
+      const bill = (body: MessageUsage | undefined) => {
+        if (!body?.model || !body.usage) return;
+        const u: BilledUsage = {
+          input: body.usage.input_tokens ?? 0,
+          cacheRead: body.usage.cache_read_input_tokens ?? 0,
+          cacheWrite: body.usage.cache_creation_input_tokens ?? 0,
+          output: body.usage.output_tokens ?? 0,
+        };
+        const m = (meter.byModel[body.model] ??= { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 });
+        for (const k of ["input", "cacheRead", "cacheWrite", "output"] as const) m[k] += u[k];
+        meter.dollars += billedDollars(u, body.model) + (body.usage.server_tool_use?.web_search_requests ?? 0) * SEARCH_DOLLARS;
+      };
+      // #162: the coach and console chat stream (server-sent events), billed once the stream ends without holding it
+      // up; everything else answers in one JSON body.
+      if ((res.headers.get("content-type") ?? "").includes("event-stream")) {
+        void res.clone().text().then((text) => bill(usageFromStream(text)), () => undefined);
+      } else {
+        bill((await res.clone().json().catch(() => undefined)) as MessageUsage | undefined);
+      }
+    }
+    return res;
   }) as typeof fetch;
   return () => {
     globalThis.fetch = real;
@@ -148,6 +219,12 @@ export async function startEvalApp(opts: {
       fetchMedia: evalMediaFetcher,
       // Photo descriptions are for memory's search, not the reply being graded: skip the extra Claude call.
       describer: undefined,
+      // #185: the eval's voice notes aren't real audio; nothing to rewrap.
+      rewrapper: undefined,
+      // #163: case videos carry what they show; never Gemini.
+      watcher: evalWatcher,
+      // #163: no "watching it now" here; it never changes the reply being graded.
+      holdingAfterMs: undefined,
       allowedNumbers: [opts.phone],
       now: opts.clock.now,
       // #132: no reply grace here. Turns go one at a time and the grace never changes the words, so it would
@@ -198,12 +275,19 @@ export const BURST_SEPARATOR = " +++ ";
  */
 export async function textZohBurst(app: EvalApp, texts: { text: string; mediaUrl?: string }[], handle: string): Promise<TranscriptLine[]> {
   const before = app.sendblue.sent.length;
+  const handles: string[] = [];
   for (const [i, t] of texts.entries()) {
     if (i > 0) app.clock.advance(1_000);
-    await postText(app, t.text, texts.length > 1 ? `${handle}-${i + 1}` : handle, t.mediaUrl ?? "");
+    handles.push(texts.length > 1 ? `${handle}-${i + 1}` : handle);
+    await postText(app, t.text, handles.at(-1)!, t.mediaUrl ?? "");
   }
   await app.built.queue.idle();
-  return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+  const replies = app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString() }));
+  // #162: what it searched, opened and watched for these replies, ahead of them, for the grader.
+  const rows = await app.db.select({ timings: schema.messages.timings }).from(schema.messages).where(inArray(schema.messages.sendblueHandle, handles));
+  const lookups = rows.flatMap((r) => String((r.timings as Record<string, unknown> | null)?.lookups ?? "").split("\n").filter(Boolean));
+  const at = replies[0]?.at ?? app.clock.now().toISOString();
+  return [...lookups.map((text) => ({ from: "lookup" as const, text, at })), ...replies];
 }
 
 /** How long after a tester's text ZOH's work on it happens, on the eval's clock (#131). */
@@ -260,43 +344,47 @@ export async function advanceTo(app: EvalApp, hhmm: string, timeZone: string): P
   return app.sendblue.sent.slice(before).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true }));
 }
 
-/** A case line from a founder in the console chat: "console Yanni: ...", "console Yanni (exact, now): ...". */
-export const CONSOLE_LINE = /^console (\w+)(?: \((exact(?:, now)?)\))?: ([\s\S]+)$/i;
+/** A case line from a founder in the console chat: "console Yanni: ...", or "console Yanni (do it)" for clicking Do it on the newest draft (#155). */
+export const CONSOLE_LINE = /^console (\w+)(?: \((do it)\))?(?:: ([\s\S]+))?$/i;
 
 /**
- * Sends a founder's line through the real console chat route, as that founder, and returns it
- * with ZOH's console answer. A "send exactly this" line gets one nudge tick a minute later, as
- * production would, so the text it sends joins the transcript.
+ * Sends a founder's line through the real console chat route, as that founder, and returns it with
+ * ZOH's console answer and any draft card it made (#155). "(do it)" clicks Do it on the newest open
+ * draft instead, then runs one nudge tick a minute later, as production would, so a text it sends
+ * joins the transcript.
  */
 export async function consoleSay(app: EvalApp, line: RegExpExecArray): Promise<TranscriptLine[]> {
-  const [, name, flags, text] = line as unknown as [string, string, string | undefined, string];
+  const [, name, doIt, text] = line as unknown as [string, string, string | undefined, string | undefined];
   const tester = await getTesterByPhone(app.db, app.phone);
   if (!tester) throw new Error("A console line needs a tester: seed one first");
   const at = app.clock.now();
-  const before = await app.db.select({ id: schema.consoleMessages.id }).from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id));
+  const thread = () => app.db.select().from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id));
+  const before = new Set((await thread()).map((r) => r.id));
   const cookie = `${SESSION_COOKIE}=${encodeURIComponent(encodeSession(newSession(at, name), CONSOLE_SECRET))}`;
-  const form = new URLSearchParams({ text, ...(flags ? { exact: "on" } : {}), ...(flags?.endsWith("now") ? { sendNow: "on" } : {}) });
-  const res = await app.built.app.inject({
-    method: "POST",
-    url: `/console/testers/${tester.id}/chat`,
-    headers: { "content-type": "application/x-www-form-urlencoded", cookie },
-    payload: form.toString(),
-  });
-  if (res.statusCode !== 303) throw new Error(`Console chat answered ${res.statusCode}: ${res.body.slice(0, 200)}`);
-  await app.built.queue.idle();
-  const seen = new Set(before.map((r) => r.id));
-  const answers = (await app.db.select().from(schema.consoleMessages).where(eq(schema.consoleMessages.testerId, tester.id)))
-    .filter((m) => !seen.has(m.id) && m.kind === "coach" && m.author === COACH_AUTHOR)
-    .map((m) => ({ from: "zoh" as const, text: m.body, at: m.createdAt.toISOString(), console: true }));
-  const out: TranscriptLine[] = [{ from: "founder", text: `${name}${flags ? ` (${flags})` : ""}: ${text}`, at: at.toISOString() }, ...answers];
-  app.clock.advance(30_000);
-  if (flags) {
+  const post = (url: string, form: Record<string, string>) =>
+    app.built.app.inject({ method: "POST", url, headers: { "content-type": "application/x-www-form-urlencoded", cookie }, payload: new URLSearchParams(form).toString() });
+  if (doIt) {
+    const draft = (await thread()).filter((m) => m.kind === "draft" && m.draftStatus === "draft").sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime()).at(-1);
+    if (!draft) throw new Error("(do it) needs an open draft from ZOH first");
+    await post(`/console/testers/${tester.id}/drafts/${draft.id}/confirm`, {});
+    const out: TranscriptLine[] = [{ from: "founder", text: `${name} clicks Do it on: ${draft.body}`, at: at.toISOString() }];
     const sendsBefore = app.sendblue.sent.length;
     app.clock.advance(60_000);
     await app.nudger.tick(app.clock.now());
     out.push(...app.sendblue.sent.slice(sendsBefore).map((s) => ({ from: "zoh" as const, text: s.content, at: s.at.toISOString(), started: true })));
+    app.clock.advance(30_000);
+    return out;
   }
-  return out;
+  if (!text) throw new Error(`A console line needs words: ${line[0]}`);
+  const res = await post(`/console/testers/${tester.id}/chat`, { text });
+  if (res.statusCode !== 303) throw new Error(`Console chat answered ${res.statusCode}: ${res.body.slice(0, 200)}`);
+  await app.built.queue.idle();
+  const answers = (await thread())
+    .filter((m) => !before.has(m.id) && ((m.kind === "coach" && m.author === COACH_AUTHOR) || m.kind === "draft"))
+    .sort((x, y) => x.createdAt.getTime() - y.createdAt.getTime())
+    .map((m) => ({ from: "zoh" as const, text: m.kind === "draft" ? `[draft card: Do it / Change / Cancel] ${m.body}` : m.body, at: m.createdAt.toISOString(), console: true }));
+  app.clock.advance(30_000);
+  return [{ from: "founder", text: `${name}: ${text}`, at: at.toISOString() }, ...answers];
 }
 
 /**
@@ -367,6 +455,8 @@ export interface RunOptions {
   saved?: boolean;
   /** Show the grader the step log, lessons included, read at the end (console lines get it at the start). */
   record?: boolean;
+  /** Tests only: the app once it's up (a fake console coach writes its drafts to its database). */
+  onApp?: (app: EvalApp) => void;
 }
 
 /** Gap between seeded texts, which end a minute before the run's first text. */
@@ -386,7 +476,13 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   const { timeZone, status } = guessTimeZone(app.phone);
   // Seeded memory reaches further back: start their context before the oldest of it.
   const oldest = memoryDays(seed);
-  const contextStart = oldest ? new Date(Math.min(storedStart.getTime(), now.getTime() - (oldest + 1) * DAY_MS)) : storedStart;
+  // The earlier of the real and the eval clock's start: rows the run stamps on the eval clock (a founder's next
+  // step confirmed in the console, #155) must count as after it, as they would in production.
+  // #196: the team's seeded notes and requests count only from their context's start, so it starts before them.
+  const teamHours = Math.max(0, ...seed.team.map((t) => t.hours_ago));
+  const contextStart = new Date(
+    Math.min(storedStart.getTime(), startedAt.getTime(), now.getTime() - teamHours * 60 * 60_000 - SEED_STEP_MS, oldest ? now.getTime() - (oldest + 1) * DAY_MS : Infinity),
+  );
   const [tester] = await app.db
     .insert(schema.testers)
     .values({
@@ -434,11 +530,35 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         lockedAt: new Date(now.getTime() - e.days_ago * DAY_MS),
       });
     }
+    // Locked the day before day 1 (on the eval clock), so today's kickoff isn't skipped as "just
+    // locked" and seeded step days count toward the slip ladder.
+    const lockedAt = new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000);
+    // #196: a temporary lighter plan sits on top of their usual one, which comes back after it.
+    if (p.temporary) {
+      await app.db.insert(schema.plans).values({
+        testerId: tester!.id,
+        goalSlug: seed.goal,
+        status: "locked",
+        version: earlierPlans.length + 1,
+        step: p.temporary.usual_step,
+        place: p.place,
+        stepTime: p.time,
+        days: p.days,
+        proof: p.proof,
+        proofNote: p.proof_note,
+        reason: p.reason,
+        minutes: p.minutes,
+        startDate: localDate(now, timeZone, -p.started_days_ago),
+        commitment: "I'm in",
+        lockedAt,
+      });
+    }
+    const planVersion = earlierPlans.length + (p.temporary ? 2 : 1);
     const [plan] = await app.db.insert(schema.plans).values({
       testerId: tester!.id,
       goalSlug: seed.goal,
       status: "locked",
-      version: earlierPlans.length + 1,
+      version: planVersion,
       setupStep: p.setup_step,
       step: p.step,
       destination: p.destination,
@@ -452,10 +572,12 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       startDate: localDate(now, timeZone, -p.started_days_ago),
       commitment: "I'm in",
       needsReview: true,
-      // Locked the day before day 1 (on the eval clock), so today's kickoff isn't skipped as "just
-      // locked" and seeded step days count toward the slip ladder.
-      lockedAt: new Date(startedAt.getTime() - (p.started_days_ago + 1) * 24 * 60 * 60_000),
+      ...(p.temporary ? { endsOn: localDate(now, timeZone, p.temporary.ends_in_days), changeKind: "other" as const } : {}),
+      lockedAt: p.temporary ? new Date(lockedAt.getTime() + 60_000) : lockedAt,
     }).returning();
+    if (seed.plan_review_alert) {
+      await raiseAlert(app.db, { testerId: tester!.id, topic: "plan_review", key: `plan_review:${plan!.id}`, body: `Plan version ${plan!.version} to review`, planId: plan!.id, at: plan!.lockedAt ?? now });
+    }
     for (const d of seed.step_days) {
       await app.db
         .insert(schema.stepDays)
@@ -469,6 +591,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
           proofSeen: d.proof_seen ?? null,
           reflection: d.reflection ?? null,
           movedTime: d.moved_time ?? null,
+          howItWentSaid: d.how_it_went_said ?? null,
         });
     }
     if (seed.today_step) {
@@ -491,7 +614,21 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
         createdAt: new Date(now.getTime() - k.days_ago * DAY_MS),
       });
     }
-    await seedNextSteps(app, tester!, seed, earlierPlans.length + 2, now);
+    await seedNextSteps(app, tester!, seed, planVersion + 1, now);
+  }
+  // #196: the console as the founders left it, and a break in progress, through the app's own helpers.
+  for (const t of seed.team) {
+    const at = new Date(now.getTime() - t.hours_ago * 60 * 60_000);
+    if (t.kind === "note") await addThreadLine(app.db, { testerId: tester!.id, kind: "note", author: "Yanni", body: t.body, at });
+    else await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at });
+  }
+  if (seed.pause) {
+    const { started_hours_ago, until_days, reason } = seed.pause;
+    await startPause(app.db, tester!, {
+      at: new Date(now.getTime() - started_hours_ago * 60 * 60_000),
+      ...(until_days ? { until: localDate(now, timeZone, until_days) } : {}),
+      ...(reason ? { reason } : {}),
+    });
   }
   const context: TranscriptLine[] = [];
   for (const [i, line] of seed.history.entries()) {
@@ -501,11 +638,20 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       contactNumber: app.phone,
       lineNumber: LINE,
       content: line.text,
+      ...(line.document
+        ? {
+            mediaUrl: parseMediaLine(`[document ${line.document.name}: ${line.document.text}]`)!.mediaUrl,
+            mediaContentType: line.document.name.endsWith(".pdf") ? "application/pdf" : "text/plain",
+            transcript: line.document.text,
+          }
+        : {}),
       createdAt: new Date(storedStart.getTime() + i * SEED_STEP_MS),
       // What the nudge tick reads as the text's time, on the eval clock.
       sentAt: at,
     });
-    context.push({ from: line.from, text: line.text, at: at.toISOString() });
+    // The grader sees what the document said, as it does for a case's own media lines.
+    const shown = line.document ? `[document ${line.document.name}: ${line.document.text}] ${line.text}` : line.text;
+    context.push({ from: line.from, text: shown, at: at.toISOString() });
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
   return context;
@@ -577,6 +723,8 @@ async function seedNextSteps(app: EvalApp, tester: schema.Tester, seed: Seed, ve
       decidedKind: s.decided_kind,
       decidedProposal: s.decided_proposal,
       outcome: s.outcome,
+      planChanges: s.plan_changes,
+      deliveredAt: s.delivered_hours_ago !== undefined ? new Date(app.clock.now().getTime() - s.delivered_hours_ago * 3_600_000) : null,
     });
   }
 }
@@ -634,6 +782,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const phone = fakeNumber(plan.areaCode, opts.index);
   const clock = new EvalClock(zonedDate(evalDay(plan.startDay), plan.startTime, plan.timeZone));
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
+  opts.onApp?.(app);
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
@@ -766,6 +915,8 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
     ...versions.map((x) => `New plan version ${x.version}${x.changeKind ? ` (${x.changeKind})` : ""}: ${x.step}, ${x.days.join(" ")} at ${x.stepTime}${x.endsOn ? `, until ${x.endsOn}` : ""}`),
     ...lessons.map((k) => `Takeaway (${k.evidence}, ${k.day}): ${k.text}`),
     ...days.flatMap((d) => (d.reflection ? [`Reflection for ${d.date}: ${d.reflection}`] : [])),
+    // #160: what the step shows they can now do, and gaps, so the grader can check both against the conversation.
+    ...days.flatMap((d) => [...(d.canDo ? [`Can now do (${d.date}): ${d.canDo}`] : []), ...(d.gaps ? [`Gaps (${d.date}): ${d.gaps}`] : [])]),
     ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");

@@ -1,0 +1,215 @@
+{
+  "feature": "lookback",
+  "id": "case:quiet-sunday-monday-recap",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "bec1fa66000b",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "c111401afc3b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:quiet-sunday-monday-recap",
+        "kind": "case",
+        "id": "quiet-sunday-monday-recap",
+        "title": "Silent all Sunday at the unanswered cap: no fourth text Sunday; Monday's kickoff opens with last week's recap, then today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:55",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "done, 3 min straight without stopping!!",
+          "at": "2026-11-07T23:52:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "THREE minutes, Sam. That's real. Same time tomorrow.",
+          "at": "2026-11-07T23:53:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Yesterday you ran 3 minutes straight, so today we stretch it: 3.5 min easy jog, 1 min walk, 3 rounds around the block at 6:30 pm, talk-test pace. Send the Strava screenshot after. That's 7 days in a row if you do it. You in? 🏃",
+          "at": "2026-11-08T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam! 6:30 is almost here: 3.5 min easy jog, 1 min walk, 3 rounds around the block, talk-test pace. Get your shoes on and send the Strava screenshot after. 🏃",
+          "at": "2026-11-08T23:20:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Today's 3.5 min jog, 1 min walk, 3 rounds was set for 6:30. How did it go? Send the Strava screenshot when you're back. 🏃",
+          "at": "2026-11-08T23:49:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Last week you got 5 full days and 1 smaller one in, and Saturday you ran 3 minutes straight for the first time. Sunday got away from us, skata, but that's one slip, so today matters. You're a few days from the nonstop mile on Nov 14, and the way there is the full step: 3.5 min easy jog, 1 min walk, 3 rounds around the block at 6:30 pm, talk-test pace, then a Strava screenshot. You said you'd do this and I know you will. You in? 🏃",
+          "at": "2026-11-09T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-09T14:01:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sam! 6:30 pm, then send me that Strava screenshot. You're closing in on that mile. 🔥",
+          "at": "2026-11-09T14:01:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-09 to today): 0 done in full, 0 smaller, 0 missed.\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: 1 min easy jog, 2 min walk, 3 rounds around the block (harder than expected)\nTue, Nov 3: done, step: 1.5 min jog, 1.5 min walk, 3 rounds, at talk-test pace\nWed, Nov 4: done (smaller version), step: 2 min jog, 1 min walk, 3 rounds, talk-test pace (only 2 rounds, shins sore)\nThu, Nov 5: done, step: 2 min jog, 1 min walk, 3 rounds, talk-test pace\nFri, Nov 6: done, step: 2.5 min jog, 1 min walk, 3 rounds, talk-test pace\nSat, Nov 7: done, step: 3 min jog, 1 min walk, 3 rounds, talk-test pace (3 min straight without stopping)\nSun, Nov 8 (yesterday): missed, step (harder): Around the block at 6:30 pm: 3.5 min easy jog, 1 min walk, 3 rounds, talk-test pace. Send a Strava screenshot after.\nMon, Nov 9 (today): step day, not done yet at 18:30, step (same): Around the block at 6:30 pm: 3.5 min easy jog, 1 min walk, 3 rounds, talk-test pace. Send a Strava screenshot after.\nTue, Nov 10 (tomorrow): step day at 18:30\nWed, Nov 11: step day at 18:30\nThu, Nov 12: step day at 18:30\nFri, Nov 13: step day at 18:30\nSat, Nov 14: step day at 18:30\nSun, Nov 15: step day at 18:30\nMon, Nov 16: step day at 18:30\nProof for 2026-11-02: Strava, 10 min, 0.6 mi\nProof for 2026-11-03: Strava, 10 min, 0.7 mi\nReflection for 2026-11-03: Slowing to a pace where I could talk made it doable\nProof for 2026-11-04: Strava, 7 min\nProof for 2026-11-05: Strava, 10 min, 0.8 mi\nProof for 2026-11-06: Strava, 11 min, 0.9 mi\nProof for 2026-11-07: Strava, 12 min, 1.0 mi\nLesson (explained, 2026-11-03): Slow enough to talk is the right pace\nLesson (explained, 2026-11-04): Sore shins: walk more, not less\nLesson (applied, 2026-11-05): Slow enough to talk is the right pace\nLesson (recalled, 2026-11-07): Slow enough to talk is the right pace",
+      "saved": "Reflection for 2026-11-03: Slowing to a pace where I could talk made it doable\nStep set for 2026-11-09, agreed: Around the block at 6:30 pm: 3.5 min easy jog, 1 min walk, 3 rounds, talk-test pace. Send a Strava screenshot after.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, which is within the limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy energy, warm and specific, with the emoji used as punctuation at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, a clean check-in."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct with one emoji at the end, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, asking how it went as the follow-up requires."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, firm and specific to the step, with one emoji at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives 2 to 4 progress points in prose (5 full and 1 smaller, 3 minutes nonstop, talk-test pace), with one question at the end, though it is not a bulleted list."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Talk-test pace is described as applied and the shin lesson is not mentioned, so no understanding is claimed."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day counts (5 full, 1 smaller), the Saturday 3 minutes and the Nov 14 mile all match the log and the state."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No unprompted or on-your-own wording about any lesson."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs to about six sentences, longer than three, though a Monday recap plus a fully defined step can reasonably run long."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy and warm with a light Greek touch and a single emoji at the end, not overfamiliar."
+              },
+              {
+                "rule": "monday-recap",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with an evidenced recap from the record, then a fully defined step (what, where, 6:30 pm, Strava), then one question about being in, none about the week."
+              },
+              {
+                "rule": "miss-light",
+                "pass": true,
+                "borderline": false,
+                "reason": "Sunday's miss is named lightly as one slip inside the recap, not as the headline."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, a confirmation with no new recap."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with one emoji at the end, warm and not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "No Sunday evening recap after three unanswered texts; Monday 9 am gives one recap-led text with the step and one question, and the shin lesson is not called understood."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the Sunday sequence stayed within the unanswered-text cap, and Monday's single text opened with an evidenced recap that named the Sunday miss lightly and ended in a fully defined step and one question. The only soft spot is that the Monday recap runs longer than the short limit, which is borderline given it carries a recap and a step."
+      }
+    }
+  ]
+}

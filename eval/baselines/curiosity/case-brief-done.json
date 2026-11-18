@@ -1,0 +1,688 @@
+{
+  "feature": "curiosity",
+  "id": "case:brief-done",
+  "suite": "regression",
+  "storedAt": "2026-11-15T06:05:25.611Z",
+  "branch": "feature/197-eval-grader-check",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7d058cc066ab",
+    "voice": "7b93abe53b87",
+    "instructions": "c7348af58300",
+    "script": "e71bb4b6d7b0"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:brief-done#1",
+        "kind": "case",
+        "id": "brief-done",
+        "suite": "regression",
+        "title": "Too slow: a brief tester who's clearly done gets let go warmly, never a third push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Kai! 20 minute run around the park at 7. You in?",
+          "at": "2026-11-02T10:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ya",
+          "at": "2026-11-02T10:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done. ran the loop, 20 min]",
+          "at": "2026-11-02T12:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes done before 8, Kai 🔥 How did the run feel today, easy or a bit of a grind?",
+          "at": "2026-11-02T12:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "good",
+          "at": "2026-11-02T12:30:37.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good is what I like to hear. What made it feel good today?",
+          "at": "2026-11-02T12:30:44.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah that's about it",
+          "at": "2026-11-02T12:31:05.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Kai. Wednesday at 7: same loop, 20 minutes, at a pace where you could still talk, voice note after. Work for you?",
+          "at": "2026-11-02T12:31:12.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "k",
+          "at": "2026-11-02T12:31:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for Wednesday 💪",
+          "at": "2026-11-02T12:31:45.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Ran the loop, 20 min, said it felt \"good\"; no more detail.\nStep set for 2026-11-04, agreed: 20 minute easy run around the park at 7 am, same loop, at a pace where you could still talk\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the completed run specifically with 'before 8' and an emoji, not generic praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads like a person texting, with no process language."
+              },
+              {
+                "rule": "not-leading",
+                "pass": false,
+                "borderline": true,
+                "reason": "\"How did the run feel today, easy or a bit of a grind?\" offers a two-option menu of guesses about his experience before he has described it."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": true,
+                "reason": "'Good is what I like to hear' is mildly filler but not empty praise; one light follow-up on 'good' is allowed."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Simple follow-up that sounds like a person checking in."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"What made it feel good today?\" is an open follow-up that builds on the word he chose and does not offer guesses."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "'All good, Kai' is warm wrap-up without praise or pressure."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one closing question; the step is fully defined as the rule allows."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Wraps up naturally with no check-in on how the run went."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Wraps up with no question about how the run went; the only question is a logistics confirmation of the Wednesday step."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short confirmation line for a 'k' yes, with no praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One short line with no question."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches the terse tester in a natural way."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirmation line with no question at all."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "real-moment",
+            "pass": true,
+            "borderline": false,
+            "reason": "The vague 'good' got a question about the actual run, and the follow-up probed the run itself."
+          },
+          {
+            "rule": "went-well",
+            "pass": true,
+            "borderline": true,
+            "reason": "It asked what made the run feel good, but the tester closed it off, so the reflection was only lightly drawn out."
+          },
+          {
+            "rule": "not-rushing",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester was not mid-story and clearly said they were done, so ZOH moved on appropriately."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "'nah that's about it' ended questions, ZOH wrapped up with the fully defined Wednesday step and 'Work for you?', and 'k' got a short line back."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": true,
+            "borderline": true,
+            "reason": "Questions stop once the tester says they're done; the only extra question is one light follow-up on \"good\", and the wrap-up doesn't chase depth."
+          }
+        ],
+        "summary": "ZOH handled this terse tester well: it counted the run, asked one light follow-up, and stopped chasing for depth once the tester said that was about it. It gave a fully defined next step with a single closing question and treated 'k' as a yes with a short confirmation, so the regression case passes."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:brief-done#2",
+        "kind": "case",
+        "id": "brief-done",
+        "suite": "regression",
+        "title": "Too slow: a brief tester who's clearly done gets let go warmly, never a third push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Kai! 20 minute run around the park at 7. You in?",
+          "at": "2026-11-02T10:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ya",
+          "at": "2026-11-02T10:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done. ran the loop, 20 min]",
+          "at": "2026-11-02T12:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes in the bank, Kai 🔥 Two step days in a row now. How did the legs and lungs feel out there today?",
+          "at": "2026-11-02T12:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "good",
+          "at": "2026-11-02T12:30:37.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good is what I like to hear. Was there a moment on the loop today where it felt easiest, or one where you wanted to stop?",
+          "at": "2026-11-02T12:30:44.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah that's about it",
+          "at": "2026-11-02T12:31:05.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Kai. Next up is Wednesday: same 20 minute easy run around the park at 7 am, voice note when you're back. Work for you?",
+          "at": "2026-11-02T12:31:12.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "k",
+          "at": "2026-11-02T12:31:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "💪",
+          "at": "2026-11-02T12:31:45.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Ran the loop, 20 min, said it felt \"good\"; gave nothing more.\nStep set for 2026-11-04, not agreed: 20 minute easy run around the park at 7 am, voice note when you're back\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and specific, but \"Two step days in a row now\" claims history the transcript doesn't show."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads like a person texting, with no process language."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Open, neutral question about how the legs and lungs felt; it doesn't offer guesses about their experience."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Good is what I like to hear\" is a warm, plain acknowledgement, not empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Natural conversational follow-up with no machinery showing."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks an either/or about the run, 'a moment where it felt easiest, or one where you wanted to stop', after a terse 'good'; it's a menu, but it's not a leading guess at a lapse."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"All good, Kai.\" is warm and not praise-heavy, and it wraps up without chasing."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads as a person closing out and setting the next day, with no labels."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Wraps up warmly and closes with a yes/no logistics check, 'Work for you?', with no leading question about how it went."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single flexing emoji is a light acknowledgement of the yes."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single emoji, the shortest possible reply to \"k\"."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches the terse tester naturally."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Emoji-only reply to 'k' with no question, so nothing leading."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "real-moment",
+            "pass": true,
+            "borderline": false,
+            "reason": "The vague \"good\" was met with a question about a concrete moment on the loop."
+          },
+          {
+            "rule": "went-well",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH drew out how it felt, but the tester gave nothing more, so the next step had little to double down on."
+          },
+          {
+            "rule": "not-rushing",
+            "pass": true,
+            "borderline": false,
+            "reason": "The tester closed with \"nah that's about it\", so moving on was correct."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH stopped probing after \"nah that's about it\" and gave a fully defined step with \"Work for you?\", but its one follow-up after \"good\" was a two-part question, which is less light than ideal."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": true,
+            "borderline": true,
+            "reason": "Stops probing once the tester says they're done and lets them go; only the slight two-part follow-up after 'good' is debatable."
+          }
+        ],
+        "summary": "ZOH handled this terse tester well: it counted the run, asked one light follow-up, stopped questioning once the tester closed the thread, and gave a fully defined next step with \"Work for you?\". The main blemish is the unsupported \"Two step days in a row\" claim and a slightly heavier follow-up after \"good\" than the rule's \"at most one light follow-up\" calls for."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:brief-done#3",
+        "kind": "case",
+        "id": "brief-done",
+        "suite": "regression",
+        "title": "Too slow: a brief tester who's clearly done gets let go warmly, never a third push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Kai! 20 minute run around the park at 7. You in?",
+          "at": "2026-11-02T10:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ya",
+          "at": "2026-11-02T10:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: done. ran the loop, 20 min]",
+          "at": "2026-11-02T12:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes in the bag, Kai 🔥 Two step days in a row now. How did the loop feel today, and what made it feel that way?",
+          "at": "2026-11-02T12:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "good",
+          "at": "2026-11-02T12:30:37.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good is a solid start. What was the best part of it, the pace, the air, finishing it?",
+          "at": "2026-11-02T12:30:44.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "nah that's about it",
+          "at": "2026-11-02T12:31:05.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "All good, Kai. Next up is Wednesday at 7: same easy 20-minute loop around the park, voice note when you're back. Work for you?",
+          "at": "2026-11-02T12:31:12.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "k",
+          "at": "2026-11-02T12:31:38.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "💪",
+          "at": "2026-11-02T12:31:45.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-02: Said the run was \"good\", nothing more.\nStep set for 2026-11-04, not agreed: 20 minute easy run around the park at 7 am Wednesday, voice note when back\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"20 minutes in the bag, Kai 🔥\" is a warm, specific acknowledgement of the completed run, not empty praise."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences with one question at the end, though the question bundles two parts about how the loop felt."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reads like a person texting about the run with no visible process or rule language."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks an open question about how the run felt and what made it feel that way, with no guessed answers offered."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Good is a solid start\" is a plain, non-hollow acknowledgement of the tester's word."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, a single light follow-up to \"good\"."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": true,
+                "reason": "Listing \"the pace, the air, finishing it\" as guesses feels a bit like a menu of guesses about them."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks what the best part was, then offers a menu (pace, air, finishing it) after a terse 'good', which edges toward guessing their experience."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"All good, Kai.\" accepts the tester's wrap-up warmly without pressing for more."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, \"Work for you?\"."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Natural closing that sets the next step without showing any machinery."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "Closes the questioning with a logistics check ('Work for you?') and asks nothing about how the run went."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "warm-not-hollow",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single 💪 is a short line back to the tester's \"k\" yes."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A short line with no question, appropriate for closing out."
+              },
+              {
+                "rule": "natural",
+                "pass": true,
+                "borderline": false,
+                "reason": "Matches the terse texting style of the tester."
+              },
+              {
+                "rule": "not-leading",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single emoji reply with no question, so nothing leading is possible."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "real-moment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked about the actual run (how the loop felt, best part) after the vague \"good\" answer."
+          },
+          {
+            "rule": "options-tied",
+            "pass": true,
+            "borderline": false,
+            "reason": "The next step is the same 20-minute loop tied to the tester's known run plan, not an unsupported option set."
+          },
+          {
+            "rule": "went-well",
+            "pass": true,
+            "borderline": true,
+            "reason": "Drew out what went well once, then accepted the tester closing it, which fits the terse case."
+          },
+          {
+            "rule": "not-rushing",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester gave no story or unfinished thread, so moving on to the next step was appropriate."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Counted the run and gave one follow-up after \"good\", then wrapped with a fully defined step and \"Work for you?\" with no follow-up on how it went; the menu-style follow-up is the only soft spot."
+          },
+          {
+            "rule": "not-dragging",
+            "pass": true,
+            "borderline": true,
+            "reason": "After 'good', ZOH asked one light follow-up, then stopped when the tester said 'nah that's about it' and moved straight to the next step."
+          }
+        ],
+        "summary": "ZOH handled the terse run check-in well: it celebrated the run, gave one light follow-up to \"good\", and wrapped up warmly with a fully defined Wednesday step once the tester closed the conversation. The only soft spots are the menu-style follow-up question and a bundled two-part question in the opening text, both borderline rather than clear misses."
+      }
+    }
+  ]
+}

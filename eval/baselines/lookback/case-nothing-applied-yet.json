@@ -1,0 +1,167 @@
+{
+  "feature": "lookback",
+  "id": "case:nothing-applied-yet",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "db94275e7ffd",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "5cb63e682075"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:nothing-applied-yet",
+        "kind": "case",
+        "id": "nothing-applied-yet",
+        "title": "A thin first week with nothing applied or recalled yet: an honest recap, no inflated understanding",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:00",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "skipped today, meeting got cancelled",
+          "at": "2026-11-07T15:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, no meeting no mic. Monday's standup, then.",
+          "at": "2026-11-07T15:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Priya! Here's the progress you made this week:\n• You spoke up in standup on Monday, said what you're working on, and did it with your heart racing.\n• Wednesday you prepped your line the night before and read it out. You told me that prep helped a lot.\n• 2 days done in full. Tuesday you froze, and Thursday's meeting got cancelled.\n\nYour goal is to lead one team meeting by the end of the month. Right now you're building the habit of speaking first, and the night-before prep looks like your best tool for it. For Monday's standup, do you want to prep your line again tonight?",
+          "at": "2026-11-08T23:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "meh, felt like a slow week",
+          "at": "2026-11-08T23:01:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, two steps done out of five days isn't the week you wanted, and a cancelled meeting isn't on you. What made it feel slow: Tuesday's freeze, or not getting enough chances to speak?",
+          "at": "2026-11-08T23:01:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-08T23:01:34.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No stress, Priya. One slow week doesn't change where you're headed. For Monday, let's use what worked on Wednesday. Tonight, write your one sentence. At 10 am standup, say it before anyone asks. Then send me a quick voice note on how it went. Work for you?",
+          "at": "2026-11-08T23:01:41.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 2 done in full, 0 smaller, 2 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: One sentence in standup before anyone asks\nTue, Nov 3: missed (froze, said nothing)\nWed, Nov 4: done, step: One sentence in standup, prepared the night before\nThu, Nov 5: missed (meeting got cancelled)\nFri, Nov 6: step day, nothing recorded\nSat, Nov 7 (yesterday): rest day\nSun, Nov 8 (today): rest day\nMon, Nov 9 (tomorrow): step day at 10:00\nTue, Nov 10: step day at 10:00\nWed, Nov 11: step day at 10:00\nThu, Nov 12: step day at 10:00\nFri, Nov 13: step day at 10:00\nSat, Nov 14: rest day\nSun, Nov 15: rest day\nProof for 2026-11-02: voice note: said what she's working on, heart racing\nProof for 2026-11-04: voice note: read her prepped line\nReflection for 2026-11-04: Prepping the line the night before helped a lot\nReflection for 2026-11-08: Said \"meh, felt like a slow week\", then \"ok\" when asked what made it slow.\nLesson (explained, 2026-11-04): Prep your one line the night before\nLesson (explained, 2026-11-08): Prepping your line the night before makes speaking up easier",
+      "saved": "Takeaway (explained, 2026-11-08): Prepping your line the night before makes speaking up easier\nReflection for 2026-11-04: Prepping the line the night before helped a lot\nReflection for 2026-11-08: Said \"meh, felt like a slow week\", then \"ok\" when asked what made it slow.\nStep set for 2026-11-09, not agreed: Tonight write one sentence about what you're working on. Monday at 10 am standup, say it before anyone asks. Then send a voice note on what you said and how it felt.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two real wins (Monday standup, Wednesday prep) are backed by the record; the third bullet lists misses rather than progress, which is a borderline fit."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calls prep 'your best tool' and says 'prep helped a lot' without claiming she has mastered speaking up."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Monday standup, heart racing, Wednesday prep and Tuesday freeze all match the proof and step log."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording appears."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A short recap list plus about three sentences ending in one question, within the allowed length for a recap."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji or overfamiliarity; energy is reasonable for Pushy."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and not overfamiliar; it acknowledges the slow week without guilt."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers to Wednesday's prep, which is in the record, and makes no new factual claim."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Several sentences, but a step-defining text may run longer, and it ends with one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with no guilt, fake urgency or emoji row."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The recap is honest and not inflated, and Monday's step is fully defined and asked if it works; however, the slow-week reply has an extra question and never names the two wins explicitly."
+          }
+        ],
+        "summary": "ZOH's 6 pm recap stayed honest: it credited the two real wins, framed prep as a tool rather than mastery, and avoided guilt. The slow-week reply was warm and ended with a fully defined Monday step, though it asked an extra question after her thin reply and did not spell out both wins."
+      }
+    }
+  ]
+}

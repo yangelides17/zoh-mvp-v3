@@ -1,0 +1,472 @@
+{
+  "feature": "onboarding",
+  "id": "joking-bedtime-no-emojis",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "837def526f14"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "joking-bedtime-no-emojis",
+        "kind": "scenario",
+        "id": "joking-bedtime-no-emojis",
+        "title": "Joking tester, bedtime, asks for no emojis midway",
+        "persona": "joking",
+        "areaCode": "617",
+        "startTime": "21:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hey lol is this the sleep coaching thing? my friend said u guys could help me stop being up till 2am every night 😅",
+          "at": "2026-11-03T02:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yep, you found it! I'm ZOH, an AI coach, and I'll help you get off the 2am cycle with one small step a day. You can text \"stop\" anytime, or tell me to chill out or push harder and I'll adjust. Let's go! What's your name?",
+          "at": "2026-11-03T02:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Theo lol. so is this gonna be like a robot yelling at me to go to bed",
+          "at": "2026-11-03T02:01:01.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, no yelling, Theo. I'm more the friend who backs you up and keeps you honest, one small step at a time. So what usually keeps you up until 2am?",
+          "at": "2026-11-03T02:01:08.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "haha ok fair. honestly mostly my phone in bed. tiktok then youtube and suddenly it's 2am 💀",
+          "at": "2026-11-03T02:01:49.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Classic trap, Theo, and very fixable. What time would you want to be asleep on a normal night?",
+          "at": "2026-11-03T02:01:56.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haha tiktok at 11pm is a trap, 2am is just the bill lol. Ideally lights out by 11:30 🙃",
+          "at": "2026-11-03T02:02:43.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "\"2am is just the bill\" is going on a poster, Theo. 11:30 is a very doable target. How many hours of sleep do you want to get on a normal night?",
+          "at": "2026-11-03T02:02:50.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haha honestly probably like 7-8? I'm running on fumes rn 💀",
+          "at": "2026-11-03T02:03:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Running on fumes is exactly why 11:30 matters, Theo. Do you use a sleep app or wearable to track your sleep, or is it just you and the clock?",
+          "at": "2026-11-03T02:03:43.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "Haha I've got an Apple Watch that tracks sleep, so it'll tell you I'm a disaster lol. Does it sync with this or do I have to do it manually? 🙃",
+          "at": "2026-11-03T02:04:21.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No sync on my end, Theo. You'd send me a screenshot of your watch's sleep data as proof, and that's easy. Nobody's judging the disaster, we're just tracking it moving the right way 😄 Where do you want this to get you? Like waking up less wrecked, or being asleep by 11:30 most nights. \"Not sure yet\" is totally fine too.",
+          "at": "2026-11-03T02:04:28.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "no emojis pls",
+          "at": "2026-11-03T02:05:31.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, no emojis from here on. Where do you want this to get you, Theo? Waking up less wrecked, asleep by 11:30 most nights, or \"not sure yet\" is totally fine too.",
+          "at": "2026-11-03T02:05:38.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "haha ok. asleep by 11:30 most nights, that's the goal. \"less wrecked\" is kinda the vibe too lol. what's the plan tho, do i have to delete tiktok or something 💀",
+          "at": "2026-11-03T02:06:02.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No need to delete TikTok, Theo. The problem is the phone being in your bed, so we move the phone, not the app. Here's the plan:\n\n• Where this gets you: asleep by 11:30 most nights, and less wrecked in the mornings\n• Setup today: pick a charging spot across the room, out of arm's reach of the bed\n• Tonight: at 11:00 pm the phone goes on that charger, then lights out by 11:30\n• Every day at 11:00 pm, same routine, 30 minutes from charger to lights out\n• Proof: a screenshot of your Apple Watch sleep data the next morning. If that's a hassle, a photo of the phone on its charger works too\n• Why: scrolling happens because the phone is within reach, so putting it across the room breaks the TikTok to YouTube slide\n\nI'll still reach you with a heads-up at 10:50 pm. Each day shapes the next step, so we build toward 11:30 lights out without needing willpower at midnight. What do you think?",
+          "at": "2026-11-03T02:06:09.100Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one exclamation point, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a name, which fits the first-text purpose."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere without overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what keeps them up, which fits the 2am goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic, no affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a bedtime question, which fits the goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bedtime question is allowed."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and playful, no affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about sleep hours, which relates to the goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": false,
+                "borderline": true,
+                "reason": "Asks how many hours of sleep, a sleep question that is not bedtime."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about tracking tools, which fits a sleep goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to what was said."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the tracker only once."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs about five sentences, over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "One emoji used as punctuation; warm and not affectionate."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they want this to lead, which fits the goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Explains the proof method without inventing facts."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct with no emojis."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about the destination, which fits the goal."
+              },
+              {
+                "rule": "follows-style",
+                "pass": true,
+                "borderline": false,
+                "reason": "Drops emojis as requested and confirms the change."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 8,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan list is about six bullets, close to the eight-line cap with intro and outro."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets, no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and energetic without affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan fits the phone-in-bed habit and the 11:30 target."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Claims that the phone in reach causes scrolling, a general claim not from the tester."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": false,
+            "borderline": true,
+            "reason": "Asks only for name and skips the goal list; the goal was only partly named and the name was not given."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks the destination twice only after the tester skipped it, which is allowed."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learns the target time, bedtime routine, setting, length of routine and proof before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks once whether they use a sleep tracker and does not push one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Sleep is a starter goal and the tester named it clearly."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text says they can tell ZOH to chill out or push harder."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the plan once the key inputs are in and carries straight into it."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Eight ZOH texts, well within the limit."
+          }
+        ],
+        "summary": "ZOH handled the sleep goal well, learned the key inputs quickly, respected the no-emoji request and built a concrete, usable plan. The main misses were a first text that asked only for name without the goal list, a sleep-hours question outside bedtime, and a sixth text that ran past three sentences."
+      }
+    }
+  ]
+}

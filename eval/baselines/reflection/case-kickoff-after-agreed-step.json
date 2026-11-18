@@ -1,0 +1,265 @@
+{
+  "feature": "reflection",
+  "id": "case:kickoff-after-agreed-step",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "92a0848607fa",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "8b711d383f2c"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-agreed-step#1",
+        "kind": "case",
+        "id": "kickoff-after-agreed-step",
+        "suite": "regression",
+        "title": "The kickoff after a step agreed the night before reminds, with the tip, and checks they're still in (#92)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] That was way better than yesterday. I slowed the jogs right down and could actually talk.",
+          "at": "2026-11-02T00:45:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the whole trick: slow enough to talk. So tomorrow: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Work for you?",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked. Park, 7 pm, 4 rounds.",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Riley! Yesterday you slowed the jogs to talking pace and the run got easier. Today's the same pace: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing the jogs to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds at the park at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reminds of the agreed step (2 min jog, 1 min walk, 4 rounds at the park at 7) without re-asking it, and proposes no different step."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings back yesterday's pace lesson naturally inside the kickoff, not as a quiz or separate text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about three sentences with one closing question, but the step is restated in full, which edges toward long."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, opens with name and energy, no emoji row, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Opens with Riley's name, reminds of the agreed step with the talking-pace tip, asks no time question, and ends with 'Still in?', which shows the yes is already given."
+          }
+        ],
+        "summary": "ZOH's single 9 am kickoff handles the regression case well: it opens with Riley's name, reminds them of the agreed park step and the talking-pace tip, and closes with 'Still in?' instead of a first-time ask. The only soft spot is that the step is restated in full, making the text a little longer than a bare reminder needs to be."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:kickoff-after-agreed-step#2",
+        "kind": "case",
+        "id": "kickoff-after-agreed-step",
+        "suite": "regression",
+        "title": "The kickoff after a step agreed the night before reminds, with the tip, and checks they're still in (#92)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] That was way better than yesterday. I slowed the jogs right down and could actually talk.",
+          "at": "2026-11-02T00:45:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the whole trick: slow enough to talk. So tomorrow: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Work for you?",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked. Park, 7 pm, 4 rounds.",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Riley! Yesterday you slowed the jogs to talking pace and the second round got easy. Tonight at 7 at the park: 2 min jog, 1 min walk, 4 rounds, about 15 min, then send the Strava screenshot. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing the jogs to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds at the park at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reminds of the agreed step (2 min jog, 1 min walk, 4 rounds at 7) without re-asking for agreement or proposing a new step."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end, within the length limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with Riley's name and no emoji row or overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Opens with Riley's name, reminds of the agreed step, ends with 'Still in?', and avoids asking the time or proposing a new step. The slow-enough-to-talk tip appears only as 'talking pace', which is a loose fit for the tip wording."
+          }
+        ],
+        "summary": "ZOH's 9 am kickoff did what the regression case asks: it opened with Riley's name, restated the agreed 2-on, 1-off, 4-round park plan at 7, and closed with a light 'Still in?' instead of a first-time ask. The only soft spot is that the talk-test tip is implied as 'talking pace' rather than stated directly."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:kickoff-after-agreed-step#3",
+        "kind": "case",
+        "id": "kickoff-after-agreed-step",
+        "suite": "regression",
+        "title": "The kickoff after a step agreed the night before reminds, with the tip, and checks they're still in (#92)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] That was way better than yesterday. I slowed the jogs right down and could actually talk.",
+          "at": "2026-11-02T00:45:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the whole trick: slow enough to talk. So tomorrow: 2 min jog, 1 min walk, 4 rounds at the park at 7, about 15 minutes. Work for you?",
+          "at": "2026-11-02T00:46:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's go",
+          "at": "2026-11-02T00:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked. Park, 7 pm, 4 rounds.",
+          "at": "2026-11-02T00:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Riley! Yesterday you slowed the jogs to talking pace and the second round got easy. Tonight at 7 at the park it's 2 min jog, 1 min walk, 4 rounds, about 15 min, and a Strava screenshot after. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-11-01: Slowing the jogs to talking pace made the second round easy\nStep set for 2026-11-02, agreed: 2 min jog, 1 min walk, 4 rounds at the park at 7 pm (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with Riley's name and reminds of the agreed 2 min jog, 1 min walk, 4 rounds at 7 without re-asking the step."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without overfamiliarity or emoji rows."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Warm opener, agreed step reminded, talking-pace tip referenced, ends with 'Still in?' and asks no time or new step. The Strava screenshot proof is not in the known facts, so it may be an invented detail."
+          }
+        ],
+        "summary": "ZOH's single 9 am kickoff follows the regression script closely: it greets Riley by name, reminds them of the agreed 4-round park step at 7 without re-asking, and closes with a light 'Still in?' rather than a first-time yes question. The only doubt is the Strava screenshot proof, which isn't in the known facts and could count as an invented detail."
+      }
+    }
+  ]
+}

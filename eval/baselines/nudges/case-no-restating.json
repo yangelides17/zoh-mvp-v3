@@ -1,0 +1,292 @@
+{
+  "feature": "nudges",
+  "id": "case:no-restating",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "d73391342fb9",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "c757fc74a119"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:no-restating",
+        "kind": "case",
+        "id": "no-restating",
+        "title": "A day of back-and-forth: the step and time come up when they matter, not in every reply",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Priya! Ten pages of Dune on the couch at 7 tonight. You in?",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "yes! I'm in",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Priya! That's two days down, and tonight makes three. Go get lost in Arrakis. 📖",
+          "at": "2026-11-02T15:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "btw is it weird that I skip the appendices",
+          "at": "2026-11-02T15:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Not weird at all. The appendices are bonus material, and plenty of readers skip them or save them for after the story. Your plan is the 10 pages of story tonight. Are you excited for where you are in Dune?",
+          "at": "2026-11-02T15:00:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "work is insane today",
+          "at": "2026-11-02T15:01:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds like a heavy day, Priya. Ten pages at 7 still fits, even if you're fried by then. It's about 20 minutes on the couch, and it can be your wind-down. Think you can still make it happen tonight?",
+          "at": "2026-11-02T15:01:16.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "omg my boss just asked me to stay late, can we do 8:30 instead?",
+          "at": "2026-11-02T15:01:42.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done, 8:30 tonight it is, Priya. Same 10 pages on the couch, so get through the late stretch at work and then it's you and Dune. Send me a photo of the page you stop on. 💪",
+          "at": "2026-11-02T15:01:49.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "cool cool",
+          "at": "2026-11-02T15:02:28.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds good. Good luck with the late stretch, Priya. Dune will be waiting at 8:30. 📖",
+          "at": "2026-11-02T15:02:35.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "what time was it again?",
+          "at": "2026-11-02T15:02:58.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "8:30 tonight, Priya. Ten pages on the couch, then a photo of the page you stop on. 📖",
+          "at": "2026-11-02T15:03:05.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm celebration with no pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with a single emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the appendix question without judgment."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and curious, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four sentences with one question at the end, within the limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Acknowledges the heavy day without pushing guilt."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and understanding, though it re-pitches the step and time unprompted."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, with the photo ask as an instruction, not a question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accommodates the late change without pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words; the single emoji is punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and sincere, matching the pushy level."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm closing with no pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere; the time repeat is a mild restatement."
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, with no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain answer with no pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words, one emoji at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, though it adds the step to a plain time answer."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Mostly fixed: the time change is confirmed once and 'cool cool' is answered, but ZOH 3 re-pitches the step and time unprompted, and ZOH 5 and 6 repeat the time and step."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 3 restates 'Ten pages at 7' and '20 minutes' unasked, and ZOH 6 restates the step after a plain time question; ZOH 4's move confirmation is allowed."
+          }
+        ],
+        "summary": "ZOH mostly handles the scripted exchange well: it confirms the move to 8:30 once, answers 'cool cool' briefly and gives the time plainly when asked. It still restates the step or time in a few replies (ZOH 3, 5 and 6), so the original problem is partly back, which makes this a borderline fail on the regression rule."
+      }
+    }
+  ]
+}

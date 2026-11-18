@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import type { Db } from "../db/client.js";
 import {
@@ -6,6 +6,8 @@ import {
   goals,
   maintenanceCheckins,
   messages,
+  pauses,
+  planInputs,
   plans,
   stepDays,
   suggestions,
@@ -26,16 +28,21 @@ import { messageTime, switchReasons } from "../memory/store.js";
 import { addDays } from "../nudges/schedule.js";
 import { maintenanceStreak, type HitRate, type StreakRun } from "../nudges/streak.js";
 import { testerNow } from "../testers/clock.js";
+import { stillOpen } from "../coach/next-steps.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
 import { activePause } from "../testers/pauses.js";
 import { learnings, type Learnings } from "../coach/week.js";
+import { countsOnBadge, openDrafts } from "./drafts.js";
 import { listSuggestions } from "./suggestions.js";
 
 /** What the founder console reads (spec: GitHub issue "Founder console", "What we experience" 2 and 3; per tab since #63). */
 
 export interface GoalView {
   goal: TesterGoal;
-  title: string;
+  /** #181: their own goal (the plan's destination, else their onboarding answer, else FIGURING_IT_OUT). Never the category. */
+  focus: string;
+  /** The menu choice it falls under. Never stands in for the focus. */
+  category: string;
   current?: StreakRun;
   past: StreakRun[];
   hitRate: HitRate;
@@ -52,11 +59,35 @@ export interface TesterRow {
   alertsWaiting: number;
   /** Next steps waiting for a decision whose alert is already seen (or that never had one). */
   suggestionsWaiting: number;
+  /** #214: console chat drafts waiting for a founder's Do it (see `countsOnBadge`). */
+  draftsWaiting: number;
 }
 
 export async function goalTitles(db: Db): Promise<Map<string, Goal>> {
   const rows = await db.select().from(goals).orderBy(asc(goals.sortOrder));
   return new Map(rows.map((g) => [g.slug, g]));
+}
+
+/** What Focus says when there's no destination and no onboarding answer (#181). */
+export const FIGURING_IT_OUT = "figuring it out";
+
+/** Each goal's own wording (#181): the newest locked plan's destination, else what they said in onboarding. */
+async function ownGoals(db: Db, testerId: string): Promise<Map<string, string>> {
+  const locked = await db
+    .select({ goalSlug: plans.goalSlug, destination: plans.destination })
+    .from(plans)
+    .where(and(eq(plans.testerId, testerId), eq(plans.status, "locked")))
+    .orderBy(desc(plans.version));
+  const inputs = await db.select({ goalSlug: planInputs.goalSlug, what: planInputs.what }).from(planInputs).where(eq(planInputs.testerId, testerId));
+  const own = new Map<string, string>();
+  for (const i of inputs) if (i.what?.trim()) own.set(i.goalSlug, i.what.trim());
+  const newest = new Set<string>();
+  for (const p of locked) {
+    if (newest.has(p.goalSlug)) continue;
+    newest.add(p.goalSlug);
+    if (p.destination?.trim()) own.set(p.goalSlug, p.destination.trim());
+  }
+  return own;
 }
 
 /** Each goal's streaks and hit rate, through today in their zone. */
@@ -66,12 +97,14 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
   const answers =
     checkins ??
     (await db.select().from(maintenanceCheckins).where(eq(maintenanceCheckins.testerId, tester.id)).orderBy(asc(maintenanceCheckins.date)));
+  const own = await ownGoals(db, tester.id);
   const views: GoalView[] = [];
   for (const goal of rows) {
-    const title = titles.get(goal.goalSlug)?.title ?? goal.goalSlug;
+    const category = titles.get(goal.goalSlug)?.title ?? goal.goalSlug;
+    const focus = own.get(goal.goalSlug) ?? FIGURING_IT_OUT;
     const focusEra = await goalMetrics(db, tester.id, goal.goalSlug, today);
     if (goal.role !== "maintenance") {
-      views.push({ goal, title, current: focusEra.current, past: focusEra.past, hitRate: focusEra.hitRate });
+      views.push({ goal, focus, category, current: focusEra.current, past: focusEra.past, hitRate: focusEra.hitRate });
       continue;
     }
     // Proof-backed days run until it became maintenance; after that the streak is self-reported.
@@ -90,7 +123,8 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
     const confirmed = mine.filter((c) => c.answer === "kept_up" || c.answer === "mostly").at(-1);
     views.push({
       goal,
-      title,
+      focus,
+      category,
       current: streak.current,
       past: [...proven.past, ...streak.past],
       hitRate: focusEra.hitRate,
@@ -104,13 +138,14 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
 /**
  * The tester list (#63): every tester, the ones with something to look at first, then most recently
  * texting. The badge counts unseen alerts plus waiting suggestions whose alert is already seen, so a
- * waiting suggestion and its own alert count once.
+ * waiting suggestion and its own alert count once, plus open console drafts (#214, `countsOnBadge`).
  */
 export async function testerRows(db: Db, now: Date): Promise<TesterRow[]> {
   const titles = await goalTitles(db);
   const all = await db.select().from(testers);
   const unseen = await db.select().from(consoleMessages).where(and(eq(consoleMessages.kind, "alert"), isNull(consoleMessages.seenAt)));
   const waiting = await db.select().from(suggestions).where(eq(suggestions.decision, "waiting"));
+  const drafts = (await db.select().from(consoleMessages).where(and(eq(consoleMessages.kind, "draft"), eq(consoleMessages.draftStatus, "draft")))).filter(countsOnBadge);
   const out: TesterRow[] = [];
   for (const tester of all) {
     const views = await goalViews(db, tester, testerNow(tester, now), titles);
@@ -129,10 +164,11 @@ export async function testerRows(db: Db, now: Date): Promise<TesterRow[]> {
       lastText,
       alertsWaiting: alerts.length,
       suggestionsWaiting: waiting.filter((s) => s.testerId === tester.id && !flagged.has(s.id)).length,
+      draftsWaiting: drafts.filter((d) => d.testerId === tester.id).length,
     });
   }
   const at = (r: TesterRow) => (r.lastText ? messageTime(r.lastText).getTime() : r.tester.createdAt.getTime());
-  const needs = (r: TesterRow) => (r.alertsWaiting + r.suggestionsWaiting > 0 ? 1 : 0);
+  const needs = (r: TesterRow) => (r.alertsWaiting + r.suggestionsWaiting + r.draftsWaiting > 0 ? 1 : 0);
   return out.sort((a, b) => needs(b) - needs(a) || at(b) - at(a));
 }
 
@@ -154,6 +190,8 @@ export interface TesterHeader {
   alertsWaiting: number;
   /** Waiting suggestions whose alert is already seen (or that never had one). */
   suggestionsWaiting: number;
+  /** #214: console chat drafts waiting for a founder's Do it (see `countsOnBadge`). */
+  draftsWaiting: number;
 }
 
 export async function testerHeader(db: Db, testerId: string, now: Date): Promise<TesterHeader | undefined> {
@@ -177,6 +215,7 @@ export async function testerHeader(db: Db, testerId: string, now: Date): Promise
     pause: await activePause(db, tester.id),
     alertsWaiting: alerts.length,
     suggestionsWaiting: waiting.filter((s) => !flagged.has(s.id)).length,
+    draftsWaiting: (await openDrafts(db, testerId)).filter(countsOnBadge).length,
   };
 }
 
@@ -234,6 +273,25 @@ export async function textsChunk(db: Db, tester: Tester, cursor: ChunkCursor = {
   return rows.reverse();
 }
 
+/** Texts shown above the one "See in chat" opens at, for context. */
+const CONTEXT_BEFORE = 10;
+
+/** #218: one of their texts and everything after it, with a few before; undefined when it isn't theirs. */
+export async function textsFrom(db: Db, tester: Tester, messageId: string): Promise<Message[] | undefined> {
+  const [target] = await db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.id, messageId), eq(messages.contactNumber, tester.phone)));
+  if (!target) return undefined;
+  const context = await textsChunk(db, tester, { before: target.createdAt }, CONTEXT_BEFORE + 1);
+  const from = context[0]?.createdAt ?? target.createdAt;
+  return db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.contactNumber, tester.phone), gte(messages.createdAt, from)))
+    .orderBy(asc(messages.createdAt), asc(messages.id));
+}
+
 /** Lines the "ZOH is thinking" check reads. */
 const RECENT_LINES = 20;
 
@@ -256,15 +314,20 @@ export interface ConsoleTab {
   recent: ConsoleMessage[];
   /** Unseen first (newest first), then the latest seen ones. */
   alerts: { unseen: ConsoleMessage[]; earlier: ConsoleMessage[] };
+  /** Needs you: next steps waiting for a founder's decision. */
   pending: Suggestion[];
+  /** Needs you (#214): console chat drafts waiting for a founder's Do it, oldest first. */
+  drafts: ConsoleMessage[];
+  /** Waiting on the tester (#105): what the founders settled that hasn't played out yet. */
+  waiting: { requests: ConsoleMessage[]; suggestions: Suggestion[] };
 }
 
 export async function consoleTab(db: Db, testerId: string): Promise<ConsoleTab> {
   return { items: await threadChunk(db, testerId), recent: await recentLines(db, testerId), ...(await sideSection(db, testerId)) };
 }
 
-/** What sits under the chat: alerts and next steps waiting for a decision. */
-export async function sideSection(db: Db, testerId: string): Promise<Pick<ConsoleTab, "alerts" | "pending">> {
+/** What sits under the chat: alerts, what needs a founder, and what waits on the tester. */
+export async function sideSection(db: Db, testerId: string): Promise<SideSection> {
   const alerts = (seen: boolean) =>
     db
       .select()
@@ -277,7 +340,34 @@ export async function sideSection(db: Db, testerId: string): Promise<Pick<Consol
     .from(suggestions)
     .where(and(eq(suggestions.testerId, testerId), eq(suggestions.decision, "waiting")))
     .orderBy(asc(suggestions.createdAt));
-  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending };
+  const requests = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), inArray(consoleMessages.requestStatus, ["pending", "sending"])))
+    .orderBy(asc(consoleMessages.createdAt));
+  const approved = await db
+    .select()
+    .from(suggestions)
+    .where(and(eq(suggestions.testerId, testerId), inArray(suggestions.decision, ["approved", "changed"])))
+    .orderBy(asc(suggestions.createdAt));
+  const waiting = { requests, suggestions: approved.filter(stillOpen) };
+  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending, drafts: await openDrafts(db, testerId), waiting };
+}
+
+export type SideSection = Pick<ConsoleTab, "alerts" | "pending" | "drafts" | "waiting">;
+
+/** The chat cards the page still shows as live (#105), as they stand now: this tester's only. */
+export async function liveItems(db: Db, testerId: string, ids: string[]): Promise<ThreadItem[]> {
+  if (!ids.length) return [];
+  const lines = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.testerId, testerId), inArray(consoleMessages.id, ids), ne(consoleMessages.kind, "alert")));
+  const ideas = await db.select().from(suggestions).where(and(eq(suggestions.testerId, testerId), inArray(suggestions.id, ids)));
+  return [
+    ...lines.map((line) => ({ type: "line" as const, id: line.id, at: line.createdAt, line })),
+    ...ideas.map((suggestion) => ({ type: "suggestion" as const, id: suggestion.id, at: suggestion.createdAt, suggestion })),
+  ];
 }
 
 export interface ProgressTab {
@@ -287,10 +377,12 @@ export interface ProgressTab {
   /** Newest first. */
   stepDays: StepDayView[];
   suggestions: Suggestion[];
-  /** Where their focus goal's current plan is headed, if anywhere (#78). */
-  destination?: string;
   /** Every lesson (a reset deletes them): understood (applied or recalled) and only explained (#78). */
   learnings: Learnings;
+  /** #107: every break they asked for, oldest first, shown between step days (never counted as one). */
+  pauses: Pause[];
+  /** Their zone, for the pauses' days and times. */
+  timeZone: string;
 }
 
 export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> {
@@ -308,15 +400,15 @@ export async function progressTab(db: Db, tester: Tester): Promise<ProgressTab> 
   const days = await db.select().from(stepDays).where(eq(stepDays.testerId, tester.id)).orderBy(desc(stepDays.date));
   const testerPlans = await db.select().from(plans).where(eq(plans.testerId, tester.id)).orderBy(desc(plans.version));
   const lessons = await db.select().from(takeaways).where(eq(takeaways.testerId, tester.id));
-  const current = testerPlans.find((p) => p.status === "locked" && p.goalSlug === tester.goalSlug);
   return {
     switches: [...(await switchReasons(db, tester)).entries()].map(([pair, s]) => ({ pair, ...s })),
     checkins,
     plans: testerPlans,
     stepDays: days.map((day) => ({ day, proofs: proofsByDay.get(day.date) ?? [], learned: lessons.filter((l) => l.day === day.date).map((l) => l.text) })),
     suggestions: await listSuggestions(db, tester.id),
-    ...(current?.destination ? { destination: current.destination } : {}),
     learnings: learnings(lessons),
+    pauses: await db.select().from(pauses).where(eq(pauses.testerId, tester.id)).orderBy(asc(pauses.startedAt)),
+    timeZone: tester.timeZone,
   };
 }
 
@@ -331,6 +423,12 @@ export async function mediaMessage(db: Db, messageId: string): Promise<Message |
 }
 
 /** Unseen alerts across every tester, newest first. */
+/** #69: ids of next steps still waiting for the founders' decision, across everyone. */
+export async function waitingSuggestionIds(db: Db): Promise<Set<string>> {
+  const rows = await db.select({ id: suggestions.id }).from(suggestions).where(eq(suggestions.decision, "waiting"));
+  return new Set(rows.map((r) => r.id));
+}
+
 export async function waitingAlerts(db: Db, testerIds?: string[]): Promise<ConsoleMessage[]> {
   return db
     .select()

@@ -1,0 +1,161 @@
+{
+  "feature": "console",
+  "id": "case:suggest-next-step",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "9de15a166a0c",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "b83c1aef7ac4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:suggest-next-step",
+        "kind": "case",
+        "id": "suggest-next-step",
+        "title": "A founder asks for a clear next step in the chat; ZOH files it and confirms what and which goal in a line",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "10 pages done, this book is getting good",
+          "at": "2026-11-01T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two weeks straight, Maya. Love that it's pulling you in 📖",
+          "at": "2026-11-01T23:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: she's crushing the reading. let's deepen it to 15 pages a night, same time",
+          "at": "2026-11-02T13:50:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] File a next step for Maya (deepen on Read & learn more (books, ideas, any topic)): \"Go from 10 to 15 pages a night, same time (9:30 pm, in bed), same photo proof.\". ZOH raises it as its own idea when it fits, and asks first.",
+          "at": "2026-11-02T13:50:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted the next step for Maya. It's a deepen from 10 to 15 pages a night, at the same time (9:30 pm, in bed) with the same photo proof. Once it's confirmed, I'll bring it up as my own idea when it fits and ask her first. Nothing happens until a founder clicks Do it or tells me yes.",
+          "at": "2026-11-02T13:50:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni clicks Do it on: File a next step for Maya (deepen on Read & learn more (books, ideas, any topic)): \"Go from 10 to 15 pages a night, same time (9:30 pm, in bed), same photo proof.\". ZOH raises it as its own idea when it fits, and asks first.",
+          "at": "2026-11-02T13:50:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Morning, Maya! Seven nights straight, and you said the book is getting good, so I think you're ready for more. Want to go from 10 to 15 pages starting tonight, same 9:30 in bed and same photo of your page?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: step day, nothing recorded\nTue, Oct 20: step day, nothing recorded\nWed, Oct 21: step day, nothing recorded\nThu, Oct 22: step day, nothing recorded\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: step day, nothing recorded\nMon, Oct 26: done\nTue, Oct 27: done\nWed, Oct 28: done\nThu, Oct 29: done\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): done\nMon, Nov 2 (today): step day, not done yet at 21:30\nTue, Nov 3 (tomorrow): step day at 21:30\nWed, Nov 4: step day at 21:30\nThu, Nov 5: step day at 21:30\nFri, Nov 6: step day at 21:30\nSat, Nov 7: step day at 21:30\nSun, Nov 8: step day at 21:30\nMon, Nov 9: step day at 21:30",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Draft matches the known plan facts: 10 to 15 pages, 9:30 pm, in bed, same photo proof."
+              },
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": true,
+                "reason": "Draft card states what will be filed and for which goal, but the card format is longer than a line or two."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the known details (10 to 15 pages, 9:30 pm, in bed, photo proof) accurately."
+              },
+              {
+                "rule": "confirms",
+                "pass": true,
+                "borderline": true,
+                "reason": "Says what (10 to 15 pages) and when (9:30 pm), but runs three sentences and never names the goal."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says it will raise the step as its own idea when it fits, and that nothing happens until a founder approves."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Seven nights straight matches the log (Oct 26 to Nov 1 all done), and the 'book is getting good' line is her own words."
+              },
+              {
+                "rule": "own-idea",
+                "pass": true,
+                "borderline": false,
+                "reason": "Raised as ZOH's own idea in a question she can answer, at the morning nudge, with her OK asked for."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "Draft card and ZOH 2 say exactly what will be filed and that nothing happens until a founder clicks Do it; no claim it was filed."
+          },
+          {
+            "rule": "files-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "Drafts the deepen and states what and when in a line, but ZOH 2 doesn't name the goal, relying on the draft card for it."
+          },
+          {
+            "rule": "proposal-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "Opens the text with a proposal, asks her OK as its own idea, and never says the plan already changed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Drafts the deepen, tells Yanni what it will file in a couple of lines, says it's not filed until Do it, asks no questions back, and Maya's text doesn't mention the team."
+          }
+        ],
+        "summary": "ZOH handled the console request well: it drafted the 15-page deepen with its details, said plainly it isn't filed until a founder clicks Do it, and asked no questions back. Its text to Maya was grounded in her real streak and her own words, and it asked her OK as its own idea without mentioning the team."
+      }
+    }
+  ]
+}

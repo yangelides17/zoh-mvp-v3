@@ -11,6 +11,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
     bucket `zoh-media`.
   - `staging`: a duplicate with its own app (deploys `dev`), Postgres, Speaches and bucket; its own
     public domain. Never shares a database or bucket with production.
+  - Speaches (both apps) has `STT_MODEL_TTL=300` and `TTS_MODEL_TTL=0` (Nov 18): the Whisper model
+    unloads after 5 idle minutes instead of staying in memory (it held 0.9–1.4 GB all day, about
+    $23 a month for both). Idle it holds about 0.3 GB; the first voice note after a quiet spell
+    waits about 6 s more (model load 5.4 s on staging, warm transcription 1.4 s).
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`
   (who gets replies, nudges and memory; `*` means everyone, set on production at launch, Nov 3 2026),
@@ -26,7 +30,13 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   waits while the tester is typing; default 30, `0` turns the hold off without a code change).
   Optional `REPLY_GRACE_SECONDS` (#132: how long a ready reply waits for a late typing signal or
   another text before it goes out, and again after a hold ends on "stopped"; default 2.5, decimals
-  allowed, `0` turns it off).
+  allowed, `0` turns it off). `RAILPACK_DEPLOY_APT_PACKAGES` includes `ffmpeg` on both apps (#185:
+  iPhone .caf voice notes are stored as AAC .m4a so the console plays them in Chrome: AAC is copied,
+  anything else re-encoded, #217: iMessage notes are Opus with no header in the .caf, so they can't be
+  copied into .ogg; `/health` reports `ffmpeg`; without it voice notes stay .caf and nothing else breaks).
+  `GEMINI_API_KEY` (#163: Gemini watches videos; a separate key per app, prepaid credits with
+  auto-reload and a monthly limit in Google AI Studio; without it the coach is told it can't watch
+  videos) and optional `GEMINI_MODEL` (default `gemini-3.8-flash`). `/health?deep=1` pings Gemini.
   Model: `claude-sonnet-5-5`. Staging has its own `DATABASE_URL`, `BUCKET_*`, `SPEACHES_*`,
   `CONSOLE_PASSWORD` and `CONSOLE_SESSION_SECRET` (and may have its own `SENDBLUE_WEBHOOK_SECRET`);
   the same Sendblue keys and number; `ALLOWED_NUMBERS`/`DEV_NUMBERS` founders only (with `*`, staging
@@ -46,6 +56,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - **Eval key:** locally `ANTHROPIC_API_KEY` in `.env` (gitignored). In Claude Code cloud
   environments use `EVAL_ANTHROPIC_API_KEY` and run with `env -u ANTHROPIC_BASE_URL` (see
   `eval/README.md`). Use a separate key with a low spending limit.
+- **Real replays (#197):** `npm run real` reads production with `DATABASE_URL` (Railway's public Postgres URL), like
+  `npm run memory`: read-only, numbers printed masked. A replay case keeps no names or phone numbers (refused if
+  anything number-like is left) and possibly sensitive conversations are left out. The grader check's stronger model
+  is Opus (`EVAL_STRONG_MODEL` overrides), about $0.30 a conversation.
 
 ## Decisions to carry forward (beyond `docs/coach-voice.md`)
 - Staging and production (#82, Nov 1): branches `feature/*` → `dev` (default branch, deploys staging)
@@ -93,7 +107,20 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   went quiet) and each locked plan version to review are saved as console alerts, one per event
   (`raiseAlert`), which the founder console (#10) shows. Since #12 alerts also cover a stop, a
   stopped tester texting again, pause and back from pause, feedback (word for word) and failures (the
-  system-down reply or a text that didn't send; at most one per tester per hour).
+  system-down reply or a text that didn't send; at most one per tester per hour). Since #155 they also
+  cover the tester's answer to a next step or plan change the founders approved (agreed, changed,
+  declined) and a founder text or request that couldn't go out; a sent text only updates its card.
+- Console chat (#155): ZOH is the founders' go-between, and everything it would do for them (a note, a
+  text, a plan change, a decision) is a draft card until a founder clicks Do it or types a yes. The
+  "Send exactly this" and "Send now" boxes are gone: word-for-word texts go through a draft too. A
+  founder's change to the tester's plan is only a proposal ZOH raises; the plan changes on the tester's
+  yes (with their tweak), with no plan-review alert. A stop cancels queued texts and open proposals.
+  Since #214 a draft also shows under Needs You until it's confirmed or cancelled (reversing #155's "a
+  draft lives only in chat"), and a founder's proposal (plan change or next step) goes on ZOH's next text
+  (default), with the morning text, or now as ZOH's own text; a "now" that can't go waits for the next text
+  and the founders get an alert.
+  The console chat reads only the voice page's voice, not its rule sections (#196, Yanni, Nov 16): if it seems
+  confused about why ZOH did something in practice, that may be why (see the note in `src/console/chat.ts`).
 - Pause (#12): a break the tester asks for, kept in `pauses` (separate from the automatic pause after
   3 silent days). The coach asks why and pushes back once on a weak reason. While one is open ZOH starts
   no texts (founder requests included) but always replies; a step day that ends inside it is never a
@@ -122,9 +149,25 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   is day 1's. The coach can no longer send a harder step to the founders: only a new focus.
   Each saved step has a `step_kind` (#88): first (day 1), same, easier or harder than the step
   before; Metrics' "Progressed" counts harder days (untagged older days aren't counted).
+- Conversation judged by the coach, not by holds (#157, Nov 14, from a measured experiment): how ZOH asks and when it
+  moves on comes from principles with their reasons and tagged example exchanges in the voice page, and the per-reply
+  state states facts, never orders. Code keeps only hard rules (a yes counts only for a step they've seen, a deepen or
+  upgrade is saved only after it's shown and agreed, the reflection's safety net). The #131 soft hold and an outside
+  "reviewer" call were tried and removed: on the same eval suite they did no better and the rule-heavy version did worse.
+  Details on #157 and #196.
+- Reflect before the next step (#211, Nov 18; partly reverses #157's "no code holds"): with judgment alone ZOH kept
+  proposing tomorrow in the reply to the first real answer (eval and live). Reflection and the next step are now two
+  moments. A **moment can stay closed until ZOH records a fact that opens it, with code guarding the minimum**: while
+  today's reflection is open, the next step's section (`nextStep`) isn't loaded, the sheet hides "Next step day", and
+  saving tomorrow's step or Sunday's recap is refused. ZOH opens it with `save_reflection` `landed` (what it now
+  understands) or `exit` (their words wanting to wrap up); not before one follow-up on a real answer was answered
+  (timestamps on `step_days`, so a redone reply can't skip it). It also closes after 30 minutes of their silence
+  (`REFLECTION_QUIET_MINUTES`), on any text ZOH starts, at the day's end, on a thin talk and at the safety net; texts ZOH
+  starts are never held. The same pattern fits other moments later (onboarding into the plan, the turn to the week).
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
-  upgrade the tester asks for is made right away and recorded too. An approved deepen or upgrade
+  upgrade the tester asks for is made once they've seen the new version and said yes (#157, Nov 14;
+  was "right away"), and recorded too. An approved deepen or upgrade
   rides on the next step-day kickoff (or a reply); a new focus is raised in a reply, within the goal
   cap, and keeps the old focus as maintenance. Maintenance goals get a one-line check-in in the
   kickoff twice a week; alerts cover milestones (focus only), a second miss, 2 quiet days, two
@@ -132,8 +175,17 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 - Plans start right away and get founder review in the background; if we'd change something, the
   coach texts "I'd suggest a couple of changes — yes or no?". Moving someone to a harder goal waits
   for our OK.
-- Eval: $1 per issue on the branch, up to $3 for a group (Oct 29; was $1 per branch), targeted runs (`--case`) by default, full runs only with Yanni's OK; graded
-  against the checks Yanni approves in each spec, judged reasonably.
+- Eval: $1 per issue on the branch, up to $3 for a group, plus $4.50 for the release's full run (Nov 14, #197; was
+  $0.50 / $1.50), targeted runs (`--case`) by default, full runs only with Yanni's OK; graded against the checks Yanni
+  approves in each spec, judged reasonably. A change is judged by comparing its cases, one run each (Nov 15, Yanni,
+  for cost: was 3; cases differ far more than runs of one case, so more cases beat more runs), with the stored
+  baseline (`eval/baselines/`, committed, one file per case, only ever stored from 3 runs); cases that did worse
+  are rerun 3 times, since one run can't put a single case beyond noise, scored by group with margins across cases; a single
+  averaged score hid every difference on #157. Haiku grades both sides (in an 8-case calibration it caught 8/8 known
+  mistakes and agreed with Sonnet on 97% of checks); `--final` grades with the coach's model. Spend is what the API
+  billed, the coach inside the app included (Nov 15): it had been estimated at a fifth of its cost, which hid most
+  of the $25 to $32 days of Nov 14 and 15 on the dev key. The release's full run (about $34 estimated) waits for
+  Yanni's OK every time rather than raising its $4.50 cap (Yanni, Nov 15).
 - Coach memory (#8) is a small wiki per tester in Postgres (no outside search service): pages of
   facts that each cite the text they came from, written by one pass per tester at 3 am their time
   (first run reads back up to 14 days). Photos get a one-line description as they arrive. Search
@@ -142,10 +194,53 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   Once a plan is locked, replies and nudges read a cached memory block plus only today's and
   yesterday's texts (at least 30), instead of the last 200; up to 5 lookups a reply (2 searches).
   Each reply's tokens are logged in the message's `timings`.
+- Instructions by moment (#200): after onboarding, a reply reads a core (cached on its own, the same for
+  every reply in a phase) plus only the parts its moment can use (`partsFor`), cached as a second block;
+  a part is left out only when it can't apply in that reply, and a tool call can add one partway through
+  (a goal switch brings in making the plan), never drop one. Tools depend only on the phase. That's
+  4 cache breakpoints a request (core, parts, memory, the conversation): the API's maximum, so a new
+  cached block means merging two. Each reply's parts are in its message's `timings.coach_sections`; each
+  nudge's in its log line (`sections`). The status sheet rides at the end of the latest message, labelled
+  as the app's (`SHEET_IN_MESSAGE` in `src/wiring.ts`; false puts it back last in the system prompt).
+  Onboarding's prompt is unchanged.
 - Photo and voice verification (#7): the coach judges proof in its reply (no second Claude call)
-  and saves a verdict and a line on what it saw on the day. No proof, no done. Photos stay in the
-  bucket; voice-note audio is deleted 30 days after it arrived (hourly job), transcripts stay.
-  Proof-gaming flags are saved only.
+  and saves a verdict and a line on what it saw on the day. No proof, no done. Proof-gaming flags
+  are saved only.
+- More ways to send proof (#163): videos count as proof, watched by Gemini (Yanni, Nov 14: about
+  $0.01–0.05 a video, against $0.10–0.25 for frames plus Whisper plus Claude, and it hears the audio
+  with the picture). Gemini watches up to the first 20 minutes against today's step and writes an
+  account plus a one-line summary; the coach judges from the account and never sees the video.
+  Under 18 MB the video goes inline, above it through Gemini's Files API (deleted right after). A
+  key or credit problem raises a console alert; any failure tells the coach it couldn't watch it.
+  `open_file` re-watches a video with the tester's question. Documents count as proof too. PDFs reach the coach as the file itself
+  (Claude reads layout and scans); Word, Excel/CSV, PowerPoint, text, markdown and code files as their
+  words; Pages, Numbers, Keynote and old .doc/.ppt are named as files it can't open. Read in full up
+  to 100 pages, past that the first 100. A document's words are kept like a transcript (memory search;
+  later replies within the two-day window show them like a paste), plus a one-line summary.
+  `open_file` reopens any file a tester sent from our copy and reads it afresh. **Every file is kept
+  for good** (Yanni, Nov 14), reversing the old 30-day delete of voice-note audio; audio deleted
+  before then stays gone (`media_deleted_at`). A video or document they send gets one fixed holding
+  text at once (#162; it was after 10 s) ("reading it now 📖" / "watching it now 👀"), recorded with
+  `holding` in its timings and not counted as one of ZOH's texts since the proof.
+- Information curation (#162): replies and the console chat use Anthropic's web search and web fetch
+  (`web_search_20260209` / `web_fetch_20260209`, run inside the Claude call; $10 per 1,000 searches,
+  a page costs only its tokens, cut at 8k). Per reply: 5 searches, 5 pages, 2 videos, enforced by
+  lowering each call's `max_uses` to what's left (so the tool list changes after a round that
+  searched; fine on our account, but Anthropic rejects tool changes mid-conversation on accounts
+  made after Aug 31 2026 unless thinking blocks are dropped). No daily cap; each reply's timings
+  record `web_searches`, `web_pages`, `video_watches` and `lookups` (what it searched and found), and
+  the console's Texts tab shows "🔎 2 · 📖 1 · ~4¢" under it. YouTube: Gemini only, given the link,
+  full resolution, first 20 minutes (`watch_video`); no transcript service, as YouTube has no
+  terms-compliant way to get other people's transcripts (captions.download needs edit rights, the
+  scraping libraries use undocumented endpoints and are blocked from cloud hosts). Gemini's YouTube
+  input is a free preview; low resolution would save about 3¢ per 10 minutes if Google starts
+  charging. **Only links ZOH saw this turn go out** (their texts, its earlier texts, team requests,
+  memory, search results, opened pages; a YouTube link only once watched): one nudge to fix it, then
+  the link is removed. **Status texts** go the moment a search, page read or watch starts ("looking
+  that up 🔎", "reading it now 📖", "watching it now 👀"), one per kind and at most 2 per reply
+  (the holding text counts), never repeated by a redraft. The coach and console chat stream, with a
+  2-minute timeout per call, and a reply that has searched isn't retried. No search in texts ZOH
+  starts (no morning kickoff search).
 - Test mode (#14): a dev number texts `jump 3h`, `jump 2d`, `jump 7:30am` or `jump next`, and that
   tester's own clock (`testers.clock_offset_ms`) walks forward in 5-minute steps, running their
   nudges, day closes, memory pass and Sunday summary on the way; then one ⏩ log line. The jump
@@ -159,7 +254,9 @@ anything here (a new service or variable, a reversed decision, a new outside lim
 ## Outside limits
 - **Sendblue:** replies within 24 hours of a tester's last text are unlimited; after that the coach
   can still text first, up to 200 contacts per line per day; 150 outbound texts in a row with no
-  reply is the only other cap. Photo links expire after 30 days (we keep our own copy).
+  reply is the only other cap. Photo links expire after 30 days (we keep our own copy). Its largest
+  inbound file isn't documented (its upload API caps at 100 MB); we download up to 500 MB, with two
+  minutes to do it (#163), and tell the coach when a file was too big.
 - **Sendblue opt-out:** Sendblue keeps its own opt-out list (STOP, QUIT, END, REVOKE, OPT OUT,
   CANCEL, UNSUBSCRIBE; START opts back in) and refuses every send to a number on it, the stop
   confirmation included. When a stopped tester texts us again, the app calls
@@ -167,4 +264,5 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   reply through: since #109 they stay stopped in ZOH (nothing it starts goes out) until they say a clear
   yes to restarting (`restart_coaching`), which records the stopped stretch as a closed pause. Turning the filter off,
   narrowing its match, and whether Sendblue sends its own STOP reply need Sendblue support (#30).
-- **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s).
+- **Reply speed:** about 2 to 4 seconds after a text arrives (measured live Oct 27: 1.8 to 4.3 s); a
+  reply that searches and opens pages takes about 20 to 60 s (#162), with a status text first.

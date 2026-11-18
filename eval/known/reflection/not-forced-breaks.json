@@ -1,0 +1,18 @@
+{
+  "id": "not-forced-breaks",
+  "rule": "not-forced",
+  "expect": "fail",
+  "why": "Night 20 of the same phone-down habit, and they say it's the same as always, yet ZOH asks what they learned from it.",
+  "seed": {
+    "name": "Rosa",
+    "goal": "bedtime",
+    "phase": "active",
+    "answers": { "when": "10:45 pm", "what": "phone away and lights out" },
+    "history": [{ "from": "zoh", "text": "Night 20, Rosa. Phone down, lights out by 10:45." }],
+    "plan": { "step": "In bed with the phone down and lights off by 10:45 pm", "place": "your bedroom", "time": "22:45", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "photo", "reason": "Same time every night is what resets your sleep.", "minutes": 5 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "[photo: dark bedroom, phone on the dresser] done 👍 same as always" },
+    { "from": "zoh", "text": "Twenty nights, Rosa ✅ What did you learn or notice about yourself tonight?" }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "feelings-no-search",
+  "suite": "capability",
+  "title": "Feelings and a check-in: no search, just ZOH",
+  "origin": "Issue #162 (information curation), the contrast case: no search for small talk, feelings or check-ins",
+  "seed": {
+    "name": "Ana",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "get back into the gym", "where": "the gym near work", "when": "6 pm", "how_long": "30 min" },
+    "history": [
+      { "from": "zoh", "text": "Today, Ana: 30 minutes at the gym near work at 6, the same circuit as Monday. Pic at the end." }
+    ],
+    "plan": {
+      "step": "30 min circuit at the gym near work",
+      "place": "the gym near work",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri"],
+      "proof": "photo",
+      "proof_note": "a pic at the gym",
+      "reason": "Three short sessions a week is how the gym becomes normal again.",
+      "minutes": 30,
+      "started_days_ago": 9
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done", "step": "30 min circuit at the gym near work", "proof_seen": "mirror selfie at the gym" }
+    ],
+    "today_step": { "step": "30 min circuit at the gym near work", "agreed_hours_ago": 1 }
+  },
+  "testerLines": [
+    "honestly feeling kinda down today. everyone at that gym looks like they've been going for years",
+    "yeah I'll still go, just needed to say it",
+    "how's your day going lol"
+  ],
+  "whatWentWrong": "New for #162: the contrast case. With search available, the risk is looking things up (\"tips for gym anxiety\") when they just need ZOH.",
+  "shouldHaveHappened": "No ZOH LOOKED UP lines at all: this is feelings, a check-in and small talk. ZOH meets the feeling first (understanding, maybe a light reframe: most people there started where she is), no push in that text, no links or articles. When she says she'll still go, a warm short line. The small-talk question gets a light, short answer and back to her. Short texts.",
+  "areaCode": "718",
+  "startTime": "16:00",
+  "timeZone": "America/New_York"
+}

@@ -1,7 +1,15 @@
 import { z } from "zod";
-import type { Weekday } from "../src/db/schema.js";
+import { PROOF_METHODS, REQUEST_DELIVERIES, type Weekday } from "../src/db/schema.js";
 
-export const PERSONAS = ["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
+/**
+ * Which suite a case belongs to (#197). "regression": established behavior that should pass almost every
+ * run; a drop gets flagged. "capability": a new feature's own cases; they start low and graduate into
+ * regression once they pass every run. "replay": a real tester conversation, reported apart, never tuned against.
+ */
+export const SUITES = ["regression", "capability", "replay"] as const;
+export type Suite = (typeof SUITES)[number];
+
+export const PERSONAS =["terse", "chatty", "joking", "confused", "all-at-once", "resistant"] as const;
 export type Persona = (typeof PERSONAS)[number];
 
 /** Facts the simulated tester answers from. Never shown to ZOH or the grader. */
@@ -34,7 +42,16 @@ export const seedSchema = z.object({
     how_long: z.string().optional(),
     tracks_with: z.string().optional(),
   }),
-  history: z.array(z.object({ from: z.enum(["tester", "zoh"]), text: z.string().min(1) })).min(1),
+  history: z
+    .array(
+      z.object({
+        from: z.enum(["tester", "zoh"]),
+        text: z.string().min(1),
+        /** #163: a document they sent with this text, kept as the pipeline keeps one (its words as the transcript). */
+        document: z.object({ name: z.string().regex(/^[\w.-]+\.\w+$/), text: z.string().min(1) }).optional(),
+      }),
+    )
+    .min(1),
   /** #48: quiet hours they chose themselves (local "HH:MM"); without it, the default ones, which fit around the step. */
   quiet_hours: z.object({ start: z.string().regex(/^\d{2}:\d{2}$/), end: z.string().regex(/^\d{2}:\d{2}$/) }).optional(),
   /** How long before the run's first line the seeded conversation ended (default: a minute before). */
@@ -48,14 +65,34 @@ export const seedSchema = z.object({
       place: z.string().optional(),
       time: z.string().regex(/^\d{2}:\d{2}$/),
       days: z.array(z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"])).min(3),
-      proof: z.enum(["photo", "screenshot", "voice"]),
+      proof: z.enum(PROOF_METHODS),
       proof_note: z.string().optional(),
       reason: z.string(),
       /** How long the step takes, in minutes. */
       minutes: z.number().int().min(0).max(600).optional(),
       /** Day 1 this many days before the run's day (0: day 1 is today). */
       started_days_ago: z.number().int().min(0).max(30).default(0),
+      /**
+       * #196: this plan is a temporary lighter one (change_plan with until), through this many days
+       * after the run's day; `usual_step` is the version before it, which comes back after.
+       */
+      temporary: z.object({ ends_in_days: z.number().int().min(0).max(30), usual_step: z.string() }).optional(),
     })
+    .optional(),
+  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff). */
+  team: z
+    .array(
+      z.object({
+        kind: z.enum(["note", "request"]),
+        body: z.string().min(1),
+        hours_ago: z.number().min(0).max(72).default(1),
+        delivery: z.enum(REQUEST_DELIVERIES).default("natural"),
+      }),
+    )
+    .default([]),
+  /** #196: a break in progress, started this many hours ago, until a local day this many days on (none: until they're back). */
+  pause: z
+    .object({ started_hours_ago: z.number().min(0).max(240), until_days: z.number().int().min(1).max(30).optional(), reason: z.string().optional() })
     .optional(),
   /**
    * How earlier step days went (needs a plan): e.g. { "days_ago": 1, "status": "missed" }; optionally
@@ -72,6 +109,8 @@ export const seedSchema = z.object({
         reflection: z.string().optional(),
         /** A time moved for that day only, local "HH:MM". */
         moved_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+        /** #196: whether they said how it went when they marked it done (false: proof alone, #93's pickup). */
+        how_it_went_said: z.boolean().optional(),
       }),
     )
     .default([]),
@@ -98,12 +137,20 @@ export const seedSchema = z.object({
       }),
     )
     .default([]),
+  /** #69: the seeded plan's "Plan version N to review" alert, unseen, as locking it raises in production. */
+  plan_review_alert: z.boolean().default(false),
   /** Next steps on the seeded goal as the founders left them (next-step feature). */
   suggestions: z
     .array(
       z.object({
-        kind: z.enum(["deepen", "upgrade", "new_focus"]),
+        kind: z.enum(["deepen", "upgrade", "new_focus", "adjust"]),
         raised_by: z.enum(["coach", "tester", "founder"]).default("coach"),
+        /** adjust only (#155): the plan fields the founders proposed, as stored (stepTime "HH:MM", place, days...). */
+        plan_changes: z
+          .object({ stepTime: z.string().optional(), place: z.string().optional(), minutes: z.number().optional(), proof: z.enum(PROOF_METHODS).optional() })
+          .optional(),
+        /** How long ago ZOH raised it, for one waiting on their answer. */
+        delivered_hours_ago: z.number().optional(),
         proposal: z.string(),
         reasoning: z.string().optional(),
         new_goal: z.string().optional(),
@@ -179,9 +226,9 @@ export const caseSchema = z.object({
   /**
    * The tester's texts, in order. A line "advance to HH:MM" is not a text: the clock moves to that local
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
-   * A line "console Yanni: ..." is a founder's message in the console chat (add "(exact)" or
-   * "(exact, now)" after the name for "send exactly this" and "send now"); ZOH's console answer joins
-   * the transcript, marked as console.
+   * A line "console Yanni: ..." is a founder's message in the console chat; ZOH's console answer and
+   * any draft card it makes join the transcript, marked as console. "console Yanni (do it)" clicks Do it
+   * on the newest open draft (#155).
    */
   testerLines: z.array(z.string().min(1)).min(1),
   whatWentWrong: z.string(),
@@ -193,12 +240,16 @@ export const caseSchema = z.object({
   timeZone: z.string().default("America/New_York"),
   persona: z.enum(PERSONAS).optional(),
   seed: seedSchema.optional(),
+  suite: z.enum(SUITES).default("regression"),
 });
 export type RegressionCase = z.infer<typeof caseSchema>;
 
 export interface TranscriptLine {
-  /** "founder": a founder's line in the console chat (console feature); never seen by the tester. */
-  from: "tester" | "zoh" | "founder";
+  /**
+   * "founder": a founder's line in the console chat (console feature); never seen by the tester. "lookup" (#162):
+   * what ZOH searched, opened or watched for its next reply, for the grader; never seen by the tester.
+   */
+  from: "tester" | "zoh" | "founder" | "lookup";
   text: string;
   /** ZOH answering the founders in the console chat, not a text to the tester. */
   console?: boolean;
@@ -214,6 +265,8 @@ export interface ConversationPlan {
   key: string;
   kind: "scenario" | "case";
   id: string;
+  /** A case's suite; simulated scenarios, and reports from before #197, count as regression. */
+  suite?: Suite;
   title: string;
   persona: Persona | "scripted";
   areaCode: string;

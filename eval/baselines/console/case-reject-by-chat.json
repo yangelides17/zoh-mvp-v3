@@ -1,0 +1,91 @@
+{
+  "feature": "console",
+  "id": "case:reject-by-chat",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:17:24.737Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "60edb9b74bb1",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "f602269e8ef0"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:reject-by-chat",
+        "kind": "case",
+        "id": "reject-by-chat",
+        "title": "\"Reject it\" in the chat is drafted, then a typed yes rejects it, and only then is it called done",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "founder",
+          "text": "Yanni: reject his request to switch, he should stick with running for now",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "[draft card: Do it / Change / Cancel] Reject: Learn to solve a Rubik's cube (why: He should stick with running for now.). It never reaches Jordan.",
+          "at": "2026-11-02T19:00:00.000Z",
+          "console": true
+        },
+        {
+          "from": "zoh",
+          "text": "I've drafted the rejection of Jordan's Rubik's cube switch, with your reason: stick with running for now. It's a card now, and nothing happens until you click Do it or tell me yes. He won't be told about it either way.",
+          "at": "2026-11-02T19:00:00.001Z",
+          "console": true
+        },
+        {
+          "from": "founder",
+          "text": "Yanni: yes do it",
+          "at": "2026-11-02T19:00:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Done. The Rubik's cube switch is rejected, and Jordan stays on running. He won't hear about it from this.",
+          "at": "2026-11-02T19:00:30.001Z",
+          "console": true
+        }
+      ],
+      "endedBy": "script",
+      "record": "Mon, Oct 19: before this plan\nTue, Oct 20: before this plan\nWed, Oct 21: before this plan\nThu, Oct 22: before this plan\nFri, Oct 23: step day, nothing recorded\nSat, Oct 24: step day, nothing recorded\nSun, Oct 25: rest day\nMon, Oct 26: done\nTue, Oct 27: rest day\nWed, Oct 28: done\nThu, Oct 29: rest day\nFri, Oct 30: done\nSat, Oct 31: done\nSun, Nov 1 (yesterday): rest day\nMon, Nov 2 (today): step day, not done yet at 18:00\nTue, Nov 3 (tomorrow): rest day\nWed, Nov 4: step day at 18:00\nThu, Nov 5: rest day\nFri, Nov 6: step day at 18:00\nSat, Nov 7: step day at 18:00\nSun, Nov 8: rest day\nMon, Nov 9: step day at 18:00",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "drafts",
+            "pass": true,
+            "borderline": false,
+            "reason": "The draft card states the action and that it never reaches Jordan, and ZOH 2 says nothing happens until Do it or yes; ZOH 3 reports only the action Yanni confirmed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH drafted the rejection with Yanni's reason, said it won't reach Jordan without claiming it was rejected, then after yes confirmed it was rejected and sent nothing to Jordan."
+          }
+        ],
+        "summary": "ZOH handled the regression case correctly: it drafted the rejection with Yanni's reason, said plainly that nothing happens until confirmed and that Jordan won't be told, and only reported it rejected after Yanni said yes. The earlier failure, where the request stayed queued, did not recur, though ZOH 2 repeats ZOH 1's point and could be tighter."
+      }
+    }
+  ]
+}

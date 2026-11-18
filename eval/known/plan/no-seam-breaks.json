@@ -1,0 +1,22 @@
+{
+  "id": "no-seam-breaks",
+  "rule": "no-seam",
+  "expect": "fail",
+  "why": "ZOH says it has everything, then asks another question the plan needed: the seam the rule forbids.",
+  "seed": {
+    "name": "Sam",
+    "goal": "get-moving",
+    "phase": "planning",
+    "answers": { "what": "running", "where": "the park by my place", "when": "mornings before work", "how_long": "20 minutes" },
+    "history": [
+      { "from": "zoh", "text": "Love it. How long can you give it on a normal morning?" },
+      { "from": "tester", "text": "20 min" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "so whats the plan" },
+    { "from": "zoh", "text": "That's everything I need! Putting your plan together now." },
+    { "from": "zoh", "text": "Oh, one more thing: will you run outside at the park, or on a treadmill when it rains?" },
+    { "from": "tester", "text": "outside always" }
+  ]
+}

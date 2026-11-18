@@ -1,0 +1,69 @@
+{
+  "id": "draft-plan-change",
+  "title": "A founder's plan change is drafted as a proposal ZOH will ask the tester about, never as done",
+  "origin": "#155 (console chat as ZOH's proxy), spec example \"Propose to Maya: step moves to 7:30 am\"",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "a 20 minute run",
+      "where": "the park",
+      "when": "6 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥"
+      },
+      {
+        "from": "zoh",
+        "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪"
+      }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "done"
+      },
+      {
+        "days_ago": 5,
+        "status": "done"
+      },
+      {
+        "days_ago": 7,
+        "status": "done"
+      }
+    ]
+  },
+  "testerLines": [
+    "console Yanni: let's move his runs to mornings, 7 am at the park, before work",
+    "console Yanni (do it)"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a founder's plan change drafted and confirmed.",
+  "shouldHaveHappened": "ZOH drafts a plan change (runs at 7 am at the park) whose card says it will ask Jordan first and nothing changes until he says yes. Its line to Yanni says the same in a line or two and never says the plan is changed or that Jordan was told. Nothing is texted to Jordan in this exchange.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}

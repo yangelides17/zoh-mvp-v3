@@ -1,3 +1,7 @@
+import { createDraft } from "../src/console/drafts.js";
+import { createCoach } from "../src/coach/coach.js";
+import type { Db } from "../src/db/client.js";
+import { FakeClaudeModel } from "./helpers.js";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -6,18 +10,18 @@ import type { NudgeRequest, Replier, ReplyInput } from "../src/claude/replier.js
 import { createSendblueClient } from "../src/sendblue/client.js";
 import { appDeps } from "../src/wiring.js";
 import type { Completer, CompletionRequest } from "../eval/claude.js";
-import { UsageError, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
+import { HAIKU, UsageError, graderModel, missingKeyMessage, parseEvalArgs } from "../eval/cli.js";
 import { evalDay, zonedDate } from "../eval/clock.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, readPages, rubricFor } from "../eval/features.js";
 import { budgetFor, issueCount, overBudgetMessage, recordSpend, readLedger } from "../eval/budget.js";
 import { gradeConversation, gradeJsonSchema, graderUserPrompt, parseGrade } from "../eval/grader.js";
-import { evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester } from "../eval/harness.js";
+import { createMeter, evalConfig, guardFetch, REPLY_LAG_MS, runConversation, scriptedTester, SEARCH_DOLLARS } from "../eval/harness.js";
 import { loadCases, loadScenarios, planConversations } from "../eval/load.js";
 import { evalMediaFetcher, evalTranscriber, parseMediaLine } from "../eval/media.js";
 import { aggregate, diffRuns, renderMarkdown, sameScope, suggestLiveChecks, worstReplies, type ReportData } from "../eval/report.js";
 import { DONE, cleanSimulatorText, simulatedTester } from "../eval/simulator.js";
-import type { Check, ConversationPlan, Grade, GradedConversation, TranscriptLine } from "../eval/types.js";
+import { caseSchema, type Check, type ConversationPlan, type Grade, type GradedConversation, type TranscriptLine } from "../eval/types.js";
 
 const onboarding = FEATURES.onboarding!;
 const rubric = rubricFor(onboarding);
@@ -94,7 +98,12 @@ describe("eval: scenarios and cases", () => {
     const plans = planConversations(loadScenarios(onboarding), cases, { persona: "joking", runs: 2 });
     expect(plans.filter((p) => p.kind === "scenario").every((p) => p.persona === "joking")).toBe(true);
     expect(plans.map((p) => p.key).slice(0, 2)).toEqual([expect.stringMatching(/#1$/), expect.stringMatching(/#2$/)]);
-    expect(plans.slice(-2).map((p) => p.key)).toEqual(["case:first", "case:second"]);
+    expect(plans.slice(-4).map((p) => p.key)).toEqual(["case:first#1", "case:first#2", "case:second#1", "case:second#2"]);
+
+    // #197: --runs repeats scripted cases too, each run under its own key, with the case's suite.
+    const repeated = planConversations([], cases, { runs: 3 });
+    expect(repeated.map((p) => p.key)).toEqual(["case:first#1", "case:first#2", "case:first#3", "case:second#1", "case:second#2", "case:second#3"]);
+    expect(repeated.every((p) => p.suite === "regression")).toBe(true);
 
     await writeFile(join(dir, "003-broken.json"), "{ nope");
     await expect(loadCases("x", `${dir}/`)).rejects.toThrow(/003-broken.json/);
@@ -167,8 +176,15 @@ describe("eval: nudge cases", () => {
       "kickoff-after-one-day-move",
       "recommit-after-day-three",
       "still-in-morning-yes",
+      // #196: moments with no case before.
+      "stall-in-onboarding",
+      "one-a-day-after-two-misses",
+      "followup-no-proof",
+      "lighter-plan-kickoff",
+      "two-reduced-days",
     ]);
-    expect(cases.every((c) => c.seed?.plan)).toBe(true);
+    // The stall nudge is for a plan not locked yet; every other nudge case starts on a locked plan.
+    expect(cases.filter((c) => !c.seed?.plan).map((c) => c.id)).toEqual(["stall-in-onboarding"]);
     expect(cases.find((c) => c.id === "day-three")!.seed!.step_days).toHaveLength(4);
   });
 });
@@ -182,6 +198,12 @@ describe("eval: proof cases send photos and voice notes", () => {
     const voice = parseMediaLine("[voice: ten pages done]")!;
     expect(voice.caption).toBe("");
     expect(await evalTranscriber.transcribe((await evalMediaFetcher(voice.mediaUrl)).bytes, "v.caf", "audio/x-caf")).toBe("ten pages done");
+    // #163: a document line is served as a real file of its type.
+    const doc = parseMediaLine("[document essay.pdf: The keeper woke early.] draft done")!;
+    expect(doc.caption).toBe("draft done");
+    const served = await evalMediaFetcher(doc.mediaUrl);
+    expect([served.contentType, Buffer.from(served.bytes.subarray(0, 4)).toString()]).toEqual(["application/pdf", "%PDF"]);
+    expect(doc.mediaUrl.endsWith("/essay.pdf")).toBe(true);
     expect(parseMediaLine("just text")).toBeUndefined();
     await expect(evalMediaFetcher("https://eval.media/photo/missing.jpg")).rejects.toThrow();
   });
@@ -202,7 +224,17 @@ describe("eval: proof cases send photos and voice notes", () => {
       "smaller-asked-with-reason",
       "smaller-no-reason",
       "zoh-suggests-smaller",
+      // #163: documents and videos as proof.
+      "document-writing-counts",
+      "video-counts",
+      "video-off-topic",
+      "pages-file-cant-open",
+      "document-recall-later",
     ]);
+    const doc = cases.find((c) => c.id === "document-writing-counts")!;
+    const docEcho = new EchoReplier();
+    await runConversation(planConversations([], [doc], { runs: 1 })[0]!, scriptedTester(doc.testerLines), { maxTurns: 2, index: 3, env: {}, replier: docEcho });
+    expect(docEcho.received[0]!.at(-1)!.text).toContain("[Sent a document: lighthouse-scene-4.docx]\n<document>\nTheo set the ledger down");
     for (const c of cases.filter((c) => c.id === "dark-selfie-counts" || c.id === "voice-note-off-topic" || c.id === "writing-screenshot-only")) {
       const plan = planConversations([], [c], { runs: 1 })[0]!;
       const echo = new EchoReplier();
@@ -252,6 +284,52 @@ describe("eval: texts sent together (#16)", () => {
     const photo = turns.find((t) => t.image);
     expect(photo?.text).toContain("[Sent a photo]");
     expect(turns.at(-1)!.text).toBe("Not bad!");
+  });
+});
+
+describe("eval: seeds for the team, a pause and a lighter plan (#196)", () => {
+  it("start the tester with the founders' note and request, a break in progress and a temporary plan, as the coach sees them", async () => {
+    const regression = caseSchema.parse({
+      id: "seeded",
+      title: "seeded",
+      origin: "test",
+      testerLines: ["hey"],
+      whatWentWrong: "-",
+      shouldHaveHappened: "-",
+      seed: {
+        name: "Sam",
+        goal: "reading",
+        phase: "active",
+        answers: {},
+        history: [{ from: "zoh", text: "LET'S GO" }],
+        plan: { step: "5 pages", time: "19:00", days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], proof: "photo", reason: "r", temporary: { ends_in_days: 3, usual_step: "10 pages" } },
+        team: [
+          { kind: "note", body: "Sam's mom is in hospital this week" },
+          { kind: "request", body: "Suggest the Dune audiobook for the drive" },
+        ],
+        pause: { started_hours_ago: 2, until_days: 2, reason: "family" },
+      },
+    });
+    const model = new FakeClaudeModel("Thinking of you, Sam.");
+    let coach: Replier | undefined;
+    const replier: Replier = { reply: (input) => coach!.reply(input), check: async () => {} };
+    const plan = planConversations([], [regression], { runs: 1 })[0]!;
+    const result = await runConversation(plan, scriptedTester(regression.testerLines), {
+      maxTurns: 2,
+      index: 9,
+      env: {},
+      replier,
+      onApp: (app) => (coach = createCoach({ db: app.db, model })),
+    });
+    expect(result.appErrors).toEqual([]);
+    const state = model.stateOf();
+    // #199: the sheet's team lines are facts now (how to use them is THE TEAM's).
+    expect(state).toContain("FROM THE TEAM, notes:");
+    expect(state).toContain("Sam's mom is in hospital this week");
+    expect(state).toMatch(/FROM THE TEAM, request \[\w+\], not done yet: Suggest the Dune audiobook for the drive/);
+    expect(state).toMatch(/This is a temporary lighter plan through \d{4}-\d{2}-\d{2}; then their usual plan comes back\./);
+    expect(state).toContain("PAUSED");
+    expect(result.savedState).toMatchObject({ plans: [{ version: 1, step: "10 pages" }, { version: 2, step: "5 pages", change_kind: "other" }] });
   });
 });
 
@@ -368,6 +446,50 @@ describe("eval: running a conversation through the real app", () => {
   });
 });
 
+describe("eval: what a run really costs", () => {
+  it("bills every Claude response from the usage it reports, cache tokens included, and leaves the body readable", async () => {
+    const real = globalThis.fetch;
+    const usage = { input_tokens: 1000, cache_read_input_tokens: 10_000, cache_creation_input_tokens: 4000, output_tokens: 500 };
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ model: "claude-sonnet-5-5", usage }), { status: 200, headers: { "content-type": "application/json" } })) as typeof fetch;
+    const meter = createMeter();
+    const restore = guardFetch(meter);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", body: "{}" });
+      expect(((await res.json()) as { model: string }).model).toBe("claude-sonnet-5-5");
+      await fetch("https://example.com/v1/messages");
+    } finally {
+      restore();
+      globalThis.fetch = real;
+    }
+    expect(meter.byModel["claude-sonnet-5-5"]).toEqual({ input: 1000, cacheRead: 10_000, cacheWrite: 4000, output: 500 });
+    // Sonnet: $2 in, $10 out per million; cache reads at 0.1x the input price, writes at 1.25x.
+    expect(meter.dollars).toBeCloseTo(((1000 + 1000 + 5000) * 2 + 500 * 10) / 1e6, 10);
+  });
+
+  it("#162: bills a streamed reply from its final usage, searches included, without holding the stream", async () => {
+    const real = globalThis.fetch;
+    const events = [
+      { type: "message_start", message: { model: "claude-sonnet-5-5", usage: { input_tokens: 1000, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, output_tokens: 1 } } },
+      { type: "message_delta", usage: { output_tokens: 500, input_tokens: 3000, server_tool_use: { web_search_requests: 2, web_fetch_requests: 1 } } },
+    ];
+    const sse = events.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
+    globalThis.fetch = (async () => new Response(sse, { status: 200, headers: { "content-type": "text/event-stream" } })) as typeof fetch;
+    const meter = createMeter();
+    const restore = guardFetch(meter);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", body: "{}" });
+      expect(await res.text()).toBe(sse);
+      await new Promise((r) => setTimeout(r, 10));
+    } finally {
+      restore();
+      globalThis.fetch = real;
+    }
+    expect(meter.byModel["claude-sonnet-5-5"]).toEqual({ input: 3000, cacheRead: 0, cacheWrite: 0, output: 500 });
+    expect(meter.dollars).toBeCloseTo((3000 * 2 + 500 * 10) / 1e6 + 2 * SEARCH_DOLLARS, 10);
+  });
+});
+
 describe("eval: grader", () => {
   it("shows a seeded conversation as context, separate from the graded texts", () => {
     const at = "2026-11-02T23:00:00Z";
@@ -386,10 +508,12 @@ describe("eval: grader", () => {
   });
 
   const good: Grade = {
-    texts: [{ zohText: 1, checks: [ok("one-question"), bad("short")] }],
+    texts: [{ zohText: 1, checks: [bad("short")] }],
     conversation: [bad("first-text")],
     summary: "Meh.",
   };
+  /** What gradeConversation returns for it: the grader's checks plus one question per text, counted in code (#197). */
+  const graded: Grade = { ...good, texts: [{ zohText: 1, checks: [bad("short"), { rule: "one-question", pass: true, borderline: false, reason: "no question (counted in code)" }] }] };
   const plan = conv("x", "terse", good).plan;
   const transcript: TranscriptLine[] = [
     { from: "tester", text: "Start", at: "2026-11-03T04:05:00Z" },
@@ -404,7 +528,7 @@ describe("eval: grader", () => {
   });
 
   it("labels ZOH texts and shows local time and the regression expectation", () => {
-    const prompt = graderUserPrompt({ plan: { ...plan, regression: { id: "r", title: "t", origin: "o", testerLines: ["Start"], whatWentWrong: "W", shouldHaveHappened: "S", areaCode: "212", startTime: "23:05", timeZone: "America/New_York" } }, transcript });
+    const prompt = graderUserPrompt({ plan: { ...plan, regression: { id: "r", title: "t", origin: "o", testerLines: ["Start"], whatWentWrong: "W", shouldHaveHappened: "S", areaCode: "212", startTime: "23:05", timeZone: "America/New_York", suite: "regression" } }, transcript });
     expect(prompt).toContain("[ZOH 1] (11:05 pm) Welcome!");
     expect(prompt).toContain("(Eastern)");
     expect(prompt).toContain("What should happen: S");
@@ -450,7 +574,7 @@ describe("eval: grader", () => {
       return { text: replies.shift() ?? "", usage: { input: 100, output: 10 }, stopReason: "end_turn" };
     };
     const res = await gradeConversation({ plan, transcript, rubric, pages }, flaky);
-    expect(res.grade).toEqual(good);
+    expect(res.grade).toEqual(graded);
     expect(res.usage).toEqual({ input: 200, output: 20 });
     expect(seen[0]!.system).toContain("## 4. Rules");
     expect(seen[0]!.jsonSchema).toBeDefined();
@@ -583,20 +707,37 @@ describe("eval: command line and cost", () => {
   it("parses arguments and explains mistakes", () => {
     expect(parseEvalArgs(["onboarding"])).toEqual({
       feature: "onboarding",
+      compare: false,
+      storeBaseline: false,
+      regrade: undefined,
+      regradeBaseline: false,
       runs: 1,
       maxTurns: 20,
       concurrency: 3,
+      final: false,
       dryRun: false,
       overBudget: false,
       persona: undefined,
       cases: undefined,
       scenarios: undefined,
     });
+    // #197: comparing, storing and re-grading; "all" for the release's full run.
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--runs", "3", "--compare", "--store-baseline"])).toMatchObject({ compare: true, storeBaseline: true, runs: 3 });
+    expect(parseEvalArgs(["curiosity", "--regrade", "eval/reports/x.json", "--compare"])).toMatchObject({ regrade: "eval/reports/x.json", compare: true });
+    expect(parseEvalArgs(["all", "--runs", "3", "--compare", "--store-baseline"]).feature).toBe("all");
+    // Nov 15 (Yanni, cost): a comparison runs each case once; cases that did worse are rerun with --runs 3.
+    expect(parseEvalArgs(["curiosity", "--case", "a", "--compare"]).runs).toBe(1);
+    // A baseline is stored from 3 runs or more.
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--compare", "--store-baseline"])).toThrow(/stored from 3 runs/);
+    expect(() => parseEvalArgs(["curiosity", "--case", "a", "--runs", "2", "--store-baseline"])).toThrow(/stored from 3 runs/);
+    expect(() => parseEvalArgs(["all", "--case", "a"])).toThrow(/pick one feature/);
+    expect(() => parseEvalArgs(["curiosity", "--regrade", "x.json", "--runs", "3"])).toThrow(/runs no conversations/);
     expect(parseEvalArgs(["plan", "--scenario", "a", "--scenario", "b"]).scenarios).toEqual(["a", "b"]);
     expect(() => parseEvalArgs(["plan", "--scenario", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--case", "a", "--case", "b"]).cases).toEqual(["a", "b"]);
     expect(() => parseEvalArgs(["onboarding", "--case", "a", "--persona", "terse"])).toThrow(/drop --persona/);
     expect(parseEvalArgs(["onboarding", "--over-budget"]).overBudget).toBe(true);
+    expect(parseEvalArgs(["onboarding", "--final"]).final).toBe(true);
     expect(parseEvalArgs(["onboarding", "--persona", "terse", "--runs", "3"])).toMatchObject({ persona: "terse", runs: 3 });
     expect(() => parseEvalArgs([])).toThrow(UsageError);
     expect(() => parseEvalArgs(["checkins"])).toThrow(/Unknown feature/);
@@ -636,6 +777,20 @@ describe("eval: command line and cost", () => {
     expect(estimateCost(plans, { ...base, evalModel: "claude-opus-5-5" }).dollars.high).toBeGreaterThan(est.dollars.high);
     expect(estimateCost(plans, { ...base, maxTurns: 5 }).tokens.high).toBeLessThan(est.tokens.high);
     expect(estimateCost(plans, { ...base, simModel: "claude-haiku-5-5" }).dollars.high).toBeLessThan(est.dollars.high);
+    // #197: re-grading pays only the grader.
+    expect(estimateCost(plans, { ...base, gradeOnly: true }).dollars.high).toBeLessThan(est.dollars.high / 2);
+  });
+
+  it("estimates the coach near what it was billed (Nov 15: $0.041 for 1 reply, $0.157 for 7)", async () => {
+    const cases = await loadCases("onboarding");
+    const plan = (id: string) => planConversations([], cases, { cases: [id], runs: 1 });
+    const opts = { maxTurns: 20, pagesChars: 20_000, coachModel: "claude-sonnet-5-5", evalModel: "claude-haiku-5-5" };
+    const one = estimateCost(plan("goal-in-first-text"), opts).dollars.low;
+    const seven = estimateCost(plan("voice-after-onboarding"), opts).dollars.low;
+    expect(one).toBeGreaterThan(0.041 * 0.8);
+    expect(one).toBeLessThan(0.041 * 1.3);
+    expect(seven).toBeGreaterThan(0.157 * 0.8);
+    expect(seven).toBeLessThan(0.157 * 1.3);
   });
 
   it("keeps each branch within its eval budget", async () => {
@@ -651,7 +806,13 @@ describe("eval: command line and cost", () => {
     expect(ledger["feature/x"]).toEqual({ spentUsd: 1.25, runs: 2 });
   });
 
-  it("budgets $1 per issue a branch builds, up to $3", () => {
+  it("grades with Haiku while iterating and with the coach's model on a --final run", () => {
+    expect(graderModel({}, "claude-sonnet-5-5", false)).toBe(HAIKU);
+    expect(graderModel({}, "claude-sonnet-5-5", true)).toBe("claude-sonnet-5-5");
+    expect(graderModel({ EVAL_MODEL: "claude-opus-5-5" }, "claude-sonnet-5-5", false)).toBe("claude-opus-5-5");
+  });
+
+  it("budgets $1 per issue a branch builds, up to $3 (#197)", () => {
     expect(issueCount("feature/12-commands")).toBe(1);
     expect(issueCount("feature/41-42-48-nudge-fixes")).toBe(3);
     expect(issueCount("feature/41-3am-pass")).toBe(1);
@@ -672,28 +833,32 @@ describe("eval: command line and cost", () => {
 });
 
 describe("eval: console lines (console feature)", () => {
-  it("sends founder lines through the real console chat and an exact one out on the next tick", async () => {
+  it("sends founder lines through the real console chat, shows its drafts, and a Do it sends the text on the next tick (#155)", async () => {
     const [c] = (await loadCases("console")).filter((x) => x.id === "rude-request");
     const plan = planConversations([], [c!], { runs: 1 })[0]!;
     const asked: string[] = [];
+    let db: Db | undefined;
     const consoleCoach = {
-      answer: async (testerId: string) => {
+      answer: async (testerId: string, now: Date) => {
         asked.push(testerId);
+        // Stands in for the real console coach drafting a word-for-word text.
+        if (db && asked.length === 2) await createDraft(db, { testerId, author: "Stamati", action: "send_text", input: { words: "Hey Jordan, word for word" }, summary: 'Text Jordan word for word: "Hey Jordan, word for word"', at: now });
         return undefined;
       },
     };
-    const lines = ["console Yanni: how's he doing?", "console Stamati (exact, now): Hey Jordan, word for word", "hi"];
-    const result = await runConversation(plan, scriptedTester(lines), { maxTurns: 4, index: 5, env: {}, replier: new EchoReplier(), consoleCoach });
+    const lines = ["console Yanni: how's he doing?", "console Stamati: send him exactly: Hey Jordan, word for word", "console Stamati (do it)", "hi"];
+    const result = await runConversation(plan, scriptedTester(lines), { maxTurns: 5, index: 5, env: {}, replier: new EchoReplier(), consoleCoach, onApp: (app) => (db = app.db) });
     expect(result.error).toBeUndefined();
     expect(result.transcript.map((l) => `${l.from}${l.console ? " (console)" : ""}${l.started ? " (started)" : ""}: ${l.text}`)).toEqual([
       "founder: Yanni: how's he doing?",
-      "founder: Stamati (exact, now): Hey Jordan, word for word",
+      "founder: Stamati: send him exactly: Hey Jordan, word for word",
+      'zoh (console): [draft card: Do it / Change / Cancel] Text Jordan word for word: "Hey Jordan, word for word"',
+      'founder: Stamati clicks Do it on: Text Jordan word for word: "Hey Jordan, word for word"',
       "zoh (started): Hey Jordan, word for word",
       "tester: hi",
       "zoh: got: hi",
     ]);
-    // Only the plain line asks the console coach; an exact one goes out as written.
-    expect(asked).toHaveLength(1);
+    expect(asked).toHaveLength(2);
     // The grader gets the step log ZOH saw, so true facts about his days aren't marked made up.
     expect(result.record).toContain("Sat, Oct 31: missed");
     expect(result.record).toContain("Mon, Nov 2 (today): step day, not done yet at 18:00");

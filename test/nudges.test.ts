@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { raiseAlert } from "../src/console/alerts.js";
-import { createCoach } from "../src/coach/coach.js";
-import { buildStateBlock, NUDGES } from "../src/coach/prompt.js";
+import { createCoach, NUDGE_TOOLS, SHEET_LABEL } from "../src/coach/coach.js";
+import { buildStateBlock, FIXED_INSTRUCTIONS, NUDGES, TODAYS_STEP } from "../src/coach/prompt.js";
 import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import {
@@ -19,13 +19,13 @@ import {
   type Plan,
   type Tester,
 } from "../src/db/schema.js";
-import { createMediaRetention } from "../src/media/retention.js";
 import { dueNudge, serviceDate, zonedTime, type NudgeInput } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import { summarizeDays } from "../src/nudges/streak.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { goalMetrics, loadTesterGoals, setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
+import { loadVoiceDoc } from "../src/coach/voice.js";
 import { DEV, FakeClaudeModel, LINE, ME, STRANGER, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
 
 const TZ = "America/New_York";
@@ -158,9 +158,9 @@ async function stepDay(tester: Tester, date: string) {
   return row;
 }
 
-async function tool(name: string, input: unknown, now: Date, lastTesterText = "", goalCap?: number) {
+async function tool(name: string, input: unknown, now: Date, lastTesterText = "", goalCap?: number, lastZohText = "") {
   const tester = (await getTester(t.db, (await t.db.select().from(testers).where(eq(testers.phone, ME)))[0]!.id))!;
-  const state = await loadCoachState(t.db, tester, { now, isFirstText: false, lastTesterText, goalCap });
+  const state = await loadCoachState(t.db, tester, { now, isFirstText: false, lastTesterText, lastZohText, goalCap });
   return runTool(t.db, state, name, input, now);
 }
 
@@ -510,7 +510,9 @@ describe("moving today and saying they're on it", () => {
     expect(await stepDay(tester, MON)).toMatchObject({ onItAt: null, agreedAt: at(MON, "09:01") });
     const block = buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "09:02"), isFirstText: false }));
     expect(block).not.toContain("on it");
-    expect(block).toContain("They said yes to today's step");
+    expect(block).toContain("They said yes to it today (Mon 9:01 AM): settled.");
+    // #199: why "on it" is only within the hour (the check-in it makes unneeded) is now NUDGES' reason.
+    expect(NUDGES).toContain("Starting it now or within the hour: call mark_on_it (the app then skips the check-in it no longer needs)");
   });
 
   it("#137: on it within the hour still counts, right up to the step", async () => {
@@ -627,7 +629,86 @@ describe("dueNudge", () => {
   });
 });
 
+describe("#200: what a reply loads, in the real coach", () => {
+  const systemText = (model: FakeClaudeModel, i: number) => model.requests.at(i)!.system.map((b) => b.text).join("\n\n");
+  const reply = (coach: ReturnType<typeof createCoach>, tester: Tester, text: string, extra: object = {}) =>
+    coach.reply({ tester, turns: [{ role: "user", text }], now: at(MON, "10:00"), ...extra });
+
+  it("a goal switch partway through a reply brings in making the plan from the next round; the cached core stays the same", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script({ tools: [{ name: "switch_goal", input: { slug: "nutrition", reason: "hurt my knee, can't sit long" } }] }, "Makes sense. Do you have a protein target?");
+    let sections: string[] = [];
+    await reply(createCoach({ db: t.db, model }), tester, "my knee's wrecked, I want to switch to eating better", { onSections: (s: string[]) => (sections = s) });
+    expect(model.requests).toHaveLength(2);
+    expect(systemText(model, 0)).not.toContain("- With everything in hand: save it with propose_plan");
+    expect(systemText(model, 1)).toContain("- With everything in hand: save it with propose_plan");
+    expect(model.requests[1]!.system[0]).toEqual(model.requests[0]!.system[0]);
+    // Logged: what the reply read, the plan included.
+    expect(sections).toEqual(expect.arrayContaining(["core", "plan", "planChange"]));
+  });
+
+  it("the tools depend only on the phase, so the cached core is shared across replies", async () => {
+    // Monday is a rest day here: the photo is what brings in proof, so the two replies load different parts.
+    const tester = await setup({ days: ["tue", "thu", "sat"] });
+    const model = new FakeClaudeModel();
+    const coach = createCoach({ db: t.db, model });
+    model.script("Let's go.");
+    await reply(coach, tester, "in for tonight");
+    model.script("Nice!");
+    await reply(coach, tester, "[Sent a photo]", { media: true });
+    const [a, b] = model.requests.map((r) => r.tools.map((x) => x.name));
+    expect(b).toEqual(a);
+    expect(systemText(model, 1).length).not.toBe(systemText(model, 0).length);
+    expect(model.requests[1]!.system[0]).toEqual(model.requests[0]!.system[0]);
+  });
+
+  it("the sheet switch: on, exactly one sheet, last in the latest message, every round; off, last in the system prompt", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script({ tools: [{ name: "mark_agreed", input: {} }] }, "Locked in for 7.");
+    await reply(createCoach({ db: t.db, model, sheetInMessage: true }), tester, "yes I'm in");
+    expect(model.requests).toHaveLength(2);
+    for (const req of model.requests) {
+      expect(req.system.some((b) => b.text.startsWith("STATE ("))).toBe(false);
+      const blocks = req.messages.flatMap((m) => (typeof m.content === "string" ? [m.content] : m.content.map((c) => ("text" in c ? c.text : ""))));
+      expect(blocks.filter((x) => x.startsWith(SHEET_LABEL))).toHaveLength(1);
+      const last = req.messages.at(-1)!.content as { type: string; text?: string }[];
+      expect(last.at(-1)!.text).toMatch(new RegExp(`^\\${SHEET_LABEL.slice(0, 20)}[\\s\\S]*\\nSTATE \\(`));
+    }
+    // The second round's sheet shows what the first round's tool did.
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain("They said yes to it today");
+
+    const off = new FakeClaudeModel();
+    off.script("ok");
+    await reply(createCoach({ db: t.db, model: off }), tester, "cool");
+    expect(off.stateOf()).toMatch(/^STATE \(/);
+    expect(JSON.stringify(off.requests[0]!.messages)).not.toContain(SHEET_LABEL);
+  });
+});
+
 describe("the coach writing a nudge", () => {
+  it("#108, #200: a tool's name on its own line never reaches them, even one the text wasn't offered", async () => {
+    const tester = await setup();
+    const model = new FakeClaudeModel();
+    model.script("Yo Sam!\nmark_agreed\nTen pages tonight, you in?");
+    const text = await createCoach({ db: t.db, model }).nudge!({ tester, turns: [], now: at(MON, "09:00"), moment: "kickoff" });
+    expect(model.requests[0]!.tools.map((x) => x.name)).not.toContain("mark_agreed");
+    expect(text).toBe("Yo Sam!\nTen pages tonight, you in?");
+  });
+
+  it("#200: the scheduler logs which parts a text it starts loaded", async () => {
+    await setup();
+    const logged: Record<string, unknown>[] = [];
+    const log = { ...silent, info: (o: Record<string, unknown>) => logged.push(o) } as unknown as Logger;
+    const model = new FakeClaudeModel();
+    model.script("Kalimera Sam! Ten pages tonight at 7, you in?");
+    const real = createNudgeScheduler({ db: t.db, log, sendblue: t.sendblue, replier: createCoach({ db: t.db, model }), allowedNumbers: [ME], lineNumber: LINE });
+    await real.tick(at(MON, "09:00"));
+    await real.stop();
+    expect(logged).toContainEqual(expect.objectContaining({ kind: "kickoff", sections: "core,nudges,todaysStep" }));
+  });
+
   it("one call when it writes straight away, the moment in the state block and a note in place of a tester text", async () => {
     const tester = await setup();
     const model = new FakeClaudeModel();
@@ -645,12 +726,19 @@ describe("the coach writing a nudge", () => {
     expect(text).toBe("Kalimera Sam! Ten pages of Dune on the couch at 7 tonight. Still on?");
     expect(model.requests).toHaveLength(1);
     const req = model.requests[0]!;
-    // Tools on, so it can save today's step first (#76); only set_today_step runs (test/todays-step.test.ts).
+    // Tools on, so it can save today's step first (#76); #196: offered only the tools a text it starts can use.
     expect(req.toolChoice).toBe("auto");
-    expect(req.tools.map((x) => x.name)).toContain("mark_step_done");
-    expect(req.system[0]!.text).toContain(NUDGES);
+    expect(req.tools.map((x) => x.name).sort()).toEqual([...NUDGE_TOOLS].sort());
+    // #200: a kickoff loads the texts ZOH starts and today's step, not how to answer a reply.
+    const system = req.system.map((b) => b.text).join("\n\n");
+    expect(system).toContain("NUDGES (texts you start;");
+    expect(system).toContain("TODAY'S STEP (phase");
+    expect(system).not.toContain('When they text (phase "active")');
+    expect(system).not.toContain("WEEK LOOK-BACK (phase");
+    expect(FIXED_INSTRUCTIONS).toContain(NUDGES);
     expect(model.stateOf()).toContain("NUDGE MOMENT: kickoff");
-    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet.");
+    expect(model.stateOf()).toContain("Today: Mon 2026-11-02, a step day at 19:00. Today's step: not set yet (the plan's step applies until it is).");
+    expect(model.stateOf()).toMatch(/Moments now: Nudges; Today's step/);
     expect(model.stateOf()).toContain("Next step day: Tue 2026-11-03.");
     expect(model.stateOf()).toContain('Their words when they committed: "I\'m in"');
     const last = req.messages.at(-1)!;
@@ -677,7 +765,10 @@ describe("the state block for an active tester", () => {
     await tool("mark_on_it", {}, at(MON, "20:10"));
     const state = await loadCoachState(t.db, tester, { now: at(MON, "20:12"), isFirstText: false });
     const block = buildStateBlock(state);
-    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet. Pick it the first time you talk about today (see NUDGES) and save it with set_today_step; until then the plan's step applies. Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
+    expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
+    // #199: picking it and saving it is TODAY'S STEP's guidance, not the sheet's.
+    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
+    expect(TODAYS_STEP).toContain("set_today_step saves it");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
     await doneWithPhoto("full", at(MON, "20:40"), "10 pages");
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: at(MON, "20:41"), isFirstText: false }))).toContain("Status: done.");
@@ -831,9 +922,11 @@ describe("a kickoff the morning already covered (#42)", () => {
     expect(await stepDay(tester, MON)).toMatchObject({ agreedAt: at(MON, "10:00") });
     const block = async () =>
       buildStateBlock(await loadCoachState(t.db, (await getTester(t.db, tester.id))!, { now: at(MON, "20:00"), isFirstText: false }));
-    expect(await block()).toContain("They said yes to today's step (Mon 10:00 AM): it's settled.");
+    // #199: "settled" is the fact; not re-saying it is TODAY'S STEP's guidance (#42).
+    expect(await block()).toContain("They said yes to it today (Mon 10:00 AM): settled.");
+    expect(TODAYS_STEP).toContain("Once they've said yes (settled), don't re-say it or its proof, or ask if they're still on");
     await doneWithPhoto("full", at(MON, "19:30"));
-    expect(await block()).not.toContain("They said yes to today's step");
+    expect(await block()).not.toContain("They said yes to it");
     // A rest day has nothing to agree to.
     expect(await tool("mark_agreed", {}, at(TUE, "10:00"))).toMatchObject({ ok: false });
   });
@@ -895,22 +988,24 @@ describe("a temporary lighter plan (rule 7)", () => {
     const block = buildStateBlock(await loadCoachState(t.db, tester, { now: at(WED, "10:00"), isFirstText: false }));
     expect(block).toContain("Recent step days, newest first:\n- Tue 2026-11-03, done (reduced version): the plan's step\n- Mon 2026-11-02, done (reduced version): the plan's step");
     expect(block).toContain("Streak: 0 step days, not counting today (done today makes it 1). Missed in a row: 0. Reduced in a row: 2.");
-    expect(block).toContain("lower the plan for good (change_plan), or lighter for a short stretch with an end date (change_plan with until)");
+    // #199: the sheet gives the count and the moment; asking which it is lives in "When they start to slip".
+    expect(block).toMatch(/Moments now: .*When they start to slip/);
+    expect(loadVoiceDoc()).toContain("So after two reduced days in a row (on their usual plan), ZOH asks which it is");
+    expect(loadVoiceDoc()).toContain("(change_plan with until)");
   });
 });
 
 describe("proof (spec: Photo and voice verification)", () => {
   const seen = { proof: "plausible", seen: "dark selfie, lights off" } as const;
 
-  it("done needs a photo or voice note from today, and saves the verdict and what was seen", async () => {
+  it("done needs proof from today (a video counts since #163), and saves the verdict and what was seen", async () => {
     const tester = await setup();
     const words = await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"));
     expect(words).toMatchObject({ ok: false, error: expect.stringContaining("words alone don't mark it done") });
-    // Yesterday's photo and a video don't count for today.
+    // Yesterday's photo doesn't count for today.
     await photo(at(SUN, "21:00"));
-    await photo(at(MON, "19:40"), "video");
     expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:00"))).toMatchObject({ ok: false });
-    await photo(at(MON, "20:01"), "voice");
+    await photo(at(MON, "20:01"), "video");
     expect(await tool("mark_step_done", { how: "full", ...seen }, at(MON, "20:02"))).toMatchObject({ ok: true });
     expect(await stepDay(tester, MON)).toMatchObject({ status: "done", proofVerdict: "plausible", proofSeen: "dark selfie, lights off" });
   });
@@ -940,7 +1035,7 @@ describe("proof (spec: Photo and voice verification)", () => {
   it("the state block tells the coach what proof came in and its read of it", async () => {
     const tester = await setup();
     const block = () => loadCoachState(t.db, tester, { now: at(MON, "20:00"), isFirstText: false }).then(buildStateBlock);
-    expect(await block()).toContain("No photo, screenshot or voice note from them today.");
+    expect(await block()).toContain("No photo, screenshot, voice note, video or document from them today.");
     await photo(at(MON, "19:50"));
     await tool("proof_unclear", { verdict: "doesnt_match", seen: "bright hallway, lights on" }, at(MON, "19:51"));
     expect(await block()).toContain("Proof sent today: 1. Your read: doesnt match (bright hallway, lights on). Still sorting it out with them.");
@@ -1003,42 +1098,6 @@ describe("proof (spec: Photo and voice verification)", () => {
   });
 });
 
-describe("voice-note audio retention", () => {
-  it("deletes audio 30 days after it arrived, keeps newer audio and every photo, and records it", async () => {
-    const now = at(MON, "12:00");
-    const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000);
-    const rows = [
-      { key: "media/1/old.caf", type: "audio/x-caf", when: daysAgo(31) },
-      { key: "media/1/old-unlabeled.m4a", type: "application/octet-stream", when: daysAgo(40) },
-      { key: "media/1/new.caf", type: "audio/x-caf", when: daysAgo(29) },
-      { key: "media/1/old.jpg", type: "image/jpeg", when: daysAgo(60) },
-    ];
-    for (const r of rows) {
-      await t.media.put(r.key, new Uint8Array([1]), r.type);
-      await t.db.insert(messages).values({
-        direction: "inbound",
-        contactNumber: ME,
-        mediaUrl: `https://cdn.example/${r.key}`,
-        mediaKey: r.key,
-        mediaContentType: r.type,
-        transcript: r.type === "image/jpeg" ? null : "did my ten pages",
-        createdAt: r.when,
-      });
-    }
-    const retention = createMediaRetention({ db: t.db, log: silent, media: t.media });
-    expect(await retention.tick(now)).toBe(2);
-    expect([...t.media.objects.keys()].sort()).toEqual(["media/1/new.caf", "media/1/old.jpg"]);
-    const saved = await t.db.select().from(messages).orderBy(asc(messages.createdAt));
-    expect(saved.map((m) => [m.mediaKey, m.mediaDeletedAt !== null, m.transcript])).toEqual([
-      ["media/1/old.jpg", false, null],
-      ["media/1/old-unlabeled.m4a", true, "did my ten pages"],
-      ["media/1/old.caf", true, "did my ten pages"],
-      ["media/1/new.caf", false, "did my ten pages"],
-    ]);
-    expect(await retention.tick(now)).toBe(0);
-  });
-});
-
 describe("goals foundation (spec: Step log and next step)", () => {
   const done = async (tester: Tester, ...dates: string[]) => {
     const plan = (await t.db.select().from(plans).orderBy(asc(plans.version)))[0]!;
@@ -1066,14 +1125,23 @@ describe("goals foundation (spec: Step log and next step)", () => {
   it("change_plan saves its kind (other by default); deepen keeps the streak, upgrade starts a new one", async () => {
     const tester = await setup();
     await done(tester, MON, TUE);
-    expect(await tool("change_plan", { step: "15 pages of Dune", kind: "deepen", asked: "15 pages" }, at(WED, "08:00"), "can we do 15 pages now?")).toMatchObject({ ok: true });
+    // #157: a deepen or upgrade they ask for is made on their yes to the version ZOH showed.
+    const deepen = { step: "15 pages of Dune", kind: "deepen", asked: "yes 15", shown: "15 pages of Dune a night" };
+    expect(await tool("change_plan", deepen, at(WED, "08:00"), "yes 15", undefined, "15 pages of Dune a night from now on?")).toMatchObject({ ok: true });
     expect(await block(tester, at(WED, "08:01"))).toContain("Streak: 2 step days, not counting today");
     expect(await tool("change_plan", { time: "20:00" }, at(WED, "08:02"))).toMatchObject({ ok: true });
     expect(await tool("change_plan", { step: "5 pages", until: FRI, kind: "deepen", asked: "5 pages" }, at(WED, "08:03"), "just 5 pages till Friday")).toMatchObject({
       ok: false,
       error: expect.stringContaining("kind other"),
     });
-    const upgrade = await tool("change_plan", { step: "20 min of lifting", kind: "upgrade", asked: "lifting" }, at(WED, "08:04"), "I want to try lifting instead");
+    const upgrade = await tool(
+      "change_plan",
+      { step: "20 min of lifting", kind: "upgrade", asked: "lifting", shown: "20 min of lifting at 8" },
+      at(WED, "08:04"),
+      "yes, lifting instead",
+      undefined,
+      "Swap it for 20 min of lifting at 8? New streak from there.",
+    );
     expect(upgrade).toMatchObject({ ok: true, message: expect.stringContaining("A new streak starts") });
     expect((await t.db.select().from(plans).orderBy(asc(plans.version))).map((p) => p.changeKind)).toEqual([null, "deepen", "other", "upgrade"]);
     expect(await block(tester, at(WED, "08:05"))).toContain("Streak: 0 step days, not counting today (done today makes it 1).");

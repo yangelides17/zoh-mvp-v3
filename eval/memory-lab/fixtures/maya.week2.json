@@ -1,0 +1,77 @@
+{
+  "scenario": "maya",
+  "week": 2,
+  "format": 1,
+  "notes": "Days 8-14: a roommate fight, a late close, midterms coming, and a request to switch to studying.",
+  "tester": {
+    "phone": "+15555550102",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "23:40" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 8, "status": "done", "step": "Read 15 pages of Normal People", "step_kind": "same", "agreed_at": "00:50",
+      "note": "15 pages", "proof_verdict": "clear", "proof_seen": "Normal People open to page 54", "reflection": "Connell is so annoying, I love him." },
+    { "kind": "step_day", "day": 9, "status": "done", "step": "Read 15 pages of Normal People", "step_kind": "same",
+      "note": "Read to escape roommate stress", "proof_verdict": "clear", "proof_seen": "Normal People open to page 68", "reflection": "Needed that." },
+    { "kind": "step_day", "day": 10, "status": "missed", "step": "Read 15 pages of Normal People", "note": "Kept late closing at work." },
+    { "kind": "step_day", "day": 11, "status": "done_reduced", "step": "Read 15 pages of Normal People", "step_kind": "same",
+      "note": "5 pages, stressed", "proof_verdict": "clear", "proof_seen": "Normal People open to page 73" },
+    { "kind": "step_day", "day": 14, "status": "missed", "step": "Read 15 pages of Normal People", "note": "Studied instead." },
+    { "kind": "suggestion", "day": 14, "time": "23:12", "goal": "reading", "suggestion_kind": "new_focus", "raised_by": "tester",
+      "proposal": "Help Maya study for midterms; keep reading a little.", "new_goal": "deep_work",
+      "reasoning": "She asked for study help with midterms starting, and wants to keep reading a little.",
+      "decision": "approved", "decided_kind": "new_focus",
+      "decided_proposal": "Focus on one 45-minute study block a night; reading becomes maintenance with 2 check-ins a week.",
+      "decided_at": { "day": 15, "time": "10:00" }, "delivered_at": { "day": 15, "time": "22:40" },
+      "outcome": "agreed", "outcome_at": { "day": 15, "time": "23:05" } }
+  ],
+  "messages": [
+    { "day": 8, "time": "00:20", "from": "zoh", "text": "How'd reading go tonight?" },
+    { "day": 8, "time": "00:35", "from": "tester", "text": "was home this weekend, didnt bring the book lol", "tests": "explains the silent weekend after the fact; 'home' never located" },
+    { "day": 8, "time": "00:36", "from": "zoh", "text": "Ha, fair. Tonight's a fresh one: 15 pages at 11:30. Deal?" },
+    { "day": 8, "time": "00:50", "from": "tester", "text": "deal" },
+    { "day": 8, "time": "11:00", "from": "zoh", "text": "Hey Maya! 15 pages at 11:30 tonight, like we said 📚" },
+    { "day": 8, "time": "23:20", "from": "zoh", "text": "10 minutes! 📖" },
+    { "day": 8, "time": "23:52", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of Normal People open to page 54." } },
+    { "day": 8, "time": "23:52", "from": "tester", "text": "done" },
+    { "day": 8, "time": "23:53", "from": "zoh", "text": "Back on it 🔥 How's Normal People treating you?" },
+    { "day": 9, "time": "00:10", "from": "tester", "text": "connell is so annoying i love him", "tests": "a book character, not a person in her life" },
+    { "day": 9, "time": "00:10", "from": "zoh", "text": "That's how you know a book's got you 😂" },
+
+    { "day": 9, "time": "11:00", "from": "zoh", "text": "Hey Maya! Night four, 15 pages at 11:30. You in?" },
+    { "day": 9, "time": "22:55", "from": "tester", "text": "my roommate lily left her dishes in the sink for 4 days im losing it", "tests": "Lily under People; the fight is a short thread" },
+    { "day": 9, "time": "22:56", "from": "zoh", "text": "4 days?! 😤 Reading might be the escape tonight." },
+    { "day": 9, "time": "23:20", "from": "zoh", "text": "10 minutes! 📖" },
+    { "day": 10, "time": "00:05", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of Normal People open to page 68." } },
+    { "day": 10, "time": "00:05", "from": "tester", "text": "ya needed that" },
+    { "day": 10, "time": "00:06", "from": "zoh", "text": "Love that it's your reset 💛" },
+
+    { "day": 10, "time": "11:00", "from": "zoh", "text": "Hey Maya! 15 pages at 11:30 tonight. You in?" },
+    { "day": 10, "time": "23:20", "from": "zoh", "text": "10 minutes! 📖" },
+    { "day": 11, "time": "00:20", "from": "zoh", "text": "How'd it go tonight?" },
+    { "day": 11, "time": "00:45", "from": "tester", "text": "devon made me close again and stay late. didnt read", "tests": "Devon is her manager only implicitly; filed under Work, unsure of role" },
+    { "day": 11, "time": "00:46", "from": "zoh", "text": "Closing twice is rough 😒 Tomorrow, just 15." },
+
+    { "day": 11, "time": "11:00", "from": "zoh", "text": "Hey Maya! 15 pages at 11:30. You in?" },
+    { "day": 11, "time": "22:30", "from": "tester", "text": "lily and i arent talking now lol" },
+    { "day": 11, "time": "22:31", "from": "zoh", "text": "Oof, roommate silent treatment is the worst. Hope it cools off." },
+    { "day": 11, "time": "23:20", "from": "zoh", "text": "10 minutes! 📖" },
+    { "day": 11, "time": "23:55", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Photo of Normal People open to page 73." } },
+    { "day": 11, "time": "23:55", "from": "tester", "text": "only 5 pages. too stressed" },
+    { "day": 11, "time": "23:56", "from": "zoh", "text": "5 pages on a stressful night still counts 💪" },
+
+    { "day": 12, "time": "23:30", "from": "tester", "text": "lily apologized, we're good. she did all the dishes lol", "tests": "the fight resolves: no open conflict left on Lily's page" },
+    { "day": 12, "time": "23:31", "from": "zoh", "text": "Love a happy ending 🧽😂" },
+    { "day": 12, "time": "23:35", "from": "tester", "text": "midterms start next week im so cooked" },
+    { "day": 12, "time": "23:36", "from": "zoh", "text": "You've got this. What's first?" },
+
+    { "day": 14, "time": "11:00", "from": "zoh", "text": "Hey Maya! Sunday pages at 11:30. You in?" },
+    { "day": 14, "time": "18:00", "from": "zoh", "text": "Hey Maya! Three nights of reading this week, even with roommate drama and a late close. What would help most this coming week?" },
+    { "day": 14, "time": "23:10", "from": "tester", "text": "honestly can you help me study instead. midterms are killing me", "tests": "new-focus request; reading is not dropped" },
+    { "day": 14, "time": "23:11", "from": "tester", "text": "i still wanna read a little tho" },
+    { "day": 14, "time": "23:12", "from": "zoh", "text": "Love that. Let me think on it. Reading tonight still on?" },
+    { "day": 14, "time": "23:25", "from": "tester", "text": "no im studying" },
+    { "day": 14, "time": "23:25", "from": "zoh", "text": "Respect. Get after it 📚" }
+  ]
+}

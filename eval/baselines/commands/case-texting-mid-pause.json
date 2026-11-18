@@ -1,0 +1,343 @@
+{
+  "feature": "commands",
+  "id": "case:texting-mid-pause",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "f7c9b2335254",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "5369890dce13"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#1",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a fun find 📚 Anything on the shelves catch your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally your call, Dani. You're paused, so nothing counts against you either way. But if you're itching to read, even a few pages of The Hobbit in that little library would be a fun bonus 📖 Are you feeling like reading, or is this a full break?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text; rule applies trivially and is not violated."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text; rule not triggered."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Warm about the trip, no step, proof or streak in the first reply; says they're paused so nothing is owed, bonus pages only, no proof ask, no resume_texts."
+          },
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": true,
+            "reason": "Not a new pause request here; the earlier pause was already accepted, so this rule is only lightly relevant."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": true,
+            "reason": "No can't-do-today text in this exchange; rule barely applies and is not violated."
+          },
+          {
+            "rule": "restart-ask-once",
+            "pass": true,
+            "borderline": true,
+            "reason": "Not in a stopped state; rule not really triggered."
+          },
+          {
+            "rule": "restart-yes-only",
+            "pass": true,
+            "borderline": true,
+            "reason": "No restart attempt in this exchange; rule not triggered."
+          }
+        ],
+        "summary": "ZOH handled the paused-trip regression case well: it stayed warm, said nothing was owed, offered reading only as an optional bonus, and didn't push proof or resume the texts. Its second text asks a clarifying question about whether this is a full break, which fits the no-pressure brief."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#2",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a great find 📚 Anything on the shelves catching your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally your call, Dani. You're paused, so there's no pressure and nothing to prove. But if the urge hits, even 10 minutes of The Hobbit in that little library would be a great bonus. Do you feel like it, or are you saving it all for Thursday?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text; rule not triggered, so it passes trivially as nothing to acknowledge."
+              },
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a feedback message; no team acknowledgment was needed here."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback given in this text, so the feedback rule does not apply."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pause was already set earlier with a real reason (family trip); this case starts mid-pause and ZOH doesn't re-ask or re-push."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "No can't-do-today text in this exchange; rule not really in play."
+          },
+          {
+            "rule": "restart-ask-once",
+            "pass": true,
+            "borderline": false,
+            "reason": "No STOP and no restart flow in this exchange; rule not triggered."
+          },
+          {
+            "rule": "restart-yes-only",
+            "pass": true,
+            "borderline": false,
+            "reason": "No restart attempt occurs; nothing to confirm or refuse."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Reply 2 mentions 10 minutes of The Hobbit as a bonus, which is acceptable, but it asks 'saving it all for Thursday?' and nudges reading with a question, edging toward a soft ask; also first reply is warm and on-topic, good."
+          }
+        ],
+        "summary": "ZOH stayed warm about the trip, respected the pause, and never asked for proof or lifted the pause, which fits the regression case. The main weakness is the second reply's ending question about reading, which leans slightly toward pressure rather than fully letting the bonus be optional."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:texting-mid-pause#3",
+        "kind": "case",
+        "id": "texting-mid-pause",
+        "suite": "capability",
+        "title": "Texting during a pause: answered as usual, no step or proof push",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "14:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "flying to Lisbon for a family thing, can we pause till Thursday?",
+          "at": "2026-11-01T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Of course, Dani. Paused till Thursday morning. Safe travels ✈️",
+          "at": "2026-11-01T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "landed! the hotel has a little library lol",
+          "at": "2026-11-02T19:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome to Lisbon, Dani! A hotel library is a fun find 📚 Anything on the shelves catch your eye?",
+          "at": "2026-11-02T19:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "should I still read while I'm here?",
+          "at": "2026-11-02T19:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Your call, Dani, since you're on a break till Thursday. But I'd love it if you did. Even 10 minutes with The Hobbit, or something from that little library, keeps the habit warm. What sounds good to you?",
+          "at": "2026-11-02T19:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text, so the rule is not triggered; nothing contradicts it."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "feedback",
+                "pass": true,
+                "borderline": false,
+                "reason": "No feedback request in this text; rule not triggered."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": false,
+            "reason": "Pause was requested in the earlier context and accepted immediately with a real reason (family trip); not part of this conversation's scored turns."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "No can't-do-today text in this conversation; rule does not apply."
+          },
+          {
+            "rule": "restart-ask-once",
+            "pass": true,
+            "borderline": false,
+            "reason": "No STOP or restart scenario in this conversation; rule does not apply."
+          },
+          {
+            "rule": "restart-yes-only",
+            "pass": true,
+            "borderline": false,
+            "reason": "No restart scenario in this conversation; rule does not apply."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH 2 says 'I'd love it if you did' and pushes 'Even 10 minutes...keeps the habit warm' and asks 'What sounds good to you?', pressuring reading while paused rather than saying it's optional."
+          }
+        ],
+        "summary": "ZOH stayed warm and on-topic in the first reply, but its second reply pressed Dani to read during the pause with a push and a question, missing the expected 'nothing owed, bonus if you feel like it' framing. The regression is borderline: it doesn't ask for proof or lift the pause, but the tone leans toward pressure rather than an optional bonus."
+      }
+    }
+  ]
+}

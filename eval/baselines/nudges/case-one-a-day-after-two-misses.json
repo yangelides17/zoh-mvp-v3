@@ -1,0 +1,316 @@
+{
+  "feature": "nudges",
+  "id": "case:one-a-day-after-two-misses",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a281d616e2ca",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "1f0456ee6bf7"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#1",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Your 10 pm is coming up, and here's a smaller way in. Get in bed and read just 5 minutes of chapter 4. If you want to keep going after that, even better. Then send me a photo of the page you stopped on. Can you do that tonight?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: read 5 minutes of chapter 4, in bed, around the 10 pm slot."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", a warm greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or shame about the misses; it frames the smaller start as a way in."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences, well over the one-to-three limit, though it has only one question at the end."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What (5 min of chapter 4), where (in bed) and when (10 pm) are all given."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and direct without overfamiliarity, though the energy is a little flat for the default Pushy level."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Exactly one text, warm with Sam's name, sincere and guilt-free, with a new smaller-start angle naming today's step; the only miss is its length."
+          }
+        ],
+        "summary": "ZOH sent exactly one warm, guilt-free text at the usual time, offering a smaller start on the 15-minute Atomic Habits step with a new angle instead of another push, which is what this regression case asks for. Its main miss is length: five sentences where the rule allows three, so the text runs long even though it has only one question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#2",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! It's almost 10, and chapter 4 has been waiting a couple of nights. Tonight let's keep it small: 5 minutes of Atomic Habits (chapter 4) in bed at 10, then send me a photo of the page you stop on. Work for you?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 5 minutes of Atomic Habits chapter 4, in bed at 10, with a photo of the page as proof."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", their name and a warm greeting."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "\"chapter 4 has been waiting a couple of nights\" edges toward a dig at the missed days, though it stays light."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ends with one question, but runs to four short sentences, slightly over the three-sentence limit."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its only question is \"Work for you?\", and it doesn't re-ask a time already agreed."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (5 min, chapter 4), where (in bed), when (10), how long (5 min) and the proof (photo of the page)."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "No teaching is added, which suits a day after two misses."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and sincere with a smaller-start angle, but the energy is gentler than the Pushy default."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly one text is started today, at the usual time near 10 pm, warm with Sam's name, sincere, with a smaller start instead of another push and the step named."
+          }
+        ],
+        "summary": "ZOH sent one warm, guilt-free text at the usual time that names tonight's step and offers a smaller start, which is the new angle the case asked for. It runs slightly long and leans gentle for Pushy level, but it sends nothing else and holds the regression case."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:one-a-day-after-two-misses#3",
+        "kind": "case",
+        "id": "one-a-day-after-two-misses",
+        "suite": "capability",
+        "title": "Two misses in a row: one text today, a new angle, never silence or guilt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sam! Chapter 4 of Atomic Habits at 10 tonight, in bed. You said you'd do it and I know you will. You in?",
+          "at": "2026-11-01T07:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still here, Sam. Ten pages before bed, you've got this.",
+          "at": "2026-11-01T07:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam! Chapter 4 has been waiting two nights, and you read chapter 3 in bed and sent me page 52, so I know you can. Tonight, just 5 pages of chapter 4 in bed at 10, then a photo of the page you stop on. Work for you?",
+          "at": "2026-11-03T02:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 5 pages of chapter 4, in bed, at 10, with a photo of the stopping page."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Sam!\", a warm greeting with their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": true,
+                "reason": "No direct guilt, but \"has been waiting two nights\" leans toward pointing at the misses."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, \"Work for you?\", and doesn't re-ask a time already set."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What (5 pages of chapter 4), where (in bed), when (10), and proof (photo of the page) are all given."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and energetic, but \"so I know you can\" reads as more of a push than the new angle asked for."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Exactly one text started today, warm with Sam's name, names the step, and offers a smaller start (5 pages), though it still reads as a push rather than a fully new angle."
+          }
+        ],
+        "summary": "ZOH sent exactly one warm, name-led text at the usual time that names tonight's step and offers a smaller start, with no follow-ups. It leans on a push (\"waiting two nights\", \"so I know you can\") rather than an open question about what's getting in the way, so the new-angle part is only borderline."
+      }
+    }
+  ]
+}

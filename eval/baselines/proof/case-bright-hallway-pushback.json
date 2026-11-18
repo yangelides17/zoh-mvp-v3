@@ -1,0 +1,150 @@
+{
+  "feature": "proof",
+  "id": "case:bright-hallway-pushback",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ac7eae12db1f",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "9cd99687d2fa"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:bright-hallway-pushback",
+        "kind": "case",
+        "id": "bright-hallway-pushback",
+        "title": "A bright daytime selfie in a big building as \"bedtime\" proof gets kind pushback",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:43",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off.",
+          "at": "2026-11-02T16:40:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "bet",
+          "at": "2026-11-02T16:41:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo bright-atrium-selfie.jpg: a selfie in bright light inside a big open building atrium with walkways and people in the background; clearly not a bedroom, lights on] in bed!!",
+          "at": "2026-11-03T02:43:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, Yanni, that looks like a bright atrium with a lot of daylight, not your bedroom. 😄 It's 9:43, so you've got time. Get in bed, phone down, lights off, and send me a quick selfie. Can you do that by 9:45?",
+          "at": "2026-11-03T02:43:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "lol ok fine I'm still out, leaving now",
+          "at": "2026-11-03T02:44:20.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Appreciate the honesty, Yanni. 😄 Head home, and the step stands: in bed, phone down, lights off, selfie sent. What time will you realistically be in bed tonight?",
+          "at": "2026-11-03T02:44:27.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "[photo dark-selfie.jpg: a dark, flash-lit selfie of the tester squinting at the flash, shirt off, dark room; no bed visible in the shot] ok NOW I'm in bed",
+          "at": "2026-11-03T03:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That squint says it all, Yanni, but that's a dark room and you in bed, so it counts. 😄 Day 3 is in the books, even if it landed late. What kept you out tonight?",
+          "at": "2026-11-03T03:20:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kind-pushback",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says plainly the bright atrium selfie isn't a bedroom, with a light 'Ha' and no accusation, then asks for a real one."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, including two instructions and a question, exceeding the one-to-three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, with one emoji as punctuation and no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and kind; gets them home without guilt, one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "Celebrates the dark selfie as counting, and notes it landed late without guilt."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and celebratory; 'That squint says it all' is a light tease that is mostly fine."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Atrium selfie rejected kindly, tester gets home warmly, and the dark selfie is celebrated with a no-guilt note that it landed late."
+          }
+        ],
+        "summary": "ZOH handled the contradicting atrium selfie kindly, kept the tester on track when they admitted they were still out, and counted the late dark selfie with celebration and no guilt. Its first text ran four sentences, over the short limit, though the core regression behavior was met."
+      }
+    }
+  ]
+}

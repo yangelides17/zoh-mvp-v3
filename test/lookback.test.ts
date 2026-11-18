@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, WEEK_LOOKBACK } from "../src/coach/prompt.js";
 import { loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { learnings, weekStart } from "../src/coach/week.js";
@@ -124,8 +124,8 @@ describe("the 6 pm Sunday recap", () => {
     expect(await tool("record_week_recap", {}, at(SUN2, "16:00"))).toMatchObject({ ok: true });
     expect(await t.db.select().from(nudges)).toMatchObject([{ date: SUN2, kind: "lookback", status: "skipped" }]);
     expect(await day(SUN2, "16:05", "21:55")).toEqual([]);
-    // Recording it twice changes nothing; on any other day it's refused.
-    expect(await tool("record_week_recap", {}, at(SUN2, "16:10"))).toMatchObject({ ok: true });
+    // #199: a second recap in a later reply is refused (the sheet no longer says "never again"); on any other day too.
+    expect(await tool("record_week_recap", {}, at(SUN2, "16:10"))).toMatchObject({ ok: false, error: expect.stringContaining("already given") });
     expect(await t.db.select().from(nudges)).toHaveLength(1);
     expect(await tool("record_week_recap", {}, at(SAT, "16:00"))).toMatchObject({ ok: false, error: "The week's recap is on Sundays." });
     // Inside a text ZOH starts, only the recap's own text may call it (a no-op there: its slot is the record).
@@ -243,14 +243,16 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     expect(await day(SUN2, "09:00", "23:55")).toEqual(["kickoff@09:00", "checkin@18:20", "followup@18:40"]);
     expect(await lookbackRow()).toMatchObject({ date: SUN2, status: "owed", messageId: null });
     // Still owed, not given: talking Sunday night they'd get it then.
-    expect(await stateAt(at(SUN2, "21:00"))).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet");
+    expect(await stateAt(at(SUN2, "21:00"))).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: not given yet.");
 
     // Monday: Sunday closes as missed; the morning text (after a miss) gives the recap.
     await day(MON2, "08:55", "08:55");
     const kickoff = await stateAt(at(MON2, "09:00"), "after_miss");
-    expect(kickoff).toContain("LAST WEEK'S LOOK-BACK, Mon 2026-11-02 to Sun 2026-11-08: owed: they didn't answer Sunday's texts");
-    expect(kickoff).toContain("This text (not sent yet) opens with the recap (WEEK LOOK-BACK), minus its question about the week");
-    expect(kickoff).toContain("Last week: 6 done in full, 0 smaller, 1 missed");
+    expect(kickoff).toContain("LAST WEEK'S LOOK-BACK, Mon 2026-11-02 to Sun 2026-11-08. Recap: owed: they didn't answer Sunday's texts, so it waited for today.");
+    // #199: the sheet says this text carries it (the app records it); how it opens the text is WEEK LOOK-BACK's guidance.
+    expect(kickoff).toContain("This text carries (not sent yet):\n- last week's recap, owed since Sunday (LAST WEEK'S LOOK-BACK below; the app records it)");
+    expect(WEEK_LOOKBACK).toContain("Owed from a silent Sunday (LAST WEEK'S LOOK-BACK): it opens the next text, before that text's own job, minus its question about the week, a miss in it named lightly, never the headline");
+    expect(kickoff).toContain("Last week: 6 done in full (Mon, Tue, Wed, Thu, Fri, Sat), 0 smaller, 1 missed (Sun).");
     expect(kickoff).toContain("Their destination: a mile by Nov 14");
     expect(kickoff).not.toContain("WEEK LOOK-BACK, Mon 2026-11-09");
     expect(await day(MON2, "09:00", "09:00")).toEqual(["after_miss@09:00"]);
@@ -258,7 +260,11 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     expect(await lookbackRow()).toMatchObject({ status: "skipped", messageId: text!.id });
 
     // Given: a reply about it is the week talk; nothing more goes out for it, and Tuesday has no trace.
-    expect(await stateAt(at(MON2, "10:00"))).toContain("Given today: never again; their replies about last week are the week talk");
+    // #199: the sheet says it was given; "never again, replies are the week talk" is WEEK LOOK-BACK's guidance.
+    const after = await stateAt(at(MON2, "10:00"));
+    expect(after).toContain("LAST WEEK'S LOOK-BACK, Mon 2026-11-02 to Sun 2026-11-08. Recap: given today.");
+    expect(after).not.toContain("This text carries");
+    expect(WEEK_LOOKBACK).toContain("replies about last week are the week talk, kept short");
     expect((await day(MON2, "09:05", "23:55")).filter((m) => m.startsWith("lookback"))).toEqual([]);
     expect(await stateAt(at(TUE2, "10:00"))).not.toContain("LOOK-BACK");
   });
@@ -369,7 +375,9 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     await day(SUN2, "09:00", "23:55");
     await day(MON2, "08:00", "08:00");
     await say(sam, "inbound", at(MON2, "08:30"), "morning!");
-    expect(await stateAt(at(MON2, "08:31"))).toContain("Not given yet: open this reply with the recap (WEEK LOOK-BACK)");
+    // #199: owed to this reply, which records it with record_week_recap; opening the text with it is WEEK LOOK-BACK's guidance.
+    expect(await stateAt(at(MON2, "08:31"))).toContain("- last week's recap, owed since Sunday (LAST WEEK'S LOOK-BACK below; you call record_week_recap)");
+    expect(WEEK_LOOKBACK).toContain("it opens the next text, before that text's own job");
     // The reply that hasn't recorded it: the kickoff still goes, even though they texted today.
     t.replier.skipWhenAllowed = true;
     expect(await day(MON2, "09:00", "09:00")).toEqual(["after_miss@09:00"]);
@@ -384,9 +392,13 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     await day(MON2, "08:00", "08:00");
     expect(await tool("record_week_recap", {}, at(MON2, "08:31"))).toMatchObject({ ok: true, message: expect.stringContaining("your text now gives the recap") });
     expect(await lookbackRow()).toMatchObject({ status: "skipped" });
-    expect(await stateAt(at(MON2, "08:31"))).toContain("LAST WEEK'S LOOK-BACK, Mon 2026-11-02 to Sun 2026-11-08: This text (not sent yet) is the recap.");
+    const recorded = await stateAt(at(MON2, "08:31"));
+    expect(recorded).toContain("LAST WEEK'S LOOK-BACK, Mon 2026-11-02 to Sun 2026-11-08. Recap: in this text.");
+    expect(recorded).toContain("This text carries (not sent yet):\n- last week's recap (LAST WEEK'S LOOK-BACK below; recorded)");
     // The morning text that follows is a normal one, and may be skipped like any other.
-    expect(await stateAt(at(MON2, "09:00"), "after_miss")).toContain("Given today");
+    const morning = await stateAt(at(MON2, "09:00"), "after_miss");
+    expect(morning).toContain("Recap: given today.");
+    expect(morning).not.toContain("last week's recap");
     expect(await tool("record_week_recap", {}, at(MON2, "08:40"))).toMatchObject({ ok: false, error: "The week's recap is on Sundays." });
   });
 });
@@ -437,19 +449,32 @@ describe("the state block on Sunday", () => {
     expect(await block(at(SAT, "18:00"))).not.toContain("WEEK LOOK-BACK");
     const sunday = await block(at(SUN2, "17:00"));
     expect(sunday).toContain(
-      "WEEK LOOK-BACK, Mon 2026-11-02 to today: Not given yet: once today's talk settles, or when they ask how they did (WEEK LOOK-BACK), with record_week_recap.\n" +
+      "WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: not given yet.\n" +
         // #103: the tally is the only count ZOH may give, and "each" only for what's true of every day.
-        'This week: 5 done in full, 0 smaller, 0 missed, today included (each day in Recent step days and Today above). Use these numbers exactly; "every" or "each" only for what\'s true of every one of those days.\n' +
-        'Understood this week (applied or recalled; only these count as understood or "can do"):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
+        "This week: 5 done in full (Mon, Tue, Wed, Thu, Fri), 0 smaller, 0 missed, today included; rest days: Sun.\n" +
+        'Understood this week (applied or recalled):\n- "Phone in the other room" (explained Mon 2026-11-02, applied Thu 2026-11-05)\n' +
         'Only explained so far (starting to click):\n- "Summarize each chapter in a line" (explained Fri 2026-11-06)\n' +
-        "Their destination: finish Dune by Dec 1 (say where they stand vs. it).",
+        "Their destination: finish Dune by Dec 1",
     );
-    expect(await block(at(SUN2, "18:00"), "lookback")).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: This text (not sent yet) is the recap. The app records it: no tool call.");
+    // #199: how to use these facts moved to WEEK LOOK-BACK: when (a rest day), the exact numbers (#103), "understood"
+    // (#78) and where they stand vs. the destination.
+    expect(WEEK_LOOKBACK).toContain("A rest day or no step done: once today's talk settles, or when they ask how they did. The recap goes in that text, with record_week_recap.");
+    expect(WEEK_LOOKBACK).toContain('days done, with the block\'s numbers exactly, and "every" or "each" only for what\'s true of every one of those days');
+    expect(WEEK_LOOKBACK).toContain('Only learnings the block lists as understood count as understood or "can do"');
+    expect(WEEK_LOOKBACK).toContain("where they stand vs. their destination, if they have one");
+    const lookback = await block(at(SUN2, "18:00"), "lookback");
+    expect(lookback).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: in this text.");
+    expect(lookback).toContain("This text carries (not sent yet):\n- the week's recap (WEEK LOOK-BACK below; the app records it)");
     // Recorded in this reply (the tool runs before the text is written): this text still gives it.
     expect(await tool("record_week_recap", {}, at(SUN2, "17:05"))).toMatchObject({ message: expect.stringContaining("your text now gives the recap") });
-    expect(await block(at(SUN2, "17:05"))).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today: This text (not sent yet) is the recap.");
-    // Any later reply: it's done.
-    expect(await block(at(SUN2, "17:10"))).toContain("The recap is done for this week (in conversation or its own text): never again today");
+    const recorded = await block(at(SUN2, "17:05"));
+    expect(recorded).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: in this text.");
+    expect(recorded).toContain("This text carries (not sent yet):\n- the week's recap (WEEK LOOK-BACK below; recorded)");
+    // Any later reply: it's done (#199: a fact; "never again" is WEEK LOOK-BACK's, and the tool refuses a second one).
+    const later = await block(at(SUN2, "17:10"));
+    expect(later).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: given today (in conversation or its own text).");
+    expect(later).not.toContain("the week's recap");
+    expect(WEEK_LOOKBACK).toContain("Once given, it isn't given again that week; their replies to it are the week talk.");
   });
 
   it("after a Sunday step, the reflection's wrap-up turns to the week, and the next step waits for the week talk", async () => {
@@ -458,18 +483,31 @@ describe("the state block on Sunday", () => {
     await t.db.insert(messages).values({ direction: "inbound", contactNumber: ME, content: "", mediaUrl: "https://cdn.example/p.jpg", mediaContentType: "image/jpeg", createdAt: at(SUN2, "19:25"), sentAt: at(SUN2, "19:25") });
     expect(await tool("mark_step_done", { how: "full", proof: "clear", seen: "Dune open at page 120" }, at(SUN2, "19:26"))).toMatchObject({ ok: true });
     const first = await block(at(SUN2, "19:27"));
-    expect(first).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the week (WEEK LOOK-BACK) waits for a later text");
-    expect(first).toContain("Not given yet: not in this text (it celebrates their proof); turn to the week at the reflection's wrap-up");
+    // #199: the sheet gives the facts (1st text since their proof, recap not given, the Sunday moment); when the week
+    // comes is WEEK LOOK-BACK's guidance.
+    expect(first).toContain("This reply is your 1st text since their proof today.");
+    expect(first).toContain("WEEK LOOK-BACK, Mon 2026-11-02 to today. Recap: not given yet.");
+    expect(first).toMatch(/Moments now: .*Sunday look-back/);
+    expect(WEEK_LOOKBACK).toContain("talking on Sunday after a step, never in the text that celebrates their proof: first the day's reflection (PROOF)");
     // The text that celebrates their proof can't record the recap; the next one can.
     expect(await tool("record_week_recap", {}, at(SUN2, "19:27"))).toMatchObject({ ok: false, error: expect.stringContaining("today's reflection first") });
     await say(sam, "outbound", at(SUN2, "19:28"), "Page 120! How did it feel?");
     const second = await block(at(SUN2, "19:30"));
-    expect(second).toContain("Not given yet: turn to the week at the reflection's wrap-up, in place of the next step");
-    // #102: the text that ends the reflection carries the recap, even when they're done or rushed.
-    expect(second).toContain("then the week (WEEK LOOK-BACK) in that same text, even when they're done or rushed");
+    expect(second).toContain("This reply is your 2nd text since their proof today.");
+    expect(second).toContain("Recap: not given yet.");
+    // #102: the text that ends the reflection carries the recap, even when they're done or rushed (now WEEK LOOK-BACK's).
+    expect(WEEK_LOOKBACK).toContain("then turns to the week in place of the next step");
+    expect(WEEK_LOOKBACK).toContain("Done or tired: still a short recap, never a goodnight without it.");
+    // #211: the turn to the week is the reflection's wrap-up, so it waits until the reflection has landed.
+    expect(await tool("record_week_recap", {}, at(SUN2, "19:30"))).toMatchObject({ ok: false, error: expect.stringContaining("still open") });
+    await say(sam, "inbound", at(SUN2, "19:31"), "felt great, the chapter flew by");
+    await tool("save_reflection", { summary: "Felt great, the chapter flew by", how_it_went: true, take: "Full step." }, at(SUN2, "19:31"));
+    await say(sam, "outbound", at(SUN2, "19:32"), "Love that. What made it fly by?");
+    await say(sam, "inbound", at(SUN2, "19:33"), "the plot finally kicked in, I couldn't stop");
+    await tool("save_reflection", { summary: "Felt great once the plot kicked in", how_it_went: true, take: "Full step.", landed: "The plot kicking in made reading easy" }, at(SUN2, "19:34"));
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
-    expect(await block(at(SAT, "19:27"))).not.toContain("then the week");
+    expect(await block(at(SAT, "19:27"))).not.toContain("WEEK LOOK-BACK");
   });
 
   it("nothing understood yet says so, and no block before 3 step days", async () => {
@@ -478,7 +516,8 @@ describe("the state block on Sunday", () => {
     expect(await block(at(SUN2, "17:00"))).not.toContain("WEEK LOOK-BACK");
     await done(sam, THU);
     const sunday = await block(at(SUN2, "17:00"));
-    expect(sunday).toContain('only these count as understood or "can do"):\n- none yet');
+    expect(sunday).toContain("Understood this week (applied or recalled):\n- none yet");
+    expect(WEEK_LOOKBACK).toContain("Nothing understood yet: name what they did, honestly.");
     expect(sunday).not.toContain("Their destination:");
   });
 });

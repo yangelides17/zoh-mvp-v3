@@ -18,14 +18,19 @@ One feature, one flow, using the commands in `.claude/commands/`:
 1. `/spec <idea>`: shape it with Yanni; the approved spec becomes the issue. **Gate 1.**
 2. `/plan <n>`: read the code, propose the build; the approved plan is posted on the issue. **Gate 2.**
 3. `/build <n>`: build on `feature/<n>-<slug>` from `dev`, tests first, draft PR into `dev` early, eval if ZOH's words change.
-4. `/review <n>`: a fresh session checks the PR against the spec and plan; merges into `dev` (staging) when Yanni says so.
+4. `/review <n>`: a fresh session checks the PR against the spec and plan and that the design held up; merges into
+   `dev` (staging) when Yanni says so.
 5. Live checks on staging from Yanni's phone (from the issue's "Live checks" comment); problems become `bug` issues.
 6. `/release`: notes, a "Worth a look" list and the `dev` → `main` PR; on Yanni's "ship" it merges, tags the version
    and checks production. `/status` shows the board anytime; `/idea` files a new idea or bug to spec later; `/quick`
    makes a small change with a record, always asking first: dev (staging) or a hotfix on production.
 
-Run at most 2 or 3 builds at once, each in its own git worktree under `../zoh-worktrees/` (never switch
-branches in the main folder, which stays on `dev`; `/build` and `/review` set this up and `/review` cleans up after merging). The issue is the record: spec in the body, plan and `Decision:`
+Run at most 2 or 3 builds at once, each in its own git worktree under `.claude/worktrees/` (never switch
+branches in the main folder, which stays on `dev`; `/build` and `/review` set this up and `/review` cleans up after merging). Create the
+worktree from the main folder with `git worktree add .claude/worktrees/<slug> ...` as the command says, then enter it
+with the `EnterWorktree` tool by `path` (no prompt there, and the session can't edit outside it); never `EnterWorktree`
+by `name`, which picks its own branch. Leave it with `ExitWorktree` (`keep`) before creating or removing worktrees
+(Nov 14). The issue is the record: spec in the body, plan and `Decision:`
 notes as comments, PR linked with `Closes #n`. Don't copy specs into the repo.
 
 **Groups and parallel builds are optional.** The commands can take several issues at once (related, dependent, or
@@ -45,6 +50,13 @@ never lecture, never skip the tests.
 title or a few words saying what it is, e.g. "#21 (note a possible non-Eastern time zone)" or
 "plan agreement (#5)". Nobody memorizes the numbers.
 
+**Picking an issue** (for `/plan`, `/build`, `/review`). `$ARGUMENTS` may be a number, a description ("the nudges
+one") or empty. If it isn't a number, list open issues with the step's label and match it; if it's empty or matches
+more than one, show them as a short numbered list and ask Yanni. Use the chosen number for `$ARGUMENTS` throughout.
+
+**Reading `dev`.** Plan and spec against the newest code: `git fetch origin`; if this folder is a clean `dev` that's
+behind, `git pull --ff-only`; if it's on another branch, read files with `git show origin/dev:<path>`, never by switching.
+
 **Branches and PRs.** `dev` is the default branch and deploys to staging; `main` deploys to production and
 changes only through a release (`/release`, a `dev` → `main` PR, tagged `v<version>`) or a hotfix. Feature work
 (anything from an issue, anything testers would notice, any database change) branches from `dev` and goes
@@ -59,10 +71,12 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `npm run build`: compile to `dist/`.
 - `npm run db:generate`: after editing `src/db/schema.ts`, generate a migration in `drizzle/`. Commit both.
 - `npm run dev`: run locally with `tsx` (needs a `.env`, see `.env.example`).
-- `npm run eval -- <feature> --case <id>`: replays only the regression cases a change touches against the
-  real coach, graded by a separate Claude (about $0.10–0.20 a case). Costs money: **$1 per issue on the branch, up to $3**, enforced
-  (see `eval/README.md`). A full run (no `--case`, $1.30–1.90) only for changes that affect every
-  conversation, and only with Yanni's OK. `npm run check` is free: tests never call Claude.
+- `npm run eval -- <feature> --case <id>`: replays only the cases a change touches against the real coach, graded
+  by Haiku (billed about $0.02 a case plus $0.02 a ZOH reply, nearly all the coach); when done, `--compare` runs
+  each once against the stored baseline, and only the cases it says did worse are rerun with `--runs 3 --compare
+  --store-baseline` (more cases beat more runs; see "How to test a change to ZOH's words" in `eval/README.md`). Costs money: **$1 per issue on the branch, up to $3**, enforced. A full run (no `--case`) only
+  for changes that affect every conversation, with Yanni's OK; `/release` does one at each release.
+  `npm run check` is free: tests never call Claude.
 
 ## Layout
 - `src/index.ts`: startup. `src/wiring.ts`: builds every dependency (production and the eval share it).
@@ -77,9 +91,12 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - `src/db/`: Drizzle schema, queries, migration runner.
 - `src/sendblue/`, `src/claude/`, `src/media/`, `src/transcription/`: one small client each.
 - `test/`: Vitest with an in-memory Postgres (PGlite) and fakes for every outside service.
-- `eval/`: the judgment harness. `docs/coach-voice.md`: how ZOH talks (applies to every feature).
+- `eval/`: the judgment harness, its stored baselines (`eval/baselines/`), the grader check (`npm run grader-check`,
+  known answers in `eval/known/`) and real replays (`npm run real`, read-only). `docs/coach-voice.md`: how ZOH talks
+  (applies to every feature).
 - `docs/reference.md`: infrastructure, decisions to carry forward and outside limits (read once). Where things
   stand is the issue board (`/status`).
+- Memory work: read `docs/memory-design.md` first; the memory lab and synthetic testers: `docs/memory-lab.md`.
 - `docs/workflow.md`: the same flow written for people (setup, commands, habits). Keep it in sync when
   the commands change.
 
@@ -87,6 +104,8 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
 - TypeScript strict. No `any` without a comment saying why.
 - Every outside service sits behind an interface with a fake in `test/helpers.ts`. Tests never call
   Sendblue, Claude, the bucket or Speaches.
+- A test sets up only what comes before the change, never the state the change is meant to produce: run the
+  real code path, so removing the change makes the test fail.
 - Schema changes only through `src/db/schema.ts` + a generated migration. Never edit applied migrations.
 - Never log or commit secrets, API keys or full phone numbers (use `maskNumber`).
 - Webhook handler stays fast: store, answer 2xx, then do slow work in the `TaskQueue`.
@@ -97,14 +116,23 @@ open an issue afterward. Never commit feature work straight to `main`. No requir
   `docs/reference.md` in the same commit or PR.
 - Keep changes to the issue's spec and plan. Product questions go to Yanni; ideas beyond scope
   become `idea` issues, not code.
+- **Simplicity.** Write the least code that meets the spec. Add an abstraction only when something needs it today: a
+  second real use, or the test fake an outside service needs (above). Remove what your change leaves unused (imports,
+  functions, branches), but don't reshape or "tidy" code the issue didn't ask about.
+- **Say so when it's wrong.** If the spec, the plan or a request looks mistaken, say so plainly, with the reason, even
+  after it was approved. Don't build something you think won't work without flagging it first.
 
 ## Changing what ZOH says
 - Two files are live prompts, so edit them with care: **`docs/coach-voice.md`** is read word for word by
-  the coach after onboarding (minus `<!-- people only -->` parts, loaded at startup), and
-  **`src/coach/prompt.ts`** holds the condensed voice and rules for onboarding plus the rules for every
-  phase. Any edit to either changes the live coach: flag it for Yanni, keep the condensed voice in sync
+  the coach after onboarding (minus `<!-- people only -->` parts, loaded at startup), including the rule
+  sections under headings marked `<!-- rules: <key> -->` (#196; four of them are read during onboarding
+  too), and **`src/coach/prompt.ts`** holds the condensed voice and rules for onboarding plus the state
+  block. Any edit to either changes the live coach: flag it for Yanni, keep the condensed voice in sync
   with the page, stay within the prompt budgets, and run the eval cases it touches. Mark sections for
-  features that aren't built yet "Not active yet" (the coach is told not to act on them).
+  features that aren't built yet "Not active yet" (the coach is told not to act on them). Every line ZOH
+  reads is listed in `docs/prompt-inventory.json`: after changing one, `npm run inventory -- --write`.
+- Follow the method in the voice page's people-only header ("How to change what ZOH says", #201): principle,
+  placement, reason, conflicts, a contrasting pair only for a judgment call, then cases, a grader check and a record.
 - Keep instructions lean: sharpen an existing line before adding one, fix the cause rather than the
   instance, keep examples in `eval/cases/` rather than the prompt, and stay within the prompt budgets.
 - When the coach gets something wrong (eval, live or beta): save the exchange as a regression case in

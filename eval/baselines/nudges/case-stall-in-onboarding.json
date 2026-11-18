@@ -1,0 +1,409 @@
+{
+  "feature": "nudges",
+  "id": "case:stall-in-onboarding",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "192fc1507282",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "dfe73593a206"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:stall-in-onboarding#1",
+        "kind": "case",
+        "id": "stall-in-onboarding",
+        "suite": "capability",
+        "title": "Onboarding stalls: one stall nudge picks up where it left off",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I want to stop scrolling in bed, I'm up till 1 most nights",
+          "at": "2026-11-02T16:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Up till 1 is rough, Leo. What time would you actually like to be asleep by?",
+          "at": "2026-11-02T16:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "11 would be amazing",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "11 it is. Where does the phone usually end up when you get into bed?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo, still thinking about getting you asleep by 11 instead of 1. How many hours of sleep do you want to wake up with?",
+          "at": "2026-11-02T19:58:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "sorry, crazy day. on the nightstand, right next to my head lol",
+          "at": "2026-11-02T20:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No worries, Leo. A phone right next to your head makes the scroll easy, so we'll fix that. How many hours of sleep do you want to wake up with?",
+          "at": "2026-11-02T20:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Leo\" and the name is used warmly."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt about the silence; it just picks the thread back up."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct, and matches a coach's energy without overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"No worries\" is accepting, with no guilt about the delay."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no formatting or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no overfamiliar or affectionate language."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The first text skipped the open phone-location question and asked about sleep hours instead; ZOH 2 then repeated that same hours question verbatim."
+          }
+        ],
+        "summary": "ZOH's stalled-onboarding nudge was warm, guilt-free and short, and it used Leo's name. It did not pick up where the conversation left off: it dropped the phone-location question for a new one, then repeated that question verbatim in its reply."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:stall-in-onboarding#2",
+        "kind": "case",
+        "id": "stall-in-onboarding",
+        "suite": "capability",
+        "title": "Onboarding stalls: one stall nudge picks up where it left off",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I want to stop scrolling in bed, I'm up till 1 most nights",
+          "at": "2026-11-02T16:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Up till 1 is rough, Leo. What time would you actually like to be asleep by?",
+          "at": "2026-11-02T16:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "11 would be amazing",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "11 it is. Where does the phone usually end up when you get into bed?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo, still thinking about getting you asleep by 11 instead of 1. When you get there, how many hours of sleep are you aiming for?",
+          "at": "2026-11-02T19:58:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "sorry, crazy day. on the nightstand, right next to my head lol",
+          "at": "2026-11-02T20:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No worries, Leo. Right next to your head makes scrolling almost automatic. If you're asleep by 11, how many hours of sleep are you aiming for?",
+          "at": "2026-11-02T20:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Leo\", their name, as a text ZOH starts itself."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt about the silence; it just resumes the topic."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"No worries, Leo\" accepts the delay without guilt."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and grounded in what Leo just said about the nightstand."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The follow-up asks about sleep hours instead of picking up where the phone ends up at night, the thread it was meant to resume. The reply does build on the nightstand detail."
+          }
+        ],
+        "summary": "ZOH answered Leo's late reply warmly and without guilt, and its follow-up question fit the onboarding. The unanswered-question follow-up, though, jumped to sleep hours instead of picking up the phone-location question it was meant to resume."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:stall-in-onboarding#3",
+        "kind": "case",
+        "id": "stall-in-onboarding",
+        "suite": "capability",
+        "title": "Onboarding stalls: one stall nudge picks up where it left off",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I want to stop scrolling in bed, I'm up till 1 most nights",
+          "at": "2026-11-02T16:55:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Up till 1 is rough, Leo. What time would you actually like to be asleep by?",
+          "at": "2026-11-02T16:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "11 would be amazing",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "11 it is. Where does the phone usually end up when you get into bed?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Hey Leo, I'm still thinking about getting you from 1 am down to lights out by 11. How many hours of sleep would you like to get each night?",
+          "at": "2026-11-02T19:58:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "sorry, crazy day. on the nightstand, right next to my head lol",
+          "at": "2026-11-02T20:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "No worries, Leo. Phone right by your head makes the scroll easy. How many hours of sleep are you hoping to get each night?",
+          "at": "2026-11-02T20:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens \"Hey Leo,\" with their name, warm and unprompted."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says nothing about the silence or the missed reply."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and conversational, with no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, sincere and not overfamiliar."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light acknowledgement of the phone placement, with no guilt or urgency."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The nudge asks about sleep hours instead of picking up the unanswered phone-location question, so it reads as moving on rather than continuing where it left off."
+          }
+        ],
+        "summary": "ZOH timed its follow-up correctly, kept it warm, short and guilt-free, and its reply carried onboarding forward without re-asking the 11 pm or phone-out-of-bedroom details. The main miss is that the self-started text asked about sleep hours instead of picking up the unanswered question about where the phone ends up at night, which is borderline since the reply still moved the conversation on."
+      }
+    }
+  ]
+}

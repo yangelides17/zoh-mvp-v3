@@ -1,0 +1,472 @@
+{
+  "feature": "proof",
+  "id": "case:blurry-never-clears",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:48:30.587Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "46758ad0622d",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "81a17b12a6f2"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:blurry-never-clears#1",
+        "kind": "case",
+        "id": "blurry-never-clears",
+        "suite": "regression",
+        "title": "A blurry photo: a natural clarifying ask, then a warm miss when no real proof comes",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off.",
+          "at": "2026-11-02T16:39:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "bet",
+          "at": "2026-11-02T16:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo blurry.jpg: almost all a blurry dark-red smear, like a finger over the lens; nothing can be made out] done",
+          "at": "2026-11-03T02:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Yanni, nice, you're ahead of the 9:45 mark 🌙 I can't tell what that photo shows though, it's just a blurry dark red. Can you send one more, a selfie in bed with the lights off, so I can check it off?",
+          "at": "2026-11-03T02:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ugh my camera's being weird",
+          "at": "2026-11-03T02:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, cameras pick the worst moments. Try this: open the camera app, flip to the front camera, and wipe the lens. A dark room can make the photo come out as a blur, so a dim lamp or your phone screen light for one second is fine. It's 9:43, so you've got a couple of minutes. Send it when it works 🌙",
+          "at": "2026-11-03T02:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "phone's at 1% I can't keep doing this, just trust me",
+          "at": "2026-11-03T02:43:36.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally fair, Yanni, 1% battery is a real reason. No proof, no check mark tonight, but no hard feelings. If you plug in and get a quick selfie to me before 10, it still counts. Otherwise, phone on the charger, lights out, and we go again tomorrow at 9:45 😴",
+          "at": "2026-11-03T02:43:43.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a selfie in bed, a photo, and names no typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and light, honest that the blur can't be made out, not suspicious."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a photo to send when the camera works; no typed proof named."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs about five sentences with a list of camera tips; well over three."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Easy, friendly tone that keeps the camera problem light."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences; the closing one is long, though only one line of logic."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says it's fair and no hard feelings, warm and not accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "Honestly says it can't make out the blurry photo and asks for one more shot lightly."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": true,
+            "reason": "Asked for other proof first, then closed as a miss, though it left the proof door open."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "After the trust plea it offers a selfie before 10 that still counts, so it keeps asking instead of closing with tomorrow."
+          }
+        ],
+        "summary": "ZOH stayed honest and warm on the unclear blur and kept the camera trouble easy, with no suspicion. It missed the regression point: after the tester asked to be trusted, it reopened the door to a selfie before 10 rather than closing warmly on tomorrow, and its replies ran past the length limit."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:blurry-never-clears#2",
+        "kind": "case",
+        "id": "blurry-never-clears",
+        "suite": "regression",
+        "title": "A blurry photo: a natural clarifying ask, then a warm miss when no real proof comes",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off.",
+          "at": "2026-11-02T16:39:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "bet",
+          "at": "2026-11-02T16:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo blurry.jpg: almost all a blurry dark-red smear, like a finger over the lens; nothing can be made out] done",
+          "at": "2026-11-03T02:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, I can't make this one out. It's a dark maroon blur, with no bed or you in it. Can you send a selfie in bed with the lights off? Even a dim one works, and that's what makes the check mark real 🌙",
+          "at": "2026-11-03T02:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ugh my camera's being weird",
+          "at": "2026-11-03T02:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Camera glitches happen, Yanni. Try flipping to the front camera or closing and reopening the camera app, then send me one more selfie in bed with the lights off. It's 9:43, so you've got a couple of minutes before lights out 🌙",
+          "at": "2026-11-03T02:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "phone's at 1% I can't keep doing this, just trust me",
+          "at": "2026-11-03T02:43:36.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair enough, Yanni. I believe you, but no proof, no check mark tonight. Plug in and get some sleep 🌙 Tomorrow's the one that matters: full step, and a selfie sent before the phone goes down.",
+          "at": "2026-11-03T02:43:43.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a selfie photo as the proof, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, honest and light, with the moon emoji as punctuation and no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a selfie in bed with lights off, a photo, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, no question mark, ending on the request."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Easy and supportive about the camera; 'a couple of minutes before lights out' adds mild time pressure."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a selfie sent before the phone goes down, a photo, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about four sentences, slightly over the one-to-three limit, though it asks no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and not accusing, but 'no proof, no check mark tonight' reads a bit like a rule recital."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "Honestly says it can't make the blurry photo out and asks lightly for another selfie."
+          },
+          {
+            "rule": "change-method",
+            "pass": false,
+            "borderline": true,
+            "reason": "After two proof troubles with a failing camera, it never offers a different proof method such as a voice note."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Honest about the blur, keeps the camera help easy, closes tonight warmly on trust without asking again; the closing is slightly firm."
+          }
+        ],
+        "summary": "ZOH handled the blurry photo honestly and kindly, offered easy camera help, and stopped asking once the tester asked to be trusted. It could have been shorter in the final text and offered a different proof method sooner."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:blurry-never-clears#3",
+        "kind": "case",
+        "id": "blurry-never-clears",
+        "suite": "regression",
+        "title": "A blurry photo: a natural clarifying ask, then a warm miss when no real proof comes",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:42",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Night 2 locked in, Yanni. Same deal tonight: in bed, phone down by 9:45, selfie with the lights off.",
+          "at": "2026-11-02T16:39:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "bet",
+          "at": "2026-11-02T16:40:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo blurry.jpg: almost all a blurry dark-red smear, like a finger over the lens; nothing can be made out] done",
+          "at": "2026-11-03T02:42:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, I'm with you on the \"done.\" That photo came through as a blurry maroon blur though, and I can't see a bed or you in it. 😄 Can you send a quick selfie in bed with the lights off? Then I can give you the check mark.",
+          "at": "2026-11-03T02:42:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ugh my camera's being weird",
+          "at": "2026-11-03T02:43:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, cameras pick the worst moments. Try this: flip to the front camera, tap the screen to focus, and take it with your phone's flash or screen light on. A dim selfie in bed is totally fine. It's almost 9:45, so send it as soon as you've got it.",
+          "at": "2026-11-03T02:43:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "phone's at 1% I can't keep doing this, just trust me",
+          "at": "2026-11-03T02:43:36.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yanni, I believe you, and I'm not doubting you. No proof means no check mark tonight, but that's no big deal. If you can plug in and get one dim selfie in bed before you sleep, it still counts. If not, tomorrow we start fresh at 9:45 and I'll be holding you to it. Sleep well 😴",
+          "at": "2026-11-03T02:43:43.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a selfie in bed with the lights off, which is a photo as proof."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and playful with one emoji as punctuation, no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a selfie as the proof and gives camera tips, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "About four sentences with no question, and the camera tips run long for a short text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and easygoing with no suspicion or pressure."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a dim selfie in bed as the proof, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "About five sentences, well past the three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with the emoji used as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": true,
+            "reason": "Honestly says the photo is unclear and lightly asks for a selfie, but the final text still keeps the ask going."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks for another proof first, then warmly records tonight as a miss when no proof comes."
+          },
+          {
+            "rule": "change-method",
+            "pass": false,
+            "borderline": true,
+            "reason": "Proof trouble recurs (blur, camera, 1% battery), but ZOH never offers a different proof method such as a voice note."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After 'just trust me' ZOH still asks for a selfie before sleep instead of closing warmly on tomorrow's proof, and it runs long."
+          }
+        ],
+        "summary": "ZOH was honest and friendly about the blurry photo and gave a useful camera tip, but its texts ran long and it kept pushing for a selfie after the tester asked to be trusted. The regression case failed because ZOH didn't close it with the right proof for tomorrow and stop asking."
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-import type { RubricRule } from "./features.js";
+import { GROUPS, type Group, type RubricRule } from "./features.js";
+import { DECIDING, GROUP_LABELS, type Comparison, type GroupChange, type GroupScore } from "./score.js";
 import type { Check, GradedConversation, TokenUsage } from "./types.js";
 
 export interface Tally {
@@ -63,6 +64,13 @@ export interface ReportData {
   worst: WorstReply[];
   liveChecks: LiveCheck[];
   diff?: RunDiff;
+  /** #197: scores by group over this run's cases, real replays apart. */
+  groups?: Record<Group, GroupScore>;
+  replayGroups?: Record<Group, GroupScore>;
+  /** #197: compared with the stored baseline, case by case. */
+  comparison?: { main: Comparison; replays?: Comparison; rescripted: string[] };
+  /** The saved report this one re-grades, when it does. */
+  regradedFrom?: string;
   usage: TokenUsage;
   conversations: GradedConversation[];
 }
@@ -129,6 +137,7 @@ function zohTextsWithContext(conv: GradedConversation): { text: string; after?: 
   const out: { text: string; after?: string }[] = [];
   let lastTester: string | undefined;
   for (const line of conv.transcript) {
+    if (line.from === "lookup") continue;
     if (line.from !== "zoh") lastTester = line.text;
     else out.push({ text: line.text, after: lastTester });
   }
@@ -228,10 +237,97 @@ function quote(text: string): string {
     .join("\n");
 }
 
+function points(x: number): string {
+  return `${Math.round(x * 100)}`;
+}
+
+/** "±12", or a plain note with under 3 cases or a margin spanning the whole scale (two alike cases would show a false ±0). */
+function marginText(margin: number | null, cases: number): string {
+  if (margin === null) return "one case, no margin";
+  return cases < 3 || margin >= 1 ? "too few cases for a margin" : `±${points(margin)}`;
+}
+
+function scoreCell(s: GroupScore): string {
+  if (s.rate === null) return "n/a";
+  const m = marginText(s.margin, s.cases);
+  return m.startsWith("±") ? `${pct(s.rate)} ${m}` : `${pct(s.rate)} (${m})`;
+}
+
+/** The group table (#197): one row per group that applied. */
+export function groupTable(groups: Record<Group, GroupScore>): string[] {
+  const out = ["| Group | Score | Cases passing every run |", "| --- | --- | --- |"];
+  for (const g of GROUPS) {
+    const s = groups[g];
+    if (s.cases === 0) continue;
+    out.push(`| ${GROUP_LABELS[g]}${DECIDING.includes(g) ? "" : " (shown, doesn't decide)"} | ${scoreCell(s)} | ${s.everyRun}/${s.cases} |`);
+  }
+  return out;
+}
+
+function changeLine(c: GroupChange): string {
+  const name = GROUP_LABELS[c.group];
+  const style = DECIDING.includes(c.group) ? "" : " Style doesn't decide.";
+  const moved = c.diff === null ? "" : `${c.diff >= 0 ? "+" : "−"}${points(Math.abs(c.diff))} points, ${marginText(c.margin, c.cases)}`;
+  const span = `${pct(c.before)} → ${pct(c.after)} on the same ${c.cases === 1 ? "case" : `${c.cases} cases`} (${moved})`;
+  if (c.verdict === "worse") return `${style ? "" : "⚠ "}**${name} got worse beyond noise:** ${span}.${style}`;
+  if (c.verdict === "better") return `**${name} got better beyond noise:** ${span}.${style}`;
+  return `${name}: ${span}, within noise.${style}`;
+}
+
+/** The comparison in plain words, for the report and the console (#197). */
+export function comparisonLines(cmp: NonNullable<ReportData["comparison"]>, label: (id: string) => string = (id) => id, feature?: string): string[] {
+  const { main } = cmp;
+  const worse = main.groups.filter((g) => g.verdict === "worse" && DECIDING.includes(g.group));
+  const problems = worse.length + main.drops.length;
+  const out = [
+    problems === 0
+      ? "**Nothing got worse beyond noise.**"
+      : `⚠ **${problems} thing${problems === 1 ? "" : "s"} got worse beyond noise** (${[worse.length ? `${worse.length} group${worse.length === 1 ? "" : "s"}` : "", main.drops.length ? `${main.drops.length} regression case${main.drops.length === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ")}): read those transcripts before deciding.`,
+    "",
+  ];
+  for (const g of main.groups) if (g.cases > 0) out.push(`- ${changeLine(g)}`);
+  if (main.groups.every((g) => g.cases === 0)) out.push("- No case here has a baseline yet, so nothing was compared.");
+  out.push("");
+  if (main.drops.length) {
+    out.push("Regression cases that got worse beyond noise:");
+    for (const d of main.drops) {
+      out.push(`- ⚠ \`${d.id}\` (${d.title}): ${GROUP_LABELS[d.group]} passed ${d.before.passes}/${d.before.runs} runs before, ${d.after.passes}/${d.after.runs} now${d.after.failed.length ? `; failed ${d.after.failed.map(label).join(", ")}` : ""}.`);
+    }
+  } else out.push("No regression case got worse beyond noise.");
+  // Nov 15: a comparison runs each case once, so a single case can't be beyond noise; these get rerun 3 times.
+  if (main.slipped.length) {
+    const flags = main.slipped.map((id) => id.replace(/^(case|scenario):/, (_, kind: string) => `--${kind} `)).join(" ");
+    out.push("", `Did worse than the baseline, not beyond noise: ${main.slipped.map(label).join(", ")}. Rerun them 3 times to tell: npm run eval -- ${feature ?? "<feature>"} ${flags} --runs 3 --compare`);
+  }
+  if (main.ready.length) {
+    out.push("", `Ready to graduate (capability cases that passed every run in the baseline and again now): ${main.ready.map((id) => `\`${id}\``).join(", ")}. Set \`"suite": "regression"\` in their case files.`);
+  }
+  if (main.unmatched.length) out.push("", `No baseline yet, so not compared: ${main.unmatched.map((id) => `\`${id}\``).join(", ")}.`);
+  if (cmp.rescripted.length) out.push("", `Their script changed since the baseline, so they count as new: ${cmp.rescripted.map((id) => `\`${id}\``).join(", ")}.`);
+  if (cmp.replays && cmp.replays.groups.some((g) => g.cases > 0)) {
+    out.push("", "Real replays (reported apart, never tuned against):");
+    for (const g of cmp.replays.groups) if (g.cases > 0) out.push(`- ${changeLine(g)}`);
+  }
+  return out;
+}
+
 export function renderMarkdown(r: ReportData): string {
   const lines: string[] = [];
   const label = new Map(r.rubric.map((x) => [x.id, x.label]));
   lines.push(`# Coach judgment: ${r.feature}`, "");
+  if (r.regradedFrom) lines.push(`Re-graded from ${r.regradedFrom} with the current checks; no conversation was run again.`, "");
+  if (r.groups) {
+    lines.push(
+      "## Scores by group",
+      "",
+      "A conversation passes a group only if every check in it passed. Each case's runs are averaged first; ± is the 95% margin across cases.",
+      "",
+      ...groupTable(r.groups),
+      "",
+    );
+    if (r.replayGroups && GROUPS.some((g) => r.replayGroups![g].cases > 0)) lines.push("Real replays, apart (never tuned against):", "", ...groupTable(r.replayGroups), "");
+  }
+  if (r.comparison) lines.push("## Compared with the baseline", "", ...comparisonLines(r.comparison, (id) => `\`${id}\``, r.feature), "");
   lines.push(
     `Run ${r.startedAt} → ${r.finishedAt}. Coach model \`${r.models.coach}\`, simulator \`${r.models.sim ?? r.models.eval}\`, grader \`${r.models.eval}\`.${r.costUsd !== undefined ? ` Cost about $${r.costUsd.toFixed(2)}.` : ""}`,
     `${r.conversations.length} conversations (runs per scenario: ${r.options.runs}, turn cap: ${r.options.maxTurns}${r.options.persona ? `, persona: ${r.options.persona}` : ""}${r.options.cases?.length ? `, cases: ${r.options.cases.join(", ")}` : ""}). Tokens used by the simulator and grader: ${r.usage.input.toLocaleString("en-US")} in, ${r.usage.output.toLocaleString("en-US")} out.`,
@@ -295,6 +391,7 @@ export function renderMarkdown(r: ReportData): string {
     for (const l of conv.transcript) {
       if (l.from === "tester") lines.push(`**Tester:** ${l.text}`, "");
       else if (l.from === "founder") lines.push(`**Founder (console):** ${l.text}`, "");
+      else if (l.from === "lookup") lines.push(`_ZOH looked up: ${l.text}_`, "");
       else {
         n += 1;
         lines.push(`**ZOH ${n}${l.console ? " (console)" : ""}:** ${l.text.replace(/\n/g, "  \n")}`, "");
@@ -330,6 +427,15 @@ export function summaryLines(r: ReportData, files: { md: string; json: string })
         .map(([p, t]) => `${p} ${pct(t.rate)}`)
         .join(", "),
   ];
+  if (r.groups) {
+    out.push(
+      "By group: " +
+        GROUPS.filter((g) => r.groups![g].cases > 0)
+          .map((g) => `${GROUP_LABELS[g].toLowerCase()} ${scoreCell(r.groups![g])}`)
+          .join(", "),
+    );
+  }
+  if (r.comparison) out.push("", ...comparisonLines(r.comparison, (id) => id, r.feature).filter((l) => l !== "").map((l) => l.replace(/\*\*/g, "")), "");
   const weakest = Object.entries(r.summary.rules)
     .sort((a, b) => (a[1].rate ?? 1) - (b[1].rate ?? 1))
     .slice(0, 5)

@@ -1,0 +1,252 @@
+{
+  "feature": "plan",
+  "id": "case:plan-with-destination",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5d9e0db6401a",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "ceb2f98ba37a"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:plan-with-destination",
+        "kind": "case",
+        "id": "plan-with-destination",
+        "title": "First plan with a destination: day 1 fully defined, a line on how it progresses, no path",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I log my walks on Strava already",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, Strava it is. Is there something you're working toward with running?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Yeah I want to run a mile without stopping by Nov 14. Mon, Wed and Fri work best",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "A mile by Nov 14 is a great target, and starting from zero with Strava already in your pocket gives us a real edge. Here's the plan:\n\n• Headed for: a mile without stopping by Nov 14\n• Day 1 is today: around your block, 5 rounds of 1 min easy jog + 2 min walk (15 min)\n• Pace: easy enough that you could hold a conversation\n• Schedule: Mon, Wed, Fri at 6:30 pm\n• Proof: a Strava screenshot of the activity\n• Why: run/walk intervals build you up safely from zero, and the jog minutes grow as you get stronger\n\nEach day shapes the next step, so the jogging stretches get longer as you show me you're ready. Easy alternative on proof: a voice note if Strava acts up.\n\nWhat do you think?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "love it",
+          "at": "2026-11-02T17:00:51.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad it's landing, Sam. Today's the first day, 6:30 pm around your block, and you're about to start building toward that mile. Are you committing to this plan?",
+          "at": "2026-11-02T17:00:58.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in!",
+          "at": "2026-11-02T17:01:20.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Sam! 🔥 Day 1 is today at 6:30 pm around your block. Screenshot from Strava when you're done, and let's get this mile.",
+          "at": "2026-11-02T17:01:27.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text runs about 9 lines including bullets, near the roughly 8-line allowance for presenting a plan."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, confident energy with no emoji row and no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the mile, Nov 14, Strava, the block and 6:30 pm that Sam gave, plus ZOH's own run/walk suggestion."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives where (around the block), what (1 min jog and 2 min walk), how much (5 rounds, 15 min) and when (today, 6:30 pm)."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no emoji or affection beyond the name."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the details already in the plan."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Restates the time and place but not the length or what to do, though the full step was given in the previous text."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences confirming the lock."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with a single emoji at the end of the beat, no row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no new claims about Sam."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives the day and place but not the length or the steps, which were set in the earlier plan text."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "All needed inputs were gathered before the plan, and no extra questions followed a closing line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete plan with what, how much, where, when, which days, and a Strava screenshot as proof that fits how Sam tracks."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the mile destination, day 1 step, schedule and proof, plus a short progression line with no list of future steps."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": true,
+            "reason": "Asks 'Are you committing to this plan?' in natural words, a real ask, though fairly close to a stock phrasing."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 6:30 pm, with no pushback to answer."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "Quiet hours are never raised after the lock."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a bullet list in the text ending with a question, and the lock followed a clear 'I'm in!'."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The plan opens with a line on the mile and starting from zero, shows the destination, day 1, schedule and Strava proof, adds a progression line and ends with one question."
+          }
+        ],
+        "summary": "ZOH delivered a concrete, well-shaped first plan that matches the regression case: a specific opener, the Nov 14 mile destination, a fully defined day 1, the Mon/Wed/Fri schedule, a Strava proof and a progression line. The commitment ask and lock were natural, with only minor borderline points on plan length and the later texts not restating the full step."
+      }
+    }
+  ]
+}

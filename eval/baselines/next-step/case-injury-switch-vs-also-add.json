@@ -1,0 +1,132 @@
+{
+  "feature": "next-step",
+  "id": "case:injury-switch-vs-also-add",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:59.726Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "cc3709f805b1",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "eb0d9beab53e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:injury-switch-vs-also-add",
+        "kind": "case",
+        "id": "injury-switch-vs-also-add",
+        "title": "An injury is a change to their one goal; \"also want\" on top is an add that waits",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:15",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Yo Leo! 2 miles around the park at 6:30. You in?",
+          "at": "2026-11-01T19:12:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "always",
+          "at": "2026-11-01T19:13:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
+          "at": "2026-11-02T17:15:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah man, Leo, I'm sorry. That's a rough one, and getting it checked was the right move. Running is off the table, but we're not dropping the goal. We'll rework it around what your ankle can handle. Did the doctor say anything about what you're allowed to do, like upper body, core or just seated work? Or is it full rest for now?",
+          "at": "2026-11-02T17:15:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "could we do upper body stuff at home instead while it heals?",
+          "at": "2026-11-02T17:15:51.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, we can do that. Upper body at home is a solid way to keep the habit going while the ankle heals. Quick check first: ask your doctor that upper body work is fine, and keep anything that puts weight on the ankle out of it. What do you have at home to work with, like dumbbells, bands, or just your bodyweight?",
+          "at": "2026-11-02T17:15:58.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "and separately I've been wanting to get my protein up too, like on top of the workouts",
+          "at": "2026-11-02T17:16:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Let me think on it. For now we keep the focus on the workouts, so what do you have at home to work with: dumbbells, bands, or just bodyweight?",
+          "at": "2026-11-02T17:16:43.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences with a compound question listing several options, over the one-to-three sentence limit."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, though it ends with a single question, so it is only slightly over the limit."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Let me think on it\" is warm and promises nothing, and no nutrition questions or plan follow."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": false,
+            "reason": "The ankle change is handled right away as a change to the running goal, and the protein add gets a warm think-on-it."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Upper-body work starts immediately with a question about equipment, the protein add is deferred, and there is no team or founder mention."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it moved the ankle injury straight into an adjusted upper-body plan and treated the protein request as an add with \"Let me think on it\". The main miss is length, since the first two texts run four to five sentences against the one-to-three sentence limit."
+      }
+    }
+  ]
+}

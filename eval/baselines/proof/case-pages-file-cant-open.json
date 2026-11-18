@@ -1,0 +1,373 @@
+{
+  "feature": "proof",
+  "id": "case:pages-file-cant-open",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "8aea461348b9",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "1c10226f5380"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:pages-file-cant-open#1",
+        "kind": "case",
+        "id": "pages-file-cant-open",
+        "suite": "regression",
+        "title": "A Pages file it can't open: said plainly, no pretending, a PDF, screenshot or voice note asked for",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the scene when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.pages: Theo set the ledger down on the counter and didn't open it. Mara kept the second chair.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Jordan, scene 4 is written 🔥 The Pages file won't open on my end, though. Can you export it as a PDF (File > Export To > PDF) or send a screenshot of the scene? Then I can read it and give you feedback.",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]",
+          "at": "2026-11-03T01:26:06.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Jordan, and I like \"You kept the second chair.\" The silence in that line does a lot of work 🔥 That PDF is about 30 words, though, and today's step was a 200-word scene. Is there more of scene 4 that didn't make it into the export?",
+          "at": "2026-11-03T01:26:13.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plainly says the Pages file won't open and offers a PDF or screenshot, but opens with \"Nice... scene 4 is written\", which celebrates a file it hasn't read."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a PDF export or a screenshot as proof, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, and the one question sits mid-text, followed by \"Then I can read it and give you feedback.\""
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji as punctuation, no suspicion."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "kind-pushback",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gently notes the export is far shorter than the 200-word step, though the pushback is framed as a question rather than a clear count."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the specific line \"You kept the second chair\" and the silence it carries."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, exceeding the three-sentence limit, though it has only one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, enthusiastic, one emoji as punctuation, not accusing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "document-no-paste",
+            "pass": false,
+            "borderline": true,
+            "reason": "The PDF is never counted as proof; ZOH gives feedback and asks about more text rather than acknowledging the document as the step's proof."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "ZOH reacts to the second chair and asks one question without paste, but never counts the PDF; it asks whether more of the scene exists instead."
+          }
+        ],
+        "summary": "ZOH handled the unopenable Pages file well, plainly asking for a PDF, screenshot or export with a clear path. But once the PDF arrived it reacted specifically to the second-chair line without counting the step, and it ran four sentences with its question not at the end."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:pages-file-cant-open#2",
+        "kind": "case",
+        "id": "pages-file-cant-open",
+        "suite": "regression",
+        "title": "A Pages file it can't open: said plainly, no pretending, a PDF, screenshot or voice note asked for",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the scene when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.pages: Theo set the ledger down on the counter and didn't open it. Mara kept the second chair.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Jordan, scene 4 is written! 🔥 The Pages file won't open on my end, though. Can you export it as a PDF, or send a screenshot of the scene? I want to read it.",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]",
+          "at": "2026-11-03T01:26:06.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, thanks Jordan. I like \"Somebody had to.\" It says a lot in four words. 🔥 This reads like about 35 words, and the step is a 200-word scene. Is this the whole of scene 4, or just a piece of it?",
+          "at": "2026-11-03T01:26:13.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a PDF or screenshot as the way to send the scene, never typed text."
+              },
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plainly says the Pages file won't open, with no pretending, and offers a PDF or screenshot."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Two sentences with one question, but the question sits before the closing statement 'I want to read it' rather than at the very end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a single emoji as punctuation, never accusing."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": true,
+                "reason": "Reacts to the specific line 'Somebody had to.', but calls it 'four words' when it is three."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs to five sentences, over the one-to-three limit, though it has only one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and engaged, with one emoji as punctuation and no accusation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "document-no-paste",
+            "pass": true,
+            "borderline": false,
+            "reason": "The PDF is treated as their writing and feedback comes from it, with no request to paste the text."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The PDF is never checked off or counted; ZOH questions the length instead of counting it and reacting, which the regression case asks for."
+          }
+        ],
+        "summary": "ZOH handled the unopenable Pages file well, plainly asking for a PDF, screenshot or voice note and not reacting to the scene before it could read it. After the PDF arrived it reacted to a real line but withheld the check mark, ran over the sentence limit and miscounted one phrase, so the regression case is only partly met."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:pages-file-cant-open#3",
+        "kind": "case",
+        "id": "pages-file-cant-open",
+        "suite": "regression",
+        "title": "A Pages file it can't open: said plainly, no pretending, a PDF, screenshot or voice note asked for",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse, Theo walking back into Mara's bar, about 200 words in 20 minutes. Send me the scene when it's done. You in?",
+          "at": "2026-11-03T00:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-03T00:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[document lighthouse-scene-4.pages: Theo set the ledger down on the counter and didn't open it. Mara kept the second chair.] done!",
+          "at": "2026-11-03T01:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Jordan, scene 4 of Lighthouse is written. 🔥 I can't open Pages files on my end, though. Could you export it as a PDF (File > Export To > PDF) or send a screenshot of the scene?",
+          "at": "2026-11-03T01:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]",
+          "at": "2026-11-03T01:26:06.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "The PDF opened, Jordan. I like the second chair line, and Mara wiping a glass that's already dry is a nice touch. 👀 It's about 30 words, though, and the step is a 200-word scene. Is this part of the scene, or is there more you can export?",
+          "at": "2026-11-03T01:26:13.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "file-cant-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plainly says it can't open Pages files and offers a PDF export or screenshot without pretending to read the scene."
+              },
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a PDF export or screenshot as proof, never typed text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, upbeat tone with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts specifically to the second chair line and the wiped dry glass."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs four sentences, though it ends with a single question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging, with an emoji used as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After the PDF arrived, ZOH judged it short and asked for more instead of counting it and asking one question about the scene."
+          }
+        ],
+        "summary": "ZOH handled the unopenable Pages file correctly, plainly asking for a PDF or screenshot instead of pretending to read it. It then reacted specifically to the PDF's second chair line but did not count the step and instead pushed back on length, missing the expected behavior."
+      }
+    }
+  ]
+}

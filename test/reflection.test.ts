@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach, NOT_SENT_NOTE } from "../src/coach/coach.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, NUDGES, partsFor, PROOF, TODAYS_STEP } from "../src/coach/prompt.js";
 import { loadCoachState, loadDaySummary } from "../src/coach/state.js";
-import { runTool, type ReplyStart } from "../src/coach/tools.js";
-import { messages, plans, stepDays, takeaways, testers, type Tester } from "../src/db/schema.js";
+import { runTool } from "../src/coach/tools.js";
+import { messages, nudges, plans, stepDays, takeaways, testers, type Tester } from "../src/db/schema.js";
 import { zonedTime } from "../src/nudges/schedule.js";
 import { setFocusGoal } from "../src/testers/goals.js";
 import { getTester, resetTester, updateTester } from "../src/testers/testers.js";
@@ -81,8 +81,8 @@ async function say(direction: "inbound" | "outbound", when: Date, content: strin
 const me = async () => (await getTester(t.db, (await t.db.select().from(testers))[0]!.id))!;
 const state = async (now: Date, lastTesterText = "") => loadCoachState(t.db, await me(), { now, isFirstText: false, lastTesterText });
 const block = async (now: Date) => buildStateBlock(await state(now));
-const tool = async (name: string, input: unknown, now: Date, lastTesterText = "", start?: ReplyStart) =>
-  runTool(t.db, await state(now, lastTesterText), name, input, now, start);
+const tool = async (name: string, input: unknown, now: Date, lastTesterText = "") =>
+  runTool(t.db, await state(now, lastTesterText), name, input, now);
 const row = async (date: string) => (await t.db.select().from(stepDays).where(eq(stepDays.date, date)))[0];
 
 /** Monday's step done with a Strava screenshot at 7:30 pm. */
@@ -92,13 +92,32 @@ async function doneMonday() {
 }
 
 const NEXT = "2 min jog, 1 min walk, 4 rounds on your block at 6:30 pm";
+/** #211: what the next step's own section opens with, to tell whether a reply read it. */
+const NEXT_STEP_GUIDANCE = "THE NEXT STEP (no reflection open";
 
-/** #131: a real reflection in an earlier reply (asked 7:31, answered and saved 7:32), so a proposal after it isn't early. */
+/**
+ * #131, #157: a reflection that's run its course in earlier replies, so a proposal after it isn't early: how it went
+ * and what went well (7:32), then one question deeper on something they said, answered (7:34).
+ */
 async function reflected() {
   await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
-  await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3");
-  await tool("save_reflection", { summary: "Harder than expected: the hill in round 3", how_it_went: true, take: "Full step, hill was hard." }, at(MON, "19:32"));
+  await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3. but slowing down on the flat parts worked");
+  await tool(
+    "save_reflection",
+    { summary: "Hill in round 3 was hard; slowing on the flats worked", how_it_went: true, went_well: "Slowing down on the flats kept them going", take: "Full step, hill was hard." },
+    at(MON, "19:32"),
+  );
+  await say("outbound", at(MON, "19:33"), "What happened on the hill?");
+  await say("inbound", at(MON, "19:34"), "I sprinted the start of it and ran out of gas halfway");
+  // #211: ZOH lands it once it understands what happened, which opens the next step.
+  const landed = await tool(
+    "save_reflection",
+    { summary: "Sprinted the hill's start, gassed halfway; slowing on the flats worked", how_it_went: true, take: "Pacing on hills is the gap.", landed: "Pacing is the gap: sprinting the hill's start gassed them" },
+    at(MON, "19:34"),
+  );
+  expect(landed).toMatchObject({ ok: true, message: expect.stringContaining("landed") });
 }
+
 
 describe("takeaways", () => {
   it("saves with its evidence and day, and shows on the following days with its age", async () => {
@@ -119,8 +138,11 @@ describe("takeaways", () => {
     expect(await tool("save_takeaway", { text: "Slow enough to talk is the right pace", evidence: "recalled" }, at(WED, "18:50"))).toMatchObject({ ok: true });
     const wed = await block(at(WED, "19:00"));
     expect(wed).toContain(
-      'Takeaways, newest first (bring one back now and then, or build it into a step; see PROOF):\n- today (Wed): "Slow enough to talk is the right pace" (recalled)\n- 2 days ago (Mon): "Slow enough to talk is the right pace" (explained)',
+      'Takeaways, newest first:\n- today (Wed): "Slow enough to talk is the right pace" (recalled)\n- 2 days ago (Mon): "Slow enough to talk is the right pace" (explained)',
     );
+    // #199: bringing one back or building it into a step is PROOF's and TODAY'S STEP's guidance, not the sheet's.
+    expect(PROOF).toContain("Recall: now and then, about 1, 3 and 7 days on, bring one back in a check-in or the conversation");
+    expect(TODAYS_STEP).toContain("Build an earlier takeaway in when it fits (about 1, 3 and 7 days on)");
   });
 
   it("shows only the last two weeks, and is gone after a reset", async () => {
@@ -158,10 +180,10 @@ describe("reflection", () => {
     await doneMonday();
     expect(await block(at(MON, "19:31"))).toContain("Today's reflection: none yet.");
     expect(await block(at(MON, "19:31"))).toContain(
-      'They haven\'t said how it went for them yet (how it felt, how hard, room for more; a lesson, what got in the way or a thin "okay" isn\'t that): find out before any next step, unless they\'re rushed or say skip.',
+      "They haven't said how it went for them yet.",
     );
     await tool("save_reflection", { summary: "Easier when slower", how_it_went: true, take: "Slowed down, felt good." }, at(MON, "19:40"));
-    expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went.');
+    expect(await block(at(MON, "19:41"))).toContain('Today\'s reflection: "Easier when slower". They\'ve said how it went for them.');
     expect(await block(at(WED, "09:00"))).toContain(`- Mon ${MON}, done: the plan's step (proof: Strava run, 1.2 mi; reflection: Easier when slower)`);
   });
 
@@ -175,16 +197,18 @@ describe("reflection", () => {
     await setup();
     await say("outbound", at(MON, "18:50"), "Starts in 10, Sam!");
     await doneMonday();
-    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today: celebrate and ask one question (how it went; or, if their proof already says, a gap that matters or deeper on something they said); the next step waits for a later text, even when they've said what they want next, unless they're rushed or done talking.");
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today.");
     // They said how it went early, so the talk runs on its content, not a count.
     await tool("save_reflection", { summary: "Felt easy, slower pace helped", how_it_went: true, take: "Easy, wants more." }, at(MON, "19:30"));
     const times = ["19:31", "19:33", "19:35", "19:37", "19:41", "19:43", "19:45"];
     for (const [i, hhmm] of times.entries()) {
       await say("outbound", at(MON, hhmm), `reply ${i}`);
       await say("inbound", at(MON, hhmm.replace(/.$/, "9")), "more");
-      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today: follow what they just said: if it opens something");
+      if (i === 3) expect(await block(at(MON, "19:39"))).toContain("This reply is your 5th text since their proof today.");
     }
-    expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today: wrap up now unless they're clearly still going, then the next step.");
+    // #199: the sheet says it's long (a fact); wrapping up is PROOF's guidance, with its reason.
+    expect(await block(at(MON, "19:50"))).toContain("This reply is your 8th text since their proof today. That's a long talk, past the usual length of a reflection.");
+    expect(PROOF).toContain("A talk the state calls long is time to wrap up, since their time matters as much as the talk");
     // A text ZOH starts isn't part of the exchange.
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(MON, "19:50"), isFirstText: false, nudgeMoment: "followup" }));
     expect(nudge).not.toContain("since their proof");
@@ -202,37 +226,19 @@ describe("reflection probes thin answers and waits before the next step (#131)",
       if (i < replies - 1) await say("outbound", at(MON, `19:3${3 + i * 2}`), "What made it okay?");
     }
   }
-  const FIND_OUT = "find out first: a thin answer is an opening, so ask what's behind it, tied to their proof, never guessing what it means; the next step waits, unless they're rushed or say skip: then the next step";
-
-  it("a thin answer keeps the guard: saved, not said, and the next step waits at texts 2 and 3", async () => {
+  it("#157: the state says what has happened, as facts; how to talk is the voice page's job", async () => {
     await setup();
     await talk(1);
     // "okay" is saved as thin: the coach marks how it went false (tool description), so it isn't said.
     expect(await tool("save_reflection", { summary: 'Said it felt "okay"', how_it_went: false, take: "Thin so far." }, at(MON, "19:32"))).toMatchObject({ ok: true });
     expect(await row(MON)).toMatchObject({ reflection: 'Said it felt "okay"', howItWentSaid: false });
-    const second = await block(at(MON, "19:32"));
-    expect(second).toContain('Today\'s reflection: "Said it felt "okay"". They haven\'t said how it went for them yet');
-    expect(second).toContain(`This reply is your 2nd text since their proof today: ${FIND_OUT}.`);
-    expect(second).not.toContain("follow what they just said");
-    await say("outbound", at(MON, "19:33"), "What made it okay?");
-    await say("inbound", at(MON, "19:34"), "dunno, fine");
-    expect(await block(at(MON, "19:34"))).toContain(`This reply is your 3rd text since their proof today: ${FIND_OUT}.`);
-  });
-
-  it("the next step never comes from the count alone: little back twice wraps up warmly at text 4; a real answer turns to the balance line", async () => {
-    await setup();
-    await talk(3);
-    expect(await block(at(MON, "19:37"))).toContain("This reply is your 4th text since their proof today: they've given little back twice: wrap up warmly now, no more questions, then the next step.");
-    // Once there's something real, the talk runs on content and the next step comes when it shapes it.
-    await tool("save_reflection", { summary: "Okay, but the hill in round 2 was brutal", how_it_went: true, take: "Hill was hard." }, at(MON, "19:37"));
-    const real = await block(at(MON, "19:37"));
-    expect(real).toContain("They've said how it went.");
-    expect(real).toContain(
-      "follow what they just said: if it opens something (a worry, a difficulty, what clicked, a reason), ask about that, one question, before any reassurance or proposal; if not, new ground (how it felt, how hard, room for more). What they want for tomorrow is noted, not the end. Move on only once a reply gives you nothing new to follow, or they've run out; then the next step (PROOF)",
-    );
-    // Rushed and "skip" are the coach's call from their words: the not-said line names them as the way out.
-    await t.db.update(stepDays).set({ howItWentSaid: false }).where(eq(stepDays.date, MON));
-    expect(await block(at(MON, "19:37"))).toContain("find out before any next step, unless they're rushed or say skip.");
+    const thin = await block(at(MON, "19:32"));
+    expect(thin).toContain('Today\'s reflection: "Said it felt "okay"". They haven\'t said how it went for them yet. This reply is your 2nd text since their proof today.');
+    await tool("save_reflection", { summary: "Okay, but the hill in round 2 was brutal", how_it_went: true, take: "Hill was hard." }, at(MON, "19:33"));
+    const real = (await block(at(MON, "19:33"))).split("\n").find((l) => l.includes("Today's reflection:"))!;
+    expect(real).toContain("They've said how it went for them.");
+    // No orders about what to ask or when to move on, and no checklist to fish from.
+    for (const order of ["ask ", "find out", "wrap up warmly", "follow what they just said", "Covered so far", "Before the next step"]) expect(real).not.toContain(order);
   });
 
   it("a next step is agreed only after it's been shown: never in the reply that first saves it", async () => {
@@ -332,7 +338,9 @@ describe("reflection that gets to know them (#93)", () => {
   it("yesterday's step done with no word on how it went: picked up in a line when they text, never in a text ZOH starts", async () => {
     await setup();
     await doneMonday();
-    expect(await block(at(TUE, "10:00"))).toContain("Yesterday's step was done with no word on how it went: you may pick it up in a line now");
+    // #199: the sheet states it; picking it up in a line, once, never chased, is PROOF's guidance.
+    expect(await block(at(TUE, "10:00"))).toContain("Yesterday's step was done with no word yet on how it went.");
+    expect(PROOF).toContain("Yesterday's step done with no word yet on how it went (state): you may pick it up in a line when they text, once (save_reflection day yesterday); never chase it");
     const nudge = buildStateBlock(await loadCoachState(t.db, await me(), { now: at(TUE, "10:00"), isFirstText: false, nudgeMoment: "rest_day" }));
     expect(nudge).not.toContain("Yesterday's step was done");
     // Once they've said, or for a day from before it was recorded, nothing.
@@ -368,14 +376,16 @@ describe("the next step, agreed at the wrap-up", () => {
 
     const wed = await block(at(WED, "09:00"));
     expect(wed).toContain(`Today's step (set, holds for today): "${NEXT}"`);
-    expect(wed).toContain("They said yes to today's step ahead of time (Mon 7:55 PM): the kickoff reminds them of it (with any tip), and its one question checks they're still in, in words that show they already said yes");
+    // #199: the sheet states the yes came ahead; reminding and checking they're still in is the kickoff's guidance (NUDGES).
+    expect(wed).toContain("They said yes to it ahead of time, on an earlier day (Mon 7:55 PM).");
+    expect(NUDGES).toContain("still in when they agreed ahead (state): then remind them of it, with any tip, and end by asking if they're still in, in words that show they already said yes, never a first-time \"you in?\"");
     expect(wed).not.toContain("asks nothing");
 
     // The kickoff that morning writes with that state.
     const model = new FakeClaudeModel("Morning Sam! 2 on, 1 off, 4 rounds tonight at 6:30. Same rule: slow enough to talk.");
     const coach = createCoach({ db: t.db, model, voice: "v" });
     await coach.nudge!({ tester: await me(), turns: [], now: at(WED, "09:00"), moment: "kickoff" });
-    expect(model.stateOf()).toContain("ahead of time (Mon 7:55 PM): the kickoff reminds them of it");
+    expect(model.stateOf()).toContain("They said yes to it ahead of time, on an earlier day (Mon 7:55 PM)");
   });
 
   it("a changed step without a new yes is asked fresh; with a yes it stays agreed (#92)", async () => {
@@ -408,142 +418,277 @@ describe("the next step, agreed at the wrap-up", () => {
   it("a yes the same day is settled as before (#42)", async () => {
     await setup();
     await tool("set_today_step", { kind: "same", step: NEXT, agreed: true }, at(WED, "08:30"), "yes");
-    expect(await block(at(WED, "08:31"))).toContain("They said yes to today's step (Wed 8:30 AM): it's settled.");
+    // #199: "settled" is the fact; not re-saying it is TODAY'S STEP's guidance.
+    expect(await block(at(WED, "08:31"))).toContain("They said yes to it today (Wed 8:30 AM): settled.");
+    expect(TODAYS_STEP).toContain("Once they've said yes (settled), don't re-say it or its proof, or ask if they're still on");
   });
 });
 
-describe("the next step waits once in the reflection: a soft hold with a way through (#131)", () => {
-  const EARLY = "Not saved, and early:";
-  const propose = (now: Date, extra: object = {}, start?: ReplyStart) => tool("set_today_step", { step: NEXT, kind: "same", day: "next", ...extra }, now, "", start);
-  const thin = (when: Date) => tool("save_reflection", { summary: 'Said it felt "okay"', how_it_went: false, take: "Thin so far." }, when);
-  const real = (when: Date) => tool("save_reflection", { summary: "Asking for his time feels like bothering him", how_it_went: true, take: "A worry about outreach." }, when);
-
-  it("in the text that celebrates their proof: pushed back, nothing saved; with a reason it goes (they asked for it, rushed)", async () => {
+describe("what a reply can and can't record", () => {
+  it("#157: an empty optional line doesn't fail the save (it would leave the state behind and hold the step)", async () => {
     await setup();
     await doneMonday();
-    const early = await propose(at(MON, "19:30"));
-    expect(early).toMatchObject({ ok: false, error: expect.stringContaining(`${EARLY} this text celebrates their proof`) });
-    expect(early).toMatchObject({ error: expect.stringContaining("Don't give the next step in this text") });
-    expect(await row(WED)).toBeUndefined();
-    // Risk: a tester who's rushed or asks "what's tomorrow?" is never held up for a question.
-    expect(await propose(at(MON, "19:30"), { ready: 'Rushed: "done, gotta run"' })).toMatchObject({ ok: true });
-    expect(await row(WED)).toMatchObject({ step: NEXT, agreedAt: null });
+    const saved = await tool("save_reflection", { summary: "20 min, about right", how_it_went: true, in_the_way: "", went_well: " ", take: "Short answers." }, at(MON, "19:33"));
+    expect(saved).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ howItWentSaid: true, inTheWay: null, wentWell: null });
   });
 
-  it("a reason has to say something: an empty one doesn't get through", async () => {
-    await setup();
-    await doneMonday();
-    expect(await propose(at(MON, "19:30"), { ready: "  " })).toMatchObject({ ok: false });
-    expect(await row(WED)).toBeUndefined();
-  });
-
-  it("risk: a reflection that was already real when the reply began gets no forced extra question", async () => {
-    await setup();
-    await doneMonday();
-    // A rich voice note: saved as real with ZOH's 1st text, which asked its one question.
-    await real(at(MON, "19:31"));
-    await say("outbound", at(MON, "19:31"), "That's real. What made the asking feel like bothering him?");
-    await say("inbound", at(MON, "19:33"), "he's busy, but he did offer to help");
-    expect(await propose(at(MON, "19:33"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
-  });
-
-  it("the reply with their first real answer is pushed back once; the next reply goes, so at most one more exchange", async () => {
-    await setup();
-    await doneMonday();
-    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
-    await say("inbound", at(MON, "19:32"), "a little awkward");
-    await thin(at(MON, "19:32"));
-    await say("outbound", at(MON, "19:33"), "Which part felt most awkward?");
-    await say("inbound", at(MON, "19:34"), "Asking for his time. I worry I'm bothering him.");
-    // This reply saves it as real, then proposes: the reply began thin, so it's early.
-    await real(at(MON, "19:34"));
-    expect(await propose(at(MON, "19:34"), {}, { howItWentSaid: false })).toMatchObject({
-      ok: false,
-      error: expect.stringContaining(`${EARLY} they just gave you their first real answer`),
-    });
-    await say("outbound", at(MON, "19:35"), "What about it feels like bothering him?");
-    await say("inbound", at(MON, "19:36"), "he's busy");
-    expect(await propose(at(MON, "19:36"), {}, { howItWentSaid: true })).toMatchObject({ ok: true });
-  });
-
-  it("thin: held at texts 2 and 3 unless they say skip; after little back twice (text 4) it goes", async () => {
-    await setup();
-    await doneMonday();
-    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
-    await say("inbound", at(MON, "19:32"), "okay");
-    await thin(at(MON, "19:32"));
-    expect(await propose(at(MON, "19:32"))).toMatchObject({ ok: false, error: expect.stringContaining(`${EARLY} nothing real on how it went yet`) });
-    await say("outbound", at(MON, "19:33"), "What made it okay?");
-    await say("inbound", at(MON, "19:34"), "fine");
-    expect(await propose(at(MON, "19:34"))).toMatchObject({ ok: false });
-    // "skip": let go at once.
-    expect(await propose(at(MON, "19:34"), { ready: 'Said "skip"' })).toMatchObject({ ok: true });
-    await t.db.delete(stepDays).where(eq(stepDays.date, WED));
-    await say("outbound", at(MON, "19:35"), "Anything that surprised you?");
-    await say("inbound", at(MON, "19:36"), "dunno");
-    // Two follow-ups got little back: the wrap-up proposes without a reason (no third push).
-    expect(await propose(at(MON, "19:36"))).toMatchObject({ ok: true });
-  });
-
-  it("the safety net (8th text) never holds, even on the reply where it first turned real", async () => {
-    await setup();
-    await doneMonday();
-    for (let i = 0; i < 7; i++) {
-      await say("outbound", at(MON, `19:${31 + i * 2}`), "And?");
-      await say("inbound", at(MON, `19:${32 + i * 2}`), "hm");
-    }
-    await real(at(MON, "19:44"));
-    expect(await propose(at(MON, "19:44"), {}, { howItWentSaid: false })).toMatchObject({ ok: true });
-  });
-
-  it("only early proposals: a yes to a step they saw, a day without proof and texts ZOH starts are never held", async () => {
-    await setup();
-    // No proof today: nothing to reflect on.
-    expect(await propose(at(MON, "20:00"))).toMatchObject({ ok: true });
-    await t.db.delete(stepDays).where(eq(stepDays.date, WED));
-    await doneMonday();
-    // A text ZOH starts (any moment, here a kickoff): its own rules apply, never this hold.
-    const nudgeState = await loadCoachState(t.db, await me(), { now: at(MON, "19:31"), isFirstText: false, nudgeMoment: "kickoff" });
-    expect(await runTool(t.db, nudgeState, "set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:31"))).toMatchObject({ ok: true });
-    // Shown in a sent text, then their yes in a later reply, while the reflection is still thin: agreed.
-    await say("outbound", at(MON, "19:31"), `Tomorrow: ${NEXT}. Work for you?`);
-    await say("inbound", at(MON, "19:32"), "yes");
-    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next", agreed: true }, at(MON, "19:32"), "yes", { howItWentSaid: false })).toMatchObject({ ok: true });
-    expect((await row(WED))?.agreedAt).toEqual(at(MON, "19:32"));
-  });
-
-  it("risk: a proposal written in the refused round is never sent, and a yes to it never counts as agreed", async () => {
+  it("risk: text written in a refused round is never sent, and a yes to a step they never saw never counts", async () => {
     await t.close();
     const model = new FakeClaudeModel();
     t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }), now: () => at(MON, "19:34") });
     await setup();
     await doneMonday();
     await say("outbound", at(MON, "19:31"), "Nice! Which part felt most awkward?");
-    // Round 1: saves the first real answer and writes tomorrow's step with it; round 2: the question it should ask.
+    // Round 1 writes tomorrow's step and saves it as agreed in the same reply (refused: they haven't seen it);
+    // round 2 is the reply that goes out.
     model.script(
       {
-        text: "That worry makes sense. Tomorrow: add an easy-out line to the draft. Work for you?",
-        tools: [
-          { name: "save_reflection", input: { summary: "Asking for his time feels like bothering him", how_it_went: true, take: "A worry about outreach." } },
-          { name: "set_today_step", input: { step: "Add an easy-out line to the Alex draft at 6:30 pm", kind: "same", day: "next" } },
-        ],
+        text: "That worry makes sense. Tomorrow: add an easy-out line to the draft, you're set.",
+        tools: [{ name: "set_today_step", input: { step: "Add an easy-out line to the Alex draft at 6:30 pm", kind: "same", day: "next", agreed: true } }],
       },
-      "That makes sense. What about it feels like bothering him: his time, or how he'd see you?",
+      "That makes sense. What about asking for his time feels like bothering him?",
     );
     await postWebhook(t, inboundEvent({ content: "Asking for his time. I worry I'm bothering him.", from_number: ME, number: ME }));
     await t.queue.idle();
     const out = await t.db.select().from(messages).where(eq(messages.direction, "outbound"));
-    expect(out.map((m) => m.content).at(-1)).toBe("That makes sense. What about it feels like bothering him: his time, or how he'd see you?");
-    expect(out.map((m) => m.content)).not.toContain("That worry makes sense. Tomorrow: add an easy-out line to the draft. Work for you?");
-    // The reply began thin, so the coach passed that through: round 2 hears it was early and that nothing went out.
-    const round2 = JSON.stringify(model.requests[1]!.messages.at(-1));
-    expect(round2).toContain("they just gave you their first real answer");
-    expect(round2).toContain(NOT_SENT_NOTE);
+    expect(out.map((m) => m.content).at(-1)).toBe("That makes sense. What about asking for his time feels like bothering him?");
+    expect(out.map((m) => m.content)).not.toContain("That worry makes sense. Tomorrow: add an easy-out line to the draft, you're set.");
+    expect(JSON.stringify(model.requests[1]!.messages.at(-1))).toContain(NOT_SENT_NOTE);
     expect(await row(WED)).toBeUndefined();
-    // If a step slipped into a text anyway and they say yes, the app never records a step they agreed to:
-    // the yes is refused, and that morning's kickoff presents a step and asks.
-    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next", agreed: true }, at(MON, "19:40"), "yes")).toMatchObject({ ok: false });
+  });
+});
+
+describe("#160: what each step shows they can now do, and gaps", () => {
+  it("saves can-do and gaps with the reflection, and a later save without them keeps them", async () => {
+    await setup();
+    await doneMonday();
+    const saved = await tool(
+      "save_reflection",
+      { summary: "Ran all 3 rounds; the hill gassed them", how_it_went: true, can_do: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill", take: "Full step." },
+      at(MON, "19:33"),
+    );
+    expect(saved).toMatchObject({ ok: true });
+    expect(await row(MON)).toMatchObject({ canDo: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill" });
+    await tool("save_reflection", { summary: "Hill was hard, slowing on the flats worked", how_it_went: true, take: "Full step." }, at(MON, "19:36"));
+    expect(await row(MON)).toMatchObject({ canDo: "Jog 1 min without stopping, 3 rounds", gaps: "Pacing on the hill" });
+  });
+
+  it("gaps show on that day in ZOH's recent step days; can-do stays off the sheet (the recap's 'can do' is applied or recalled lessons only)", async () => {
+    await setup();
+    await doneMonday();
+    await tool(
+      "save_reflection",
+      { summary: "Ran all 3 rounds; the hill gassed them", how_it_went: true, can_do: "Jog 1 min without stopping", gaps: "Pacing on the hill", take: "Full step." },
+      at(MON, "19:33"),
+    );
+    const tue = await block(at(TUE, "10:00"));
+    expect(tue).toMatch(/- Mon 2026-11-02, done: [^\n]*gaps: Pacing on the hill/);
+    expect(tue).not.toContain("Jog 1 min without stopping");
+  });
+
+  it("no word on what they learned never holds the next step", async () => {
+    await setup();
+    await doneMonday();
+    await tool("save_reflection", { summary: "Felt good, a bit tired", how_it_went: true, take: "Full step." }, at(MON, "19:33"));
+    await say("outbound", at(MON, "19:34"), "What kind of tired?");
+    await say("inbound", at(MON, "19:35"), "the good kind, I slept badly last night");
+    // #211: it lands on how it felt alone: nothing about what they learned is required.
+    await tool("save_reflection", { summary: "Felt good, tired from bad sleep", how_it_went: true, take: "Full step.", landed: "Felt good; tired from bad sleep, not the step" }, at(MON, "19:35"));
+    await say("outbound", at(MON, "19:36"), `Wednesday: ${NEXT}. Work for you?`);
+    expect(await tool("set_today_step", { step: NEXT, kind: "harder", day: "next", reason: "Felt good" }, at(MON, "19:37"))).toMatchObject({ ok: true });
+    expect(await row(WED)).toMatchObject({ step: NEXT });
+  });
+});
+
+describe("#211: reflect before the next step", () => {
+  /** The real coach on a scripted model, answering their text at `now`. */
+  async function coachAt(now: Date): Promise<FakeClaudeModel> {
+    await t.close();
+    const model = new FakeClaudeModel();
+    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }), now: () => now });
+    return model;
+  }
+  async function text(content: string) {
+    await postWebhook(t, inboundEvent({ content, from_number: ME, number: ME }));
+    await t.queue.idle();
+  }
+
+  it("bug: in the reply to their first real answer, tomorrow's step isn't saved", async () => {
+    const model = await coachAt(at(MON, "19:33"));
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    model.script(
+      {
+        tools: [
+          { name: "save_reflection", input: { summary: "Hill in round 3 was hard", how_it_went: true, take: "Full step." } },
+          { name: "set_today_step", input: { step: NEXT, kind: "same", day: "next", reason: "Hill was hard" } },
+        ],
+      },
+      "What happened on the hill?",
+    );
+    await text("harder than I thought, the hill in round 3 was rough");
     expect(await row(WED)).toBeUndefined();
-    expect(await block(at(WED, "09:00"))).not.toContain("ahead of time");
+    // Nothing in that reply pointed at tomorrow: no next-step guidance, no "Next step day" line.
+    for (const req of model.requests) {
+      expect(JSON.stringify(req)).not.toContain(NEXT_STEP_GUIDANCE);
+      expect(JSON.stringify(req)).not.toContain("Next step day:");
+    }
+  });
+
+  /** Proof at 7:30, celebrated at 7:31, their first real answer at 7:32 (saved), ZOH's follow-up at 7:33. */
+  async function answered() {
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3 was rough");
+    await tool("save_reflection", { summary: "Hill in round 3 was hard", how_it_went: true, take: "Full step." }, at(MON, "19:32"));
+    await say("outbound", at(MON, "19:33"), "What happened on the hill?");
+  }
+
+  it("once the follow-up is answered, landing it opens the next step in that same reply, with its reason saved", async () => {
+    const model = await coachAt(at(MON, "19:35"));
+    await answered();
+    model.script(
+      { tools: [{ name: "save_reflection", input: { summary: "Sprinted the hill's start and gassed", how_it_went: true, take: "Pacing.", landed: "Pacing is the gap: they sprint the hill's start" } }] },
+      { tools: [{ name: "set_today_step", input: { step: NEXT, kind: "same", day: "next", reason: "Pace the hill" } }] },
+      `That's the whole thing. Wednesday: ${NEXT}. Work for you?`,
+    );
+    await text("I sprinted the start of it and ran out of gas halfway");
+    expect(JSON.stringify(model.requests[0])).not.toContain(NEXT_STEP_GUIDANCE);
+    expect(JSON.stringify(model.requests[1])).toContain(NEXT_STEP_GUIDANCE);
+    expect(await row(WED)).toMatchObject({ step: NEXT });
+    expect(await row(MON)).toMatchObject({ landedReason: "Pacing is the gap: they sprint the hill's start", landedBy: "understood", landedAt: at(MON, "19:35") });
+  });
+
+  it("both in one round: the next step goes through only after the landing", async () => {
+    const model = await coachAt(at(MON, "19:35"));
+    await answered();
+    const land = { name: "save_reflection", input: { summary: "Gassed on the hill", how_it_went: true, take: "Pacing.", landed: "Pacing is the gap" } };
+    const step = { name: "set_today_step", input: { step: NEXT, kind: "same", day: "next" } };
+    model.script({ tools: [step, land] }, "What made you sprint it?");
+    await text("I sprinted the start of it and ran out of gas halfway");
+    expect(await row(WED)).toBeUndefined();
+    expect(JSON.stringify(model.requests[1])).toContain("save_reflection landed first");
+    // The other order, in a later reply: landed, then the step.
+    await t.db.update(stepDays).set({ landedAt: null, landedReason: null, landedBy: null }).where(eq(stepDays.date, MON));
+    model.script({ tools: [land, step] }, `Wednesday: ${NEXT}. Work for you?`);
+    await text("I think I just wanted to get it over with");
+    expect(await row(WED)).toMatchObject({ step: NEXT });
+  });
+
+  it("landing before a follow-up is answered is refused, without naming what's missing; a redone reply can't skip it", async () => {
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    await say("inbound", at(MON, "19:32"), "harder than I thought, the hill in round 3 was rough");
+    const early = await tool("save_reflection", { summary: "Hill was hard", how_it_went: true, take: "Full step.", landed: "Hill was hard" }, at(MON, "19:32"));
+    expect(early).toMatchObject({ ok: true, message: expect.stringContaining("It stays open") });
+    if (early.ok) for (const field of ["how_it_went", "went_well", "in_the_way", "differently"]) expect(early.message).not.toContain(field);
+    expect(await row(MON)).toMatchObject({ landedAt: null, reflection: "Hill was hard" });
+    // They text again before that reply went out: the redone reply still comes before any follow-up was answered.
+    await say("inbound", at(MON, "19:33"), "like really rough");
+    expect(await tool("save_reflection", { summary: "Hill was really rough", how_it_went: true, take: "Full step.", landed: "Hill was hard" }, at(MON, "19:33"))).toMatchObject({
+      message: expect.stringContaining("It stays open"),
+    });
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:33"))).toMatchObject({ ok: false });
+  });
+
+  it("proof that already said how it went: the answer to the celebration's question can land it", async () => {
+    await setup();
+    await doneMonday();
+    await tool("save_reflection", { summary: "Felt easy, wants more", how_it_went: true, take: "Easy." }, at(MON, "19:30"));
+    await say("outbound", at(MON, "19:31"), "Easy already! What made it feel easy this time?");
+    await say("inbound", at(MON, "19:33"), "slowing down on the flats");
+    expect(await tool("save_reflection", { summary: "Easy; slowing on the flats", how_it_went: true, take: "Easy.", landed: "Slowing on the flats made it easy" }, at(MON, "19:33"))).toMatchObject({
+      message: expect.stringContaining("landed"),
+    });
+  });
+
+  it("their own words wanting to wrap up land it at once; a stray phrase or words they didn't say don't", async () => {
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    const save = (exit: string, said: string, hhmm: string) => tool("save_reflection", { summary: "Felt good", how_it_went: true, take: "Rushed.", exit }, at(MON, hhmm), said);
+    expect(await save("felt good", "felt good, a bit tired", "19:32")).toMatchObject({ message: expect.stringContaining("It stays open") });
+    expect(await save("let's move on", "felt good, a bit tired", "19:32")).toMatchObject({ message: expect.stringContaining("It stays open") });
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:32"))).toMatchObject({ ok: false });
+    expect(await save("gotta run, what's next", "felt good but gotta run, what's next?", "19:32")).toMatchObject({ message: expect.stringContaining("landed") });
+    expect(await row(MON)).toMatchObject({ landedBy: "exit", landedReason: "gotta run, what's next" });
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:32"))).toMatchObject({ ok: true });
+  });
+
+  it("a sign-off that is their whole text is an exit", async () => {
+    await setup();
+    await doneMonday();
+    await say("outbound", at(MON, "19:31"), "Nice! How did it feel?");
+    expect(await tool("save_reflection", { summary: "Signed off", how_it_went: false, take: "Signed off.", exit: "night" }, at(MON, "19:32"), "night!")).toMatchObject({
+      message: expect.stringContaining("landed"),
+    });
+  });
+
+  it("thin answers close it at ZOH's 4th text, counted from done (an unclear-proof talk before doesn't count)", async () => {
+    await setup();
+    await say("inbound", at(MON, "19:00"), "", true);
+    await tool("proof_unclear", { verdict: "unclear", seen: "a blurry screen" }, at(MON, "19:00"));
+    await say("outbound", at(MON, "19:01"), "Can't make that one out, another shot?");
+    await say("outbound", at(MON, "19:03"), "Still blurry, one more?");
+    await doneMonday();
+    expect(await block(at(MON, "19:30"))).toContain("This reply is your 1st text since their proof today.");
+    for (const hhmm of ["19:31", "19:33"]) {
+      await say("outbound", at(MON, hhmm), "What made it okay?");
+      await say("inbound", at(MON, hhmm.replace(/.$/, "2")), "ok");
+    }
+    // ZOH's 3rd text since done (the two before it don't count): still open.
+    expect((await state(at(MON, "19:34"))).reflection).toMatchObject({ open: true });
+    await say("outbound", at(MON, "19:35"), "What made it okay?");
+    await say("inbound", at(MON, "19:36"), "ok");
+    expect((await state(at(MON, "19:36"))).reflection).toMatchObject({ open: false, closedBy: "thin" });
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "19:36"))).toMatchObject({ ok: true });
+  });
+
+  it("the safety net closes it, however good the talk", async () => {
+    await answered();
+    for (const hhmm of ["19:35", "19:37", "19:39", "19:41", "19:43", "19:45"]) await say("outbound", at(MON, hhmm), "and then?");
+    expect((await state(at(MON, "19:47"))).reflection).toMatchObject({ open: false, closedBy: "long" });
+  });
+
+  it("30 minutes of silence after ZOH's last text closes it: their next text is a normal conversation", async () => {
+    await answered();
+    expect((await state(at(MON, "20:02"))).reflection).toMatchObject({ open: true });
+    const back = await state(at(MON, "20:04"));
+    expect(back.reflection).toMatchObject({ open: false, closedBy: "quiet" });
+    expect(partsFor(back)).toContain("nextStep");
+    expect(buildStateBlock(back)).toContain(`Next step day: Wed ${WED}.`);
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(MON, "20:04"))).toMatchObject({ ok: true });
+  });
+
+  it("a text ZOH starts after the step was done closes it; the next day there's none", async () => {
+    await answered();
+    const [sent] = await t.db.insert(messages).values({ direction: "outbound", contactNumber: ME, content: "Quick one, Sam!", createdAt: at(MON, "19:40"), sentAt: at(MON, "19:40") }).returning();
+    await t.db.insert(nudges).values({ testerId: (await me()).id, date: MON, kind: "checkin", moment: "checkin", messageId: sent!.id, status: "sent", createdAt: at(MON, "19:40") });
+    expect((await state(at(MON, "19:42"))).reflection).toMatchObject({ open: false, closedBy: "started" });
+    expect((await state(at(TUE, "09:00"))).reflection).toBeUndefined();
+  });
+
+  it("left open, texts ZOH starts go out as usual and aren't held: the rest-day text, then the kickoff", async () => {
+    await answered();
+    expect((await state(at(MON, "19:34"))).reflection).toMatchObject({ open: true });
+    const nudge = await loadCoachState(t.db, await me(), { now: at(MON, "19:34"), isFirstText: false, nudgeMoment: "followup" });
+    expect(nudge.reflection).toBeUndefined();
+    expect(buildStateBlock(nudge)).toContain("Next step day:");
+    const scheduler = createNudgeScheduler({ db: t.db, log: silent, sendblue: t.sendblue, replier: t.replier, allowedNumbers: [ME], lineNumber: LINE });
+    for (let ms = at(TUE, "08:00").getTime(); ms <= at(WED, "10:00").getTime(); ms += 5 * 60_000) await scheduler.tick(new Date(ms));
+    expect(t.replier.nudges.map((n) => n.moment)).toEqual(expect.arrayContaining(["rest_day", "kickoff"]));
+  });
+
+  it("a rest-day bonus step done with proof isn't held", async () => {
+    await setup();
+    await say("inbound", at(TUE, "19:30"), "", true);
+    expect(await tool("mark_step_done", { how: "full", proof: "clear", seen: "Strava run" }, at(TUE, "19:30"))).toMatchObject({ ok: true });
+    await say("outbound", at(TUE, "19:31"), "A bonus run! How did it feel?");
+    expect((await state(at(TUE, "19:32"))).reflection).toBeUndefined();
+    expect(await tool("set_today_step", { step: NEXT, kind: "same", day: "next" }, at(TUE, "19:32"))).toMatchObject({ ok: true });
   });
 });

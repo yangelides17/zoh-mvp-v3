@@ -1,0 +1,102 @@
+{
+  "feature": "proof",
+  "id": "case:smaller-asked-with-reason",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b115cb923a22",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "53cac30ccad4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:smaller-asked-with-reason",
+        "kind": "case",
+        "id": "smaller-asked-with-reason",
+        "title": "Asked for a 5-minute version with a reason: set at once, spelled out in that text",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "17:10",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! Tonight at 8: scene 4 of Lighthouse in Notes, Theo walking back into Mara's bar, about 200 words in 20 minutes. Screenshot it when it's done. You in?",
+          "at": "2026-11-02T21:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in",
+          "at": "2026-11-02T21:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "my kid's home sick and the full scene feels like too much today. can we make it easier, just 5 minutes? what's the smallest useful version I can do now?",
+          "at": "2026-11-02T22:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sick kid at home, so yes. Here's the small version, Jordan.\n\n• Open Notes and write just the opening of Scene 4. Theo comes back to Mara's bar.\n• About 60 words, 4 or 5 sentences. Don't worry about polish.\n• Set a 5-minute timer and start now.\n• Send me a screenshot of it in Notes when you're done.\n\nA small version still counts and keeps your streak alive. Go take care of your kiddo, then knock this out. 💪",
+          "at": "2026-11-02T22:10:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names only a screenshot of the Notes writing as proof, never typed text."
+              },
+              {
+                "rule": "smaller-in-full",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms in one text: the opening of Scene 4 (about 60 words), a 5-minute timer, start now, and a screenshot as proof."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "The list is allowed, but the prose around it runs about four sentences, over the one-to-three limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with a single emoji at the end, no pressure or accusation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "smaller-pushback",
+            "pass": true,
+            "borderline": false,
+            "reason": "A real reason (sick kid at home) was given, so ZOH set the smaller version at once with no pushback."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Instead of just saying it's set, ZOH spelled out what, how much, when and the Notes screenshot proof, in one text."
+          }
+        ],
+        "summary": "ZOH handled the regression well: with a real reason it set a smaller version at once and spelled out the task, length, timing and screenshot proof instead of just saying it was set. The one miss is that the prose around its list runs slightly past the short-text limit."
+      }
+    }
+  ]
+}

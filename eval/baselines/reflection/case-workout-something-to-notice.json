@@ -1,0 +1,763 @@
+{
+  "feature": "reflection",
+  "id": "case:workout-something-to-notice",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "731b37689966",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "7b3afc24609a"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:workout-something-to-notice#1",
+        "kind": "case",
+        "id": "workout-something-to-notice",
+        "suite": "capability",
+        "title": "A first interval run, proof that says nothing about it: what they did and noticed gets as much attention as how it felt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning, Dev! First intervals today: 1 min jog, 2 min walk, 4 rounds around the park at 7. A quick voice note when you're done.",
+          "at": "2026-11-02T11:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T11:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, all four rounds.]",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dev, first jog rounds done, 3 step days in a row 🔥 How did the jogging minutes feel compared to the walking?",
+          "at": "2026-11-02T12:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "harder than I expected, rounds 3 and 4 were rough",
+          "at": "2026-11-02T12:25:36.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rough in rounds 3 and 4 is normal when jogging is new, Dev, and you finished all four anyway 💪 What did rough feel like: breathing, legs, or your head telling you to stop?",
+          "at": "2026-11-02T12:25:43.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "idk, I kind of just pushed through them",
+          "at": "2026-11-02T12:26:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Pushing through when it gets rough is the skill that gets you to that mile, Dev. That's a real win 💪 Wednesday at 7, want to run the same four rounds again, jogging a touch slower so rounds 3 and 4 feel easier?",
+          "at": "2026-11-02T12:26:25.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh I think I started the first jog way too fast actually",
+          "at": "2026-11-02T12:26:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a sharp catch, Dev. Starting slow so rounds 3 and 4 feel easier is the whole trick. So Wednesday at 7: same four rounds of 1 min jog, 2 min walk, with the first jog easy enough that you could still talk. Work for you?",
+          "at": "2026-11-02T12:27:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T12:27:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Dev. Wednesday at 7, easy first jog, voice note after. Go enjoy the rest of your Monday 💪",
+          "at": "2026-11-02T12:27:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Start the first jog slow so the later rounds feel easier\nReflection for 2026-11-02: Did all four jog/walk rounds; rounds 3 and 4 rough, pushed through. Thinks he started the first jog too fast.\nCan now do (2026-11-02): Finish four 1-min jog rounds with walking breaks\nGaps (2026-11-02): Rounds 3-4 fatigue; building jog endurance\nStep set for 2026-11-04, agreed: 1 min jog, 2 min walk, 4 rounds around the park at 7 am (about 15 min), with the first jog at an easy pace, slow enough that you could talk\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, one emoji as punctuation, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with one emoji; nothing affectionate."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is proportionate and sincere; no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with a single closing question, and the step is fully defined."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, as the agreed confirmation requires."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Confirms the lock and carries the next move: Wednesday at 7 and a voice note after."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, one emoji, no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the voice-note proof, ZOH opens with one question about how the jogging felt."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Questions follow what Dev said, one per text, but ZOH 1 invents '3 step days in a row' and the follow-ups never ask what he did."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": false,
+            "borderline": false,
+            "reason": "The proof doesn't say what Dev did or noticed, and ZOH's questions cover only feelings and difficulty ('how did it feel', 'what did rough feel like'), never what he did or noticed."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved can-do and gaps match Dev's words: four rounds finished, rounds 3-4 rough."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Dev kept answering and ZOH moved to the next step without a third push on a flat answer."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'idk, I kind of just pushed through them' is thin, and ZOH affirmed it rather than asking what was behind it, though it did not guess."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to Dev's first real answer followed rounds 3-4 and asked one question without proposing the next step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": true,
+            "reason": "The reflection moved to the next step within three texts, though the step was proposed before Dev named the too-fast start."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The named difficulty of rounds 3-4 got one question before the proposal."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The Wednesday step was fully defined in ZOH 4, built on the too-fast start, and agreement was asked after it was shown."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH 4 builds Dev's own 'started too fast' lesson into Wednesday's step."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Dev's did/noticed was never drawn out with questions, and ZOH 1 invented '3 step days in a row' (the first day). The too-fast catch was handled and the lock was confirmed with no new question."
+          }
+        ],
+        "summary": "ZOH counted the voice note and picked up Dev's own 'started too fast' lesson well, building the Wednesday step on it, and it confirmed the lock without a new question. It failed the regression: its reflection questions covered only how the jog felt and never drew out what Dev did or noticed, and it invented a '3 step days in a row' detail."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:workout-something-to-notice#2",
+        "kind": "case",
+        "id": "workout-something-to-notice",
+        "suite": "capability",
+        "title": "A first interval run, proof that says nothing about it: what they did and noticed gets as much attention as how it felt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning, Dev! First intervals today: 1 min jog, 2 min walk, 4 rounds around the park at 7. A quick voice note when you're done.",
+          "at": "2026-11-02T11:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T11:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, all four rounds.]",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dev, first jog day done, all four rounds! That's 3 step days in a row 🔥 How did those one-minute jogs feel compared to the walks?",
+          "at": "2026-11-02T12:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "harder than I expected, rounds 3 and 4 were rough",
+          "at": "2026-11-02T12:25:36.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rough in rounds 3 and 4 is normal. That's where the jogging starts building your legs and lungs. What do you think made those two harder: the pace, your breathing, or your legs?",
+          "at": "2026-11-02T12:25:43.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "idk, I kind of just pushed through them",
+          "at": "2026-11-02T12:26:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Pushing through when it's rough is the skill that gets you to that mile, Dev 💪 What was going through your head in round 4 that kept you going?",
+          "at": "2026-11-02T12:26:25.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh I think I started the first jog way too fast actually",
+          "at": "2026-11-02T12:26:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good catch, Dev. Going out too fast on jog one is exactly what makes rounds 3 and 4 rough 🎯 Wednesday at 7, same 1 min jog and 2 min walk, 4 rounds around the park, but start that first jog at an easy pace where you could still talk. Voice note after. Work for you?",
+          "at": "2026-11-02T12:27:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T12:27:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for Wednesday at 7, Dev. Easy first jog, talking pace the whole way 🙌 Go enjoy the rest of your Monday.",
+          "at": "2026-11-02T12:27:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Start the first jog slow so you've got legs left for the last rounds\nReflection for 2026-11-02: Jog/walk intervals harder than expected; rounds 3-4 rough, pushed through; realized he started the first jog too fast.\nCan now do (2026-11-02): Complete 4 rounds of 1 min jog / 2 min walk\nGaps (2026-11-02): Pacing the jogs\nStep set for 2026-11-04, agreed: 1 min jog, 2 min walk, 4 rounds around the park at 7 am, starting the first jog at an easy, can-talk pace (about 15 min)\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, which fits the short rule."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, emoji used as punctuation with no row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences and one closing question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, asking what was going through his head."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy-level encouragement with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A short plan-style text of about three sentences with one question; within the allowed length for a proposed step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with one emoji after the praise."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, which fits a lock-in confirmation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype-level warmth and one emoji, not overfamiliar."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the voice-note proof, ZOH celebrates and opens with a single question about how the jogs felt."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each question follows what Dev said about rounds 3 and 4, one question per text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH asks what was going through his head in round 4, drawing out what he did, though the pacing question is more about feel."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved can-do and gap match the proof and Dev's own words about the jogs and pacing."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH stops after the agreed step and a one-line confirmation, with no extra questions."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'idk, I pushed through' is thin, and ZOH followed with a question about what was going through his head in round 4."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "Its reply to Dev's first real answer followed one thing he said and did not propose tomorrow's step yet."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Once Dev named starting too fast, ZOH moved to the next step within one text."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": true,
+            "reason": "The named difficulty in rounds 3 and 4 got a question before the proposal, though reassurance came first."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "It acknowledges 'good catch', defines the step fully (jog pace, rounds, time, voice note), and asks 'Work for you?' after showing it."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": true,
+            "reason": "Voice note fits a run and is not typed text, but no reason or alternative is given for it."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "Dev's start-too-fast lesson is built directly into the next step's pacing instruction."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Voice note counted, feeling and what Dev did were both drawn out, the next step built on pacing and confirmed after 'sounds good' with no new question; equal weight on what he did is only partly met."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it counted the voice note, asked about how the rough rounds felt and what Dev was thinking, and built Wednesday's step on his own pacing lesson, asking 'Work for you?' only after showing it in full. It confirmed the lock-in in one line with no new question, though its questions leaned toward feelings more than the equal weight the rule asks for."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:workout-something-to-notice#3",
+        "kind": "case",
+        "id": "workout-something-to-notice",
+        "suite": "capability",
+        "title": "A first interval run, proof that says nothing about it: what they did and noticed gets as much attention as how it felt",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:25",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning, Dev! First intervals today: 1 min jog, 2 min walk, 4 rounds around the park at 7. A quick voice note when you're done.",
+          "at": "2026-11-02T11:22:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T11:23:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Done, all four rounds.]",
+          "at": "2026-11-02T12:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Dev, first jog day done, 3 in a row! 🔥 How did those four jog rounds feel compared to the walks?",
+          "at": "2026-11-02T12:25:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "harder than I expected, rounds 3 and 4 were rough",
+          "at": "2026-11-02T12:25:36.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Rounds 3 and 4 hitting hard is really common on a first jog day, and you finished them anyway. What do you think made those two rough: your legs, your breathing, or something else?",
+          "at": "2026-11-02T12:25:43.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "idk, I kind of just pushed through them",
+          "at": "2026-11-02T12:26:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "\"Pushed through\" is the grit that gets you to that mile, Dev. What was going on in round 4 when you wanted to quit: did the jog pace feel too fast, or was it just the clock dragging?",
+          "at": "2026-11-02T12:26:25.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh I think I started the first jog way too fast actually",
+          "at": "2026-11-02T12:26:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the fix, Dev. Going out too fast in round 1 is why 3 and 4 hurt. For Wednesday at 7 it's the same 1 min jog, 2 min walk, 4 rounds around the park, about 15 min. This time, jog slow enough that you could still talk, especially in round 1. Work for you?",
+          "at": "2026-11-02T12:27:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "sounds good",
+          "at": "2026-11-02T12:27:40.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for Wednesday at 7, Dev 💪 Go easy in round 1. Slow enough to talk is the goal.",
+          "at": "2026-11-02T12:27:47.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Start the first jog slower than feels necessary, or the last rounds get rough\nReflection for 2026-11-02: First jog day done; rounds 3 and 4 rough, realized he started the first jog way too fast.\nCan now do (2026-11-02): Complete 4 jog/walk rounds\nGaps (2026-11-02): Pacing: holding an easy jog pace across all rounds\nStep set for 2026-11-04, agreed: 1 min jog, 2 min walk, 4 rounds around the park at 7 am (about 15 min), jogging at an easy pace where you could still talk, especially round 1\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm, with one fire emoji as punctuation, but '3 in a row' is a streak claim I can't confirm from the transcript."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no emoji or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question that follows his 'pushed through' remark."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, with no overfamiliar language."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A plan-presenting text, within the allowed length, with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm with no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "The lock confirmation carries a reminder about round 1, so it is not a bare save."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, as the regression case requires."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After proof with no word on how it went, ZOH1 opened the reflection with one question and never chased it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": true,
+            "reason": "Each question comes from his words, one per text, though '3 in a row' is not in what he said."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH2 leaned on feelings and causes, but ZOH3 drew out what he did (pace in round 4), so it covers what he did and noticed."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "The can-do and pacing gap match the proof and his words about starting the first jog too fast."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Two follow-ups, then it moved to the next step once he named the pacing issue, with no third push."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'I kind of just pushed through them' got a proof-grounded follow-up on round 4, though the pace guess in ZOH3 leans somewhat."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH2 followed his rounds 3 and 4 remark and did not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Once he said he started too fast, ZOH moved to the next step within one text."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "The difficulty he named got one question before the proposal."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH4 built on his pacing point, fully defined the step, and asked 'Work for you?' after showing it."
+          },
+          {
+            "rule": "lesson-reused",
+            "pass": true,
+            "borderline": false,
+            "reason": "The next step builds in the takeaway that the first jog should be slow enough to talk."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "It counts the voice note, covers feeling and what he did, follows his pacing point, and confirms with no new question, though the 'what he did' draw-out is thin before ZOH3."
+          }
+        ],
+        "summary": "ZOH handled the first jog day well: it counted the voice note, asked one question per text, and used Dev's own pacing point to build a fully defined next step. The main weakness is that the early questions leaned on feelings and causes before drawing out what he actually did, so that part of the reflection came late."
+      }
+    }
+  ]
+}

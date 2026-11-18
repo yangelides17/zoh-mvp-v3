@@ -1,0 +1,289 @@
+{
+  "feature": "onboarding",
+  "id": "maya-all-at-once",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "e072157b13d5"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "maya-all-at-once",
+        "kind": "scenario",
+        "id": "maya-all-at-once",
+        "title": "Maya answers everything in her first text (page example)",
+        "persona": "all-at-once",
+        "areaCode": "917",
+        "startTime": "08:10",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hi! I'm Maya, I want to read about stoicism every morning at home before work, maybe 10 min",
+          "at": "2026-11-02T13:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hi Maya, I'm ZOH! I'll help you get better at one thing, with a small step each day. Stoicism every morning is a great pick. You can text \"stop\" anytime, and you can change how I coach just by telling me, like \"chill out\" or \"push me harder.\"\n\nWhat time do you want to read each morning? A set time makes it stick, so pick something like 7:00 or 7:30.",
+          "at": "2026-11-02T13:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Around 7:45, at home before work. I've got about 10 minutes then. I have a paperback of Meditations already, and I read some Marcus Aurelius in college but nothing since.",
+          "at": "2026-11-02T13:10:54.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that you already own the paperback and have some Marcus in your past. Where do you want this to get you? It could be finishing Meditations, or having a few ideas you can actually use. \"Not sure yet\" works too.",
+          "at": "2026-11-02T13:11:01.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly I just want to read and learn more about stoic philosophy every morning. Finishing Meditations would be nice but not a must, I'm more into actually understanding the ideas and maybe using some of them.",
+          "at": "2026-11-02T13:12:12.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Wanting to understand and use the ideas, not just finish the book, is a great way to read Marcus. Here's the plan:\n\n• Where it's headed: understand stoic ideas and use a few in daily life\n• Day 1 (today, since 7:45 has passed): tonight at 8:00 pm at home, read Book 2 of Meditations for 10 min. Pick one line that stands out.\n• Usual schedule: every day at 7:45 am, at home, 10 min. I'll text you a heads-up at 7:35.\n• Proof: a 30-second voice note saying that line in your own words and where you could use it. Alternative: a photo of the page with the line marked.\n• Why: putting ideas in your own words is what makes them stick.\n\nEach day's step builds on how the last one went, toward actually using the ideas, not just reading them. What do you think?",
+          "at": "2026-11-02T13:12:19.300Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt, and it carries the intro, stop and style lines plus the time question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and clear, but the energy is fairly mild for the Pushy default."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asking for a reading time fits a morning stoicism goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only for a time she hadn't given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what she said, with no invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question; the time question is about a reading slot."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no affection or row of emoji."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Destination question matches the reading goal and offers a not-sure option."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the time or location she already gave."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to the paperback and college reading she mentioned."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Stays on onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation may run up to about 8 lines; this has roughly 7 lines of opener, bullets and close."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullet list with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Specific reaction to her goal, with sincere energy and no affection."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan fits her 10 minutes at home, the Meditations book and her goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates settled details in the plan rather than asking them again."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Promises a 7:35 heads-up text the app may not send; the plan uses only her details otherwise."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": false,
+                "reason": "Moves straight into the plan with no off-topic content."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it is ZOH, what it does, stop works anytime, style change option, and her name and goal were already given."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": false,
+            "reason": "Time, location and reading goal are each asked once and then reused in the plan."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Learned what (Meditations and stoic ideas), where (home), when (7:45) and how long (10 min) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": false,
+            "reason": "Never asked about an app or tool and never pushed one."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reading and learning stoicism is a listed starter and was handled directly."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells her she can change coaching style by texting ZOH."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the plan once all plan questions are answered, with no recap or plan-is-coming line."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Three texts and a short onboarding, well within limits."
+          }
+        ],
+        "summary": "ZOH covered the key onboarding inputs in three texts and gave Maya a clear, specific plan built on her reading goal, time and paperback. The main weak spots are a fairly mild energy level for the Pushy default and a heads-up reminder promise the app may not send."
+      }
+    }
+  ]
+}

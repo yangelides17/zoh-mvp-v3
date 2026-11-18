@@ -1,0 +1,124 @@
+{
+  "id": "founder-adjust-tweak",
+  "title": "A founder's plan change is raised as ZOH's question, and the tester's tweak is what's saved",
+  "origin": "#155, spec example \"would 7:30 work better? / 8 would be better / 8 it is\"",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 12,
+    "answers": {
+      "what": "The Overstory",
+      "where": "bed",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "10 down, page 212"
+      },
+      {
+        "from": "zoh",
+        "text": "Two weeks straight, Maya. That's who you are now. Kalinixta 📚"
+      }
+    ],
+    "plan": {
+      "step": "10 pages of The Overstory",
+      "place": "bed",
+      "time": "21:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 14
+    },
+    "step_days": [
+      {
+        "days_ago": 1,
+        "status": "done"
+      },
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "done"
+      },
+      {
+        "days_ago": 4,
+        "status": "done"
+      },
+      {
+        "days_ago": 5,
+        "status": "done"
+      },
+      {
+        "days_ago": 6,
+        "status": "done"
+      },
+      {
+        "days_ago": 7,
+        "status": "done"
+      },
+      {
+        "days_ago": 8,
+        "status": "done"
+      },
+      {
+        "days_ago": 9,
+        "status": "done"
+      },
+      {
+        "days_ago": 10,
+        "status": "done"
+      },
+      {
+        "days_ago": 11,
+        "status": "done"
+      },
+      {
+        "days_ago": 12,
+        "status": "done"
+      },
+      {
+        "days_ago": 13,
+        "status": "done"
+      },
+      {
+        "days_ago": 14,
+        "status": "done"
+      }
+    ],
+    "suggestions": [
+      {
+        "kind": "adjust",
+        "raised_by": "founder",
+        "proposal": "step at 7:30 pm",
+        "reasoning": "she mentioned falling asleep reading at 9",
+        "decision": "approved",
+        "plan_changes": {
+          "stepTime": "19:30"
+        }
+      }
+    ]
+  },
+  "testerLines": [
+    "advance to 09:05",
+    "7:30 is tight with dinner, 8 would be better"
+  ],
+  "whatWentWrong": "New case, not a past mistake: a founder's plan change, accepted with a tweak.",
+  "shouldHaveHappened": "The 9 am kickoff raises moving her reading to 7:30 pm as ZOH's own idea and asks if it would work for her (her call), never as already decided and with no mention of a team or founders; one question only. Her \"8 would be better\" gets a short confirmation that her reading is now at 8 pm, starting tonight, with no extra questions.",
+  "startTime": "08:55",
+  "timeZone": "America/New_York"
+}

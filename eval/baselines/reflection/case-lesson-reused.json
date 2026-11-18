@@ -1,0 +1,334 @@
+{
+  "feature": "reflection",
+  "id": "case:lesson-reused",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "7dd512ee4766",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "646995a05112"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:lesson-reused#1",
+        "kind": "case",
+        "id": "lesson-reused",
+        "suite": "regression",
+        "title": "A lesson from three days ago is built into today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] talked to the new guy on my team at lunch, it was fine but kinda died after 2 min",
+          "at": "2026-11-01T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two minutes with someone new is a real start, Sofia. We'll build on it tomorrow.",
+          "at": "2026-11-01T23:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sofia! Five days in a row is within reach. Yesterday's chat with the new guy died after 2 minutes, so today at 12:30 you talk to him again. Ask one follow-up about something he says, like the one that worked on Friday, and aim to go past 2 minutes. Send a voice note after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yeah ok I'm in",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sofia! 12:30, new guy, one real follow-up question, and you've got this 💪 Send the voice note when you're done.",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Asking a follow-up about what they just said kept it going way longer\nReflection for 2026-11-01: It was fine but died after 2 minutes\nStep set for 2026-11-02, agreed: At lunch, talk to the new guy again and ask him one follow-up question about something he says, aiming to keep it going past 2 minutes. 12:30, about 10 min, then send a voice note on how it went.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": false,
+                "borderline": true,
+                "reason": "The step was already agreed, but the kickoff ends with a first-time \"You in?\" instead of a reminder that shows they already said yes."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"like the one that worked on Friday\" brings the earlier follow-up lesson back naturally inside the kickoff, not as a quiz."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Five sentences with one question at the end; it runs past the one-to-three sentence limit for a kickoff that teaches nothing new."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy energy with one emoji-free sentence; no overfamiliarity or affection."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype is warm and pushy, with one emoji used as punctuation."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, which fits the limit."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "The kickoff does build in the Friday follow-up lesson and asks one thing, but ZOH 2 restates the step (\"12:30, new guy, one real follow-up question\") after \"I'm in\", which the expected behavior rules out."
+          }
+        ],
+        "summary": "ZOH built the lesson from three days ago into the kickoff and asked only one thing, which is what was wanted. It fell short by re-asking \"You in?\" after an already-agreed step and then restating the step in its reply to \"I'm in\"."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lesson-reused#2",
+        "kind": "case",
+        "id": "lesson-reused",
+        "suite": "regression",
+        "title": "A lesson from three days ago is built into today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] talked to the new guy on my team at lunch, it was fine but kinda died after 2 min",
+          "at": "2026-11-01T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two minutes with someone new is a real start, Sofia. We'll build on it tomorrow.",
+          "at": "2026-11-01T23:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Sofia! Yesterday's chat with the new guy died after 2 minutes, and Friday you found that a follow-up about what someone just said keeps it going. So at 12:30 today, talk to him again, and when it starts to fade, ask one follow-up about something he said. Voice note after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yeah ok I'm in",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sofia 💪 Go get that 12:30 chat. I'll be here for the voice note after.",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Asking a follow-up about what they just said kept it going way longer\nReflection for 2026-11-01: It was fine but died after 2 minutes\nStep set for 2026-11-02, agreed: At lunch, talk with the new guy again and when the chat starts to fade, ask one follow-up about something he just said. Voice note after on how it went.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": false,
+                "borderline": true,
+                "reason": "Ends with a first-time \"You in?\" even though the saved step is marked agreed, so it re-asks instead of reminding."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings back Friday's follow-up lesson inside the kickoff, woven into the step rather than as a quiz."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about four sentences plus the greeting, with one question at the end; slightly long for a kickoff."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic opener with the name and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, no question, and a light line that doesn't restate the step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype with one emoji as punctuation, warm and sincere."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "The kickoff names the new guy, lunch at 12:30 and the Friday follow-up lesson, and asks one thing (\"You in?\"), but leaves out how long the chat should be. The reply after \"I'm in\" is a short line that doesn't restate the step."
+          }
+        ],
+        "summary": "ZOH built Friday's follow-up lesson into today's lunch step, asked one question, and replied to the yes with a short line, which is the behavior the regression case wanted. The kickoff left out the chat's length and re-asked for a yes on a step that was already marked agreed, so it's only a partial pass."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:lesson-reused#3",
+        "kind": "case",
+        "id": "lesson-reused",
+        "suite": "regression",
+        "title": "A lesson from three days ago is built into today's step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:50",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "[voice note] talked to the new guy on my team at lunch, it was fine but kinda died after 2 min",
+          "at": "2026-11-01T23:47:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Two minutes with someone new is a real start, Sofia. We'll build on it tomorrow.",
+          "at": "2026-11-01T23:48:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Sofia! Your follow-up questions kept things going on Friday, so use that with the new guy today. At 12:30, ask him one question about something he said last time, then one follow-up on his answer. Aim to go past 2 minutes, then send a voice note on how it went. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yeah ok I'm in",
+          "at": "2026-11-02T14:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Sofia 💪 12:30, one question about something he said last time, then a follow-up. Voice note after and tell me how it went.",
+          "at": "2026-11-02T14:05:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Reflection for 2026-10-30: Asking a follow-up about what they just said kept it going way longer\nReflection for 2026-11-01: It was fine but died after 2 minutes\nStep set for 2026-11-02, agreed: At lunch, talk to the new guy on your team again. Ask one question about something he said last time, then one follow-up on his answer. Aim to keep it going past 2 minutes. 12:30, about 10 min, voice note after on how it went.\nStep set for 2026-11-03, not agreed: placeholder\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "kickoff-agreed",
+                "pass": true,
+                "borderline": false,
+                "reason": "Presents the lunch step and asks \"You in?\" as a first-time kickoff, since the step wasn't agreed yet."
+              },
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings in Friday's follow-up lesson inside the kickoff itself, as part of the conversation, not as a quiz or separate text."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "About four or five short sentences with one question at the end; a bit longer than the one-to-three guideline but within the step-presenting allowance."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, with a single emoji-free opener and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question, as a short acknowledgement."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it is a reply with a next move carried by the step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic with one emoji used as punctuation at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "After \"yeah ok I'm in\", ZOH 2 restates the whole step (\"12:30, one question about something he said last time, then a follow-up. Voice note after...\") instead of a short line without restating it."
+          }
+        ],
+        "summary": "ZOH built the Friday follow-up lesson into a clear, one-question kickoff, though the kickoff only implied the about-10-minute length. After the tester agreed, ZOH's reply restated the step in full, which is the exact miss the regression case was meant to catch."
+      }
+    }
+  ]
+}

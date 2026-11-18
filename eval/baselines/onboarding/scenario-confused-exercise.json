@@ -1,0 +1,718 @@
+{
+  "feature": "onboarding",
+  "id": "confused-exercise",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:14:32.634Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ba0415cac19f",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "38925d982b9e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "confused-exercise",
+        "kind": "scenario",
+        "id": "confused-exercise",
+        "title": "Confused tester, exercise, vague answers",
+        "persona": "confused",
+        "areaCode": "305",
+        "startTime": "15:40",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "hi? someone told me to text this number about exercise stuff. what is zoh exactly? how does it work",
+          "at": "2026-11-02T20:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH, an AI coach the ZOH team built. I help you get better at one thing with a small step each day, and I check in by text to keep you on track. You can text \"stop\" anytime, and you can change how I coach just by telling me (\"chill out,\" \"push me harder\").\n\nExercise is a great place to start. What's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T20:40:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "pat. i want to do something about exercise i guess. just walking maybe? i walk the dog sometimes lol",
+          "at": "2026-11-02T20:40:56.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to meet you, Pat. Walking is a great place to start, and the dog is built-in company. Tell me a bit about how those dog walks go now: where do you usually go, and how long are they?",
+          "at": "2026-11-02T20:41:03.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "we walk around the block mostly. maybe 10 min? not really sure what this is btw, is it like an app or a person",
+          "at": "2026-11-02T20:41:53.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair question, Pat. I'm an AI coach, not an app or a person. The ZOH team built me, and the founders read along to make me better. I text you a small step each day, you send a quick photo or screenshot as proof, and I keep you going.\n\nA 10 minute loop with the dog is a real start. What time of day could you walk them most days?",
+          "at": "2026-11-02T20:42:00.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "whenever",
+          "at": "2026-11-02T20:42:53.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Flexible is good, Pat, but a set time is what makes it stick. Which works better for you, right after work or after dinner?",
+          "at": "2026-11-02T20:43:00.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "the after work one i guess. what do u mean by proof tho, like take a pic of me walking??",
+          "at": "2026-11-02T20:43:23.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Not a pic of you, Pat. A quick photo works, like the dog's leash at the door or your street mid-walk. A screenshot from a step counter works too if you have one on your phone.\n\nGot it on after work. How many minutes can you give the walk on most days: 10, or a bit more?",
+          "at": "2026-11-02T20:43:30.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly not sure yet. Depends on the day. Maybe 30 min? Would that be too much to start",
+          "at": "2026-11-02T20:44:16.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Not too much, Pat. Walking 30 minutes is very doable, but you're at 10 now, and starting a little under what you can do helps it stick. I'd start at 15 minutes and let the good days run longer. Does 15 work for you?",
+          "at": "2026-11-02T20:44:23.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "the 15 min thing sounds ok. is that what i'd be doing every day then? or like some days off",
+          "at": "2026-11-02T20:45:09.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Up to you, Pat. Every day is fine, or you can take days off as long as it's at least 3 a week. Which days would you want to walk?",
+          "at": "2026-11-02T20:45:16.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "i dunno, prob most days. weekends prob too since the dog wants out lol. is it gonna send me reminders or do i have to remember",
+          "at": "2026-11-02T20:46:04.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Yes, I'll text you on your walk days to get you going, so you don't have to remember, Pat. I'll follow up if I haven't heard from you.\n\nWeekends are in. Which weekday do you want off: Monday, Tuesday, Wednesday, Thursday or Friday? Or would you rather just walk all seven?",
+          "at": "2026-11-02T20:46:11.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "i dunno, maybe no days off? just walk all 7. but wait, u said i could take some off? confusing lol",
+          "at": "2026-11-02T20:47:09.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, sorry, that was confusing, Pat. Days off are optional. Seven days a week is a totally fine plan, so we'll go with all seven.\n\nOne last thing before I put it together: is there anything you'd like this walking to get you toward, like more energy or a longer walk? \"Not sure yet\" is a fine answer.",
+          "at": "2026-11-02T20:47:16.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "idk maybe just feel less wiped out after work? not sure yet tbh",
+          "at": "2026-11-02T20:48:05.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Feeling less wiped out after work is a great reason, Pat. Walking is a solid way to chase it. Here's the plan:\n\n• Headed for: feeling less wiped out after work\n• Day 1, today: 15-minute brisk-ish walk with the dog around the block\n• Every day at 5:30 pm, 15 minutes\n• Proof: a photo of the leash or your street mid-walk\n• Why: a short daily walk builds the habit, and it's a small enough step to keep up on tired days\n• Easy alternative: a step counter screenshot works too\n\nEach day shapes the next one. If 15 feels easy, we'll stretch it, always aiming at that after-work energy.\n\nWhat do you think?",
+          "at": "2026-11-02T20:48:12.400Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "First text is exempt from the length limit and carries the intro, stop line, style line and question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the bullet list is a plain goal list."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly, energetic and not overfamiliar; no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks name and goal, the right opening questions for a new tester."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Describes ZOH accurately without inventing facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake, sleep or pushiness questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain conversational text with no formatting."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the dog walk."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where and how long for the walks, which fits the stated goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about details not yet given."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Pat said about the dog."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Answers the what-is-ZOH question across about six sentences, over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what time of day the walks happen, which fits the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about a new detail."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Describes ZOH as an AI coach and the founders reading along, consistent with the voice page."
+              },
+              {
+                "rule": "on-track",
+                "pass": true,
+                "borderline": true,
+                "reason": "Answers Pat's question about what ZOH is briefly, then returns to onboarding."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm enough for Pushy level."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a single relevant question about timing."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about a time not yet set."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "No invented facts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences across the photo explanation and the question, over the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and clear."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks minutes for the walk, which fits the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks how many minutes again after Pat gave 10 min and then maybe 30; the earlier answers were unclear."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Pat said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 6,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, just over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Proposes 15 minutes based on Pat's stated 10 minutes and asks for agreement."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a new decision."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "References the 10 minutes Pat mentioned."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 7,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and clear."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks which days to walk, which fits the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a new question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accurately describes the at-least-3-a-week rule."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 8,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Four sentences, over the three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic enough."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about weekday days off, which fits the plan."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks a new question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Promises to text on walk days and follow up, which the app may or may not send."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "2 questions in one text (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 9,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Five sentences across the reply and the goal question, over the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": true,
+                "reason": "Opens with filler 'Ha,' though the text is otherwise plain."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and clear."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the destination of the walking, which fits the goal."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the destination once, and Pat's earlier answer was unclear."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accurately restates the days-off rule."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 10,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan presentation uses a reaction line and a bullet list of six items, within the plan exception."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Bullets are plain, with no markdown headings."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to feeling less wiped out."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan fits the dog walk, the after-work goal and the 15-minute start."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats no settled answers."
+              },
+              {
+                "rule": "honest",
+                "pass": false,
+                "borderline": true,
+                "reason": "Sets 5:30 pm though Pat only said after work and never agreed to 5:30."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No prohibited questions."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text says ZOH is an AI coach, explains the step-per-day approach, mentions stop and style changes, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": true,
+            "reason": "Asked about minutes again after unclear answers, which is allowed, though the 10-minute detail was already given."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": true,
+            "borderline": false,
+            "reason": "Covers what (walking), where (around the block), when (after work), and how long (15 minutes) before the plan."
+          },
+          {
+            "rule": "tracking",
+            "pass": true,
+            "borderline": true,
+            "reason": "Mentions a step counter screenshot as an option without pushing an app Pat didn't ask for."
+          },
+          {
+            "rule": "goal-list",
+            "pass": true,
+            "borderline": false,
+            "reason": "Narrowed Pat's walking idea into the Get fitter starter."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells Pat they can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "wrap-up",
+            "pass": true,
+            "borderline": true,
+            "reason": "Shows the plan after the destination question, but the 5:30 pm time was never confirmed by Pat."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Ten ZOH texts over a short exchange, within the limit."
+          }
+        ],
+        "summary": "ZOH covered the onboarding inputs and proposed a clear first plan, and the first text met its required content. Its weak spots are several texts running over the three-sentence limit and a 5:30 pm time it set without Pat agreeing to it."
+      }
+    }
+  ]
+}

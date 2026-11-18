@@ -1,0 +1,270 @@
+{
+  "feature": "plan",
+  "id": "case:writing-plan-proof",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "e1220b696956",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "20580056855f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:writing-plan-proof",
+        "kind": "case",
+        "id": "writing-plan-proof",
+        "title": "A writing plan's proof: a screenshot of where they wrote it plus the paste, never typed lines",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "12:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "I write everything in Notes on my phone",
+          "at": "2026-11-02T16:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Notes it is. Is there somewhere you want Lighthouse to get to?",
+          "at": "2026-11-02T16:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "not sure yet honestly, I just want to write most days. every day works",
+          "at": "2026-11-02T17:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Writing straight into Notes means there's nothing between you and the page, and that's why this should work. Here's the plan:\n\n• Headed toward: writing most days, no finish line yet\n• Day 1, tonight at 8 pm: write one short scene for Lighthouse in Notes, 20 minutes\n• Every day, 8 pm, 20 minutes\n• Proof: a screenshot of the scene in Notes. Once it counts, paste the text here too so I can give you feedback. If a screenshot's a hassle, a voice note reading it aloud works.\n• Why: a short scene a day keeps Lighthouse moving, and it doesn't matter where it ends up.\n\nEach day's step will build on how the last one went, so we can adjust as we learn what works for you. What do you think?",
+          "at": "2026-11-02T17:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T17:00:48.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Glad it works for you, Jordan. So are you committing to this: a scene for Lighthouse every day at 8 pm, starting tonight?",
+          "at": "2026-11-02T17:00:55.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm in",
+          "at": "2026-11-02T17:01:18.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Jordan! Lighthouse gets its first scene tonight at 8 pm. Let's go 🔦",
+          "at": "2026-11-02T17:01:25.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A plan presentation may run about 8 lines; this one is roughly 8 to 9 lines including intro and closing question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list, which is allowed, with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, confident and energetic enough for Pushy default, with no overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only Lighthouse, Notes, 8 pm and 20 minutes from the tester's words, plus a reasonable suggested scene."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Day 1 gives what, where, when and how long; 'one short scene' is a little loose on length but acceptable."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with a question and a clear next move, not a bare save confirmation."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with no overfamiliarity or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the agreed scene and time from the plan without inventing facts."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates a step that is already defined: a scene every day at 8 pm, starting tonight."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with the commitment question, which carries the next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with 'Let's go' and an emoji as punctuation, warm without overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "States only the agreed day 1 at 8 pm tonight."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the scene and time for day 1, consistent with the agreed plan."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives the lock confirmation plus day 1 timing, so it is not a bare save confirmation."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "No extra needed questions before the plan; the destination was asked lightly and the plan locks without it."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Gives what, how much, where, when, every day, and a screenshot proof that fits a Notes-based writer."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the headed-toward line, day 1 step, schedule, proof, and a progression line with no future step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Tester was unsure; ZOH had asked once lightly and then locked the plan smoothly with no destination."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks naturally whether they're committing to a scene every day at 8 pm, not a stock line."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight at 8 pm, with no pushback needed."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "Plan was shown as a bullet list ending with 'What do you think?' before the commitment ask."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Avoids typed-text proof and locks with hype and day 1, but the screenshot proof bullet lacks the required one-line why."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it offered a Notes screenshot with a paste for feedback and a voice-note alternative, never typed text as proof, asked for commitment naturally, and locked with a hype line and day 1 timing. The main miss is that the proof bullet gives no one-line why for the screenshot, so the regression check is borderline."
+      }
+    }
+  ]
+}

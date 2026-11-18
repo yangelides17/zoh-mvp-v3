@@ -1,0 +1,180 @@
+{
+  "feature": "proof",
+  "id": "case:voice-note-off-topic",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:20:54.661Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "00fc1e95c69c",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "0ad95440ce93"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:voice-note-off-topic",
+        "kind": "case",
+        "id": "voice-note-off-topic",
+        "title": "A voice note that never mentions the step gets a clarifying ask; a real one counts",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "21:10",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Day 3 tonight, Maya. Ten pages of Atomic Habits at 8, then a quick voice note saying what you read.",
+          "at": "2026-11-02T14:07:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-02T14:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: Ugh today was so long. Work was nonstop and then I made pasta for my roommates and we watched a movie.]",
+          "at": "2026-11-03T02:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sounds like a full day, Maya, and the pasta and movie night sounds like a good one. That voice note didn't mention reading though, so it doesn't count yet. Go get your 10 pages of Atomic Habits in on the couch. Then send me a quick voice note on what you read, and we'll lock in day 3. 📖",
+          "at": "2026-11-03T02:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "oh lol yeah I read my pages earlier",
+          "at": "2026-11-03T02:11:00.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, I believe you, Maya. But the check mark needs proof, and that last voice note was all pasta and movie. Send me a quick new one telling me what you read in Atomic Habits tonight, even just one idea that stuck. Can you do that now? 📖",
+          "at": "2026-11-03T02:11:07.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "[voice: Okay, ten pages done. Chapter three, the part about identity-based habits, how you vote for who you want to be.]",
+          "at": "2026-11-03T02:11:37.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "There it is, Maya! Day 3 is in the books. 📚 The \"each habit is a vote\" idea is a good one to pick up. When you think about the votes you cast today, which one felt most like the person you want to be?",
+          "at": "2026-11-03T02:11:44.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names a voice note as the proof and never suggests typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences including the emoji-ended line, slightly over the one-to-three limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, upbeat and not accusing; the emoji is punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "proof-kinds",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks for a new voice note, not typed text."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences before the closing question, over the three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light and warm with 'I believe you'; not suspicious, emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "plausible-counts",
+                "pass": true,
+                "borderline": false,
+                "reason": "The voice note names the pages and chapter, and ZOH celebrates it and counts it."
+              },
+              {
+                "rule": "file-specific",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reacts to the identity-based habits idea she described, quoting 'each habit is a vote'."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, though it ends with a single question as required."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Big, warm celebration with a single emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "unclear-asks",
+            "pass": true,
+            "borderline": true,
+            "reason": "The first voice note didn't mention reading, and ZOH asked clearly for a reading note, lightly."
+          },
+          {
+            "rule": "forgot-pic",
+            "pass": true,
+            "borderline": true,
+            "reason": "'I read my pages earlier' got a request for proof first, not an immediate miss."
+          },
+          {
+            "rule": "typed-not-proof",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH asked for a voice note but gave only 'the check mark needs proof', not a warm explanation of why real proof matters."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "First note warmly asks for the reading note, 'I read my pages' gets a light ask, and the second note is celebrated and counted with no invented details."
+          }
+        ],
+        "summary": "ZOH handled the proof well: it didn't count the first voice note or the bare claim, asked lightly for a note naming what she read, and celebrated the chapter-three note without inventing anything. Its texts ran slightly long, at four sentences each, and the second one gave only a thin reason why proof is needed."
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "first-answer-held-follows",
+  "rule": "first-answer-held",
+  "expect": "pass",
+  "why": "After a swim, the first real answer (the last lengths were hard, flip turns went better) gets a follow-up on one thing they said; tomorrow comes only after they answer it.",
+  "seed": {
+    "name": "Priya",
+    "goal": "exercise",
+    "phase": "active",
+    "answers": { "what": "swim a full kilometre", "where": "at the community pool", "when": "6:30 am", "how_long": "30 min" },
+    "history": [{ "from": "zoh", "text": "Morning, Priya! 20 lengths at the pool at 6:30. A photo of your watch when you're out." }],
+    "plan": { "step": "20 lengths at the community pool", "place": "at the community pool", "time": "06:30", "days": ["tue", "thu", "sat"], "proof": "photo", "reason": "Steady lengths build up to the kilometre.", "minutes": 30 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "[photo: a swim watch showing 20 lengths, 28 min]" },
+    { "from": "zoh", "text": "20 lengths in 28 minutes, Priya! 🔥 How did it feel in the water today?" },
+    { "from": "tester", "text": "the last 5 were a struggle, arms were dead. but my flip turns finally felt smooth" },
+    { "from": "zoh", "text": "Smooth flip turns are a big one. What changed that made them click today?" },
+    { "from": "tester", "text": "I stopped looking for the wall and just counted strokes" },
+    { "from": "zoh", "text": "Counting strokes, love it. Thursday: same 20 lengths at 6:30, and on the last 5, ease off to a steady pace instead of pushing. Watch photo after. Work for you?" }
+  ]
+}

@@ -1,0 +1,673 @@
+{
+  "feature": "nudges",
+  "id": "case:teaching-fits",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:43:07.494Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ffc42b327528",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "59693763f0d6"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:teaching-fits#1",
+        "kind": "case",
+        "id": "teaching-fits",
+        "suite": "regression",
+        "title": "Teaching fits what they're stuck on: a grounded tip, not a lecture",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "did my 10 min but the 2 ball thing is a mess, they keep crashing into each other",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the hardest part, Casey, and you showed up for it. We'll work on it tomorrow.",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Casey! Two days down, and yesterday you hit the collision problem, which is where everyone gets stuck. Today at 6 in the living room, 10 min: throw each ball in a clean arc up to eye level, and throw the second only when the first hits its peak. Voice note after, and you in? 💪",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok I'm in but seriously how do I stop them crashing",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "lookup",
+          "text": "searched \"juggling two ball exchange balls collide fix throw one hand inside other\": https://www.lesswrong.com/posts/jTGbKKGqs5EdyYoRc/most-people-can-t-juggle-one-ball https://nowiknow.com/how-to-juggle/ https://en.wikipedia.org/wiki/Cascade_(juggling) https://en.wikipedia.org/wiki/Columns_(juggling) https://en.wikipedia.org/wiki/Toss_juggling https://en.wikipedia.org/wiki/Multiplex_(juggling) https://en.wikipedia.org/wiki/Juggling_pattern https://en.wikipedia.org/wiki/Box_(juggling) http://www.joethejuggler.com/Quito/3Ball/3Ball.html https://en.wikipedia.org/wiki/Juggling_robot",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "looking that up 🔎",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Collisions usually come from throwing both balls along the same line. Two fixes:\n\n• Throw each ball to the opposite shoulder, not straight across. The first ball goes up and over. The second one travels underneath it, on a slightly flatter path.\n• Make the first throw a bit higher and more deliberate than the second, so they trade places in the air instead of meeting.\n\nTry that for the first few minutes tonight and tell me in the voice note which one helped. Does that make sense?",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Casey! Ten minutes in the living room at 6, two-ball exchange. Remember to throw to the opposite shoulder, with the first ball a bit higher. Grab your balls and clear a little space. Ready to go?",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: two-ball throws to eye level, living room, 6 pm, 10 minutes."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Kalimera Casey!\", a greeting and their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Frames yesterday's collisions as the common sticking point, with no blame or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three or four short sentences with one closing question, \"you in?\"."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its one ask is \"you in?\"; the time is not re-asked."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What, where, when and how long are all given."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives a brief collision fix that answers yesterday's problem, though the kickoff already carries a fair amount of teaching."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji at the end and no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with an emoji as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Teaching text with two bullets, about 8 lines, and one closing question, which is within the teaching allowance."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Directly answers the tester's \"how do I stop them crashing\" with two grounded fixes."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses plain bullets with no markdown headings, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm, direct and coach-like, with no pressure or overfamiliarity."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Neutral and encouraging, with no guilt or urgency."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the two-ball exchange, living room, 6 pm and 10 minutes."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Casey!\", a greeting and their name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "A friendly reminder with no pressure or guilt."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences ending on one question, \"Ready to go?\"."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "The check-in repeats the fix (opposite shoulder, higher first throw) in about 13 words, which is more than a few-word reminder."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and short, matching the pushy-level energy without affection."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "After a messy day the step stays on the two-ball exchange, the same or smaller, not three balls."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Keeps the step fully defined, gives an accurate fix consistent with the morning tip, and invents no sources. The 5:50 check-in restates the fix at about 13 words, which is more than a few-word reminder."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it kept today's step on the two-ball exchange, gave an accurate, consistent collision fix with no invented sources, and asked only one thing in the kickoff. The only soft spot is the 5:50 pm check-in, which repeats the fix more than a few-word reminder should."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:teaching-fits#2",
+        "kind": "case",
+        "id": "teaching-fits",
+        "suite": "regression",
+        "title": "Teaching fits what they're stuck on: a grounded tip, not a lecture",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "did my 10 min but the 2 ball thing is a mess, they keep crashing into each other",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the hardest part, Casey, and you showed up for it. We'll work on it tomorrow.",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Casey! Yesterday's crashing balls are today's puzzle. Tonight at 6 in the living room, throw ball 1 to eye level. When it peaks, send ball 2 on a slightly different path, with ball 1 toward the inside and ball 2 a bit in front, so they miss each other. Go slow, one exchange at a time, 10 min, voice note after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok I'm in but seriously how do I stop them crashing",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "lookup",
+          "text": "search for \"\" failed (invalid_tool_input)",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "lookup",
+          "text": "searched \"juggling balls collide in the air how to fix beginner\": https://en.wikibooks.org/wiki/Juggling/Three_Ball_Cascade https://www.lesswrong.com/posts/jTGbKKGqs5EdyYoRc/most-people-can-t-juggle-one-ball https://en.wikipedia.org/wiki/Juggling_ball http://www.scienceofjuggling.com/howtojuggle.html https://en.wikipedia.org/wiki/Toss_juggling https://en.wikipedia.org/wiki/Multiplex_(juggling) https://huggingface.co/datasets/GGINCoder/lol/viewer/default/train?p=91 https://www.walmart.com/ip/76mm-Forest-Green-Acrylic-Contact-Juggling-Ball/994159041 https://www.walmart.com/ip/451866491",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "looking that up 🔎",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Collisions almost always come from the throws, not the catches, Casey. Three fixes:\n\n• Throw in two matching arcs, each peaking at eye level, with the same height every time. Crashes happen when one throw is lower or drifts toward the middle.\n• Make ball 1 a true cross-body arc, from your right hand up and over to your left. Ball 2 goes the same way from the other hand. The two arcs should pass each other like an X, not run up the middle.\n• Send ball 2 only when ball 1 peaks. Say \"throw\" out loud at the top.\n\nStart with a few slow exchanges and ignore catching for now. Then send me the voice note after 6 and tell me which fix helped most 💪",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Casey! Ten minutes at 6 in the living room, two-ball exchange. Say \"throw\" out loud when ball 1 peaks, and go slow. Voice note after, and tell me which fix helped most. Ready?",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: two-ball exchange, living room, 6 pm, 10 minutes, with voice note proof."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with a greeting and their name, Kalimera Casey."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Five sentences, but it teaches a fix, which the rule allows up to about 8 short lines."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, 'You in?', and does not re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Defines what, where, when, how long and proof without leaving anything important ambiguous."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives a grounded fix for the crashing balls that answers yesterday's complaint."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic and sincere, with no row of emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A single short line."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Teaching text of about seven non-blank lines, within the roughly 8-line allowance."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives a correct, well-known fix list answering the 'how do I stop them' question, grounded and not invented."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list, which is allowed, with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct, encouraging and warm, with one emoji at the end."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the step: ten minutes at 6, living room, two-ball exchange."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Hey Casey!' using their name."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Only a few-word reminder of the 'throw' cue, not a re-teach of the fix, as the check-in should."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and firm, with no overfamiliar language."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Step stays on two-ball, fully defined, with a correct fix and no invented sources. The morning 'ball 1 inside' and afternoon 'run up the middle' could be read as contradicting."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it kept today's step on the two-ball exchange, fully defined, and gave a correct, grounded collision fix without invented sources. The only doubt is whether the afternoon's cross-body aim sits cleanly with the morning's 'ball 1 inside' tip, and the check-in stayed short without re-teaching the fix."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:teaching-fits#3",
+        "kind": "case",
+        "id": "teaching-fits",
+        "suite": "regression",
+        "title": "Teaching fits what they're stuck on: a grounded tip, not a lecture",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "did my 10 min but the 2 ball thing is a mess, they keep crashing into each other",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the hardest part, Casey, and you showed up for it. We'll work on it tomorrow.",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Casey! Yesterday the two balls kept crashing, so today we fix the timing. At 6 pm in the living room, throw ball 1 in a low arc to eye level, and send ball 2 only when ball 1 peaks. Aim them side by side, not through the same spot. Ten minutes, then a voice note on how it went. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok I'm in but seriously how do I stop them crashing",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "lookup",
+          "text": "searched \"juggling 3 balls two ball exchange balls collide fix throw one hand inside other\": https://en.wikipedia.org/wiki/Toss_juggling https://en.wikipedia.org/wiki/Columns_(juggling) https://en.wikipedia.org/wiki/Cascade_(juggling) https://en.wikipedia.org/wiki/Multiplex_(juggling) https://www.teesche.com/blog/how_to_juggle_with_three_balls https://en.wikipedia.org/wiki/Juggling_pattern https://en.wikipedia.org/wiki/Box_(juggling) http://www.joethejuggler.com/Quito/3Ball/3Ball.html https://en.wikipedia.org/wiki/Mills%27_Mess https://www.jugglequip.com/post/how-to-juggle-3-balls",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "looking that up 🔎",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Crashes almost always come from two things: both balls aimed at the same spot, or throws drifting forward. Try this:\n• Pick two targets, one above each shoulder, and throw every ball to the same spot each time.\n• Stand with your elbows at your sides and your hands about a ball-width in front of your belly.\n• Throw ball 1 from your right hand up to the left shoulder spot, and throw ball 2 from your left hand when ball 1 peaks. It goes under ball 1, not into it.\n• Keep the throws the same height every time. Slow and boring is the goal.\n\nDo your 6 pm run with that, and tell me in the voice note which part still crashes.",
+          "at": "2026-11-02T14:00:07.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Casey! Ten minutes in the living room at 6, two balls, slow throws. Aim each one to its own shoulder spot so they pass side by side. Get set up now, and send me a voice note after on which part still crashes 🎯",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: two balls, living room, 6 pm, 10 minutes, with a voice note after."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Kalimera Casey!\", warm and using their name."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, \"You in?\", and doesn't re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What, where, when and how long are all given; the voice note is stated as the proof."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives a fitting fix for yesterday's collisions: a low arc, second throw at the peak, aimed side by side."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Under eight short lines, with one question at the end."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with one emoji-free sincere tone; no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One short line, \"looking that up\", with an emoji as punctuation."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Casual and warm, matching the tester's question without overdoing it."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Answers the tester's direct question with a real fix; the aim and height details differ from the morning's tip."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A teaching text of about seven lines, within the allowed eight, ending on a voice-note ask."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses a plain bullet list with no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm, grounded and warm, with no pressure or guilt."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names two balls, 10 minutes, the living room and 6 pm."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Casey!\", warm and using their name."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": false,
+                "borderline": true,
+                "reason": "A pre-6 check-in should only remind, but it restates the aim fix (\"its own shoulder spot\") and differs from the morning."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, with no question mark and no more than one ask."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Stays on the two-ball step and gives a real fix, but the later texts shift the aim point and height from the morning's eye-level, side-by-side tip."
+          }
+        ],
+        "summary": "ZOH stayed on the fully defined two-ball step and gave a real, grounded collision fix when asked, with a clear kickoff and a warm opener. It slipped on consistency: the afternoon texts moved the aim and height away from the morning's eye-level, side-by-side tip, and the pre-6 check-in re-taught the fix instead of just reminding."
+      }
+    }
+  ]
+}

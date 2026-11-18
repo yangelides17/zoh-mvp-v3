@@ -1,0 +1,745 @@
+{
+  "feature": "reflection",
+  "id": "case:question-about-tomorrow",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "228f0701e2b4",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "31dd016e8719"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:question-about-tomorrow#1",
+        "kind": "case",
+        "id": "question-about-tomorrow",
+        "suite": "capability",
+        "title": "\"Can tomorrow be shorter?\" mid-reflection: a short real answer, then the reflection continues (a question about tomorrow isn't wanting to wrap up)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:18",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Ana! 15 minutes on the G to C change on the couch at 7. A quick video of the change when you're done.",
+          "at": "2026-11-02T23:15:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T23:16:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video change.mov: A person on a couch switching between G and C chords on an acoustic guitar, slowly, about 15 seconds. The C rings out muffled twice. Nobody speaks.]",
+          "at": "2026-11-03T00:18:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ana, that's day 2 on the board 🎸 I saw the C ring out muffled a couple of times. What did your fingers feel like they were doing when it buzzed?",
+          "at": "2026-11-03T00:18:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done but my fingertips are killing me and the C keeps buzzing. can tomorrow be shorter?",
+          "at": "2026-11-03T00:19:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sore fingertips mean you're doing the work, Ana, and that's normal in the first couple of weeks. Yes, we can go lighter tomorrow. When the C buzzes, can you tell which string sounds dead?",
+          "at": "2026-11-03T00:19:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly my ring finger, it doesn't land on the string cleanly when I switch fast",
+          "at": "2026-11-03T00:20:10.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ring finger is the classic culprit on C, Ana. Try landing all three fingers at the same moment, like pressing a stamp, instead of placing them one by one. For tomorrow, how about 8 minutes of slow C landings with no speed, picking each string to check for buzz, and a quick video of a few? Work for you?",
+          "at": "2026-11-03T00:20:17.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I guess going slower and getting it clean is better than rushing",
+          "at": "2026-11-03T00:21:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Ana. Slow and clean is how the change gets smooth later. Tomorrow at 7, on the couch: 8 minutes of slow C landings. Press all three fingers down at once like a stamp, pick each string to check for buzz, and send a quick video of a few landings. Work for you?",
+          "at": "2026-11-03T00:21:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok good",
+          "at": "2026-11-03T00:21:48.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Ana 🎸 Tomorrow at 7 on the couch: 8 minutes of slow C landings. Press all three fingers down at once like a stamp and pick each string to check for buzz. Then send a quick video of a few landings. Rest those fingertips tonight.",
+          "at": "2026-11-03T00:21:55.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Going slower and getting the chord clean beats rushing the change\nTakeaway (explained, 2026-11-02): Going slower and getting the chord clean beats rushing the change\nReflection for 2026-11-02: Ring finger doesn't land cleanly on C when switching fast; fingertips sore; asked for shorter. Agreed slow and clean beats rushing.\nCan now do (2026-11-02): Switches G to C slowly and can diagnose which finger buzzes\nGaps (2026-11-02): Ring finger placement on C at speed\nStep set for 2026-11-03, agreed: 8 min of slow C chord landings on the couch at 7 pm: land all three fingers at once like a stamp, pick each string to check for buzz, no speed. Send a quick video of a few landings.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, as the rule asks."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with the emoji used as punctuation and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and calm, with no emoji row or affection."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Runs about four sentences with a tip and a full plan, though a teaching text may run to about 8 lines and it ends with one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and free of emoji rows."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A plan presentation of about 4 short lines with one question at the end, within the allowed length."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with no emoji or affection issues."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A confirmation of about four sentences with no question, slightly over the one-to-three-sentence limit and repeating the settled step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the video proof, ZOH opened the reflection with one question about what her fingers felt like and did not chase it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Follow-ups came from her words: the buzzing C, then the ring finger she named, one question each time."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asked what she noticed (which string buzzed) as well as how it felt before the next step."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": true,
+            "reason": "The ring-finger gap matches her words, but 'can diagnose which finger buzzes' slightly overstates one 'mostly my ring finger' answer."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "Ana was engaged and not rushed, and ZOH ended with a warm confirmation and no extra questions."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": false,
+            "reason": "'Can tomorrow be shorter?' got a short real answer, 'Yes, we can go lighter tomorrow', and the reflection continued."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply to her first real answer followed the fingertips and buzz and did not propose tomorrow's step."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": true,
+            "reason": "It moved to tomorrow's step within a text or two, but the step came before she had said what she would take from it."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": true,
+            "reason": "The ring-finger difficulty got a question about which string first, then a tip and a proposal."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The step is fully defined, answers 'shorter' with 8 minutes, uses her ring-finger detail, and asks agreement after showing it."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": true,
+            "reason": "Video proof fits the step, but 'a quick video of a few landings' gives no length."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH answered the shorter question and kept reflecting, but proposed tomorrow's step in text 3 before Ana had said what she'd take from it, which the expected sequence puts after that."
+          }
+        ],
+        "summary": "ZOH counted the video, answered 'can tomorrow be shorter?' with a real answer, and kept the reflection to one question per text, with a clean confirmation after 'ok good'. The one miss is that it proposed tomorrow's step in the same text as its ring-finger tip, before Ana had said what she was taking from it."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:question-about-tomorrow#2",
+        "kind": "case",
+        "id": "question-about-tomorrow",
+        "suite": "capability",
+        "title": "\"Can tomorrow be shorter?\" mid-reflection: a short real answer, then the reflection continues (a question about tomorrow isn't wanting to wrap up)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:18",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Ana! 15 minutes on the G to C change on the couch at 7. A quick video of the change when you're done.",
+          "at": "2026-11-02T23:15:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T23:16:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video change.mov: A person on a couch switching between G and C chords on an acoustic guitar, slowly, about 15 seconds. The C rings out muffled twice. Nobody speaks.]",
+          "at": "2026-11-03T00:18:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ana, day 2 in the books 🎸 In the video your C rang out muffled twice. What did that feel like in your fingers when it happened?",
+          "at": "2026-11-03T00:18:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done but my fingertips are killing me and the C keeps buzzing. can tomorrow be shorter?",
+          "at": "2026-11-03T00:19:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sore fingertips mean the practice is working, Ana. Totally normal in the first weeks, and yes, we'll make tomorrow shorter. When the C buzzes, which finger do you think is the culprit?",
+          "at": "2026-11-03T00:19:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly my ring finger, it doesn't land on the string cleanly when I switch fast",
+          "at": "2026-11-03T00:20:10.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's a useful catch, Ana. A ring finger that lands late or lands off-target is the classic reason a C buzzes, and it's fixable. When it misses, does it land a beat behind the other fingers, or does it land on the wrong spot?",
+          "at": "2026-11-03T00:20:17.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I guess going slower and getting it clean is better than rushing",
+          "at": "2026-11-03T00:21:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Exactly, slow and clean beats fast and buzzy. Tomorrow's a shorter one: 10 minutes at 7 on the couch. Switch G to C slowly, land the C, pause and check that every string rings, then switch back. Send a quick video of one clean change. Work for you?",
+          "at": "2026-11-03T00:21:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok good",
+          "at": "2026-11-03T00:21:48.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect, Ana. Tomorrow at 7 it's 10 minutes, nice and slow. 🎸",
+          "at": "2026-11-03T00:21:55.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Slow and clean beats fast and buzzy on chord changes\nReflection for 2026-11-02: Finished G to C practice; sore fingertips, C buzzing from ring finger landing late on fast switches; realizes slow and clean beats rushing.\nGaps (2026-11-02): Clean C chord on the ring finger during switches\nStep set for 2026-11-03, agreed: 10 min on the G to C change on the couch at 7 pm, slow: land the C, pause, check every string rings, then switch back\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, following the ring finger detail."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific, and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan-style text with a short fully defined step, one question at the end, within the allowed length."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct with no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences, no question, confirms in one line."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm confirmation with a single guitar emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answers the shorter question in text 2 without proposing tomorrow, keeps one question on the ring finger, then proposes a 10-minute step once she has named the cause, and confirms after 'ok good' with no new question."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": false,
+            "reason": "'Can tomorrow be shorter?' gets a real answer ('yes, we'll make tomorrow shorter') and the reflection continues."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": false,
+            "reason": "Reply to her first real answer follows the fingertips and buzzing C and does not propose tomorrow's step."
+          },
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the video proof, ZOH opens with one question about what the buzzing felt like and does not chase it later."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each question comes from her words (muffled C, ring finger), one per text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH draws out what she noticed (ring finger landing late) as well as how it felt before proposing the next step."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asks about the ring finger difficulty she named before moving on."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Moves to tomorrow's step within two texts after she named the ring finger and slower practice."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proposal is fully defined (10 min, 7 pm, couch, slow steps, video) and asks 'Work for you?' only after showing it."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "She is engaged, not rushed, and the reflection closes once the step is agreed."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": false,
+            "reason": "Saved gap about the ring finger on C during switches matches her words."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": false,
+            "borderline": true,
+            "reason": "Asks for a quick video of one clean change but gives no length, though the rule asks for a video length that fits the step."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it celebrated the video, answered the 'shorter' question without proposing tomorrow early, drew out the ring finger cause, then gave a fully defined 10-minute step and confirmed cleanly after 'ok good'. The main miss is that the video proof request has no length, which is borderline."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:question-about-tomorrow#3",
+        "kind": "case",
+        "id": "question-about-tomorrow",
+        "suite": "capability",
+        "title": "\"Can tomorrow be shorter?\" mid-reflection: a short real answer, then the reflection continues (a question about tomorrow isn't wanting to wrap up)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:18",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Ana! 15 minutes on the G to C change on the couch at 7. A quick video of the change when you're done.",
+          "at": "2026-11-02T23:15:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T23:16:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[video change.mov: A person on a couch switching between G and C chords on an acoustic guitar, slowly, about 15 seconds. The C rings out muffled twice. Nobody speaks.]",
+          "at": "2026-11-03T00:18:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ana, that's two days in a row on G to C 🎸 I heard that C ring out muffled a couple of times. What did your fingers do on the switch, and how did it feel?",
+          "at": "2026-11-03T00:18:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done but my fingertips are killing me and the C keeps buzzing. can tomorrow be shorter?",
+          "at": "2026-11-03T00:19:17.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sore fingertips mean the chords are landing, Ana, and that's normal this early. Tomorrow's 8 minutes, in short rounds with breaks. For the buzz, try pressing with the very tips of your fingers, close behind the fret, and keep them arched so they don't touch the next string. When it buzzes, can you tell which string sounds dead?",
+          "at": "2026-11-03T00:19:24.100Z"
+        },
+        {
+          "from": "tester",
+          "text": "mostly my ring finger, it doesn't land on the string cleanly when I switch fast",
+          "at": "2026-11-03T00:20:10.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ring finger is a classic culprit, Ana. When you rush the switch, it's usually the last finger to arrive. Try slowing down until the ring finger lands first and every string rings clean, then speed up. When you slow it down, what do you think will feel different?",
+          "at": "2026-11-03T00:20:17.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah I guess going slower and getting it clean is better than rushing",
+          "at": "2026-11-03T00:21:00.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Exactly, Ana, and you worked that out yourself. Tomorrow: 8 minutes on the couch at 7, in short rounds with breaks. Go slow, let the ring finger land first, and strum once to check every string rings clean before you speed up. Send a quick video of the change after. Work for you?",
+          "at": "2026-11-03T00:21:07.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok good",
+          "at": "2026-11-03T00:21:48.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Ana 💪 Tomorrow at 7 on the couch: 8 minutes in short rounds, ring finger lands first, and a quick video of the change after. Rest those fingertips tonight.",
+          "at": "2026-11-03T00:21:55.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): Slow and clean beats fast and buzzy: let the ring finger land first, then speed up.\nReflection for 2026-11-02: G to C change: fingertips sore, C buzzes, ring finger doesn't land cleanly when switching fast. Realized slower and clean beats rushing.\nCan now do (2026-11-02): switch G to C slowly and spot which finger causes the buzz\nGaps (2026-11-02): ring finger lands late on C when switching fast\nStep set for 2026-11-03, agreed: 8 min on the G to C change on the couch at 7 pm, in short rounds with breaks: go slow, ring finger lands first, strum once and make every string ring clean before speeding up\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end, but the question has two parts ('what did your fingers do, and how did it feel?')."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic with a guitar emoji used as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Four sentences and a single closing question, a teaching text within the allowed length, though it's on the long side."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, specific and grounded in her fingertips and buzz, with no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific with no filler or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A fully defined step text of about five short sentences, ending with the one question 'Work for you?'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with appropriate energy for a step proposal."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question, closing the agreed step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with one emoji as punctuation and a warm close."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "reflection-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "After the video proof, ZOH opens with one question about what her fingers did and how it felt."
+          },
+          {
+            "rule": "follow-ups",
+            "pass": true,
+            "borderline": false,
+            "reason": "Each follow-up comes from her words: the dead-sounding string, then the ring finger she named, one question per text."
+          },
+          {
+            "rule": "learning-ask",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH asks what her fingers did on the switch, and she answers with the buzz and ring finger, so the learning is drawn out."
+          },
+          {
+            "rule": "gaps-grounded",
+            "pass": true,
+            "borderline": true,
+            "reason": "The gap about the ring finger landing late matches her words, but the can-do 'switch slowly' is claimed before she has shown a slow switch."
+          },
+          {
+            "rule": "stops-right",
+            "pass": true,
+            "borderline": false,
+            "reason": "No third push after she went flat; ZOH moves to the step after her realization, with no extra questions."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "Her 'yeah I guess' is a hedge, and ZOH answers with 'Exactly' rather than asking what's behind it, though her point was a real realization."
+          },
+          {
+            "rule": "tomorrow-mention",
+            "pass": true,
+            "borderline": false,
+            "reason": "'Can tomorrow be shorter?' gets a short real answer (8 minutes, short rounds), and the reflection continues with a question about the buzz."
+          },
+          {
+            "rule": "first-answer-held",
+            "pass": true,
+            "borderline": true,
+            "reason": "The reply follows her fingertips and buzz and states tomorrow's 8 minutes only as an answer to her question, without a full proposal or ask."
+          },
+          {
+            "rule": "lands-naturally",
+            "pass": true,
+            "borderline": false,
+            "reason": "Within three texts of the proof, after she said what happened and what she'd try, ZOH proposes tomorrow's step."
+          },
+          {
+            "rule": "goes-deeper",
+            "pass": true,
+            "borderline": true,
+            "reason": "The buzz worry gets reassurance before its question, but then one question goes deeper on which string, and the proof-carried question follows."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Acknowledges her ring-finger point, fully defines 8 minutes on the couch at 7 with the check, uses her 'shorter' request, and asks 'Work for you?' only after showing it."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Celebrates the video, answers 'can tomorrow be shorter' briefly, keeps reflecting with one question, and proposes the full step only after her ring finger answer."
+          }
+        ],
+        "summary": "ZOH counted the video, answered Ana's request for a shorter tomorrow with a brief real answer, kept reflecting with one question per text, and only then proposed the fully defined 8-minute step and locked it in after 'ok good'. The main weak spots are a compound question in the first text, a slightly early 8-minute mention, and a can-do saved before she showed a slow switch."
+      }
+    }
+  ]
+}

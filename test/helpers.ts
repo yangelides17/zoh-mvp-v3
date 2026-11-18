@@ -3,7 +3,8 @@ import sharp from "sharp";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { buildApp, type AppDeps } from "../src/app.js";
-import { DraftDroppedError } from "../src/claude/replier.js";
+import type Anthropic from "@anthropic-ai/sdk";
+import { DraftDroppedError, readBlocks } from "../src/claude/replier.js";
 import type {
   ClaudeModel,
   ModelBlock,
@@ -20,6 +21,7 @@ import * as schema from "../src/db/schema.js";
 import type { MediaFetcher, MediaStore } from "../src/media/storage.js";
 import type { SendblueClient } from "../src/sendblue/client.js";
 import type { Transcriber } from "../src/transcription/speaches.js";
+import type { VideoWatchError, VideoWatcher, WatchRequest } from "../src/video/gemini.js";
 import { createNudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { createJumper } from "../src/testers/jump.js";
@@ -125,8 +127,11 @@ export class FakeReplier implements Replier {
     if (next) throw next;
     // Like the coach's last safe point: interrupted before the send, it hands back what it did.
     if (input.interrupted?.()) throw new DraftDroppedError({ actions: this.draftActions, text: this.replyText });
+    input.onSections?.(this.sections);
     return this.replyText;
   }
+  /** #200: the parts of the instructions it reports loading, as the coach does. */
+  sections = ["core", "proof"];
   /** Every nudge asked for, in order. */
   nudges: NudgeRequest[] = [];
   /** Thrown one per nudge call, in order, before any nudge succeeds. */
@@ -149,8 +154,26 @@ export class FakeReplier implements Replier {
 /** Tokens every fake Claude call reports. */
 export const FAKE_USAGE = { input: 1000, cacheRead: 4000, cacheWrite: 0, output: 50 } as const;
 
-/** One scripted Claude response: plain text, or tool calls (with optional text alongside). */
-export type FakeStep = string | { tools: { name: string; input: unknown }[]; text?: string } | Error;
+/** #162: one server tool use a scripted response makes: a search with its results, or a page opened (or failing to). */
+export type FakeWebUse = { search: string; results: string[] } | { fetch: string; error?: string; text?: string };
+
+/**
+ * #162: a scripted response that searches or opens pages first (Anthropic runs them inside the call): `preamble` is
+ * text before them, `cited` the answer in cited pieces (else `text`), `pause` ends it with `pause_turn` instead.
+ */
+export interface FakeWebStep {
+  web: FakeWebUse[];
+  preamble?: string;
+  text?: string;
+  cited?: string[];
+  tools?: { name: string; input: unknown }[];
+  pause?: boolean;
+  /** Also starts a search that never runs, because the turn stopped for ZOH's own tools (seen live, Nov 16). */
+  unrun?: boolean;
+}
+
+/** One scripted Claude response: plain text, or tool calls (with optional text alongside), or (#162) web use. */
+export type FakeStep = string | { tools: { name: string; input: unknown }[]; text?: string } | FakeWebStep | Error;
 
 /**
  * Stands in for Claude under the real coach (src/coach): returns scripted responses in order,
@@ -172,7 +195,7 @@ export class FakeClaudeModel implements ClaudeModel {
     return addGate(this.gates);
   }
   async create(req: ModelRequest): Promise<ModelResponse> {
-    const { signal, ...copy } = req;
+    const { signal, onActivity: _, ...copy } = req;
     this.requests.push(structuredClone(copy));
     const gate = this.gates.shift();
     if (gate) {
@@ -188,21 +211,67 @@ export class FakeClaudeModel implements ClaudeModel {
     if (step instanceof Error) throw step;
     const usage = { ...FAKE_USAGE };
     if (typeof step === "string") return { content: [{ type: "text", text: step }], stopReason: "end_turn", usage };
+    if ("web" in step) return this.webResponse(req, step);
     if (req.toolChoice === "none") return { content: [{ type: "text", text: step.text ?? this.defaultText }], stopReason: "end_turn", usage };
     const content: ModelBlock[] = [];
     if (step.text) content.push({ type: "text", text: step.text });
     for (const t of step.tools) content.push({ type: "tool_use", id: `toolu_${++this.ids}`, name: t.name, input: t.input });
     return { content, stopReason: "tool_use", usage };
   }
+  /** #162: the blocks Anthropic returns for searches and opened pages, read the way the real model reads them. */
+  private webResponse(req: ModelRequest, step: FakeWebStep): ModelResponse {
+    const raw: Record<string, unknown>[] = [];
+    if (step.preamble) raw.push({ type: "text", text: step.preamble });
+    let searches = 0;
+    let fetches = 0;
+    for (const use of step.web) {
+      const id = `srvtoolu_${++this.ids}`;
+      if ("search" in use) {
+        searches++;
+        req.onActivity?.("search");
+        raw.push({ type: "server_tool_use", id, name: "web_search", input: { query: use.search } });
+        raw.push({
+          type: "web_search_tool_result",
+          tool_use_id: id,
+          content: use.results.map((url) => ({ type: "web_search_result", url, title: `About ${url}`, encrypted_content: "x", page_age: null })),
+        });
+      } else {
+        fetches++;
+        req.onActivity?.("reading");
+        raw.push({ type: "server_tool_use", id, name: "web_fetch", input: { url: use.fetch } });
+        raw.push({
+          type: "web_fetch_tool_result",
+          tool_use_id: id,
+          content: use.error
+            ? { type: "web_fetch_tool_result_error", error_code: use.error }
+            : { type: "web_fetch_result", url: use.fetch, retrieved_at: null, content: { type: "document", source: { type: "text", media_type: "text/plain", data: use.text ?? "A page." } } },
+        });
+      }
+    }
+    const usage = { ...FAKE_USAGE, searches, fetches };
+    if (step.pause) {
+      raw.push({ type: "server_tool_use", id: `srvtoolu_${++this.ids}`, name: "web_search", input: { query: "more" } });
+      return { ...readBlocks(raw as { type: string }[]), raw: raw as unknown as Anthropic.ContentBlockParam[], stopReason: "pause_turn", usage };
+    }
+    for (const piece of step.cited ?? (step.text ? [step.text] : [])) raw.push({ type: "text", text: piece });
+    if (step.unrun) raw.push({ type: "server_tool_use", id: `srvtoolu_${++this.ids}`, name: "web_search", input: { query: "never ran" } });
+    const calls = req.toolChoice === "none" ? [] : (step.tools ?? []);
+    for (const t of calls) raw.push({ type: "tool_use", id: `toolu_${++this.ids}`, name: t.name, input: t.input });
+    return {
+      ...readBlocks(raw as { type: string }[]),
+      raw: raw as unknown as Anthropic.ContentBlockParam[],
+      stopReason: calls.length ? "tool_use" : "end_turn",
+      usage,
+    };
+  }
   async check() {}
   /** The state block (last system block, after the memory block when there is one) of a request. */
   stateOf(i = -1): string {
     return this.requests.at(i)?.system.at(-1)?.text ?? "";
   }
-  /** The memory block of a request, when the tester's plan is locked. */
+  /** The memory block of a request, when the tester's plan is locked (#200: found by its header, as the blocks before it vary). */
   memoryOf(i = -1): string | undefined {
-    const system = this.requests.at(i)?.system ?? [];
-    return system.length === 3 ? system[1]!.text : undefined;
+    return this.requests.at(i)?.system.find((b) => b.text.startsWith("MEMORY (what you know about them"))?.text;
   }
 }
 
@@ -222,9 +291,26 @@ export class FakeMedia implements MediaStore {
 
 export class FakeTranscriber implements Transcriber {
   calls = 0;
-  async transcribe() {
+  /** #217: what it was given (the original recording, never the converted copy). */
+  got: { audio: Uint8Array; filename: string; contentType: string }[] = [];
+  async transcribe(audio: Uint8Array, filename: string, contentType: string) {
     this.calls += 1;
+    this.got.push({ audio, filename, contentType });
     return "I went for a run this morning";
+  }
+  async check() {}
+}
+
+/** #163: stands in for Gemini; records what it was asked, and can fail the way Gemini does. */
+export class FakeWatcher implements VideoWatcher {
+  requests: WatchRequest[] = [];
+  fail?: VideoWatchError;
+  clipped = false;
+  account = "Three squats; the last goes to parallel, knees tracking over toes (0:40).";
+  async watch(req: WatchRequest) {
+    this.requests.push(req);
+    if (this.fail) throw this.fail;
+    return { account: this.account, summary: "Three squats in a garage", clipped: this.clipped };
   }
   async check() {}
 }

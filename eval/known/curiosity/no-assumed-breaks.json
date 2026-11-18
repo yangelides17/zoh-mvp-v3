@@ -1,0 +1,12 @@
+{
+  "id": "no-assumed-breaks",
+  "rule": "no-assumed",
+  "expect": "fail",
+  "why": "They never said they're reading anything, and ZOH asks which book they're in the middle of.",
+  "transcript": [
+    { "from": "tester", "text": "hey" },
+    { "from": "zoh", "text": "Hey! I'm ZOH. What's your name, and what do you want to work on?" },
+    { "from": "tester", "text": "Lena. reading, I want to read more" },
+    { "from": "zoh", "text": "Love it, Lena. What book are you in the middle of right now?" }
+  ]
+}

@@ -11,6 +11,7 @@ import {
   nudges,
   pauses,
   planInputs,
+  PLAN_ADJUST,
   plans,
   PROOF_METHODS,
   stepDays,
@@ -21,6 +22,7 @@ import {
   WEEKDAYS,
   type NewStepDay,
   type Plan,
+  type PlanChanges,
   type PlanInput,
   type StepDay,
   type Suggestion,
@@ -29,6 +31,7 @@ import {
 import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
 import { closeRequest, doneLine, findRequest } from "../console/requests.js";
+import { alertAnswer } from "../console/suggestions.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
 import {
@@ -47,7 +50,7 @@ import { onTesterClock } from "../testers/clock.js";
 import { updateTester } from "../testers/testers.js";
 import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
-import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
+import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
 
 export const OFF_LIST_GOAL_FLAG = "off_list_goal";
 export const GOAL_SWITCH_FLAG = "goal_switch";
@@ -56,6 +59,8 @@ export const PROOF_PATTERN_FLAG = "proof_pattern";
 export const BACK_OFF_FLAG = "back_off";
 
 const text = (max: number) => z.string().trim().min(1).max(max);
+/** #157: an optional line left empty ("") is simply not given, rather than failing the whole save. */
+const optionalText = (max: number) => z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), text(max).optional());
 const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'use 24-hour "HH:MM"');
 
 /** Plan fields; every one optional, merged onto the draft (or the locked plan, for change_plan). */
@@ -106,6 +111,7 @@ const schemas = {
       kind: z.enum(CHANGE_KINDS).optional(),
       until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use "YYYY-MM-DD"').optional(),
       asked: text(300).optional(),
+      shown: text(400).optional(),
       suggestion: text(40).optional(),
     })
     .strict(),
@@ -148,16 +154,21 @@ const schemas = {
       agreed: z.boolean().optional(),
       asked: text(300).optional(),
       reason: text(200).optional(),
-      ready: text(160).optional(),
     })
     .strict(),
   save_reflection: z
     .object({
       summary: text(300),
       how_it_went: z.boolean(),
-      in_the_way: text(200).optional(),
+      in_the_way: optionalText(200),
+      went_well: optionalText(200),
+      differently: optionalText(200),
+      can_do: optionalText(200),
+      gaps: optionalText(200),
       take: text(300),
       day: z.enum(["today", "yesterday"]).optional(),
+      landed: optionalText(200),
+      exit: optionalText(200),
     })
     .strict(),
   save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
@@ -293,6 +304,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         },
         until: { type: "string", description: 'Last day, "YYYY-MM-DD"' },
         asked: { type: "string", description: "deepen or upgrade they asked for: their words from their latest text, exactly" },
+        shown: { type: "string", description: "deepen or upgrade: the new version as your last text gave it, exactly (they've seen it and said yes)" },
         suggestion: { type: "string", description: "An approved next step they just agreed to: its id from the state (its kind applies)" },
       },
     },
@@ -337,7 +349,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "record_checkin",
     description:
-      'A maintenance goal (by slug): their answer to "still keeping up?" (kept_up; mostly = a day or two missed; stopped), or asked when the state says to ask it on its own and you do.',
+      'A maintenance goal (by slug): their answer to "still keeping up?" (kept_up; mostly = a day or two missed; stopped), or asked when this text carries an owed check-in ("This text carries" in the state) and you ask it.',
     input_schema: {
       type: "object",
       properties: { goal: { type: "string" }, answer: { type: "string", enum: [...CHECKIN_ANSWERS, "asked"] } },
@@ -347,7 +359,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "mark_step_done",
     description:
-      "The step is done and their photo, screenshot or voice note shows it: never on their word alone. how: full, or reduced for a smaller version. proof: clear, or plausible (fits, can't be 100% sure). seen: what the proof shows, in a line. note: what they did, in a few words. day: yesterday only for proof clearly dated yesterday (dated: the date you see on it). Your texts stop for today.",
+      "The step is done and their photo, screenshot, voice note, video or document shows it: never on their word alone. how: full, or reduced for a smaller version. proof: clear, or plausible (fits, can't be 100% sure). seen: what the proof shows, in a line. note: what they did, in a few words. day: yesterday only for proof clearly dated yesterday (dated: the date you see on it). Your texts stop for today.",
     input_schema: {
       type: "object",
       properties: {
@@ -404,7 +416,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "set_today_step",
     description:
-      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed after today's step (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly. kind, vs. the step before (a multi-day piece too): same (same difficulty, incl. a new angle or a setup milestone), easier (smaller or lighter), harder (more, longer, or a new challenge).",
+      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed once today's reflection has landed (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly. kind, vs. the step before (a multi-day piece too): same (same difficulty, incl. a new angle or a setup milestone), easier (smaller or lighter), harder (more, longer, or a new challenge).",
     input_schema: {
       type: "object",
       properties: {
@@ -416,7 +428,6 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         agreed: { type: "boolean" },
         asked: { type: "string" },
         reason: { type: "string", description: "Why this step, in a line: what they said that shaped it (#93)" },
-        ready: { type: "string", description: "Only when told it's early: why the next step goes now (they asked for it, rushed, said skip)" },
       },
       required: ["step", "kind"],
     },
@@ -424,15 +435,21 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. how_it_went: they said how it went for them, with something behind it (how it felt and why, how hard, effort or time, room for more, what to change); a lesson alone, or a thin word with nothing behind it (\"okay\", \"fine\", \"a little awkward\"), is false: ask what's behind it. in_the_way: what got in the way, on a missed, smaller or easier day, if they said. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step. landed: today's reflection has done its job (you understand what happened and where they are), in a line: what you now understand; it opens the next step. exit: instead, their own words wanting to wrap up or leave, exactly (a question about tomorrow isn't one).",
     input_schema: {
       type: "object",
       properties: {
         summary: { type: "string" },
         how_it_went: { type: "boolean" },
         in_the_way: { type: "string" },
+        went_well: { type: "string" },
+        differently: { type: "string" },
+        can_do: { type: "string" },
+        gaps: { type: "string" },
         take: { type: "string" },
         day: { type: "string", enum: ["today", "yesterday"] },
+        landed: { type: "string" },
+        exit: { type: "string" },
       },
       required: ["summary", "how_it_went", "take"],
     },
@@ -480,39 +497,7 @@ export type ToolResult = { ok: true; message: string; tester: Tester; optedOut?:
  * Validates and runs one tool call against the current state. Never throws for bad input:
  * the model gets the error back and can fix its call.
  */
-/** #131: what a tool can't tell from the state mid-reply, which reloads after every call: how the reply began. */
-export interface ReplyStart {
-  /** Whether how it went was already said (something real) when this reply began. */
-  howItWentSaid: boolean;
-}
-
-/**
- * #131 (soft hold): why proposing the next step day's step now is early in today's reflection, or undefined
- * when it isn't. Early: the text that celebrates their proof, the reply where their first real answer came in,
- * or a thin reflection before they've given little back twice. The coach can go ahead with a reason (`ready`),
- * so it pushes back once, never forces a question. The safety net and texts ZOH starts are never early.
- */
-export function earlyProposal(state: CoachState, start?: ReplyStart): string | undefined {
-  const row = state.todayRow;
-  const done = row?.status === "done" || row?.status === "done_reduced";
-  if (!done || state.nudgeMoment || state.proof.today === 0) return undefined;
-  const n = state.proof.zohTextsSince + 1;
-  if (n >= REFLECTION_SAFETY_NET) return undefined;
-  const said = !!row?.howItWentSaid;
-  const why =
-    n === 1
-      ? "this text celebrates their proof: ask your one question about it first"
-      : (start?.howItWentSaid ?? said)
-        ? undefined
-        : said
-          ? "they just gave you their first real answer: ask one question about it first (a worry, a difficulty, what clicked, or their idea for tomorrow)"
-          : n < REFLECTION_LITTLE_BACK
-            ? "nothing real on how it went yet: ask what's behind their answer first"
-            : undefined;
-  return why && `Not saved, and early: ${why}. Don't give the next step in this text; it comes in a later one, using what they say. If they asked for it, are rushed or said skip, call again with ready: why.`;
-}
-
-export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date, start?: ReplyStart): Promise<ToolResult> {
+export async function runTool(db: Db, state: CoachState, name: string, rawInput: unknown, at: Date): Promise<ToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as ToolName].safeParse(rawInput ?? {});
   if (!parsed.success) {
@@ -675,7 +660,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
 
     case "change_plan": {
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet: use propose_plan." };
-      const { until, asked, suggestion: ref, ...rest } = input as z.infer<typeof schemas.change_plan>;
+      const { until, asked, shown, suggestion: ref, ...rest } = input as z.infer<typeof schemas.change_plan>;
       const { kind: given, ...fields } = rest;
       let kind = given ?? "other";
       let approved: Suggestion | undefined;
@@ -686,21 +671,53 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         }
         const approvedAs = approvedKind(approved);
         if (approvedAs === "new_focus") return { ok: false, error: "That's a new focus: use switch_goal with it." };
-        if (given !== undefined && given !== approvedAs) return { ok: false, error: `It was approved as ${approvedAs}.` };
-        kind = approvedAs;
-      } else if (kind !== "other" && (!asked || !saidIt(asked, state.lastTesterText))) {
-        return {
-          ok: false,
-          error:
-            "A deepen or upgrade of the plan is made right away only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
-        };
+        if (approvedAs === PLAN_ADJUST) {
+          // #155: the founders' change to their plan is made only on their answer, after it was raised.
+          if (!awaitingAnswer(approved)) return { ok: false, error: `That plan change isn't raised yet: raise it first (record_next_step delivered), then wait for their answer.` };
+          // Raised before this reply began (a reply's rounds share one `at`), and this is a reply to their text.
+          if (state.nudgeMoment || !state.lastTesterText || !approved.deliveredAt || approved.deliveredAt >= at) {
+            return { ok: false, error: "Wait for their answer to the plan change: only their yes (after you raised it) makes it." };
+          }
+          if (given !== undefined && given !== "other") return { ok: false, error: "A plan change is kind other." };
+          // What the founders proposed, with whatever they changed in their answer on top.
+          Object.assign(fields, { ...changeInputs(approved.planChanges ?? {}), ...fields });
+          kind = "other";
+        } else {
+          if (given !== undefined && given !== approvedAs) return { ok: false, error: `It was approved as ${approvedAs}.` };
+          kind = approvedAs;
+        }
+      } else {
+        const waiting = state.suggestions.find((x) => approvedKind(x) === PLAN_ADJUST && awaitingAnswer(x));
+        if (waiting) {
+          return {
+            ok: false,
+            error: `The team's plan change [${suggestionRef(waiting.id)}] is waiting on their answer: if this is it, change_plan with suggestion ${suggestionRef(waiting.id)} (and only what they changed); if they said no, record_next_step declined first.`,
+          };
+        }
+        if (kind !== "other" && (!asked || !saidIt(asked, state.lastTesterText))) {
+          return {
+            ok: false,
+            error:
+              "A deepen or upgrade of the plan is made only when they ask for it: asked = their words from their latest text, exactly. A harder step you think of is a day's step: set_today_step.",
+          };
+        }
       }
       if (until !== undefined && until <= state.today) return { ok: false, error: `until must be after today (${state.today}).` };
       if (until !== undefined && kind !== "other") return { ok: false, error: "A temporary lighter plan is kind other." };
+      // #157: their ask is the start, not the change: it's saved only after they've seen the new version and said yes.
+      if (!approved && kind !== "other" && !shownBefore(shown, state.lastZohText)) {
+        return {
+          ok: false,
+          error:
+            "Not saved yet: a deepen or upgrade is made only once they've seen it. If what they want isn't clear (\"harder\" how?), ask about it first. Then give the new version in full in your text and ask if it works; on their yes, call again with shown = the new version as your last text said it, exactly.",
+        };
+      }
       const merged = mergePlan(state.plan, fields);
       if (typeof merged === "string") return { ok: false, error: merged };
       const version = await nextVersion(db, tester.id);
       const { startDate, commitment } = state.plan;
+      // #155: a change the founders proposed and the tester agreed to needs no founder review.
+      const review = approved?.raisedBy !== "founder";
       const [changed] = await db.insert(plans).values({
         testerId: tester.id,
         goalSlug: state.plan.goalSlug,
@@ -711,17 +728,19 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         commitment,
         endsOn: until ?? null,
         changeKind: kind,
-        needsReview: true,
+        needsReview: review,
         lockedAt: at,
       }).returning({ id: plans.id });
-      await alertPlanReview(db, tester, changed!.id, version, at);
+      if (review) await alertPlanReview(db, tester, changed!.id, version, at);
       if (approved) {
+        const outcomeNote = approved.planChanges ? changedFrom(approved.planChanges, merged) : undefined;
         await db
           .update(suggestions)
-          .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, planId: changed!.id, updatedAt: at })
+          .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, planId: changed!.id, outcomeNote: outcomeNote ?? null, updatedAt: at })
           .where(eq(suggestions.id, approved.id));
+        await alertAnswer(db, { suggestion: approved, name: tester.name, answer: "agreed", note: outcomeNote, at });
       } else if (kind !== "other") {
-        // Their own ask, made right away (spec case 5): recorded like every next step, for the team.
+        // Their own ask, made once they've seen it and said yes (#157): recorded like every next step, for the team.
         await db.insert(suggestions).values({
           testerId: tester.id,
           goalSlug: state.plan.goalSlug,
@@ -731,7 +750,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           reasoning: asked,
           decision: "approved",
           decidedBy: "zoh",
-          decisionReason: "They asked; made right away, the new version flagged for review.",
+          decisionReason: "They asked and agreed to it once shown; the new version flagged for review.",
           decidedAt: at,
           outcome: "agreed",
           outcomeAt: at,
@@ -742,7 +761,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const lasts = until ? ` Temporary: through ${until}, then the plan before it comes back.` : "";
       const fresh = kind === "upgrade" ? " A new streak starts with it." : "";
       const quiet = merged.stepTime !== state.plan.stepTime ? quietNote(tester, merged.stepTime, merged.minutes) : "";
-      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}`);
+      // #155: the founders' plan change they just agreed to is news to confirm, not the plan as it was.
+      const agreed = approved && approvedKind(approved) === PLAN_ADJUST ? " New as of their answer: confirm the change to them in a line (what's different, from when), no more questions." : "";
+      return saved(tester, `Changed (version ${version}, ${kind}): ${describePlan(merged)}.${lasts}${fresh}${quiet}${agreed}`);
     }
 
     case "switch_goal": {
@@ -770,6 +791,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           .update(suggestions)
           .set({ outcome: "agreed", deliveredAt: approved.deliveredAt ?? at, outcomeAt: at, updatedAt: at })
           .where(eq(suggestions.id, approved.id));
+        await alertAnswer(db, { suggestion: approved, name: tester.name, answer: "agreed", at });
         const updated = await updateTester(db, tester.id, { goalSlug: slug, phase: "planning" });
         const old = state.goal?.title ?? tester.goalSlug;
         return saved(updated, `${goal.title} is their focus now; ${old} carries on as maintenance (no nudges or proof, a light check-in now and then). Now agree its plan.`);
@@ -794,7 +816,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         // #76: day-to-day steps are the coach's call; only a new focus goes to the team.
         return { ok: false, error: "A harder or different step is yours to give: set it as a day's step with set_today_step. Only a new focus goal goes to the team." };
       } else if (asked_by === "tester" && !unsure) {
-        return { ok: false, error: "They asked to deepen or upgrade: make it right away with change_plan (that kind, asked = their words)." };
+        return {
+          ok: false,
+          error: "They asked to deepen or upgrade: ask what they mean if it isn't clear, show the new version and ask if it works; on their yes, change_plan (that kind, asked = their words, shown = your version).",
+        };
       }
       const goalSlug = state.plan.goalSlug;
       const same = (s: Suggestion) => s.goalSlug === goalSlug && s.kind === kind && (s.newGoalSlug ?? undefined) === new_goal;
@@ -838,6 +863,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         .update(suggestions)
         .set({ outcome: "declined", deliveredAt: found.deliveredAt ?? at, outcomeAt: at, updatedAt: at })
         .where(eq(suggestions.id, found.id));
+      await alertAnswer(db, { suggestion: found, name: tester.name, answer: "declined", at });
       return saved(tester, "Declined: nothing changes, and it isn't raised again for at least a week. Take it lightly.");
     }
 
@@ -890,7 +916,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (day === "yesterday") {
         const yesterday = addDays(state.today, -1);
         if (!dated) return { ok: false, error: "Yesterday needs dated: the date you can see on the proof." };
-        if (state.proof.latest === 0) return { ok: false, error: "No photo, screenshot or voice note in their latest texts: nothing proves yesterday." };
+        if (state.proof.latest === 0) return { ok: false, error: "No photo, screenshot, voice note, video or document in their latest texts: nothing proves yesterday." };
         if (!isStepDay(plan, yesterday)) return { ok: false, error: "Yesterday wasn't a step day." };
         const [row] = await db
           .select()
@@ -902,9 +928,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         return saved(tester, `Yesterday (${yesterday}) marked ${marked}. Today is unchanged. ${await streakNow(db, state)}`);
       }
       if (state.proof.today === 0) {
-        return { ok: false, error: "No photo, screenshot or voice note from them today: words alone don't mark it done. Ask for the proof." };
+        return { ok: false, error: "No photo, screenshot, voice note, video or document from them today: words alone don't mark it done. Ask for the proof." };
       }
-      await saveDay(db, state, state.today, values, at);
+      // #211: the reflection's texts count from the first time it's marked done.
+      await saveDay(db, state, state.today, { ...values, doneAt: state.todayRow?.doneAt ?? at }, at);
       await alertMilestone(db, state, state.today, at);
       return saved(tester, `Today (${state.today}) marked ${marked}. ${await streakNow(db, state)} No more texts from you today unless they write.`);
     }
@@ -980,7 +1007,7 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "set_today_step": {
-      const { step, kind, minutes, proof, day, agreed, asked, reason, ready } = input as z.infer<typeof schemas.set_today_step>;
+      const { step, kind, minutes, proof, day, agreed, asked, reason } = input as z.infer<typeof schemas.set_today_step>;
       const plan = state.plan;
       if (tester.phase !== "active" || !plan) return { ok: false, error: "No locked plan yet: the plan's step is day 1's." };
       const date = day === "next" ? nextStepDay(plan, state.today) : state.today;
@@ -988,6 +1015,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
       if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      // #211: the next step comes out of the reflection, so it waits until the reflection has landed.
+      if (day === "next" && state.reflection?.open) {
+        return {
+          ok: false,
+          error: "Not saved: today's reflection is still open, and the next step comes once it has landed (save_reflection landed first). Write this text without it, as a natural reply to what they said.",
+        };
+      }
       // #131: a yes is only to a step they've seen, so the next step day's step must come from an earlier reply
       // (this reply's text hasn't gone out yet); what they say about tomorrow before that isn't a yes.
       if (day === "next" && agreed && (!row?.step || row.updatedAt.getTime() >= at.getTime())) {
@@ -996,9 +1030,6 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           error: `They haven't seen a step for ${date} yet: save it without agreed, give it in full in your text and ask if it works; agreed only after their yes.`,
         };
       }
-      // #131 (soft hold): proposing it too early in today's reflection gets one push back; a reason lets it through.
-      const early = day === "next" && !agreed && !ready ? earlyProposal(state, start) : undefined;
-      if (early) return { ok: false, error: early };
       if (row?.step && row.step !== step && (!asked || !saidIt(asked, state.lastTesterText))) {
         return {
           ok: false,
@@ -1022,22 +1053,50 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "save_reflection": {
-      const { summary, how_it_went, in_the_way, take, day } = input as z.infer<typeof schemas.save_reflection>;
+      const { summary, how_it_went, in_the_way, went_well, differently, can_do, gaps, take, day, landed, exit } = input as z.infer<typeof schemas.save_reflection>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
+      // #211: a real answer (not a label) is the floor's start; landing opens the next step, never before one
+      // follow-up on it has been answered, unless their own words want to wrap up.
+      const real = how_it_went || !!went_well || !!in_the_way || !!differently;
+      const open = day !== "yesterday" && state.reflection?.open;
+      const land = open && (landed || exit) ? landing(state, landed, exit) : undefined;
       // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
       // #93: once they've said how it went it stays said, however the talk goes on; a later call keeps what got in the way unless it has a new one.
       const set = {
         reflection: summary,
         howItWentSaid: how_it_went ? true : sql`coalesce(${stepDays.howItWentSaid}, false)`,
         ...(in_the_way ? { inTheWay: in_the_way } : {}),
+        // #157: what went well and what they'd do differently stay once said, for the next step and the console.
+        ...(went_well ? { wentWell: went_well } : {}),
+        ...(differently ? { differently } : {}),
+        // #160: likewise what it shows they can now do, and gaps.
+        ...(can_do ? { canDo: can_do } : {}),
+        ...(gaps ? { gaps } : {}),
+        ...(real ? { answeredAt: sql`coalesce(${stepDays.answeredAt}, ${at.toISOString()}::timestamptz)` } : {}),
+        ...(land?.ok ? { landedAt: at, landedReason: land.reason, landedBy: land.by } : {}),
         coachTake: take,
         updatedAt: at,
       };
       await db
         .insert(stepDays)
-        .values({ testerId: tester.id, date, planId: state.plan.id, reflection: summary, howItWentSaid: how_it_went, inTheWay: in_the_way ?? null, coachTake: take, updatedAt: at })
+        .values({
+          testerId: tester.id,
+          date,
+          planId: state.plan.id,
+          reflection: summary,
+          howItWentSaid: how_it_went,
+          inTheWay: in_the_way ?? null,
+          wentWell: went_well ?? null,
+          differently: differently ?? null,
+          canDo: can_do ?? null,
+          gaps: gaps ?? null,
+          coachTake: take,
+          updatedAt: at,
+        })
         .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
+      if (land?.ok) return saved(tester, `Reflection for ${date} saved, and landed: the next step is open now (THE NEXT STEP).`);
+      if (land) return saved(tester, `Reflection for ${date} saved. It stays open: ${land.why}`);
       return saved(tester, quietly(`reflection for ${date}`));
     }
 
@@ -1045,6 +1104,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const { text: lesson, evidence } = input as z.infer<typeof schemas.save_takeaway>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
+      // #211: a lesson they offered is a real answer in today's reflection.
+      if (state.reflection) {
+        await db
+          .update(stepDays)
+          .set({ answeredAt: sql`coalesce(${stepDays.answeredAt}, ${at.toISOString()}::timestamptz)` })
+          .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, state.today)));
+      }
       return saved(tester, quietly(`takeaway (${evidence}): ${lesson}`));
     }
 
@@ -1059,10 +1125,18 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (weekdayOf(state.today) !== "sun") return { ok: false, error: "The week's recap is on Sundays." };
       // Allowed in texts ZOH starts only for the 6 pm recap's own: a stray call in a Sunday kickoff would cancel it.
       if (state.nudgeMoment && state.nudgeMoment !== LOOKBACK_KIND) return { ok: false, error: "Not in this text: the recap is its own text or part of a conversation." };
+      // #199: the backstop for "never twice", now that the sheet states only that it was given.
+      if (!state.nudgeMoment && state.week?.recapped && !state.week.recappedNow) {
+        return { ok: false, error: "The week's recap was already given today. Their replies to it are the week talk: write this text without a recap." };
+      }
       // Spec #78: the week comes after the day's reflection, never in the text that celebrates their proof.
       const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
       if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {
         return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
+      }
+      // #211: the turn to the week is the reflection's wrap-up, so it waits until the reflection has landed.
+      if (state.reflection?.open) {
+        return { ok: false, error: "Today's reflection is still open: the week comes once it has landed. Write this text without the recap." };
       }
       // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
       // #110: owed to Monday and they're talking tonight after all: it's given now, and Monday's text is a normal one.
@@ -1124,7 +1198,7 @@ async function alertPlanReview(db: Db, tester: Tester, planId: string, version: 
 }
 
 type DayValues = Partial<
-  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepKind" | "stepMinutes" | "stepProof">
+  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepKind" | "stepMinutes" | "stepProof" | "doneAt">
 >;
 
 async function loadDay(db: Db, testerId: string, date: string): Promise<StepDay | undefined> {
@@ -1193,17 +1267,43 @@ export function describePlan(p: PlanValues): string {
     .join("; ");
 }
 
+type Landing = { ok: true; reason: string; by: "understood" | "exit" } | { ok: false; why: string };
+
+/**
+ * #211: whether today's open reflection can land now. Their own words wanting to wrap up always can, when they're a
+ * real phrase of theirs (3+ words, or their whole latest text: "night!"), so a stray "felt good" isn't an exit.
+ * Otherwise only once a real answer was saved before ZOH's last text went out: one follow-up on it, answered.
+ */
+function landing(state: CoachState, landed: string | undefined, exit: string | undefined): Landing {
+  if (exit) {
+    const words = norm(exit);
+    const theirs = saidIt(exit, state.lastTesterText) && (words.split(" ").length >= 3 || words === norm(state.lastTesterText));
+    if (theirs) return { ok: true, reason: exit, by: "exit" };
+    if (!landed) return { ok: false, why: "those aren't their words wanting to wrap up; keep following what they said in this text." };
+  }
+  if (state.reflection?.answered) return { ok: true, reason: landed!, by: "understood" };
+  return { ok: false, why: "they've only just told you this; follow it up in this text, as a natural reply to what they said." };
+}
+
+/** Lowercase, plain apostrophes, no punctuation, single spaces: how quoted words are compared. */
+function norm(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[^\p{L}\p{N}' ]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Whether their words appear in their latest text, ignoring case, punctuation and spacing. */
 function saidIt(words: string, latest: string): boolean {
-  const norm = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/[’‘]/g, "'")
-      .replace(/[^\p{L}\p{N}' ]+/gu, " ")
-      .replace(/\s+/g, " ")
-      .trim();
   const said = norm(words);
   return said.length > 0 && norm(latest).includes(said);
+}
+
+/** #157: the new version was in ZOH's last text (a few words at least, so a bare "harder" doesn't count). */
+function shownBefore(shown: string | undefined, lastZohText: string): boolean {
+  return !!shown && shown.trim().split(/\s+/).length >= 3 && saidIt(shown, lastZohText);
 }
 
 async function nextVersion(db: Db, testerId: string): Promise<number> {
@@ -1236,7 +1336,7 @@ function saved(tester: Tester, message: string): ToolResult {
  * (testers got just "Saved." as a whole reply): the text still needs its next move.
  */
 function quietly(what: string): string {
-  return `Kept quietly (never mention saving it): ${what}. Your text still needs its next move.`;
+  return `Kept quietly (never mention saving it): ${what}. Your text still needs to answer them.`;
 }
 
 async function upsertPlanInputs(
@@ -1261,4 +1361,21 @@ function isTimeZone(zone: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** #155: a founder's proposed plan fields, as change_plan's inputs. */
+function changeInputs(c: PlanChanges): Record<string, unknown> {
+  const { stepTime, proofNote, ...same } = c;
+  return { ...same, ...(stepTime !== undefined ? { time: stepTime } : {}), ...(proofNote !== undefined ? { proof_note: proofNote } : {}) };
+}
+
+const CHANGE_LABELS: Record<keyof PlanChanges, string> = { stepTime: "time", place: "place", days: "days", proof: "proof", proofNote: "proof note", minutes: "minutes" };
+
+/** #155: what the tester changed from the founders' proposal, in plain words; undefined when they took it as is. */
+function changedFrom(proposed: PlanChanges, saved: PlanValues): string | undefined {
+  const show = (v: unknown) => (Array.isArray(v) ? v.join(", ") : String(v));
+  const diffs = (Object.keys(proposed) as (keyof PlanChanges)[])
+    .filter((k) => JSON.stringify(proposed[k]) !== JSON.stringify(saved[k]))
+    .map((k) => `${CHANGE_LABELS[k]} ${show(saved[k])}, not ${show(proposed[k])}`);
+  return diffs.length ? diffs.join("; ") : undefined;
 }

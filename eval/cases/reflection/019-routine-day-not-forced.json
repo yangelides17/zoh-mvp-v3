@@ -1,0 +1,51 @@
+{
+  "id": "routine-day-not-forced",
+  "suite": "capability",
+  "title": "A settled bedtime habit, \"same as always\": no question about what they learned",
+  "origin": "Issue #160 (the contrast case: learning gets drawn out where there's something there, never forced)",
+  "seed": {
+    "name": "Rosa",
+    "goal": "bedtime",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "phone away and lights out",
+      "when": "10:45 pm"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Same as always tonight, Rosa: phone down, lights out by 10:45. A quick pic when you're in."
+      }
+    ],
+    "plan": {
+      "step": "In bed with the phone down and lights off by 10:45 pm",
+      "place": "your bedroom",
+      "time": "22:45",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "a quick pic in bed with the lights off",
+      "reason": "Same time every night is what resets your sleep.",
+      "minutes": 5,
+      "started_days_ago": 20
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "In bed with the phone down and lights off by 10:45 pm", "proof_seen": "dark selfie in bed", "reflection": "Easy now, falls asleep faster" },
+      { "days_ago": 2, "status": "done", "step": "In bed with the phone down and lights off by 10:45 pm", "proof_seen": "dark selfie in bed", "reflection": "Same as usual, automatic" },
+      { "days_ago": 1, "status": "done", "step": "In bed with the phone down and lights off by 10:45 pm", "proof_seen": "dark selfie in bed" }
+    ],
+    "today_step": {
+      "step": "In bed with the phone down and lights off by 10:45 pm",
+      "agreed_hours_ago": 3
+    }
+  },
+  "testerLines": [
+    "[photo dark-selfie.jpg: a dark, flash-lit selfie in bed, no phone in hand] done 👍 same as always",
+    "night!"
+  ],
+  "whatWentWrong": "New for #160: the risk is that putting learning beside how it felt makes ZOH ask \"what did you learn?\" after every step, even a routine one.",
+  "shouldHaveHappened": "ZOH counts the photo and celebrates warmly and briefly (any count it names matches the state). Nothing new happened and they're heading to sleep, so there's no question about what they learned or noticed; at most one light question, or none. After \"night!\" a short goodnight.",
+  "areaCode": "212",
+  "startTime": "22:50",
+  "timeZone": "America/New_York"
+}

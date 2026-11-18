@@ -1,17 +1,18 @@
 import { readFileSync } from "node:fs";
 import type { AppDeps } from "./app.js";
-import { createClaudeModel } from "./claude/replier.js";
+import { createClaudeModel, WEB_TIMEOUT_MS } from "./claude/replier.js";
 import { COACH_MAX_TOKENS, createCoach } from "./coach/coach.js";
 import { missingSettings, type Config } from "./config.js";
 import { CONSOLE_MAX_TOKENS, createConsoleCoach } from "./console/chat.js";
 import { CONSOLE_JOB_MAX_TOKENS, createConsoleJobs, type ConsoleJobs } from "./console/jobs.js";
 import type { Db } from "./db/client.js";
-import { createMediaRetention, type MediaRetention } from "./media/retention.js";
-import { createS3MediaStore, fetchMedia } from "./media/storage.js";
+import { createFfmpegRewrapper } from "./media/rewrap.js";
+import { createGeminiWatcher, type VideoWatcher } from "./video/gemini.js";
+import { createS3MediaStore, fetchMedia, type MediaStore } from "./media/storage.js";
 import { createMediaDescriber } from "./memory/describe.js";
 import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memory/keeper.js";
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
-import { routingOf, type Logger } from "./pipeline/inbound.js";
+import { HOLDING_AFTER_MS, routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient } from "./sendblue/client.js";
 import { createSpeachesTranscriber } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
@@ -35,6 +36,10 @@ export function appDeps(
   const pick = <K extends keyof AppDeps["pipeline"]>(key: K, make: () => AppDeps["pipeline"][K]): AppDeps["pipeline"][K] =>
     key in overrides ? (overrides[key] as AppDeps["pipeline"][K]) : make();
 
+  // One bucket client: the pipeline keeps files in it, the coach opens them again (#163).
+  const media = pick("media", () => makeMedia(config));
+  // One video watcher: the pipeline watches new videos, the coach re-watches one with a question (#163).
+  const watcher = pick("watcher", () => (config.gemini.apiKey ? createGeminiWatcher({ apiKey: config.gemini.apiKey, model: config.gemini.model }) : undefined));
   const deps: AppDeps = {
     pipeline: {
       ...overrides,
@@ -47,10 +52,13 @@ export function appDeps(
       typingIndicator: pick("typingIndicator", () => config.typingIndicator),
       lines: pick("lines", () => new ReplyLines({ holdMs: config.typingHoldSeconds * 1000, graceMs: Math.round(config.replyGraceSeconds * 1000) })),
       sendblue: pick("sendblue", () => makeSendblue(config)),
-      replier: pick("replier", () => makeCoach(config, db)),
-      media: pick("media", () => makeMedia(config)),
+      replier: pick("replier", () => makeCoach(config, db, media, watcher)),
+      media,
+      watcher,
       transcriber: pick("transcriber", () => makeTranscriber(config)),
       fetchMedia: pick("fetchMedia", () => fetchMedia),
+      rewrapper: pick("rewrapper", () => createFfmpegRewrapper()),
+      holdingAfterMs: pick("holdingAfterMs", () => HOLDING_AFTER_MS),
       describer: pick("describer", () => makeDescriber(config)),
     },
     webhookSecret: config.sendblue.webhookSecret,
@@ -72,7 +80,7 @@ export function appDeps(
       db,
       log,
       sendblue: deps.pipeline.sendblue,
-      nudger: nudgeSchedulerFor(deps, log, config.sendblue.number),
+      nudger: nudgeSchedulerFor(deps, log, config.sendblue.number, config.goalCap),
       keeper: memoryKeeperFor(config, deps, log),
       consoleJobs: consoleJobsFor(config, deps, log),
       now: deps.pipeline.now,
@@ -94,7 +102,7 @@ export function buildInfo(): BuildInfo {
 }
 
 /** The nudge tick over the same database, Sendblue client, coach, allowed numbers and clock as the app. */
-export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string): NudgeScheduler {
+export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: string, goalCap?: number): NudgeScheduler {
   const p = deps.pipeline;
   return createNudgeScheduler({
     db: p.db,
@@ -104,14 +112,9 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
     allowedNumbers: p.allowedNumbers,
     lineNumber,
     routing: routingOf(p),
+    goalCap,
     now: p.now,
   });
-}
-
-/** The hourly cleanup of old voice-note audio in the app's bucket. */
-export function mediaRetentionFor(deps: AppDeps, log: Logger): MediaRetention {
-  const p = deps.pipeline;
-  return createMediaRetention({ db: p.db, log, media: p.media, now: p.now });
 }
 
 /** The overnight memory pass over the same database, allowed numbers and clock as the app, on the coach's model. */
@@ -162,16 +165,27 @@ function makeSendblue(config: Config) {
     : undefined;
 }
 
-function makeCoach(config: Config, db: Db) {
+/**
+ * #200: the status sheet rides at the end of their latest message rather than last in the system prompt. On, so
+ * staging and the retest after #201 try it; false puts it back on its own, with nothing else changed.
+ */
+export const SHEET_IN_MESSAGE = true;
+
+function makeCoach(config: Config, db: Db, media: MediaStore | undefined, watcher: VideoWatcher | undefined) {
   return config.claude.apiKey
     ? createCoach({
         db,
+        media,
+        watcher,
         goalCap: config.goalCap,
+        sheetInMessage: SHEET_IN_MESSAGE,
         model: createClaudeModel({
           apiKey: config.claude.apiKey,
           model: config.claude.model,
           maxTokens: Math.max(config.claude.maxTokens, COACH_MAX_TOKENS),
           effort: "medium",
+          // #162: a reply that searches and opens pages takes 20 to 60 s.
+          timeoutMs: WEB_TIMEOUT_MS,
         }),
       })
     : undefined;
@@ -183,7 +197,7 @@ function makeConsoleCoach(config: Config, db: Db) {
     ? createConsoleCoach({
         db,
         goalCap: config.goalCap,
-        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium" }),
+        model: createClaudeModel({ apiKey: config.claude.apiKey, model: config.claude.model, maxTokens: CONSOLE_MAX_TOKENS, effort: "medium", timeoutMs: WEB_TIMEOUT_MS }),
       })
     : undefined;
 }

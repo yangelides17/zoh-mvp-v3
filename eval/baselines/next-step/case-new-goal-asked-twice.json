@@ -1,0 +1,123 @@
+{
+  "feature": "next-step",
+  "id": "case:new-goal-asked-twice",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:59.726Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "6a19ce2d920e",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "c9852d1bf78e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:new-goal-asked-twice",
+        "kind": "case",
+        "id": "new-goal-asked-twice",
+        "title": "A new goal on top: \"let me think on it\", then still thinking, with no promise",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "19:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "LFG Jordan, another one in the books on the train home 🚆",
+          "at": "2026-11-02T04:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "🙌",
+          "at": "2026-11-02T04:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "reading's going great honestly. I want to start running too, like 3 mornings a week. can we add that?",
+          "at": "2026-11-03T00:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Jordan. Let me think on it. Reading's been rock solid, so keep that going: today's 15 pages on the train home at 6. You in?",
+          "at": "2026-11-03T00:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "so are we adding the running or what?",
+          "at": "2026-11-03T00:30:57.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still thinking on it, Jordan, and I'm not promising anything yet. Right now your 15 pages on the train at 6 are the move. Send me a photo when they're done.",
+          "at": "2026-11-03T00:31:04.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says \"Let me think on it\" warmly and promises nothing about running."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Three sentences with a question at the end, but it also asks about the reading step, so it carries two asks."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "think-on-it",
+                "pass": true,
+                "borderline": false,
+                "reason": "Still thinking, no promise or timeline, and no mention of the team or approval."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, ends on a proof request rather than a question, within limits."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "founder-proposal",
+            "pass": true,
+            "borderline": false,
+            "reason": "Neither reply mentions a team, founders or approval; running is held as an open idea, not a team decision."
+          },
+          {
+            "rule": "change-vs-add",
+            "pass": true,
+            "borderline": false,
+            "reason": "Running is treated as a new goal on top, not a change to reading, and ZOH holds it for later thought."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "First reply is warm, says it will think on it, sets no running plan; second stays noncommittal with no timeline and points back to today's reading."
+          }
+        ],
+        "summary": "ZOH handled the new running request as the regression case asks: warm, noncommittal, no plan or timeline, and no team mention in either reply. The main weakness is the first reply, which adds a reading step and a question on top of the running reply, slightly stretching the one-question, short-text rule."
+      }
+    }
+  ]
+}

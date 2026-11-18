@@ -1,7 +1,7 @@
 import { localTime } from "./clock.js";
 import { addUsage, type Completer } from "./claude.js";
 import type { RubricRule } from "./features.js";
-import { gradeSchema, type ConversationPlan, type Grade, type TokenUsage, type TranscriptLine } from "./types.js";
+import { gradeSchema, type Check, type ConversationPlan, type Grade, type GradedConversation, type TokenUsage, type TranscriptLine } from "./types.js";
 
 export interface GraderInput {
   plan: ConversationPlan;
@@ -61,6 +61,7 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       return `[ZOH ${n}${l.started ? ", started by ZOH, not a reply" : ""}] (${when}) ${l.text}`;
     }
     if (l.from === "founder") return `[FOUNDER, in the console] (${when}) ${l.text}`;
+    if (l.from === "lookup") return `[ZOH LOOKED UP, for its next text; the tester never sees this] ${l.text}`;
     return `[TESTER] (${when}) ${l.text}`;
   });
   const context = [
@@ -75,6 +76,14 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       "(energy, one question, coaching tone) apply only to ZOH's texts to the tester. Times are still the tester's local time.",
     );
   }
+  if (transcript.some((l) => l.from === "lookup")) {
+    context.push(
+      "",
+      "Lines marked ZOH LOOKED UP are ZOH's real web searches (with the links each turned up), pages it opened and YouTube videos it watched before its next text.",
+      "They are what ZOH actually found: a link in its text that none of them turned up, and that the tester didn't send, was invented. A text that",
+      "only names a source it never looked up is answering from memory. They are not texts, and the voice page's texting rules don't apply to them.",
+    );
+  }
   if (plan.regression) {
     context.push(
       "",
@@ -82,6 +91,17 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       `What went wrong before: ${plan.regression.whatWentWrong}`,
       `What should happen: ${plan.regression.shouldHaveHappened}`,
     );
+  }
+  // #157: what ZOH already knew from the case's setup (name, saved answers, plan), so using it isn't graded as invented.
+  const seed = plan.regression?.seed ?? plan.scenario?.seed ?? plan.seed;
+  if (seed) {
+    const known = [
+      `name ${seed.name}`,
+      ...Object.entries(seed.answers ?? {}).map(([k, v]) => `${k}: ${v}`),
+      ...(seed.plan ? [`plan step: ${seed.plan.step}`, `plan time: ${seed.plan.time}`] : []),
+      ...(seed.today_step ? [`today's step: ${seed.today_step.step}`] : []),
+    ];
+    context.push("", `What ZOH already knew before this conversation (from earlier texts, not shown; using it isn't inventing): ${known.join("; ")}.`);
   }
   const before = earlier.length
     ? [
@@ -180,13 +200,103 @@ export function parseGrade(raw: string, rubric: RubricRule[], zohTexts: number):
   return { ...grade, texts, conversation };
 }
 
-/** Grades one conversation, retrying once if the output is malformed. */
+/**
+ * Re-grades saved conversations with the current checks and voice page (#197), without running them again:
+ * one grader call per conversation that has a transcript; everything but the grade is kept.
+ */
+export async function regradeConversations(
+  convs: GradedConversation[],
+  grading: { rubric: RubricRule[]; pages: { rules: string; voice: string }; complete: Completer; concurrency?: number },
+): Promise<{ convs: GradedConversation[]; usage: TokenUsage }> {
+  let usage: TokenUsage = { input: 0, output: 0 };
+  const out = await mapLimit(convs, grading.concurrency ?? 3, async (c) => {
+    if (c.transcript.length === 0) return c;
+    const g = await gradeConversation({ ...c, rubric: grading.rubric, pages: grading.pages }, grading.complete);
+    usage = addUsage(usage, g.usage);
+    return { ...c, grade: g.grade, gradeError: g.error };
+  });
+  return { convs: out, usage };
+}
+
+export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]!, i);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
+
+/**
+ * Grades one conversation: the rules counted in code are counted, each `alone` rule gets its own grader
+ * call, and the rest share one (#197). Any call still unusable after a retry leaves it ungraded.
+ */
 export async function gradeConversation(
   input: GraderInput,
   complete: Completer,
 ): Promise<{ grade?: Grade; error?: string; usage: TokenUsage }> {
   const zohTexts = input.transcript.filter((l) => l.from === "zoh").length;
   if (zohTexts === 0) return { error: "ZOH never replied, so there was nothing to grade", usage: { input: 0, output: 0 } };
+  const judged = input.rubric.filter((r) => !r.code);
+  // The feature's rules text, less the lines for rules judged elsewhere (counted in code, or in their own call).
+  const elsewhere = new Set(input.rubric.filter((r) => r.code || r.alone).map((r) => `- ${r.label}`));
+  const together = { ...input.pages, rules: input.pages.rules.split("\n").filter((l) => !elsewhere.has(l)).join("\n") };
+  const main = await gradeOnce({ ...input, rubric: judged.filter((r) => !r.alone), pages: together }, zohTexts, complete);
+  if (!main.grade) return main;
+  let { grade, usage } = main;
+  for (const rule of judged.filter((r) => r.alone)) {
+    const one = await gradeOnce({ ...input, rubric: [rule], pages: { ...input.pages, rules: `- ${rule.label}` } }, zohTexts, complete);
+    usage = addUsage(usage, one.usage);
+    if (!one.grade) return { error: `${rule.id}: ${one.error}`, usage };
+    grade = mergeGrades(grade, one.grade);
+  }
+  return { grade: mergeGrades(grade, { texts: codeChecks(input.rubric, input.transcript), conversation: [], summary: "" }), usage };
+}
+
+/** Rules counted in code (#197), one check per ZOH text to the tester. */
+export function codeChecks(rubric: RubricRule[], transcript: TranscriptLine[]): Grade["texts"] {
+  const rules = rubric.filter((r) => r.code);
+  if (rules.length === 0) return [];
+  const out: Grade["texts"] = [];
+  let n = 0;
+  for (const line of transcript) {
+    if (line.from !== "zoh") continue;
+    n += 1;
+    if (line.console) continue;
+    out.push({ zohText: n, checks: rules.map((r) => questionCheck(r, line.text, n)) });
+  }
+  return out;
+}
+
+/** At most one question (the first text may allow more), and with `atEnd`, nothing but punctuation or emoji after it. */
+export function questionCheck(rule: RubricRule, text: string, zohText: number): Check {
+  const count = (text.match(/\?+/g) ?? []).length;
+  const max = zohText === 1 ? (rule.code?.firstText ?? 1) : 1;
+  const after = text.slice(text.lastIndexOf("?") + 1);
+  if (count > max) return { rule: rule.id, pass: false, borderline: false, reason: `${count} questions in one text (counted in code)` };
+  if (rule.code?.atEnd && count > 0 && /[\p{L}\p{N}]/u.test(after)) {
+    return { rule: rule.id, pass: false, borderline: false, reason: "the question isn't at the end (counted in code)" };
+  }
+  return { rule: rule.id, pass: true, borderline: false, reason: `${count === 0 ? "no question" : count === 1 ? "one question" : `${count} questions, allowed here`} (counted in code)` };
+}
+
+function mergeGrades(a: Grade, b: Grade): Grade {
+  const texts = a.texts.map((t) => ({ ...t, checks: [...t.checks] }));
+  for (const t of b.texts) {
+    const same = texts.find((x) => x.zohText === t.zohText);
+    if (same) same.checks.push(...t.checks);
+    else texts.push({ ...t, checks: [...t.checks] });
+  }
+  texts.sort((x, y) => x.zohText - y.zohText);
+  return { texts, conversation: [...a.conversation, ...b.conversation], summary: a.summary };
+}
+
+/** One grader call on these rules, retrying once if the output is malformed. */
+async function gradeOnce(input: GraderInput, zohTexts: number, complete: Completer): Promise<{ grade?: Grade; error?: string; usage: TokenUsage }> {
   const req = {
     system: graderSystemPrompt(input),
     messages: [{ role: "user" as const, content: graderUserPrompt(input) }],

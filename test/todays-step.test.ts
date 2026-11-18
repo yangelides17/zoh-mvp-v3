@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createCoach, NOT_SENT_NOTE, NUDGE_ROUNDS } from "../src/coach/coach.js";
-import { buildStateBlock } from "../src/coach/prompt.js";
+import { buildStateBlock, TODAYS_STEP } from "../src/coach/prompt.js";
 import { dayStep, loadCoachState } from "../src/coach/state.js";
 import { runTool } from "../src/coach/tools.js";
 import { consoleMessages, messages, plans, stepDays, suggestions, testers, type Tester } from "../src/db/schema.js";
@@ -106,7 +106,9 @@ describe("set_today_step", () => {
   it("saves on today's row, and the coach's state shows it; before that, the plan's step applies", async () => {
     await setup();
     const before = await block(at(WED, "09:00"));
-    expect(before).toContain("Today's step: not set yet. Pick it the first time you talk about today");
+    // #199: the sheet states it isn't set; when to pick it is TODAY'S STEP's.
+    expect(before).toContain("Today's step: not set yet (the plan's step applies until it is).");
+    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
     expect(dayStep((await allPlans())[0]!, await row(WED)).step).toBe("1 min easy jog, 2 min walk, 3 rounds around the block");
 
     expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: true });

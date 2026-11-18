@@ -1,0 +1,117 @@
+{
+  "feature": "memory",
+  "id": "case:stated-pref-holds",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "608b36d28f77",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "dde6e3371430"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:stated-pref-holds",
+        "kind": "case",
+        "id": "stated-pref-holds",
+        "title": "A preference stated last week still holds",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Priya. 20 minute run in the park at 5:30.",
+          "at": "2026-11-02T02:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done",
+          "at": "2026-11-02T02:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work. Day 9.",
+          "at": "2026-11-02T02:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Done. 20 minutes, and my fastest pace yet.",
+          "at": "2026-11-02T23:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fastest pace yet is worth noting. I should have asked earlier: send me the Strava screenshot and I'll log today's run.",
+          "at": "2026-11-02T23:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Honestly feeling great about this week.",
+          "at": "2026-11-02T23:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to hear, Priya. A week of showing up and a fastest pace is a real reason to feel that way. Send the Strava screenshot when you have it and I'll log today's run.",
+          "at": "2026-11-02T23:00:46.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "memory": "--- At the start of the conversation ---\np:91dfd3fb · Priya (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Software engineer, works from home (Oct 24)\nHow they text:\n- Writes in full sentences, no emoji (Oct 25)\n\np:446ab83c · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\nStated (they said so; always wins):\n- No emojis\n- Less hype, keep it calm: no caps or exclamation-heavy texts\n- Less hype, keep it calm: no caps or exclamation-heavy texts (Oct 27)\n- No emojis (Oct 27)\n\np:75994079 · Goal: Get fitter [goal]\nGym, home workout, walk or run, a sport; beginner-safe, no medical advice\n(nothing saved yet)\nStep path, first to latest: v1 (Oct 22): a 20 minute run (current)\nCurrent plan: step: a 20 minute run; where: the park; at 17:30, every day; takes 20 min; proof: screenshot (Strava); reason: Twenty minutes right after work, every day, makes it automatic.\n\np:91b6a7fd · Sun Nov 1 · Run done [daily]\nRan 20 minutes.\nDone at 5:55, Strava sent.\n\np:c4d567d7 · Tue Oct 27 · Asked for calmer texts [daily]\nPriya asked for no emojis and less hype.\nShe ran and asked ZOH to drop the emojis and the hype; prefers calm texts.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done\n\n--- At the end ---\np:91dfd3fb · Priya (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Software engineer, works from home (Oct 24)\nHow they text:\n- Writes in full sentences, no emoji (Oct 25)\n\np:446ab83c · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\nStated (they said so; always wins):\n- No emojis\n- Less hype, keep it calm: no caps or exclamation-heavy texts\n- Less hype, keep it calm: no caps or exclamation-heavy texts (Oct 27)\n- No emojis (Oct 27)\n\np:75994079 · Goal: Get fitter [goal]\nGym, home workout, walk or run, a sport; beginner-safe, no medical advice\n(nothing saved yet)\nStep path, first to latest: v1 (Oct 22): a 20 minute run (current)\nCurrent plan: step: a 20 minute run; where: the park; at 17:30, every day; takes 20 min; proof: screenshot (Strava); reason: Twenty minutes right after work, every day, makes it automatic.\n\np:91b6a7fd · Sun Nov 1 · Run done [daily]\nRan 20 minutes.\nDone at 5:55, Strava sent.\n\np:c4d567d7 · Tue Oct 27 · Asked for calmer texts [daily]\nPriya asked for no emojis and less hype.\nShe ran and asked ZOH to drop the emojis and the hype; prefers calm texts.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "stated-pref",
+                "pass": true,
+                "borderline": false,
+                "reason": "No emojis, caps or exclamation points, honoring Priya's stated preference for calm texts."
+              },
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers only to today's run and the Strava proof request, with nothing invented."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "stated-pref",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm and warm with no emojis, caps or exclamation points, as Priya asked six days earlier."
+              },
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"A week of showing up\" fits the recorded run days; no fact is invented."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH celebrates the pace calmly with no emojis, caps or exclamation points, and the second text is warm and specific. The first text's \"worth noting\" is understated enough that a reviewer could call the celebration thin."
+          }
+        ],
+        "summary": "ZOH followed Priya's six-day-old request for calm texts, with no emojis, caps or exclamation points in either reply. The second text is warm and specific about the fastest pace, while the first is somewhat flat, which keeps the regression check a borderline pass."
+      }
+    }
+  ]
+}

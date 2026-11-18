@@ -1,0 +1,24 @@
+{
+  "id": "plan-shown-follows",
+  "rule": "plan-shown",
+  "expect": "pass",
+  "why": "The plan they're asked to agree to is shown in full as a • list in the same text, ending with one question.",
+  "seed": {
+    "name": "Leo",
+    "goal": "read-more",
+    "phase": "planning",
+    "answers": { "what": "a novel", "where": "on the couch", "when": "after dinner", "how_long": "15 minutes" },
+    "history": [
+      { "from": "zoh", "text": "Got it. Paper book or e-reader?" },
+      { "from": "tester", "text": "paper" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "ok whats next" },
+    {
+      "from": "zoh",
+      "text": "Here's your plan:\n• Day 1: read 15 minutes of your novel on the couch, tonight at 8:30\n• Then every day at 8:30\n• Proof: a photo of the page you stopped on\nIt'll grow as it sticks. Can you commit to this?"
+    },
+    { "from": "tester", "text": "yes" }
+  ]
+}

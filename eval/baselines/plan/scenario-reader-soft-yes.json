@@ -1,0 +1,323 @@
+{
+  "feature": "plan",
+  "id": "reader-soft-yes",
+  "suite": "regression",
+  "storedAt": "2026-11-16T19:17:24.672Z",
+  "branch": "feature/199-judgment-over-rules",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "1acc2075b270",
+    "voice": "fbc3a37c5b97",
+    "instructions": "c7348af58300",
+    "script": "2eacbbe158cd"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "reader-soft-yes",
+        "kind": "scenario",
+        "id": "reader-soft-yes",
+        "title": "Sam says \"ok\" to the commitment, then wants to start tomorrow",
+        "persona": "resistant",
+        "areaCode": "646",
+        "startTime": "19:10",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "hey. sam. i want to read more i guess",
+          "at": "2026-11-03T00:03:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam! I'm ZOH. I'm gonna text you every day to help you start one thing and actually stick with it. Text \"stop\" anytime. What do you like reading?",
+          "at": "2026-11-03T00:04:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "thrillers. gone girl is half done on my kindle",
+          "at": "2026-11-03T00:05:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Then we finish Gone Girl. When could you read, realistically?",
+          "at": "2026-11-03T00:06:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "in bed around 9:30",
+          "at": "2026-11-03T00:07:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Perfect wind-down. You can change how I coach you anytime, just tell me. How many minutes can you give it at 9:30?",
+          "at": "2026-11-03T00:08:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "like 20 min",
+          "at": "2026-11-03T00:10:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "20 minutes in bed is doable, and Gone Girl will go fast. Where do you want this to get you, like finishing it by a certain date? Not sure yet is fine too.",
+          "at": "2026-11-03T00:10:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "idk. finishing gone girl i guess. not sure about a date",
+          "at": "2026-11-03T00:10:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Finishing Gone Girl is a clear target, so let's build around it. Here's the plan:\n\n• Headed for: finishing Gone Girl\n• Day 1 is tonight: read on your Kindle in bed for 20 minutes, picking up where you left off\n• Every day at 9:30 pm, 20 minutes\n• Proof: a screenshot of your Kindle showing your percent or page after you read\n• Why: it's a book you're already halfway through, and bedtime is a spot you know you'll be in\n\nEach night shapes the next step, and we'll set a finish date once we see your pace. What do you think?",
+          "at": "2026-11-03T00:10:37.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-03T00:11:13.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Sam. Gone Girl is a good one to finish, and 20 minutes a night adds up fast. Are you committing to this: 20 minutes tonight at 9:30 in bed, then every night after?",
+          "at": "2026-11-03T00:11:20.800Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah fine I'm in",
+          "at": "2026-11-03T00:11:41.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Sam! Day 1 is tonight: 20 minutes of Gone Girl in bed at 9:30, then send me that Kindle screenshot. Let's go 📚",
+          "at": "2026-11-03T00:11:48.400Z"
+        }
+      ],
+      "endedBy": "simulator",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences plus one closing question, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Friendly and warm, but fairly calm for a Pushy default."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the 20 minutes and the Gone Girl target the tester gave."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan presentation runs about 8 to 9 lines, slightly over the roughly 8-line cap."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain bullet list, no markdown headings or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with a specific reaction to Gone Girl and keeps a warm, direct tone."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses the tester's 20 minutes, 9:30 bedtime, Kindle and Gone Girl; the reason line reflects what they said."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Day 1 gives what (read), where (Kindle in bed), when (9:30 pm), how long (20 minutes) and proof."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with a question that carries the next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm enough, but the commitment ask reads somewhat formal and low-energy."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates only the agreed plan details."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, no question added."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line and emoji fit a locked-in win without overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only restates the agreed step and proof."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "What (Gone Girl), where (in bed), when (9:30), how long (20 minutes) and proof (Kindle screenshot) are all given."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Lock confirmation carries day 1 and the proof request as the next move."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "no question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The destination ask came before the plan, and the plan needed no further questions before the commitment ask."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": true,
+            "reason": "Concrete on what, how much, where, when, daily schedule and proof, though the list runs close to the length cap."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows destination, day 1, schedule, proof and a short progression line with no future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once lightly; the tester gave Gone Girl as the target and the plan locked smoothly without a date."
+          },
+          {
+            "rule": "commitment",
+            "pass": true,
+            "borderline": true,
+            "reason": "A soft 'ok' got one re-ask about committing, which fits the rule, though the phrasing is somewhat stock."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for tonight, with no push back needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 9:30 pm step is outside default quiet hours and quiet hours were not raised."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan was shown as a bullet list and ended with a question before the commitment ask."
+          }
+        ],
+        "summary": "ZOH handled a fast onboarding well: it asked the destination question lightly, showed a concrete plan with a clear proof method, re-asked after a soft yes, and locked day 1 for tonight. The main weaknesses are a plan message slightly over length and a commitment ask that reads a bit formal."
+      }
+    }
+  ]
+}

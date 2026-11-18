@@ -345,7 +345,7 @@ export async function observationCount(db: Db, testerId: string, label: string):
 
 export interface TimelineItem {
   ref: string;
-  kind: MemoryPageKind | "photo" | "voice note" | "video" | "attachment";
+  kind: MemoryPageKind | "photo" | "voice note" | "video" | "document" | "attachment";
   title: string;
   summary: string;
   at: Date;
@@ -374,7 +374,7 @@ export async function timeline(db: Db, tester: Tester, limit = 30): Promise<Time
 
 export function mediaLabel(m: Message): TimelineItem["kind"] {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
-  return kind === "image" ? "photo" : kind === "audio" ? "voice note" : kind === "video" ? "video" : "attachment";
+  return kind === "image" ? "photo" : kind === "audio" ? "voice note" : kind === "video" ? "video" : kind === "document" ? "document" : "attachment";
 }
 
 /** What a media text holds, in words: its description or transcript, plus any caption. */

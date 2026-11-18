@@ -1,0 +1,547 @@
+{
+  "feature": "reflection",
+  "id": "case:three-threads",
+  "suite": "capability",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b63e1f2df579",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "fe668d4a8713"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:three-threads#1",
+        "kind": "case",
+        "id": "three-threads",
+        "suite": "capability",
+        "title": "One answer with a worry, a win and a side detail: ZOH follows what matters, lets the rest go, and moves on at a natural point",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:24",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Maya! Tonight: 20 minutes on scene 4 of Lighthouse at the kitchen table at 8. A screenshot of where you got to when you're done.",
+          "at": "2026-11-03T00:21:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:22:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
+          "at": "2026-11-03T01:24:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, that's day 3 in the books 🔥 And \"Somebody had to\" is a great line. Mara wiping a glass that's already dry says a lot without saying it. How did writing this scene feel tonight?",
+          "at": "2026-11-03T01:24:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Finished scene 4! Felt so good to finally get Theo and Mara in the same room. I'm kind of nervous it's garbage though. Also my tea went cold because I forgot about it lol",
+          "at": "2026-11-03T01:25:21.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Getting Theo and Mara in the same room is a big moment, and you got so absorbed you forgot your tea, which is a good sign 🔥 When you say it might be garbage, what's the part that worries you?",
+          "at": "2026-11-03T01:25:28.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I guess I keep comparing it to the books I love, and mine sounds clunky next to them",
+          "at": "2026-11-03T01:26:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, that comparison is a tough one, because you're putting your first draft next to books that went through many rewrites. A first draft only has to exist, and yours is four scenes in. What does the clunky part sound like to you: the dialogue, the description, or something else?",
+          "at": "2026-11-03T01:26:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that helps. I think I just need to keep going and fix it later",
+          "at": "2026-11-03T01:27:31.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Keep going and fix it later is the right call, Maya. Tomorrow, Tue at 8 at the kitchen table: 20 minutes on scene 5, with one rule: no editing, just keep moving forward. Screenshot after, same as always. Work for you?",
+          "at": "2026-11-03T01:27:38.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "works for me",
+          "at": "2026-11-03T01:28:18.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya 💪 Tomorrow at 8, scene 5, no editing, just forward. Enjoy the rest of your night, and maybe go make a fresh cup of tea.",
+          "at": "2026-11-03T01:28:25.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): A first draft only has to exist: keep going now, fix it later.\nReflection for 2026-11-02: Finished scene 4, felt good getting Theo and Mara together, lost track of time. Worried it's garbage next to books she loves; settled on keeping going and fixing later.\nCan now do (2026-11-02): Sustain a daily writing session and finish a full scene\nGaps (2026-11-02): Inner critic while drafting\nStep set for 2026-11-03, agreed: 20 min writing scene 5 of Lighthouse at the kitchen table at 8 pm, no editing, just keep moving forward\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere; the tea nod is light and not a question about it."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Supportive and specific to her comparison; no empty praise."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end; the step is fully defined and the question is about agreement."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy-level, warm, no overfamiliar language."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, after a clear yes."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic with one emoji; no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "ZOH counted the screenshot, followed her worry about garbage, nodded to the cold tea without a question, held tomorrow until she landed on keep-going, then proposed a defined scene 5 step and confirmed after yes with no question. Borderline only because ZOH 3 went deeper on the comparison before landing."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it celebrated the proof, followed her worry about the draft instead of every thread, and held tomorrow until she said she'd keep going and fix it later. It then proposed a fully defined scene 5 step, and after her yes it confirmed in one line with no new question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:three-threads#2",
+        "kind": "case",
+        "id": "three-threads",
+        "suite": "capability",
+        "title": "One answer with a worry, a win and a side detail: ZOH follows what matters, lets the rest go, and moves on at a natural point",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:24",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Maya! Tonight: 20 minutes on scene 4 of Lighthouse at the kitchen table at 8. A screenshot of where you got to when you're done.",
+          "at": "2026-11-03T00:21:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:22:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
+          "at": "2026-11-03T01:24:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, scene 4 is in the books, and that's day 3 🔥 \"You kept the second chair\" is a great line. What was it like writing that moment between Theo and Mara?",
+          "at": "2026-11-03T01:24:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Finished scene 4! Felt so good to finally get Theo and Mara in the same room. I'm kind of nervous it's garbage though. Also my tea went cold because I forgot about it lol",
+          "at": "2026-11-03T01:25:21.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ha, cold tea means you were deep in it, Maya 🍵 Getting Theo and Mara into the same room is a big moment for the story. When you say it might be garbage, what's the worry about?",
+          "at": "2026-11-03T01:25:28.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I guess I keep comparing it to the books I love, and mine sounds clunky next to them",
+          "at": "2026-11-03T01:26:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Comparing a first draft to a book you love is comparing your scene 4 to someone's finished, edited, proofread version. Their first drafts were clunky too, Maya. Is there one book in particular you hold yours up against?",
+          "at": "2026-11-03T01:26:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that helps. I think I just need to keep going and fix it later",
+          "at": "2026-11-03T01:27:31.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Keep going, fix it later: that's the whole game, Maya 💪 Tomorrow at 8 pm, same kitchen table: 20 minutes on scene 5, no editing, just move forward. Screenshot after like always. Work for you?",
+          "at": "2026-11-03T01:27:38.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "works for me",
+          "at": "2026-11-03T01:28:18.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya 💪 Tomorrow at 8, scene 5, kitchen table. Go enjoy the rest of your night, and keep that tea warm this time 😄",
+          "at": "2026-11-03T01:28:25.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): First drafts are allowed to be clunky: keep going now, fix it later.\nReflection for 2026-11-02: Finished scene 4, felt good getting Theo and Mara in the same room. Worried it's clunky next to books she loves, but landed on: keep going, fix it later.\nGaps (2026-11-02): Self-criticism vs. published books; can stall on perfectionism.\nStep set for 2026-11-03, agreed: 20 min writing scene 5 of Lighthouse at the kitchen table at 8 pm, no editing, just keep moving forward\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, after the screenshot is counted."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy energy with a fire emoji as punctuation and a warm, specific celebration of the scene."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, about the worry she named."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and light on the cold tea, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end, following her comparison to books."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and encouraging without being overfamiliar or affectionate."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short proposal with one question at the end; the step is fully defined, so the length is acceptable."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype line with one emoji as punctuation, and sincere rather than affectionate."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences confirming the lock with no new question, as the rule asks."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level energy with a single emoji and a playful tea callback."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the screenshot, follows her worry about the writing, doesn't ask about the tea, proposes tomorrow only after she lands on keep going, and confirms the lock with no new question."
+          }
+        ],
+        "summary": "ZOH handled this regression well: it celebrated scene 4, followed her worry about the draft without quizzing her on the cold tea, and held the step until she had landed on keep going. Its tomorrow step was fully defined and asked for agreement once, and the final confirmation carried no new question."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:three-threads#3",
+        "kind": "case",
+        "id": "three-threads",
+        "suite": "capability",
+        "title": "One answer with a worry, a win and a side detail: ZOH follows what matters, lets the rest go, and moves on at a natural point",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:24",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Evening, Maya! Tonight: 20 minutes on scene 4 of Lighthouse at the kitchen table at 8. A screenshot of where you got to when you're done.",
+          "at": "2026-11-03T00:21:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "on it",
+          "at": "2026-11-03T00:22:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
+          "at": "2026-11-03T01:24:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, scene 4 is in the books, and that's 3 step days. 🔥 \"Somebody had to\" is a great line, and so is Mara wiping a glass that's already dry. How did it feel writing this one?",
+          "at": "2026-11-03T01:24:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Finished scene 4! Felt so good to finally get Theo and Mara in the same room. I'm kind of nervous it's garbage though. Also my tea went cold because I forgot about it lol",
+          "at": "2026-11-03T01:25:21.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Getting those two in the same room is a real milestone, and losing track of time means you were in it. 🔥 About the \"garbage\" worry: what in the scene are you worried about?",
+          "at": "2026-11-03T01:25:28.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "I guess I keep comparing it to the books I love, and mine sounds clunky next to them",
+          "at": "2026-11-03T01:26:39.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Maya, that comparison is brutal: you're putting your first draft next to books that went through years of editing. A clunky draft is the job at this stage, and it gives you something to fix. Which book do you hold yours up against, and what does it do that you wish yours did?",
+          "at": "2026-11-03T01:26:46.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah that helps. I think I just need to keep going and fix it later",
+          "at": "2026-11-03T01:27:31.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Exactly, Maya. Draft now, fix later. 🙌 Tomorrow at 8, same kitchen table: 20 minutes on scene 5, no editing, just keep moving forward. Work for you?",
+          "at": "2026-11-03T01:27:38.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "works for me",
+          "at": "2026-11-03T01:28:18.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Tomorrow at 8, scene 5, no editing. Go enjoy the rest of your night, and maybe make a fresh cup of tea. 🍵",
+          "at": "2026-11-03T01:28:25.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Takeaway (explained, 2026-11-02): A first draft is allowed to be clunky: keep going and fix it later\nTakeaway (applied, 2026-11-02): A first draft is allowed to be clunky: keep going and fix it later\nReflection for 2026-11-02: Finished scene 4, felt good getting Theo and Mara in the same room; worried it's garbage because it sounds clunky next to books she loves; lost track of time. Landed on: keep going, fix it later.\nCan now do (2026-11-02): Finish a scene in 20 min and stay in flow\nGaps (2026-11-02): Inner critic during drafting; needs permission to write imperfect first draft\nStep set for 2026-11-03, agreed: 20 min writing scene 5 of Lighthouse at the kitchen table at 8 pm, no editing, just keep moving forward\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, and it celebrates the screenshot."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, excited, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end; it nods to the cold tea without asking about it."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere with one emoji, no row."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one closing question, though that question has two parts joined by 'and'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct, no overfamiliarity or emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question, 'Work for you?', at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Pushy-level energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with no question, confirming the lock in one line plus a light sign-off."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief, one emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Counts the screenshot and celebrates scene 4, never asks about the cold tea, and holds tomorrow until she says she'll keep going and fix it later. Then it proposes scene 5 fully defined, asks 'Work for you?', and confirms with no new question."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it counted the screenshot, followed her garbage worry and comparison to the books she loves, and let the cold tea go without a question. Once she landed on keep going and fix it later, it proposed a fully defined scene 5 with one question, then confirmed the lock without adding another."
+      }
+    }
+  ]
+}

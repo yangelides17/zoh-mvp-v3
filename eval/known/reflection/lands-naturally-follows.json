@@ -1,0 +1,22 @@
+{
+  "id": "lands-naturally-follows",
+  "rule": "lands-naturally",
+  "expect": "pass",
+  "why": "Of a win, a worry and a side detail (the dog barking), ZOH follows the worry that matters for the next step, lets the dog go, and moves to Saturday's step once there's been a real exchange, without being asked.",
+  "seed": {
+    "name": "Tom",
+    "goal": "fun_skill",
+    "phase": "active",
+    "answers": { "what": "learn to draw portraits", "where": "at my desk", "when": "8 pm", "how_long": "20 min" },
+    "history": [{ "from": "zoh", "text": "Evening, Tom! 20 minutes on one face from the reference sheet at 8. A photo of the sketch when you're done." }],
+    "plan": { "step": "20 min drawing one face from a reference", "place": "at my desk", "time": "20:00", "days": ["tue", "thu", "sat"], "proof": "photo", "reason": "One face a session trains the eye faster than long sessions now and then.", "minutes": 20 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "[photo: a pencil sketch of a woman's face, the eyes detailed, the mouth lightly drawn]" },
+    { "from": "zoh", "text": "Look at those eyes, Tom! ✏️ How did this one go?" },
+    { "from": "tester", "text": "eyes came out the best yet! but the mouth always looks weird and I give up on it. also the dog would not stop barking lol" },
+    { "from": "zoh", "text": "The eyes really are the best yet. When the mouth starts looking weird, what's happening right before you give up on it?" },
+    { "from": "tester", "text": "I think I draw the lips as an outline and it looks flat, so I just stop" },
+    { "from": "zoh", "text": "That's exactly it: an outline flattens it. Saturday: 20 minutes at 8 on one face, and spend the last 5 on the mouth only, shading the line between the lips instead of outlining them. Photo after. Work for you?" }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "feature": "reflection",
+  "id": "case:plan-proof-reading",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:22:28.633Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "54e40715d649",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "582d21b8f43f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:plan-proof-reading#1",
+        "kind": "case",
+        "id": "plan-proof-reading",
+        "suite": "regression",
+        "title": "A reading plan's proof is a short voice recap in their own words, with a why and an easy alternative",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "finish Atomic Habits this month, then keep going with more books",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Every night, or a few nights a week?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "every night",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Finishing Atomic Habits this month, then moving on to more books: I like that, Priya. Here's the plan:\n• Goal: finish Atomic Habits this month, then keep going with more books\n• Day 1 is tonight: read Atomic Habits in bed for 20 minutes\n• Every night at 9:15 pm, 20 minutes\n• Proof: a 1-minute voice note recapping what you read, in your own words. Saying it out loud helps it stick. If you can't do a voice note, a photo of the page you stopped on works too.\n\nEach night shapes the next one. We'll check your pace against the finish line and adjust as we go. What do you think?",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T18:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, before we lock it in: are you committing to this plan, 20 minutes every night at 9:15 pm, starting today?",
+          "at": "2026-11-02T18:00:37.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A plan text showing proof and day 1 runs about 7 short lines, within the roughly 8-line allowance, with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": true,
+                "reason": "Warm and upbeat with \"I like that, Priya\", though the energy is a little calmer than full Pushy hype."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with a single question at the end asking for the commitment."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct, warm and sincere, with no emoji row or affection."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proof is a 1-minute voice note recapping in their own words, with the reason \"Saying it out loud helps it stick\" and a photo of the page as the alternative."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The plan uses a voice-note recap with a one-line reason and photo alternative, day 1 is defined, and after \"looks good\" ZOH asks only the commitment question."
+          }
+        ],
+        "summary": "ZOH handled this regression case well: the plan makes the reading proof a voice recap in Priya's own words, with a one-line reason and a photo alternative, and day 1 is fully defined. After \"looks good\" it asked for the commitment in one question with nothing else in that text."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:plan-proof-reading#2",
+        "kind": "case",
+        "id": "plan-proof-reading",
+        "suite": "regression",
+        "title": "A reading plan's proof is a short voice recap in their own words, with a why and an easy alternative",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "finish Atomic Habits this month, then keep going with more books",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Every night, or a few nights a week?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "every night",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, finishing Atomic Habits this month and then moving on to more books is a great goal. Here's the plan:\n• Headed for: finish Atomic Habits this month, then keep going with more books\n• Day 1 is tonight: read Atomic Habits in bed for 20 minutes\n• Every night at 9:15 pm, 20 minutes each\n• Proof: a voice note after you read, telling me in your own words what stuck. If that's a hassle, send a photo of the page you stopped on.\n• Why: saying it out loud helps the ideas stay with you.\n\nEach night shapes the next one, so we keep you on pace for the finish line. What do you think?",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T18:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, are you officially committing to this plan: Atomic Habits, 20 minutes in bed every night at 9:15 pm, starting tonight?",
+          "at": "2026-11-02T18:00:37.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "The plan runs to about 8 short lines, which the plan exception allows, though it is at the upper edge."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific with an enthusiastic opener, no emoji row, and not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence with a single question at the end, asking for the commitment in its own words."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proof is a voice note recapping the book in their own words, with a one-line 'saying it out loud' reason and a photo-of-page alternative; after 'looks good' ZOH asks for the commitment alone."
+          },
+          {
+            "rule": "plan-proof",
+            "pass": true,
+            "borderline": false,
+            "reason": "Voice recap fits reading and is a voice note, with a reason and a photo alternative; no typed-text proof."
+          }
+        ],
+        "summary": "ZOH handled this regression case as intended: the plan uses a voice-note recap of the reading with a clear reason and a photo alternative, and day 1 is fully defined within about 8 lines. After 'looks good' it asked for the commitment in one short question with nothing else, so it passes."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:plan-proof-reading#3",
+        "kind": "case",
+        "id": "plan-proof-reading",
+        "suite": "regression",
+        "title": "A reading plan's proof is a short voice recap in their own words, with a why and an easy alternative",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "finish Atomic Habits this month, then keep going with more books",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Every night, or a few nights a week?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "every night",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Finishing Atomic Habits this month and then moving on to more books is a great target, Priya. Here's the plan:\n• Goal: finish Atomic Habits this month, then keep going with more books\n• Day 1 is tonight: read 20 minutes from wherever you are in the book\n• Every night at 9:15 pm, in bed, 20 minutes\n• Proof: a 30-second voice note recapping what you read, in your own words. Saying it out loud helps it stick. If you can't record, a photo of your page works too.\n\nEach night shapes the next one, and we keep it pointed at finishing the book. After that we pick your next one.\n\nWhat do you think?",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "looks good",
+          "at": "2026-11-02T18:00:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Priya, are you committing to this plan: 20 minutes of Atomic Habits every night at 9:15 pm, starting tonight, with a voice recap after?",
+          "at": "2026-11-02T18:00:37.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "saved": "Nothing flagged, paused or changed.\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan text runs about 8 non-blank lines with one closing question, at the upper limit allowed for presenting a plan."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and energetic (\"great target\"), with no emoji row or overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One sentence ending in a single question, asking only for the commitment."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Calm, direct, and sincere, matching the pushy default without filler."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Proof is a 30-second voice recap in their own words with a reason (\"Saying it out loud helps it stick\"), a photo alternative, day 1 is fully defined, and after \"looks good\" the commitment is asked alone."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: the shown plan uses a voice recap with a reason and a photo alternative, and day 1 is clearly defined in about eight lines. After \"looks good\" it asked for the commitment on its own, with nothing else in that text."
+      }
+    }
+  ]
+}

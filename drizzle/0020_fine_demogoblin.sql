@@ -1,0 +1,1 @@
+ALTER TABLE "testers" ADD COLUMN "scenario" text;

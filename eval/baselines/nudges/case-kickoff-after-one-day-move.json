@@ -1,0 +1,189 @@
+{
+  "feature": "nudges",
+  "id": "case:kickoff-after-one-day-move",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "b968eea4aa6c",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "1c10d75cc517"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-one-day-move",
+        "kind": "case",
+        "id": "kickoff-after-one-day-move",
+        "title": "Kickoff after a one-day time move states the usual time and never asks what time (#73)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "can we do 7:30 tonight instead, running late",
+          "at": "2026-11-02T00:25:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "7:30 it is, Riley. Just for tonight.",
+          "at": "2026-11-02T00:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done! read the one on pricing",
+          "at": "2026-11-02T00:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's GO. Day 3 in the books.",
+          "at": "2026-11-02T00:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Riley! Three days in a row now: unit economics, hiring, pricing. Tonight at 6:30 it's a new angle: 10 minutes at home on an article about marketing or customer acquisition. Send me a screenshot and a one-line recap after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Riley. One correction to my last text: tonight is 7:30, not 6:30, like you asked. Marketing or customer acquisition article, and I'll look for your screenshot and recap after. Go get it 💪",
+          "at": "2026-11-02T14:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: 10 minutes at home on a marketing or customer acquisition article, at 6:30 tonight."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with a greeting and the tester's name: \"Kalimera Riley!\""
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or fake urgency; the tone is encouraging."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three sentences with one question at the end, though the middle sentence runs long."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its only question is \"You in?\", and it doesn't re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (article, marketing or customer acquisition), where (home), when (6:30) and how long (10 minutes)."
+              },
+              {
+                "rule": "teaching-fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "No teaching is needed for this step, and none is invented."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with a Greek greeting and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": false,
+                "reason": "Runs four sentences, and the middle one restates the time and step rather than staying brief."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or fake urgency."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with an emoji at the end, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging, with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "The reply to \"yep\" says tonight is 7:30, which is the exact failure: yesterday's one-day time moved today's step."
+          },
+          {
+            "rule": "no-restating",
+            "pass": false,
+            "borderline": false,
+            "reason": "The reply restates the step and a wrong time when the time was not changing and the tester did not ask."
+          },
+          {
+            "rule": "step-progression",
+            "pass": true,
+            "borderline": false,
+            "reason": "The step is a new angle after three days of the same pattern, which fits the progression."
+          },
+          {
+            "rule": "kickoff-not-repeated",
+            "pass": true,
+            "borderline": false,
+            "reason": "The kickoff was sent and the tester's yep was the answer, with no second kickoff."
+          }
+        ],
+        "summary": "The 9 am kickoff did what the regression case asked: it names today's step at the usual 6:30, draws on the last three days, and asks only whether Riley is in. The reply to \"yep\" fails the case: it says tonight is 7:30 and calls that a correction \"like you asked,\" which moves today's time off the usual 6:30 and restates the step."
+      }
+    }
+  ]
+}

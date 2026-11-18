@@ -24,6 +24,11 @@ export function when(at: Date | null | undefined): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: FOUNDER_ZONE, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
 }
 
+/** "Mon, Nov 2, 7:30 PM" in a tester's zone. */
+export function dayAndTime(at: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
+}
+
 /** Just the time of day, under a bubble (the day is in the divider above). */
 export function clock(at: Date): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: FOUNDER_ZONE, hour: "numeric", minute: "2-digit" }).format(at);
@@ -71,6 +76,15 @@ export function hitRatePct(v: GoalView): string {
   return closed ? `${Math.round((done / closed) * 100)}%` : "–";
 }
 
+/** iPhone voice notes (Core Audio files): Safari plays them, Chrome can't (#97). */
+const isCaf = (m: Message) => /x-caf/i.test(m.mediaContentType ?? "") || /\.caf$/i.test(m.mediaKey ?? "");
+
+/** #163: a document's name from its link, else "document". */
+function fileLabel(m: Message): string {
+  const last = (m.mediaUrl ?? "").split("?")[0]!.split("/").pop() ?? "";
+  return /\.[a-z0-9]{2,8}$/i.test(last) ? decodeURIComponent(last) : "document";
+}
+
 export function proofHtml(m: Message): string {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
   const src = `/console/media/${esc(m.id)}`;
@@ -80,18 +94,35 @@ export function proofHtml(m: Message): string {
     : kind === "image"
       ? `<a href="${src}"><img class="proof" src="${src}" alt="proof photo" loading="lazy"></a>`
       : kind === "audio"
-        ? `<audio controls preload="none" src="${src}"></audio>`
-        : `<a href="${src}">${esc(kind)} file</a>`;
-  const words = [m.description, m.transcript && `"${m.transcript}"`, m.content].filter(Boolean).map(esc).join(" · ");
+        ? `<audio controls preload="none" src="${src}"></audio>${isCaf(m) ? `<a class="media-download" href="${src}" download hidden>Download (Chrome can't play iPhone voice notes; Safari can)</a>` : ""}`
+        : kind === "video"
+          ? `<video controls preload="none" src="${src}"></video>`
+          : kind === "document"
+            ? `<a href="${src}" target="_blank" rel="noopener">📄 ${esc(fileLabel(m))}</a>`
+            : `<a href="${src}">${esc(kind)} file</a>`;
+  // A document's text can run to pages: its summary is shown, and the file is a click away.
+  const transcript = kind === "document" ? undefined : m.transcript && `"${m.transcript}"`;
+  const words = [m.description, transcript, m.content].filter(Boolean).map(esc).join(" · ");
   return `<div>${media}${words ? `<div class="muted">${words}</div>` : ""}</div>`;
 }
 
-export function alertCard(a: ConsoleMessage, testerId: string, testerName?: string): string {
-  const seen = a.seenAt
-    ? `<span class="muted">seen by ${esc(a.seenBy)} ${esc(when(a.seenAt))}</span>`
-    : `<form class="inline" method="post" action="/console/testers/${esc(testerId)}/alerts/${esc(a.id)}/seen"><button class="small">Seen</button></form>`;
-  return `<div class="card"><div class="row spread"><div class="row"><span class="chip${a.seenAt ? "" : " warn"}">${esc((a.topic ?? "alert").replaceAll("_", " "))}</span>${testerName ? `<a href="/console/testers/${esc(testerId)}?tab=console">${esc(testerName)}</a>` : ""}<span class="muted">${esc(when(a.createdAt))}</span></div>${seen}</div>
-<div style="margin-top:6px">${esc(a.body)}</div>${a.why ? `<div class="muted">Why: ${esc(a.why)}</div>` : ""}</div>`;
+/**
+ * An alert, with a button that says what it does (#69): Mark reviewed on a plan to review (it's already
+ * active), a pointer to the decision for a next step waiting on the founders, Seen on anything else;
+ * and Discuss in chat on every one. `decisionWaiting`: its next step still waits for a decision.
+ */
+export function alertCard(a: ConsoleMessage, testerId: string, opts: { testerName?: string; decisionWaiting?: boolean } = {}): string {
+  const base = `/console/testers/${esc(testerId)}/alerts/${esc(a.id)}`;
+  const review = a.topic === "plan_review";
+  const button = a.seenAt
+    ? `<span class="muted">${review ? "reviewed" : "seen"} by ${esc(a.seenBy)} ${esc(when(a.seenAt))}</span>`
+    : opts.decisionWaiting
+      ? `<a class="small" href="${opts.testerName ? `/console/testers/${esc(testerId)}?tab=console` : ""}#needs-you">Decide it under Needs you</a>`
+      : `<form class="inline" method="post" action="${base}/seen"><button class="small">${review ? "Mark reviewed" : "Seen"}</button></form>`;
+  const note = review && !a.seenAt ? `<div class="muted">Their plan is already active (they committed to it); marking it reviewed records that you've looked.</div>` : "";
+  const discuss = `<form class="inline" method="post" action="${base}/discuss"><button class="small">Discuss in chat</button></form>`;
+  return `<div class="card"><div class="row spread"><div class="row"><span class="chip${a.seenAt ? "" : " warn"}">${esc((a.topic ?? "alert").replaceAll("_", " "))}</span>${opts.testerName ? `<a href="/console/testers/${esc(testerId)}?tab=console">${esc(opts.testerName)}</a>` : ""}<span class="muted">${esc(when(a.createdAt))}</span></div><div class="row">${discuss}${button}</div></div>
+<div style="margin-top:6px">${esc(a.body)}</div>${a.why ? `<div class="muted">Why: ${esc(a.why)}</div>` : ""}${note}</div>`;
 }
 
 /** A next step, with Approve / Change / Reject while it waits. The same card sits in the chat and under Pending. */

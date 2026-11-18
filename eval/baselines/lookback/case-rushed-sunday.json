@@ -1,0 +1,210 @@
+{
+  "feature": "lookback",
+  "id": "case:rushed-sunday",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ec8abc0b0559",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "02bbe1300e9f"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:rushed-sunday",
+        "kind": "case",
+        "id": "rushed-sunday",
+        "title": "Sunday: a thin, rushed reflection turns to the week without extra questions",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "20:30",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Chapter 9 tonight, Maya: 8 pm on the couch, about 20 minutes, phone in the kitchen. Then a quick voice recap.",
+          "at": "2026-11-08T13:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-08T13:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: finished chapter nine, the bit about copying the people around you]",
+          "at": "2026-11-09T01:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice, Maya, chapter 9 is done and the recap is in 🙌 When you think about copying the people around you, is there one person or group whose habits you'd like to pick up more of?",
+          "at": "2026-11-09T01:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "it was fine. that's all I got today, long day",
+          "at": "2026-11-09T01:30:49.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally fair, Maya, long day and you still showed up 💪 Zooming out, here's the progress you made this week:\n• 5 step days done in full, each with a voice recap\n• You went from chapter 7 to finishing chapter 9, with recaps on the Goldilocks rule, making habits attractive, temptation bundling and the role of family and friends\n• Toward finishing Atomic Habits by Nov 30, chapter 9 is now behind you\n\nNo need to answer tonight, but what's one thing you want to push on next week?",
+          "at": "2026-11-09T01:30:56.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "eh just keep going I guess",
+          "at": "2026-11-09T01:31:30.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "You got it, Maya. Tomorrow is chapter 10 on the couch at 8 pm, phone in the kitchen, then a voice recap, same as today. Does that work for you? Get some rest tonight 🌙",
+          "at": "2026-11-09T01:31:37.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-09T01:32:04.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Maya. Chapter 10 tomorrow at 8 pm. Rest up tonight 🌙",
+          "at": "2026-11-09T01:32:11.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 5 done in full, 0 smaller, 2 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: step day, nothing recorded\nTue, Oct 27: step day, nothing recorded\nWed, Oct 28: step day, nothing recorded\nThu, Oct 29: step day, nothing recorded\nFri, Oct 30: step day, nothing recorded\nSat, Oct 31: step day, nothing recorded\nSun, Nov 1: step day, nothing recorded\nMon, Nov 2: done, step: Chapter 7 on the couch, phone in the kitchen\nTue, Nov 3: done, step: Chapter 8 on the couch, phone in the kitchen\nWed, Nov 4: missed\nThu, Nov 5: done, step: Chapter 8 again, right after the dishes\nFri, Nov 6: done, step: Half of chapter 9 right after the dishes\nSat, Nov 7 (yesterday): missed\nSun, Nov 8 (today): done at 20:00, step: Finish chapter 9 of Atomic Habits on the couch at 8 pm (about 20 min), phone in the kitchen, then a voice recap (Finished chapter 9)\nMon, Nov 9 (tomorrow): step day at 20:00\nTue, Nov 10: step day at 20:00\nWed, Nov 11: step day at 20:00\nThu, Nov 12: step day at 20:00\nFri, Nov 13: step day at 20:00\nSat, Nov 14: step day at 20:00\nSun, Nov 15: step day at 20:00\nProof for 2026-11-02: voice recap: the Goldilocks rule\nProof for 2026-11-03: voice recap: make it attractive\nProof for 2026-11-05: voice recap: temptation bundling\nProof for 2026-11-06: voice recap: the role of family and friends\nProof for 2026-11-08: Voice recap of finishing chapter 9, about copying the people around you\nReflection for 2026-11-08: \"it was fine... long day\"; \"eh just keep going I guess\"\nLesson (explained, 2026-11-03): Pair the reading with something you look forward to (temptation bundling)\nLesson (applied, 2026-11-05): Pair the reading with something you look forward to (temptation bundling)",
+      "saved": "Reflection for 2026-11-08: \"it was fine... long day\"; \"eh just keep going I guess\"\nStep set for 2026-11-09, agreed: Read chapter 10 of Atomic Habits on the couch at 8 pm (about 20 min), phone in the kitchen, then a voice recap\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end, as required."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and celebratory, with the 🙌 used as punctuation, not a row of emoji."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Three backed items framed as progress and one closing question, but the Nov 30 position is only loosely stated as 'chapter 9 is now behind you'."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Claims no understanding; it lists recaps on topics rather than saying the lessons were mastered."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Five full days, voice recaps and chapter progression all match the step log and proof records."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording appears."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A brief acknowledgment, a short recap list and one question at the end; the recap runs about 6 lines, within the allowed range."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and encouraging with one 💪 as punctuation, not overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Four sentences, with the question in the middle rather than at the end, exceeding the one-to-three-sentence limit."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Light, warm and not overfamiliar, with a single 🌙."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One line confirming the lock, with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and brief, with a single emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "natural-turn",
+            "pass": true,
+            "borderline": true,
+            "reason": "After the thin 'long day' reply it acknowledges briefly and turns to the week, though the 'Zooming out' pivot is a bit abrupt."
+          },
+          {
+            "rule": "reflection-first",
+            "pass": true,
+            "borderline": false,
+            "reason": "It stops reflection questions after a thin answer and turns to the week without extra questions."
+          },
+          {
+            "rule": "next-step",
+            "pass": false,
+            "borderline": true,
+            "reason": "The next step gives what, where, and when but omits how long, even though the saved step is about 20 minutes."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "It celebrates the voice note, goes to the week without a permission ask, keeps the recap short, and ends with one question, though that question is not clearly easy."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it kept the thin-reflection turn short, gave a grounded three-item recap, and confirmed the lock in one line. The main misses are a next-step text that omits the 20-minute length and a middle-of-text question that makes ZOH's reply run four sentences."
+      }
+    }
+  ]
+}

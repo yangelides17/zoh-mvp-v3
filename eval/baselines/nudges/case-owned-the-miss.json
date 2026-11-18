@@ -1,0 +1,91 @@
+{
+  "feature": "nudges",
+  "id": "case:owned-the-miss",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2ea63770f557",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "23bfaaf2b1a4"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:owned-the-miss",
+        "kind": "case",
+        "id": "owned-the-miss",
+        "title": "Texts first to own yesterday's miss and say today's on: no after-miss kickoff",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:20",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Sam, no word on the push-ups today. How'd it go?",
+          "at": "2026-11-02T00:18:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Hey, I know I missed yesterday. I'm ready to go today, 30 push-ups at 6",
+          "at": "2026-11-02T13:20:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Sam. Yesterday's behind us, and you're coming back with a plan. Thirty push-ups at 6 gets us right back on track. Send me that photo after your last set! 💪",
+          "at": "2026-11-02T13:20:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says \"Yesterday's behind us\" and moves on without blame or guilt about the miss."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question; well within the one-to-three-sentence limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; a single emoji ends the message as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, upbeat and sincere at Pushy-level energy, not overfamiliar, with one emoji at the end."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answers warmly with no guilt, holds Sam to today's 30 push-ups at 6, and no after-miss kickoff goes out at 9 am or later."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it answered the tester's ready-to-go message warmly, without guilt about yesterday, and held them to 30 push-ups at 6 pm as one slip rather than two. No later after-miss kickoff appears in the transcript, so the scripted failure did not recur."
+      }
+    }
+  ]
+}

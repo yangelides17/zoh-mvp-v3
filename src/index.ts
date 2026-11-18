@@ -3,10 +3,9 @@ import { ConfigError, loadConfig, missingSettings } from "./config.js";
 import { createDb } from "./db/client.js";
 import { safeError } from "./errors.js";
 import type { ConsoleJobs } from "./console/jobs.js";
-import type { MediaRetention } from "./media/retention.js";
 import type { MemoryKeeper } from "./memory/keeper.js";
 import type { NudgeScheduler } from "./nudges/scheduler.js";
-import { appDeps, consoleJobsFor, mediaRetentionFor, memoryKeeperFor, nudgeSchedulerFor } from "./wiring.js";
+import { appDeps, consoleJobsFor, memoryKeeperFor, nudgeSchedulerFor } from "./wiring.js";
 
 let config;
 try {
@@ -28,7 +27,6 @@ const deps = appDeps(config, db, {}, { version: process.env.RAILWAY_GIT_COMMIT_S
 const { app, queue } = await buildApp(deps);
 let nudger: NudgeScheduler | undefined;
 let keeper: MemoryKeeper | undefined;
-let retention: MediaRetention | undefined;
 let consoleJobs: ConsoleJobs | undefined;
 
 const missing = missingSettings(config);
@@ -41,7 +39,6 @@ async function shutdown(signal: string) {
   app.log.info({ signal, inFlight: queue.size }, "Shutting down");
   await nudger?.stop();
   await keeper?.stop();
-  await retention?.stop();
   await consoleJobs?.stop();
   await app.close();
   await Promise.race([queue.idle(), new Promise((r) => setTimeout(r, 20_000))]);
@@ -64,16 +61,12 @@ try {
 }
 
 // ZOH's own texts: one tick a minute, once the app is taking texts.
-nudger = nudgeSchedulerFor(deps, app.log, config.sendblue.number);
+nudger = nudgeSchedulerFor(deps, app.log, config.sendblue.number, config.goalCap);
 nudger.start();
 
 // Coach memory: each tester's day is filed overnight (3 am their time); checked once a minute.
 keeper = memoryKeeperFor(config, deps, app.log);
 keeper.start();
-
-// Voice-note audio is deleted 30 days after it arrived (transcripts stay); checked hourly.
-retention = mediaRetentionFor(deps, app.log);
-retention.start();
 
 // Founder console: a one-line why on each alert, and weekly summaries Sunday 8 am Eastern; checked once a minute.
 consoleJobs = consoleJobsFor(config, deps, app.log);

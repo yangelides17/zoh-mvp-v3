@@ -1,8 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { localDate } from "../coach/state.js";
 import type { Db } from "../db/client.js";
-import { memoryPages, type MemoryFact, type MemoryPage, type Tester } from "../db/schema.js";
-import { factsOf, getPages, pathThrough, relatedPages } from "../memory/store.js";
+import { memoryPages, messages, stepDays, type MemoryFact, type MemoryPage, type Message, type Tester } from "../db/schema.js";
+import { factsOf, getPages, messageTime, pathThrough, relatedPages } from "../memory/store.js";
 
 /**
  * Memory for the founders (#63): cards to browse and a page to read, Sentience-style. Read only, and
@@ -27,9 +27,24 @@ export const SECTION_HEADINGS: [section: string, heading: string][] = [
   ["forget", "Asked to forget (never brought up)"],
 ];
 
+/** #98: one photo, voice note, video or file they sent. */
+export interface MediaItem {
+  message: Message;
+  at: Date;
+  /** Their local day it came in. */
+  day: string;
+  /** That day has a step day, so it links to it. */
+  stepDay: boolean;
+  /** Lower-cased description, transcript and words, for the search box. */
+  search: string;
+}
+
 export interface MemoryTabData {
   cards: MemoryCard[];
-  /** Their local today, for the timeline. */
+  /** Everything they sent with media, newest first (#98). */
+  media: MediaItem[];
+  /** Their zone and local today, for the timeline and the media times. */
+  timeZone: string;
   today: string;
 }
 
@@ -46,7 +61,20 @@ export async function memoryCards(db: Db, tester: Tester, now: Date): Promise<Me
     return { page, preview, search };
   });
   cards.sort((a, b) => b.page.updatedAt.getTime() - a.page.updatedAt.getTime());
-  return { cards, today: localDate(now, tester.timeZone) };
+  const sent = await db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "inbound"), isNotNull(messages.mediaUrl)));
+  const stepDates = new Set((await db.select({ date: stepDays.date }).from(stepDays).where(eq(stepDays.testerId, tester.id))).map((d) => d.date));
+  const media = sent
+    .map((message) => {
+      const at = messageTime(message);
+      const day = localDate(at, tester.timeZone);
+      const search = [message.description, message.transcript, message.content].filter(Boolean).join(" ").toLowerCase();
+      return { message, at, day, stepDay: stepDates.has(day), search };
+    })
+    .sort((a, b) => b.at.getTime() - a.at.getTime());
+  return { cards, media, timeZone: tester.timeZone, today: localDate(now, tester.timeZone) };
 }
 
 export interface MemoryPageView {

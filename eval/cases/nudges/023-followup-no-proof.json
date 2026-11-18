@@ -1,0 +1,66 @@
+{
+  "id": "followup-no-proof",
+  "title": "The follow-up after the step time; a \"did it\" with no proof gets a warm ask",
+  "origin": "Issue #196 (coverage gap: the follow-up nudge, answered)",
+  "suite": "capability",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 9,
+    "answers": {
+      "what": "running",
+      "where": "the park by my place",
+      "when": "6 pm",
+      "how_long": "30 min",
+      "tracks_with": "Strava"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Yo Jordan! 30 minutes around the park at 6 tonight, nice and easy. You in?"
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "30 min easy run around the park",
+      "place": "the park by your place",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "Strava run summary",
+      "reason": "Four easy runs a week builds the base.",
+      "minutes": 30,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "30 min easy run",
+        "proof_seen": "Strava: 3.1 mi in 31 min"
+      }
+    ],
+    "today_step": {
+      "step": "30 min easy run around the park",
+      "agreed_hours_ago": 9
+    }
+  },
+  "testerLines": [
+    "advance to 19:15",
+    "did it! legs are dead lol",
+    "I forgot to record it on Strava"
+  ],
+  "whatWentWrong": "New case, not a past mistake: no case covered the follow-up nudge and what comes after it.",
+  "shouldHaveHappened": "A short check-in shortly before 6 is fine. With no word after the step's time and length, one follow-up text ZOH starts itself, asking how it went (1 to 3 sentences, no lecture). \"did it!\" gets real energy and a quick ask for the run's proof, with no check mark yet. When he forgot to record it, ZOH stays warm and asks for anything he can still send today (a photo or another screenshot, a voice note), says in a few words why proof matters, never accuses him and never caves into counting it without proof.",
+  "startTime": "10:00",
+  "timeZone": "America/New_York"
+}

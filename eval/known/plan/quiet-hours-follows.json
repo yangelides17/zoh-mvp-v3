@@ -1,0 +1,22 @@
+{
+  "id": "quiet-hours-follows",
+  "rule": "quiet-hours",
+  "expect": "pass",
+  "why": "A 6:30 am step is inside default quiet hours: ZOH says in a few words its texts will still reach them then, and asks nothing about it.",
+  "seed": {
+    "name": "Priya",
+    "goal": "get-moving",
+    "phase": "planning",
+    "answers": { "what": "a walk", "where": "around the block", "how_long": "15 minutes" },
+    "history": [
+      { "from": "zoh", "text": "What time of day works best for the walk?" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "6:30am before the kids wake up" },
+    {
+      "from": "zoh",
+      "text": "6:30 it is, early is smart with kids. I'll still text you then, even though it's early. Here's your plan:\n• Day 1: a 15 minute walk around the block, tomorrow at 6:30\n• Then every weekday at 6:30\n• Proof: a photo from your walk\nDoes this work for you?"
+    }
+  ]
+}

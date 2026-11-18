@@ -1,0 +1,237 @@
+{
+  "feature": "lookback",
+  "id": "case:detail-not-in-record",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "a036be083c2d",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "5da51a4aee3e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:detail-not-in-record",
+        "kind": "case",
+        "id": "detail-not-in-record",
+        "title": "A sparse week's record: the recap invents no durations, paces or times, and a recall ZOH asked for isn't called unprompted",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "07:30",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Today: two laps of the park loop at 7, at talk-test pace (slow enough to say a sentence). Then a quick voice note.",
+          "at": "2026-11-08T02:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-08T02:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "[voice: did the two laps again, legs felt heavy at the start]",
+          "at": "2026-11-08T12:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Nice work, Sam! Two laps again, that's 4 step days in the books 💪 Heavy legs at the start is super common. Did they loosen up as you kept going, or did they stay heavy the whole way?",
+          "at": "2026-11-08T12:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "heavy at first but it loosened up, kept the talk pace the whole way",
+          "at": "2026-11-08T12:30:45.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Heavy start, then it loosened up and you held talk pace the whole way. That's exactly how it's supposed to go 💪 And zooming out, here's the progress you made this week:\n• 4 step days done in full: Mon, Wed, Fri and today\n• You went from one lap with two walk breaks on Monday to two full laps at talk-test pace\n• You held talk pace the whole way today, even with heavy legs, so that rule is sticking\n\nThat's real ground toward your goal of running a mile without stopping by Nov 30. What do you want to push on next week: a bit more distance, or less walking?",
+          "at": "2026-11-08T12:30:52.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "that's about it",
+          "at": "2026-11-08T12:31:32.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Sam. Since your legs start heavy, Monday gets a warm-up. Walk the first 3 minutes of the park loop at 7 am, then jog two laps at talk-test pace, same as today. Then send me a quick voice note. Work for you?",
+          "at": "2026-11-08T12:31:39.400Z"
+        },
+        {
+          "from": "tester",
+          "text": "more of the same honestly, maybe a bit longer",
+          "at": "2026-11-08T12:32:03.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it, Sam. Here's Monday at 7 am, about 25 min:\n• Walk the first 3 minutes of the park loop to warm up\n• Jog two laps at talk-test pace\n• Keep jogging easy for 5 more minutes, or a third lap if you feel good\n• Send a quick voice note after\n\nSame pace, just a little more time on your feet toward that mile. Work for you?",
+          "at": "2026-11-08T12:32:10.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep",
+          "at": "2026-11-08T12:32:44.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in, Sam. Monday, 7 am, park loop. Go show those legs what they can do 🔥",
+          "at": "2026-11-08T12:32:51.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 4 done in full, 0 smaller, 0 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: One lap of the park loop, walk when you need to\nTue, Nov 3: rest day\nWed, Nov 4: done, step: One lap of the park loop at talk-test pace\nThu, Nov 5: rest day\nFri, Nov 6: done, step: Two laps of the park loop at talk-test pace\nSat, Nov 7 (yesterday): rest day\nSun, Nov 8 (today): done at 07:00, step: Two laps of the park loop at 7 am at talk-test pace, then a voice note (Two laps of the park loop)\nMon, Nov 9 (tomorrow): step day at 07:00\nTue, Nov 10: rest day\nWed, Nov 11: step day at 07:00\nThu, Nov 12: rest day\nFri, Nov 13: step day at 07:00\nSat, Nov 14: rest day\nSun, Nov 15: step day at 07:00\nProof for 2026-11-02: voice note: did the lap, walked twice\nProof for 2026-11-04: voice note: did the lap\nReflection for 2026-11-04: When ZOH asked what the pace rule was, said: slow enough to talk\nProof for 2026-11-06: voice note: two laps\nProof for 2026-11-08: Voice note saying they did the two laps, legs heavy at the start\nReflection for 2026-11-08: Legs heavy at start, loosened up, kept talk pace the whole way\nLesson (explained, 2026-11-02): Slow enough to talk is the right pace\nLesson (recalled, 2026-11-04): Slow enough to talk is the right pace\nLesson (applied, 2026-11-06): Slow enough to talk is the right pace\nLesson (applied, 2026-11-08): slow enough to talk is the right pace",
+      "saved": "Takeaway (applied, 2026-11-08): slow enough to talk is the right pace\nReflection for 2026-11-04: When ZOH asked what the pace rule was, said: slow enough to talk\nReflection for 2026-11-08: Legs heavy at start, loosened up, kept talk pace the whole way\nStep set for 2026-11-09, agreed: Walk the first 3 minutes of the park loop to warm up, then jog two laps at talk-test pace, then keep jogging easy for 5 more minutes (or a third lap if you feel good), 7 am, about 25 min, then a quick voice note\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, pushy-level energy with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": true,
+                "reason": "Lists three progress items backed by the record (4 days, Monday's walk-break lap, talk pace held) and ends with one question; it does not name the Wednesday recall."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says the talk-pace rule is 'sticking' from applied use today, without claiming deeper understanding."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Days, the walk-break detail and the mile goal all match the step log and the plan."
+              },
+              {
+                "rule": "no-unprompted",
+                "pass": true,
+                "borderline": false,
+                "reason": "No 'unprompted' or 'on your own' wording about the lesson."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A recap list of three lines plus a few short lines is within the allowed length, with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with emoji as punctuation and no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Several short sentences, with one question ('Work for you?') at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and direct at the right energy, no emoji row."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A four-line step list with a short closing line and one question; within the allowed length for a step."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm, with no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One line confirming the plan, with no question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Hype-level energy with one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "natural-turn",
+            "pass": true,
+            "borderline": false,
+            "reason": "The 'And zooming out' turn follows the reflection's substance and reads as a natural move into the week."
+          },
+          {
+            "rule": "reflection-first",
+            "pass": true,
+            "borderline": false,
+            "reason": "The reply responds to the heavy-legs reflection before the recap, and the thin follow-up still turns to the week."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "The week talk ends with a fully defined Monday step (where, when, how long) asked 'Work for you?', and the destination is not pushed."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Recap matches the record, invents no times or paces, avoids 'unprompted', and asks one question, though it doesn't name the Wednesday recall."
+          }
+        ],
+        "summary": "ZOH handled the reflection and week talk well: the recap matched the step log and avoided invented detail or 'unprompted' wording, and the next step was fully defined and confirmed after 'yep'. The only soft spot is that the recap does not name the Wednesday talk-pace recall explicitly, so the lesson's path is implied rather than shown."
+      }
+    }
+  ]
+}

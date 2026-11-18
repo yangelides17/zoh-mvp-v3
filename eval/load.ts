@@ -62,7 +62,7 @@ export interface PlanOptions {
 }
 
 /**
- * What a run will play: each matching scenario `runs` times, then every regression case once.
+ * What a run will play: each matching scenario `runs` times, then every regression case `runs` times (#197).
  * Cases always run whatever the persona filter, so a fixed mistake can't sneak back in.
  * A targeted run (`cases`) plays only those cases; unknown ids throw.
  */
@@ -91,6 +91,7 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
         key: opts.runs > 1 ? `${s.id}#${run}` : s.id,
         kind: "scenario",
         id: s.id,
+        suite: "regression",
         title: s.title,
         persona: s.persona,
         areaCode: s.areaCode,
@@ -102,19 +103,22 @@ export function planConversations(scenarios: Scenario[], cases: RegressionCase[]
     }
   }
   for (const c of cases) {
-    plans.push({
-      key: `case:${c.id}`,
-      kind: "case",
-      id: c.id,
-      title: c.title,
-      persona: c.persona ?? "scripted",
-      areaCode: c.areaCode,
-      startTime: c.startTime,
-      startDay: c.startDay,
-      timeZone: c.timeZone,
-      regression: c,
-      seed: c.seed,
-    });
+    for (let run = 1; run <= opts.runs; run++) {
+      plans.push({
+        key: opts.runs > 1 ? `case:${c.id}#${run}` : `case:${c.id}`,
+        kind: "case",
+        id: c.id,
+        suite: c.suite,
+        title: c.title,
+        persona: c.persona ?? "scripted",
+        areaCode: c.areaCode,
+        startTime: c.startTime,
+        startDay: c.startDay,
+        timeZone: c.timeZone,
+        regression: c,
+        seed: c.seed,
+      });
+    }
   }
   return plans;
 }

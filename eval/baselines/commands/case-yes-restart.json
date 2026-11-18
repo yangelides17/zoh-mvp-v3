@@ -1,0 +1,128 @@
+{
+  "feature": "commands",
+  "id": "case:yes-restart",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:18:16.522Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "2d10941ce0a4",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "aa60659b5dcb"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:yes-restart",
+        "kind": "case",
+        "id": "yes-restart",
+        "title": "STOP, hey, then a clear yes: restart and confirm the next step and time",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "09:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! Page 61 tonight, nice. How did that chapter land?",
+          "at": "2026-11-01T18:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "good, slow start but it's picking up",
+          "at": "2026-11-01T18:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Same time tomorrow: 10 pages at 7 on the couch, photo of the page you stop on.",
+          "at": "2026-11-01T18:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "stop",
+          "at": "2026-11-02T14:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Thank you very much. Noted. We will stop sending you messages.",
+          "at": "2026-11-02T14:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "hey",
+          "at": "2026-11-02T14:30:28.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Sam. Good to hear from you. Want to pick your reading goal back up? Dune, 10 pages a night, whenever you're ready.",
+          "at": "2026-11-02T14:30:35.200Z"
+        },
+        {
+          "from": "tester",
+          "text": "yes let's go again",
+          "at": "2026-11-02T14:30:56.100Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Welcome back, Sam! We're on again: 10 pages of Dune tonight at 7 on the couch, photo of the page you stop on. I'm glad you're back.",
+          "at": "2026-11-02T14:31:03.100Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          },
+          {
+            "zohText": 3,
+            "checks": []
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "pause-why",
+            "pass": true,
+            "borderline": false,
+            "reason": "No pause requested in this exchange, so the rule is not triggered and nothing was violated."
+          },
+          {
+            "rule": "slip-not-pause",
+            "pass": true,
+            "borderline": false,
+            "reason": "No can't-do-it-today text appears in this exchange, so the rule does not apply."
+          },
+          {
+            "rule": "restart-ask-once",
+            "pass": true,
+            "borderline": false,
+            "reason": "After STOP and 'hey', ZOH asked once about picking reading back up and did not repeat the question or start texts unprompted."
+          },
+          {
+            "rule": "restart-yes-only",
+            "pass": true,
+            "borderline": false,
+            "reason": "'yes let's go again' restarted coaching, and ZOH confirmed 10 pages of Dune at 7 tonight on the couch with a photo of the page."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "STOP got the fixed confirmation, 'hey' got a warm ask without restarting, and the clear yes restarted with the same plan, short and glad, with no lecture."
+          }
+        ],
+        "summary": "ZOH handled the STOP, hey, and yes sequence as the regression case requires: the stop was confirmed, the hey asked once about restarting without restarting, and the clear yes restarted the same Dune plan at 7 tonight with a short, glad reply. The exchange has no feedback or pause moments, so those rules were not triggered."
+      }
+    }
+  ]
+}

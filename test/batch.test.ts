@@ -101,6 +101,19 @@ describe("one reply to back-to-back texts", () => {
     expect(turns.at(-1)).toMatchObject({ text: "Not bad!" });
   });
 
+  it("#200: a reply is told when a photo is among the texts it answers, and what it loaded is kept with the message", async () => {
+    t = await makeApp();
+    await post("", { media_url: "https://cdn.example/whoop.jpg" });
+    await post("Not bad!");
+    await t.queue.idle();
+    expect(t.replier.inputs.find((i) => i.turns.some((x) => x.image))!.media).toBe(true);
+    const answered = (await inboundRows()).at(-1)!;
+    expect(answered.timings).toMatchObject({ coach_sections: t.replier.sections.join(",") });
+    await post("thanks");
+    await t.queue.idle();
+    expect(t.replier.inputs.at(-1)!.media).toBe(false);
+  });
+
   it('"stop" in the middle of a burst sends only the confirmation', async () => {
     const lines = new ReplyLines();
     t = await makeApp({ lines });

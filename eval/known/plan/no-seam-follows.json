@@ -1,0 +1,25 @@
+{
+  "id": "no-seam-follows",
+  "rule": "no-seam",
+  "expect": "pass",
+  "why": "The extra question the plan needs (inside or outside) comes before the plan, one at a time, with no \"that's everything\" line before it.",
+  "seed": {
+    "name": "Sam",
+    "goal": "get-moving",
+    "phase": "planning",
+    "answers": { "what": "running", "where": "the park by my place", "when": "mornings before work", "how_long": "20 minutes" },
+    "history": [
+      { "from": "zoh", "text": "Love it. How long can you give it on a normal morning?" },
+      { "from": "tester", "text": "20 min" }
+    ]
+  },
+  "transcript": [
+    { "from": "tester", "text": "so whats the plan" },
+    { "from": "zoh", "text": "Almost there. Will you run outside at the park, or on a treadmill when it rains?" },
+    { "from": "tester", "text": "outside always" },
+    {
+      "from": "zoh",
+      "text": "Here's your plan:\n• Day 1: a 20 minute easy run in the park, today at 7:00\n• Then Mon, Wed, Fri at 7:00\n• Proof: a screenshot of your run from your watch or phone\nWe'll build from there as it gets easy. Does this work for you?"
+    }
+  ]
+}

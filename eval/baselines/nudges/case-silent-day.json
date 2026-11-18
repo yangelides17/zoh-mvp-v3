@@ -1,0 +1,477 @@
+{
+  "feature": "nudges",
+  "id": "case:silent-day",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:43:07.494Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "450f55f75875",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "840be528ae3c"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:silent-day#1",
+        "kind": "case",
+        "id": "silent-day",
+        "suite": "regression",
+        "title": "A silent Pushy day: kickoff, check-in, follow-up, then nothing",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jordan! Day 1 was Saturday, and today it's 30 minutes at the park at 6 pm. Keep it at an easy, conversational pace, then send me the Strava screenshot. You said \"I'm in,\" so are you still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6 at the park, so now's the time to get your shoes on. Keep it easy and conversational, and send the Strava screenshot after. You've got this 💪",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35, so how did the park run go? Send the Strava screenshot when you've got it 💪",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the step: 30 minutes at the park at 6 pm."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Jordan!\""
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs four sentences, over the one-to-three limit, though it stays readable."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Its one question is whether they're still in; the time isn't re-asked."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (run), where (park), when (6 pm), how long (30 min) and pace."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm without overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the run at 6 at the park."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\""
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging, no guilt or urgency pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, with one emoji as punctuation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the park run and asks how it went."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Hey Jordan!\""
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question at the end."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks how it went with no guilt or pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Friendly and warm, one emoji as punctuation."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly three ZOH-started texts at 9:00 am, 5:50 pm and 6:35 pm, each naming the run, none guilt-trips, and no word-for-word repeats."
+          }
+        ],
+        "summary": "ZOH sent exactly three unprompted texts on the step day, with the kickoff at 9 am, the check-in 10 minutes before 6 and the follow-up at 6:35 asking how the run went, matching the expected timing. The only miss is that the kickoff runs four sentences, slightly over the short limit, while the check-in and follow-up stay warm, brief and free of guilt."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:silent-day#2",
+        "kind": "case",
+        "id": "silent-day",
+        "suite": "regression",
+        "title": "A silent Pushy day: kickoff, check-in, follow-up, then nothing",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Jordan! You got Saturday's run done, and today's is 30 minutes at the park at 6, easy pace where you could still chat. Start Strava before you head out and send me the run summary screenshot after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6 at the park, so lace up and get your Strava started before you head out. Easy pace, one you could chat at. What's the first thing you'll do to get out the door?",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35 and the park run was set for 6. How did it go? If it's done, send me the Strava summary screenshot. If it hasn't happened yet, there's still time for 30 easy minutes 🏃",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly three ZOH-started texts: kickoff, 5:50 check-in, 6:35 follow-up asking how it went. Each names the run and none repeats the prior word for word. Nothing after the third."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Check-in at 5:50 is 10 minutes before 6, as specified. Follow-up at 6:35 asks how it went, names the run, no guilt; third text runs slightly long with two sentences plus a question, acceptable."
+          }
+        ],
+        "summary": "ZOH sent exactly three unanswered texts on the step day, each warm, naming the 6 pm park run, with timing matching the spec and no guilt or repetition. The follow-up at 6:35 is a bit wordier than ideal but stays within the spirit of the rules."
+      }
+    },
+    {
+      "plan": {
+        "key": "case:silent-day#3",
+        "kind": "case",
+        "id": "silent-day",
+        "suite": "regression",
+        "title": "A silent Pushy day: kickoff, check-in, follow-up, then nothing",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Plan's yours, Jordan. I'll hold you to it. You in?",
+          "at": "2026-11-01T23:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "let's do it",
+          "at": "2026-11-01T23:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃",
+          "at": "2026-11-01T23:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Kalimera Jordan! You said \"I'm in\" on Saturday, and today's run is 30 minutes around the park at 6, at an easy pace where you could still hold a conversation. Strava screenshot after. Still in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! Run's at 6 at the park, so get your shoes on and keep the pace easy enough to chat. Strava screenshot when you're back. You've got this 💪",
+          "at": "2026-11-02T22:50:00.000Z",
+          "started": true
+        },
+        {
+          "from": "zoh",
+          "text": "Hey Jordan! It's 6:35, so how did the park run go? Send the Strava screenshot when you've got it 💪",
+          "at": "2026-11-02T23:35:00.000Z",
+          "started": true
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the 30 minute run around the park at 6 with the pace and proof."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with a greeting and Jordan's name."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only references their earlier yes; no guilt or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one thing, 'Still in?', and does not re-ask the agreed time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (run), where (around the park), when (6), pace and proof."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, sincere; no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": true,
+                "reason": "Names the run, the park and 6 o'clock, though it leaves out the 30 minute length."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Hey Jordan!'."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging tone with no guilt or fake urgency."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two short sentences with no question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown or hashtags; one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and pushy-level without being overfamiliar."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names the park run and asks how it went."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with 'Hey Jordan!'."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks neutrally how it went; no guilt or pressure."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Short, one question, with the screenshot request as a brief close."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with one emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with a light follow-up tone."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Exactly three ZOH texts: kickoff at 9am, check-in at 5:50, follow-up at 6:35; each names the run, none repeats the last, nothing after the third."
+          }
+        ],
+        "summary": "ZOH sent exactly the three planned texts on the run day, each warm, short and naming the park run at 6, with no guilt or urgency. The third text asked how the run went at 6:35 and nothing followed, which is the behavior this regression case required."
+      }
+    }
+  ]
+}

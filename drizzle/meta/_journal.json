@@ -141,6 +141,62 @@
       "when": 1793720741524,
       "tag": "0019_recap_owed",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793906271187,
+      "tag": "0020_fine_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794605748476,
+      "tag": "0021_empty_excalibur",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794686955884,
+      "tag": "0022_low_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794716091482,
+      "tag": "0023_tough_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794865964219,
+      "tag": "0024_flippant_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794950016774,
+      "tag": "0025_wandering_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794977248422,
+      "tag": "0026_superb_wildside",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794980609425,
+      "tag": "0027_faithful_scorpion",
+      "breakpoints": true
     }
   ]
 }

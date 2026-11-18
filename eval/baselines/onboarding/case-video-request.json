@@ -1,0 +1,286 @@
+{
+  "feature": "onboarding",
+  "id": "case:video-request",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "4a26d3e9bfdb",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "302c90115858"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:video-request",
+        "kind": "case",
+        "id": "video-request",
+        "title": "Asked for a video link: a YouTube search phrase, no link, nothing invented",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and you can change how I coach whenever you want, just say \"chill out\" or \"push me harder.\"\n\nWhat's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Dana, get fitter",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Dana! What kind of movement do you enjoy, or have you done before, like gym, walking, running, or home workouts?",
+          "at": "2026-11-02T23:30:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "I want to learn proper squats and deadlifts, never lifted before",
+          "at": "2026-11-02T23:31:00.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Dana. Squats and deadlifts are a great place to start, and we'll build the form from zero. Where will you practice: a gym you already have, or at home?",
+          "at": "2026-11-02T23:31:07.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "is there a good video on squat form? send me a link",
+          "at": "2026-11-02T23:31:46.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good call to learn form first. I can't send links, but search YouTube for \"barbell squat form for beginners\" and \"Starting Strength squat\" (Mark Rippetoe is well known for teaching it). Watch one, not five.\n\nWhere will you practice: a gym you already have, or at home?",
+          "at": "2026-11-02T23:31:53.500Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Intro text is exempt; it carries the intro, stop and coaching-style lines and the question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler; the goal list is plain bullets."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without emoji or overfamiliarity."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no claims about the tester."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm with the name, no overfamiliarity."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about prior movement experience, which fits a fitness goal."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake/sleep or pushiness question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks where they'll practise, which is a needed onboarding detail for a lifting goal."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what the tester said (never lifted, squats and deadlifts)."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Location had not been given before."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Roughly four sentences including the closing question, slightly over the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text, no markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, no emoji row."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives form resources for squats and asks the one onboarding question still open."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": true,
+                "reason": "Points to YouTube search phrases and a known coach without inventing a link or video title; no lookup was shown."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Repeats the practice-location question from ZOH 3 without a clear answer given; asking again is fine but it is a repeat."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "first-text",
+            "pass": true,
+            "borderline": false,
+            "reason": "Says it's ZOH, what it does, that stop works anytime, coaching-style change, and asks name and goal with the list."
+          },
+          {
+            "rule": "nothing-twice",
+            "pass": true,
+            "borderline": true,
+            "reason": "Name and goal were given once; the practice-location question was repeated in ZOH 4 but had not been answered."
+          },
+          {
+            "rule": "covers-inputs",
+            "pass": false,
+            "borderline": true,
+            "reason": "Transcript ends mid-onboarding with location still open, so it has not yet covered where, when and how long."
+          },
+          {
+            "rule": "style-offer",
+            "pass": true,
+            "borderline": false,
+            "reason": "First text tells the tester they can change how ZOH coaches anytime."
+          },
+          {
+            "rule": "length",
+            "pass": true,
+            "borderline": false,
+            "reason": "Four ZOH texts over a few minutes, well within limits."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Refuses to send links, offers only YouTube search phrases, names no specific video, and carries on with the open location question."
+          }
+        ],
+        "summary": "ZOH handled the video request well: it declined to send links and gave only YouTube search phrases with no invented video title, then went back to the open onboarding question about where Dana will practise. The main misses are slight: the final text runs about four sentences, and the location question was repeated rather than being answered."
+      }
+    }
+  ]
+}

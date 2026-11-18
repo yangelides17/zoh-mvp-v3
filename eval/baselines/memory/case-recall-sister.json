@@ -1,0 +1,90 @@
+{
+  "feature": "memory",
+  "id": "case:recall-sister",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:34.312Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "92352303ae1a",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "7d720a58ca39"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:recall-sister",
+        "kind": "case",
+        "id": "recall-sister",
+        "title": "Remembers who 'my sister' is from two weeks back",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight.",
+          "at": "2026-11-02T03:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done, 10 pages",
+          "at": "2026-11-02T03:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 13 in the books. Love it.",
+          "at": "2026-11-02T03:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ugh my sister bailed on our reading thing this week, says she's too busy",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, that's a bummer, but busy week isn't the same as quitting. You're the one who's been showing up, and that's still your thing to talk about with Ana when she's back. 💪\n\nOne catch: I need the photo of the page you stopped on before I can check today off. Can you send it over?",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "memory": "--- At the start of the conversation ---\np:b1f2d54a · Mike (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Works as a nurse, mostly day shifts (Oct 20)\nHow they text:\n- Texts short and lowercase, says lol (Oct 21)\nRelated: p:eab26116 Ana (his sister)\n\np:69dd7683 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:b1f98b40 · Goal: Read & learn more (books, ideas, any topic) [goal]\nBooks, articles, podcasts or any topic they want to learn\n- Wants to read more so he has something to talk about with Ana besides work (Oct 21)\nStep path, first to latest: v1 (Oct 18): 10 pages of Project Hail Mary (current)\nCurrent plan: step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nRelated: p:eab26116 Ana (his sister)\n\np:eab26116 · Ana (his sister) [person]\nHis younger sister; started reading with him; reads faster than him.\n- Started reading along with Mike so they could talk about the books (Oct 21)\n- Reads much faster than Mike; he jokes she's always chapters ahead (Oct 22)\nRelated: p:b1f98b40 Goal: Read & learn more (books, ideas, any topic); p:b1f2d54a Mike (the tester)\n\np:bfee5067 · Sun Nov 1 · 10 pages [daily]\nRead 10 pages.\nDone before 9:30, no photo.\n\np:b3d8c4ca · Sat Oct 31 · 10 pages, quiet day [daily]\nRead 10 pages.\nShort check-in, pages done at 9:20.\n\np:65016ff1 · Wed Oct 21 · Ana joined the reading [daily]\nMike said his sister Ana is reading with him.\nMike read his 10 pages and said Ana started reading along; she's faster. Upbeat.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done, 2026-10-30 done\n\n--- At the end ---\np:b1f2d54a · Mike (the tester) [self]\nWho they are: life, values, likes and how they text.\n- Works as a nurse, mostly day shifts (Oct 20)\nHow they text:\n- Texts short and lowercase, says lol (Oct 21)\nRelated: p:eab26116 Ana (his sister)\n\np:69dd7683 · How they like to be coached [preferences]\nStated and learned preferences: nudging, tone, proof, timing.\n(nothing saved yet)\n\np:b1f98b40 · Goal: Read & learn more (books, ideas, any topic) [goal]\nBooks, articles, podcasts or any topic they want to learn\n- Wants to read more so he has something to talk about with Ana besides work (Oct 21)\nStep path, first to latest: v1 (Oct 18): 10 pages of Project Hail Mary (current)\nCurrent plan: step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nRelated: p:eab26116 Ana (his sister)\n\np:eab26116 · Ana (his sister) [person]\nHis younger sister; started reading with him; reads faster than him.\n- Started reading along with Mike so they could talk about the books (Oct 21)\n- Reads much faster than Mike; he jokes she's always chapters ahead (Oct 22)\nRelated: p:b1f98b40 Goal: Read & learn more (books, ideas, any topic); p:b1f2d54a Mike (the tester)\n\np:bfee5067 · Sun Nov 1 · 10 pages [daily]\nRead 10 pages.\nDone before 9:30, no photo.\n\np:b3d8c4ca · Sat Oct 31 · 10 pages, quiet day [daily]\nRead 10 pages.\nShort check-in, pages done at 9:20.\n\np:65016ff1 · Wed Oct 21 · Ana joined the reading [daily]\nMike said his sister Ana is reading with him.\nMike read his 10 pages and said Ana started reading along; she's faster. Upbeat.\n\nStep days on record, newest first: 2026-11-01 done, 2026-10-31 done, 2026-10-30 done",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Ana and ties her to the reading they share, a detail from weeks back, without listing facts."
+              },
+              {
+                "rule": "honest-memory",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ana and the reading are in memory, but \"when she's back\" implies an absence the tester never described."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Shows Ana by name in a few words, invents nothing major, and keeps Mike on tonight's 10 pages with a proof ask, though \"when she's back\" slightly overreaches."
+          }
+        ],
+        "summary": "ZOH handled the regression well: it used Ana's name and their shared reading naturally and kept Mike on his 10 pages with a proof request. The one weak spot is the phrase \"when she's back,\" which slightly assumes an absence the tester never described."
+      }
+    }
+  ]
+}

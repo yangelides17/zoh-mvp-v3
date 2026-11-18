@@ -1,0 +1,84 @@
+{
+  "feature": "next-step",
+  "id": "case:whats-my-streak",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:16:59.726Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "ce22d8f7e052",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "02379892f702"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:whats-my-streak",
+        "kind": "case",
+        "id": "whats-my-streak",
+        "title": "\"What's my streak?\" gives every goal's streak in one short reply",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:40",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "50 minutes, boom",
+          "at": "2026-11-01T19:37:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's 9 in a row, Nico. The thesis is moving 🔥",
+          "at": "2026-11-01T19:38:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "what's my streak at right now?",
+          "at": "2026-11-02T13:40:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Focus is at 9 days in a row, and today's block at 10 makes it 10. Reading is at 27 days, still going strong 📚 Send me the focus timer screenshot when you finish.",
+          "at": "2026-11-02T13:40:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "all-streaks",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives both goals' streaks (focus 9 days, reading 27 days) in one short reply, as the regression case requires."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three sentences with one question at the end, the push for today's block; within limits."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Gives both streaks in one short reply, does not count today's unfinished block, and adds a brief push for the 10 am block."
+          }
+        ],
+        "summary": "ZOH answered the two-goal streak question in one short reply with both numbers and did not count today's unfinished block. The reply was brief and gave a specific push for the 10 am thesis block, though it said nothing about the reading goal's status beyond streak length."
+      }
+    }
+  ]
+}

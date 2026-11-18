@@ -1,0 +1,123 @@
+{
+  "scenario": "sam",
+  "format": 1,
+  "checkpoints": [
+    {
+      "after_day": 2,
+      "must_hold": [
+        { "id": "name", "statement": "The tester's name is Sam." },
+        { "id": "job-er-nurse", "statement": "Sam is an ER nurse." },
+        { "id": "works-nights", "statement": "Sam works night shifts." },
+        { "id": "why-in-his-words", "statement": "Sam wants to stop feeling dead all the time (his reason, in his own words or close to them)." },
+        { "id": "ran-in-college", "statement": "Sam used to run in college and hasn't in a while." }
+      ],
+      "must_not_hold": [
+        { "id": "no-age", "statement": "Any age for Sam." },
+        { "id": "no-last-name", "statement": "Any last name for Sam." },
+        { "id": "no-hospital-name", "statement": "The name of the hospital Sam works at." },
+        { "id": "no-shift-days", "statement": "The specific weekdays Sam works." }
+      ],
+      "probes": [
+        { "id": "what-work", "question": "What does Sam do for work?", "expected": "He's an ER nurse who works nights." }
+      ]
+    },
+    {
+      "after_day": 7,
+      "must_hold": [
+        { "id": "sister-wedding", "statement": "Sam's sister is getting married on day 13 (the Saturday of the second week)." },
+        { "id": "giving-toast", "statement": "Sam is giving a toast at his sister's wedding." },
+        { "id": "sister-name-ana", "statement": "Sam's sister's name is Ana (as he wrote it)." },
+        { "id": "forest-park", "statement": "Sam runs in Forest Park." },
+        { "id": "roommate", "statement": "Sam lives with at least one roommate." }
+      ],
+      "must_not_hold": [
+        { "id": "no-melatonin", "statement": "Anything about melatonin, sleep aids or medication." },
+        { "id": "no-dog", "statement": "Anything about a neighbor's dog." },
+        { "id": "no-sister-age", "statement": "An age for Sam's sister." }
+      ],
+      "probes": [
+        { "id": "coming-up", "question": "What's coming up for Sam in the next week?", "expected": "His sister's wedding on Saturday (day 13), where he's giving a toast." }
+      ]
+    },
+    {
+      "after_day": 11,
+      "must_hold": [
+        { "id": "marco", "statement": "Sam has a coworker named Marco who also runs in Forest Park." },
+        { "id": "knee-sore", "statement": "Sam's left knee was sore on day 11." },
+        { "id": "extra-shift-11", "statement": "Sam picked up an extra shift on day 11." },
+        { "id": "suit-done", "statement": "Sam needed to pick up a suit for the wedding, and he did on day 11 (or memory holds no open reminder about the suit)." }
+      ],
+      "must_not_hold": [
+        { "id": "no-suit-runner", "statement": "Anything about a man running in a suit." },
+        { "id": "one-sister", "statement": "Two different sisters, or the sister recorded twice as separate people." }
+      ],
+      "probes": []
+    },
+    {
+      "after_day": 14,
+      "must_hold": [
+        { "id": "wedding-happened", "statement": "Sam's sister's wedding has happened (day 13)." },
+        { "id": "toast-went-well", "statement": "Sam's toast went well; people cried." }
+      ],
+      "must_not_hold": [
+        { "id": "wedding-not-upcoming", "statement": "The wedding described as still upcoming." },
+        { "id": "no-wrong-count", "statement": "Sam ran only once in week 2 (his own miscount, stated as fact)." }
+      ],
+      "probes": []
+    },
+    {
+      "after_day": 15,
+      "must_hold": [
+        { "id": "sister-anna", "statement": "Sam's sister's name is spelled Anna." },
+        { "id": "knee-fine", "statement": "Sam's knee is fine again as of day 15." }
+      ],
+      "must_not_hold": [
+        { "id": "ana-uncorrected", "statement": "Sam's sister's name given only as Ana, with no correction to Anna." },
+        { "id": "knee-still-sore", "statement": "Sam's knee is currently sore (as the latest information)." },
+        { "id": "no-mom-detail", "statement": "Anything about Sam's mother beyond a passing mention that she sent wedding photos." }
+      ],
+      "probes": [
+        { "id": "spell-sister", "question": "How is Sam's sister's name spelled?", "expected": "Anna, with two n's." }
+      ]
+    },
+    {
+      "after_day": 21,
+      "must_hold": [
+        { "id": "short-staffed", "statement": "Sam's unit is short-staffed and he picked up three extra shifts around days 18 to 20." },
+        { "id": "run-after-shift", "statement": "Sam prefers running right after a night shift because he's already up." },
+        { "id": "wants-friends", "statement": "Sam wants help making friends outside work; he realized it at his sister's wedding." }
+      ],
+      "must_not_hold": [
+        { "id": "no-invented-silence", "statement": "Any reason for Sam's silence on days 18 to 20 other than the extra shifts." },
+        { "id": "not-coaching-friends", "statement": "ZOH is already coaching Sam on making friends." },
+        { "id": "no-diagnosis", "statement": "Burnout, depression, loneliness or any other condition described as Sam's state." }
+      ],
+      "probes": [
+        { "id": "open-request", "question": "What has Sam asked ZOH for that is still open?", "expected": "Help making friends outside work." }
+      ]
+    },
+    {
+      "after_day": 28,
+      "must_hold": [
+        { "id": "ran-with-marco", "statement": "Sam ran with Marco on day 25." },
+        { "id": "easier-with-company", "statement": "Running with someone makes it easier for Sam." },
+        { "id": "dayjob-maybe", "statement": "Sam is thinking about applying for a day-shift job at another hospital, but hasn't decided." },
+        { "id": "marco-thursdays-maybe", "statement": "Marco might keep running with Sam on Thursdays (not settled)." }
+      ],
+      "must_not_hold": [
+        { "id": "no-marc-person", "statement": "Marc and Marco as two different people." },
+        { "id": "no-car", "statement": "Anything about Sam's car." },
+        { "id": "job-not-decided", "statement": "Sam has decided to change jobs or is leaving his job." },
+        { "id": "no-melatonin-28", "statement": "Anything about melatonin, sleep aids or medication." }
+      ],
+      "probes": [
+        { "id": "sister-name", "question": "What's Sam's sister's name, and how is it spelled?", "expected": "Anna, with two n's." },
+        { "id": "runs-with", "question": "Who does Sam run with?", "expected": "His coworker Marco, sometimes, maybe on Thursdays; not settled." },
+        { "id": "open-request-28", "question": "What did Sam ask ZOH for that it hasn't answered yet?", "expected": "Help making friends outside work." },
+        { "id": "when-why-run", "question": "When does Sam like to run, and why?", "expected": "Right after a night shift, because he's already up." },
+        { "id": "changing-jobs", "question": "Is Sam changing jobs?", "expected": "He's thinking about a day-shift job elsewhere; nothing decided." },
+        { "id": "sleep-aid", "question": "What does Sam take to help him sleep?", "expected": "Memory doesn't say (it must not know)." }
+      ]
+    }
+  ]
+}

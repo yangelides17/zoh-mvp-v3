@@ -1,0 +1,349 @@
+{
+  "feature": "onboarding",
+  "id": "case:not-sure",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:12:10.992Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "413cbdb166e6",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "92bc5026e7de"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:not-sure",
+        "kind": "case",
+        "id": "not-sure",
+        "title": "Not sure what to work on: get to know them, then 2–3 fitted ideas",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Start",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Hey, I'm ZOH! I'll help you get better at one thing with a small step each day. Text \"stop\" anytime, and you can change how I coach whenever you want, just tell me (\"chill out\", \"push me harder\"). What's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Jordan. honestly not sure",
+          "at": "2026-11-02T23:30:28.500Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Good to meet you, Jordan, and not being sure is a fine place to start. Let's figure it out together. What do you do for work these days?",
+          "at": "2026-11-02T23:30:35.500Z"
+        },
+        {
+          "from": "tester",
+          "text": "I'm a nurse, I work night shifts",
+          "at": "2026-11-02T23:31:03.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Respect, Jordan. Night shifts take real stamina. What do you like to do with your free time when you're off?",
+          "at": "2026-11-02T23:31:10.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "cards and poker with the crew on breaks, and I used to read a lot before nights",
+          "at": "2026-11-02T23:31:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Cards on breaks and a reading habit you miss, I like it. What's something you'd love to be better at, even if it feels random?",
+          "at": "2026-11-02T23:31:46.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "sleeping better would be huge honestly",
+          "at": "2026-11-02T23:32:30.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Jordan, sleep it is. On night shifts it's tricky, so what keeps you up or wrecks your sleep after a shift?",
+          "at": "2026-11-02T23:32:37.300Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Intro, stop, style and question are carried in three sentences, with the goal list as a list."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and energetic without being overfamiliar."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks name and goal, which is what the first text should do."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Makes no invented claims about the tester."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "2 questions, allowed here (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language, no filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accepts 'not sure' warmly, with no pressure."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens a get-to-know-you question that fits an undecided tester."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about work, which had not been given yet."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only the name Jordan gave."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm acknowledgement ('Night shifts take real stamina') without flattery."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about free time, a natural next get-to-know-you question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask the work question."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Jordan said about nursing and night shifts."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific to the cards and reading details."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks what they'd like to be better at, a to-know-you question."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Does not re-ask about work or hobbies."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Reflects only what Jordan said."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": false,
+                "reason": "No wake or sleep question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 5,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with one question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain language."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and warm; 'Let's go' matches the tone."
+              },
+              {
+                "rule": "fits",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks what disrupts sleep after shifts, which fits the goal but comes before any ideas are offered."
+              },
+              {
+                "rule": "no-repeat",
+                "pass": true,
+                "borderline": false,
+                "reason": "Builds on sleep, which Jordan just raised, without repeating anything."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses Jordan's words about night shifts and sleep."
+              },
+              {
+                "rule": "not-asked",
+                "pass": true,
+                "borderline": true,
+                "reason": "Asks about sleep disruptors, not wake or sleep times, so it is not a banned question."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "After 'not sure' ZOH asks one question per text with no re-asks, but the transcript ends before the 2 to 3 ideas list and the ask-which-grabs-them step, and it runs to a fifth question."
+          }
+        ],
+        "summary": "ZOH handled the 'not sure' starter well: it accepted it warmly, asked one question per text without re-asking, and built on what Jordan said about nights, cards, reading and sleep. The transcript stops before ZOH offers the 2 to 3 fitted ideas and asks which one grabs Jordan, so the regression is only partly tested."
+      }
+    }
+  ]
+}

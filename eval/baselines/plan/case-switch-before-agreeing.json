@@ -1,0 +1,306 @@
+{
+  "feature": "plan",
+  "id": "case:switch-before-agreeing",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:13:13.096Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "216cd9866f0c",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "2a82112a0484"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:switch-before-agreeing",
+        "kind": "case",
+        "id": "switch-before-agreeing",
+        "title": "Switching to something on the side before agreeing, with no idea yet: a discovery step and the new plan, unprompted",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "13:00",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "5 min a day at 4, at home",
+          "at": "2026-11-02T17:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's everything I need, here's your plan:\n• Today at 4 pm at home: 5 min asking ChatGPT to draft one follow-up text to your crew\n• Then every day at 4 pm, 5 min\n• Proof: a screenshot of the draft (easy to grab, and you'll see them stack up)\nEach day's step builds on how the last one went. What do you think?",
+          "at": "2026-11-02T17:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "Actually before we commit, I'd rather start something on the side. I don't have a business idea though or know where to start. Same 4 pm at home, 5 minutes a day",
+          "at": "2026-11-02T18:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that, Sam. No idea yet is a totally fine place to start, and we'll find one together in small steps. Is there somewhere you'd like this to get you, like a first customer, a small launch, or just a project you're proud of? \"Not sure yet\" works too.",
+          "at": "2026-11-02T18:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "Yea tech and building things sounds good. I j don't know what problem to work on or what I could make",
+          "at": "2026-11-02T18:01:15.300Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Tech and building is a great lane, Sam. You don't need an idea yet, because the best ones start from problems you've actually run into. So we start there:\n• Headed for: finding a tech/building idea worth making\n• Today at 4 pm at home, 5 min: write down 3 small annoyances from your day (tech or everyday stuff) that you wish worked better\n• Then every day at 4 pm, 5 min, at home\n• Proof: a screenshot of your notes, or a voice note reading them out\n• Why: real problems you've felt are where good ideas come from, so we collect those first\n\nEach day's step builds on how the last one went, and we narrow toward something worth building. What do you think?",
+          "at": "2026-11-02T18:01:22.300Z"
+        },
+        {
+          "from": "tester",
+          "text": "ok",
+          "at": "2026-11-02T18:02:12.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam, I want to make sure this is a real yes and not just a shrug. Are you committing to this plan: 3 annoyances today at 4 pm, then 5 minutes every day at home?",
+          "at": "2026-11-02T18:02:19.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences, within the one-to-three limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and steady, with no overfamiliarity or emoji row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Invents nothing about Sam; it asks where they want this to go and offers 'not sure yet'."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "No step is given in this text."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save-only reply; it moves the conversation forward with a question."
+              },
+              {
+                "rule": "one-question",
+                "pass": false,
+                "borderline": false,
+                "reason": "the question isn't at the end (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "A plan-presenting text may run about 8 lines; this runs about 8 lines including the opener and closing question."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain • bullets with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and specific, reacting to the tech and building interest, with no emoji row."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses only what Sam said (tech, building) plus ZOH's own suggestion of annoyances to note."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what (3 annoyances), where (at home), when (4 pm), how long (5 min) and proof."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Carries a full plan and a question, not a save confirmation."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences, within the limit."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "No markdown, hashtags or filler."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Direct and warm, no pressure or affection."
+              },
+              {
+                "rule": "honest",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the plan it showed; invents no facts."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the steps with time and length, consistent with the shown plan."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks the next question, so it carries a move forward."
+              },
+              {
+                "rule": "one-question",
+                "pass": true,
+                "borderline": false,
+                "reason": "one question (counted in code)"
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "no-seam",
+            "pass": true,
+            "borderline": false,
+            "reason": "The one light destination question comes before the plan, and there is no 'that's everything' line."
+          },
+          {
+            "rule": "plan-shape",
+            "pass": true,
+            "borderline": false,
+            "reason": "Concrete: 3 annoyances, 4 pm, at home, 5 min daily, with a screenshot or voice note proof that fits."
+          },
+          {
+            "rule": "first-plan",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows the direction, day 1's step, the daily schedule, proof and a line on how each day builds on the last, with no future-step list."
+          },
+          {
+            "rule": "destination",
+            "pass": true,
+            "borderline": false,
+            "reason": "Asked once, lightly, and Sam's 'tech and building' answer was enough to proceed."
+          },
+          {
+            "rule": "commitment",
+            "pass": false,
+            "borderline": true,
+            "reason": "Re-ask says 'not just a shrug' and points at the 'ok', picking apart the wording instead of re-asking in its own words."
+          },
+          {
+            "rule": "day-one",
+            "pass": true,
+            "borderline": false,
+            "reason": "Day 1 is set for today at 4 pm."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "4 pm is outside default quiet hours, so nothing is needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet hours are raised."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "No step falls inside tester-set quiet hours."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not applicable to this goal."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": true,
+            "reason": "Sam shifted to a tech/building side project with nothing committed yet, and ZOH takes it in stride without pushback, as the regression case asks."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "Keeps Sam's 4 pm, at home and 5 minutes when switching."
+          },
+          {
+            "rule": "plan-shown",
+            "pass": true,
+            "borderline": false,
+            "reason": "The new plan is shown unprompted as a • list ending with one question, and the commitment ask follows it."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "No save-only reply: ZOH asks a light question, shows a new 4 pm, home, 5-minute plan with a discovery step and proof, and never points back to the old plan."
+          }
+        ],
+        "summary": "ZOH handled the switch well, moving from the old AI plan to a new tech/building discovery plan with the same 4 pm, at-home, 5-minute frame and no save-only reply. The one clear miss is the commitment re-ask, which comments on Sam's 'ok' ('not just a shrug') rather than asking again in its own words."
+      }
+    }
+  ]
+}

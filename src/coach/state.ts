@@ -6,6 +6,7 @@ import {
   flags,
   goals,
   messages,
+  nudges,
   planInputs,
   plans,
   stepDays,
@@ -27,9 +28,12 @@ import {
   type Tester,
   type Weekday,
 } from "../db/schema.js";
-import { notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
-import { mediaKind } from "../media/storage.js";
-import { addDays, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+import { claimedRequest, notesForCoach, pendingRequests, REPLY_CARRIES, requestsDoneAt } from "../console/requests.js";
+import { mediaKind, type MediaKind } from "../media/storage.js";
+
+/** What counts as proof: photos and voice notes, and documents and videos since #163. */
+const PROOF_KINDS: MediaKind[] = ["image", "audio", "document", "video"];
+import { addDays, isStepDay, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
@@ -41,6 +45,22 @@ import { loadLastWeek, loadWeek, type WeekLookback } from "./week.js";
 export const REFLECTION_SAFETY_NET = 8;
 /** #131: by this text, two follow-ups have got little back (nothing real on how it went): wrap up warmly. */
 export const REFLECTION_LITTLE_BACK = 4;
+/** #211: this long without a text from them after ZOH's last one, a reflection closes (one setting, to extend later). */
+export const REFLECTION_QUIET_MINUTES = 30;
+
+/** #211: why a reflection is no longer open. */
+export type ReflectionClose = "landed" | "quiet" | "started" | "thin" | "long";
+
+/**
+ * #211: today's reflection, in a reply after today's step was marked done with proof (a step day). While it's open,
+ * the next step stays closed; ZOH lands it, or it closes on its own.
+ */
+export interface ReflectionNow {
+  open: boolean;
+  closedBy?: ReflectionClose;
+  /** A real answer was saved before ZOH's last text went out: one follow-up has been answered. */
+  answered: boolean;
+}
 
 /** Plan input columns by question key. */
 export const PLAN_FIELDS = {
@@ -92,6 +112,8 @@ export interface CoachState {
   days: DaySummary;
   /** Photos, screenshots and voice notes they sent: today, and in their texts since ZOH's last one. */
   proof: ProofSeen;
+  /** #211: today's reflection; unset outside one (no step done today, a rest day, a text ZOH starts). */
+  reflection?: ReflectionNow;
   /** Set when ZOH is starting a text itself rather than replying. */
   nudgeMoment?: NudgeMoment;
   /** What that text also carries: an approved next step or a maintenance check-in. */
@@ -122,6 +144,8 @@ export interface CoachState {
   teamRequestsDone: ConsoleMessage[];
   /** Their latest text: what lock_plan checks the commitment against. */
   lastTesterText: string;
+  /** #157: ZOH's last text before their latest: what a deepen or upgrade they agree to must have shown. */
+  lastZohText: string;
   /** No first reply has been sent since the tester's context started. */
   isFirstText: boolean;
   /** Onboarding finished during this reply: it must be the recap turn. */
@@ -137,6 +161,7 @@ export async function loadCoachState(
     isFirstText: boolean;
     justFinished?: boolean;
     lastTesterText?: string;
+    lastZohText?: string;
     nudgeMoment?: NudgeMoment;
     carry?: NudgeCarry;
     goalCap?: number;
@@ -195,7 +220,7 @@ export async function loadCoachState(
     .where(and(eq(takeaways.testerId, tester.id), gte(takeaways.day, addDays(today, -14)), gte(takeaways.createdAt, tester.contextStartedAt)))
     .orderBy(desc(takeaways.day), desc(takeaways.createdAt));
   const recentDays = await loadRecentDays(db, tester, today);
-  const proof = await loadProof(db, clock, today, opts.now);
+  const proof = await loadProof(db, clock, today, opts.now, todayRow?.doneAt ?? undefined);
   const open = goal ? openQuestions(goal, inputs) : [];
   const draft = testerPlans.find((p) => p.status === "draft");
   const description = inputs?.extraNotes.goal_description;
@@ -222,6 +247,7 @@ export async function loadCoachState(
     lastWeek: plan && tester.phase === "active" && owedRecapShows(recentDays, opts.nudgeMoment) ? await loadLastWeek(db, tester, today, recentTakeaways, opts.now) : undefined,
     days: goal ? await loadDaySummary(db, tester.id, goal.slug, today) : summarizeDays([], []),
     proof,
+    reflection: plan && todayRow && !opts.nudgeMoment ? await loadReflection(db, tester, plan, todayRow, proof, opts.now) : undefined,
     nudgeMoment: opts.nudgeMoment,
     carry: opts.carry,
     goalCap: opts.goalCap ?? DEFAULT_GOAL_CAP,
@@ -241,9 +267,14 @@ export async function loadCoachState(
     pause: await activePause(db, tester.id),
     stopped: tester.stoppedAt ? { since: tester.stoppedAt, asked: await repliedSinceStop(db, tester, tester.stoppedAt) } : undefined,
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).
-    teamRequests: await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
+    // #155: a request a nudge carries is claimed ("sending") while that text is written, so it's loaded by its id.
+    teamRequests:
+      opts.carry && "requestId" in opts.carry
+        ? await claimedRequest(db, tester.id, opts.carry.requestId)
+        : await pendingRequests(db, tester.id, opts.now, opts.nudgeMoment ? REQUEST_DELIVERIES : REPLY_CARRIES),
     teamRequestsDone: opts.nudgeMoment ? [] : await requestsDoneAt(db, tester.id, opts.now),
     lastTesterText: opts.lastTesterText ?? "",
+    lastZohText: opts.lastZohText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
     now: opts.now,
@@ -324,6 +355,16 @@ export async function loadRecentDays(db: Db, tester: Tester, date: string): Prom
   return rows;
 }
 
+/** #163: today's step in a line, for watching a video against it; undefined before a plan. */
+export async function todaysStepLine(db: Db, tester: Tester, now: Date): Promise<string | undefined> {
+  const today = serviceDate(now, await withDaySteps(db, tester, now));
+  const plan = await loadCurrentPlan(db, tester, today);
+  if (!plan) return undefined;
+  const [row] = await db.select().from(stepDays).where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, today))).limit(1);
+  const { step, minutes, proof } = dayStep(plan, row);
+  return `${step}${minutes ? ` (${minutes} min)` : ""}; proof: ${proof}`;
+}
+
 /** A day's step (#76): its own when the coach set one, otherwise the plan's step, length and proof. */
 export function dayStep(
   plan: Pick<Plan, "step" | "minutes" | "proof" | "proofNote">,
@@ -348,15 +389,57 @@ export interface ProofSeen {
   today: number;
   /** Sent since ZOH's last text: where proof for yesterday has to be. */
   latest: number;
-  /** ZOH's texts since their first proof today (#77: the reflection exchange's soft cap); 0 before any. */
+  /**
+   * ZOH's texts since today's step was marked done (#211), or since their first proof today before then (#77);
+   * 0 before any.
+   */
   zohTextsSince: number;
+  /** #211: when ZOH's latest text went out (a holding text aside). */
+  lastZohAt?: Date;
+}
+
+/**
+ * #211: whether today's reflection is still open. It closes once ZOH lands it, when a text ZOH starts goes out after
+ * the step was done, after REFLECTION_QUIET_MINUTES without a text from them, on a thin talk (no real answer by
+ * ZOH's REFLECTION_LITTLE_BACK-th text) or at the safety net. Days marked done before #211 have no done time: no hold.
+ */
+async function loadReflection(db: Db, tester: Tester, plan: Plan, row: StepDay, proof: ProofSeen, now: Date): Promise<ReflectionNow | undefined> {
+  const done = row.status === "done" || row.status === "done_reduced";
+  if (!done || !row.doneAt || proof.today === 0 || !isStepDay(plan, row.date, row)) return undefined;
+  const last = proof.lastZohAt;
+  const answered = !!row.answeredAt && !!last && row.answeredAt.getTime() < last.getTime();
+  const n = proof.zohTextsSince + 1;
+  const quiet = proof.zohTextsSince > 0 && !!last && now.getTime() - last.getTime() >= REFLECTION_QUIET_MINUTES * 60_000;
+  const closedBy: ReflectionClose | undefined = row.landedAt
+    ? "landed"
+    : (await startedSince(db, tester.id, row.doneAt))
+      ? "started"
+      : quiet
+        ? "quiet"
+        : n >= REFLECTION_SAFETY_NET
+          ? "long"
+          : n >= REFLECTION_LITTLE_BACK && !row.answeredAt
+            ? "thin"
+            : undefined;
+  return closedBy ? { open: false, closedBy, answered } : { open: true, answered };
+}
+
+/** #211: a text ZOH started (a nudge: a check-in, the Sunday recap) went out after `since`. */
+async function startedSince(db: Db, testerId: string, since: Date): Promise<boolean> {
+  const [hit] = await db
+    .select({ id: nudges.id })
+    .from(nudges)
+    .innerJoin(messages, eq(messages.id, nudges.messageId))
+    .where(and(eq(nudges.testerId, testerId), eq(nudges.status, "sent"), sql`coalesce(${messages.sentAt}, ${messages.createdAt}) > ${since}`))
+    .limit(1);
+  return !!hit;
 }
 
 /**
  * Counts the photos, screenshots and voice notes they sent in the last two days that fall on their
  * local day today, and those since ZOH's last text. Videos and files don't count: ZOH can't see them.
  */
-export async function loadProof(db: Db, tester: Tester, today: string, now: Date): Promise<ProofSeen> {
+export async function loadProof(db: Db, tester: Tester, today: string, now: Date, doneAt?: Date): Promise<ProofSeen> {
   // When a text happened: Sendblue's sent time, else when it was stored (as memory's `sentTime`; not
   // imported from there, since memory's store imports the coach's tools, which import this file).
   const sentTime = sql<Date>`coalesce(${messages.sentAt}, ${messages.createdAt})`;
@@ -375,17 +458,21 @@ export async function loadProof(db: Db, tester: Tester, today: string, now: Date
   const outbound = await db
     .select({ at: sentTime })
     .from(messages)
-    .where(and(window, eq(messages.direction, "outbound")))
+    // #163: a "watching it now" holding text isn't one of ZOH's texts since the proof.
+    .where(and(window, eq(messages.direction, "outbound"), sql`${messages.timings}->>'holding' is null`))
     .orderBy(desc(sentTime));
-  const proof = inbound.filter((m) => ["image", "audio"].includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
+  const proof = inbound.filter((m) => PROOF_KINDS.includes(mediaKind(m.mediaContentType ?? undefined, m.mediaUrl!)));
   const outTimes = outbound.map((o) => new Date(o.at).getTime());
   const lastOutAt = outTimes[0];
   const todays = proof.filter((m) => serviceDate(messageTime(m), tester) === today);
   const firstAt = todays.length ? Math.min(...todays.map((m) => messageTime(m).getTime())) : undefined;
+  // #211: once done, from then: an unclear-proof talk or an earlier photo isn't part of the reflection.
+  const from = firstAt === undefined ? undefined : (doneAt?.getTime() ?? firstAt);
   return {
     today: todays.length,
     latest: proof.filter((m) => lastOutAt === undefined || messageTime(m).getTime() > lastOutAt).length,
-    zohTextsSince: firstAt === undefined ? 0 : outTimes.filter((t) => t > firstAt).length,
+    zohTextsSince: from === undefined ? 0 : outTimes.filter((t) => t > from).length,
+    ...(lastOutAt === undefined ? {} : { lastZohAt: new Date(lastOutAt) }),
   };
 }
 

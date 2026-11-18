@@ -16,6 +16,16 @@ then nothing reaches testers.
    if Yanni gave one. Bump it on `dev` so staging shows it too: in the main folder on a clean `dev`
    (`git pull --ff-only`), `npm version <v> --no-git-tag-version`, `npm run check`, commit "Release v<v>: version",
    push `dev`.
+   **Full comparison and baseline refresh** (#197), in the main folder on the same clean `dev`: first
+   `npm run eval -- all --runs 3 --compare --store-baseline --dry-run` (free) for the cost. The release's own
+   allowance is $4.50; if the estimate is over it, the run refuses: show Yanni the estimate and run with
+   `--over-budget` only on his OK. If it stops because a feature's baseline was graded differently, run the
+   `--regrade-baseline` command it prints, then the full run again. Then run it without `--dry-run`
+   (`--concurrency 6`; it takes a while). It compares every case with the stored baseline and stores the fresh runs.
+   Commit `eval/baselines/` as "Release v<v>: eval baseline" and push `dev`. Then check the grader:
+   `npm run grader-check -- all --runs 3 --report <the curiosity report the full run just wrote> --sample 2`
+   (about $0.70). Anything worse beyond noise, and any rule whose catch or pass rate is below 80% or where the
+   grader and the stronger model disagree, goes on the "Worth a look" list (step 5).
 3. **Release notes**, in plain words for Yanni (what testers will notice, not code). Save them to a file: they go in
    the release PR now and on the GitHub Release at ship (step 6), so every version's page says what it included. The shape:
    ```
@@ -30,9 +40,11 @@ then nothing reaches testers.
    (end the body with the attribution lines the session asks for). Not a draft: CI runs on it.
 5. **Worth a look** (suggestions, never blockers). Before asking for "ship", give Yanni a short list, also added to
    the PR as a comment, one line each on what and why. Use judgment, not a checklist dump:
-   - **Live checks** still unticked (`- [ ]` in an issue's "Live checks" comment) that matter: ones that touch
-     what testers see or say, risky paths (sending, stop, pauses, scheduling, the database), or that a review flagged.
-     Skip trivial or cosmetic ones.
+   - **Live checks** still unticked (`- [ ]` in an issue's "Live checks" comment) that the review marked
+     **(most important)**, with its reason. Others only if they touch a risky path (sending, stop, pauses, scheduling,
+     the database).
+   - **The full comparison** (step 2): any group or regression case worse beyond noise since the last release, and
+     capability cases ready to graduate.
    - **Concerns** found in the PRs, reviews, `Decision:` comments and issue threads: known gaps or "follow-up"
      notes left open, an eval that was skipped, below target or over budget, a migration (irreversible on
      production), a new Railway variable production doesn't have yet, a fix that landed on staging only hours ago

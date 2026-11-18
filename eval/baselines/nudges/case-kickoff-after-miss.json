@@ -1,0 +1,155 @@
+{
+  "feature": "nudges",
+  "id": "case:kickoff-after-miss",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:14:29.872Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "95073a6902ce",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "6018cdd644b1"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:kickoff-after-miss",
+        "kind": "case",
+        "id": "kickoff-after-miss",
+        "title": "After a miss, today's step is the same or easier, never a jump",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "08:30",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morgan! You've got this tonight. 2 min jog, 1 min walk around the block at 6:30.",
+          "at": "2026-10-31T01:27:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "work blew up, not happening today sorry",
+          "at": "2026-10-31T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "zoh",
+          "text": "Morning, Morgan! Friday got swallowed by work, so today we get it back. 6:30 pm around your block: 1.5 min jog, 1.5 min walk, 3 rounds, the same ones you handled Wednesday. That's only about 15 minutes, and it keeps the mile by Nov 14 in reach. Send me the Strava screenshot after. You in?",
+          "at": "2026-11-02T14:00:00.000Z",
+          "started": true
+        },
+        {
+          "from": "tester",
+          "text": "ok yeah I'm in",
+          "at": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go, Morgan. 6:30 pm, around the block, and I'll be waiting on that Strava screenshot. 💪",
+          "at": "2026-11-02T14:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "names-commitment",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names today's step: 1.5 min jog, 1.5 min walk, 3 rounds, around the block at 6:30 pm."
+              },
+              {
+                "rule": "warm-open",
+                "pass": true,
+                "borderline": false,
+                "reason": "Opens with \"Morning, Morgan!\""
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "\"Friday got swallowed by work\" names the miss lightly with no guilt or urgency."
+              },
+              {
+                "rule": "short",
+                "pass": false,
+                "borderline": true,
+                "reason": "Runs about seven sentences with extra detail (\"That's only about 15 minutes\", \"keeps the mile by Nov 14 in reach\"), well over one to three sentences."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Ends with one question, \"You in?\", and does not ask about time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Gives what, where (around your block), when (6:30 pm) and how long (about 15 minutes)."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain text with no markdown or hashtags."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, direct and pushy-level without overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Two sentences with no question, which fits the limit."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Encouraging and free of guilt or pressure."
+              },
+              {
+                "rule": "plain-words",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plain words with a single emoji as punctuation."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm and sincere, with a single emoji and no overfamiliarity."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "The kickoff is correct: it eases to 1.5/1.5, names the miss lightly and asks only if they're in. But the reply restates \"6:30 pm, around the block\", which the regression case says should not happen after a short yes."
+          }
+        ],
+        "summary": "ZOH handled the regression well: the kickoff names the missed Friday lightly, eases the step below Friday's, and asks one thing, with no time re-asked. It falls short on length in the kickoff and restates the time and place in the reply to a short yes."
+      }
+    }
+  ]
+}

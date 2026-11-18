@@ -1,0 +1,70 @@
+{
+  "id": "discuss-plan-review",
+  "title": "Discussing a plan-review alert: explained from the record (already active), then marked reviewed by draft",
+  "origin": "#69 (Oct 29 and Oct 31: a founder took Seen on a plan review for an approval)",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "a 20 minute run",
+      "where": "the park",
+      "when": "6 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥"
+      },
+      {
+        "from": "zoh",
+        "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪"
+      }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat"
+      ],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      {
+        "days_ago": 2,
+        "status": "done"
+      },
+      {
+        "days_ago": 3,
+        "status": "done"
+      },
+      {
+        "days_ago": 5,
+        "status": "done"
+      },
+      {
+        "days_ago": 7,
+        "status": "done"
+      }
+    ],
+    "plan_review_alert": true
+  },
+  "testerLines": [
+    "console Yanni: About the alert \"Plan version 1 to review\" (plan review): what happened, why does it matter, and where does it stand now?",
+    "console Yanni: ok mark it reviewed"
+  ],
+  "whatWentWrong": "The plan-review alert's only button was Seen, and a founder thought it approved the plan.",
+  "shouldHaveHappened": "ZOH explains in a few lines that Jordan committed to plan version 1 (runs at 6 pm at the park on his days), that it's already active, and that reviewing only records a founder looked: no approval is needed. Marking it reviewed is a draft (offered, or made when Yanni asks); it's only called done after Yanni's \"ok mark it reviewed\" confirms it, never before.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}

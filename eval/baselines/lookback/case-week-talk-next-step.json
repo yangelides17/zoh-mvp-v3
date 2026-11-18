@@ -1,0 +1,204 @@
+{
+  "feature": "lookback",
+  "id": "case:week-talk-next-step",
+  "suite": "regression",
+  "storedAt": "2026-11-18T06:19:56.692Z",
+  "branch": "dev",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "9d00d75f8fec",
+    "voice": "b413875b3c11",
+    "instructions": "c7348af58300",
+    "script": "9db8f52cf2ec"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:week-talk-next-step",
+        "kind": "case",
+        "id": "week-talk-next-step",
+        "title": "The week talk on a rest-day Sunday: they text first, the destination is set lightly, a new focus goes to the founders, and it ends in a defined next step",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "16:00",
+        "startDay": "sun",
+        "timeZone": "America/New_York",
+        "suite": "regression"
+      },
+      "context": [
+        {
+          "from": "tester",
+          "text": "first two layers done without the guide!!",
+          "at": "2026-11-07T22:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "WITHOUT the guide, Leo. That's the cube starting to make sense. Sunday's a rest day.",
+          "at": "2026-11-07T22:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "yo how'd I do this week",
+          "at": "2026-11-08T21:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Leo, solid week! 🔥\n• You showed up for all 6 step days, every one in full.\n• You went from the white cross on Monday to white corners Tuesday and middle layer edges Wednesday.\n• Your best time on the first two layers dropped from 4:10 Thursday to 3:40 Friday to 3:05 Saturday.\n• Saturday you did it without the guide, and you said the edge insert finally makes sense.\n\nWhat felt best this week, and what do you want to push on next?",
+          "at": "2026-11-08T21:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly I want to solve the whole thing by next weekend",
+          "at": "2026-11-08T21:00:33.900Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's the goal: the whole cube, no guide, by Saturday Nov 14. You've got two layers down, so the last layer is the only part left. 💪\n\nTomorrow at 9 pm at your desk, you learn the yellow cross on the last layer, 15 min. Warm up with a couple of full first-two-layers solves first, then send me a timer screenshot like usual. Work for you?",
+          "at": "2026-11-08T21:00:40.900Z"
+        },
+        {
+          "from": "tester",
+          "text": "also kinda want to start juggling on the side lol",
+          "at": "2026-11-08T21:01:17.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love that. Let me think on it. 😄 For now, the cube is the mission: finish the last layer by Saturday. Does tomorrow's yellow cross at 9 pm work for you?",
+          "at": "2026-11-08T21:01:24.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah ok",
+          "at": "2026-11-08T21:01:59.400Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in. Tomorrow, 9 pm, yellow cross. Go get it, Leo! 🧩",
+          "at": "2026-11-08T21:02:06.400Z"
+        }
+      ],
+      "endedBy": "script",
+      "record": "(Read at the end of the conversation: today's step and what ZOH saved during it are included.)\nThis week (2026-11-02 to today): 6 done in full, 0 smaller, 0 missed.\nSun, Oct 25: before this plan\nMon, Oct 26: before this plan\nTue, Oct 27: before this plan\nWed, Oct 28: before this plan\nThu, Oct 29: before this plan\nFri, Oct 30: before this plan\nSat, Oct 31: before this plan\nSun, Nov 1: before this plan\nMon, Nov 2: done, step: White cross, beginner's method\nTue, Nov 3: done, step: White corners\nWed, Nov 4: done, step: Middle layer edges\nThu, Nov 5: done, step: First two layers in a row, guide open\nFri, Nov 6: done, step: First two layers, guide open only when stuck\nSat, Nov 7 (yesterday): done, step: First two layers without the guide\nSun, Nov 8 (today): rest day\nMon, Nov 9 (tomorrow): step day at 21:00\nTue, Nov 10: step day at 21:00\nWed, Nov 11: step day at 21:00\nThu, Nov 12: step day at 21:00\nFri, Nov 13: step day at 21:00\nSat, Nov 14: step day at 21:00\nSun, Nov 15: rest day\nProof for 2026-11-02: timer: 3 attempts\nProof for 2026-11-03: timer: 4 attempts\nProof for 2026-11-04: timer: 5 attempts\nProof for 2026-11-05: timer: 4:10 best\nProof for 2026-11-06: timer: 3:40 best\nProof for 2026-11-07: timer: 3:05 best\nReflection for 2026-11-07: Didn't need the guide once; the edge insert finally makes sense\nLesson (explained, 2026-11-04): Edge insert: up, away, and back in\nLesson (explained, 2026-11-05): Hold the solved layer on the bottom\nLesson (applied, 2026-11-07): Edge insert: up, away, and back in",
+      "saved": "New plan version 2 (other): Learn the white cross from the beginner's method, 15 min at your desk, mon tue wed thu fri sat at 21:00\nReflection for 2026-11-07: Didn't need the guide once; the edge insert finally makes sense\nStep set for 2026-11-09, agreed: Learn the yellow cross on the last layer from the beginner's method, 15 min at your desk at 9 pm, then do a couple of full first-two-layers solves to warm up\nStyle now: pushy",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "recap",
+                "pass": true,
+                "borderline": false,
+                "reason": "Four backed pieces: all 6 days done, white cross to middle layer edges, best time 4:10 to 3:05, Saturday without the guide. Framed as progress, ends with one question."
+              },
+              {
+                "rule": "no-inflation",
+                "pass": true,
+                "borderline": false,
+                "reason": "Only the edge insert is called applied. The solved-layer-on-bottom lesson is not claimed as understood."
+              },
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": false,
+                "reason": "Every number and day matches the step log and proof record."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "A recap list of about 6 short lines with one closing question, within the recap allowance."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, energetic, one emoji as punctuation, no row."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "grounded",
+                "pass": true,
+                "borderline": true,
+                "reason": "The next step matches the saved step; the destination is restated as 'by Saturday Nov 14' without a saved change_plan."
+              },
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": true,
+                "reason": "Several sentences plus a warm-up instruction, but it is one defined step with one question at the end."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Energetic and specific, one emoji, no overfamiliarity."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "Three short sentences ending with one question."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm reply to the juggling idea with one emoji. 'Let me think on it' fits."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "short",
+                "pass": true,
+                "borderline": false,
+                "reason": "One confirmation line with no question, as requested after 'yeah ok'."
+              },
+              {
+                "rule": "voice",
+                "pass": true,
+                "borderline": false,
+                "reason": "Warm, hype-level energy, one emoji."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "natural-turn",
+            "pass": true,
+            "borderline": false,
+            "reason": "The recap answers the tester's 'how'd I do this week' directly, so the switch into the week feels natural."
+          },
+          {
+            "rule": "next-step",
+            "pass": true,
+            "borderline": true,
+            "reason": "Ends with a fully defined Monday step (yellow cross, 9 pm, desk, 15 min, screenshot) and asks if it works; the warm-up adds some extra detail."
+          },
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": false,
+            "reason": "Juggling was not passed to the team: no suggest_next_step was saved. ZOH 3 also re-asks the step question and restates 'finish the last layer by Saturday', leaning toward pushing the destination."
+          }
+        ],
+        "summary": "ZOH gave an accurate, well-grounded week recap with no inflated claims and a fully defined Monday step that the tester confirmed. It handled the juggling idea warmly but never passed it to the team, and it restated the destination deadline and repeated the step question, so the regression case fails."
+      }
+    }
+  ]
+}
