@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:reflection-short-done",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:11:03.764Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T05:08:34.960Z",
+  "branch": "feature/211-reflect-first",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "5649d1edda10",
-    "voice": "c0dfbb42fd2a",
+    "checks": "345a42a40563",
+    "voice": "2da0416a0038",
     "instructions": "c7348af58300",
     "script": "daace7d248f3"
   },
@@ -86,22 +86,22 @@
             "zohText": 1,
             "checks": [
               {
+                "rule": "recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "No recall used here, and none was needed for a proof reply."
+              },
+              {
                 "rule": "short",
                 "pass": false,
                 "borderline": false,
-                "reason": "Asks two questions in one text ('How did those sets feel?' and 'Was the last set of push-ups a grind...?'), breaking the one-question limit."
+                "reason": "Asks two questions in one text: \"How did those sets feel?\" and \"Was the last set of push-ups a grind...\", breaking the one-question limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, celebratory, one emoji at the end of the beat; not overfamiliar."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation; it carries a reflection question."
+                "reason": "Warm, celebratory energy with one emoji at the end; sincere and not overfamiliar."
               }
             ]
           },
@@ -112,13 +112,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end."
+                "reason": "Two short sentences with one question at the end, grounded in the tired legs they named."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm, sincere, no overfamiliarity or emoji row."
+                "reason": "Calm and warm, no emoji row, not overfamiliar."
               }
             ]
           },
@@ -129,19 +129,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three sentences with one question, 'Work for you?', at the end."
+                "reason": "Three sentences with one question at the end, \"Work for you?\"."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and firm, matches pushy energy without pressure."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Carries a fully defined next step and asks for agreement."
+                "reason": "Warm and firm, acknowledges their tired legs without guilt."
               }
             ]
           },
@@ -152,19 +146,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Short confirmation with no question, as required after 'let's go'."
+                "reason": "Confirms the lock-in briefly with no question at all."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype with one emoji at the end; sincere, not affectionate."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Confirms the lock and restates day 1 details; not a bare save message."
+                "reason": "Warm, hype-level energy with one emoji at the end."
               }
             ]
           }
@@ -174,10 +162,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "After 'nah that's it' ZOH stops digging, acknowledges tired legs, proposes a held-steady step with time and place, asks 'Work for you?'; after 'let's go' it confirms with no question. Extra question in ZOH 1 is the only blemish."
+            "reason": "Stops digging after \"nah that's it\", proposes tomorrow's step acknowledging tired legs, asks if it works, and confirms \"let's go\" with no new question. The proposal omits how long the step runs, so it isn't fully defined."
           }
         ],
-        "summary": "ZOH handled the regression well: after 'nah that's it' it stopped digging, acknowledged the tired legs, proposed a sensibly held-steady step and asked if it worked, then confirmed 'let's go' with no new question. The main miss is ZOH 1 asking two questions in one text, which breaks the one-question rule."
+        "summary": "ZOH counted the voice note, asked one follow-up about the tired legs, then stopped digging and proposed a sensible same-level step for tomorrow. Its main misses are a double question in the first text and a proposal that leaves out the step's length."
       }
     }
   ]

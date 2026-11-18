@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:rushed",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:16:41.787Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T05:08:34.960Z",
+  "branch": "feature/211-reflect-first",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "e4cb138c7f45",
-    "voice": "2045dce938d4",
+    "checks": "5c8a584b799e",
+    "voice": "2da0416a0038",
     "instructions": "c7348af58300",
     "script": "d593ffe9bc9f"
   },
@@ -78,14 +78,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with no question, which fits a rushed tester."
+                "borderline": true,
+                "reason": "Four short sentences with no question; a light invite for tomorrow, but the sentence count sits at the edge of the limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype is warm and the single emoji sits at the end as punctuation."
+                "reason": "Energetic and warm with one emoji as punctuation, and it isn't overfamiliar."
               }
             ]
           },
@@ -95,14 +95,20 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Two sentences with no question mark."
+                "borderline": true,
+                "reason": "Four sentences with no question, which is acceptable, though it runs slightly long for a rushed tester."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and calm, with no overfamiliarity or pressure."
+                "reason": "Warm and sincere with no emoji row or affectionate language."
+              },
+              {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a save confirmation; it carries the next step forward."
               }
             ]
           },
@@ -113,56 +119,50 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question."
+                "reason": "Three short sentences with no question, ending the exchange cleanly."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm close with one emoji as punctuation."
+                "reason": "Brief, warm and in the right energy with one emoji."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": true,
-                "reason": "Confirms the locked step and adds a closing line rather than a bare save confirmation."
+                "reason": "It confirms the lock and restates the step, so it isn't a bare save confirmation, though it's close to one."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "reflection-ask",
+            "rule": "not-forced",
             "pass": true,
             "borderline": true,
-            "reason": "Rushed proof gets a light tomorrow invite instead of a reflection question, which is acceptable here."
-          },
-          {
-            "rule": "not-forced",
-            "pass": false,
-            "borderline": true,
-            "reason": "ZOH 2 says 'Next time I want a bit more on what stuck with you', pressing for learning from a rushed tester."
+            "reason": "Rushed tester gets no question about what they learned; the only pointer is 'tell me what stuck tomorrow', which defers rather than asks now."
           },
           {
             "rule": "stops-right",
-            "pass": false,
-            "borderline": true,
-            "reason": "ZOH 2 fishes for a fuller answer next time after 'ok fine, busy day', rather than just letting the rushed tester go."
+            "pass": true,
+            "borderline": false,
+            "reason": "After 'gotta run' and 'ok fine, busy day', ZOH stops with a light line and no follow-up question."
           },
           {
             "rule": "next-step",
-            "pass": false,
-            "borderline": false,
-            "reason": "Chapter 5 is named but not fully defined (no 20 minutes, no voice recap proof), and ZOH never asks whether it works."
+            "pass": true,
+            "borderline": true,
+            "reason": "Chapter 5, couch, 8 pm is given and the size is implied by 'same as always', but the 20 minutes and voice recap are not stated in full."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The celebration, no-question handling and confirmation were right, but ZOH 2 chases a longer reflection and leaves the step under-defined."
+            "reason": "No question about the step, but ZOH 2's 'Next time I want a bit more on what stuck with you' pushes for a longer reflection after a rushed tester, which the expected behavior rules out."
           }
         ],
-        "summary": "ZOH handled the rushed voice note well: it celebrated briefly, asked no question at first, and confirmed 'sure' without a new question. It fell short in the middle text, where it said it wanted more on what stuck next time and gave Chapter 5 without its full definition or a check on whether it works."
+        "summary": "ZOH counted the voice note briefly and asked no question about how the step went, stopping right with a light invite for tomorrow. It weakened the outcome by restating tomorrow's step without the full size and voice recap, and by promising a deeper reflection next time, which the rushed tester did not invite."
       }
     }
   ]

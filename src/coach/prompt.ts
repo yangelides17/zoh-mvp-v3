@@ -36,10 +36,11 @@ export const PROMPT_BUDGET_CHARS = {
   planChange: 590,
   nudges: 1872,
   nudgeReplies: 708,
-  // #211: the next step's lines left proof for their own section (loaded once a reflection lands); +460 between
-  // them for what to go deeper on and when it has landed; +10 each for the pointers that now name it.
+  // #211: the next step's lines left proof for their own section (loaded once a reflection lands); +560 between
+  // them for what to go deeper on, when it has landed and a rushed tester leaving with the next step; +10 each for
+  // the pointers that now name it.
   todaysStep: 1900,
-  proof: 3500,
+  proof: 3600,
   nextStep: 560,
   weekLookback: 2400,
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
