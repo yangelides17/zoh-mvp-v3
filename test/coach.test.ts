@@ -675,6 +675,29 @@ describe("instructions", () => {
     expect(FIXED_INSTRUCTIONS).not.toContain(TODAYS_STEP);
   });
 
+  it("choose any step, today's or the next one, from best practices that each carry their reason (#164)", () => {
+    // One place says how a step is chosen; the next step points to it rather than repeating it.
+    expect(TODAYS_STEP).toContain("Choosing any step (today's, or the next one after a reflection)");
+    expect(TODAYS_STEP).toContain("simple enough to do and interesting enough to want to");
+    expect(TODAYS_STEP).toContain("learning before results");
+    expect(TODAYS_STEP).toContain("help with the part that's hard and another try");
+    expect(TODAYS_STEP).toContain("plan for it in a line");
+    // Guidance, not a checklist: the practices are used where they fit.
+    expect(TODAYS_STEP).toContain("never all at once or as labels");
+    const nextStep = splitVoicePage(loadVoiceDoc()).rules.nextStep;
+    expect(nextStep).toContain("chosen and fully defined as in TODAY'S STEP");
+    expect(nextStep).toContain("plan for what they said might get in the way");
+  });
+
+  it("make the destination a near goal built on what they've shared, renewed each week (#165)", () => {
+    expect(PLAN_AGREEMENT).toContain("about 3 to 7 steps");
+    expect(PLAN_AGREEMENT).toContain("built only on what they've shared");
+    expect(PLAN_AGREEMENT).toContain("the first step toward it");
+    // After lock, plan agreement isn't loaded: today's step and the Sunday look-back carry the goal on.
+    expect(TODAYS_STEP).toContain("Toward their destination");
+    expect(WEEK_LOOKBACK).toContain("kept, adjusted or moved up");
+  });
+
   it("allow at most 3 Greek words a day, in the onboarding prompt and the voice page", () => {
     expect(CORE_VOICE).toContain("At most 3 a day");
     expect(loadVoiceDoc()).toContain("At most 3 a day");
