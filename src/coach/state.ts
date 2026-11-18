@@ -27,7 +27,9 @@ import {
   type Takeaway,
   type Tester,
   type Weekday,
+  type CoachingGuidance,
 } from "../db/schema.js";
+import { listGuidance } from "../coaching/guidance.js";
 import { claimedRequest, listeningQuestions, notesForCoach, pendingRequests, REPLY_CARRIES, requestsClaimed } from "../console/requests.js";
 import { mediaKind, type MediaKind } from "../media/storage.js";
 
@@ -134,6 +136,8 @@ export interface CoachState {
   earlierAnswers: PlanInput[];
   /** The founders' notes from the console: context, never quoted (spec "Founder console", rule 3). */
   teamNotes: ConsoleMessage[];
+  /** #158: the team's lasting guidance on how to coach them, oldest first; read on every text. */
+  guidance: CoachingGuidance[];
   /** The break they asked for, while it's on (spec "Commands and safety"). */
   pause?: Pause;
   /** #109: they texted stop and haven't said yes to restarting; `asked`: ZOH has replied since, so it asked. */
@@ -268,6 +272,7 @@ export async function loadCoachState(
     ),
     earlierAnswers,
     teamNotes: await notesForCoach(db, tester, opts.now),
+    guidance: await listGuidance(db, tester.id),
     pause: await activePause(db, tester.id),
     stopped: tester.stoppedAt ? { since: tester.stoppedAt, asked: await repliedSinceStop(db, tester, tester.stoppedAt) } : undefined,
     // A reply carries natural requests and due manual nudges; a text ZOH starts only the one it was given (the carry).

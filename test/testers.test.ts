@@ -44,7 +44,6 @@ describe("testers", () => {
       timeZoneStatus: "assumed_eastern",
       quietHoursStart: "22:00",
       quietHoursEnd: "09:00",
-      pushiness: "pushy",
       isTestUser: false,
       stoppedAt: null,
     });
@@ -121,7 +120,6 @@ describe("testers", () => {
         timeZoneStatus: "confirmed",
         quietHoursStart: "23:00",
         quietHoursEnd: "07:00",
-        pushiness: "chill",
         styleNotes: "fewer emojis",
       });
       await t.db.insert(planInputs).values({ testerId: before.id, goalSlug: "exercise", what: "dumbbells", when: "7:30" });
@@ -139,7 +137,6 @@ describe("testers", () => {
         timeZoneStatus: "assumed_eastern",
         quietHoursStart: "22:00",
         quietHoursEnd: "09:00",
-        pushiness: "pushy",
         styleNotes: "",
         stoppedAt: null,
         isTestUser: true,

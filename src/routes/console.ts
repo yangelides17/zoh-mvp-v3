@@ -37,7 +37,10 @@ import { cancelDraft } from "../console/drafts.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, SUGGESTION_KINDS, testers, type Tester } from "../db/schema.js";
+import { consoleMessages, memoryFacts, SUGGESTION_KINDS, testers, type Tester } from "../db/schema.js";
+import { addGuidance, CoachingError, deleteLearnedPreference, editGuidance, removeGuidance, removeStatedPreference } from "../coaching/coaching.js";
+import { coachingCard } from "../console/coaching-card.js";
+import { coachingCardHtml } from "../console/views/coaching.js";
 import { testerNow } from "../testers/clock.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
@@ -78,7 +81,7 @@ const LIVE_MAX = 200;
 const LIVE_CARDS = 100;
 
 type Form = Record<string, string | undefined>;
-type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string; did: string };
+type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string; did: string; gid: string; fid: string; nid: string };
 
 export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOptions): Promise<void> {
   const clock = opts.now ?? (() => new Date());
@@ -192,7 +195,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
         ? textsTabHtml(from, header.tester, now, CHUNK, { target: msg })
         : textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK, { missing: msg !== undefined });
     }
-    else if (tab === "memory") content = memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
+    else if (tab === "memory") content = coachingCardHtml(await coachingCard(opts.db, header.tester, now), id) + memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
     else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
     return html(reply, testerView(header, tab, content, name, notice), code);
   };
@@ -202,6 +205,55 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!isUuid(id)) return html(reply, "Not found", 404);
     const { tab, msg } = query(request);
     return (await testerHtml(reply, id, asTab(tab), name, undefined, 200, typeof msg === "string" ? msg : undefined)) ?? html(reply, "Not found", 404);
+  }));
+
+  // #158: the Coaching card's changes, each saved with the founder's name; back to the card, or the card saying why not.
+  const coaching = (handler: (tester: Tester, request: FastifyRequest<{ Params: Params; Body: Form }>, name: string, now: Date) => Promise<void>) =>
+    action(async (request, reply, name) => {
+      const { id } = request.params;
+      if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+      const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+      if (!tester) return reply.code(404).send({ error: "not found" });
+      try {
+        await handler(tester, request, name, await nowFor(id));
+      } catch (err) {
+        if (err instanceof CoachingError) return (await testerHtml(reply, id, "memory", name, `Not saved: ${err.message}`, 409)) ?? reply.code(409).send({ error: err.message });
+        throw err;
+      }
+      return reply.redirect(`/console/testers/${encodeURIComponent(id)}?tab=memory#coaching`, 303);
+    });
+  const formText = (request: FastifyRequest<{ Body: Form }>) => (typeof request.body?.text === "string" ? request.body.text : "");
+  const idParam = (request: FastifyRequest<{ Params: Params }>, key: "gid" | "fid" | "nid") => {
+    const value = request.params[key];
+    if (!isUuid(value)) throw new CoachingError("That's gone.");
+    return value;
+  };
+
+  app.post("/console/testers/:id/coaching/guidance", coaching(async (tester, request, name, now) => {
+    await addGuidance(opts.db, tester, formText(request), name, now);
+  }));
+  app.post("/console/testers/:id/coaching/guidance/:gid", coaching(async (tester, request, name, now) => {
+    await editGuidance(opts.db, tester, idParam(request, "gid"), formText(request), name, now);
+  }));
+  app.post("/console/testers/:id/coaching/guidance/:gid/remove", coaching(async (tester, request, name, now) => {
+    await removeGuidance(opts.db, tester, idParam(request, "gid"), name, now);
+  }));
+  // A style request (stated) or a learned preference: removed wherever the coach reads it.
+  app.post("/console/testers/:id/coaching/facts/:fid/remove", coaching(async (tester, request, name, now) => {
+    const [fact] = await opts.db.select().from(memoryFacts).where(and(eq(memoryFacts.id, idParam(request, "fid")), eq(memoryFacts.testerId, tester.id)));
+    if (!fact) return;
+    if (fact.section === "stated") await removeStatedPreference(opts.db, tester, fact, name, now);
+    else await deleteLearnedPreference(opts.db, tester, fact, name, now);
+  }));
+  // Make it lasting: the (trimmed) note becomes guidance, and the note stops being read so it isn't read twice.
+  app.post("/console/testers/:id/coaching/notes/:nid/lasting", coaching(async (tester, request, name, now) => {
+    const [note] = await opts.db
+      .select()
+      .from(consoleMessages)
+      .where(and(eq(consoleMessages.id, idParam(request, "nid")), eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note")));
+    if (!note) throw new CoachingError("That note is gone.");
+    await addGuidance(opts.db, tester, formText(request), name, now);
+    await opts.db.update(consoleMessages).set({ doneAt: now }).where(eq(consoleMessages.id, note.id));
   }));
 
   // One memory page (#63), only under its own tester.

@@ -1,0 +1,61 @@
+{
+  "id": "guidance-tester-wins-follows",
+  "rule": "guidance-tester-wins",
+  "expect": "pass",
+  "why": "She asks for low-key weekends, against the guidance to push harder: ZOH takes her request in one line, not the guidance.",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "answers": {
+      "what": "Dune",
+      "where": "on the couch",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[voice: chapter 6 done, the desert scenes are so good]"
+      },
+      {
+        "from": "zoh",
+        "text": "Chapter 6 in the bag, Maya. Same time tomorrow, chapter 7."
+      }
+    ],
+    "plan": {
+      "step": "Read one chapter of Dune",
+      "place": "on the couch",
+      "time": "21:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "reason": "A chapter a night keeps the story moving without eating your evening.",
+      "minutes": 20
+    },
+    "team": [
+      {
+        "kind": "guidance",
+        "body": "Push harder on weekends: hold her to the full chapter, no smaller versions",
+        "hours_ago": 48
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "can you chill a bit with me on weekends? I want it low key"
+    },
+    {
+      "from": "zoh",
+      "text": "Got it, weekends stay low key. A chapter if you feel like it, no pressure."
+    }
+  ]
+}
