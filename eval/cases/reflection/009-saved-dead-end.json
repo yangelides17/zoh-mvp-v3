@@ -62,8 +62,23 @@
   },
   "testerLines": [
     "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
-    "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
-    "yeah that works"
+    {
+      "say": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
+      "when": "after ZOH replies to the scene",
+      "fixed": true
+    },
+    {
+      "say": "yeah that works",
+      "means": "agrees to the step ZOH proposed",
+      "when": "after ZOH proposes tomorrow's step and asks if it works",
+      "length": "thin",
+      "lead": false
+    }
+  ],
+  "facts": [
+    "the scene's last line is the hard part: you want Lena's line to be about the costume, really about giving up the part",
+    "the next thing to write is the opening-night scene, from Lena's side",
+    "8 pm at your desk for 30 minutes works tomorrow"
   ],
   "whatWentWrong": "After the tester explained the \"I finally got the sleeves to fit\" line and its subtext, ZOH replied only \"Saved.\" No response to the idea and no next step.",
   "shouldHaveHappened": "ZOH counts the voice note and responds to the scene specifically. When Dana explains the sleeves line, ZOH reacts to the idea itself (a line about the costume that's really about giving up the part) in a sentence or two, and the conversation keeps moving: one more specific question, or a wrap-up that proposes the next step day's step, fully defined (which scene or revision, at the desk, 8 pm, about 30 minutes) and asks if it works. No reply is ever only a save confirmation. Once a next step is agreed it confirms in a line with no new question.",
