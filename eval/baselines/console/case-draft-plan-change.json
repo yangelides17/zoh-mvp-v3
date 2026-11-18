@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:draft-plan-change",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T05:06:01.746Z",
+  "branch": "feature/214-drafts-needs-you",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "cde6f88cb869",
-    "voice": "fbc3a37c5b97",
+    "checks": "1c27e51e4532",
+    "voice": "ab7df5083af6",
     "instructions": "c7348af58300",
     "script": "4b37d47696e9"
   },
@@ -68,17 +68,17 @@
           {
             "rule": "drafts",
             "pass": true,
-            "borderline": false,
-            "reason": "The draft card says ZOH asks Jordan first and nothing changes until he says yes, and the reply to Yanni says the same without claiming a change happened."
+            "borderline": true,
+            "reason": "The card says ZOH asks Jordan first and nothing changes until he says yes, and the line to Yanni repeats it. \"ZOH asks them first\" is slightly ambiguous about who \"them\" is."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH drafted the 7 am park change with the ask-first card, its line to Yanni says nothing is changed or told to Jordan, and nothing was texted to him."
+            "reason": "ZOH drafted the 7 am park change with a card saying it asks first, sent a matching line to Yanni, and texted nothing to Jordan."
           }
         ],
-        "summary": "ZOH handled the founder's plan-change request correctly: it drafted the 7 am park move as a card that asks Jordan first, and its console reply to Yanni said the same in two lines without claiming the plan changed or that Jordan was told. No tester-facing texts were sent, so the texting-voice rules were not tested here."
+        "summary": "ZOH handled the founder's plan-change request as intended: it drafted the 7 am park change with a card that says nothing changes until Jordan says yes. Its console line to Yanni matches the card, says today's 6 pm run is still set, and never claims the plan changed or that Jordan was told."
       }
     }
   ]

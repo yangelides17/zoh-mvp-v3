@@ -3,6 +3,7 @@ import type { ConsoleMessage, Goal, Message, Tester } from "../../db/schema.js";
 import { stillOpen } from "../../coach/next-steps.js";
 import { messageTime } from "../../memory/store.js";
 import type { ConsoleTab, SideSection, ThreadItem } from "../data.js";
+import { draftRef } from "../drafts.js";
 import { APP_AUTHOR, awaitingAnswer } from "../requests.js";
 import { alertCard, clock, dayLabel, esc, founderDay, proofHtml, suggestionCard, when } from "./shared.js";
 
@@ -66,7 +67,8 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
           ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form></div>`
           : "";
       const result = m.draftResult && status !== "draft" ? `<div class="muted">${esc(m.draftResult)}</div>` : "";
-      return `<div class="event draft" ${id}><div class="head"><span class="chip${status === "draft" ? " warn" : ""}">${esc(DRAFT_STATUS_LABELS[status] ?? status)}</span><span class="muted">for ${esc(m.author)} · ${time}</span></div>
+      // #214: named by its own ref ("draft [ab12cd34]"), apart from the request or next step it makes once done.
+      return `<div class="event draft" ${id}><div class="head"><span class="chip${status === "draft" ? " warn" : ""}">${esc(DRAFT_STATUS_LABELS[status] ?? status)}</span><span class="muted">draft [${esc(draftRef(m.id))}] · for ${esc(m.author)} · ${time}</span></div>
 <div>${esc(m.body)}</div>${result}${actions}</div>`;
     }
     case "summary":
@@ -164,8 +166,10 @@ export function sideHtml(side: SideSection, ctx: ThreadContext, sig: string): st
   const card = (a: ConsoleMessage) => alertCard(a, ctx.testerId, { decisionWaiting: Boolean(a.suggestionId && waitingIds.has(a.suggestionId)) });
   const alerts = unseen.map(card).join("") || `<p class="muted">Nothing waiting.</p>`;
   const older = earlier.length ? `<details><summary class="muted">Earlier (${earlier.length})</summary>${earlier.map(card).join("")}</details>` : "";
-  const pending = side.pending.length
-    ? side.pending.map((s) => suggestionCard(s, ctx.testerId, ctx.titles)).join("")
+  // #214: drafts waiting for a Do it sit here too, the same card as in the chat.
+  const needs = side.drafts.length + side.pending.length;
+  const pending = needs
+    ? [...side.drafts.map((d) => lineHtml(d, ctx)), ...side.pending.map((s) => suggestionCard(s, ctx.testerId, ctx.titles))].join("")
     : `<p class="muted">Nothing needs you. To suggest a next step, tell ZOH in the chat.</p>`;
   const { requests, suggestions } = side.waiting;
   const waiting =
@@ -174,7 +178,7 @@ export function sideHtml(side: SideSection, ctx: ThreadContext, sig: string): st
   const waitingCount = requests.length + suggestions.length;
   return `<div id="side" data-sig="${esc(sig)}"><h2 id="alerts">Alerts${unseen.length ? ` <span class="badge">${unseen.length}</span>` : ""}</h2>${alerts}${older}
 <h2 id="pending">Pending</h2>
-<h3 id="needs-you">Needs you${side.pending.length ? ` <span class="badge">${side.pending.length}</span>` : ""}</h3>${pending}
+<h3 id="needs-you">Needs you${needs ? ` <span class="badge">${needs}</span>` : ""}</h3>${pending}
 <h3 id="waiting-on-tester">Waiting on the tester${waitingCount ? ` <span class="chip">${waitingCount}</span>` : ""}</h3>${waiting}</div>`;
 }
 

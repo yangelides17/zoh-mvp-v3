@@ -285,6 +285,28 @@ const SCRIPT = `(function () {
       setTimeout(function () { texts.scrollTop = target.offsetTop - texts.offsetTop - texts.clientHeight / 3; }, 0);
     });
   }
+  // #214: a button's reload (Seen, Do it, a decision) comes back where the founder was reading: the window and each
+  // scroll box, on this tester and tab only, once. Sending a chat line (the one form with a text box) still lands at
+  // the newest line.
+  var spot = "zoh-scroll:" + base + ":" + tab;
+  document.addEventListener("submit", function (e) {
+    var f = e.target;
+    if (!f || String(f.method).toLowerCase() !== "post" || f.querySelector("textarea")) return;
+    var keep = { at: Date.now(), y: window.scrollY, boxes: {} };
+    boxes.forEach(function (b) { keep.boxes[b.dataset.kind] = b.scrollTop; });
+    try { sessionStorage.setItem(spot, JSON.stringify(keep)); } catch (err) {}
+  });
+  var kept = null;
+  try { kept = JSON.parse(sessionStorage.getItem(spot) || "null"); sessionStorage.removeItem(spot); } catch (err) {}
+  if (kept && Date.now() - kept.at < 30000) {
+    var restore = function () {
+      boxes.forEach(function (b) { if (b.dataset.kind in kept.boxes) b.scrollTop = kept.boxes[b.dataset.kind]; });
+      window.scrollTo(0, kept.y);
+    };
+    restore();
+    // After the page's own scrolls on load (the thread to its newest line, the link's #anchor).
+    window.addEventListener("load", function () { setTimeout(restore, 0); });
+  }
   if (!boxes.length) return;
   function poll() {
     if (document.hidden) return;

@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:manual-nudge-now",
   "suite": "regression",
-  "storedAt": "2026-11-16T19:24:23.687Z",
-  "branch": "feature/199-judgment-over-rules",
+  "storedAt": "2026-11-18T05:06:01.746Z",
+  "branch": "feature/214-drafts-needs-you",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "ab08a33d81e3",
-    "voice": "fbc3a37c5b97",
+    "checks": "72071c335f0d",
+    "voice": "ab7df5083af6",
     "instructions": "c7348af58300",
     "script": "40083df9bc7d"
   },
@@ -71,19 +71,21 @@
       "grade": {
         "texts": [
           {
+            "zohText": 1,
+            "checks": []
+          },
+          {
+            "zohText": 2,
+            "checks": []
+          },
+          {
             "zohText": 3,
             "checks": [
-              {
-                "rule": "grounded",
-                "pass": false,
-                "borderline": true,
-                "reason": "Refers to \"yesterday's run\", but the step log shows Sunday Nov 1 as a rest day; the only run in the transcript is today's 2.1-mile shoe run."
-              },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with a warm greeting and asks about the shoes as ZOH's own curiosity, with no mention of Yanni or the team."
+                "reason": "Sent as ZOH's own question about the shoes after a click, not a bare relay of Yanni's request; it reads naturally."
               }
             ]
           }
@@ -93,16 +95,34 @@
             "rule": "drafts",
             "pass": true,
             "borderline": false,
-            "reason": "The card and ZOH 2 say the text goes out within a minute of Do it, not that it is already on its way."
+            "reason": "Card and console line say it will text Jordan within a minute of Do it, not that it is already on its way."
+          },
+          {
+            "rule": "alert-accurate",
+            "pass": true,
+            "borderline": true,
+            "reason": "Not really an alert explanation, but the card and line describe the pending text accurately from saved state; no false approval claim."
+          },
+          {
+            "rule": "files-step",
+            "pass": true,
+            "borderline": false,
+            "reason": "Not a next-step suggestion request; the check does not apply cleanly, and nothing wrong was said."
+          },
+          {
+            "rule": "proposal-asks",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH's text is a question about shoes, not a plan change, so the proposal-asks rule is not triggered and it does not claim a plan changed."
           },
           {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "Sent within a minute of Do it, about the shoes, with no push on today's run or proof and no team mention; but it ends with two question marks and misstates the run as yesterday's."
+            "borderline": false,
+            "reason": "Draft said it would text within a minute of Do it; it went out at 2:01 pm, asks about the shoes tied to yesterday's run, one question, no push about the 6 pm run or proof, no mention of Yanni."
           }
         ],
-        "summary": "ZOH handled the regression well: the draft promised a send within a minute, the text went out on time in its own warm voice, and it avoided pushing the 6 pm run or mentioning the team. The main miss is the text's reference to \"yesterday's run\", which the step log contradicts, plus a second question that strains the one-question rule."
+        "summary": "ZOH drafted the nudge accurately, never claiming it was already sent, and after Do it sent one warm, single-question text about the new shoes within a minute. The regression case behaved as specified, with no push about today's run and no mention of the team."
       }
     }
   ]

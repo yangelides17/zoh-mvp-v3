@@ -6554,11 +6554,11 @@
    "reason": "You're their one point of contact, as you will be when you run on your own"
   },
   {
-   "text": "- NUDGE MOMENT team: a text they asked you to send. Its one job is the request, as your own idea; no step or proof push.",
+   "text": "- NUDGE MOMENT team: a text they asked you to send. Its one job is the request or next step it carries, as your own idea; no step or proof push.",
    "file": "docs/coach-voice.md",
    "where": "The team (rules: team)",
    "kind": "rule",
-   "change": "moved from src/coach/prompt.ts (TEAM)",
+   "change": "new",
    "reason": "You're their one point of contact, as you will be when you run on your own"
   },
   {

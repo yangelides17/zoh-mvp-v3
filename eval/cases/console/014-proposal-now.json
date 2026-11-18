@@ -1,0 +1,54 @@
+{
+  "id": "proposal-now",
+  "title": "A founder's plan change sent \"now\": the card says so, and ZOH's own text asks the tester within a minute",
+  "origin": "#214 (proposals now or in the morning), from #213's staging test Nov 17: a time change waited through a whole check-in",
+  "suite": "capability",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "a 20 minute run",
+      "where": "the park",
+      "when": "6 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥"
+      },
+      {
+        "from": "zoh",
+        "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪"
+      }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" },
+      { "days_ago": 5, "status": "done" },
+      { "days_ago": 7, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "console Yanni: let's move his runs to 7 am at the park, before work. ask him now",
+    "console Yanni (do it)",
+    "advance to 14:04"
+  ],
+  "whatWentWrong": "New behavior (#214): before it, a confirmed plan change only rode the tester's next text, so a founder's change could wait through a whole check-in.",
+  "shouldHaveHappened": "ZOH drafts the plan change (runs at 7 am at the park); its card and its line to Yanni say ZOH will ask Jordan in its own text now, that nothing changes until he says yes, and never that it's done. After Do it, within a minute ZOH's own text reaches Jordan: a short, warm question, as ZOH's own idea, whether 7 am at the park would suit his runs better than 6 pm, asking his OK (his call). It reads naturally with nothing from him before it, never says the plan changed or that the team decided it, and has no push about today's run or proof.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}

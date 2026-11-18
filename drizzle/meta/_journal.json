@@ -183,6 +183,13 @@
       "when": 1794950016774,
       "tag": "0025_wandering_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794977248422,
+      "tag": "0026_superb_wildside",
+      "breakpoints": true
     }
   ]
 }

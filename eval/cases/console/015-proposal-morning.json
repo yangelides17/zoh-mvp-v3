@@ -1,0 +1,53 @@
+{
+  "id": "proposal-morning",
+  "title": "A founder's plan change for the morning: the card says it goes with the morning text, and nothing reaches the tester before",
+  "origin": "#214 (proposals now or in the morning)",
+  "suite": "capability",
+  "seed": {
+    "name": "Jordan",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": {
+      "what": "a 20 minute run",
+      "where": "the park",
+      "when": "6 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[photo: running app, 2.1 miles in 21 minutes] new shoes day 🔥"
+      },
+      {
+        "from": "zoh",
+        "text": "Two miles in the new shoes, Jordan! That's how you break them in 💪"
+      }
+    ],
+    "plan": {
+      "step": "a 20 minute run",
+      "place": "the park",
+      "time": "18:00",
+      "days": ["mon", "wed", "fri", "sat"],
+      "proof": "screenshot",
+      "proof_note": "your running app",
+      "reason": "Twenty minutes after work, before dinner.",
+      "minutes": 20,
+      "started_days_ago": 10
+    },
+    "step_days": [
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" },
+      { "days_ago": 5, "status": "done" },
+      { "days_ago": 7, "status": "done" }
+    ]
+  },
+  "testerLines": [
+    "console Yanni: let's move his runs to 30 minutes instead of 20. bring it up with his morning text",
+    "console Yanni (do it)"
+  ],
+  "whatWentWrong": "New behavior (#214): a founder's proposal can ride only the morning text.",
+  "shouldHaveHappened": "ZOH drafts the plan change (runs of 30 minutes); its card and its line to Yanni say ZOH will ask Jordan with the morning text, that nothing changes until he says yes, and never that it's done or that Jordan was told. Nothing is texted to Jordan in this exchange.",
+  "startTime": "14:00",
+  "timeZone": "America/New_York"
+}
