@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { createCoach } from "../src/coach/coach.js";
 import { addRequest, requestRef } from "../src/console/requests.js";
@@ -114,5 +114,31 @@ describe("a team request carried in a reply (#169 part 0)", () => {
     await t.queue.idle();
 
     expect(await row(r.id)).toMatchObject({ requestStatus: "pending", messageId: null });
+  });
+
+  it("a reply Sendblue accepted but that couldn't be stored still counts as sent: carried once, no 'didn't send' alert", async () => {
+    const model = new FakeClaudeModel();
+    t = await makeApp({ replier: createCoach({ db: (await makeDb()).db, model }) });
+    const r = await request();
+    // Storing any outbound text fails (a database blip right after Sendblue took it).
+    await t.db.execute(
+      sql.raw(`CREATE FUNCTION no_outbound() RETURNS trigger AS $$ BEGIN
+        IF NEW.direction = 'outbound' THEN RAISE EXCEPTION 'database blip'; END IF; RETURN NEW; END $$ LANGUAGE plpgsql`),
+    );
+    await t.db.execute(sql.raw("CREATE TRIGGER no_outbound BEFORE INSERT ON messages FOR EACH ROW EXECUTE FUNCTION no_outbound()"));
+    model.script({ tools: [{ name: "mark_request_done", input: { request: requestRef(r.id) } }] }, "Quick one: what's made mornings hardest?");
+    try {
+      await post("morning!");
+      await t.queue.idle();
+    } finally {
+      // The test database is shared by the file: never leave it failing for the next test.
+      await t.db.execute(sql.raw("DROP TRIGGER no_outbound ON messages"));
+      await t.db.execute(sql.raw("DROP FUNCTION no_outbound"));
+    }
+
+    expect(sent()).toEqual(["Quick one: what's made mornings hardest?"]);
+    expect(await row(r.id)).toMatchObject({ requestStatus: "done", messageId: null });
+    const failures = await t.db.select().from(consoleMessages).where(and(eq(consoleMessages.testerId, r.testerId), eq(consoleMessages.topic, "failure")));
+    expect(failures).toHaveLength(0);
   });
 });

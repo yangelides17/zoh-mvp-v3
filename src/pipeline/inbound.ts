@@ -329,11 +329,11 @@ function mergeDropped(had: DroppedDraft, more: DroppedDraft): DroppedDraft {
 }
 
 /** #169: closes the requests a sent reply carried, linked to it, with a Done line for the founders. */
-async function closeClaims(db: Db, ids: readonly string[], reply: Message): Promise<void> {
-  const at = reply.sentAt ?? reply.createdAt;
+async function closeClaims(db: Db, ids: readonly string[], reply: SentReply): Promise<void> {
+  const { at, message } = reply;
   for (const id of ids) {
     const [request] = await db.select().from(consoleMessages).where(eq(consoleMessages.id, id));
-    if (request) await closeRequest(db, { request, status: "done", at, messageId: reply.id, line: doneLine(request.body, "in a reply", at) });
+    if (request) await closeRequest(db, { request, status: "done", at, ...(message ? { messageId: message.id } : {}), line: doneLine(request.body, "in a reply", at) });
   }
 }
 
@@ -573,7 +573,7 @@ async function sendReply(
   batch: PendingText[],
   media: (PreparedMedia | undefined)[],
   replyText: string,
-): Promise<Message | undefined> {
+): Promise<SentReply | undefined> {
   const { db, log } = deps;
   const now = deps.now ?? (() => new Date());
   const clock = clockFor(deps, tester);
@@ -583,29 +583,36 @@ async function sendReply(
 
   // 4. Send and record the reply.
   await Promise.all(batch.map((p) => p.typing));
-  let sentReply: Message | undefined;
+  let result: SentReply | undefined;
   try {
     const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content: replyText });
     const realSentAt = now();
     const sentAt = testerNow(tester, realSentAt);
+    result = { at: sentAt };
     timings.reply_sent_at = realSentAt.toISOString();
     if (inbound.sentAt) timings.received_to_reply_sent_ms = sentAt.getTime() - inbound.sentAt.getTime();
     const started = Date.parse(String(timings.processing_started_at));
     if (Number.isFinite(started)) timings.processing_ms = realSentAt.getTime() - started;
     // #162: the reply carries what it looked up, for the console's cost line beside it.
     const lookups = Object.fromEntries(LOOKUP_TIMINGS.filter((k) => timings[k]).map((k) => [k, Number(timings[k])]));
-    sentReply = await insertOutbound(db, {
-      contactNumber: inbound.contactNumber,
-      lineNumber: inbound.lineNumber,
-      content: replyText,
-      sendblueHandle: sent.messageHandle ?? null,
-      status: sent.status ?? null,
-      inReplyTo: inbound.id,
-      sentAt,
-      createdAt: onTesterClock(tester, sentAt),
-      ...(Object.keys(lookups).length ? { timings: lookups } : {}),
-      raw: sent.raw as object,
-    });
+    try {
+      result.message = await insertOutbound(db, {
+        contactNumber: inbound.contactNumber,
+        lineNumber: inbound.lineNumber,
+        content: replyText,
+        sendblueHandle: sent.messageHandle ?? null,
+        status: sent.status ?? null,
+        inReplyTo: inbound.id,
+        sentAt,
+        createdAt: onTesterClock(tester, sentAt),
+        ...(Object.keys(lookups).length ? { timings: lookups } : {}),
+        raw: sent.raw as object,
+      });
+    } catch (err) {
+      // It went out: never reported as unsent, so nothing it carried goes out twice.
+      errors.push(`record reply: ${errorMessage(err)}`);
+      log.error({ ...ctx, err: safeError(err) }, "The reply was sent but storing it failed");
+    }
   } catch (err) {
     errors.push(`send: ${errorMessage(err)}`);
     log.error({ ...ctx, err: safeError(err) }, "Sending the reply failed");
@@ -637,8 +644,11 @@ async function sendReply(
     });
   }
   log.info({ ...ctx, timings, errors, texts: batch.length }, "Inbound message handled");
-  return sentReply;
+  return result;
 }
+
+/** #169: a reply Sendblue accepted: when, and its stored row (missing only if storing it failed). */
+type SentReply = { at: Date; message?: Message };
 
 /**
  * Saves a one-line description of a photo or document (from Claude) or a video (its caption) so memory

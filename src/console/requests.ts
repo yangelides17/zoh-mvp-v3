@@ -367,21 +367,25 @@ export async function recordAnswer(
   opts: { question: ConsoleMessage; status: AnswerStatus; answer?: string; name: string | null; at: Date },
 ): Promise<boolean> {
   const q = opts.question;
-  const [row] = await db
-    .update(consoleMessages)
-    .set({ answerStatus: opts.status, answer: opts.answer ?? null, answeredAt: opts.at })
-    .where(and(eq(consoleMessages.id, q.id), or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered"))))
-    .returning();
-  if (!row) return false;
-  const who = opts.name ?? "They";
-  const asked = clip(q.body, 120);
-  const body = opts.status === "answered" ? `${who} answered "${asked}": ${opts.answer}` : `${who} talked past "${asked}" (ZOH won't ask again)`;
-  await addThreadLine(db, { testerId: q.testerId, kind: "coach", author: APP_AUTHOR, body, at: opts.at });
-  if (q.alertOnAnswer) {
-    const topic = opts.status === "answered" ? ANSWER_ALERT : UNANSWERED_ALERT;
-    await raiseAlert(db, { testerId: q.testerId, topic, key: `${topic}:${q.id}`, body, at: opts.at });
-  }
-  return true;
+  // The answer, its thread line and its alert land together: a failed alert can't leave the answer saved with no
+  // alert (a retry would find it already answered and raise nothing).
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .update(consoleMessages)
+      .set({ answerStatus: opts.status, answer: opts.answer ?? null, answeredAt: opts.at })
+      .where(and(eq(consoleMessages.id, q.id), or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered"))))
+      .returning();
+    if (!row) return false;
+    const who = opts.name ?? "They";
+    const asked = clip(q.body, 120);
+    const body = opts.status === "answered" ? `${who} answered "${asked}": ${opts.answer}` : `${who} talked past "${asked}" (ZOH won't ask again)`;
+    await addThreadLine(tx, { testerId: q.testerId, kind: "coach", author: APP_AUTHOR, body, at: opts.at });
+    if (q.alertOnAnswer) {
+      const topic = opts.status === "answered" ? ANSWER_ALERT : UNANSWERED_ALERT;
+      await raiseAlert(tx, { testerId: q.testerId, topic, key: `${topic}:${q.id}`, body, at: opts.at });
+    }
+    return true;
+  });
 }
 
 /** #169: one alert per question still unanswered `NO_ANSWER_MS` after ZOH asked it (none once they've stopped). */

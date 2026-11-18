@@ -3384,6 +3384,13 @@
    "change": "new"
   },
   {
+   "text": "Team question ${ref} is already answered: nothing more to record.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
    "text": "Recorded for the team. Your text answers them as usual.",
    "file": "src/coach/tools.ts",
    "where": "runTool",
@@ -4173,6 +4180,13 @@
    "where": "draftReply > attempts",
    "kind": "not read by ZOH",
    "change": "moved from src/pipeline/inbound.ts (draftReply)"
+  },
+  {
+   "text": "record reply: ${errorMessage(err)}",
+   "file": "src/pipeline/inbound.ts",
+   "where": "sendReply",
+   "kind": "not read by ZOH",
+   "change": "new"
   },
   {
    "text": "send: ${errorMessage(err)}",

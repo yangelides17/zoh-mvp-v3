@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { createConsoleCoach } from "../src/console/chat.js";
@@ -131,6 +131,29 @@ describe("an answer to a team question (#169)", () => {
     expect(raised[0]).toMatchObject({ topic: ANSWER_ALERT });
     expect(raised[0]!.body).toBe(`Sam answered "Ask what's made mornings hardest this week": the alarm's across the room and I snooze`);
     expect((await testerRows(t.db, reply)).find((r) => r.tester.id === tester.id)!.alertsWaiting).toBe(1);
+  });
+
+  it("an alert that fails to save takes the answer with it, so a retry records both", async () => {
+    const tester = await seed();
+    const q = await asked(tester);
+    const reply = new Date(now.getTime() + 2 * HOUR);
+    await t.db.execute(
+      sql.raw(`CREATE FUNCTION no_alerts() RETURNS trigger AS $$ BEGIN
+        IF NEW.kind = 'alert' THEN RAISE EXCEPTION 'database blip'; END IF; RETURN NEW; END $$ LANGUAGE plpgsql`),
+    );
+    await t.db.execute(sql.raw("CREATE TRIGGER no_alerts BEFORE INSERT ON console_messages FOR EACH ROW EXECUTE FUNCTION no_alerts()"));
+    try {
+      await expect(record(tester, q, reply, { outcome: "answered", answer: "the alarm's across the room" })).rejects.toThrow();
+      expect((await row(q.id)).answerStatus).toBeNull();
+    } finally {
+      // The test database is shared by the file: never leave it failing for the next test.
+      await t.db.execute(sql.raw("DROP TRIGGER no_alerts ON console_messages"));
+      await t.db.execute(sql.raw("DROP FUNCTION no_alerts"));
+    }
+    expect((await record(tester, q, reply, { outcome: "answered", answer: "the alarm's across the room" })).ok).toBe(true);
+    expect(await alerts(tester.id)).toHaveLength(1);
+    // Already recorded: the coach is told so, not "Recorded".
+    expect((await record(tester, q, reply, { outcome: "answered", answer: "again" })).ok).toBe(false);
   });
 
   it("alert off: the answer is saved, with no alert", async () => {

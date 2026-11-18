@@ -1173,7 +1173,9 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const found = findRequest(state.teamQuestions, ref);
       if (!found) return { ok: false, error: `No team question ${ref} waiting for an answer.` };
       if (outcome === "answered" && !answer) return { ok: false, error: "answered needs answer: theirs, close to their words." };
-      await recordAnswer(db, { question: found, status: outcome, ...(outcome === "answered" ? { answer } : {}), name: tester.name, at });
+      if (!(await recordAnswer(db, { question: found, status: outcome, ...(outcome === "answered" ? { answer } : {}), name: tester.name, at }))) {
+        return { ok: false, error: `Team question ${ref} is already answered: nothing more to record.` };
+      }
       return saved(tester, outcome === "answered" ? "Recorded for the team. Your text answers them as usual." : "Recorded; don't ask it again.");
     }
   }
