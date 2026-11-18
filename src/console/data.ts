@@ -32,6 +32,7 @@ import { stillOpen } from "../coach/next-steps.js";
 import { goalMetrics, loadTesterGoals } from "../testers/goals.js";
 import { activePause } from "../testers/pauses.js";
 import { learnings, type Learnings } from "../coach/week.js";
+import { countsOnBadge, openDrafts } from "./drafts.js";
 import { listSuggestions } from "./suggestions.js";
 
 /** What the founder console reads (spec: GitHub issue "Founder console", "What we experience" 2 and 3; per tab since #63). */
@@ -58,6 +59,8 @@ export interface TesterRow {
   alertsWaiting: number;
   /** Next steps waiting for a decision whose alert is already seen (or that never had one). */
   suggestionsWaiting: number;
+  /** #214: console chat drafts waiting for a founder's Do it (see `countsOnBadge`). */
+  draftsWaiting: number;
 }
 
 export async function goalTitles(db: Db): Promise<Map<string, Goal>> {
@@ -135,13 +138,14 @@ export async function goalViews(db: Db, tester: Tester, now: Date, titles: Map<s
 /**
  * The tester list (#63): every tester, the ones with something to look at first, then most recently
  * texting. The badge counts unseen alerts plus waiting suggestions whose alert is already seen, so a
- * waiting suggestion and its own alert count once.
+ * waiting suggestion and its own alert count once, plus open console drafts (#214, `countsOnBadge`).
  */
 export async function testerRows(db: Db, now: Date): Promise<TesterRow[]> {
   const titles = await goalTitles(db);
   const all = await db.select().from(testers);
   const unseen = await db.select().from(consoleMessages).where(and(eq(consoleMessages.kind, "alert"), isNull(consoleMessages.seenAt)));
   const waiting = await db.select().from(suggestions).where(eq(suggestions.decision, "waiting"));
+  const drafts = (await db.select().from(consoleMessages).where(and(eq(consoleMessages.kind, "draft"), eq(consoleMessages.draftStatus, "draft")))).filter(countsOnBadge);
   const out: TesterRow[] = [];
   for (const tester of all) {
     const views = await goalViews(db, tester, testerNow(tester, now), titles);
@@ -160,10 +164,11 @@ export async function testerRows(db: Db, now: Date): Promise<TesterRow[]> {
       lastText,
       alertsWaiting: alerts.length,
       suggestionsWaiting: waiting.filter((s) => s.testerId === tester.id && !flagged.has(s.id)).length,
+      draftsWaiting: drafts.filter((d) => d.testerId === tester.id).length,
     });
   }
   const at = (r: TesterRow) => (r.lastText ? messageTime(r.lastText).getTime() : r.tester.createdAt.getTime());
-  const needs = (r: TesterRow) => (r.alertsWaiting + r.suggestionsWaiting > 0 ? 1 : 0);
+  const needs = (r: TesterRow) => (r.alertsWaiting + r.suggestionsWaiting + r.draftsWaiting > 0 ? 1 : 0);
   return out.sort((a, b) => needs(b) - needs(a) || at(b) - at(a));
 }
 
@@ -185,6 +190,8 @@ export interface TesterHeader {
   alertsWaiting: number;
   /** Waiting suggestions whose alert is already seen (or that never had one). */
   suggestionsWaiting: number;
+  /** #214: console chat drafts waiting for a founder's Do it (see `countsOnBadge`). */
+  draftsWaiting: number;
 }
 
 export async function testerHeader(db: Db, testerId: string, now: Date): Promise<TesterHeader | undefined> {
@@ -208,6 +215,7 @@ export async function testerHeader(db: Db, testerId: string, now: Date): Promise
     pause: await activePause(db, tester.id),
     alertsWaiting: alerts.length,
     suggestionsWaiting: waiting.filter((s) => !flagged.has(s.id)).length,
+    draftsWaiting: (await openDrafts(db, testerId)).filter(countsOnBadge).length,
   };
 }
 
@@ -308,6 +316,8 @@ export interface ConsoleTab {
   alerts: { unseen: ConsoleMessage[]; earlier: ConsoleMessage[] };
   /** Needs you: next steps waiting for a founder's decision. */
   pending: Suggestion[];
+  /** Needs you (#214): console chat drafts waiting for a founder's Do it, oldest first. */
+  drafts: ConsoleMessage[];
   /** Waiting on the tester (#105): what the founders settled that hasn't played out yet. */
   waiting: { requests: ConsoleMessage[]; suggestions: Suggestion[] };
 }
@@ -341,10 +351,10 @@ export async function sideSection(db: Db, testerId: string): Promise<SideSection
     .where(and(eq(suggestions.testerId, testerId), inArray(suggestions.decision, ["approved", "changed"])))
     .orderBy(asc(suggestions.createdAt));
   const waiting = { requests, suggestions: approved.filter(stillOpen) };
-  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending, waiting };
+  return { alerts: { unseen: await alerts(false), earlier: await alerts(true) }, pending, drafts: await openDrafts(db, testerId), waiting };
 }
 
-export type SideSection = Pick<ConsoleTab, "alerts" | "pending" | "waiting">;
+export type SideSection = Pick<ConsoleTab, "alerts" | "pending" | "drafts" | "waiting">;
 
 /** The chat cards the page still shows as live (#105), as they stand now: this tester's only. */
 export async function liveItems(db: Db, testerId: string, ids: string[]): Promise<ThreadItem[]> {

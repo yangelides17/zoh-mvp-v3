@@ -50,6 +50,12 @@ export async function openDrafts(db: Db, testerId: string): Promise<ConsoleMessa
     .orderBy(asc(consoleMessages.createdAt));
 }
 
+/**
+ * #214: whether an open draft adds to a badge. Deciding a waiting next step or marking an alert only works on
+ * something the badge already counts (the next step, the unseen alert), so those count once, as that thing.
+ */
+export const countsOnBadge = (draft: Pick<ConsoleMessage, "draftAction">) => draft.draftAction !== "decide_suggestion" && draft.draftAction !== "mark_alert";
+
 /** A draft by its full id or ref, this tester's only. */
 export async function findDraft(db: Db, testerId: string, ref: string): Promise<ConsoleMessage | undefined> {
   const wanted = ref.trim().toLowerCase().replace(/^\[|\]$/g, "");

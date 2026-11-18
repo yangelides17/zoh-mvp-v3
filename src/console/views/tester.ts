@@ -57,7 +57,7 @@ ${stats}<span class="more-label muted">More</span></summary><div class="hdr-more
 
 export function testerView(h: TesterHeader, tab: Tab, content: string, name: string, notice?: string): string {
   const t = h.tester;
-  const waiting = h.alertsWaiting + h.suggestionsWaiting;
+  const waiting = h.alertsWaiting + h.suggestionsWaiting + h.draftsWaiting;
   const tabs = TABS.map(
     (k) =>
       `<a href="/console/testers/${esc(t.id)}?tab=${k}"${k === tab ? ` class="on" aria-current="page"` : ""} title="${TAB_LABELS[k]}">${TAB_ICONS[k]}<span class="tlabel">${TAB_LABELS[k]}</span>${k === "console" && waiting ? ` <span class="badge">${waiting}</span>` : ""}</a>`,
