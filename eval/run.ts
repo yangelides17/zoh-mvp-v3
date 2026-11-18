@@ -30,7 +30,7 @@ import {
   type ReportData,
 } from "./report.js";
 import { caseIdOf, compareScores, groupScores, scoreCases, type CaseScore } from "./score.js";
-import { simulatedTester } from "./simulator.js";
+import { caseTester, simulatedTester, WAITS_PER_CASE } from "./simulator.js";
 import type { ConversationPlan, GradedConversation } from "./types.js";
 
 /** One feature's share of the run: what to play (or re-grade), and the baseline to compare with. */
@@ -269,13 +269,17 @@ async function play(
   const { feature, plans, rubric, pages } = job;
   let done = 0;
   const graded = await mapLimit(plans, args.concurrency, async (plan, index): Promise<GradedConversation> => {
-    const tester = plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
-    // A case gets one turn past its script so it ends "by script", not by the cap.
-    const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
+    const c = plan.regression;
+    // #230: a case whose lines wait for their moment gets the case tester; plain cases replay as before.
+    const waits = c?.testerLines.some((l) => typeof l !== "string") ?? false;
+    const tester = c ? (waits ? caseTester(c, deps.simulate) : scriptedTester(c.testerLines)) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
+    // A case gets one turn past its script (and any extra replies a waiting line may take) so it ends "by script", not by the cap.
+    const maxTurns = c ? c.testerLines.length + (waits ? WAITS_PER_CASE : 0) + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
     const result = await runConversation(plan, tester, { maxTurns, index, env: deps.env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const out: GradedConversation = { ...result };
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
-    if (!result.error || result.transcript.length > 0) {
+    // A case problem is the case's fault, not ZOH's: listed in the report, never graded.
+    if (result.endedBy !== "case-problem" && (!result.error || result.transcript.length > 0)) {
       try {
         const g = await gradeConversation(
           { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, saved: result.saved, rubric, pages },
@@ -289,7 +293,13 @@ async function play(
       }
     }
     done += 1;
-    const status = out.error ? `error: ${out.error}` : out.gradeError ? `not graded: ${out.gradeError}` : "graded";
+    const status = out.error
+      ? `error: ${out.error}`
+      : result.lines?.problem
+        ? `case problem, not graded: ${result.lines.problem}`
+        : out.gradeError
+          ? `not graded: ${out.gradeError}`
+          : "graded";
     console.log(`  [${done}/${plans.length}] ${feature.name} ${plan.key}: ${zohCount} ZOH texts, ended by ${result.endedBy}, ${status}`);
     return out;
   });

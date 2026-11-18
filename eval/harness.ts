@@ -32,7 +32,7 @@ import { billedDollars, type BilledUsage } from "./cost.js";
 import { evalMediaFetcher, evalTranscriber, evalWatcher, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
-import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
+import { lineText, type CaseLine, type ConversationPlan, type ConversationResult, type LineCounts, type Seed, type TokenUsage, type TranscriptLine } from "./types.js";
 
 const WEBHOOK_SECRET = "eval-webhook-secret";
 const CONSOLE_SECRET = "eval-console-secret";
@@ -423,16 +423,18 @@ export interface Tester {
   next(transcript: TranscriptLine[]): Promise<string | null>;
   usage(): TokenUsage;
   /** Why it stopped when next() returned null. */
-  readonly endReason: "simulator" | "script";
+  readonly endReason: "simulator" | "script" | "case-problem";
+  /** #230: how a case's waiting lines went out. */
+  lines?(): LineCounts;
 }
 
-/** Replays a regression case's lines in order, one per turn. */
-export function scriptedTester(lines: string[]): Tester {
+/** Replays a regression case's lines in order, one per turn, as written (a waiting line's wording, #230). */
+export function scriptedTester(lines: (string | CaseLine)[]): Tester {
   let i = 0;
   return {
     endReason: "script",
     async next() {
-      return i < lines.length ? (lines[i++] as string) : null;
+      return i < lines.length ? lineText(lines[i++]!) : null;
     },
     usage: () => ({ input: 0, output: 0 }),
   };
@@ -786,7 +788,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
-  const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(l.trim())) ? await readStepLog(app) : undefined;
+  const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(lineText(l).trim())) ? await readStepLog(app) : undefined;
   const savedBefore = opts.saved ? await savedIds(app) : undefined;
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
@@ -835,6 +837,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
+      ...(tester.lines ? { lines: tester.lines() } : {}),
       // #103: the look-back's facts include today's step, so its log is read once the conversation is over.
       ...(opts.record ? { record: await readStepLog(app, true) } : record ? { record } : {}),
       ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
