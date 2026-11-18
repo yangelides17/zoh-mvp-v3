@@ -163,6 +163,7 @@ async function moveHistoryBack(db: Db, tester: Tester, ms: number): Promise<void
       dueAt: back(consoleMessages.dueAt),
       expiresAt: back(consoleMessages.expiresAt),
       doneAt: back(consoleMessages.doneAt),
+      answeredAt: back(consoleMessages.answeredAt),
       seenAt: back(consoleMessages.seenAt),
       createdAt: back(consoleMessages.createdAt),
     })

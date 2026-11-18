@@ -229,7 +229,18 @@ export interface ChunkCursor {
 }
 
 /** One item in the console chat: a thread line (alerts live in their own section) or a next-step suggestion as a card. */
-export type ThreadItem = { type: "line"; id: string; at: Date; line: ConsoleMessage } | { type: "suggestion"; id: string; at: Date; suggestion: Suggestion };
+export type ThreadItem =
+  /** `delivery` (#168): Sendblue's status for the text that carried a request. */
+  | { type: "line"; id: string; at: Date; line: ConsoleMessage; delivery?: string | null }
+  | { type: "suggestion"; id: string; at: Date; suggestion: Suggestion };
+
+/** #168: each request's line, with Sendblue's status for the text that carried it. */
+async function lineItems(db: Db, lines: ConsoleMessage[]): Promise<ThreadItem[]> {
+  const ids = lines.flatMap((l) => (l.kind === "request" && l.messageId ? [l.messageId] : []));
+  const rows = ids.length ? await db.select({ id: messages.id, status: messages.status }).from(messages).where(inArray(messages.id, ids)) : [];
+  const status = new Map(rows.map((r) => [r.id, r.status]));
+  return lines.map((line) => ({ type: "line" as const, id: line.id, at: line.createdAt, line, ...(line.messageId ? { delivery: status.get(line.messageId) ?? null } : {}) }));
+}
 
 /**
  * A chunk of the console chat, oldest first: the newest `limit` items at or before `before`, or
@@ -252,7 +263,7 @@ export async function threadChunk(db: Db, testerId: string, cursor: ChunkCursor 
     .orderBy(desc(suggestions.createdAt))
     .limit(limit);
   const items: ThreadItem[] = [
-    ...lines.map((line) => ({ type: "line" as const, id: line.id, at: line.createdAt, line })),
+    ...(await lineItems(db, lines)),
     ...ideas.map((suggestion) => ({ type: "suggestion" as const, id: suggestion.id, at: suggestion.createdAt, suggestion })),
   ];
   return items
@@ -365,7 +376,7 @@ export async function liveItems(db: Db, testerId: string, ids: string[]): Promis
     .where(and(eq(consoleMessages.testerId, testerId), inArray(consoleMessages.id, ids), ne(consoleMessages.kind, "alert")));
   const ideas = await db.select().from(suggestions).where(and(eq(suggestions.testerId, testerId), inArray(suggestions.id, ids)));
   return [
-    ...lines.map((line) => ({ type: "line" as const, id: line.id, at: line.createdAt, line })),
+    ...(await lineItems(db, lines)),
     ...ideas.map((suggestion) => ({ type: "suggestion" as const, id: suggestion.id, at: suggestion.createdAt, suggestion })),
   ];
 }

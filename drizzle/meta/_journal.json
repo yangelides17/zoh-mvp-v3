@@ -197,6 +197,13 @@
       "when": 1794980609425,
       "tag": "0027_faithful_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795026710678,
+      "tag": "0028_slippery_robin_chapel",
+      "breakpoints": true
     }
   ]
 }

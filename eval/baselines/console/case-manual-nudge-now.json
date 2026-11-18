@@ -2,12 +2,12 @@
   "feature": "console",
   "id": "case:manual-nudge-now",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:17:24.737Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T19:00:34.406Z",
+  "branch": "feature/169-168-questions-attachments",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "72071c335f0d",
-    "voice": "b413875b3c11",
+    "checks": "cbeaa7e910d9",
+    "voice": "accb8d11133b",
     "instructions": "c7348af58300",
     "script": "40083df9bc7d"
   },
@@ -71,24 +71,13 @@
       "grade": {
         "texts": [
           {
-            "zohText": 1,
-            "checks": [
-              {
-                "rule": "confirms",
-                "pass": true,
-                "borderline": false,
-                "reason": "Card says what will go out and when: its own text to Jordan within a minute of Do it, in its own words."
-              }
-            ]
-          },
-          {
             "zohText": 2,
             "checks": [
               {
                 "rule": "confirms",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two lines saying it will send within a minute after Do it and what the text asks."
+                "reason": "Says it will send within a minute, in its own words, and what the text asks. Short and specific."
               }
             ]
           },
@@ -97,15 +86,15 @@
             "checks": [
               {
                 "rule": "grounded",
-                "pass": true,
+                "pass": false,
                 "borderline": true,
-                "reason": "Uses the new running shoes detail from Jordan's history, but 'yesterday's run' doesn't match the step log's rest day on Sunday."
+                "reason": "Calls it 'yesterday's run', but the step log shows Sun Nov 1 as a rest day. The earlier 2.1-mile photo's date is unclear, so this is only a possible mismatch."
               },
               {
                 "rule": "own-idea",
                 "pass": true,
                 "borderline": false,
-                "reason": "Arrives as ZOH's own curious question about the shoes, tied to his runs, with no mention of Yanni or the team."
+                "reason": "Sent as ZOH's own warm check-in about the shoes, tied to Jordan's runs, with no mention of Yanni or the team."
               }
             ]
           }
@@ -115,16 +104,16 @@
             "rule": "drafts",
             "pass": true,
             "borderline": false,
-            "reason": "Card and console line both say ZOH will text within a minute after Do it, never that it's already sent."
+            "reason": "Card and console line both say ZOH will send the text within a minute of Do it, not that it's already sent."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Text goes out right after Do it as a warm shoe question with no run or proof push, but ends with two question forms."
+            "reason": "Sent within a minute of Do it, warm and tied to the shoes, with no push about the 6 pm run or proof and no team mention. It asks two questions, and the 'yesterday's run' claim is shaky."
           }
         ],
-        "summary": "ZOH handled the regression well: its console draft and confirmation promised a text within a minute of Do it, and the text that went out was a warm, grounded shoe check-in with no push about today's run and no mention of the team. The only soft spots are the 'yesterday's run' detail, which doesn't match the step log, and a follow-up that stacks two questions."
+        "summary": "ZOH handled the founder-requested check-in well: the draft was accurate, the text went out within a minute in its own warm voice, and it never mentioned the team or pushed the run. The main weaknesses are the unverified 'yesterday's run' reference, which the step log doesn't support, and a text that asks two questions where one was wanted."
       }
     }
   ]

@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, notInArray, or, sql } from "drizzle-orm";
 import type { Db } from "./client.js";
 import { messages, type Message, type NewMessage } from "./schema.js";
 
@@ -66,10 +66,17 @@ export async function updateStatusByHandle(
   status: string,
   error: string | null,
 ): Promise<number> {
+  // #168: delivery only moves forward: a late "queued" or "sent" never undoes "delivered" or "read".
+  const back = ["QUEUED", "PENDING", "SENT"].includes(status.toUpperCase());
   const updated = await db
     .update(messages)
     .set({ status, ...(error ? { error } : {}), updatedAt: new Date() })
-    .where(eq(messages.sendblueHandle, handle))
+    .where(
+      and(
+        eq(messages.sendblueHandle, handle),
+        back ? or(isNull(messages.status), notInArray(sql`upper(${messages.status})`, ["DELIVERED", "READ"])) : undefined,
+      ),
+    )
     .returning({ id: messages.id });
   return updated.length;
 }

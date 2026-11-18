@@ -52,7 +52,8 @@ export const PROMPT_BUDGET_CHARS = {
   // #211: +10 for "once today's talk has landed".
   nextStepsTeam: 800,
   // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
-  team: 750,
+  // #169: +100 for the team question line (ask once, listen, never chase).
+  team: 850,
   memory: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
@@ -305,7 +306,7 @@ export function moments(s: CoachState): Moment[] {
       m.push("Next steps and maintenance");
     }
   }
-  if (s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length) m.push("The team");
+  if (s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
   // Paused or stopped: the guidance for both is in the saving rules, read in every phase (onboarding too).
   if (s.pause || s.stopped) m.push("Saving, style and requests");
   return m;
@@ -649,7 +650,12 @@ function threadLines(s: CoachState, plan: Plan | undefined): string[] {
   if (s.teamNotes.length) lines.push(`FROM THE TEAM, notes:\n${s.teamNotes.map((n) => `- ${day(n.createdAt)}: ${n.body}`).join("\n")}`);
   const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
   if (!s.nudgeMoment) {
-    for (const r of s.teamRequests.filter((x) => x.id !== carriedId)) lines.push(`FROM THE TEAM, request [${requestRef(r.id)}], not done yet: ${r.body}`);
+    for (const r of s.teamRequests.filter((x) => x.id !== carriedId)) lines.push(`FROM THE TEAM, ${r.question ? "question" : "request"} [${requestRef(r.id)}], not done yet: ${r.body}`);
+    // #169: asked once; the answer is listened for, never chased.
+    for (const q of s.teamQuestions) {
+      const past = q.answerStatus === "dodged" ? ", they talked past it" : "";
+      lines.push(`FROM THE TEAM, question [${requestRef(q.id)}] you already asked ${day(q.doneAt!)}${past}, the team waiting on their answer (the team's note: ${q.body}). Their answer, or talking past it → record_team_answer.`);
+    }
   }
   if (!plan) return lines;
 

@@ -1536,7 +1536,21 @@
    "change": "moved from src/coach/prompt.ts (teamLines)"
   },
   {
-   "text": "FROM THE TEAM, request [${requestRef(r.id)}], not done yet: ${r.body}",
+   "text": "FROM THE TEAM, ${r.question ? \"question\" : \"request\"} [${requestRef(r.id)}], not done yet: ${r.body}",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": ", they talked past it",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines > past",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "FROM THE TEAM, question [${requestRef(q.id)}] you already asked ${day(q.doneAt!)}${past}, the team waiting on their answer (the team's note: ${q.body}). Their answer, or talking past it → record_team_answer.",
    "file": "src/coach/prompt.ts",
    "where": "threadLines",
    "kind": "status sheet",
@@ -2255,6 +2269,13 @@
    "where": "TOOL_DEFINITIONS > mark_request_done > description",
    "kind": "tool description",
    "change": "unchanged"
+  },
+  {
+   "text": "The team is waiting on a FROM THE TEAM question you already asked: in the reply to their text about it, answered (answer: theirs, close to their words) or dodged (they talked past it).",
+   "file": "src/coach/tools.ts",
+   "where": "TOOL_DEFINITIONS > record_team_answer > description",
+   "kind": "tool description",
+   "change": "new"
   },
   {
    "text": "Where they're headed: a near goal, about 3 to 7 steps out (\"jog 5 minutes without stopping by Sunday\"); empty removes it",
@@ -3335,11 +3356,11 @@
    "change": "unchanged"
   },
   {
-   "text": "in a reply",
+   "text": "No open team request ${ref}.",
    "file": "src/coach/tools.ts",
-   "where": "runTool > line",
-   "kind": "tool result",
-   "change": "unchanged"
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
   },
   {
    "text": "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.",
@@ -3347,6 +3368,41 @@
    "where": "runTool",
    "kind": "tool result",
    "change": "unchanged"
+  },
+  {
+   "text": "No team question ${ref} waiting for an answer.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "answered needs answer: theirs, close to their words.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Team question ${ref} is already answered: nothing more to record.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Recorded for the team. Your text answers them as usual.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Recorded; don't ask it again.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool",
+   "kind": "tool result",
+   "change": "new"
   },
   {
    "text": ", today included",
@@ -4098,6 +4154,13 @@
    "change": "unchanged"
   },
   {
+   "text": "in a reply",
+   "file": "src/pipeline/inbound.ts",
+   "where": "closeClaims > line",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/tools.ts (runTool > line)"
+  },
+  {
    "text": "claude: ANTHROPIC_API_KEY not configured",
    "file": "src/pipeline/inbound.ts",
    "where": "draftReply",
@@ -4117,6 +4180,13 @@
    "where": "draftReply > attempts",
    "kind": "not read by ZOH",
    "change": "moved from src/pipeline/inbound.ts (draftReply)"
+  },
+  {
+   "text": "record reply: ${errorMessage(err)}",
+   "file": "src/pipeline/inbound.ts",
+   "where": "sendReply",
+   "kind": "not read by ZOH",
+   "change": "new"
   },
   {
    "text": "send: ${errorMessage(err)}",
@@ -4488,6 +4558,13 @@
    "where": "ensureGoalPages > title",
    "kind": "memory block",
    "change": "unchanged"
+  },
+  {
+   "text": "Sent by ZOH (from the team)",
+   "file": "src/memory/store.ts",
+   "where": "SENT_BY_ZOH",
+   "kind": "memory block",
+   "change": "new"
   },
   {
    "text": "voice note",
@@ -6669,6 +6746,14 @@
    "kind": "rule",
    "change": "new",
    "reason": "You're their one point of contact, as you will be when you run on your own"
+  },
+  {
+   "text": "- A question: ask it once, then listen; never chase it. What they say to it: record_team_answer.",
+   "file": "docs/coach-voice.md",
+   "where": "The team (rules: team)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "It doesn't nag every hour, but it doesn't drop you either"
   },
   {
    "text": "- NUDGE MOMENT team: a text they asked you to send. Its one job is the request or next step it carries, as your own idea; no step or proof push.",

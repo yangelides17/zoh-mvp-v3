@@ -362,15 +362,19 @@ export async function timeline(db: Db, tester: Tester, limit = 30): Promise<Time
   const media = await db
     .select()
     .from(messages)
+    // Their files, and (#168) the founders' files ZOH sent them, labeled as such.
     .where(and(eq(messages.contactNumber, tester.phone), isNotNull(messages.mediaUrl), gte(messages.createdAt, memoryStart(tester))))
     .orderBy(desc(sentTime), desc(messages.id))
     .limit(limit);
   const items: TimelineItem[] = [
     ...pages.map((p) => ({ ref: pageRef(p.id), kind: p.kind, title: p.title, summary: p.summary, at: p.updatedAt })),
-    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: mediaLabel(m), summary: mediaText(m), at: messageTime(m) })),
+    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: m.direction === "outbound" ? SENT_BY_ZOH : mediaLabel(m), summary: mediaText(m), at: messageTime(m) })),
   ];
   return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
 }
+
+/** #168: how a founder's file ZOH sent them is named in memory, so it's never taken for one of theirs. */
+export const SENT_BY_ZOH = "Sent by ZOH (from the team)";
 
 export function mediaLabel(m: Message): TimelineItem["kind"] {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");
