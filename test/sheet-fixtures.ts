@@ -88,6 +88,7 @@ export function state(o: Partial<CoachState> = {}): CoachState {
     teamNotes: [],
     teamRequests: [],
     teamRequestsDone: [],
+    teamQuestions: [],
     lastTesterText: "",
     lastZohText: "",
     isFirstText: false,

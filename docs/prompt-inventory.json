@@ -1536,7 +1536,21 @@
    "change": "moved from src/coach/prompt.ts (teamLines)"
   },
   {
-   "text": "FROM THE TEAM, request [${requestRef(r.id)}], not done yet: ${r.body}",
+   "text": "FROM THE TEAM, ${r.question ? \"question\" : \"request\"} [${requestRef(r.id)}], not done yet: ${r.body}",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": ", they talked past it",
+   "file": "src/coach/prompt.ts",
+   "where": "threadLines > past",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "FROM THE TEAM, question [${requestRef(q.id)}], already asked ${day(q.doneAt!)}${past}: ${q.body}. Their answer, or talking past it → record_team_answer.",
    "file": "src/coach/prompt.ts",
    "where": "threadLines",
    "kind": "status sheet",
@@ -2255,6 +2269,13 @@
    "where": "TOOL_DEFINITIONS > mark_request_done > description",
    "kind": "tool description",
    "change": "unchanged"
+  },
+  {
+   "text": "A FROM THE TEAM question you asked: answered (answer: theirs, close to their words) or dodged (they talked past it).",
+   "file": "src/coach/tools.ts",
+   "where": "TOOL_DEFINITIONS > record_team_answer > description",
+   "kind": "tool description",
+   "change": "new"
   },
   {
    "text": "Where they're headed: a near goal, about 3 to 7 steps out (\"jog 5 minutes without stopping by Sunday\"); empty removes it",
@@ -3347,6 +3368,34 @@
    "where": "runTool",
    "kind": "tool result",
    "change": "unchanged"
+  },
+  {
+   "text": "No team question ${ref} waiting for an answer.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "answered needs answer: theirs, close to their words.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Recorded for the team. Your text answers them as usual.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Recorded; don't ask it again.",
+   "file": "src/coach/tools.ts",
+   "where": "runTool",
+   "kind": "tool result",
+   "change": "new"
   },
   {
    "text": ", today included",
@@ -6676,6 +6725,14 @@
    "kind": "rule",
    "change": "new",
    "reason": "You're their one point of contact, as you will be when you run on your own"
+  },
+  {
+   "text": "- A question: ask it once, then listen; never chase it. What they say to it: record_team_answer.",
+   "file": "docs/coach-voice.md",
+   "where": "The team (rules: team)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "It doesn't nag every hour, but it doesn't drop you either"
   },
   {
    "text": "- NUDGE MOMENT team: a text they asked you to send. Its one job is the request or next step it carries, as your own idea; no step or proof push.",

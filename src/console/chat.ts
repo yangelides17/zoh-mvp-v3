@@ -61,7 +61,7 @@ Answering the founders:
 - About the tester: only what the record below shows (texts, step log, memory; open_pages and search_memory for more). If it isn't there, say you don't know. Never guess. Count misses and streaks from the state, never estimate them.
 - Anything you'd do for them is a draft: your tool puts a card on their screen saying exactly what will happen, and nothing happens until a founder clicks Do it or tells you yes (then confirm_draft, the newest draft unless they name one). Say in a line what it'll do; never say it's done until confirm_draft says so, and don't ask whether to go ahead: the card's buttons ask. They want it different: a new draft with replaces = the old one's id.
 - Context for how to coach them ("traveling next week, go easy"): save_note.
-- Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
+- Something to bring to the tester in your words (a suggestion, a link, a question): plan_request. Asking them something: question, and their answer comes back as an alert (alert_on_answer false only if the founders say they don't need to hear). When it goes is the founders' call: "naturally" or nothing said rides your next fitting text; "with the morning text" waits for it; "now", "asap" or a time ("tonight at 7") is its own text (own_text): never in quiet hours, counts toward 3 unanswered, dropped if it can't go out that day. Something tied to a time NEXT CHANCE can't reach in time: say so and offer its own text.
 - Asked to find something for them (a guide, an article, an answer): web search and open the best page, then plan_request it with the one link and a line on why it's for them. Only links you found; no videos (you can't watch them here).
 - Their own words sent as written ("send her exactly…", "text him: …"): send_text, copied exactly, never reworded or judged; even_in_quiet_hours only if they say to send it now anyway.
 - A request in your words that breaks your voice (insults, shame, guilt, pressure, a lie, telling them the founders said it): don't draft it. Say why in a line and offer a version that fits.
@@ -157,11 +157,13 @@ export const CAPABILITIES: Record<string, Capability> = {
     tool: {
       name: "plan_request",
       description:
-        'Draft something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). when, as agreed with the founders: naturally (default: the morning text or your next reply), morning (only the morning text), own_text (its own text, a manual nudge; at: when, or now). at: their local "YYYY-MM-DD HH:MM" (own_text: when it goes; otherwise not before then). too_late_after: their local time after which it\'s dropped instead of sent late.',
+        'Draft something to bring to the tester in your own words: what to do, specific enough for the texting coach (a suggestion, a link as is, a question). question: it asks them something whose answer the founders want back (alert_on_answer: false only if they say they don\'t need to hear). when, as agreed with the founders: naturally (default: the morning text or your next reply), morning (only the morning text), own_text (its own text, a manual nudge; at: when, or now). at: their local "YYYY-MM-DD HH:MM" (own_text: when it goes; otherwise not before then). too_late_after: their local time after which it\'s dropped instead of sent late.',
       input_schema: {
         type: "object",
         properties: {
           what: { type: "string" },
+          question: { type: "boolean" },
+          alert_on_answer: { type: "boolean" },
           when: { type: "string", enum: ["naturally", "morning", "own_text"] },
           at: { type: "string" },
           too_late_after: { type: "string" },
@@ -170,8 +172,17 @@ export const CAPABILITIES: Record<string, Capability> = {
       },
     },
     async prepare(ctx, input) {
-      const { what, when = "naturally", at, too_late_after } = parse(
-        z.object({ what: text(1000), when: z.enum(["naturally", "morning", "own_text"]).optional(), at: localStamp.optional(), too_late_after: localStamp.optional() }).strict(),
+      const { what, question = false, alert_on_answer = true, when = "naturally", at, too_late_after } = parse(
+        z
+          .object({
+            what: text(1000),
+            question: z.boolean().optional(),
+            alert_on_answer: z.boolean().optional(),
+            when: z.enum(["naturally", "morning", "own_text"]).optional(),
+            at: localStamp.optional(),
+            too_late_after: localStamp.optional(),
+          })
+          .strict(),
         input,
       );
       const t = ctx.tester;
@@ -197,10 +208,12 @@ export const CAPABILITIES: Record<string, Capability> = {
         delivery === "own_text"
           ? `as its own text, ${dueAt!.getTime() <= ctx.now.getTime() + 60_000 ? "within a minute of Do it" : `at ${theirs(dueAt!, t)}`}`
           : `${delivery === "morning" ? "with the morning text" : "in its next text to them that fits"}${dueAt ? `, not before ${theirs(dueAt, t)}` : ""}`;
+      // #169: a question's answer comes back as an alert, unless the founders switched it off.
+      const answers = question ? (alert_on_answer ? " A question: you'll get an alert when they answer (or don't)." : " A question: their answer is saved, with no alert.") : "";
       return {
-        summary: `ZOH brings this up with ${nameOf(t)} in its own words, ${where}: ${what}.${until}`,
+        summary: `ZOH ${question ? "asks" : "brings this up with"} ${nameOf(t)} in its own words, ${where}: ${what}.${until}${answers}`,
         apply: async () => {
-          const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now });
+          const row = await addRequest(ctx.db, { testerId: t.id, author: ctx.founder, body: what, exact: false, sendNow: false, dueAt, delivery, expiresAt, at: ctx.now, question, alertOnAnswer: alert_on_answer });
           return `Queued [${requestRef(row.id)}] ${where}.`;
         },
       };
@@ -553,6 +566,37 @@ export async function confirmDraft(
   });
 }
 
+/**
+ * #169/#168: changes a draft before anyone confirms it (the answer-alert switch, an edit of its words). The new
+ * input is checked as the capability would check it, and the card's summary follows. Only while it's a draft.
+ */
+export async function editDraft(
+  db: Db,
+  opts: { testerId: string; draftId: string; founder: string; now: Date; change: (input: Record<string, unknown>) => Record<string, unknown> },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const [draft] = await db
+    .select()
+    .from(consoleMessages)
+    .where(and(eq(consoleMessages.id, opts.draftId), eq(consoleMessages.testerId, opts.testerId), eq(consoleMessages.kind, "draft"), eq(consoleMessages.draftStatus, "draft")));
+  const capability = CAPABILITIES[draft?.draftAction ?? ""];
+  const [tester] = await db.select().from(testers).where(eq(testers.id, opts.testerId));
+  if (!draft || !capability || !tester) return { ok: false, error: "not a draft any more" };
+  const input = opts.change({ ...((draft.draftInput ?? {}) as Record<string, unknown>) });
+  const ctx: CapabilityContext = { db, tester, founder: opts.founder, now: opts.now, open: await openRequests(db, tester.id), budget: { lookups: 0, searches: 0 } };
+  try {
+    const prepared = await capability.prepare(ctx, input);
+    const [row] = await db
+      .update(consoleMessages)
+      .set({ draftInput: input, body: prepared.summary })
+      .where(and(eq(consoleMessages.id, draft.id), eq(consoleMessages.draftStatus, "draft")))
+      .returning({ id: consoleMessages.id });
+    return row ? { ok: true } : { ok: false, error: "not a draft any more" };
+  } catch (err) {
+    if (err instanceof CapabilityError) return { ok: false, error: err.message };
+    throw err;
+  }
+}
+
 /** Memory lookups, read-only: the console never saves preferences or forgets for a tester. */
 const LOOKUPS = ["open_pages", "search_memory"];
 
@@ -756,8 +800,11 @@ function threadTurn(m: ConsoleMessage): Turn {
       return { role: "user", text: `${m.author ?? "Founder"} (${at}): ${m.body}` };
     case "note":
       return { role: "user", text: `[${at}, note saved for ${m.author ?? "the team"}] ${m.body}` };
-    case "request":
-      return { role: "user", text: `[${at}, request ${requestRef(m.id)} from ${m.author ?? "the team"}${m.exact ? ", word for word" : ""}, ${m.requestStatus}] ${m.body}` };
+    case "request": {
+      // #169: a question's answer (or that they talked past it), for "what did she say?".
+      const answer = m.answerStatus === "answered" ? ` → they answered: ${m.answer}` : m.answerStatus === "dodged" ? " → they talked past it" : "";
+      return { role: "user", text: `[${at}, ${m.question ? "question" : "request"} ${requestRef(m.id)} from ${m.author ?? "the team"}${m.exact ? ", word for word" : ""}, ${m.requestStatus}] ${m.body}${answer}` };
+    }
     case "alert":
       return { role: "user", text: `[${at}, alert ${m.id.slice(0, 8)}: ${m.topic ?? "alert"}${m.seenAt ? `, ${m.topic === PLAN_REVIEW_TOPIC ? "reviewed" : "seen"} by ${m.seenBy}` : ""}] ${m.body}${m.why ? ` (why: ${m.why})` : ""}` };
     case "summary":

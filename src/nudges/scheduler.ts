@@ -13,7 +13,7 @@ import { coachHistory } from "../memory/context.js";
 import { consoleMessages, maintenanceCheckins, messages, nudges, stepDays, suggestions, testers, type Plan, type Suggestion, type Tester } from "../db/schema.js";
 import { alertFailure, raiseAlert, saveFlag } from "../console/alerts.js";
 import { activePause, endPause, lastPauseEnd, pausedOn, pauseEnds, pausesSince } from "../testers/pauses.js";
-import { addThreadLine, APP_AUTHOR, cancelStuckRequests, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
+import { addThreadLine, alertUnanswered, APP_AUTHOR, cancelStuckRequests, claimRequest, closeRequest, doneLine, expireRequests, MORNING_CARRIES, NOT_SENT_TOPIC, pendingExact, pendingRequests, releaseRequest } from "../console/requests.js";
 import { withDaySteps } from "./quiet.js";
 import { DEFAULT_GOAL_CAP, loadCheckins, loadTesterGoals } from "../testers/goals.js";
 import { safeError } from "../errors.js";
@@ -179,6 +179,9 @@ async function forTester(deps: NudgeSchedulerDeps, stored: Tester, now: Date): P
     await endPause(db, tester.id, { at: now, by: "end_date" });
     pause = undefined;
   }
+
+  // #169: a team question ZOH asked a day ago with no answer yet: the founders hear so, once.
+  await alertUnanswered(db, tester, now);
 
   // A step day that ended with nothing done is a miss, whatever else happens, unless it ended inside a pause.
   if (plan && !tester.stoppedAt) {

@@ -4,7 +4,7 @@ import { stillOpen } from "../../coach/next-steps.js";
 import { messageTime } from "../../memory/store.js";
 import type { ConsoleTab, SideSection, ThreadItem } from "../data.js";
 import { draftRef } from "../drafts.js";
-import { APP_AUTHOR, awaitingAnswer } from "../requests.js";
+import { APP_AUTHOR, awaitingAnswer, LISTEN_DAYS } from "../requests.js";
 import { alertCard, clock, dayLabel, esc, founderDay, proofHtml, suggestionCard, when } from "./shared.js";
 
 /**
@@ -53,18 +53,28 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
           ? `<form class="inline" method="post" action="/console/testers/${esc(ctx.testerId)}/requests/${esc(m.id)}/cancel"><button class="small">Cancel</button></form>`
           : "";
       const how = m.exact ? "word for word" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
-      const chips = [how, m.sendNow && "even in quiet hours", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      const chips = [m.question && (m.alertOnAnswer ? "question · alert on answer" : "question"), how, m.sendNow && "even in quiet hours", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      // #169: what came of the question.
+      const answer =
+        m.answerStatus === "answered" ? `<div><b>Answer:</b> ${esc(m.answer ?? "")}</div>` : m.answerStatus === "dodged" ? `<div class="muted">They talked past it; ZOH won't ask again.</div>` : "";
       const timing = [m.dueAt && `${m.delivery === "own_text" ? "at" : "not before"} ${when(m.dueAt)}`, m.expiresAt && `dropped if not out by ${when(m.expiresAt)}`].filter(Boolean);
       return `<div class="event" ${id}><div class="head">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)} · ${time}</span></div>
-<div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
+<div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${answer}${cancel}</div>`;
     }
     case "draft": {
       // #155: what the console chat would do, until a founder confirms it.
       const status = m.draftStatus ?? "draft";
       const base = `/console/testers/${esc(ctx.testerId)}/drafts/${esc(m.id)}`;
+      // #169: a question's answer alert, switched before Do it.
+      const input = (m.draftInput ?? {}) as { question?: boolean; alert_on_answer?: boolean };
+      const alertOn = input.alert_on_answer !== false;
+      const answerAlert =
+        m.draftAction === "plan_request" && input.question
+          ? `<form class="inline" method="post" action="${base}/answer-alert"><input type="hidden" name="on" value="${alertOn ? "false" : "true"}"><button class="small" title="Switch the alert for their answer">${alertOn ? "Alert me when they answer: on" : "Alert me when they answer: off"}</button></form>`
+          : "";
       const actions =
         status === "draft"
-          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form></div>`
+          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form>${answerAlert}</div>`
           : "";
       const result = m.draftResult && status !== "draft" ? `<div class="muted">${esc(m.draftResult)}</div>` : "";
       // #214: named by its own ref ("draft [ab12cd34]"), apart from the request or next step it makes once done.
@@ -83,7 +93,10 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
 function isLive(i: ThreadItem): boolean {
   if (i.type === "suggestion") return stillOpen(i.suggestion);
   if (i.line.kind === "draft") return i.line.draftStatus === "draft";
-  return i.line.kind === "request" && (i.line.requestStatus === "pending" || i.line.requestStatus === "sending");
+  if (i.line.kind !== "request") return false;
+  if (i.line.requestStatus === "pending" || i.line.requestStatus === "sending") return true;
+  // #169/#168: once it's out, its answer and delivery still come in (as long as ZOH listens for an answer).
+  return !!i.line.doneAt && Date.now() - i.line.doneAt.getTime() < LISTEN_DAYS * 86_400_000;
 }
 
 /**

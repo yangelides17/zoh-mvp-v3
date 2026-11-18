@@ -1,7 +1,7 @@
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, ne, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { raiseAlert } from "./alerts.js";
-import { consoleMessages, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
+import { consoleMessages, type AnswerStatus, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
 
 /**
  * What the founders send through the console chat (spec: GitHub issue "Founder console", 4 and
@@ -63,12 +63,17 @@ export async function addRequest(
     expiresAt?: Date;
     at: Date;
     status?: "pending" | "cancelled";
+    /** #169: a question whose answer comes back to the founders (an alert unless `alertOnAnswer` is false). */
+    question?: boolean;
+    alertOnAnswer?: boolean;
   },
 ): Promise<ConsoleMessage> {
   const [row] = await db
     .insert(consoleMessages)
     .values({
       testerId: opts.testerId,
+      question: opts.question ?? false,
+      alertOnAnswer: opts.alertOnAnswer ?? true,
       kind: "request",
       author: opts.author,
       body: opts.body,
@@ -304,4 +309,78 @@ export async function notesForCoach(db: Db, tester: Pick<Tester, "id" | "context
     .orderBy(desc(consoleMessages.createdAt))
     .limit(NOTES_SHOWN);
   return rows.reverse();
+}
+
+/** #169: how long ZOH listens for the answer to a team question it asked (a dodge included). */
+export const LISTEN_DAYS = 7;
+/** #169: no answer this long after ZOH asked: the founders hear so (once). */
+export const NO_ANSWER_MS = 24 * 3_600_000;
+/** #169: the alert with their answer, and the one for no answer or talking past it (each once per question). */
+export const ANSWER_ALERT = "question_answer";
+export const UNANSWERED_ALERT = "question_unanswered";
+
+/**
+ * #169: team questions ZOH asked and is still listening for: asked (sent) in the last `LISTEN_DAYS` days, since
+ * their context started, not answered yet (a dodge still listens). None once they've stopped. Oldest first.
+ */
+export async function listeningQuestions(db: Db, tester: Pick<Tester, "id" | "contextStartedAt" | "stoppedAt">, now: Date): Promise<ConsoleMessage[]> {
+  if (tester.stoppedAt) return [];
+  const since = new Date(Math.max(tester.contextStartedAt.getTime(), now.getTime() - LISTEN_DAYS * 86_400_000));
+  return db
+    .select()
+    .from(consoleMessages)
+    .where(
+      and(
+        eq(consoleMessages.testerId, tester.id),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.question, true),
+        eq(consoleMessages.requestStatus, "done"),
+        gte(consoleMessages.doneAt, since),
+        or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered")),
+      ),
+    )
+    .orderBy(asc(consoleMessages.doneAt));
+}
+
+const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 3)}...` : s);
+
+/**
+ * #169: records what came of a question ZOH asked: their answer (close to their words), or that they talked past
+ * it. Saved either way, with a line in the thread; the founders get an alert unless they switched it off. An
+ * answer after a dodge or a no-answer alert still counts. False when it was already answered.
+ */
+export async function recordAnswer(
+  db: Db,
+  opts: { question: ConsoleMessage; status: AnswerStatus; answer?: string; name: string | null; at: Date },
+): Promise<boolean> {
+  const q = opts.question;
+  const [row] = await db
+    .update(consoleMessages)
+    .set({ answerStatus: opts.status, answer: opts.answer ?? null, answeredAt: opts.at })
+    .where(and(eq(consoleMessages.id, q.id), or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered"))))
+    .returning();
+  if (!row) return false;
+  const who = opts.name ?? "They";
+  const asked = clip(q.body, 120);
+  const body = opts.status === "answered" ? `${who} answered "${asked}": ${opts.answer}` : `${who} talked past "${asked}" (ZOH won't ask again)`;
+  await addThreadLine(db, { testerId: q.testerId, kind: "coach", author: APP_AUTHOR, body, at: opts.at });
+  if (q.alertOnAnswer) {
+    const topic = opts.status === "answered" ? ANSWER_ALERT : UNANSWERED_ALERT;
+    await raiseAlert(db, { testerId: q.testerId, topic, key: `${topic}:${q.id}`, body, at: opts.at });
+  }
+  return true;
+}
+
+/** #169: one alert per question still unanswered `NO_ANSWER_MS` after ZOH asked it (none once they've stopped). */
+export async function alertUnanswered(db: Db, tester: Tester, now: Date): Promise<void> {
+  for (const q of await listeningQuestions(db, tester, now)) {
+    if (!q.alertOnAnswer || q.answerStatus || !q.doneAt || now.getTime() - q.doneAt.getTime() < NO_ANSWER_MS) continue;
+    await raiseAlert(db, {
+      testerId: tester.id,
+      topic: UNANSWERED_ALERT,
+      key: `${UNANSWERED_ALERT}:${q.id}`,
+      body: `No answer yet from ${tester.name ?? "them"} (asked ${founderTime(q.doneAt)}): "${clip(q.body, 120)}"`,
+      at: now,
+    });
+  }
 }

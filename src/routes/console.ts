@@ -32,7 +32,7 @@ import { metricsView } from "../console/views/metrics.js";
 import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
 import { coachThinking, consoleTabHtml, itemHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
-import { confirmDraft, postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { confirmDraft, editDraft, postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { cancelDraft } from "../console/drafts.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
@@ -348,6 +348,16 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     }
     const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()) });
     if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not done: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
+    return back(reply, id, "chat");
+  }));
+
+  // #169: the "Alert me when they answer" switch on a question's draft card, before Do it.
+  app.post("/console/testers/:id/drafts/:did/answer-alert", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const on = request.body?.on === "true";
+    const done = await editDraft(opts.db, { testerId: id, draftId: did, founder: name, now: await nowFor(id), change: (input) => ({ ...input, alert_on_answer: on }) });
+    if (!done.ok) return reply.code(409).send({ error: done.error });
     return back(reply, id, "chat");
   }));
 
