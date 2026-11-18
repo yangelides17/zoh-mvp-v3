@@ -344,11 +344,12 @@ export interface ConversationResult {
   usage: TokenUsage;
 }
 
-/** #230: waiting lines sent word for word, changed to fit, and the extra replies sent while one waited. */
+/** #230: waiting lines sent word for word, changed to fit, skipped (their point already made), and the extra replies sent while one waited. */
 export interface LineCounts {
   exact: number;
   adapted: number;
   waited: number;
+  skipped: number;
   problem?: string;
 }
 

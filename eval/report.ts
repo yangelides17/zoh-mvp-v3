@@ -338,10 +338,11 @@ export function renderMarkdown(r: ReportData): string {
   const counted = r.conversations.filter((c) => c.lines);
   if (counted.length) {
     // #230: how the cases' waiting lines went out, and the runs that never reached a line's moment.
-    const sum = (k: "exact" | "adapted" | "waited") => counted.reduce((n, c) => n + c.lines![k], 0);
+    // Reports from before the trial's fixes have no `skipped`.
+    const sum = (k: "exact" | "adapted" | "waited" | "skipped") => counted.reduce((n, c) => n + (c.lines![k] ?? 0), 0);
     const problems = counted.filter((c) => c.lines!.problem);
     lines.push(
-      `Tester lines: ${sum("exact")} word for word, ${sum("adapted")} changed to fit, ${sum("waited")} extra replies while a line waited, ${problems.length} case problem${problems.length === 1 ? "" : "s"}.`,
+      `Tester lines: ${sum("exact")} word for word, ${sum("adapted")} changed to fit, ${sum("skipped")} skipped (already said), ${sum("waited")} extra replies while a line waited, ${problems.length} case problem${problems.length === 1 ? "" : "s"}.`,
       "",
     );
     if (problems.length) {

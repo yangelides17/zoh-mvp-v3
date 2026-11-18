@@ -23,7 +23,7 @@ class EchoReplier implements Replier {
 }
 
 /** A fake simulator answering with the given decisions in order, recording every prompt it was sent. */
-function fakeSim(answers: { decision: "fits" | "close" | "wait"; text: string }[], plain: string[] = []) {
+function fakeSim(answers: { decision: "said" | "fits" | "close" | "wait"; text: string }[], plain: string[] = []) {
   const prompts: CompletionRequest[] = [];
   let a = 0;
   let p = 0;
@@ -83,7 +83,7 @@ describe("eval: anchored case lines (#230)", () => {
     const { result, testerTexts } = await play(makeCase(["Start", anchored]), sim.complete);
     expect(testerTexts).toEqual(["Start", "it went ok, a bit messy", anchored.say]);
     expect(result.endedBy).toBe("script");
-    expect(result.lines).toEqual({ exact: 1, adapted: 0, waited: 1 });
+    expect(result.lines).toEqual({ exact: 1, adapted: 0, waited: 1, skipped: 0 });
     // The simulator saw ZOH's latest text, the facts and the line's moment.
     const first = String(sim.prompts[0]!.messages[0]!.content);
     expect(first).toContain("got: Start");
@@ -95,7 +95,7 @@ describe("eval: anchored case lines (#230)", () => {
     const sim = fakeSim([{ decision: "close", text: "looking down at my left hand, for sure" }]);
     const { result, testerTexts } = await play(makeCase(["Start", anchored]), sim.complete);
     expect(testerTexts).toEqual(["Start", "looking down at my left hand, for sure"]);
-    expect(result.lines).toEqual({ exact: 0, adapted: 1, waited: 0 });
+    expect(result.lines).toEqual({ exact: 0, adapted: 1, waited: 0, skipped: 0 });
     const prompt = String(sim.prompts[0]!.messages[0]!.content);
     expect(prompt).toContain("got: Start");
     expect(prompt).toContain(anchored.means);
@@ -109,7 +109,7 @@ describe("eval: anchored case lines (#230)", () => {
     ]);
     const { result, testerTexts } = await play(makeCase(["Start", { say: "works", when: "after ZOH proposes something", fixed: true }]), sim.complete);
     expect(testerTexts).toEqual(["Start", "sure, works for me", "works"]);
-    expect(result.lines).toEqual({ exact: 1, adapted: 0, waited: 1 });
+    expect(result.lines).toEqual({ exact: 1, adapted: 0, waited: 1, skipped: 0 });
   });
 
   it("leads toward the line by default; with lead off, the waiting reply is written without it", async () => {
@@ -126,6 +126,25 @@ describe("eval: anchored case lines (#230)", () => {
     expect(String(reply.messages[0]!.content) + reply.system).not.toContain(anchored.say);
     expect(String(reply.messages[0]!.content) + reply.system).not.toContain(anchored.means);
     expect(reply.system).toContain("looks down at the left hand early");
+  });
+
+  it("skips a line whose point was already made, going straight to the next one (no repeats)", async () => {
+    const sim = fakeSim([
+      { decision: "said", text: "" },
+      { decision: "fits", text: "" },
+    ]);
+    const { result, testerTexts } = await play(makeCase(["Start", anchored, { say: "ok yeah", means: "agrees", when: "after a proposal", length: "thin" }]), sim.complete);
+    expect(testerTexts).toEqual(["Start", "ok yeah"]);
+    expect(result.lines).toEqual({ exact: 1, adapted: 0, waited: 0, skipped: 1 });
+  });
+
+  it("leads only by steering the topic, never by asking ZOH to suggest or decide; a changed line carries only its own point", async () => {
+    const sim = fakeSim([{ decision: "fits", text: "" }]);
+    await play(makeCase(["Start", anchored]), sim.complete);
+    const prompt = String(sim.prompts[0]!.messages[0]!.content);
+    expect(prompt).toMatch(/never ask ZOH to suggest, propose, plan or decide/i);
+    expect(prompt).toMatch(/only this text's own point/i);
+    expect(prompt).toMatch(/"said"/);
   });
 
   it("marks a case problem after 2 extra texts on one line", async () => {
@@ -187,8 +206,8 @@ describe("eval: anchored case lines (#230)", () => {
       ...extra,
     });
     const convs = [
-      base("case:a", { lines: { exact: 2, adapted: 1, waited: 1 }, grade: { texts: [], conversation: [{ rule: "regression", pass: true, borderline: false, reason: "ok" }], summary: "s" } }),
-      base("case:b", { endedBy: "case-problem", lines: { exact: 0, adapted: 0, waited: 3, problem: "“works” never fit (after ZOH proposes something)" } }),
+      base("case:a", { lines: { exact: 2, adapted: 1, waited: 1, skipped: 1 }, grade: { texts: [], conversation: [{ rule: "regression", pass: true, borderline: false, reason: "ok" }], summary: "s" } }),
+      base("case:b", { endedBy: "case-problem", lines: { exact: 0, adapted: 0, waited: 3, skipped: 0, problem: "“works” never fit (after ZOH proposes something)" } }),
     ];
     const summary = aggregate(convs);
     expect(Object.keys(summary.conversations)).not.toContain("case:b");
@@ -206,7 +225,7 @@ describe("eval: anchored case lines (#230)", () => {
       conversations: convs,
     };
     const md = renderMarkdown(report);
-    expect(md).toContain("Tester lines: 2 word for word, 1 changed to fit, 4 extra replies while a line waited, 1 case problem");
+    expect(md).toContain("Tester lines: 2 word for word, 1 changed to fit, 1 skipped (already said), 4 extra replies while a line waited, 1 case problem");
     expect(md).toMatch(/## Case problems[\s\S]*Case case:b[\s\S]*never fit/);
   });
 

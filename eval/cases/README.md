@@ -64,10 +64,12 @@ moment it fits, so it never lands after a text it doesn't answer:
 | `lead` | `false`: while it waits, the tester doesn't steer toward it (the case tests whether ZOH gets there itself). |
 | `starts` | `true`: the tester starts a new exchange (texting first), so it's sent without waiting. |
 
-Before each such line, the simulated tester (`EVAL_SIM_MODEL`) reads the conversation and decides: it **fits**
-(the wording is sent), it's **close** (the wording changed as little as possible to answer what ZOH actually said;
-never for a fixed line) or **not yet** (a natural reply from the case's `facts`, leading toward the line unless
-`lead` is off). After 2 extra replies on one line, or 4 in the case, the run stops as a **case problem**: not
+Before each such line, the simulated tester (`EVAL_SIM_MODEL`) reads the conversation and decides: its point was
+**already said** (skipped, so the tester never repeats itself), it **fits** (the wording is sent), it's **close**
+(the wording changed as little as possible to answer what ZOH actually said, carrying only its own point; never for
+a fixed line) or **not yet** (a natural reply from the case's `facts`). While a line waits, leading only steers the
+topic toward it and never asks ZOH to suggest, plan or decide; set `lead: false` on cases that test whether ZOH
+takes that step itself. After 2 extra replies on one line, or 4 in the case, the run stops as a **case problem**: not
 graded, listed in the report's "Case problems" with the line that never fit. The report counts lines sent word for
 word, changed to fit and the extra replies. Actions (`advance to`, `console …`), commands and photos stay plain lines.
 

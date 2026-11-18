@@ -151,11 +151,18 @@ export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine)
     `- Length: ${line.length ? LENGTH_TEXT[line.length] : "about as long as the wording"}`,
     "",
     "Decide, looking at ZOH's latest text:",
+    `- "said": you've already got this text's point across earlier in the conversation, so sending it would repeat you. (Nothing is sent for it.)`,
     `- "fits": ZOH's latest text is that moment and the wording answers it as written. (The wording is sent; your text is ignored.)`,
     ...(line.fixed
       ? []
-      : [`- "close": it's that moment, but the wording doesn't quite answer what ZOH actually said. Text: the wording changed as little as possible to answer it, same meaning and length, nothing new.`]),
-    `- "wait": ZOH isn't at that moment yet (e.g. it asked something else first). Text: a natural reply to ZOH's latest text from what's true about you${line.lead ? ", gently moving toward the planned text without doing ZOH's part for it" : ""}.`,
+      : [
+          `- "close": it's that moment, but the wording doesn't quite answer what ZOH actually said. Text: the wording changed as little as possible to answer it, same length, carrying only this text's own point: nothing else from what's true about you, and nothing you haven't been asked yet.`,
+        ]),
+    `- "wait": ZOH isn't at that moment yet (e.g. it asked something else first). Text: a natural reply to ZOH's latest text from what's true about you${
+      line.lead
+        ? ", steering the topic gently toward the planned text. Never ask ZOH to suggest, propose, plan or decide anything for you: that's what's being tested"
+        : ""
+    }.`,
   ].join("\n");
 }
 
@@ -167,7 +174,7 @@ export function waitingReplyPrompt(transcript: TranscriptLine[]): string {
 function decisionSchema(fixed: boolean): Record<string, unknown> {
   return {
     type: "object",
-    properties: { decision: { type: "string", enum: fixed ? ["fits", "wait"] : ["fits", "close", "wait"] }, text: { type: "string" } },
+    properties: { decision: { type: "string", enum: fixed ? ["said", "fits", "wait"] : ["said", "fits", "close", "wait"] }, text: { type: "string" } },
     required: ["decision", "text"],
     additionalProperties: false,
   };
@@ -175,14 +182,15 @@ function decisionSchema(fixed: boolean): Record<string, unknown> {
 
 /**
  * Plays a case's lines (#230). Plain lines and lines that start an exchange go out as written, like
- * `scriptedTester`. A line with a moment waits for it: the simulator decides whether ZOH's latest text fits ("fits"
- * sends the wording itself), is close (a minimal change, never for a fixed line) or isn't there yet (a reply from
- * the facts). Past WAITS_PER_LINE or WAITS_PER_CASE extra replies, the run stops as a case problem.
+ * `scriptedTester`. A line with a moment waits for it: the simulator decides whether its point was already made
+ * (skipped), ZOH's latest text fits ("fits" sends the wording itself), is close (a minimal change, never for a fixed
+ * line) or isn't there yet (a reply from the facts). Past WAITS_PER_LINE or WAITS_PER_CASE extra replies, the run
+ * stops as a case problem.
  */
 export function caseTester(c: RegressionCase, complete: Completer): Tester & { lines(): LineCounts } {
   const system = caseTesterSystemPrompt(c);
   const name = c.seed?.name ?? "";
-  const counts: LineCounts = { exact: 0, adapted: 0, waited: 0 };
+  const counts: LineCounts = { exact: 0, adapted: 0, waited: 0, skipped: 0 };
   let usage = { input: 0, output: 0 };
   let i = 0;
   let waitsOnLine = 0;
@@ -198,17 +206,25 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
     usage: () => usage,
     lines: () => ({ ...counts }),
     async next(transcript) {
-      const line = c.testerLines[i];
-      if (line === undefined || counts.problem) return null;
-      if (typeof line === "string" || line.starts) {
+      let line = c.testerLines[i];
+      let decided: { decision?: string; text?: string } = {};
+      // A line whose point was already made is skipped, so the tester never repeats itself (#230 trial).
+      for (;;) {
+        if (line === undefined || counts.problem) return null;
+        if (typeof line === "string" || line.starts) {
+          i += 1;
+          return lineText(line);
+        }
+        try {
+          decided = JSON.parse(await ask(lineDecisionPrompt(transcript, line), decisionSchema(line.fixed))) as typeof decided;
+        } catch {
+          throw new Error(`The simulator's decision for “${line.say}” wasn't JSON`);
+        }
+        if (decided.decision !== "said") break;
+        counts.skipped += 1;
         i += 1;
-        return lineText(line);
-      }
-      let decided: { decision?: string; text?: string };
-      try {
-        decided = JSON.parse(await ask(lineDecisionPrompt(transcript, line), decisionSchema(line.fixed))) as typeof decided;
-      } catch {
-        throw new Error(`The simulator's decision for “${line.say}” wasn't JSON`);
+        waitsOnLine = 0;
+        line = c.testerLines[i];
       }
       if (decided.decision === "fits" || (decided.decision === "close" && !line.fixed)) {
         i += 1;
