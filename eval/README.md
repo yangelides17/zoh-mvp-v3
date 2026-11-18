@@ -112,7 +112,9 @@ $0.16 for seven. (Until then the coach was estimated at about a fifth of that, s
    local time. Every tester text goes in through the real `/webhooks/sendblue` route. The coach is
    whatever `src/wiring.ts` builds, so a new coach is evaluated without touching the eval.
 3. **Simulate.** For scenarios, a Claude plays the tester from the persona, goal and hidden facts
-   and stops when ZOH wraps up (or at the turn cap). Cases send their scripted lines instead.
+   and stops when ZOH wraps up (or at the turn cap). Cases send their scripted lines instead; a line that waits for
+   its moment (#230) is held until ZOH's latest text fits it, with the simulated tester answering from the case's
+   facts meanwhile, and a case whose line never fits is a "case problem", not graded (see `eval/cases/README.md`).
 4. **Grade.** A separate Claude call sees only the transcript (with local times and the tester's
    area code), the feature's approved checks (the rubric in `eval/features.ts`, copied from the
    spec's "Should" list) and the whole voice page (`docs/coach-voice.md`), read at run time. It scores each ZOH text per rule and the conversation as a whole, as structured
