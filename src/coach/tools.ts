@@ -30,7 +30,7 @@ import {
 } from "../db/schema.js";
 import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
-import { closeRequest, doneLine, findRequest } from "../console/requests.js";
+import { claimRequest, findRequest } from "../console/requests.js";
 import { alertAnswer } from "../console/suggestions.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
@@ -1151,7 +1151,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const { request: ref } = input as z.infer<typeof schemas.mark_request_done>;
       const found = findRequest(state.teamRequests, ref);
       if (!found) return { ok: false, error: `No open team request ${ref}.` };
-      await closeRequest(db, { request: found, status: "done", at, line: doneLine(found.body, "in a reply", at) });
+      // #169: held for this reply ("sending"); it closes once the reply is sent, and goes back if it isn't.
+      if (!(await claimRequest(db, found.id, at))) return { ok: false, error: `No open team request ${ref}.` };
       return saved(tester, "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.");
     }
   }

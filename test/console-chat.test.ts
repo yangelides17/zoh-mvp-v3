@@ -439,16 +439,14 @@ describe("the texting coach and the team", () => {
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: later, isFirstText: false }))).not.toContain("Old news");
   });
 
-  it("mark_request_done closes the request once, with a Done line for the founders", async () => {
+  it("mark_request_done claims the request once for this reply (#169: it closes when the reply is sent)", async () => {
     const tester = await seed();
     const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share the sleep article", exact: false, sendNow: false, at: now });
     const state = await loadCoachState(t.db, tester, { now, isFirstText: false });
     const result = await runTool(t.db, state, "mark_request_done", { request: requestRef(request.id) }, now);
     expect(result.ok).toBe(true);
     const rows = await thread(tester.id);
-    expect(rows.find((r) => r.id === request.id)).toMatchObject({ requestStatus: "done", doneAt: now });
-    expect(rows.at(-1)).toMatchObject({ kind: "coach", author: APP_AUTHOR });
-    expect(rows.at(-1)!.body).toMatch(/^Done \(in a reply, Tue 12:00 PM\): Share the sleep article$/);
+    expect(rows.find((r) => r.id === request.id)).toMatchObject({ requestStatus: "sending", claimedAt: now, doneAt: null });
     // Later rounds of the same reply still see it, so the text doesn't drop it (eval: article-link).
     const sameReply = await loadCoachState(t.db, tester, { now, isFirstText: false });
     // #199: under "This text carries", so the text doesn't drop it.

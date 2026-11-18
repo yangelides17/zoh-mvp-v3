@@ -181,7 +181,7 @@ export function createCoach(opts: CoachOptions): Replier {
       ? { system: systemBlocks(blocks, undefined, memory), messages: withSheet(messages, state) }
       : { system: systemBlocks(blocks, state, memory), messages };
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media, carrying }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
@@ -263,7 +263,7 @@ export function createCoach(opts: CoachOptions): Replier {
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap, carrying });
       // #162: the team's requests (and anything else on the sheet) may carry a link to pass on.
       addSeen(allowed, buildStateBlock(state));
       let fallbackText = "";
@@ -383,11 +383,11 @@ export function createCoach(opts: CoachOptions): Replier {
             // #162: a document or memory it opened may hold a link to pass on.
             addSeen(allowed, result.message);
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap, carrying });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap, carrying });
             }
             parts = grown(parts, partsFor(state, reach));
           }

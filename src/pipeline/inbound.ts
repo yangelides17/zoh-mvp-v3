@@ -6,7 +6,7 @@ import { COACH_HISTORY_CAP } from "../coach/coach.js";
 import type { Db } from "../db/client.js";
 import { insertOutbound, mergeTimings, updateMessage } from "../db/messages.js";
 import { coachHistory } from "../memory/context.js";
-import { messages, type Message, type Tester } from "../db/schema.js";
+import { consoleMessages, messages, type Message, type Tester } from "../db/schema.js";
 import { prepareImageForClaude, type ClaudeImage } from "../media/images.js";
 import type { MediaDescriber } from "../memory/describe.js";
 import { MAX_DOCUMENT_PAGES, readDocument, type ReadDocument } from "../media/documents.js";
@@ -19,6 +19,7 @@ import type { Transcriber } from "../transcription/speaches.js";
 import { isAllowed } from "../config.js";
 import { safeError } from "../errors.js";
 import { alertFailure, alertTextedAfterStop } from "../console/alerts.js";
+import { closeRequest, doneLine, releaseRequest, requestsClaimed } from "../console/requests.js";
 import { devCommandOffReply, isJumpText, isOptOutText, isResetText, OPT_OUT_CONFIRMATION, optOut } from "../testers/commands.js";
 import { jumpSettled, onTesterClock, testerNow } from "../testers/clock.js";
 import { getOrCreateTester, getTester, resetTester, updateTester } from "../testers/testers.js";
@@ -251,8 +252,12 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
   let draftsDropped = 0;
   /** #162: the status texts sent for the reply being written, across its redrafts (one per kind, at most two). */
   let status = new Set<WebActivity>();
+  /** #169: team requests this reply has claimed, across its redrafts: closed once it's sent, handed back if it isn't. */
+  let claimed: string[] = [];
   for (;;) {
     if (line.cancelled) {
+      await releaseClaims(db, claimed);
+      claimed = [];
       for (const p of [...batch, ...line.cancelledPending.splice(0)]) {
         await mergeTimings(db, p.inbound.id, { ...p.timings, reply_dropped: "stop_or_reset" });
         await updateMessage(db, p.inbound.id, { status: "REPLY_DROPPED", error: null });
@@ -278,7 +283,9 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     const tester = (await getTester(db, first.id)) ?? first;
     // #162: a holding text already sent for a file they sent counts as that kind's status text.
     for (const p of batch) if (p.timings.holding_kind) status.add(p.timings.holding_kind as WebActivity);
-    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal, status);
+    const nows: Date[] = [];
+    const outcome = await draftReply(deps, line, tester, batch, media, dropped, signal, status, { nows, carrying: claimed });
+    for (const r of await requestsClaimed(db, tester.id, { at: nows })) if (!claimed.includes(r.id)) claimed.push(r.id);
     if (outcome.kind === "dropped") {
       dropped = mergeDropped(dropped, outcome.draft);
       draftsDropped++;
@@ -296,7 +303,11 @@ async function answerLine(deps: PipelineDeps, line: ReplyLine, first: Tester, se
     }
     if (draftsDropped) latest.timings.drafts_dropped = draftsDropped;
     if (batch.length > 1) latest.timings.texts_answered = batch.length;
-    await sendReply(deps, tester, sendblue, batch, media, outcome.text);
+    const reply = await sendReply(deps, tester, sendblue, batch, media, outcome.text);
+    // #169: what this reply carried counts only once it's sent, and only in the coach's own words.
+    if (reply && outcome.fromCoach) await closeClaims(db, claimed, reply);
+    else await releaseClaims(db, claimed);
+    claimed = [];
     batch = [];
     dropped = { actions: [] };
     draftsDropped = 0;
@@ -317,8 +328,25 @@ function mergeDropped(had: DroppedDraft, more: DroppedDraft): DroppedDraft {
   };
 }
 
-/** A finished draft carries the actions it took (#132), handed on if it's dropped before sending. */
-type DraftOutcome = { kind: "text"; text: string; actions: string[] } | { kind: "dropped"; draft: DroppedDraft };
+/** #169: closes the requests a sent reply carried, linked to it, with a Done line for the founders. */
+async function closeClaims(db: Db, ids: readonly string[], reply: Message): Promise<void> {
+  const at = reply.sentAt ?? reply.createdAt;
+  for (const id of ids) {
+    const [request] = await db.select().from(consoleMessages).where(eq(consoleMessages.id, id));
+    if (request) await closeRequest(db, { request, status: "done", at, messageId: reply.id, line: doneLine(request.body, "in a reply", at) });
+  }
+}
+
+/** #169: hands back the requests a reply claimed but didn't send (stopped, failed, or not the coach's words). */
+async function releaseClaims(db: Db, ids: readonly string[]): Promise<void> {
+  for (const id of ids) await releaseRequest(db, id);
+}
+
+/**
+ * A finished draft carries the actions it took (#132), handed on if it's dropped before sending. `fromCoach`: the
+ * coach wrote it (not the fallback or system-down text), so what it claimed is carried.
+ */
+type DraftOutcome = { kind: "text"; text: string; actions: string[]; fromCoach: boolean } | { kind: "dropped"; draft: DroppedDraft };
 
 /**
  * The reply text from the coach, or the fallback, with retries. Before the plan locks it reads the
@@ -333,6 +361,7 @@ async function draftReply(
   dropped: DroppedDraft,
   signal: AbortSignal,
   status: Set<WebActivity>,
+  claims: { nows: Date[]; carrying: readonly string[] },
 ): Promise<DraftOutcome> {
   const { db, log } = deps;
   const now = deps.now ?? (() => new Date());
@@ -342,7 +371,7 @@ async function draftReply(
   const ctx = { messageId: latest.inbound.id, contact: maskNumber(latest.inbound.contactNumber) };
   if (!deps.replier) {
     errors.push("claude: ANTHROPIC_API_KEY not configured");
-    return { kind: "text", text: FALLBACK_REPLY, actions: [] };
+    return { kind: "text", text: FALLBACK_REPLY, actions: [], fromCoach: false };
   }
   const replier = deps.replier;
   const sendblue = deps.sendblue;
@@ -376,6 +405,7 @@ async function draftReply(
   const actions: string[] = [];
   const delays = deps.retryDelaysMs ?? RETRY_DELAYS_MS;
   let replyText = FALLBACK_REPLY;
+  let fromCoach = false;
   let emptyRetried = false;
   let failures = 0;
   for (let attempt = 1; ; attempt++) {
@@ -384,10 +414,13 @@ async function draftReply(
       const fresh = (attempt > 1 && (await getTester(db, tester.id))) || tester;
       const history = await coachHistory(db, fresh, clock(), COACH_HISTORY_CAP);
       const turns = toTurns(history, current);
+      const at = clock();
+      claims.nows.push(at);
       replyText = await replier.reply({
         tester: fresh,
         turns,
-        now: clock(),
+        now: at,
+        ...(claims.carrying.length ? { carrying: claims.carrying } : {}),
         messageId: latest.inbound.id,
         interrupted,
         signal,
@@ -414,6 +447,7 @@ async function draftReply(
           if (u.searches || u.fetches || u.watches) searched = true;
         },
       });
+      fromCoach = true;
       break;
     } catch (err) {
       if (err instanceof DraftDroppedError) return { kind: "dropped", draft: err.draft };
@@ -446,7 +480,7 @@ async function draftReply(
     }
   }
   timings.claude_ms = now().getTime() - claudeStart.getTime();
-  return { kind: "text", text: replyText, actions };
+  return { kind: "text", text: replyText, actions, fromCoach };
   }
 }
 
@@ -539,7 +573,7 @@ async function sendReply(
   batch: PendingText[],
   media: (PreparedMedia | undefined)[],
   replyText: string,
-): Promise<void> {
+): Promise<Message | undefined> {
   const { db, log } = deps;
   const now = deps.now ?? (() => new Date());
   const clock = clockFor(deps, tester);
@@ -549,6 +583,7 @@ async function sendReply(
 
   // 4. Send and record the reply.
   await Promise.all(batch.map((p) => p.typing));
+  let sentReply: Message | undefined;
   try {
     const sent = await sendblue.sendMessage({ number: inbound.contactNumber, content: replyText });
     const realSentAt = now();
@@ -559,7 +594,7 @@ async function sendReply(
     if (Number.isFinite(started)) timings.processing_ms = realSentAt.getTime() - started;
     // #162: the reply carries what it looked up, for the console's cost line beside it.
     const lookups = Object.fromEntries(LOOKUP_TIMINGS.filter((k) => timings[k]).map((k) => [k, Number(timings[k])]));
-    await insertOutbound(db, {
+    sentReply = await insertOutbound(db, {
       contactNumber: inbound.contactNumber,
       lineNumber: inbound.lineNumber,
       content: replyText,
@@ -602,6 +637,7 @@ async function sendReply(
     });
   }
   log.info({ ...ctx, timings, errors, texts: batch.length }, "Inbound message handled");
+  return sentReply;
 }
 
 /**

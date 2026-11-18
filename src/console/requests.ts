@@ -246,14 +246,24 @@ export async function cancelStuckRequests(db: Db, tester: Tester, now: Date): Pr
 }
 
 /**
- * Requests the coach marked done in the reply it's writing now (a reply's rounds share one `now`):
- * still shown, so the text that carries one doesn't drop it once it's off the pending list.
+ * Requests the reply being written has claimed (#169): by this draft (a reply's rounds share one `now`) or by
+ * an earlier draft of the same reply that was dropped (`ids`). Still shown, so the text that carries one doesn't
+ * drop it once it's off the pending list. They close only once the reply is sent.
  */
-export async function requestsDoneAt(db: Db, testerId: string, now: Date): Promise<ConsoleMessage[]> {
+export async function requestsClaimed(db: Db, testerId: string, opts: { at: Date[]; ids?: readonly string[] }): Promise<ConsoleMessage[]> {
+  const ids = opts.ids ?? [];
+  if (!opts.at.length && !ids.length) return [];
   return db
     .select()
     .from(consoleMessages)
-    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "done"), eq(consoleMessages.doneAt, now)))
+    .where(
+      and(
+        eq(consoleMessages.testerId, testerId),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.requestStatus, "sending"),
+        or(...(opts.at.length ? [inArray(consoleMessages.claimedAt, opts.at)] : []), ...(ids.length ? [inArray(consoleMessages.id, [...ids])] : [])),
+      ),
+    )
     .orderBy(asc(consoleMessages.createdAt));
 }
 

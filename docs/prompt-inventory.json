@@ -3335,11 +3335,11 @@
    "change": "unchanged"
   },
   {
-   "text": "in a reply",
+   "text": "No open team request ${ref}.",
    "file": "src/coach/tools.ts",
-   "where": "runTool > line",
-   "kind": "tool result",
-   "change": "unchanged"
+   "where": "runTool > error",
+   "kind": "tool error",
+   "change": "new"
   },
   {
    "text": "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.",
@@ -4096,6 +4096,13 @@
    "where": "processInbound > handled",
    "kind": "not read by ZOH",
    "change": "unchanged"
+  },
+  {
+   "text": "in a reply",
+   "file": "src/pipeline/inbound.ts",
+   "where": "closeClaims > line",
+   "kind": "not read by ZOH",
+   "change": "moved from src/coach/tools.ts (runTool > line)"
   },
   {
    "text": "claude: ANTHROPIC_API_KEY not configured",
