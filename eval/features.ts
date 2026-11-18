@@ -167,13 +167,14 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "conversation",
         group: "flow",
         label:
-          "The first plan shows the destination (if they named one), day 1's step, the usual schedule and the proof, plus a short general line on how progression works from here; no list or path of future steps",
+          "The first plan shows the destination (if one was agreed), day 1's step, the usual schedule and the proof, plus a short general line on how progression works from here; no list or path of future steps",
       },
       {
         id: "destination",
         scope: "conversation",
         group: "flow",
-        label: "No destination given: at most one light ask, and the plan still locks smoothly without one",
+        label:
+          "No destination given: at most one light ask; a near one ZOH suggests is built only on what they shared, with a reason, and left to them; with too little to go on no guess, and the plan still locks smoothly without one",
       },
       {
         id: "step-defined",
