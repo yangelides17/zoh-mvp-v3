@@ -335,6 +335,22 @@ export function renderMarkdown(r: ReportData): string {
     `**Overall: ${pct(r.summary.overall.rate)}** of checks passed (${r.summary.overall.pass}/${r.summary.overall.total}, ${r.summary.overall.borderline} borderline).`,
     "",
   );
+  const counted = r.conversations.filter((c) => c.lines);
+  if (counted.length) {
+    // #230: how the cases' waiting lines went out, and the runs that never reached a line's moment.
+    // Reports from before the trial's fixes have no `skipped`.
+    const sum = (k: "exact" | "adapted" | "waited" | "skipped") => counted.reduce((n, c) => n + (c.lines![k] ?? 0), 0);
+    const problems = counted.filter((c) => c.lines!.problem);
+    lines.push(
+      `Tester lines: ${sum("exact")} word for word, ${sum("adapted")} changed to fit, ${sum("skipped")} skipped (already said), ${sum("waited")} extra replies while a line waited, ${problems.length} case problem${problems.length === 1 ? "" : "s"}.`,
+      "",
+    );
+    if (problems.length) {
+      lines.push("## Case problems", "", "A line never found its moment, so these runs weren't graded; the case needs fixing, not ZOH. Transcripts are under Conversations.", "");
+      for (const c of problems) lines.push(`- ${c.plan.title} (\`${c.plan.key}\`): ${c.lines!.problem}`);
+      lines.push("");
+    }
+  }
 
   lines.push("## Pass rate per rule", "", "| Rule | Pass rate | Passed | Borderline |", "| --- | --- | --- | --- |");
   for (const rule of r.rubric) {
@@ -444,6 +460,8 @@ export function summaryLines(r: ReportData, files: { md: string; json: string })
   if (r.diff) out.push(`Since last run: overall ${pct(r.diff.overall.before)} → ${pct(r.diff.overall.after)}`);
   const problems = r.conversations.filter((c) => c.error || c.gradeError).length;
   if (problems) out.push(`${problems} conversation(s) hit an error; see the report.`);
+  const caseProblems = r.conversations.filter((c) => c.lines?.problem).length;
+  if (caseProblems) out.push(`${caseProblems} case problem(s): a line never fit, so not graded; see the report.`);
   out.push(`Report: ${files.md}`, `        ${files.json}`);
   return out;
 }

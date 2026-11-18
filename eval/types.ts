@@ -224,6 +224,37 @@ export const scenarioSchema = z.object({
 export type Scenario = z.infer<typeof scenarioSchema>;
 export type ScenarioInput = z.input<typeof scenarioSchema>;
 
+/**
+ * #230: a tester line that waits for the moment it answers. `say` is its wording; `when` is the moment in ZOH's
+ * texts it fits ("after ZOH asks what went wrong"). Until then the simulated tester answers ZOH from the case's
+ * facts. An anchored line (the default) may be changed as little as possible to answer what ZOH actually said,
+ * keeping `means` and `length`; a `fixed` one goes out word for word or not at all. `lead: false`: the waiting
+ * replies don't steer toward it (the case tests whether ZOH gets there itself). `starts`: the tester starts a new
+ * exchange (texting first), so it's sent without waiting.
+ */
+export const LINE_LENGTHS = ["thin", "short", "full"] as const;
+export const caseLineSchema = z
+  .object({
+    say: z.string().min(1),
+    means: z.string().min(1).optional(),
+    when: z.string().min(1).optional(),
+    length: z.enum(LINE_LENGTHS).optional(),
+    fixed: z.boolean().default(false),
+    lead: z.boolean().default(true),
+    starts: z.boolean().default(false),
+  })
+  .strict()
+  .superRefine((l, ctx) => {
+    if (!l.starts && !l.when) ctx.addIssue({ code: "custom", message: "a line that answers ZOH needs `when` (or `starts: true`)" });
+    if (!l.starts && !l.fixed && !l.means) ctx.addIssue({ code: "custom", message: "an anchored line needs `means` (or `fixed: true`)" });
+  });
+export type CaseLine = z.infer<typeof caseLineSchema>;
+
+/** A case line's text as written: the line itself, or an anchored line's wording. */
+export function lineText(line: string | CaseLine): string {
+  return typeof line === "string" ? line : line.say;
+}
+
 /** A regression case: scripted tester lines, fresh ZOH replies, and what should have happened. */
 export const caseSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -235,9 +266,11 @@ export const caseSchema = z.object({
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
    * A line "console Yanni: ..." is a founder's message in the console chat; ZOH's console answer and
    * any draft card it makes join the transcript, marked as console. "console Yanni (do it)" clicks Do it
-   * on the newest open draft (#155).
+   * on the newest open draft (#155). A line can also wait for its moment (#230, `caseLineSchema`).
    */
-  testerLines: z.array(z.string().min(1)).min(1),
+  testerLines: z.array(z.union([z.string().min(1), caseLineSchema])).min(1),
+  /** #230: what's true about the tester, for the replies they send while a line waits. Never shown to ZOH or the grader. */
+  facts: z.array(z.string().min(1)).optional(),
   whatWentWrong: z.string(),
   shouldHaveHappened: z.string(),
   areaCode: z.string().regex(/^\d{3}$/).default("212"),
@@ -292,8 +325,11 @@ export interface ConversationResult {
   /** The seeded conversation before this run's first text; context only, never graded. */
   context: TranscriptLine[];
   transcript: TranscriptLine[];
-  endedBy: "simulator" | "turn-cap" | "script" | "error";
+  /** "case-problem" (#230): a line never found its moment, so the run isn't graded. */
+  endedBy: "simulator" | "turn-cap" | "script" | "error" | "case-problem";
   error?: string;
+  /** #230: how a case's waiting lines went out; `problem` says which line never fit. */
+  lines?: LineCounts;
   /** The tester's memory pages after the run (memory feature only), as the coach reads them. */
   memory?: string;
   /** The tester's dated step log at the start (console feature): what ZOH could see, so the grader can check its facts. */
@@ -306,6 +342,15 @@ export interface ConversationResult {
   /** Errors the app recorded on messages (e.g. a failed Claude call that fell back to "Got it"). */
   appErrors: string[];
   usage: TokenUsage;
+}
+
+/** #230: waiting lines sent word for word, changed to fit, skipped (their point already made), and the extra replies sent while one waited. */
+export interface LineCounts {
+  exact: number;
+  adapted: number;
+  waited: number;
+  skipped: number;
+  problem?: string;
 }
 
 export interface TokenUsage {
