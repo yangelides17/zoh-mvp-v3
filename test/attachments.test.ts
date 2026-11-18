@@ -10,6 +10,8 @@ import { zonedTime } from "../src/nudges/schedule.js";
 import { createNudgeScheduler, type NudgeScheduler } from "../src/nudges/scheduler.js";
 import type { Logger } from "../src/pipeline/inbound.js";
 import { MAX_UPLOAD_BYTES } from "../src/sendblue/client.js";
+import { renderTimeline } from "../src/memory/render.js";
+import { SENT_BY_ZOH, timeline } from "../src/memory/store.js";
 import { DEV, FakeClaudeModel, FakeWatcher, LINE, ME, inboundEvent, makeApp, postWebhook, type TestApp } from "./helpers.js";
 
 // #168: a founder attaches a file in the console chat (+ or drop); ZOH reads it before answering, drafts a
@@ -198,6 +200,22 @@ describe("sending a file (#168)", () => {
     await postWebhook(t, inboundEvent({ is_outbound: true, message_handle: out!.sendblueHandle, status: "SENT", number: ME, from_number: LINE }));
     expect((await t.db.select().from(messages).where(eq(messages.id, out!.id)))[0]!.status).toBe("DELIVERED");
     expect(await card()).toContain(">delivered<");
+  });
+
+  it("once sent, it's in memory's timeline and the Memory page, labeled as sent by ZOH (from the team)", async () => {
+    const tester = await seed();
+    const draft = await draftWithVideo(tester);
+    now = new Date(now.getTime() + 60_000);
+    await post(`/console/testers/${tester.id}/drafts/${draft.id}/confirm`, {});
+    await scheduler.tick(new Date(now.getTime() + 60_000));
+
+    const items = await timeline(t.db, tester);
+    const sent = items.find((i) => i.title === SENT_BY_ZOH);
+    expect(sent).toMatchObject({ kind: "video" });
+    expect(sent!.summary).toContain(VIDEO_ACCOUNT);
+    expect(renderTimeline(items, tester)).toContain(`[video] ${SENT_BY_ZOH} — ${VIDEO_ACCOUNT}`);
+    const page = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}?tab=memory`, headers: { cookie: cookie() } });
+    expect(page.body).toContain(`<span class="chip">${SENT_BY_ZOH}</span>`);
   });
 
   it("an upload Sendblue refuses: the card says so and nothing is queued or sent", async () => {

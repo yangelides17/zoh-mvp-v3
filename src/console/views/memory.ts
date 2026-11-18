@@ -1,5 +1,6 @@
 import type { MemoryPage, MemoryPageKind } from "../../db/schema.js";
 import { addDays } from "../../nudges/schedule.js";
+import { SENT_BY_ZOH } from "../../memory/store.js";
 import type { MediaItem, MemoryCard, MemoryPageView, MemoryTabData } from "../memory-view.js";
 import { dayAndTime, esc, proofHtml, when } from "./shared.js";
 
@@ -62,7 +63,9 @@ function mediaItem(item: MediaItem, testerId: string, timeZone: string): string 
     `<a href="${base}?tab=texts&amp;msg=${esc(item.message.id)}">see in chat</a>`,
     item.stepDay && `<a href="${base}?tab=progress#day-${esc(item.day)}">that day's step</a>`,
   ].filter(Boolean);
-  return `<div class="card media-item" data-id="${esc(item.message.id)}" data-search="${esc(item.search)}"><div class="muted">${esc(dayAndTime(item.at, timeZone))}</div>${proofHtml(item.message)}<div class="row muted">${links.join(" · ")}</div></div>`;
+  // #168: a founder's file ZOH sent them, never to be taken for one of theirs.
+  const sent = item.message.direction === "outbound" ? ` <span class="chip">${esc(SENT_BY_ZOH)}</span>` : "";
+  return `<div class="card media-item" data-id="${esc(item.message.id)}" data-search="${esc(item.search)}"><div class="muted">${esc(dayAndTime(item.at, timeZone))}${sent}</div>${proofHtml(item.message)}<div class="row muted">${links.join(" · ")}</div></div>`;
 }
 
 export function memoryTabHtml(data: MemoryTabData, testerId: string): string {
