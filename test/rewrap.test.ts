@@ -17,9 +17,10 @@ function installed(cmd: string): boolean {
   }
 }
 
-// CI installs ffmpeg and must run this; a laptop without it skips.
+// GitHub CI installs ffmpeg and must run this; a laptop without it skips, and so does Railway's
+// build (it sets CI=true too, but ffmpeg is only in the deploy image, RAILPACK_DEPLOY_APT_PACKAGES).
 const runIt = installed("ffmpeg") && installed("ffprobe");
-const required = process.env.CI === "true";
+const required = process.env.GITHUB_ACTIONS === "true";
 
 /** What a browser would see: the audio codec and length of the stored file. */
 async function probe(bytes: Uint8Array, ext: string): Promise<{ codec: string; seconds: number }> {
