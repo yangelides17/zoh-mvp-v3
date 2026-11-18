@@ -1,0 +1,28 @@
+{
+  "id": "lands-naturally-breaks",
+  "rule": "lands-naturally",
+  "expect": "fail",
+  "why": "ZOH works through every thread (the eyes, the mouth, even the barking dog) one question each, and after six of its texts it still hasn't moved to the next step, though Tom has said what the problem is and what he'd try.",
+  "seed": {
+    "name": "Tom",
+    "goal": "fun_skill",
+    "phase": "active",
+    "answers": { "what": "learn to draw portraits", "where": "at my desk", "when": "8 pm", "how_long": "20 min" },
+    "history": [{ "from": "zoh", "text": "Evening, Tom! 20 minutes on one face from the reference sheet at 8. A photo of the sketch when you're done." }],
+    "plan": { "step": "20 min drawing one face from a reference", "place": "at my desk", "time": "20:00", "days": ["tue", "thu", "sat"], "proof": "photo", "reason": "One face a session trains the eye faster than long sessions now and then.", "minutes": 20 }
+  },
+  "transcript": [
+    { "from": "tester", "text": "[photo: a pencil sketch of a woman's face, the eyes detailed, the mouth lightly drawn]" },
+    { "from": "zoh", "text": "Look at those eyes, Tom! ✏️ How did this one go?" },
+    { "from": "tester", "text": "eyes came out the best yet! but the mouth always looks weird and I give up on it. also the dog would not stop barking lol" },
+    { "from": "zoh", "text": "What made the eyes work so well this time?" },
+    { "from": "tester", "text": "I went slower on them" },
+    { "from": "zoh", "text": "And the mouth: what's happening right before you give up on it?" },
+    { "from": "tester", "text": "I draw the lips as an outline and it looks flat, so I just stop. next time I'll try shading instead" },
+    { "from": "zoh", "text": "Shading's a good idea. Did the barking throw off your focus?" },
+    { "from": "tester", "text": "a bit I guess" },
+    { "from": "zoh", "text": "Does he usually bark at that time?" },
+    { "from": "tester", "text": "sometimes" },
+    { "from": "zoh", "text": "Got it. How are you feeling about portraits overall this week?" }
+  ]
+}

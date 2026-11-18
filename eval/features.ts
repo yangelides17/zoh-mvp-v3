@@ -547,7 +547,22 @@ export const FEATURES: Record<string, FeatureDef> = {
         id: "tomorrow-mention",
         scope: "conversation",
         group: "conversation",
-        label: "A mention of tomorrow during the reflection (its size, an idea for it) is acknowledged in a few words and the reflection continues; it isn't treated as a yes to a step",
+        label:
+          "A mention of or question about tomorrow during the reflection (its size, an idea for it, \"can tomorrow be shorter?\") gets a short real answer or nod and the reflection continues; it isn't treated as a yes to a step or as wanting to wrap up, and a question isn't ignored",
+      },
+      {
+        id: "first-answer-held",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "Applies when a tester gives their first real answer about how the step went (beyond a label like \"okay\"): ZOH's reply to it follows one thing they said and doesn't propose tomorrow's step, unless their own words in it wanted to wrap up or move on (\"gotta run\", \"let's move on\", \"that's about it\")",
+      },
+      {
+        id: "lands-naturally",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "Applies to a reflection after proof: ZOH follows what matters and lets side details go, and once they've said what happened and what they'd take from it, it moves to tomorrow's step within a text or two, without being asked. Fails if ZOH asks about a side detail that wouldn't change the next step (a question per thing they mentioned), or is still asking new questions at its 5th text since the proof with no next step proposed after they've said what happened and what they'd try",
       },
       {
         id: "goes-deeper",

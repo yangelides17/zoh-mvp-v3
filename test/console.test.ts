@@ -1120,6 +1120,11 @@ describe("the Step log card's reflection sections (#93)", () => {
     gaps: null,
     coachTake: null,
     nextReason: null,
+    doneAt: null,
+    answeredAt: null,
+    landedAt: null,
+    landedReason: null,
+    landedBy: null,
     createdAt: new Date(0),
     updatedAt: new Date(0),
   };
@@ -1143,6 +1148,10 @@ describe("the Step log card's reflection sections (#93)", () => {
     expect(html).not.toContain("What went well");
     const both = stepLogSections(view({ wentWell: "Phone in the other room", differently: "Start before dinner" }), [], "t1");
     expect(both).toContain("What went well:</span> Phone in the other room");
+    // #211: when ZOH moved on to the next step and why, shown once it has.
+    expect(html).not.toContain("Moved on");
+    expect(stepLogSections(view({ landedReason: "Pacing is the gap", landedBy: "understood" }), [], "t1")).toContain("Moved on:</span> Pacing is the gap <span class=\"chip\">understood</span>");
+    expect(stepLogSections(view({ landedReason: "gotta run", landedBy: "exit" }), [], "t1")).toContain("they wrapped up");
     expect(both).toContain("Would do differently:</span> Start before dinner");
     // #160: what this step shows they can now do, and gaps to work on later, only when saved.
     expect(html).not.toContain("Can now do");

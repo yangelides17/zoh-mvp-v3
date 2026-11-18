@@ -167,6 +167,8 @@ const schemas = {
       gaps: optionalText(200),
       take: text(300),
       day: z.enum(["today", "yesterday"]).optional(),
+      landed: optionalText(200),
+      exit: optionalText(200),
     })
     .strict(),
   save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
@@ -414,7 +416,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "set_today_step",
     description:
-      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed after today's step (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly. kind, vs. the step before (a multi-day piece too): same (same difficulty, incl. a new angle or a setup milestone), easier (smaller or lighter), harder (more, longer, or a new challenge).",
+      "Save the day's step the first time you give it (usually the kickoff), fully defined, as you say it. minutes and proof only when they differ from the plan's. day next: the next step day's, proposed once today's reflection has landed (rest days skipped). agreed: they said yes to it. A set step holds for the day; replacing it needs asked: their words asking to change it, exactly. kind, vs. the step before (a multi-day piece too): same (same difficulty, incl. a new angle or a setup milestone), easier (smaller or lighter), harder (more, longer, or a new challenge).",
     input_schema: {
       type: "object",
       properties: {
@@ -433,7 +435,7 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
   {
     name: "save_reflection",
     description:
-      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step.",
+      "How the step went, from what they told you (a voice note, a few texts), in one line in their words where you can, for choosing their next steps. Call again as the talk deepens: it replaces the line. Only what they said with something behind it (a reason, a moment, an example) counts; a label alone (\"okay\", \"fine\", \"it went well\", \"a little awkward\") doesn't: ask what's behind it. how_it_went: how it went for them (how it felt and why, how hard, effort or time, room for more); a lesson alone isn't that. went_well: what went well and what made it work. in_the_way: what got in the way, if they said. differently: what they'd do differently, in their words. An idea for tomorrow is none of these: ask about it. can_do: what this step shows they can now do. gaps: what's still shaky, for a later step to take on as the next challenge, never a weakness. Both only from the proof and their words, never guessed; leave either out if nothing shows it. take: your candid take for the founders in 1 to 2 sentences (\"Did the full step, found it easy, wants more. Proof clear.\"); they never see it. day yesterday: for yesterday's step. landed: today's reflection has done its job (you understand what happened and where they are), in a line: what you now understand; it opens the next step. exit: instead, their own words wanting to wrap up or leave, exactly (a question about tomorrow isn't one).",
     input_schema: {
       type: "object",
       properties: {
@@ -446,6 +448,8 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
         gaps: { type: "string" },
         take: { type: "string" },
         day: { type: "string", enum: ["today", "yesterday"] },
+        landed: { type: "string" },
+        exit: { type: "string" },
       },
       required: ["summary", "how_it_went", "take"],
     },
@@ -926,7 +930,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       if (state.proof.today === 0) {
         return { ok: false, error: "No photo, screenshot, voice note, video or document from them today: words alone don't mark it done. Ask for the proof." };
       }
-      await saveDay(db, state, state.today, values, at);
+      // #211: the reflection's texts count from the first time it's marked done.
+      await saveDay(db, state, state.today, { ...values, doneAt: state.todayRow?.doneAt ?? at }, at);
       await alertMilestone(db, state, state.today, at);
       return saved(tester, `Today (${state.today}) marked ${marked}. ${await streakNow(db, state)} No more texts from you today unless they write.`);
     }
@@ -1010,6 +1015,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const row = day === "next" ? await loadDay(db, tester.id, date) : state.todayRow;
       if (!isStepDay(plan, date, row)) return { ok: false, error: "Today isn't a step day." };
       if (row?.status === "done" || row?.status === "done_reduced") return { ok: false, error: `${date} is already done.` };
+      // #211: the next step comes out of the reflection, so it waits until the reflection has landed.
+      if (day === "next" && state.reflection?.open) {
+        return {
+          ok: false,
+          error: "Not saved: today's reflection is still open, and the next step comes once it has landed (save_reflection landed first). Write this text without it, as a natural reply to what they said.",
+        };
+      }
       // #131: a yes is only to a step they've seen, so the next step day's step must come from an earlier reply
       // (this reply's text hasn't gone out yet); what they say about tomorrow before that isn't a yes.
       if (day === "next" && agreed && (!row?.step || row.updatedAt.getTime() >= at.getTime())) {
@@ -1041,9 +1053,14 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
     }
 
     case "save_reflection": {
-      const { summary, how_it_went, in_the_way, went_well, differently, can_do, gaps, take, day } = input as z.infer<typeof schemas.save_reflection>;
+      const { summary, how_it_went, in_the_way, went_well, differently, can_do, gaps, take, day, landed, exit } = input as z.infer<typeof schemas.save_reflection>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       const date = day === "yesterday" ? addDays(state.today, -1) : state.today;
+      // #211: a real answer (not a label) is the floor's start; landing opens the next step, never before one
+      // follow-up on it has been answered, unless their own words want to wrap up.
+      const real = how_it_went || !!went_well || !!in_the_way || !!differently;
+      const open = day !== "yesterday" && state.reflection?.open;
+      const land = open && (landed || exit) ? landing(state, landed, exit) : undefined;
       // Its own write: saveDay would re-stamp the day's plan, and a reflection never changes how the day went.
       // #93: once they've said how it went it stays said, however the talk goes on; a later call keeps what got in the way unless it has a new one.
       const set = {
@@ -1056,6 +1073,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
         // #160: likewise what it shows they can now do, and gaps.
         ...(can_do ? { canDo: can_do } : {}),
         ...(gaps ? { gaps } : {}),
+        ...(real ? { answeredAt: sql`coalesce(${stepDays.answeredAt}, ${at.toISOString()}::timestamptz)` } : {}),
+        ...(land?.ok ? { landedAt: at, landedReason: land.reason, landedBy: land.by } : {}),
         coachTake: take,
         updatedAt: at,
       };
@@ -1076,6 +1095,8 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
           updatedAt: at,
         })
         .onConflictDoUpdate({ target: [stepDays.testerId, stepDays.date], set });
+      if (land?.ok) return saved(tester, `Reflection for ${date} saved, and landed: the next step is open now (THE NEXT STEP).`);
+      if (land) return saved(tester, `Reflection for ${date} saved. It stays open: ${land.why}`);
       return saved(tester, quietly(`reflection for ${date}`));
     }
 
@@ -1083,6 +1104,13 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const { text: lesson, evidence } = input as z.infer<typeof schemas.save_takeaway>;
       if (tester.phase !== "active" || !state.plan) return { ok: false, error: "No locked plan yet." };
       await db.insert(takeaways).values({ testerId: tester.id, goalSlug: state.plan.goalSlug, day: state.today, text: lesson, evidence, createdAt: at });
+      // #211: a lesson they offered is a real answer in today's reflection.
+      if (state.reflection) {
+        await db
+          .update(stepDays)
+          .set({ answeredAt: sql`coalesce(${stepDays.answeredAt}, ${at.toISOString()}::timestamptz)` })
+          .where(and(eq(stepDays.testerId, tester.id), eq(stepDays.date, state.today)));
+      }
       return saved(tester, quietly(`takeaway (${evidence}): ${lesson}`));
     }
 
@@ -1105,6 +1133,10 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const done = state.todayRow?.status === "done" || state.todayRow?.status === "done_reduced";
       if (!state.nudgeMoment && done && state.proof.today > 0 && state.proof.zohTextsSince === 0) {
         return { ok: false, error: "Not in the text that celebrates their proof: today's reflection first (PROOF); turn to the week at its wrap-up. Write this text without the recap." };
+      }
+      // #211: the turn to the week is the reflection's wrap-up, so it waits until the reflection has landed.
+      if (state.reflection?.open) {
+        return { ok: false, error: "Today's reflection is still open: the week comes once it has landed. Write this text without the recap." };
       }
       // The 6 pm text's slot, taken: one recap a week, in conversation or as its own text, never both.
       // #110: owed to Monday and they're talking tonight after all: it's given now, and Monday's text is a normal one.
@@ -1166,7 +1198,7 @@ async function alertPlanReview(db: Db, tester: Tester, planId: string, version: 
 }
 
 type DayValues = Partial<
-  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepKind" | "stepMinutes" | "stepProof">
+  Pick<NewStepDay, "status" | "note" | "movedTime" | "onItAt" | "agreedAt" | "proofVerdict" | "proofSeen" | "proofPendingAt" | "step" | "stepKind" | "stepMinutes" | "stepProof" | "doneAt">
 >;
 
 async function loadDay(db: Db, testerId: string, date: string): Promise<StepDay | undefined> {
@@ -1235,15 +1267,36 @@ export function describePlan(p: PlanValues): string {
     .join("; ");
 }
 
+type Landing = { ok: true; reason: string; by: "understood" | "exit" } | { ok: false; why: string };
+
+/**
+ * #211: whether today's open reflection can land now. Their own words wanting to wrap up always can, when they're a
+ * real phrase of theirs (3+ words, or their whole latest text: "night!"), so a stray "felt good" isn't an exit.
+ * Otherwise only once a real answer was saved before ZOH's last text went out: one follow-up on it, answered.
+ */
+function landing(state: CoachState, landed: string | undefined, exit: string | undefined): Landing {
+  if (exit) {
+    const words = norm(exit);
+    const theirs = saidIt(exit, state.lastTesterText) && (words.split(" ").length >= 3 || words === norm(state.lastTesterText));
+    if (theirs) return { ok: true, reason: exit, by: "exit" };
+    if (!landed) return { ok: false, why: "those aren't their words wanting to wrap up; keep following what they said in this text." };
+  }
+  if (state.reflection?.answered) return { ok: true, reason: landed!, by: "understood" };
+  return { ok: false, why: "they've only just told you this; follow it up in this text, as a natural reply to what they said." };
+}
+
+/** Lowercase, plain apostrophes, no punctuation, single spaces: how quoted words are compared. */
+function norm(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[^\p{L}\p{N}' ]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Whether their words appear in their latest text, ignoring case, punctuation and spacing. */
 function saidIt(words: string, latest: string): boolean {
-  const norm = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/[’‘]/g, "'")
-      .replace(/[^\p{L}\p{N}' ]+/gu, " ")
-      .replace(/\s+/g, " ")
-      .trim();
   const said = norm(words);
   return said.length > 0 && norm(latest).includes(said);
 }

@@ -1,0 +1,59 @@
+{
+  "id": "question-about-tomorrow",
+  "suite": "capability",
+  "title": "\"Can tomorrow be shorter?\" mid-reflection: a short real answer, then the reflection continues (a question about tomorrow isn't wanting to wrap up)",
+  "origin": "Issue #211 (Yanni: only \"let's move on\" and the like end a reflection, not a question about tomorrow)",
+  "seed": {
+    "name": "Ana",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "learn to play songs on guitar",
+      "where": "on the couch",
+      "when": "7 pm",
+      "how_long": "15 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Evening, Ana! 15 minutes on the G to C change on the couch at 7. A quick video of the change when you're done."
+      },
+      {
+        "from": "tester",
+        "text": "ok"
+      }
+    ],
+    "plan": {
+      "step": "15 min guitar practice on the couch",
+      "destination": "play Wonderwall all the way through",
+      "place": "on the couch",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "video",
+      "proof_note": "a quick video of the change",
+      "reason": "A little every day is how chord changes get smooth.",
+      "minutes": 15,
+      "started_days_ago": 5
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "15 min on the G and C chords on the couch", "proof_seen": "video: G and C chords, slow" }
+    ],
+    "today_step": {
+      "step": "15 min on the G to C change on the couch at 7 pm",
+      "agreed_hours_ago": 1
+    }
+  },
+  "testerLines": [
+    "[video change.mov: A person on a couch switching between G and C chords on an acoustic guitar, slowly, about 15 seconds. The C rings out muffled twice. Nobody speaks.]",
+    "done but my fingertips are killing me and the C keeps buzzing. can tomorrow be shorter?",
+    "mostly my ring finger, it doesn't land on the string cleanly when I switch fast",
+    "yeah I guess going slower and getting it clean is better than rushing",
+    "ok good"
+  ],
+  "whatWentWrong": "New for #211: two ways to get it wrong. Treating the question about tomorrow as wanting to wrap up (proposing tomorrow right away, the reflection over), or dodging the question entirely while asking more.",
+  "shouldHaveHappened": "ZOH counts the video and celebrates. To \"can tomorrow be shorter?\" it gives a short real answer or nod (sore fingertips are normal early on, and they'll shape tomorrow together in a moment) and keeps reflecting on what's behind the buzzing C, one question per text; it doesn't propose tomorrow in that reply, and doesn't ignore the question. Once Ana has said what's happening with her ring finger and what she's taking from it, it moves to tomorrow's step, answering the shorter question (shorter or the same, with a reason tied to what she said), fully defined, and asks if it works. After \"ok good\" it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "19:18",
+  "timeZone": "America/New_York"
+}

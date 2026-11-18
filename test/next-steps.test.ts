@@ -242,7 +242,7 @@ describe("an approved next step", () => {
     const ref = suggestionRef(s.id);
     // #199: the sheet lists it; raising it as your own idea, then record_next_step delivered, is NEXT STEPS'.
     expect(await block(tester, at(MON, "10:00"))).toContain(`Next step the team approved, not raised yet [${ref}] (upgrade: 20 min of lifting).`);
-    expect(NEXT_STEPS).toContain("A next step the state lists as approved: raise it at a natural moment (after a done, or when they talk about how it's going) as your own idea, specific to them, then record_next_step delivered.");
+    expect(NEXT_STEPS).toContain("A next step the state lists as approved: raise it at a natural moment (once today's talk has landed, or when they talk about how it's going) as your own idea, specific to them, then record_next_step delivered.");
 
     expect(await tool(tester, "record_next_step", { suggestion: ref, outcome: "delivered" }, at(MON, "20:00"))).toMatchObject({ ok: true });
     const raised = await block(tester, at(MON, "20:01"));

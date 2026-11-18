@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:rushed",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:16:41.787Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T05:17:18.287Z",
+  "branch": "feature/211-reflect-first",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "e4cb138c7f45",
-    "voice": "2045dce938d4",
+    "checks": "5c8a584b799e",
+    "voice": "c17a591e1b39",
     "instructions": "c7348af58300",
     "script": "d593ffe9bc9f"
   },
@@ -78,14 +78,14 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": false,
-                "reason": "Three short sentences with no question, which fits a rushed tester."
+                "borderline": true,
+                "reason": "Four or five very short fragments with no question, which runs slightly past three sentences but reads as one brief beat."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype is warm and the single emoji sits at the end as punctuation."
+                "reason": "Energetic 'LFG Maya!' with a single book emoji as punctuation and no overfamiliarity."
               }
             ]
           },
@@ -96,13 +96,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with no question mark."
+                "reason": "Three sentences with no question, so the at-most-one-question limit is met."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and calm, with no overfamiliarity or pressure."
+                "reason": "Warm and steady with no emoji row and no overfamiliarity."
               }
             ]
           },
@@ -110,59 +110,59 @@
             "zohText": 3,
             "checks": [
               {
+                "rule": "no-saved-dead-end",
+                "pass": true,
+                "borderline": false,
+                "reason": "After the 'sure' yes it confirms and carries the next move: chapter 5 tomorrow at 8."
+              },
+              {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences with no question."
+                "reason": "Two short sentences, no question, and it closes the exchange as asked."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm close with one emoji as punctuation."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": true,
-                "reason": "Confirms the locked step and adds a closing line rather than a bare save confirmation."
+                "reason": "Warm, brief, one emoji at the end, with no pressure or affection."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "reflection-ask",
-            "pass": true,
-            "borderline": true,
-            "reason": "Rushed proof gets a light tomorrow invite instead of a reflection question, which is acceptable here."
-          },
-          {
             "rule": "not-forced",
-            "pass": false,
-            "borderline": true,
-            "reason": "ZOH 2 says 'Next time I want a bit more on what stuck with you', pressing for learning from a rushed tester."
+            "pass": true,
+            "borderline": false,
+            "reason": "With a rushed tester ('gotta run'), ZOH asks no question about what she learned or noticed."
           },
           {
             "rule": "stops-right",
-            "pass": false,
+            "pass": true,
             "borderline": true,
-            "reason": "ZOH 2 fishes for a fuller answer next time after 'ok fine, busy day', rather than just letting the rushed tester go."
+            "reason": "It stops after the rushed signal, though 'Next time I want a bit more' leans toward fishing for depth."
+          },
+          {
+            "rule": "thin-answer",
+            "pass": true,
+            "borderline": true,
+            "reason": "'ok fine, busy day' gets an acknowledgment and no probe, which fits a rushed tester even though it is a thin answer."
           },
           {
             "rule": "next-step",
             "pass": false,
             "borderline": false,
-            "reason": "Chapter 5 is named but not fully defined (no 20 minutes, no voice recap proof), and ZOH never asks whether it works."
+            "reason": "Chapter 5 is given as 'same as always' with no 20-minute length, no voice recap, and no check of whether it works."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The celebration, no-question handling and confirmation were right, but ZOH 2 chases a longer reflection and leaves the step under-defined."
+            "reason": "Step is not fully defined and ZOH 2 says 'Next time I want a bit more on what stuck with you', chasing a longer reflection."
           }
         ],
-        "summary": "ZOH handled the rushed voice note well: it celebrated briefly, asked no question at first, and confirmed 'sure' without a new question. It fell short in the middle text, where it said it wanted more on what stuck next time and gave Chapter 5 without its full definition or a check on whether it works."
+        "summary": "ZOH handled the rushed 'gotta run' well: it celebrated briefly, asked no question about how it went, and invited more tomorrow. It missed the regression's core, since tomorrow's step was not fully defined (no 20-minute length or voice recap, and no check that it works) and the 'next time I want a bit more' line chases a longer reflection."
       }
     }
   ]

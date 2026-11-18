@@ -498,6 +498,13 @@ describe("the state block on Sunday", () => {
     // #102: the text that ends the reflection carries the recap, even when they're done or rushed (now WEEK LOOK-BACK's).
     expect(WEEK_LOOKBACK).toContain("then turns to the week in place of the next step");
     expect(WEEK_LOOKBACK).toContain("Done or tired: still a short recap, never a goodnight without it.");
+    // #211: the turn to the week is the reflection's wrap-up, so it waits until the reflection has landed.
+    expect(await tool("record_week_recap", {}, at(SUN2, "19:30"))).toMatchObject({ ok: false, error: expect.stringContaining("still open") });
+    await say(sam, "inbound", at(SUN2, "19:31"), "felt great, the chapter flew by");
+    await tool("save_reflection", { summary: "Felt great, the chapter flew by", how_it_went: true, take: "Full step." }, at(SUN2, "19:31"));
+    await say(sam, "outbound", at(SUN2, "19:32"), "Love that. What made it fly by?");
+    await say(sam, "inbound", at(SUN2, "19:33"), "the plot finally kicked in, I couldn't stop");
+    await tool("save_reflection", { summary: "Felt great once the plot kicked in", how_it_went: true, take: "Full step.", landed: "The plot kicking in made reading easy" }, at(SUN2, "19:34"));
     expect(await tool("record_week_recap", {}, at(SUN2, "19:35"))).toMatchObject({ ok: true });
     // Saturday: the usual wrap-up, the next step.
     expect(await block(at(SAT, "19:27"))).not.toContain("WEEK LOOK-BACK");

@@ -2,12 +2,12 @@
   "feature": "reflection",
   "id": "case:live-plan-mention",
   "suite": "regression",
-  "storedAt": "2026-11-16T22:11:03.764Z",
-  "branch": "feature/160-proof-of-understanding",
+  "storedAt": "2026-11-18T05:08:34.960Z",
+  "branch": "feature/211-reflect-first",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "8f9c1d1ab3a4",
-    "voice": "c0dfbb42fd2a",
+    "checks": "a02a37436ef8",
+    "voice": "2da0416a0038",
     "instructions": "c7348af58300",
     "script": "d90ae8c6dcba"
   },
@@ -74,13 +74,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences with one question at the end, as the rule asks."
+                "reason": "Two sentences and one question at the end, within the limit."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Energetic, warm and specific (\"LFG Yanni!\"), with one emoji as punctuation."
+                "reason": "Warm, hype-level energy with one emoji as punctuation, not overfamiliar."
               }
             ]
           },
@@ -91,13 +91,13 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences ending in one question, which is what the rule asks for."
+                "reason": "Two sentences with one question at the end."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and plain, with no emoji row or overfamiliarity."
+                "reason": "Warm and sincere with no emoji row or affection."
               }
             ]
           },
@@ -107,81 +107,27 @@
               {
                 "rule": "short",
                 "pass": true,
-                "borderline": true,
-                "reason": "The plan text runs to about 8 short lines, within the allowance for presenting a plan, and ends with one question."
+                "borderline": false,
+                "reason": "Opens with two short sentences and a brief plan list, which the step-proposal exception allows, ending with one question."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Calm, warm and firm, with no emoji and no overfamiliarity."
+                "reason": "Calm and warm, appropriately sincere, no overfamiliarity."
               }
             ]
           }
         ],
         "conversation": [
           {
-            "rule": "reflection-ask",
-            "pass": true,
-            "borderline": false,
-            "reason": "After the freelancer-list proof, ZOH opened with one feelings question and did not chase it later."
-          },
-          {
-            "rule": "follow-ups",
-            "pass": true,
-            "borderline": false,
-            "reason": "ZOH 2 followed the tester's own Alex idea and asked one question, drawn from what they said."
-          },
-          {
-            "rule": "learning-ask",
-            "pass": true,
-            "borderline": true,
-            "reason": "ZOH 2 drew out what the tester planned to ask Alex, which covers what they did or noticed, though the first question was mostly about feelings."
-          },
-          {
-            "rule": "stops-right",
-            "pass": true,
-            "borderline": false,
-            "reason": "The tester was engaged, not rushed, so the reflection did not stop early or run long."
-          },
-          {
-            "rule": "goes-deeper",
-            "pass": false,
-            "borderline": false,
-            "reason": "The tester named reaching out as intimidating, and ZOH 3 answered with \"Totally normal\" and a proposal instead of one question about that worry."
-          },
-          {
-            "rule": "next-step",
-            "pass": true,
-            "borderline": true,
-            "reason": "The proposal is fully defined and ends with \"Work for you?\" only after it is shown, but the reassurance came before any question about the worry."
-          },
-          {
-            "rule": "tomorrow-mention",
-            "pass": false,
-            "borderline": false,
-            "reason": "The tester's \"I'd keep tomorrow to five minutes\" was treated as settling tomorrow's step, and the reflection was not continued."
-          },
-          {
-            "rule": "lesson-reused",
-            "pass": true,
-            "borderline": true,
-            "reason": "ZOH 2 reused the invoice takeaway (asking what he actually did), but the proposed draft text does not build it in."
-          },
-          {
-            "rule": "gaps-grounded",
-            "pass": true,
-            "borderline": false,
-            "reason": "The tester's reflection and the proposal match their words: five minutes, easy list, intimidating reach-out."
-          },
-          {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "This repeats the failure: after the five minutes and the intimidation remark, ZOH 3 reassured and proposed tomorrow's step without asking what makes reaching out intimidating."
+            "reason": "After the tester said reaching out feels intimidating, ZOH skipped asking what makes it intimidating and went straight to proposing tomorrow's text to Alex."
           }
         ],
-        "summary": "ZOH handled the photo proof and the first reflection well, with short texts and one question each. It repeated the known failure at the key moment: after the tester named reaching out as intimidating, it reassured and proposed tomorrow's step instead of asking what makes it intimidating first."
+        "summary": "ZOH handled the proof and first reflection well, with warm, short texts that asked about the intimidation. It then repeated the regression: after the tester said reaching out feels intimidating, it dropped the reflection and proposed tomorrow's step without asking what makes it feel that way."
       }
     }
   ]

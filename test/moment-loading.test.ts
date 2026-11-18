@@ -38,7 +38,25 @@ interface Case {
 }
 
 const CASES: Case[] = [
-  { name: "a step-day reply before the step", state: state(), loads: ["planChange", "nudgeReplies", "todaysStep", "proof", "slip", "nextSteps"], not: ["plan", "nudges", "weekLookback", "nextStepsTeam"] },
+  { name: "a step-day reply before the step", state: state(), loads: ["planChange", "nudgeReplies", "todaysStep", "proof", "nextStep", "slip", "nextSteps"], not: ["plan", "nudges", "weekLookback", "nextStepsTeam"] },
+  // #211: the reflection comes first, so the next step (and the slip ladder's "turn to tomorrow") waits.
+  { name: "the reply celebrating proof just sent", state: state(), reach: { media: true }, loads: ["proof", "todaysStep"], not: ["nextStep", "slip"] },
+  {
+    name: "celebrating proof the day after a miss",
+    state: state({ days: { streak: 0, missesInARow: 1, reducedInARow: 0 } as unknown as CoachState["days"] }),
+    reach: { media: true },
+    loads: ["proof", "slip"],
+    not: ["nextStep"],
+  },
+  // Once today's step is done after a miss, the miss is no longer "in a row": no slip ladder in the reflection.
+  { name: "an open reflection the day after a miss", state: state({ ...DONE_WITH_PROOF, reflection: { open: true, answered: true } }), loads: ["proof"], not: ["nextStep", "slip"] },
+  { name: "a reflection that has landed", state: state({ ...DONE_WITH_PROOF, reflection: { open: false, closedBy: "landed", answered: true } }), loads: ["proof", "nextStep"] },
+  {
+    name: "Sunday, the reflection still open: the week section stays, the next step waits",
+    state: state({ ...SUNDAY, ...DONE_WITH_PROOF, week: week(), reflection: { open: true, answered: false } }),
+    loads: ["proof", "weekLookback"],
+    not: ["nextStep"],
+  },
   { name: "a first \"can't today\" (nothing in the state yet)", state: state({ lastTesterText: "can't today, slammed" }), loads: ["slip", "nudgeReplies", "todaysStep"] },
   { name: "proof just arrived, reflecting", state: state(DONE_WITH_PROOF), reach: { media: true }, loads: ["proof", "todaysStep", "nextSteps"], not: ["slip"] },
   { name: "proof plus a memory question (memory is in the core once locked)", state: state(DONE_WITH_PROOF), reach: { media: true }, loads: ["proof"] },

@@ -563,6 +563,16 @@ export const stepDays = pgTable(
     coachTake: text("coach_take"),
     /** Why this day's step, in a line, as the coach set it (#93): the step log's "Next step" reason. */
     nextReason: text("next_reason"),
+    /** #211: when it was first marked done: the reflection's texts are counted from here. */
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    /** #211: when the reflection first saved a real answer (how it went, what went well, in the way, differently, a lesson). */
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    /** #211: when ZOH said the reflection had landed, which opens the next step. */
+    landedAt: timestamp("landed_at", { withTimezone: true }),
+    /** #211: what ZOH understood when it landed, or the tester's own words wanting to wrap up. */
+    landedReason: text("landed_reason"),
+    /** #211: how it landed: ZOH understood enough, or the tester asked to wrap up (exit). */
+    landedBy: text("landed_by", { enum: ["understood", "exit"] }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

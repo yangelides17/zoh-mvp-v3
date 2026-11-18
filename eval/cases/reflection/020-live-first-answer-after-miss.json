@@ -1,0 +1,58 @@
+{
+  "id": "live-first-answer-after-miss",
+  "title": "Live Nov 17 (Batch 6): the day after a miss, the first real answer got tomorrow's step instead of a question",
+  "origin": "Yanni live on staging, Nov 17 (simulated Friday Nov 20), issue #211",
+  "seed": {
+    "name": "Yanni",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": {
+      "what": "loosen up my shoulders and back during the workday",
+      "where": "at my desk",
+      "when": "3 pm",
+      "how_long": "5 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Yesterday got away from us, Yanni. Today let's make it impossible to skip: 1 minute of slow shoulder rolls at your desk at 3:00, plus a 10 sec video. In?"
+      },
+      {
+        "from": "tester",
+        "text": "yeah I'm in"
+      }
+    ],
+    "plan": {
+      "step": "5 min of shoulder rolls and neck stretches at your desk",
+      "place": "at your desk",
+      "time": "15:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "video",
+      "proof_note": "a 10 sec video of one move",
+      "reason": "A short break at the desk loosens up what sitting all day tightens.",
+      "minutes": 5,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "5 min of shoulder rolls and neck stretches at your desk", "proof_seen": "video: shoulder rolls at the desk" },
+      { "days_ago": 2, "status": "done", "step": "5 min of shoulder rolls and neck stretches at your desk", "proof_seen": "video: neck stretch at the desk" },
+      { "days_ago": 1, "status": "missed" }
+    ],
+    "today_step": {
+      "step": "1 minute of slow shoulder rolls at your desk at 3 pm, plus a 10 sec video",
+      "agreed_hours_ago": 1
+    }
+  },
+  "testerLines": [
+    "[video rolls.mov: A person at an office desk doing slow shoulder rolls, backwards then forwards, for about 10 seconds. Nobody speaks.]",
+    "Rolls felt good, shoulders loosened up a bit. Yesterday I got caught up in work and kept putting it off. The one-minute version was easier to start today",
+    "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with",
+    "sounds good"
+  ],
+  "whatWentWrong": "Good call, Yanni: starting small is what got you moving again. For tomorrow, same thing at 3:00 pm: 1 minute of slow shoulder rolls at your desk, plus a 10 sec video. If it feels easy, we build back up from there. Work for you?",
+  "shouldHaveHappened": "ZOH counts the video and celebrates getting back on it after the miss. When Yanni gives the first real answer (rolls felt good, work got in the way yesterday, the one-minute version was easier to start), ZOH follows one thing they said, curious first (for example what got them to stop and start today), and doesn't propose tomorrow in that reply. Once they've answered, it builds tomorrow on what they said (fully defined, asked if it works). After \"sounds good\" it confirms in a line with no new question.",
+  "areaCode": "212",
+  "startTime": "15:03",
+  "timeZone": "America/New_York"
+}
