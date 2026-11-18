@@ -144,6 +144,8 @@ export function stepLogSections(view: StepDayView, days: StepDayView[], testerId
     day.canDo ? line("Can now do", esc(day.canDo)) : "",
     day.gaps ? line("Gaps", esc(day.gaps)) : "",
     line("ZOH's take", day.coachTake ? esc(day.coachTake) : none),
+    // #211: when ZOH moved on to the next step, and why: what it understood, or their words wanting to wrap up.
+    day.landedReason ? line("Moved on", `${esc(day.landedReason)} <span class="chip">${day.landedBy === "exit" ? "they wrapped up" : "understood"}</span>`) : "",
     line("Next step", nextHtml),
   ].join("")}</div>`;
 }

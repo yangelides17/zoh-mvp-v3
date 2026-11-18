@@ -2,7 +2,7 @@ import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
-import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState } from "./state.js";
+import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState, type ReflectionClose } from "./state.js";
 import { describePlan, fitsGoalCap } from "./tools.js";
 import { loadVoiceDoc, splitVoicePage, voiceSections, type RuleKey } from "./voice.js";
 import { evidenceText, type WeekLookback } from "./week.js";
@@ -26,8 +26,8 @@ export const PROMPT_BUDGET_CHARS = {
   core: 5280,
   onboarding: 3700,
   examples: 800,
-  /** The voice page without its rule sections. */
-  voice: 26_750,
+  /** The voice page without its rule sections. #211: +150 for why ZOH reflects (Proof). */
+  voice: 26_900,
   tools: 2800,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
@@ -36,12 +36,16 @@ export const PROMPT_BUDGET_CHARS = {
   planChange: 590,
   nudges: 1872,
   nudgeReplies: 708,
-  todaysStep: 1890,
-  proof: 3600,
-  weekLookback: 2390,
+  // #211: the next step's lines left proof for their own section (loaded once a reflection lands); +460 between
+  // them for what to go deeper on and when it has landed; +10 each for the pointers that now name it.
+  todaysStep: 1900,
+  proof: 3500,
+  nextStep: 560,
+  weekLookback: 2400,
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
   nextSteps: 1250,
-  nextStepsTeam: 790,
+  // #211: +10 for "once today's talk has landed".
+  nextStepsTeam: 800,
   // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
   team: 750,
   memory: 1350,
@@ -160,7 +164,7 @@ export const FULL_VOICE_INTRO = `You are ZOH, a texting coach (iMessage). Your v
  * it can apply somewhere in that reply. The core (the voice's other sections, saving and style, the team, and once
  * the plan is locked, memory) is in every reply and cached on its own, so it's shared by all of them.
  */
-export const PARTS = ["plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "slip", "proof", "weekLookback", "nextSteps", "nextStepsTeam"] as const;
+export const PARTS = ["plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "slip", "proof", "nextStep", "weekLookback", "nextSteps", "nextStepsTeam"] as const;
 export type Part = (typeof PARTS)[number];
 
 /** The voice page's section (by its heading) and the rule section each part loads. */
@@ -172,6 +176,7 @@ const PART_SOURCES: Record<Part, { heading?: string; rule?: RuleKey }> = {
   todaysStep: { rule: "todaysStep" },
   slip: { heading: "When they start to slip" },
   proof: { heading: "Proof", rule: "proof" },
+  nextStep: { rule: "nextStep" },
   weekLookback: { heading: "Sunday look-back", rule: "weekLookback" },
   nextSteps: { heading: "Next steps and maintenance", rule: "nextSteps" },
   nextStepsTeam: { rule: "nextStepsTeam" },
@@ -199,6 +204,11 @@ export function partsFor(s: CoachState, reach: Reach = {}): Part[] {
     const now = moments(s);
     const started = !(plan.startDate && plan.startDate > s.today);
     const stepDay = started && isStepDay(plan, s.today, s.todayRow);
+    // #211: the reply celebrating proof just sent (not marked done yet, nor found unclear in this reply) and an open
+    // reflection hold back the next step: the reflection comes first. The celebration skips the "can't today" slip
+    // load too (a slip the state shows still loads; once today is done it no longer shows).
+    const celebrating = !s.nudgeMoment && !!reach.media && stepDay && !isDone(s.todayRow) && s.todayRow?.proofPendingAt?.getTime() !== s.now.getTime();
+    const held = celebrating || !!s.reflection?.open;
     if (s.nudgeMoment) {
       parts.add("nudges");
       if (now.includes("Today's step")) parts.add("todaysStep");
@@ -212,10 +222,12 @@ export function partsFor(s: CoachState, reach: Reach = {}): Part[] {
       if (started) parts.add("nudgeReplies").add("todaysStep");
       if (stepDay || reach.media || now.includes("Proof")) parts.add("proof");
       // A first "can't today" is only in their text: until today's step is done, it can slip.
-      if (stepDay && !isDone(s.todayRow)) parts.add("slip");
+      if (stepDay && !isDone(s.todayRow) && !celebrating) parts.add("slip");
     }
     if (now.includes("When they start to slip")) parts.add("slip");
     if (now.includes("Sunday look-back")) parts.add("weekLookback");
+    // #211: the next step, wherever proof or the week talk can lead to it, once no reflection holds it back.
+    if ((parts.has("proof") || parts.has("weekLookback")) && !held) parts.add("nextStep");
     if (now.includes("Next steps and maintenance")) parts.add("nextStepsTeam");
   }
   return PARTS.filter((p) => parts.has(p));
@@ -479,7 +491,8 @@ function todayLines(s: CoachState, plan: Plan): string[] {
   const set = nextRow?.step
     ? ` Its step is already set: "${nextRow.step}"${nextRow.agreedAt ? `, and they said yes (${localTime(nextRow.agreedAt, s.tester.timeZone)})` : ", not agreed yet"}.`
     : "";
-  if (next) lines.push(`Next step day: ${dayName(next)}.${set}`);
+  // #211: while today's reflection is open, the next step isn't on the sheet: it comes out of the reflection.
+  if (next && !s.reflection?.open) lines.push(`Next step day: ${dayName(next)}.${set}`);
   return lines;
 }
 
@@ -522,7 +535,21 @@ function reflectionLine(s: CoachState): string {
   const went = row?.howItWentSaid ? " They've said how it went for them." : " They haven't said how it went for them yet.";
   const n = s.proof.zohTextsSince + 1;
   const long = n >= REFLECTION_SAFETY_NET ? " That's a long talk, past the usual length of a reflection." : "";
-  return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today.${long}`;
+  return `${saved}${went} This reply is your ${ordinal(n)} text since their proof today.${long}${reflectionStatus(s)}`;
+}
+
+/** #211: whether today's reflection is still open, as a fact: the next step opens once it lands. */
+const CLOSED: Record<ReflectionClose, string> = {
+  landed: " The reflection has landed.",
+  quiet: " The reflection has closed: they went quiet for a while after your last text.",
+  started: " The reflection has closed: you've texted them since.",
+  thin: " The reflection has closed: little has come back.",
+  long: "",
+};
+function reflectionStatus(s: CoachState): string {
+  const r = s.reflection;
+  if (!r) return "";
+  return r.open ? " The reflection is still open: the next step opens once it has landed." : CLOSED[r.closedBy!];
 }
 
 /** #93: yesterday's step done with no word on how it went (only when nothing's been done today). */

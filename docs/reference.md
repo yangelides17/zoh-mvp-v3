@@ -155,6 +155,15 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   upgrade is saved only after it's shown and agreed, the reflection's safety net). The #131 soft hold and an outside
   "reviewer" call were tried and removed: on the same eval suite they did no better and the rule-heavy version did worse.
   Details on #157 and #196.
+- Reflect before the next step (#211, Nov 18; partly reverses #157's "no code holds"): with judgment alone ZOH kept
+  proposing tomorrow in the reply to the first real answer (eval and live). Reflection and the next step are now two
+  moments. A **moment can stay closed until ZOH records a fact that opens it, with code guarding the minimum**: while
+  today's reflection is open, the next step's section (`nextStep`) isn't loaded, the sheet hides "Next step day", and
+  saving tomorrow's step or Sunday's recap is refused. ZOH opens it with `save_reflection` `landed` (what it now
+  understands) or `exit` (their words wanting to wrap up); not before one follow-up on a real answer was answered
+  (timestamps on `step_days`, so a redone reply can't skip it). It also closes after 30 minutes of their silence
+  (`REFLECTION_QUIET_MINUTES`), on any text ZOH starts, at the day's end, on a thin talk and at the safety net; texts ZOH
+  starts are never held. The same pattern fits other moments later (onboarding into the plan, the turn to the week).
 - Next steps (#9): the coach's idea for a new focus and a tester's request for a new goal on top are saved as
   `suggestions` waiting for the founders and never reach the tester until approved; a deepen or
   upgrade the tester asks for is made once they've seen the new version and said yes (#157, Nov 14;
