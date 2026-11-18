@@ -1,0 +1,46 @@
+{
+  "id": "good-day-small-stretch",
+  "suite": "capability",
+  "title": "A good day on a skill: the next step is a small stretch built on what they said, doable and interesting, toward their goal",
+  "origin": "Issue #164 (a well-defined next step), walkthrough case 1",
+  "seed": {
+    "name": "Maya",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "learn guitar, I know a few chords", "where": "on my couch", "when": "8 pm", "how_long": "10 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Maya! Tonight: G to C to D changes, slow, 10 min on the couch at 8. Quick voice note when you're done." },
+      { "from": "tester", "text": "in" }
+    ],
+    "plan": {
+      "step": "G, C and D chord changes, slow, 10 min",
+      "destination": "play the chorus of a song I love along with the recording by Sunday",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+      "proof": "voice",
+      "proof_note": "a short voice note of you playing",
+      "reason": "Clean changes are what make a song sound like a song.",
+      "minutes": 10,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "G and C chords, holding each clean, 10 min", "proof_seen": "voice: G and C, a little buzzy" },
+      { "days_ago": 2, "status": "done", "step": "G to C changes, slow, 10 min", "proof_seen": "voice: slow G to C changes", "reflection": "C is still slow to land" },
+      { "days_ago": 1, "status": "done", "step": "G, C and D chord changes, slow, 10 min", "proof_seen": "voice: G C D changes, some pauses" }
+    ],
+    "today_step": { "step": "G, C and D chord changes, slow, 10 min on the couch at 8 pm", "agreed_hours_ago": 12 }
+  },
+  "testerLines": [
+    "[voice: G to C to D changes, steady, no long pauses between chords]",
+    "it was actually clean today, I didn't have to look at my fingers going G to C",
+    "honestly it got kind of fun once it stopped being a fight, I was humming along",
+    "sounds good"
+  ],
+  "whatWentWrong": "New case, not a past mistake (#164).",
+  "shouldHaveHappened": "ZOH counts the voice note, celebrates, and reflects briefly (curious about what changed or what was fun). Once it has landed, the next step is a small stretch on what she's shown: the changes are clean now and it got fun, so something like the same changes with a simple strum, or along with the song slowed down, heading toward playing the chorus by Sunday. Simple enough to do in 10 minutes, interesting enough to want to; not a jump (the whole song at full speed) and not the same changes again. Fully defined and asked if it works; it doesn't read like a form (no labels like 'skill focus' or 'if-then'). After 'sounds good' a short confirmation.",
+  "areaCode": "212",
+  "startTime": "20:15",
+  "timeZone": "America/New_York"
+}

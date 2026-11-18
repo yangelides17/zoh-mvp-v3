@@ -1,0 +1,47 @@
+{
+  "id": "obstacle-gets-a-plan",
+  "suite": "capability",
+  "title": "An obstacle named in the reflection: the next step comes with a plan for it, a smaller version as the fallback",
+  "origin": "Issue #164 (a well-defined next step), walkthrough case 3",
+  "seed": {
+    "name": "Priya",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "write my thesis chapter, I keep putting it off", "where": "at the library", "when": "8 am", "how_long": "45 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Priya! 45 min on the methods section at the library at 8, phone in your bag. Screenshot of the word count after." },
+      { "from": "tester", "text": "on it" }
+    ],
+    "plan": {
+      "step": "45 min of thesis writing at the library, phone in your bag",
+      "destination": "a full first draft of the methods section by Sunday",
+      "place": "at the library",
+      "time": "08:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "screenshot",
+      "proof_note": "the doc's word count",
+      "reason": "Mornings before anyone needs you are your best focus.",
+      "minutes": 45,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      { "days_ago": 3, "status": "done", "step": "45 min outlining the methods section at the library", "proof_seen": "screenshot: outline, 9 headings" },
+      { "days_ago": 2, "status": "done", "step": "45 min writing the first two methods subsections", "proof_seen": "screenshot: 480 words" },
+      { "days_ago": 1, "status": "done", "step": "45 min writing the next methods subsection", "proof_seen": "screenshot: 1,050 words total" }
+    ],
+    "today_step": { "step": "45 min on the methods section at the library at 8 am, phone in your bag", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "[screenshot: Google Doc, word count 1,640]",
+    "good session, wrote almost 600 words",
+    "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes",
+    "she'll probably ask again tomorrow honestly, she's off this week",
+    "works"
+  ],
+  "whatWentWrong": "New case, not a past mistake (#164).",
+  "shouldHaveHappened": "ZOH counts the screenshot and celebrates nearly 600 words. It reflects briefly, and the roommate (who'll likely ask again tomorrow) is the obstacle she's named. Tomorrow's step comes with a plan for it in her situation, in ZOH's own words: something like 'if she asks, breakfast is after the 45', or a smaller version at the same time (say 20 minutes) if the morning gets taken. Natural, one line, not a label like 'if-then:'. The step itself is fully defined and asked if it works. After 'works' a short confirmation.",
+  "areaCode": "212",
+  "startTime": "09:05",
+  "timeZone": "America/New_York"
+}

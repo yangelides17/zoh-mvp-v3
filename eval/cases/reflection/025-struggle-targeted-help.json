@@ -1,0 +1,46 @@
+{
+  "id": "struggle-targeted-help",
+  "suite": "capability",
+  "title": "Done, but the hard part didn't work: the next step holds the level, with help aimed at that part and another try",
+  "origin": "Issue #164 (a well-defined next step), walkthrough case 2",
+  "seed": {
+    "name": "Theo",
+    "goal": "fun_skill",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "get better at drawing, mostly sketching objects", "where": "at the kitchen table", "when": "7 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Evening Theo! Tonight: a mug from life with three values (light, middle, dark), 20 min at the kitchen table at 7. Photo when you're done." },
+      { "from": "tester", "text": "yep" }
+    ],
+    "plan": {
+      "step": "Draw one object from life, 20 min",
+      "destination": "a still life of three objects that looks properly 3D by Sunday",
+      "place": "at the kitchen table",
+      "time": "19:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+      "proof": "photo",
+      "proof_note": "a photo of the page",
+      "reason": "Drawing from life is what trains your eye.",
+      "minutes": 20,
+      "started_days_ago": 4
+    },
+    "step_days": [
+      { "days_ago": 4, "status": "done", "step": "Draw a mug from life, outline only, 20 min", "proof_seen": "photo: mug outline, good proportions" },
+      { "days_ago": 3, "status": "done", "step": "Draw an apple from life, outline only, 20 min", "proof_seen": "photo: apple outline" },
+      { "days_ago": 2, "status": "done", "step": "Watch a 10 min video on 3-value shading, then shade a sphere", "proof_seen": "photo: shaded sphere, light and dark both there", "reflection": "the idea clicked on the sphere" }
+    ],
+    "today_step": { "step": "A mug from life with three values (light, middle, dark), 20 min at the kitchen table at 7 pm", "agreed_hours_ago": 3 }
+  },
+  "testerLines": [
+    "[photo: a pencil drawing of a mug; the outline is good but the shading is all one middle gray, no real dark areas]",
+    "done but the shading came out flat, everything ended up mid gray",
+    "I think I was scared to go really dark, it felt like I'd ruin it",
+    "ok yeah"
+  ],
+  "whatWentWrong": "New case, not a past mistake (#164).",
+  "shouldHaveHappened": "ZOH counts the photo and celebrates the work (the outline is good). It's curious about the flat shading and hears that he was scared to go dark. Since the proof shows three values didn't happen yet, the next step doesn't move up (no new object, no three-object still life): it's another try at the same level, with help aimed at going dark (for example a quick tip like putting the darkest dark down first, or a value-scale warm-up before the mug). Warm, no blame, fully defined, asked if it works. After 'ok yeah' a short confirmation.",
+  "areaCode": "212",
+  "startTime": "19:30",
+  "timeZone": "America/New_York"
+}
