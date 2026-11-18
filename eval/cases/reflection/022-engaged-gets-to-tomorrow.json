@@ -17,7 +17,7 @@
     "history": [
       {
         "from": "zoh",
-        "text": "Hey Leo! 15 minutes of Project Hail Mary in bed at 9:30, phone on the dresser. A photo of your page when you're done."
+        "text": "Hey Leo! 15 minutes of Project Hail Mary in bed at 9:30, phone on the dresser. A quick voice note when you're done."
       },
       {
         "from": "tester",
@@ -29,16 +29,32 @@
       "destination": "a book a month",
       "place": "in bed",
       "time": "21:30",
-      "days": ["sun", "mon", "tue", "wed", "thu"],
-      "proof": "photo",
-      "proof_note": "a photo of your page",
+      "days": [
+        "sun",
+        "mon",
+        "tue",
+        "wed",
+        "thu"
+      ],
+      "proof": "voice",
+      "proof_note": "a quick voice note when you're done",
       "reason": "Reading in place of the scroll turns the same time into books.",
       "minutes": 15,
       "started_days_ago": 8
     },
     "step_days": [
-      { "days_ago": 2, "status": "done", "step": "15 min reading in bed, phone on the dresser", "proof_seen": "photo: Project Hail Mary, page 40" },
-      { "days_ago": 1, "status": "done", "step": "15 min reading in bed, phone on the dresser", "proof_seen": "photo: Project Hail Mary, page 58" }
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "15 min reading in bed, phone on the dresser",
+        "proof_seen": "voice: Project Hail Mary, page 40"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "15 min reading in bed, phone on the dresser",
+        "proof_seen": "voice: Project Hail Mary, page 58"
+      }
     ],
     "today_step": {
       "step": "15 min of Project Hail Mary in bed at 9:30 pm, phone on the dresser",
@@ -46,7 +62,7 @@
     }
   },
   "testerLines": [
-    "[photo: Project Hail Mary open at page 81 on a bedside table, a reading lamp on]",
+    "[voice: Done, page 81 of Project Hail Mary.]",
     "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop",
     "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how",
     "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes",
@@ -55,7 +71,7 @@
     "sounds good"
   ],
   "whatWentWrong": "New for #211: the contrast to the early proposal. With the next step held until the reflection lands, a tester who keeps giving good answers could get question after question with no end in sight.",
-  "shouldHaveHappened": "ZOH counts the photo and celebrates reading past the 15 minutes. It follows what's worth understanding (what pulled him in, what makes it work), one question per text, and lands the talk at a natural point once it understands what's going on: by about its 5th text it moves to tomorrow's step built on what he said (the dresser, a book he wants to read, maybe more time), fully defined, and asks if it works, without being asked. It never asks question after question with no progression. After \"sounds good\" it confirms in a line with no new question.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates reading past the 15 minutes. It follows what's worth understanding (what pulled him in, what makes it work), one question per text, and lands the talk at a natural point once it understands what's going on: by about its 5th text it moves to tomorrow's step built on what he said (the dresser, a book he wants to read, maybe more time), fully defined, and asks if it works, without being asked. It never asks question after question with no progression. After \"sounds good\" it confirms in a line with no new question.",
   "areaCode": "212",
   "startTime": "21:58",
   "timeZone": "America/New_York"
