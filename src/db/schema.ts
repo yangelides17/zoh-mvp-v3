@@ -321,6 +321,13 @@ export const SUGGESTION_DECISIONS = ["waiting", "approved", "changed", "rejected
 export const SUGGESTION_OUTCOMES = ["delivered", "agreed", "declined"] as const;
 
 /**
+ * When a request in ZOH's words reaches the tester (and, #214, when a founder's next step or plan change is raised): naturally (the morning text or ZOH's next reply),
+ * only with the morning text, or as its own text at a set time (a manual nudge).
+ */
+export const REQUEST_DELIVERIES = ["natural", "morning", "own_text"] as const;
+export type RequestDelivery = (typeof REQUEST_DELIVERIES)[number];
+
+/**
  * One record per next step: who raised it, what and why, the founders' decision and what happened
  * after. Never deleted: it's the coach's future training material.
  */
@@ -360,6 +367,8 @@ export const suggestions = pgTable(
     planChanges: jsonb("plan_changes").$type<PlanChanges>(),
     /** adjust only: what the tester changed from the proposal, in plain words ("time 08:00, not 07:30"). */
     outcomeNote: text("outcome_note"),
+    /** #214: when ZOH raises a founder's proposal (natural, unless the founders said morning or now). */
+    delivery: text("delivery", { enum: REQUEST_DELIVERIES }).notNull().default("natural"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -370,6 +379,7 @@ export const suggestions = pgTable(
     check("suggestions_decision_check", sql`${t.decision} in ('waiting', 'approved', 'changed', 'rejected', 'withdrawn')`),
     check("suggestions_decided_kind_check", sql`${t.decidedKind} in ('deepen', 'upgrade', 'new_focus')`),
     check("suggestions_outcome_check", sql`${t.outcome} in ('delivered', 'agreed', 'declined')`),
+    check("suggestions_delivery_check", sql`${t.delivery} in ('natural', 'morning', 'own_text')`),
   ],
 );
 
@@ -380,12 +390,6 @@ export const REQUEST_STATUSES = ["pending", "sending", "sent", "done", "cancelle
 /** #155: what the console chat proposes to do for a founder, until one confirms it. */
 export const DRAFT_STATUSES = ["draft", "confirmed", "cancelled", "failed"] as const;
 export type DraftStatus = (typeof DRAFT_STATUSES)[number];
-/**
- * When a request in ZOH's words reaches the tester: naturally (the morning text or ZOH's next reply),
- * only with the morning text, or as its own text at a set time (a manual nudge).
- */
-export const REQUEST_DELIVERIES = ["natural", "morning", "own_text"] as const;
-export type RequestDelivery = (typeof REQUEST_DELIVERIES)[number];
 
 /**
  * One console thread per tester (spec: GitHub issue "Founder console"): the founders' messages, the

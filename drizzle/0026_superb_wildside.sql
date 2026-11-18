@@ -1,0 +1,2 @@
+ALTER TABLE "suggestions" ADD COLUMN "delivery" text DEFAULT 'natural' NOT NULL;--> statement-breakpoint
+ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_delivery_check" CHECK ("suggestions"."delivery" in ('natural', 'morning', 'own_text'));
