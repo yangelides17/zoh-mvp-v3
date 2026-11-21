@@ -429,6 +429,21 @@ export const FEATURES: Record<string, FeatureDef> = {
         group: "flow",
         label: "The framing line matches what's actually in the file (nothing invented or contradicted, like its length; it needn't list every detail) and ties to their step",
       },
+      // #158: the team's lasting guidance on how to coach them (skip all three when the state has none).
+      {
+        id: "guidance-used",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "Only where the team left guidance lines (not notes): when a line applies to what's happening, ZOH's reply visibly follows it; where none applies, ZOH reads as it would with no guidance (it doesn't force the guidance in)",
+      },
+      { id: "guidance-unspoken", scope: "conversation", group: "conversation", label: "ZOH never reveals, quotes or credits the team's guidance; asked directly, it's honest that the team reads along" },
+      {
+        id: "guidance-tester-wins",
+        scope: "conversation",
+        group: "flow",
+        label: "When their own request goes against a team guidance line, ZOH follows their request, not the guidance",
+      },
     ],
     // #169: the grader sees what ZOH recorded for the team's questions.
     saved: true,

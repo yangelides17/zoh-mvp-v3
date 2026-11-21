@@ -68,7 +68,6 @@ export type NewMessage = typeof messages.$inferInsert;
 export const TESTER_PHASES = ["onboarding", "planning", "active"] as const;
 export const TIME_ZONE_STATUSES = ["assumed_eastern", "needs_city", "confirmed"] as const;
 export const DEFAULT_QUIET_HOURS = { start: "22:00", end: "09:00" } as const;
-export const DEFAULT_PUSHINESS = "pushy";
 
 /** One row per person who texts from an allowed number. */
 export const testers = pgTable(
@@ -93,7 +92,8 @@ export const testers = pgTable(
     quietHoursChosen: boolean("quiet_hours_chosen").notNull().default(false),
     /** #48: the step time ZOH last asked about moving chosen quiet hours for ("HH:MM"), so it asks once per time. */
     quietHoursAskedFor: text("quiet_hours_asked_for"),
-    pushiness: text("pushiness").notNull().default(DEFAULT_PUSHINESS),
+    /** Unused since #158 (push levels removed); kept one release so a running older deploy can still read it, then dropped. */
+    pushiness: text("pushiness").notNull().default("pushy"),
     /** What they've asked of the coach's style ("fewer emojis"). */
     styleNotes: text("style_notes").notNull().default(""),
     /** Dev accounts (DEV_NUMBERS): can text "reset". */
@@ -471,6 +471,55 @@ export const consoleMessages = pgTable(
     check("console_messages_answer_status_check", sql`${t.answerStatus} in ('answered', 'dodged')`),
   ],
 );
+
+/**
+ * #158: the team's lasting guidance on how to coach one tester ("more curious with her"). The coach reads every
+ * line on every text, never quotes it, and their own request beats it. Changes only when a founder edits it.
+ */
+export const coachingGuidance = pgTable("coaching_guidance", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  testerId: uuid("tester_id")
+    .notNull()
+    .references(() => testers.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  /** The founder who wrote or last edited it. */
+  author: text("author").notNull(),
+  /** Their own request that overrides it ("chill out"), saved by the coach; cleared when a founder edits the line. */
+  overriddenBy: text("overridden_by"),
+  overriddenAt: timestamp("overridden_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type CoachingGuidance = typeof coachingGuidance.$inferSelect;
+
+export const COACHING_AREAS = ["guidance", "style", "learned"] as const;
+export const COACHING_ACTIONS = ["add", "edit", "remove", "clear"] as const;
+
+/** #158: every change to how one tester is coached (guidance, their style requests, learned preferences), and who made it. */
+export const coachingChanges = pgTable(
+  "coaching_changes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    area: text("area", { enum: COACHING_AREAS }).notNull(),
+    action: text("action", { enum: COACHING_ACTIONS }).notNull(),
+    from: text("from"),
+    to: text("to"),
+    /** A founder's name, "tester" or "ZOH". */
+    by: text("by").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("coaching_changes_tester_at_idx").on(t.testerId, t.at),
+    check("coaching_changes_area_check", sql`${t.area} in ('guidance', 'style', 'learned')`),
+    check("coaching_changes_action_check", sql`${t.action} in ('add', 'edit', 'remove', 'clear')`),
+  ],
+);
+
+export type CoachingChange = typeof coachingChanges.$inferSelect;
 
 /** Things for the founders to look at later (e.g. an off-list goal). Saved only; nobody is notified. */
 export const flags = pgTable(

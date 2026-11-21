@@ -108,6 +108,9 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       ...(seed.today_step ? [`today's step: ${seed.today_step.step}`] : []),
     ];
     context.push("", `What ZOH already knew before this conversation (from earlier texts, not shown; using it isn't inventing): ${known.join("; ")}.`);
+    // #158: the team's lasting guidance ZOH reads on every text (never to be revealed to the tester).
+    const guidance = (seed.team ?? []).filter((x) => x.kind === "guidance").map((x) => x.body);
+    if (guidance.length) context.push(`The team's guidance on how to coach them, which ZOH reads but the tester never sees: ${guidance.map((g) => `"${g}"`).join("; ")}.`);
   }
   const before = earlier.length
     ? [

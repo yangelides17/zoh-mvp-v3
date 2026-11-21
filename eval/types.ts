@@ -79,12 +79,12 @@ export const seedSchema = z.object({
       temporary: z.object({ ends_in_days: z.number().int().min(0).max(30), usual_step: z.string() }).optional(),
     })
     .optional(),
-  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff). */
+  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff); #158: guidance lines. */
   team: z
     .array(
       z.object({
         /** #168: "file": a founder's line with a file already read (`name`, `content_type`, `account`: what's in it). */
-        kind: z.enum(["note", "request", "file"]),
+        kind: z.enum(["note", "request", "file", "guidance"]),
         body: z.string().min(1),
         hours_ago: z.number().min(0).max(72).default(1),
         delivery: z.enum(REQUEST_DELIVERIES).default("natural"),

@@ -1,5 +1,6 @@
 import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
+import { guidanceRef } from "../coaching/guidance.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState, type ReflectionClose } from "./state.js";
@@ -32,7 +33,8 @@ export const PROMPT_BUDGET_CHARS = {
   examples: 800,
   /** The voice page without its rule sections. #211: +150 for why ZOH reflects (Proof). */
   voice: 26_900,
-  tools: 2800,
+  // #158: +60 for their style request beating team guidance, naming the line it overrides.
+  tools: 2860,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
   // #201 review: +160 for rest days where the step needs recovery (Yanni, Nov 16).
@@ -53,7 +55,8 @@ export const PROMPT_BUDGET_CHARS = {
   nextStepsTeam: 800,
   // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
   // #169: +100 for the team question line (ask once, listen, never chase).
-  team: 850,
+  // #158: +50 for guidance alongside notes: where it applies, never the topic of a text.
+  team: 900,
   memory: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
@@ -83,7 +86,7 @@ export const MEMORY = PAGE.rules.memory;
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
  * Keep it in sync with the page.
  */
-export const CORE_VOICE = `You are ZOH, a texting coach (iMessage). What you're for: most people have something they want, and the friction between wanting it and doing it stops them. You turn it into one small step a day and keep them taking it until they're making real progress, as the friend who knows they're capable, wakes them up when they drift and won't let them slip. You speak from belief, never judgment, with big warm energy by default (Pushy level): real enthusiasm about their goal and what they do ("Let's go!"), and real interest in what they tell you, never polite neutrality.
+export const CORE_VOICE = `You are ZOH, a texting coach (iMessage). What you're for: most people have something they want, and the friction between wanting it and doing it stops them. You turn it into one small step a day and keep them taking it until they're making real progress, as the friend who knows they're capable, wakes them up when they drift and won't let them slip. You speak from belief, never judgment, with big warm energy by default: real enthusiasm about their goal and what they do ("Let's go!"), and real interest in what they tell you, never polite neutrality.
 When values pull apart, the earlier wins: 1) their wellbeing and trust (nobody can be coached once they stop replying); 2) understanding them, never at the cost of their time; 3) their direction is their call; 4) holding them to their word: one response on why it matters, then their call; 5) the process, which bends, except proof for a check mark and a clear yes to lock a plan. When nothing below fits a moment, do what serves this.
 
 How you ask (curious by default: understand, then prescribe):
@@ -137,7 +140,7 @@ Then:
 - Save an answer only once it's concrete enough to plan ("when" = a time of day; don't ask which days, the plan settles that. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings", "yea" to an either/or): ask once more, kindly, saying why (a set time makes it stick) and offering a choice ("which works better, 5:30 or 6?"), never correcting them; if still vague, save a sensible default and say they can change it.
 - Reality check: if what they want doesn't fit the time or resources they've said they have, say so and agree something realistic before saving. No gear: offer a version that works with what they have.
 - Goal questions get a one-line answer, off-topic a short light one, then the next open question.
-- Never ask how pushy to be.
+- Never ask how hard to push.
 - No recap or plan talk until the state says onboarding just finished. Then, in that same text, carry straight on into PLAN AGREEMENT with no recap (a first text's intro still comes first): ask the next thing the plan needs without saying you have everything, or bridge into the plan and save it with propose_plan.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
@@ -306,7 +309,7 @@ export function moments(s: CoachState): Moment[] {
       m.push("Next steps and maintenance");
     }
   }
-  if (s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
+  if (s.guidance.length || s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
   // Paused or stopped: the guidance for both is in the saving rules, read in every phase (onboarding too).
   if (s.pause || s.stopped) m.push("Saving, style and requests");
   return m;
@@ -647,6 +650,10 @@ function weekProgress(w: WeekLookback, plan: Plan, which: string): string[] {
 function threadLines(s: CoachState, plan: Plan | undefined): string[] {
   const lines: string[] = [];
   const day = (at: Date) => new Intl.DateTimeFormat("en-US", { timeZone: s.tester.timeZone, month: "short", day: "numeric" }).format(at);
+  if (s.guidance.length) {
+    const g = s.guidance.map((x) => `- [${guidanceRef(x.id)}] ${x.text}${x.overriddenBy ? ` (overridden: they asked "${x.overriddenBy}", which wins)` : ""}`);
+    lines.push(`FROM THE TEAM, guidance (lasting, how to coach them where it applies):\n${g.join("\n")}`);
+  }
   if (s.teamNotes.length) lines.push(`FROM THE TEAM, notes:\n${s.teamNotes.map((n) => `- ${day(n.createdAt)}: ${n.body}`).join("\n")}`);
   const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
   if (!s.nudgeMoment) {

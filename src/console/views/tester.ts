@@ -48,7 +48,7 @@ function headerHtml(h: TesterHeader): string {
   const more = [
     focus ? goalLine(focus, "Focus") : `<div class="muted">No focus goal yet</div>`,
     ...maintenance.map((m) => goalLine(m, "Also keeping up", ` · ${m.current?.length ?? 0} day streak (maintenance)`)),
-    `<div class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)} · ${esc(t.pushiness)}</div>`,
+    `<div class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)}</div>`,
   ].join("");
   return `<details class="card hdr"><summary><span class="avatar">${esc(initials(t.name))}</span><h1>${esc(t.name ?? "Unnamed")}</h1>
 <span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip${s === "synthetic" ? "" : " warn"}">${esc(s)}</span>`).join("")}<span class="muted">${esc(maskNumber(t.phone))}</span>

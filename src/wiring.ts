@@ -14,7 +14,7 @@ import { createMemoryKeeper, KEEPER_MAX_TOKENS, type MemoryKeeper } from "./memo
 import { createNudgeScheduler, type NudgeScheduler } from "./nudges/scheduler.js";
 import { HOLDING_AFTER_MS, routingOf, type Logger } from "./pipeline/inbound.js";
 import { createSendblueClient, type SendblueClient } from "./sendblue/client.js";
-import { createSpeachesTranscriber } from "./transcription/speaches.js";
+import { createSpeachesTranscriber, SPEACHES_WAKE_RETRY_MS } from "./transcription/speaches.js";
 import { createJumper } from "./testers/jump.js";
 import { ReplyLines } from "./pipeline/conversation.js";
 import type { BuildInfo } from "./testers/env.js";
@@ -220,6 +220,6 @@ function makeMedia(config: Config) {
 
 function makeTranscriber(config: Config) {
   return config.speaches.url
-    ? createSpeachesTranscriber({ url: config.speaches.url, apiKey: config.speaches.apiKey, model: config.speaches.model })
+    ? createSpeachesTranscriber({ url: config.speaches.url, apiKey: config.speaches.apiKey, model: config.speaches.model, wakeRetryMs: SPEACHES_WAKE_RETRY_MS })
     : undefined;
 }

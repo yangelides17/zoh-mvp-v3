@@ -318,7 +318,8 @@ export async function notesForCoach(db: Db, tester: Pick<Tester, "id" | "context
   const rows = await db
     .select()
     .from(consoleMessages)
-    .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note"), gte(consoleMessages.createdAt, since)))
+    // #158: a note made lasting (moved into guidance) is done, and read only as guidance from then on.
+    .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note"), isNull(consoleMessages.doneAt), gte(consoleMessages.createdAt, since)))
     .orderBy(desc(consoleMessages.createdAt))
     .limit(NOTES_SHOWN);
   return rows.reverse();
