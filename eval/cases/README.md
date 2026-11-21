@@ -68,7 +68,8 @@ fits instead, so it never lands after a text it doesn't answer:
 Before each such line, one call to the simulated tester (`EVAL_SIM_MODEL`) decides, with a one-sentence reason that
 the report shows: the tester's own earlier texts **already said** it (skipped), it **fits** (the wording itself is
 sent), it's **close** (ZOH asked for this very point in other words; a second call changes the wording just enough,
-carrying only its point), **passed** (optional lines only) or **not yet** (a second call replies to just what ZOH
+carrying only its point), **passed** (optional lines only: ZOH moved on, or is already at the next line's moment,
+which the decision sees) or **not yet** (a second call replies to just what ZOH
 asked, from the case's `facts`, without seeing the line, and never proposes, agrees to or decides anything).
 After 2 extra replies on one line, or 4 in the case, the run ends: an `expected` line is **ZOH's miss**, graded as
 usual; any other is a **case problem**, graded for a look but kept out of every score. An empty reply is a case
@@ -77,6 +78,8 @@ problem too. Every run is graded, so no ZOH mistake is hidden.
 **Writing cases.** The test is fair when what's tested is what's actually tested; small invented details from the
 tester are fine if they're plausible and change nothing (Yanni, Nov 21).
 - Anchor only the tester's answers to ZOH and agreements. The tester's own moves are `starts`.
+- When the tester raises something themselves (an obstacle, a second request), put it in a text they're already
+  sending, or send several texts back to back (`+++`), never as a line waiting for a question ZOH may not ask.
 - A `when` names something ZOH does, never "after ZOH does the right thing": a line waiting on ZOH's good behavior
   turns ZOH's mistake into a case problem. Where the case does expect ZOH to get somewhere, mark the line `expected`.
 - Agreements ("works", "sounds good") are `fixed` and `expected`.
