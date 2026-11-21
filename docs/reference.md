@@ -20,7 +20,17 @@ anything here (a new service or variable, a reversed decision, a new outside lim
     transcripts unchanged), which hand freed memory back: idle is 0.22 GB after a restart and
     0.70 GB once a voice note has loaded the model (measured on staging), about $5 a month saved
     per app. The rest is the Whisper libraries and file cache; no setting frees it
-    (`MKL_DISABLE_FAST_MM=1` was tried and did nothing).
+    (`MKL_DISABLE_FAST_MM=1` was tried and did nothing). Over the next days production settled
+    near 0.37 GB as the file cache was reclaimed.
+  - Staging's Speaches sleeps when idle (Railway Serverless, Nov 18; production stays always on):
+    it sleeps 5–10 minutes after its last traffic and costs nothing asleep. The setting only reaches
+    a container created after it is turned on, so it needs a new deploy, not "redeploy" (which reran
+    the old settings). A sleeping Speaches fails the first request at once (`fetch failed`) rather
+    than holding it; it is up about 10 s later. So the app (both apps; `SPEACHES_WAKE_RETRY_MS` in
+    `src/transcription/speaches.ts`) retries a voice note that can't connect every 2 s for up to
+    30 s: the first one after a quiet spell on staging waits about 20 s, and on production a note
+    that arrives while Speaches restarts keeps its words. A normal voice note isn't slowed: only a
+    failed connection waits.
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`
   (who gets replies, nudges and memory; `*` means everyone, set on production at launch, Nov 3 2026),
