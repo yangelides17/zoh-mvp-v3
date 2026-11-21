@@ -33,7 +33,7 @@
   "testerLines": [
     "advance to 18:50",
     "honestly evenings are chaos with my new job, the plan isn't working",
-    { "say": "mornings before work could work, like 7am", "means": "mornings before work, around 7, would work instead of evenings", "when": "after ZOH asks what would work instead of evenings (a different time or part of the day)", "length": "short" },
+    { "say": "mornings before work could work, like 7am", "means": "mornings before work, around 7, would work instead of evenings", "when": "after ZOH asks what would work instead of evenings, or suggests another time of day", "length": "short", "expected": true },
     { "say": "yes do that", "when": "after ZOH proposes the morning change (moving the texts' quiet hours or the step to 7am) and asks if it works", "fixed": true, "expected": true },
     { "say": "yep", "when": "after ZOH proposes the reworked morning plan and asks if it works", "fixed": true, "optional": true }
   ],

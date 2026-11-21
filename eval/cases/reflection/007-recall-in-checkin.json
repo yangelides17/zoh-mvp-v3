@@ -34,7 +34,8 @@
   },
   "testerLines": [
     "advance to 09:05",
-    "👍",
+    { "say": "slow enough to talk", "when": "after ZOH asks what yesterday's pace rule or lesson was", "fixed": true, "optional": true },
+    { "say": "👍", "when": "after ZOH's morning kickoff or its reply", "fixed": true },
     "advance to 18:55",
     { "say": "slow enough to talk", "when": "after ZOH asks what yesterday's pace rule or lesson was", "fixed": true, "optional": true }
   ],

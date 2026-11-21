@@ -223,6 +223,14 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
   let usage = { input: 0, output: 0 };
   let i = 0;
   let waitsOnLine = 0;
+  // Extra replies counted against WAITS_PER_CASE: a dropped optional line's don't count, so they can't push a later
+  // expected line into a false miss (#230 review).
+  let caseWaits = 0;
+  const drop = (line: CaseLine) => {
+    if (line.optional) caseWaits -= waitsOnLine;
+    i += 1;
+    waitsOnLine = 0;
+  };
   const ask = async (content: string, jsonSchema?: Record<string, unknown>) => {
     const res = await complete({ system, messages: [{ role: "user", content }], maxTokens: 1000, effort: "low", jsonSchema });
     usage = addUsage(usage, res.usage);
@@ -260,8 +268,7 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
         counts.log.push({ line: i, say: line.say, decision, reason: decided.reason ?? "" });
         if (decision === "said" || decision === "passed") {
           counts[decision === "said" ? "skipped" : "passed"] += 1;
-          i += 1;
-          waitsOnLine = 0;
+          drop(line);
           continue;
         }
         if (decision === "fits") {
@@ -280,18 +287,18 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
         if (line.optional && waitsOnLine >= WAITS_PER_LINE) {
           counts.log.push({ line: i, say: line.say, decision: "passed", reason: `ZOH didn't ask for it in ${waitsOnLine} more texts` });
           counts.passed += 1;
-          i += 1;
-          waitsOnLine = 0;
+          drop(line);
           continue;
         }
-        if (waitsOnLine >= WAITS_PER_LINE || counts.waited >= WAITS_PER_CASE) {
-          const where = waitsOnLine >= WAITS_PER_LINE ? `${waitsOnLine} extra replies on it` : `${counts.waited} extra replies in the case`;
+        if (waitsOnLine >= WAITS_PER_LINE || caseWaits >= WAITS_PER_CASE) {
+          const where = waitsOnLine >= WAITS_PER_LINE ? `${waitsOnLine} extra replies on it` : `${caseWaits} extra replies in the case`;
           const what = `“${line.say}” never fit (${line.when}) after ${where}`;
           if (line.expected) counts.missed = `ZOH never reached it: ${what}`;
           else counts.problem = what;
           return null;
         }
         waitsOnLine += 1;
+        caseWaits += 1;
         counts.waited += 1;
         return write(waitingReplyPrompt(transcript), line, "while waiting for");
       }

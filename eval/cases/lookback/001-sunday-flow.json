@@ -44,7 +44,7 @@
   },
   "testerLines": [
     "[voice: Done, chapter six. The make it obvious part clicked, I left the book on my pillow this morning so I'd see it tonight.]",
-    { "say": "yeah and phone was in the kitchen again, zero buzzing", "means": "the phone was in the kitchen again, no distractions", "when": "after ZOH reacts to the voice note or asks how the reading went", "length": "short", "optional": true },
+    { "say": "yeah and phone was in the kitchen again, zero buzzing", "means": "the phone was in the kitchen again, no distractions", "when": "after ZOH asks how the reading went or about distractions", "length": "short", "optional": true },
     { "say": "that's about it for today", "when": "after ZOH asks if there's anything else about today, or another question about today", "fixed": true, "optional": true },
     { "say": "honestly the dishes thing, it doesn't even feel like effort now. this week I want to get through it faster", "means": "reading after the dishes is effortless now; she wants to go faster this week", "when": "after ZOH talks about her week and asks a question about it", "length": "short", "expected": true },
     { "say": "yeah that works", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }

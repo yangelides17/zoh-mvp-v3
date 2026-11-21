@@ -40,8 +40,7 @@
   },
   "testerLines": [
     "yo how'd I do this week",
-    { "say": "honestly I want to solve the whole thing by next weekend", "means": "wants to solve the whole cube by next weekend", "when": "after ZOH's recap asks a question about his week or what's next", "length": "short", "expected": true },
-    { "say": "also kinda want to start juggling on the side lol", "starts": true },
+    { "say": "honestly I want to solve the whole thing by next weekend +++ also kinda want to start juggling on the side lol", "when": "after ZOH's recap asks a question about his week or what's next", "fixed": true, "expected": true },
     { "say": "yeah ok", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

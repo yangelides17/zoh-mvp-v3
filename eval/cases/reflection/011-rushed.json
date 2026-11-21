@@ -70,7 +70,7 @@
   },
   "testerLines": [
     "[voice: done, chapter four, gotta run]",
-    "ok fine, busy day",
+    { "say": "ok fine, busy day", "when": "after ZOH celebrates the voice note without proposing tomorrow's step yet", "fixed": true, "optional": true },
     { "say": "sure", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: depth fits the day, and a rushed tester isn't fished for more.",

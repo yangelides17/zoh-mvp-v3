@@ -30,7 +30,7 @@
     { "say": "btw is it weird that I skip the appendices", "starts": true },
     { "say": "work is insane today", "starts": true },
     { "say": "omg my boss just asked me to stay late, can we do 8:30 instead?", "starts": true },
-    { "say": "cool cool", "when": "after ZOH confirms the new time", "fixed": true },
+    { "say": "cool cool", "when": "after ZOH confirms the new time", "fixed": true, "expected": true },
     { "say": "what time was it again?", "starts": true }
   ],
   "facts": [

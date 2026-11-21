@@ -61,7 +61,7 @@
   },
   "testerLines": [
     "[voice: Done, three sets of eight push-ups and twelve squats.]",
-    { "say": "it was fine, legs were tired on the last set", "means": "it was fine; his legs were tired on the last set", "when": "after ZOH asks how it went", "length": "short" },
+    { "say": "it was fine, legs were tired on the last set", "means": "it was fine; his legs were tired on the last set", "when": "after ZOH asks how it went", "length": "short", "expected": true },
     { "say": "nah that's it", "when": "after ZOH asks a follow-up about the workout or if there's anything else", "fixed": true, "optional": true },
     { "say": "let's go", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],

@@ -30,7 +30,7 @@
   },
   "testerLines": [
     "[voice: done. ran the loop, 20 min]",
-    { "say": "good", "when": "after ZOH asks how the run went", "fixed": true },
+    { "say": "good", "when": "after ZOH asks a question about the run (how it went, how it felt, anything about it)", "fixed": true, "expected": true },
     { "say": "nah that's about it", "when": "after ZOH asks a follow-up about the run or if there's anything else", "fixed": true, "optional": true },
     { "say": "k", "when": "after ZOH proposes the next step day's step and asks if it works", "fixed": true, "expected": true }
   ],

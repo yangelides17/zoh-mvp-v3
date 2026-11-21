@@ -183,6 +183,17 @@ describe("eval: case lines that wait for their moment (#230)", () => {
     expect(result.lines).toMatchObject({ exact: 2, waited: 4 });
   });
 
+  it("doesn't count a dropped optional line's extra replies toward the case's 4, so a later expected line isn't a false miss", async () => {
+    const optional = { ...anchored, optional: true };
+    const line = (say: string) => ({ say, when: "after a question", fixed: true });
+    // Optional: 2 waits, then dropped. Then 2 + 2 waits on two lines that do fit: 4 counted, not 6.
+    const sim = fakeSim(["wait", "wait", "wait", "wait", "wait", "fits", "wait", "wait", "fits"], ["o1", "o2", "a1", "a2", "b1", "b2"]);
+    const { result, testerTexts } = await play(makeCase(["Start", optional, line("a"), line("b")]), sim.complete);
+    expect(testerTexts).toEqual(["Start", "o1", "o2", "a1", "a2", "a", "b1", "b2", "b"]);
+    expect(result.endedBy).toBe("script");
+    expect(result.lines).toMatchObject({ exact: 2, passed: 1, waited: 6 });
+  });
+
   it("makes an empty reply a case problem, never a stand-in 'ok'", async () => {
     const sim = fakeSim(["wait"], ["  "]);
     const { result, testerTexts } = await play(makeCase(["Start", anchored]), sim.complete);

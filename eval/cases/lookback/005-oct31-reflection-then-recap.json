@@ -44,7 +44,7 @@
   "testerLines": [
     "[voice: Done. Wrote the five for the gym owner. Instead of 'would you use an app for scheduling' I've got 'walk me through how you booked trainers last week'. And one follow-up on what he did the last time someone no-showed.]",
     { "say": "Honestly this one felt manageable. I still had to catch myself wanting to ask if it was frustrating, but switching to what he actually did helped. One follow-up felt like enough for today", "means": "it felt manageable; he caught himself wanting to ask if it was frustrating, switching to what the owner actually did helped, and one follow-up felt like enough", "when": "after ZOH asks how it went or how writing the questions felt", "length": "full", "expected": true },
-    { "say": "ha yeah. this week I want to actually book one real conversation, not just practice", "means": "this week he wants to book one real customer conversation, not just practice", "when": "after ZOH's recap asks a question about the week ahead", "length": "short", "expected": true },
+    { "say": "ha yeah. this week I want to actually book one real conversation, not just practice", "means": "this week he wants to book one real customer conversation, not just practice", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "short", "expected": true },
     { "say": "yeah that works", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

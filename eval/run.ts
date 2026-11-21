@@ -30,7 +30,7 @@ import {
   type ReportData,
 } from "./report.js";
 import { caseIdOf, compareScores, groupScores, scoreCases, type CaseScore } from "./score.js";
-import { caseTester, simulatedTester, WAITS_PER_CASE } from "./simulator.js";
+import { caseTester, simulatedTester, WAITS_PER_CASE, WAITS_PER_LINE } from "./simulator.js";
 import type { ConversationPlan, GradedConversation } from "./types.js";
 
 /** One feature's share of the run: what to play (or re-grade), and the baseline to compare with. */
@@ -277,7 +277,9 @@ async function play(
     const waits = c?.testerLines.some((l) => typeof l !== "string") ?? false;
     const tester = c ? (waits ? caseTester(c, deps.caseSimulate) : scriptedTester(c.testerLines)) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
     // A case gets one turn past its script (and any extra replies a waiting line may take) so it ends "by script", not by the cap.
-    const maxTurns = c ? c.testerLines.length + (waits ? WAITS_PER_CASE : 0) + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
+    // Optional lines' extra replies come on top of the case's (a dropped one's are given back).
+    const optional = c?.testerLines.filter((l) => typeof l !== "string" && l.optional).length ?? 0;
+    const maxTurns = c ? c.testerLines.length + (waits ? WAITS_PER_CASE + WAITS_PER_LINE * optional : 0) + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
     const result = await runConversation(plan, tester, { maxTurns, index, env: deps.env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const out: GradedConversation = { ...result };
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;

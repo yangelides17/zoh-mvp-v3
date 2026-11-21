@@ -70,8 +70,8 @@
   },
   "testerLines": [
     "[voice: Okay done, finished chapter four.]",
-    { "say": "the habit stacking part, like tying a new habit to one you already do", "means": "habit stacking stuck: tying a new habit to one you already do", "when": "after ZOH asks what stuck, clicked or what she learned", "length": "short" },
-    { "say": "yeah maybe after I brush my teeth I could stretch", "means": "she could stretch right after brushing her teeth", "when": "after ZOH asks how she might use it or where it could fit", "length": "short" },
+    { "say": "the habit stacking part, like tying a new habit to one you already do", "means": "habit stacking stuck: tying a new habit to one you already do", "when": "after ZOH asks what stuck, clicked or what she learned", "length": "short", "expected": true },
+    { "say": "yeah maybe after I brush my teeth I could stretch", "means": "she could stretch right after brushing her teeth", "when": "after ZOH asks how she might use it or where it could fit", "length": "short", "expected": true },
     { "say": "ok cool", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

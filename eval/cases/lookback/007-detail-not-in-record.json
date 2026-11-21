@@ -41,7 +41,7 @@
     "[voice: did the two laps again, legs felt heavy at the start]",
     { "say": "heavy at first but it loosened up, kept the talk pace the whole way", "means": "legs were heavy at first but loosened up; kept the talk-test pace the whole way", "when": "after ZOH reacts to the voice note or asks how the run went", "length": "short", "optional": true },
     { "say": "that's about it", "when": "after ZOH asks if there's anything else about today, or another question about today's run", "fixed": true, "optional": true },
-    { "say": "more of the same honestly, maybe a bit longer", "means": "same again, maybe a bit longer", "when": "after ZOH's recap asks a question about the week ahead", "length": "short", "expected": true },
+    { "say": "more of the same honestly, maybe a bit longer", "means": "same again, maybe a bit longer", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "short", "expected": true },
     { "say": "yep", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

@@ -34,8 +34,8 @@
   },
   "testerLines": [
     "[voice: (piano) bars 1 to 4 hands together, steady; at bar 5 the left hand jumps and misses, stops, restarts bar 5, stops again, then plays 6 to 8 unevenly] done, bar 5 keeps falling apart though",
-    { "say": "I think the left hand jump is too far and I kind of panic before it", "means": "bar 5's left-hand jump feels too far and he panics right before it", "when": "after ZOH asks what happened at bar 5, or how it went", "length": "short" },
-    { "say": "probably looking down at my left hand too early", "means": "it's looking down at the left hand right before the jump", "when": "after ZOH asks or guesses what makes the jump go wrong", "length": "short" },
+    { "say": "I think the left hand jump is too far and I kind of panic before it", "means": "bar 5's left-hand jump feels too far and he panics right before it", "when": "after ZOH asks what happened at bar 5, or how it went", "length": "short", "expected": true },
+    { "say": "probably looking down at my left hand too early", "means": "it's looking down at the left hand right before the jump", "when": "after ZOH asks or guesses what makes the jump go wrong", "length": "short", "optional": true },
     { "say": "ok yeah", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

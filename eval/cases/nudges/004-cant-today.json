@@ -29,7 +29,7 @@
     "advance to 09:00",
     { "say": "can't today, slammed at work until 8", "means": "can't do today's run, busy at work until 8", "when": "after ZOH's morning text about today's run", "length": "short" },
     { "say": "seriously no way I get 30 min in", "means": "the full 30 minutes really won't fit today", "when": "after ZOH holds the line (the full 30 minutes, maybe at a later time)", "length": "short", "optional": true },
-    { "say": "ok 15 min at 8:30 I can do", "when": "after ZOH suggests a smaller or later run", "fixed": true, "expected": true },
+    { "say": "ok 15 min at 8:30 I can do", "when": "after ZOH suggests a smaller version of the run (shorter than the full 30 minutes)", "fixed": true, "expected": true },
     "advance to 20:20",
     "advance to 20:50",
     { "say": "done, 15 min ✅", "starts": true },

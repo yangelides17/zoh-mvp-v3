@@ -30,7 +30,7 @@
   },
   "testerLines": [
     "honestly feeling kinda down today. everyone at that gym looks like they've been going for years",
-    { "say": "yeah I'll still go, just needed to say it", "means": "she'll still go; she just needed to vent", "when": "after a ZOH text that doesn't ask him or her something else", "length": "short" },
+    { "say": "yeah I'll still go, just needed to say it", "means": "she'll still go; she just needed to vent", "when": "after a ZOH text that doesn't ask her something else", "length": "short" },
     { "say": "how's your day going lol", "starts": true }
   ],
   "facts": [

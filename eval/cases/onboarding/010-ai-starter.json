@@ -5,7 +5,7 @@
   "testerLines": [
     "Start",
     "Priya. put AI to work for me",
-    { "say": "I'm a project manager at a construction company, drowning in meeting notes and status emails", "means": "project manager at a construction company, buried in meeting notes and status emails", "when": "after ZOH asks about her work or what she'd like AI to help with", "length": "short" },
+    { "say": "I'm a project manager at a construction company, drowning in meeting notes and status emails", "means": "project manager at a construction company, buried in meeting notes and status emails", "when": "after ZOH asks about her work or what she'd like AI to help with", "length": "short", "expected": true },
     { "say": "honestly I've barely used ChatGPT, maybe twice", "means": "has barely used ChatGPT, maybe twice", "when": "after ZOH asks what she's tried with AI or how much she's used it", "length": "short", "optional": true },
     { "say": "weekday mornings around 9:30 after standup, like 15 min", "means": "weekday mornings around 9:30 after standup, about 15 minutes", "when": "after ZOH asks when or how long she'd spend on it", "length": "short", "expected": true }
   ],

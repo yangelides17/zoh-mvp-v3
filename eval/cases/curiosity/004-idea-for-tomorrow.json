@@ -30,7 +30,7 @@
   },
   "testerLines": [
     "[voice: Did it. I gave my update first before anyone. My voice was a bit shaky at the start but it was fine after the first sentence.]",
-    { "say": "tomorrow I could maybe ask a question to someone else too", "starts": true },
+    { "say": "it got easier once people started nodding. tomorrow I could maybe ask a question to someone else too", "when": "after ZOH reacts to the voice note and asks about the standup (the shaky start, what made it fine, how it went)", "fixed": true },
     { "say": "like I never really engage with what others say, I just give my update and tune out", "means": "she never engages with what others say; she gives her update and tunes out", "when": "after ZOH asks about her idea: what it would give her, or what usually happens", "length": "short", "expected": true },
     { "say": "yeah that sounds right", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],

@@ -37,7 +37,7 @@
   },
   "testerLines": [
     "advance to 18:01",
-    { "say": "meh, felt like a slow week", "means": "the week felt slow", "when": "after ZOH's Sunday recap asks a question about her week", "length": "thin", "expected": true },
+    { "say": "meh, felt like a slow week", "means": "the week felt slow", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "thin", "expected": true },
     { "say": "ok", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

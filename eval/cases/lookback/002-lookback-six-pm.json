@@ -42,7 +42,7 @@
   },
   "testerLines": [
     "advance to 18:01",
-    { "say": "the 3 minutes felt huge honestly", "means": "the 3 minutes straight felt like a big deal", "when": "after ZOH's Sunday recap asks a question about his week", "length": "short", "expected": true },
+    { "say": "the 3 minutes felt huge honestly", "means": "the 3 minutes straight felt like a big deal", "when": "after ZOH's Sunday recap asks how his week went or what stood out", "length": "short", "optional": true },
     { "say": "keep building toward the mile, maybe 4 min jogs?", "means": "keep building toward the mile, maybe 4-minute jogs", "when": "after ZOH asks what he wants from next week or where to go from here", "length": "short", "optional": true },
     { "say": "perfect", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
   ],

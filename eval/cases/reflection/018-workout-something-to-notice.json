@@ -57,7 +57,7 @@
   },
   "testerLines": [
     "[voice: Done, all four rounds.]",
-    { "say": "harder than I expected, rounds 3 and 4 were rough", "means": "harder than expected; rounds 3 and 4 were rough", "when": "after ZOH asks how it went or felt", "length": "short" },
+    { "say": "harder than I expected, rounds 3 and 4 were rough", "means": "harder than expected; rounds 3 and 4 were rough", "when": "after ZOH asks how it went or felt", "length": "short", "expected": true },
     { "say": "idk, I kind of just pushed through them", "means": "he didn't do anything in particular, just pushed through", "when": "after ZOH asks what he did or noticed in rounds 3 and 4, or how he got through them", "length": "short", "optional": true },
     { "say": "oh I think I started the first jog way too fast actually", "means": "he started the first jog way too fast", "when": "after ZOH asks what he noticed, about his pace, or how the early rounds went", "length": "short", "expected": true },
     { "say": "sounds good", "when": "after ZOH proposes the next step day's step and asks if it works", "fixed": true, "expected": true }

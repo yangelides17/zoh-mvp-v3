@@ -70,10 +70,9 @@
   },
   "testerLines": [
     "[voice: Okay, finished chapter four. Honestly the habit stacking idea clicked, like linking a new habit to one you already do. The hard part was my phone kept buzzing the whole time.]",
-    { "say": "yeah like after I do the dishes I could just sit down and read", "means": "she could stack reading onto the dishes: after the dishes, sit down and read", "when": "after ZOH asks about habit stacking: what clicked, or how she'd use it", "length": "short", "optional": true },
+    { "say": "yeah like after I do the dishes I could just sit down and read. oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch", "means": "she could stack reading onto the dishes, and she already wrote the chapter's sticky note: after the dishes I read on the couch", "when": "after ZOH asks about habit stacking: what clicked, or how she'd use it", "length": "short", "optional": true },
     { "say": "the buzzing is mostly work slack, even at night", "means": "the buzzing is mostly work Slack, even at night", "when": "after ZOH asks about the buzzing phone or what distracted her", "length": "short", "optional": true },
     { "say": "I could leave it charging in the kitchen I guess", "means": "she could leave the phone charging in the kitchen", "when": "after ZOH asks what she could do about the phone or the buzzing", "length": "short", "optional": true },
-    { "say": "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch", "starts": true },
     { "say": "ok that works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

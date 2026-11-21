@@ -42,7 +42,7 @@
   "testerLines": [
     "[voice: finished chapter nine, the bit about copying the people around you]",
     { "say": "it was fine. that's all I got today, long day", "means": "it was fine; nothing more today, it was a long day", "when": "after ZOH reacts to the voice note or asks how it went", "length": "short" },
-    { "say": "eh just keep going I guess", "means": "no changes, just keep going", "when": "after ZOH's recap asks a question about the week ahead", "length": "thin", "expected": true },
+    { "say": "eh just keep going I guess", "means": "no changes, just keep going", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "thin", "expected": true },
     { "say": "ok", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
