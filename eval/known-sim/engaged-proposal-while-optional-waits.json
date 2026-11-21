@@ -1,0 +1,43 @@
+{
+  "id": "engaged-proposal-while-optional-waits",
+  "why": "ZOH proposed tomorrow and asked if it works: the optional phone line's moment is gone and the agreement after it is up.",
+  "case": "reflection/engaged-gets-to-tomorrow",
+  "line": 3,
+  "expect": [
+    "passed"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Done, page 81 of Project Hail Mary.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Leo, that's 23 pages tonight and three days in a row 🔥 Project Hail Mary has you hooked. What's been pulling you in at this point in the book?"
+    },
+    {
+      "from": "tester",
+      "text": "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop"
+    },
+    {
+      "from": "zoh",
+      "text": "Past 15 minutes on a night you could've scrolled, that's the plan working, Leo 📚 No spoilers, but what was it about the beetles moment that made you keep going?"
+    },
+    {
+      "from": "tester",
+      "text": "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how"
+    },
+    {
+      "from": "zoh",
+      "text": "That's a great reason to keep reading, Leo. Cliffhanger after cliffhanger, but the payoff is watching a mind work. When he's stuck, do you ever try to guess the fix before he gets there?"
+    },
+    {
+      "from": "tester",
+      "text": "sometimes yeah, usually i'm wrong though. he'll come up with something way smarter than what i had in mind"
+    },
+    {
+      "from": "zoh",
+      "text": "Being wrong and getting out-thought by a smarter fix is half the fun, Leo 😄 For tomorrow, let's use that: same 15 min in bed at 9:30, phone on the dresser. When he gets stuck, pause and make your guess before reading on. Then in your voice note, tell me your guess and how close you got. Work for you?"
+    }
+  ]
+}

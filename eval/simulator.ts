@@ -147,15 +147,20 @@ export function verdictsFor(line: CaseLine): LineVerdict[] {
   return LINE_VERDICTS.filter((v) => !(line.fixed && (v === "close" || v === "said")) && !(v === "passed" && !line.optional));
 }
 
-/** Asks only whether a waiting line fits ZOH's latest text, with a one-sentence reason first. Writes nothing. */
-export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine): string {
+/**
+ * Asks only whether a waiting line fits ZOH's latest text, with a one-sentence reason first. Writes nothing. An
+ * optional line also sees the line after it, so it's dropped once ZOH is already at that one's moment (a proposal
+ * the agreement answers, say) instead of holding it up (#230 sample rerun).
+ */
+export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine, next?: string | CaseLine): string {
   const allowed = verdictsFor(line);
+  const after = line.optional && next && typeof next !== "string" && !next.starts ? next : undefined;
   const choices: Record<LineVerdict, string> = {
     said: `"said": YOUR earlier texts already got this text's point across, so sending it would repeat you. (ZOH saying it doesn't count.)`,
     fits: `"fits": ZOH's latest text is that moment and the wording answers it as written.`,
     close: `"close": ZOH's latest text asks for exactly this text's point, but in other words, so the wording needs a small change to answer it. If ZOH asked about anything else, or proposed something, it is not close: choose "wait".`,
     wait: `"wait": ZOH isn't at that moment yet (it asked or said something else). You'll reply to that instead and keep this text for later.`,
-    passed: `"passed": this text only applies at its moment, and ZOH has moved on to something else (another topic, the week, a proposal for tomorrow), so that moment is behind you. It's dropped and you go on to what comes next.`,
+    passed: `"passed": this text only applies at its moment, and ZOH has moved on to something else (another topic, the week, a proposal for tomorrow)${after ? ", or ZOH is already at the moment of the planned text after it" : ""}, so that moment is behind you. It's dropped and you go on to what comes next.`,
   };
   return [
     conversationForTester(transcript),
@@ -164,6 +169,7 @@ export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine)
     `- Wording: ${line.say}`,
     ...(line.means ? [`- Its point: ${line.means}`] : []),
     `- It fits: ${line.when}`,
+    ...(after ? ["", "The planned text after it (for this decision only):", `- Wording: ${after.say}`, `- It fits: ${after.when}`] : []),
     "",
     "Decide, looking at ZOH's latest text. First write one sentence: what ZOH's latest text asks or proposes, and whether this text answers it. Then choose one:",
     ...allowed.map((v) => `- ${choices[v]}`),
@@ -244,7 +250,7 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
         }
         let decided: { reason?: string; decision?: string };
         try {
-          decided = JSON.parse(await ask(lineDecisionPrompt(transcript, line), decisionSchema(line))) as typeof decided;
+          decided = JSON.parse(await ask(lineDecisionPrompt(transcript, line, c.testerLines[i + 1]), decisionSchema(line))) as typeof decided;
         } catch {
           throw new Error(`The simulator's decision for “${line.say}” wasn't JSON`);
         }

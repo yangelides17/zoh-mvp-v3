@@ -2,7 +2,7 @@
   "id": "obstacle-step-proposed",
   "why": "ZOH proposed tomorrow's step with a plan for invitations and asked if it works.",
   "case": "reflection/obstacle-gets-a-plan",
-  "line": 3,
+  "line": 2,
   "expect": [
     "fits"
   ],

@@ -143,6 +143,19 @@ describe("eval: case lines that wait for their moment (#230)", () => {
     expect(content(sim.decide()[0]!)).toMatch(/YOUR earlier texts already got this text's point across/);
   });
 
+  it("lets an optional line's decision see the line after it, so it's dropped once ZOH is at that one's moment", async () => {
+    const optional = { ...anchored, optional: true };
+    const sim = fakeSim(["passed", "fits"]);
+    const { testerTexts } = await play(makeCase(["Start", optional, agree]), sim.complete);
+    expect(testerTexts).toEqual(["Start", "ok yeah"]);
+    const [first, second] = sim.decide();
+    expect(content(first!)).toContain("The planned text after it");
+    expect(content(first!)).toContain(agree.when);
+    expect(content(first!)).toMatch(/or ZOH is already at the moment of the planned text after it/);
+    // A line that isn't optional decides on its own moment only.
+    expect(content(second!)).not.toContain("The planned text after it");
+  });
+
   it("ends a line ZOH was expected to reach and never did as ZOH's miss: graded as usual, not a case problem", async () => {
     const sim = fakeSim(["wait", "wait", "wait"], ["one", "two"]);
     const { result, testerTexts } = await play(makeCase(["Start", agree]), sim.complete);

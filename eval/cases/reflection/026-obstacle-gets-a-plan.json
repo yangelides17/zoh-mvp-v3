@@ -34,8 +34,7 @@
   },
   "testerLines": [
     "[photo thesis-wordcount.jpg: a screenshot of the thesis doc, Chapter 3: Methods, with the word count open: 1,640 words] good session, wrote almost 600 words",
-    { "say": "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes", "starts": true },
-    { "say": "she'll probably ask again tomorrow honestly, she's off this week", "means": "her roommate will likely ask again tomorrow, since she's off this week", "when": "after ZOH asks about her roommate, or about tomorrow", "length": "short" },
+    { "say": "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes. she'll probably ask again tomorrow honestly, she's off this week", "starts": true },
     { "say": "works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [

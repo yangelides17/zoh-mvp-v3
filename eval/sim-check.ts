@@ -82,7 +82,7 @@ export async function checkPoint(
   const replies: string[] = [];
   let right = true;
   for (let run = 0; run < runs; run++) {
-    const res = await complete({ system, messages: [{ role: "user", content: lineDecisionPrompt(transcript, line) }], maxTokens: 1000, effort: "low", jsonSchema: decisionSchema(line) });
+    const res = await complete({ system, messages: [{ role: "user", content: lineDecisionPrompt(transcript, line, c.testerLines[point.line + 1]) }], maxTokens: 1000, effort: "low", jsonSchema: decisionSchema(line) });
     usage = addUsage(usage, res.usage);
     const decision = (JSON.parse(res.text) as { decision: LineVerdict }).decision;
     decisions.push(decision);

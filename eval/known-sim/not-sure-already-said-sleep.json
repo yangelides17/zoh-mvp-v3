@@ -1,10 +1,11 @@
 {
   "id": "not-sure-already-said-sleep",
-  "why": "The tester's own last text already said sleeping better would be huge.",
+  "why": "The tester's own last text already said sleeping better would be huge; the optional line is skipped as said or dropped as passed, which send the same nothing.",
   "case": "onboarding/not-sure",
   "line": 4,
   "expect": [
-    "said"
+    "said",
+    "passed"
   ],
   "transcript": [
     {
