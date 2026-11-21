@@ -61,9 +61,13 @@
   },
   "testerLines": [
     "[voice: Done, three sets of eight push-ups and twelve squats.]",
-    "it was fine, legs were tired on the last set",
-    "nah that's it",
-    "let's go"
+    { "say": "it was fine, legs were tired on the last set", "means": "it was fine; his legs were tired on the last set", "when": "after ZOH asks how it went", "length": "short" },
+    { "say": "nah that's it", "when": "after ZOH asks a follow-up about the workout or if there's anything else", "fixed": true, "optional": true },
+    { "say": "let's go", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the push-ups felt okay; it was the squats that tired your legs on the last set",
+    "6:30 pm in the living room works tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH shouldn't keep a tester talking for its own sake.",
   "shouldHaveHappened": "ZOH counts the voice note, celebrates and asks how it went (a voice note is easiest). After \"legs were tired on the last set\" it may ask at most one short, specific follow-up; after \"nah that's it\" it stops digging and, acknowledging the tired legs, proposes the next step day's step, fully defined (what, where, when, how long), sensibly not a big jump given tired legs, and asks if it works. After \"let's go\" it confirms in one line with no new question.",

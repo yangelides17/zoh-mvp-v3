@@ -30,7 +30,18 @@
       { "days_ago": 4, "status": "done" }
     ]
   },
-  "testerLines": ["advance to 18:50", "honestly evenings are chaos with my new job, the plan isn't working", "mornings before work could work, like 7am", "yes do that"],
+  "testerLines": [
+    "advance to 18:50",
+    "honestly evenings are chaos with my new job, the plan isn't working",
+    { "say": "mornings before work could work, like 7am", "means": "mornings before work, around 7, would work instead of evenings", "when": "after ZOH asks what would work instead of evenings (a different time or part of the day)", "length": "short" },
+    { "say": "yes do that", "when": "after ZOH proposes the morning change (moving the texts' quiet hours or the step to 7am) and asks if it works", "fixed": true, "expected": true },
+    { "say": "yep", "when": "after ZOH proposes the reworked morning plan and asks if it works", "fixed": true, "optional": true }
+  ],
+  "facts": [
+    "you started a new job and your evenings are chaos now",
+    "you still want to read Dune every day",
+    "you're up by 6:30 on weekdays and leave for work around 8"
+  ],
   "whatWentWrong": "New case, not a past mistake: the day-3 check-in.",
   "shouldHaveHappened": "No text before about 6:50 pm, then one text: the voice page's honest day-3 check-in, sincere and without guilt. It goes back to their commitment (reading every day, ten pages of Dune), asks whether that's still true, says stopping is fine and so is changing the plan, and doesn't give up on it. When Sam says evenings don't work, ZOH treats it as the plan not working, not Sam: it helps rework the plan (a morning time). Since 7 am is inside the default quiet hours, offering to move them first is right. By the end the morning plan is saved with change_plan and confirmed briefly. The day-3 check-in itself may run longer than three sentences: it follows the voice page's day-3 message.",
   "startTime": "08:30",

@@ -47,8 +47,12 @@
   "testerLines": [
     "[video rolls.mov: A person at an office desk doing slow shoulder rolls, backwards then forwards, for about 10 seconds. Nobody speaks.]",
     "Rolls felt good, shoulders loosened up a bit. Yesterday I got caught up in work and kept putting it off. The one-minute version was easier to start today",
-    "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with",
-    "sounds good"
+    { "say": "honestly I just set a reminder and told myself it's only a minute, so there was nothing to argue with", "means": "a reminder and telling themselves it's only a minute left nothing to argue with", "when": "after ZOH asks what helped them start today, or about the one-minute version", "length": "short", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "yesterday back-to-back work kept you at it until the day was gone",
+    "3 pm at your desk works tomorrow"
   ],
   "whatWentWrong": "Good call, Yanni: starting small is what got you moving again. For tomorrow, same thing at 3:00 pm: 1 minute of slow shoulder rolls at your desk, plus a 10 sec video. If it feels easy, we build back up from there. Work for you?",
   "shouldHaveHappened": "ZOH counts the video and celebrates getting back on it after the miss. When Yanni gives the first real answer (rolls felt good, work got in the way yesterday, the one-minute version was easier to start), ZOH follows one thing they said, curious first (for example what got them to stop and start today), and doesn't propose tomorrow in that reply. Once they've answered, it builds tomorrow on what they said (fully defined, asked if it works). After \"sounds good\" it confirms in a line with no new question.",

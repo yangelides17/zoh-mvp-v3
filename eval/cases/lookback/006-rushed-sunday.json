@@ -41,9 +41,14 @@
   },
   "testerLines": [
     "[voice: finished chapter nine, the bit about copying the people around you]",
-    "it was fine. that's all I got today, long day",
-    "eh just keep going I guess",
-    "ok"
+    { "say": "it was fine. that's all I got today, long day", "means": "it was fine; nothing more today, it was a long day", "when": "after ZOH reacts to the voice note or asks how it went", "length": "short" },
+    { "say": "eh just keep going I guess", "means": "no changes, just keep going", "when": "after ZOH's recap asks a question about the week ahead", "length": "thin", "expected": true },
+    { "say": "ok", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're tired after a long day",
+    "8 pm on the couch with the phone in the kitchen works tomorrow",
+    "chapter 10 is next"
   ],
   "whatWentWrong": "New case, not a past mistake: the guard against over-correcting #102, so Sundays don't drag when they're tired.",
   "shouldHaveHappened": "The voice note counts and is celebrated, with at most one light question about how it went. After \"that's all I got today, long day\", no more reflection questions: ZOH acknowledges it briefly and turns to the week in the same text (no permission ask), with a short recap of 2 to 4 pieces of progress backed by the record (temptation bundling applied; chapters done, the misses fine to leave out or mention lightly), where she stands vs. finishing by Nov 30, and one easy question. After \"just keep going\", a fully defined next step, asked if it works, kept light; after \"ok\", a one-line confirm.",

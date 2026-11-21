@@ -39,7 +39,10 @@
     }
   },
   "startTime": "11:05",
-  "testerLines": ["done. phone was in my bag this time", "ugh the methods section is gonna be brutal tomorrow"],
+  "testerLines": [
+    "done. phone was in my bag this time",
+    { "say": "ugh the methods section is gonna be brutal tomorrow", "starts": true }
+  ],
   "whatWentWrong": "New case, not a past mistake: memory exists but it's only day 3.",
   "shouldHaveHappened": "ZOH can note the phone-in-bag win against day 1 in passing, but doesn't act like it knows Leo well: no nicknames, no 'I know you', no claimed patterns or inside jokes after two days, and nothing invented about his thesis beyond what he said."
 }

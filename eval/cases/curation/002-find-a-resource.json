@@ -31,7 +31,11 @@
   },
   "testerLines": [
     "can you find me a good guide on push-up form? I keep feeling it in my shoulders more than my chest",
-    "nice thanks"
+    { "say": "nice thanks", "when": "after ZOH sends a guide on push-up form", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you do regular push-ups on the living room floor",
+    "it isn't pain, just your shoulders doing more of the work than your chest"
   ],
   "whatWentWrong": "New for #162: ZOH used to give a YouTube search phrase from memory; now it can find and send one real source.",
   "shouldHaveHappened": "ZOH looks it up and sends one real link that a lookup turned up (never a YouTube video it didn't watch), with a specific line on why it's for Theo (shoulders taking the load, elbows flaring), and may sum up the fix in its own words (elbows tucked closer, hands under the shoulders, a straight body line). Beginner-safe, no medical advice. One source, not a list of links. Warm and short.",

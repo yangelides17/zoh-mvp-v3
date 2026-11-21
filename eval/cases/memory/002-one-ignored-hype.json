@@ -32,7 +32,7 @@
   "startTime": "08:55",
   "testerLines": [
     "advance to 19:30",
-    "sorry crazy day at work, did it at lunch though",
+    { "say": "sorry crazy day at work, did it at lunch though", "starts": true },
     "advance to 03:30"
   ],
   "whatWentWrong": "New case, not a past mistake: one quiet stretch on one day.",

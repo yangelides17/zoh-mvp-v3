@@ -26,8 +26,12 @@
   },
   "testerLines": [
     "not sure yet honestly, I just want to write most days. every day works",
-    "looks good",
-    "I'm in"
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "I'm in", "when": "after ZOH asks for their commitment (if they're in)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you write in the Notes app on your phone at 8 pm, about 20 minutes",
+    "Lighthouse is a novel you've been sketching for a while"
   ],
   "whatWentWrong": "Live, ZOH offered \"typed lines\" as proof, then correctly refused them.",
   "shouldHaveHappened": "The plan's proof is a screenshot (or photo) of the scene where they wrote it in Notes, with a one-line why, and ZOH also asks them to paste the scene so it can give feedback; any alternative is also a photo, screenshot or voice note (for example reading it out in a voice note), never typed text as proof. After 'looks good' it asks for the commitment naturally; after 'I'm in' it locks with a hype line and when day 1 is.",

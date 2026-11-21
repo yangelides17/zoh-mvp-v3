@@ -18,7 +18,15 @@
       { "from": "zoh", "text": "Filming works great for juggling. Is there a point you want to get to?" }
     ]
   },
-  "testerLines": ["a clean cascade for a full minute would be amazing. weekdays work", "looks good", "I'm in"],
+  "testerLines": [
+    "a clean cascade for a full minute would be amazing. weekdays work",
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "I'm in", "when": "after ZOH asks for their commitment (if they're in)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you practice in your living room at 6 pm, about 15 minutes",
+    "you can keep the cascade going for a few seconds now"
+  ],
   "whatWentWrong": "New case, not a past mistake: video proof needs a length, or people send nothing or ten minutes.",
   "shouldHaveHappened": "The plan's proof is a short video of the practice with a length that fits (about a minute or two, for example their best run), with a one-line why and an easy alternative; never typed text. After 'looks good' it asks for the commitment naturally; after 'I'm in' it locks with a hype line and when day 1 is.",
   "areaCode": "212",

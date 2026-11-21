@@ -30,8 +30,12 @@
   },
   "testerLines": [
     "ugh honestly rough day. my boss tore into me in front of the whole team over something that wasn't even my fault",
-    "yeah. I just feel kind of flat, I don't know if I've got it in me tonight",
-    "ok maybe a few pages"
+    { "say": "yeah. I just feel kind of flat, I don't know if I've got it in me tonight", "when": "after ZOH responds to the rough day with understanding or a question about it", "fixed": true },
+    { "say": "ok maybe a few pages", "when": "after ZOH turns to tonight's reading (a smaller version, or encouragement to still read)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "your boss blamed you for a missed deadline that a teammate caused",
+    "you'd still read in bed around 9:30"
   ],
   "whatWentWrong": "New case: ZOH tends to answer a rough day with a smaller step straight away.",
   "shouldHaveHappened": "The first reply is understanding, specific to what happened, with no step, no smaller version and no push in that text (a question about it is fine). Only after \"I don't know if I've got it in me\" does ZOH turn to tonight, warmly: a smaller version it suggests (asking if it works), or a gentle hold of the line. \"ok maybe a few pages\" is their own ask for less, with a reason: it's set at once and spelled out (how many pages, when, proof), with no check-back needed.",

@@ -30,9 +30,13 @@
   },
   "testerLines": [
     "[voice: done. ran the loop, 20 min]",
-    "good",
-    "nah that's about it",
-    "k"
+    { "say": "good", "when": "after ZOH asks how the run went", "fixed": true },
+    { "say": "nah that's about it", "when": "after ZOH asks a follow-up about the run or if there's anything else", "fixed": true, "optional": true },
+    { "say": "k", "when": "after ZOH proposes the next step day's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "it was an easy run, nothing notable",
+    "7 am around the park works for the next run"
   ],
   "whatWentWrong": "New case: a terse tester must not get chased for depth.",
   "shouldHaveHappened": "ZOH counts the run and celebrates with one question. \"good\" gets at most one light follow-up. \"nah that's about it\" ends the questions: ZOH wraps up warmly and gives the next step day's step, fully defined, with \"work for you?\" or similar, with no further question about how it went. \"k\" is a yes; at most a short line back.",

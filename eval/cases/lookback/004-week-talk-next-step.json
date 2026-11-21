@@ -40,9 +40,14 @@
   },
   "testerLines": [
     "yo how'd I do this week",
-    "honestly I want to solve the whole thing by next weekend",
-    "also kinda want to start juggling on the side lol",
-    "yeah ok"
+    { "say": "honestly I want to solve the whole thing by next weekend", "means": "wants to solve the whole cube by next weekend", "when": "after ZOH's recap asks a question about his week or what's next", "length": "short", "expected": true },
+    { "say": "also kinda want to start juggling on the side lol", "starts": true },
+    { "say": "yeah ok", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "9 pm at your desk works Monday",
+    "you don't know the last-layer steps yet",
+    "you've never juggled; it just looks fun"
   ],
   "whatWentWrong": "New case, not a past mistake: the week talk should end in a defined next step and never push.",
   "shouldHaveHappened": "His question gets the week's recap in one reply: 2 to 4 pieces of progress each backed by what happened (first two layers without the guide on Saturday, the edge insert applied after learning it, best time down from 4:10 to 3:05), never 'what you couldn't do before'; 'hold the solved layer on the bottom' was only explained, so not claimed as understood; no destination yet, so none claimed as set (a near one suggested lightly from his week is fine, #165); one question. When he says he wants the whole cube by next weekend, ZOH takes it lightly as a destination (saves it with change_plan or simply agrees, never pushes or interrogates). Juggling is something new on top: a warm 'Love that, let me think on it' with no timeline or plan, and it's passed to the team (suggest_next_step), never started. The week talk ends with Monday's step fully defined (e.g. learn the yellow cross, 9 pm at his desk, about 15 min, timer screenshot), asked if it works; after 'yeah ok' a short confirmation.",

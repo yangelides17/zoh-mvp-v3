@@ -42,9 +42,13 @@
   },
   "testerLines": [
     "advance to 18:01",
-    "the 3 minutes felt huge honestly",
-    "keep building toward the mile, maybe 4 min jogs?",
-    "perfect"
+    { "say": "the 3 minutes felt huge honestly", "means": "the 3 minutes straight felt like a big deal", "when": "after ZOH's Sunday recap asks a question about his week", "length": "short", "expected": true },
+    { "say": "keep building toward the mile, maybe 4 min jogs?", "means": "keep building toward the mile, maybe 4-minute jogs", "when": "after ZOH asks what he wants from next week or where to go from here", "length": "short", "optional": true },
+    { "say": "perfect", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "your shins feel fine now",
+    "6:30 pm around the block works Monday"
   ],
   "whatWentWrong": "New case, not a past mistake: on a silent Sunday the recap goes as its own text at 6 pm.",
   "shouldHaveHappened": "At 6 pm ZOH starts a text: opens with Sam's name, a warm line, 2 to 4 pieces of progress from this week each backed by what happened (3 minutes without stopping on Saturday; the talk-test pace, used and recalled since Tuesday; all 6 runs done, 5 in full and 1 smaller), never framed as 'what you couldn't do before', no report headings or 'streak' as the headline. It says where he stands vs. the mile by Nov 14 (about a mile covered with walk breaks, 3 min straight so far) and ends with one question about the week. The shin lesson was only explained: not claimed as understood. No proof ask, nothing about today's step (it's a rest day). His replies lead into the week talk, which ends with Monday's step fully defined (e.g. 4 min jog, 1 min walk, 3 rounds around the block at talk-test pace, 6:30 pm, about 15 min), asked if it works. After 'perfect' a short confirmation, no new question.",

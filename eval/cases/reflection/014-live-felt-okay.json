@@ -55,7 +55,7 @@
   },
   "testerLines": [
     "[voice: Tell me about the last time you had to follow up with a client. ... What did you do next? ... What did you use to keep track of that follow-up?]",
-    "It felt okay"
+    { "say": "It felt okay", "when": "after ZOH counts the voice note and asks about it (how it went, how it felt, or about the practice)", "fixed": true }
   ],
   "whatWentWrong": "Okay is a fine place to land. It means saying the questions out loud isn't scary... Tomorrow at 6:30 pm: write down 3 freelancers. Work for you?",
   "shouldHaveHappened": "After 'It felt okay', ZOH asks a proof-grounded follow-up about what's behind it, without guessing what okay means, and does not propose tomorrow's step yet.",

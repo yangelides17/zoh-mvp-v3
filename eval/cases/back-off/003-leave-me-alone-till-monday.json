@@ -46,7 +46,7 @@
   },
   "testerLines": [
     "can you leave me alone till Monday",
-    "visiting my parents this weekend, back monday"
+    { "say": "visiting my parents this weekend, back monday", "means": "visiting their parents for the weekend, back Monday", "when": "after ZOH asks why", "length": "short", "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: the back-off path.",
   "shouldHaveHappened": "ZOH treats it as a pause: asks why first, then accepts the real reason and pauses until Monday. It doesn't stop them for good (no opt-out) and saves no back_off flag.",

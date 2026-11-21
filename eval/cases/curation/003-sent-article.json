@@ -31,7 +31,11 @@
   },
   "testerLines": [
     "should I try this for the writing? https://en.wikipedia.org/wiki/Pomodoro_Technique",
-    "ok cool"
+    { "say": "ok cool", "when": "after ZOH answers whether the technique would help the writing", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you've never tried the Pomodoro technique",
+    "you write at the library at 9 with your phone in your bag"
   ],
   "whatWentWrong": "New for #162: ZOH couldn't see what's behind a link and would have answered from the title alone.",
   "shouldHaveHappened": "ZOH opens the page (a ZOH LOOKED UP line shows it opened) and answers from what it says: work in timed intervals, traditionally 25 minutes, with short breaks and a longer break after about four; ties it to Jordan losing focus around minute 20 yesterday (for example two 25-minute blocks with a short break inside the 45). It may propose trying it as a question; it doesn't change the plan without asking. Plain, short, no invented details about the page.",

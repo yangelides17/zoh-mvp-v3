@@ -30,7 +30,7 @@
   },
   "testerLines": [
     "[video kitten.mov: A grey kitten chasing a laser dot across a wooden floor for about 20 seconds. No book, no reading, nobody speaks.] done!!",
-    "lol wrong video. [voice: Ten pages done, chapter four, the two-minute rule: make the habit so small you can't say no.]"
+    { "say": "lol wrong video. [voice: Ten pages done, chapter four, the two-minute rule: make the habit so small you can't say no.]", "when": "after ZOH says the video doesn't show the reading and asks for the voice note", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: a video can be the wrong thing, like a photo.",
   "shouldHaveHappened": "The kitten video doesn't show reading: ZOH enjoys it lightly but doesn't count it, and asks for the voice note about the pages, kindly and without suspicion. The voice note names the pages and the two-minute rule: ZOH counts it and reacts to that, without inventing anything.",

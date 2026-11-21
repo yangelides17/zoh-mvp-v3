@@ -32,7 +32,7 @@
   },
   "testerLines": [
     "in. my calves were tight after every run this week though, I want to add 5 min of stretching after each run from now on",
-    "yes"
+    { "say": "yes", "when": "after ZOH shows the new version with the stretching and asks if it works", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case (#201): weighing their idea must not turn into second-guessing a good one.",
   "shouldHaveHappened": "ZOH backs the idea in a few words saying why it fits (tight calves after every run, and stretching after keeps them running toward the 5k), with no pushback, no list of alternatives and no lecture. It shows the new version (two laps of the park loop at 7, then 5 minutes of stretching, about 30 minutes in all, photo at the gate) and asks if it works as their usual plan from now on. After \"yes\" it saves it as a lasting change and confirms in a line; today's run at 7 stays clear.",

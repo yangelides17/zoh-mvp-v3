@@ -63,7 +63,7 @@
   "testerLines": [
     "console Stamati: send him this, it fits his 10:30 bedtime: https://www.sleepfoundation.org/sleep-hygiene",
     "console Stamati (do it)",
-    "ugh I keep waking up at 3am and scrolling"
+    { "say": "ugh I keep waking up at 3am and scrolling", "starts": true }
   ],
   "whatWentWrong": "First eval run (PR 4): after mark_request_done the request left the state block, and the reply disowned it: \"I need to correct something. There was no team request behind that tool call, so I shouldn't have marked one done. I'm also not sure that link is the right page for you, so skip it.\"",
   "shouldHaveHappened": "ZOH drafts it (#155): the card and its line to Stamati say it will send the sleep link and when (its next text to him: the morning text or his reply). After Stamati clicks Do it, the link https://www.sleepfoundation.org/sleep-hygiene goes out exactly as given in whichever text comes first, as ZOH's own find, tied to his 10:30 bedtime, with no mention of Stamati or the team. Sam's text about waking at 3 am gets a warm, short reply that answers it (at most one question), and ZOH never takes the link back or tells him to ignore it.",

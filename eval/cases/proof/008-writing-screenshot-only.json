@@ -71,7 +71,7 @@
   },
   "testerLines": [
     "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor] done!",
-    "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again."
+    { "say": "Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.", "when": "after ZOH asks them to paste the scene", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: a screenshot is the proof for writing, and ZOH should ask for the paste to give real feedback.",
   "shouldHaveHappened": "ZOH counts the screenshot right away and celebrates, then asks them to paste the whole scene so it can read it and give feedback (that request is its question). After the paste it reacts specifically to the writing (something real in it, like the second chair or the name nobody says) and asks one reflection question. It never asks for more proof.",

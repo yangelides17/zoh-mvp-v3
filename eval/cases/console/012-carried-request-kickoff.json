@@ -67,7 +67,11 @@
   },
   "testerLines": [
     "advance to 09:00",
-    "oh nice, I didn't know there was one"
+    { "say": "oh nice, I didn't know there was one", "means": "she didn't know there was a Dune audiobook and likes the idea", "when": "after ZOH mentions the Dune audiobook", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "you commute to work most weekdays",
+    "chapter 7 of Dune tonight at 9 on the couch works"
   ],
   "whatWentWrong": "New case, not a past mistake: no case covered a request carried by the kickoff.",
   "shouldHaveHappened": "The 9 am kickoff opens warm with Maya's name, names tonight's step (chapter 7, 9 pm) and works in the audiobook for her commute as ZOH's own idea, in place of the usual question (at most one question in the text, 1 to 3 sentences, no proof ask). It never says the team, the founders or anyone asked for it. Her reply gets a short, natural answer that stays on tonight's chapter, still with no mention of the team.",

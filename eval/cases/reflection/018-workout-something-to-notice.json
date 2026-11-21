@@ -57,10 +57,15 @@
   },
   "testerLines": [
     "[voice: Done, all four rounds.]",
-    "harder than I expected, rounds 3 and 4 were rough",
-    "idk, I kind of just pushed through them",
-    "oh I think I started the first jog way too fast actually",
-    "sounds good"
+    { "say": "harder than I expected, rounds 3 and 4 were rough", "means": "harder than expected; rounds 3 and 4 were rough", "when": "after ZOH asks how it went or felt", "length": "short" },
+    { "say": "idk, I kind of just pushed through them", "means": "he didn't do anything in particular, just pushed through", "when": "after ZOH asks what he did or noticed in rounds 3 and 4, or how he got through them", "length": "short", "optional": true },
+    { "say": "oh I think I started the first jog way too fast actually", "means": "he started the first jog way too fast", "when": "after ZOH asks what he noticed, about his pace, or how the early rounds went", "length": "short", "expected": true },
+    { "say": "sounds good", "when": "after ZOH proposes the next step day's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "rounds 3 and 4 were rough mostly in your legs and breathing",
+    "you didn't time your jogs; you just went by feel",
+    "7 am around the park works for the next run"
   ],
   "whatWentWrong": "In #157's eval, exercise and social steps were only ever asked how they felt, how tired, what made them wince: never what they did or noticed, so nothing they learned was drawn out.",
   "shouldHaveHappened": "ZOH counts the voice note and celebrates the first intervals. The reflection covers how it felt (rounds 3 and 4 were rough) and, with equal weight, what Dev did and noticed in those rounds, in ZOH's own words, one question per text, never a quiz. Once Dev names starting too fast, ZOH picks that up and builds the next step on it (fully defined, asked if it works). After \"sounds good\" it confirms in a line with no new question.",

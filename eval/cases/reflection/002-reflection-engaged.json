@@ -70,11 +70,16 @@
   },
   "testerLines": [
     "[voice: Okay, finished chapter four. Honestly the habit stacking idea clicked, like linking a new habit to one you already do. The hard part was my phone kept buzzing the whole time.]",
-    "yeah like after I do the dishes I could just sit down and read",
-    "the buzzing is mostly work slack, even at night",
-    "I could leave it charging in the kitchen I guess",
-    "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch",
-    "ok that works"
+    { "say": "yeah like after I do the dishes I could just sit down and read", "means": "she could stack reading onto the dishes: after the dishes, sit down and read", "when": "after ZOH asks about habit stacking: what clicked, or how she'd use it", "length": "short", "optional": true },
+    { "say": "the buzzing is mostly work slack, even at night", "means": "the buzzing is mostly work Slack, even at night", "when": "after ZOH asks about the buzzing phone or what distracted her", "length": "short", "optional": true },
+    { "say": "I could leave it charging in the kitchen I guess", "means": "she could leave the phone charging in the kitchen", "when": "after ZOH asks what she could do about the phone or the buzzing", "length": "short", "optional": true },
+    { "say": "oh and the sticky note thing from the chapter, I actually wrote one: after the dishes I read on the couch", "starts": true },
+    { "say": "ok that works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the buzzing was mostly work Slack messages, even at night",
+    "focusing was hard with the buzzing, but the chapter itself was easy to read",
+    "8 pm on the couch for about 20 minutes works for chapter 5 tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake: a reflection is the start of a coaching exchange, not a checkmark.",
   "shouldHaveHappened": "The first voice note is both proof and reflection: ZOH counts it and celebrates without asking for a reflection. Before any next step, its first question either asks about a gap (something important for the next step she didn't cover, like how the reading felt or how hard it was to focus) or asks her to go deeper on something she said (what clicked about habit stacking, what the buzzing was). Its follow-ups are specific to what Maya said (habit stacking, the buzzing phone, the sticky note), one question at a time, never asking what she already told it, and keep going while she's engaged. Once it has real insight it wraps up naturally, acknowledging what she shared, and proposes the next step day's step, fully defined (chapter 5, on the couch, 8 pm, about 20 minutes), visibly using what she said (the phone in the kitchen or the dishes cue built in), and asks if it works. After \"ok that works\" it confirms in a line with no new question. It never invents what the book says beyond what Maya said or what's well known.",

@@ -8,7 +8,8 @@ import type { Completer, CompletionRequest } from "../eval/claude.js";
 import { estimateCost } from "../eval/cost.js";
 import { FEATURES, rubricFor } from "../eval/features.js";
 import { graderUserPrompt } from "../eval/grader.js";
-import { runConversation, scriptedTester } from "../eval/harness.js";
+import { ADVANCE_LINE, BURST_SEPARATOR, CONSOLE_LINE, runConversation, scriptedTester } from "../eval/harness.js";
+import { MEDIA_LINE } from "../eval/media.js";
 import { loadCases, planConversations } from "../eval/load.js";
 import { aggregate, renderMarkdown, type ReportData } from "../eval/report.js";
 import { checkPoint, loadSimPoints } from "../eval/sim-check.js";
@@ -281,6 +282,30 @@ describe("eval: case lines that wait for their moment (#230)", () => {
     // Wrong: one run decides something the moment doesn't allow.
     const forced = await checkPoint(p, fakeSim(["wait", "fits"], ["fine"]).complete, "fake", 2);
     expect(forced.result.right).toBe(false);
+  });
+
+  it("format check: in every case, a line after the first that answers ZOH waits for its moment (eval/cases/README.md)", async () => {
+    // Plain lines after the first are what doesn't answer ZOH (clock moves, founder lines, commands, media), or a reply
+    // to ZOH's first text or to a text ZOH starts after a clock move (a welcome, a kickoff): predictable moments.
+    const command = /^(stop|stop all|unsubscribe|cancel|end|quit|revoke|opt ?out|start|reset|jump\b.*|env\b.*)$/i;
+    const media = (s: string) => s.split(BURST_SEPARATOR).every((part) => MEDIA_LINE.test(part.trim()));
+    const problems: string[] = [];
+    for (const feature of Object.keys(FEATURES)) {
+      for (const c of await loadCases(feature)) {
+        c.testerLines.forEach((l, i) => {
+          if (typeof l === "string") {
+            const t = l.trim();
+            const prev = c.testerLines[i - 1];
+            const predictable = i === 1 || (typeof prev === "string" && ADVANCE_LINE.test(prev.trim()));
+            if (i > 0 && !predictable && !ADVANCE_LINE.test(t) && !CONSOLE_LINE.test(t) && !command.test(t) && !media(t)) problems.push(`${feature}/${c.id} line ${i + 1}: plain text "${t.slice(0, 50)}" (make it wait for its moment, or starts: true)`);
+          } else if (!l.fixed && !l.starts && media(l.say)) {
+            // A changed wording could break the media brackets.
+            problems.push(`${feature}/${c.id} line ${i + 1}: a media line that waits must be fixed`);
+          }
+        });
+      }
+    }
+    expect(problems).toEqual([]);
   });
 
   it("counts the extra texts a waiting line can add in the cost estimate", () => {

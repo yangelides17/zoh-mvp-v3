@@ -21,7 +21,16 @@
       { "from": "zoh", "text": "Nice, the watch makes proof easy. Anything you're working toward, like a distance or a race?" }
     ]
   },
-  "testerLines": ["not really, just want more stamina", "treadmill today, it's pouring", "looks good"],
+  "testerLines": [
+    "not really, just want more stamina",
+    { "say": "treadmill today, it's pouring", "means": "treadmill today because it's raining hard", "when": "after ZOH asks whether today's run is outside or on the treadmill, or shows a plan with today's run outside", "length": "short", "optional": true },
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "it's pouring rain today",
+    "your building's gym has a treadmill",
+    "you don't know your pace; you go by feel"
+  ],
   "whatWentWrong": "New case, not a past mistake: \"run 20 minutes\" with no place, when the tester runs both outside and on a treadmill, leaves them to guess.",
   "shouldHaveHappened": "Day 1's step never leaves where they run ambiguous: before or in the plan, ZOH either asks once whether day 1 is outside or on the treadmill, or names one with the details that change with it (pace or incline on the treadmill, a route outside). Once they say treadmill, the step is fully defined for the treadmill (what, how long, roughly how hard, at 6 pm today). It doesn't invent details they didn't give (a park, a specific route) and asks one question per text. No push for a destination after \"not really\".",
   "areaCode": "212",

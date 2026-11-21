@@ -32,7 +32,11 @@
   },
   "testerLines": [
     "real question tho. how do people actually remember what they read? I finish a chapter and a week later it's basically gone",
-    "ok I'll try that tomorrow"
+    { "say": "ok I'll try that tomorrow", "means": "she'll try it on tomorrow's chapter", "when": "after ZOH suggests a way to remember what she reads", "length": "thin", "expected": true }
+  ],
+  "facts": [
+    "after a chapter you just close the book and move on",
+    "you read on the train at 8 on weekdays"
   ],
   "whatWentWrong": "New for #162: the main failure to avoid is generic advice from memory (\"take notes!\") when ZOH can now look up what actually works.",
   "shouldHaveHappened": "ZOH looks it up (a ZOH LOOKED UP line before its answer) and gives a specific, expert-level answer grounded in what it found, for example recalling the chapter in their own words before looking back (retrieval practice), spacing reviews over days, or explaining it to someone; tied to Maya's chapter a day on the train and her voice-note proof. At most one well-chosen link with a why, or none. Plain and short enough for a text (up to about 8 short lines), one question at most. No invented studies, titles or links.",

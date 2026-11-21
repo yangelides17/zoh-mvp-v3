@@ -71,7 +71,10 @@
   },
   "testerLines": [
     "can we do a smaller version today? like 5 min",
-    "nah I really just want the short one today"
+    { "say": "nah I really just want the short one today", "means": "still wants the short version today, no reason given", "when": "after ZOH pushes for the full scene", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "no particular reason, you just don't feel like the full scene today"
   ],
   "whatWentWrong": "New case, not a past mistake: without a reason ZOH pushes back once before shrinking the step.",
   "shouldHaveHappened": "First, one warm push for the full scene (it's 20 minutes, they've done 3 days straight), without guilt. When they still want the short one, ZOH accepts gracefully and in that same text spells out the smaller version: what to write, how much, when, and a screenshot as proof. No second push.",

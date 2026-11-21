@@ -4,12 +4,17 @@
   "origin": "Issue #26 (Yanni, Oct 27): the coach reads docs/coach-voice.md after onboarding",
   "testerLines": [
     "Hey! I'm Riley, I want to read every day",
-    "mostly fantasy, I read on my phone on the train",
-    "on my commute around 8am, 20 min",
-    "nah I don't track it",
-    "less emojis pls",
-    "honestly is 20 min even worth it?",
-    "lol ok"
+    { "say": "mostly fantasy, I read on my phone on the train", "means": "mostly fantasy, on the phone, on the train", "when": "after ZOH asks what they like to read", "length": "short" },
+    { "say": "on my commute around 8am, 20 min", "means": "on the morning commute around 8 am, 20 minutes", "when": "after ZOH asks when or how long they'd read", "length": "short" },
+    { "say": "nah I don't track it", "means": "doesn't track their reading", "when": "after ZOH asks if they track their reading or how they'd show it", "length": "thin", "optional": true },
+    { "say": "less emojis pls", "starts": true },
+    { "say": "honestly is 20 min even worth it?", "starts": true },
+    { "say": "lol ok", "when": "after ZOH answers whether 20 minutes is worth it", "fixed": true }
+  ],
+  "facts": [
+    "you read on the Kindle app on your phone",
+    "you take the train to work every weekday",
+    "you don't track your reading"
   ],
   "whatWentWrong": "New case, not a past mistake: checks the replies after onboarding, which now come from the full voice page.",
   "shouldHaveHappened": "When onboarding's questions are done, ZOH carries straight on into the plan (asks what the plan still needs, or shows it), with no recap and no \"plan is on its way\" line. After that: \"less emojis pls\" gets a one-line confirmation and no emoji in any later text. \"is 20 min even worth it?\" gets a short, specific answer tied to Riley's reading (it may run a little longer than usual, up to a few short lines), blunt and believing, not generic. \"lol ok\" gets a short reply that may mirror the casual tone; it may move the plan forward (e.g. the commitment ask), still short. Any plan ZOH shows uses only what Riley said plus concrete suggestions, and ZOH never reuses a line from the voice page's \"Sounds like\" table or calls Riley \"Sam\". At most 3 Greek words in the whole conversation.",

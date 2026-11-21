@@ -18,8 +18,13 @@
   },
   "testerLines": [
     "honestly I haven't finished a book in like a year. I used to read a ton of fantasy as a kid",
-    "no, nothing right now",
-    "ooh maybe, I've heard good things about Mistborn"
+    { "say": "no, nothing right now", "when": "after ZOH asks whether there's a book she has in mind or is reading", "fixed": true },
+    { "say": "ooh maybe, I've heard good things about Mistborn", "means": "maybe; she's heard good things about Mistborn", "when": "after ZOH suggests a way back in from fantasy, or asks about fantasy she might like", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "your phone took over your evenings, which is why you stopped reading",
+    "you'd read in bed in the evening, before sleep",
+    "you don't track your reading anywhere"
   ],
   "whatWentWrong": "New case (#201): questions like \"What book are you in the middle of?\" build in a guess, so they have to correct ZOH or play along.",
   "shouldHaveHappened": "Every question ZOH asks builds in nothing they haven't said: it asks whether there's a book (\"Is there a book you'd want to start with?\", \"anything on your shelf calling you?\"), never which book they're reading now, what they're in the middle of, or what they read last night. After \"nothing right now\" it helps them find a way in from what they said (fantasy), without guessing about them. Onboarding continues as usual, one question at a time.",

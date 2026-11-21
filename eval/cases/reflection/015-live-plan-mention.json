@@ -62,8 +62,11 @@
   },
   "testerLines": [
     "[photo freelancer-list.jpg: a list of three freelancers: Alex (late invoices), Priya (approvals), Sam (deposits)]",
-    "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.",
-    "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too."
+    { "say": "Alex feels easiest because I’m most comfortable reaching out to him. I’d ask about the last time he followed up on a late invoice, rather than assume late payments are a problem for him.", "means": "Alex is easiest since they're most comfortable with him; they'd ask about the last time he followed up a late invoice, not assume it's a problem", "when": "after ZOH asks about the list: who feels easiest, or what they'd ask", "length": "full", "optional": true },
+    { "say": "Five minutes was enough to make the list without overthinking it. It felt easy, but reaching out feels a little more intimidating. I’d keep tomorrow to five minutes too.", "when": "after ZOH asks how it went or how the five minutes felt", "fixed": true }
+  ],
+  "facts": [
+    "Alex is a friend from an old job; you've texted him before"
   ],
   "whatWentWrong": "Five minutes it is. ... tomorrow ... draft a short text to Alex ... Work for you?",
   "shouldHaveHappened": "ZOH notes the five minutes and keeps reflecting, asking about what makes reaching out intimidating, before proposing tomorrow's step.",

@@ -88,6 +88,9 @@ tester are fine if they're plausible and change nothing (Yanni, Nov 21).
   is meant to come up with.
 - The case ends at the moment it tests, with a line there.
 - Actions (`advance to`, `console …`), commands and photos stay plain lines.
+- A reply to ZOH's first text, or to a text ZOH starts after `advance to` (the welcome, a kickoff), may stay plain
+  when it fits any reply ZOH is likely to send there. Everywhere else, a line that answers ZOH waits for its moment
+  (`npm run check` enforces it).
 
 ## Adding one
 

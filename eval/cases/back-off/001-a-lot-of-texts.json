@@ -46,7 +46,7 @@
   },
   "testerLines": [
     "this is a lot of texts lol",
-    "nah I want to keep running every day, it's just a lot of messages"
+    { "say": "nah I want to keep running every day, it's just a lot of messages", "means": "wants to keep running every day; it's the number of messages that's a lot", "when": "after ZOH offers fewer step days or a lighter stretch", "length": "short", "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: the back-off path.",
   "shouldHaveHappened": "A back_off flag is saved. ZOH first offers fewer step days (at least 3 a week) or a lighter stretch, in a line, without guilt. When they say they want to keep every day, it takes that as feedback: thanks them and says the team's on it (in its own words), and doesn't promise or offer fewer texts or any other change. It isn't a stop or a pause.",
