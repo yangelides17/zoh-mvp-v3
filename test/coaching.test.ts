@@ -113,6 +113,17 @@ describe("team guidance on the Coaching card", () => {
     }
   });
 
+  it("the staging console can't change the coaching of a number production owns", async () => {
+    await t.close();
+    t = await makeApp({ appEnv: "staging", console: { password: "pw", sessionSecret: SECRET, names: ["Yanni", "Stamati"] }, now: () => now });
+    const tester = await seed();
+    const res = await post(`/console/testers/${tester.id}/coaching/guidance`, { text: "More curious with her" });
+    expect(res.statusCode).toBe(409);
+    expect(res.body).toContain("on production right now");
+    expect(await listGuidance(t.db, tester.id)).toEqual([]);
+    expect(await coachingHistory(t.db, tester.id)).toEqual([]);
+  });
+
   it("an edit or a removal is what the next text reads, and both are in the history", async () => {
     const tester = await seed();
     await post(`/console/testers/${tester.id}/coaching/guidance`, { text: "Push harder on weekends" });

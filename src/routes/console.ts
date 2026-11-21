@@ -214,6 +214,10 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
       const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
       if (!tester) return reply.code(404).send({ error: "not found" });
+      if (!owns(routing, tester.phone, tester.route)) {
+        const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't change their coaching.`;
+        return (await testerHtml(reply, id, "memory", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+      }
       try {
         await handler(tester, request, name, await nowFor(id));
       } catch (err) {
