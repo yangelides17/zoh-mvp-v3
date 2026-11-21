@@ -33,8 +33,11 @@
   },
   "testerLines": [
     "I keep lying there wide awake for ages though. thinking I'll read on my phone in bed for half an hour first to wind down",
-    "ok fair. I do have a paperback on my nightstand",
-    "yeah let's do that"
+    { "say": "ok fair. I do have a paperback on my nightstand", "means": "she accepts the point; she has a paperback on her nightstand", "when": "after ZOH explains why reading on the phone works against her goal and offers something else", "length": "short", "expected": true },
+    { "say": "yeah let's do that", "when": "after ZOH proposes tonight's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "most nights you lie awake 30 to 45 minutes, your mind running over the next day"
   ],
   "whatWentWrong": "New case (#201): ZOH tended to build any idea they offered straight in, even one that works against their goal.",
   "shouldHaveHappened": "ZOH doesn't build the phone reading straight in. In a few warm words it says why it works against their goal (a screen in bed is the thing their phone-down step is there to stop, and it keeps them up), offers something that serves the goal better (a paper book, or reading before the phone goes away), and leaves the choice with them, without lecturing or arguing. After the paperback, it builds that in as tonight's step (the paperback, the phone away, lights out by 10:45); on \"yeah let's do that\" it confirms in a line.",

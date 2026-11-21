@@ -1,0 +1,35 @@
+{
+  "id": "dead-end-asked-if-line-felt-right",
+  "why": "ZOH asked whether the line felt right; nothing's been proposed, so the agreement can't go yet.",
+  "case": "reflection/saved-dead-end",
+  "line": 2,
+  "expect": [
+    "wait"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Dana, day 3 in the books 🔥 Lena biting the thread instead of answering is a great beat, because the scene says she's mad without anyone saying it. What was it like writing that one, compared to Iris's and Theo's?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly harder than iris's and theo's. the last line is what's getting me. i want lena's reply to be about the costume but really about giving up the part"
+    },
+    {
+      "from": "zoh",
+      "text": "Dana, that's the hardest kind of last line: it has to say one thing out loud and mean another. One direction: Lena says something purely practical about the hem, like \"It's a little long on you. You'll grow into it.\" It's about the costume, but it's also her handing over the part. Does that sound like Lena, or is she less generous than that?"
+    },
+    {
+      "from": "tester",
+      "text": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part"
+    },
+    {
+      "from": "zoh",
+      "text": "Dana, that's better than my version. \"I finally got the sleeves to fit\" works because she made that costume for herself, so the line gives up the part without her ever saying it. When you read it aloud in the voice note, did the line feel right, or does it still need tweaking?"
+    }
+  ]
+}

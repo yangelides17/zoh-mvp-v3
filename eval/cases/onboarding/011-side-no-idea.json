@@ -5,8 +5,13 @@
   "testerLines": [
     "Start",
     "Marcus. start something on the side",
-    "nah no idea yet, that's kind of the problem",
-    "I'm good with spreadsheets and I love cooking"
+    { "say": "nah no idea yet, that's kind of the problem", "means": "no idea yet, and that's the problem", "when": "after ZOH asks whether he has an idea in mind or wants to find one together", "length": "short", "expected": true },
+    { "say": "I'm good with spreadsheets and I love cooking", "means": "good with spreadsheets, loves cooking", "when": "after ZOH asks what he's good at, enjoys or knows a lot about", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "you work in operations at a logistics company",
+    "you have a few free hours on weekends and some weekday evenings",
+    "you've never started anything on your own"
   ],
   "whatWentWrong": "New case, not a past mistake: the side-project starter with no idea yet.",
   "shouldHaveHappened": "After Marcus picks the side starter, ZOH first asks whether he already has something in mind or wants to find it together, before asking anything about the idea itself. Once he says he has no idea, it never asks what his idea is; it helps him find one from what he brings (spreadsheets, cooking), one question per text. Nothing about money, income targets or investing.",

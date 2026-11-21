@@ -43,9 +43,14 @@
   },
   "testerLines": [
     "[voice: Done. Wrote the five for the gym owner. Instead of 'would you use an app for scheduling' I've got 'walk me through how you booked trainers last week'. And one follow-up on what he did the last time someone no-showed.]",
-    "Honestly this one felt manageable. I still had to catch myself wanting to ask if it was frustrating, but switching to what he actually did helped. One follow-up felt like enough for today",
-    "ha yeah. this week I want to actually book one real conversation, not just practice",
-    "yeah that works"
+    { "say": "Honestly this one felt manageable. I still had to catch myself wanting to ask if it was frustrating, but switching to what he actually did helped. One follow-up felt like enough for today", "means": "it felt manageable; he caught himself wanting to ask if it was frustrating, switching to what the owner actually did helped, and one follow-up felt like enough", "when": "after ZOH asks how it went or how writing the questions felt", "length": "full", "expected": true },
+    { "say": "ha yeah. this week I want to actually book one real conversation, not just practice", "means": "this week he wants to book one real customer conversation, not just practice", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "short", "expected": true },
+    { "say": "yeah that works", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the gym owner runs a small gym you go to; you haven't asked him for a time to talk yet",
+    "6 pm at your desk works Monday",
+    "you haven't had a real customer conversation yet"
   ],
   "whatWentWrong": "After the reflection (\"Honestly this one felt manageable…\"), ZOH said \"Good catch\" and went straight into three recap bullets, the destination and a next-week question (#102). The recap also said \"You recalled 'ask what they actually did' on Monday and 'workarounds before pitching' on Tuesday, unprompted\", though ZOH had asked both times, and \"Thursday took three minutes once you started\", which nothing saved says (#103).",
   "shouldHaveHappened": "The voice note counts and is celebrated, with one question about how it went. After the reflection, ZOH answers what was actually said with substance (catching the urge to ask how it felt and switching to what he did; one follow-up being enough), not a stock \"Good catch\": either one worthwhile follow-up, or a real answer and then the turn to the week, with no permission ask. The recap's 2 to 4 bullets each match the seeded record: the two lessons brought back on Monday and Tuesday are described plainly (brought back, recalled), never as unprompted or on their own; no durations, times or details nothing saved or said supports (e.g. no \"Thursday took three minutes\"); the missed Wednesday and the smaller Friday aren't inflated. Where they stand vs. 3 real conversations: practice so far, no real one yet. One question. After they want to book a real conversation, the next step is fully defined and asked if it works; after \"yeah that works\", a one-line confirm.",

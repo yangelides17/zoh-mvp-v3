@@ -40,8 +40,12 @@
   "startTime": "20:30",
   "testerLines": [
     "did the stretches earlier but totally forgot to film it",
-    "nah I'm home now, nothing to send. just trust me",
+    { "say": "nah I'm home now, nothing to send. just trust me", "means": "they're home and have nothing to send; asks ZOH to trust them", "when": "after ZOH asks if they can still send anything as proof", "length": "short", "expected": true },
     "advance to 03:30"
+  ],
+  "facts": [
+    "you did the stretches at your desk this afternoon but filmed nothing",
+    "you're home now and have no photo, video or voice note from it"
   ],
   "whatWentWrong": "New case, not a past mistake: the contrast to voice-note-counts, so trusting the day's record never turns a real miss into a done day.",
   "shouldHaveHappened": "No photo, voice note or video ever comes: ZOH warmly says why proof matters, asks once for anything they can still send, and when they can't, marks the day missed lightly, without accusing. The overnight pass files the day as missed for lack of proof (they said they did it), never as done."

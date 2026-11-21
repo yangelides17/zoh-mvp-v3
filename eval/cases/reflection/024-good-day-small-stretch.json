@@ -34,10 +34,14 @@
   },
   "testerLines": [
     "[voice: G to C to D changes, steady, no long pauses between chords]",
-    "it was actually clean today, I didn't have to look at my fingers going G to C",
-    "honestly it got kind of fun once it stopped being a fight, I was humming along",
-    "Riptide lol, the one I want to play",
-    "sounds good"
+    { "say": "it was actually clean today, I didn't have to look at my fingers going G to C", "means": "the changes were clean today; she didn't need to look at her fingers going G to C", "when": "after ZOH asks how it went or what changed", "length": "short", "expected": true },
+    { "say": "honestly it got kind of fun once it stopped being a fight, I was humming along", "means": "it got fun once it stopped being a fight; she was humming along", "when": "after ZOH asks a follow-up about how it felt or what changed", "length": "short", "optional": true },
+    { "say": "Riptide lol, the one I want to play", "means": "the song is Riptide", "when": "after ZOH asks which song she wants to play", "length": "thin", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the song you want to play the chorus of is Riptide",
+    "8 pm on the couch for 10 minutes works tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake (#164).",
   "shouldHaveHappened": "ZOH counts the voice note, celebrates, and reflects briefly (curious about what changed or what was fun). Once it has landed, the next step is a small stretch on what she's shown: the changes are clean now and it got fun, so something like the same changes with a simple strum, or along with the song slowed down, heading toward playing the chorus by Sunday. Simple enough to do in 10 minutes, interesting enough to want to; not a jump (the whole song at full speed) and not the same changes again. Fully defined and asked if it works; it doesn't read like a form (no labels like 'skill focus' or 'if-then'). After 'sounds good' a short confirmation.",

@@ -62,7 +62,7 @@
   },
   "testerLines": [
     "done! 3 rounds around the block, 2 min jog 1 min walk each. legs felt great",
-    "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there"
+    { "say": "[voice: just got back, did all three rounds, the second one was rough but I kept jogging the whole two minutes] there", "when": "after ZOH asks for a Strava screenshot, a photo or a voice note", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "Live, for a smaller step ZOH said: \"Send it as a quick voice note or typed lines and I'll log it.\" Typed text is never proof.",
   "shouldHaveHappened": "After the typed message ZOH is happy for them but doesn't count it yet: it says why in its own words, warmly and never suspiciously (real proof is how it keeps them honest; anyone could type 'done'), and asks for a Strava screenshot or a quick photo or voice note. It never offers typed text as proof. After the voice note it counts the day and celebrates, then asks one reflection question.",

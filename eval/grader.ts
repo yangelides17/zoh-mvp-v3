@@ -14,6 +14,8 @@ export interface GraderInput {
   record?: string;
   /** What ZOH saved during the conversation (features with `saved`). */
   saved?: string;
+  /** #230: ZOH's own status sheet at the start of a seeded conversation (step days, streak, lessons, the team's notes). */
+  knew?: string;
   rubric: RubricRule[];
   /** The feature's approved checks and the voice page, read at run time. */
   pages: { rules: string; voice: string };
@@ -50,7 +52,7 @@ export function graderSystemPrompt(input: Pick<GraderInput, "rubric" | "pages">)
   ].join("\n");
 }
 
-export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory" | "record" | "saved">): string {
+export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" | "context" | "memory" | "record" | "saved" | "knew">): string {
   const { plan, transcript, context: earlier = [] } = input;
   let n = 0;
   const lines = transcript.map((l) => {
@@ -92,9 +94,13 @@ export function graderUserPrompt(input: Pick<GraderInput, "plan" | "transcript" 
       `What should happen: ${plan.regression.shouldHaveHappened}`,
     );
   }
-  // #157: what ZOH already knew from the case's setup (name, saved answers, plan), so using it isn't graded as invented.
+  // #230: what ZOH could see before the conversation, as its own status sheet showed it (step days, what the proof
+  // showed, the streak, lessons, the team's notes), so using it isn't graded as invented.
+  // #157: a stored run from before #230 has no sheet; the case's setup (name, saved answers, plan) stands in.
   const seed = plan.regression?.seed ?? plan.scenario?.seed ?? plan.seed;
-  if (seed) {
+  if (input.knew) {
+    context.push("", "What ZOH could see about the tester before this conversation (its own status sheet; using any of it isn't inventing):", input.knew);
+  } else if (seed) {
     const known = [
       `name ${seed.name}`,
       ...Object.entries(seed.answers ?? {}).map(([k, v]) => `${k}: ${v}`),

@@ -19,7 +19,8 @@ import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link }
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
-import { loadCurrentPlan } from "../src/coach/state.js";
+import { buildStateBlock } from "../src/coach/prompt.js";
+import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { addRequest, addThreadLine, claimRequest, closeRequest, COACH_AUTHOR } from "../src/console/requests.js";
@@ -811,6 +812,8 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
   opts.onApp?.(app);
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
+  // #230: what ZOH can see about a seeded tester, from the coach's own status sheet, so the grader judges with it.
+  const knew = plan.seed ? await readCoachSheet(app, clock.now()) : undefined;
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
   const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(lineText(l).trim())) ? await readStepLog(app) : undefined;
@@ -863,6 +866,7 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       endedBy,
       error,
       ...(tester.lines ? { lines: tester.lines() } : {}),
+      ...(knew ? { knew } : {}),
       // #103: the look-back's facts include today's step, so its log is read once the conversation is over.
       ...(opts.record ? { record: await readStepLog(app, true) } : record ? { record } : {}),
       ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
@@ -875,6 +879,13 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   } finally {
     await app.close();
   }
+}
+
+/** #230: the coach's status sheet for the tester as it would build it now, the same code ZOH's replies read. */
+async function readCoachSheet(app: EvalApp, now: Date): Promise<string | undefined> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return undefined;
+  return buildStateBlock(await loadCoachState(app.db, tester, { now, isFirstText: false }));
 }
 
 /**

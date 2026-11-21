@@ -63,12 +63,15 @@
   },
   "testerLines": [
     "[voice: Done, page 81 of Project Hail Mary.]",
-    "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop",
-    "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how",
-    "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes",
-    "I think it's also that I picked a book I actually wanted to read, not one I thought I should",
-    "true. and I sleep better when I read instead of scrolling",
-    "sounds good"
+    { "say": "read way past 15 min tonight, got to the part where he figures out the beetles thing. couldn't stop", "starts": true },
+    { "say": "it's the problem solving. every chapter he's stuck and then he works it out and I want to know how", "means": "what pulls him in is the problem solving", "when": "after ZOH asks what pulled him in, or what he liked", "length": "short", "optional": true },
+    { "say": "yeah honestly the phone on the dresser is the whole trick, if it's next to me I'm on it in 2 minutes", "means": "keeping the phone on the dresser is what makes it work", "when": "after ZOH asks what's helping, or about his setup", "length": "short", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you picked a book you actually wanted to read, not one you thought you should",
+    "you sleep better when you read instead of scrolling",
+    "9:30 in bed works tomorrow; you'd happily read more than 15 minutes"
   ],
   "whatWentWrong": "New for #211: the contrast to the early proposal. With the next step held until the reflection lands, a tester who keeps giving good answers could get question after question with no end in sight.",
   "shouldHaveHappened": "ZOH counts the voice note and celebrates reading past the 15 minutes. It follows what's worth understanding (what pulled him in, what makes it work), one question per text, and lands the talk at a natural point once it understands what's going on: by about its 5th text it moves to tomorrow's step built on what he said (the dresser, a book he wants to read, maybe more time), fully defined, and asks if it works, without being asked. It never asks question after question with no progression. After \"sounds good\" it confirms in a line with no new question.",

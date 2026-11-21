@@ -30,12 +30,9 @@
   },
   "startTime": "18:30",
   "testerLines": [
-    "my sister Ana started reading with me this week lol, she's way faster than me",
-    "and my dog Max sleeps on my feet while I read, honestly helps me wind down",
-    "saw the cutest dog on my walk today btw",
-    "I just love dogs tbh",
+    "my sister Ana started reading with me this week lol, she's way faster than me +++ and my dog Max sleeps on my feet while I read, honestly helps me wind down +++ saw the cutest dog on my walk today btw +++ I just love dogs tbh",
     "advance to 21:25",
-    "ok done, 10 pages. Ana's already 3 chapters ahead smh",
+    { "say": "ok done, 10 pages. Ana's already 3 chapters ahead smh", "starts": true },
     "advance to 03:30"
   ],
   "whatWentWrong": "New case, not a past mistake: what the overnight pass files from a chatty day.",

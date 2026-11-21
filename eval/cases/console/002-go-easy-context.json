@@ -31,7 +31,11 @@
   "testerLines": [
     "console Stamati: heads up, her mom is in the hospital this week. go easy on her, no guilt if she misses",
     "advance to 09:05",
-    "thanks. honestly not sure I'll get to it today"
+    { "say": "thanks. honestly not sure I'll get to it today", "means": "thanks; she's not sure she'll get to the workout today", "when": "after ZOH's morning text about today's push-ups and squats", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "it's a hard, busy week and you'd rather not go into why",
+    "you usually do the workout at home at 6"
   ],
   "whatWentWrong": "New case, not a past mistake: founder context reaching the coach.",
   "shouldHaveHappened": "ZOH confirms to Stamati in a line or two that it will go easy on her this week (what and from when, e.g. starting with this morning's text), without lecturing. The 9 am kickoff is warm and light about today's 20 push-ups and 30 squats, with no pressure, and never mentions her mom, the hospital, the team or anything she hasn't told ZOH herself. Her \"not sure I'll get to it\" gets a kind, no-guilt reply (a smaller version is fine to offer once), not a push to hold the line.",

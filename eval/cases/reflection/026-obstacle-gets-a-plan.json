@@ -34,9 +34,13 @@
   },
   "testerLines": [
     "[photo thesis-wordcount.jpg: a screenshot of the thesis doc, Chapter 3: Methods, with the word count open: 1,640 words] good session, wrote almost 600 words",
-    "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes",
-    "she'll probably ask again tomorrow honestly, she's off this week",
-    "works"
+    { "say": "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes. she'll probably ask again tomorrow honestly, she's off this week", "starts": true },
+    { "say": "works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you wrote about 600 words of the methods section",
+    "what kept you in the chair: you told yourself you'd eat after the session",
+    "8 am at the library still works for tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake (#164).",
   "shouldHaveHappened": "ZOH counts the screenshot and celebrates nearly 600 words. It reflects briefly, and the roommate (who'll likely ask again tomorrow) is the obstacle she's named. Tomorrow's step comes with a plan for it in her situation, in ZOH's own words: something like 'if she asks, breakfast is after the 45', or a smaller version at the same time (say 20 minutes) if the morning gets taken. Natural, one line, not a label like 'if-then:'. The step itself is fully defined and asked if it works. After 'works' a short confirmation.",

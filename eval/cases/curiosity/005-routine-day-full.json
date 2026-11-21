@@ -33,8 +33,12 @@
   },
   "testerLines": [
     "[voice: Chapter 9 done. It's about how your environment shapes habits more than motivation does. Went smoothly, phone was in the other room which honestly made the whole difference. Took about 20 minutes, felt like a good amount.]",
-    "I'm going to try it with my gym bag too, leave it by the door the night before",
-    "yep sounds good"
+    { "say": "I'm going to try it with my gym bag too, leave it by the door the night before", "means": "she'll use the idea with her gym bag too: by the door the night before", "when": "after ZOH asks about the phone in the other room or the environment idea", "length": "short", "optional": true },
+    { "say": "yep sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the phone was charging in the kitchen while you read",
+    "8 pm on the couch for about 20 minutes works for chapter 10 tomorrow"
   ],
   "whatWentWrong": "New case: on a smooth day with full answers, more curiosity must not become five questions.",
   "shouldHaveHappened": "ZOH counts the proof and celebrates, asking at most one question that goes deeper on something they said (the phone in the other room, or the environment idea), not re-asking how it felt or how long it took. After their gym bag answer it moves to the next step day's step (chapter 10, same time and place, keeping the phone-away move that worked), fully defined, and asks if it works. A question or two in all, never an interrogation. After \"yep sounds good\" it confirms in a line with no new question.",

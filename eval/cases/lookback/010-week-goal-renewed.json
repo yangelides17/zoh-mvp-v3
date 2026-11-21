@@ -40,8 +40,14 @@
   },
   "testerLines": [
     "how'd I do this week?",
-    "honestly I want to keep going, it's the first book I haven't dropped",
-    "sounds good"
+    { "say": "honestly I want to keep going, it's the first book I haven't dropped", "means": "wants to keep going; it's the first book she hasn't dropped", "when": "after ZOH's recap asks a question about her week or what's next", "length": "short", "expected": true },
+    { "say": "yeah let's do that", "when": "after ZOH suggests a new goal for the week and asks what she thinks", "fixed": true, "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "9:30 pm in bed works Monday",
+    "a chapter a night feels easy",
+    "the book has about 20 short chapters"
   ],
   "whatWentWrong": "New case, not a past mistake (#165).",
   "shouldHaveHappened": "Her question gets the week's recap (2 to 4 pieces of progress backed by the record: six chapters in six days, compounding explained in her own words), including that she hit the week's goal, and one question. When she says she wants to keep going, the week talk moves the goal up, built on how the week went and reachable in about a week (for example the next six chapters by next Sunday, or the rest of the book if that's realistic at a chapter a day), offered lightly, saved with change_plan once she's OK with it. Not something far too big for a week. It ends with Monday's step fully defined (the next chapter, 9:30 pm in bed, 20 min, voice recap), asked if it works; after 'sounds good' a short confirmation.",

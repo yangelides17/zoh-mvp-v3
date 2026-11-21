@@ -1,0 +1,28 @@
+{
+  "id": "learning-asked-where-to-use-it",
+  "why": "ZOH asked what she could hang a new habit on.",
+  "case": "reflection/learning-step",
+  "line": 2,
+  "expect": [
+    "fits",
+    "close"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Okay done, finished chapter four.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Maya! Chapter four done, and that's 4 days in a row 🔥 What's one idea from it that stuck with you?"
+    },
+    {
+      "from": "tester",
+      "text": "the habit stacking part, like tying a new habit to one you already do"
+    },
+    {
+      "from": "zoh",
+      "text": "Nice, that's a good one to pull out, Maya. Is there something you already do every day that you could hang a new habit on, maybe even your reading?"
+    }
+  ]
+}

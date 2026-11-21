@@ -59,7 +59,12 @@
   },
   "testerLines": [
     "can I just do the 30 min again today?",
-    "honestly I think an hour is just too much right now, my lab hours went up this month"
+    { "say": "honestly I think an hour is just too much right now, my lab hours went up this month", "means": "the hour is too much for now because lab hours went up this month", "when": "after ZOH asks whether to lower the daily goal for good or go lighter for a while (or what's behind the shorter days)", "length": "short", "expected": true },
+    { "say": "ok that works", "when": "after ZOH proposes a lower or lighter plan and asks if it works", "fixed": true, "optional": true }
+  ],
+  "facts": [
+    "you're a grad student writing your thesis at the library",
+    "your lab hours went up this month"
   ],
   "whatWentWrong": "New case, not a past mistake: no case covered two reduced days in a row.",
   "shouldHaveHappened": "After two reduced days in a row, ZOH doesn't just set the 30 minutes again: it asks which it is, in its own words: lower the daily goal for good, or lighter for a short stretch with an end date. Once he explains (lab hours up this month), it agrees a change that fits (a lower plan for good, or a lighter one through the end of the month), saved as a plan change, and confirms it in a line. No guilt, no second push.",

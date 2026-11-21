@@ -2,7 +2,16 @@
   "id": "chosen-quiet-hours",
   "title": "A 10:30 pm step inside quiet hours the tester set themselves: one question, a no accepted, never asked again",
   "origin": "Issue #48 (quiet hours move to fit the step time), the spec's example for quiet hours they set",
-  "testerLines": ["10:30 pm in bed, 20 minutes, every night", "nah keep them, I don't need a reminder", "looks good", "I'm in"],
+  "testerLines": [
+    "10:30 pm in bed, 20 minutes, every night",
+    { "say": "nah keep them, I don't need a reminder", "means": "keep the quiet hours as they are; no reminder needed at 10:30", "when": "after ZOH asks whether to move the quiet hours or whether no text at 10:30 is okay", "length": "short", "expected": true },
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "I'm in", "when": "after ZOH asks for their commitment (if they're in)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you read Atomic Habits in bed",
+    "you don't track your reading anywhere"
+  ],
   "whatWentWrong": "New case, not a past mistake: quiet hours the tester chose are theirs, so ZOH asks once instead of moving them.",
   "shouldHaveHappened": "Because 10:30 pm is inside the quiet hours they set (no texts after 10), ZOH asks once, plainly, whether that's okay or whether it should move them so it can nudge them then; one question. After 'nah keep them', it accepts without pushing and doesn't ask again: it shows the plan (Atomic Habits in bed at 10:30 pm, 20 minutes, every night, with a voice recap as proof) ending in one question. After 'looks good' it asks for the commitment; after 'I'm in' it locks with a hype line and when day 1 is, never raising quiet hours again.",
   "areaCode": "212",

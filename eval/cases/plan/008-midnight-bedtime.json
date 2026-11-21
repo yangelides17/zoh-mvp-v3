@@ -4,9 +4,14 @@
   "origin": "Issue #48 (quiet hours move to fit the step time), the spec's planning example",
   "testerLines": [
     "Sunday to Thursday, weekends I'm out late anyway",
-    "not sure yet honestly",
-    "looks good",
-    "I'm in"
+    { "say": "not sure yet honestly", "means": "no target yet", "when": "after ZOH asks what they're working toward or where they want this to get them", "length": "thin", "optional": true },
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "I'm in", "when": "after ZOH asks for their commitment (if they're in)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're usually out late on Friday and Saturday",
+    "you don't use a sleep tracker",
+    "your phone charges in the kitchen"
   ],
   "whatWentWrong": "New case, not a past mistake: before #48 ZOH offered to move quiet hours, then could offer again after lock because it no longer saw the earlier offer.",
   "shouldHaveHappened": "ZOH shows the plan (bed by 11:50 pm with screens away, Sunday to Thursday, with a photo as proof) and says in a few words that it will stay up to reach them around then (for example a heads-up at 11:40), with no question about quiet hours; the text ends with one question about the plan. After 'looks good' it asks for the commitment in natural words; after 'I'm in' it locks with a hype line and when day 1 is. It never asks to move quiet hours or brings them up again.",

@@ -27,7 +27,7 @@
   },
   "testerLines": [
     "hey can you pause the texts for a bit",
-    "flying to Greece for my cousin's wedding, back in 5 days",
+    { "say": "flying to Greece for my cousin's wedding, back in 5 days", "means": "a trip to Greece for a cousin's wedding, back in 5 days", "when": "after ZOH asks why or what's going on", "length": "short", "expected": true },
     "advance to 21:59"
   ],
   "whatWentWrong": "New case, not a past mistake: the real-reason pause path.",

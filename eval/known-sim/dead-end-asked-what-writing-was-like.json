@@ -1,0 +1,19 @@
+{
+  "id": "dead-end-asked-what-writing-was-like",
+  "why": "ZOH asked what writing the scene was like; the sleeves line answers a question about the ending, not that.",
+  "case": "reflection/saved-dead-end",
+  "line": 1,
+  "expect": [
+    "wait"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Dana, day 3 in the books 🔥 Lena biting the thread instead of answering is a great beat, because the scene says she's mad without anyone saying it. What was it like writing that one, compared to Iris's and Theo's?"
+    }
+  ]
+}

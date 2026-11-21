@@ -31,9 +31,13 @@
   },
   "testerLines": [
     "[voice: Asked Dev a question about his launch. He gave a long answer and I didn't really know what to say after, so it just kind of hung there. Awkward.]",
-    "I guess I froze because I was already thinking about my own update",
-    "idk, what should I do tomorrow?",
-    "the second one"
+    { "say": "I guess I froze because I was already thinking about my own update", "means": "she froze because she was already thinking about her own update", "when": "after ZOH asks about the awkward moment after Dev's answer", "length": "short", "expected": true },
+    { "say": "idk, what should I do tomorrow?", "starts": true },
+    { "say": "the second one", "when": "after ZOH offers two or three options for tomorrow and asks which", "fixed": true, "optional": true }
+  ],
+  "facts": [
+    "Dev's launch is a new feature his team ships next week",
+    "standup is at 10 am every weekday"
   ],
   "whatWentWrong": "New case: when the tester asks for direction, ZOH should bring expertise tied to them, not generic tips or a question back.",
   "shouldHaveHappened": "ZOH counts it and asks about the awkward moment (open, no guesses), then about freezing if useful. Once they ask \"what should I do tomorrow?\", ZOH offers 2 or 3 concrete directions, each tied to what they said (the pause after Dev's answer, already thinking about their own update), each with a few words on why, or one clear recommendation with the reason. After \"the second one\" it sets that as the next step day's step, fully defined, and asks if it works or confirms.",

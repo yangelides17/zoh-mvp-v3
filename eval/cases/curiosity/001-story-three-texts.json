@@ -32,10 +32,14 @@
   },
   "testerLines": [
     "[voice: Done with chapter 5. It's about habit stacking, linking a new habit to one you already do.]",
-    "so the first half went fine but then",
-    "my roommate came home and sat down next to me and started talking about her day, and I read the same page like four times",
-    "yeah. I think I need to read before she gets home, she's back around 8:15",
-    "sounds good"
+    { "say": "so the first half went fine but then", "starts": true },
+    { "say": "my roommate came home and sat down next to me and started talking about her day, and I read the same page like four times", "starts": true },
+    { "say": "yeah. I think I need to read before she gets home, she's back around 8:15", "means": "she'd read before her roommate's back around 8:15", "when": "after ZOH asks about the roommate interruption or what she'd do differently", "length": "short", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "chapter 5 was about habit stacking",
+    "your roommate is usually back around 8:15"
   ],
   "whatWentWrong": "New case: ZOH tends to propose tomorrow's step as soon as it has something, even while the tester is mid-story.",
   "shouldHaveHappened": "ZOH counts the proof and celebrates. After \"so the first half went fine but then\" it lets the story come (a short \"and then?\" or similar), with no next step in that text. After the roommate part it stays on it: understanding, and a question about it, or what they'd do differently. Their fix (reading before she's back at 8:15) is what they'd do differently, said after a real reflection, so it can go straight into the next step day's step (an acknowledgement or a one-line playback first is a plus): fully defined, using it (an earlier time, before the roommate's back), and asking if it works. What fails is a step before the story is told. After \"sounds good\" it confirms in a line.",

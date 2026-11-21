@@ -47,7 +47,10 @@
     }
   },
   "startTime": "20:40",
-  "testerLines": ["done, 15 pages", "honestly how much progress have I actually made since I started with you?"],
+  "testerLines": [
+    "done, 15 pages",
+    { "say": "honestly how much progress have I actually made since I started with you?", "starts": true }
+  ],
   "whatWentWrong": "New case, not a past mistake: a progress question three weeks in.",
   "shouldHaveHappened": "ZOH traces the whole path accurately from the start: she began on a bedtime goal about three weeks ago, switched to reading because she kept scrolling in bed, started at 5 pages a night, moved to 10 after a clean week, and now 15. It mentions her recent run of done days (one reduced) without inventing numbers or dates that aren't in memory, and keeps it to a short text or two."
 }

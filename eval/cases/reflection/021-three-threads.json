@@ -63,9 +63,13 @@
   "testerLines": [
     "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]",
     "Finished scene 4! Felt so good to finally get Theo and Mara in the same room. I'm kind of nervous it's garbage though. Also my tea went cold because I forgot about it lol",
-    "I guess I keep comparing it to the books I love, and mine sounds clunky next to them",
-    "yeah that helps. I think I just need to keep going and fix it later",
-    "works for me"
+    { "say": "I guess I keep comparing it to the books I love, and mine sounds clunky next to them", "means": "she compares it to books she loves and hers sounds clunky next to them", "when": "after ZOH asks about the worry that it's garbage", "length": "short", "optional": true },
+    { "say": "yeah that helps. I think I just need to keep going and fix it later", "means": "that helps; she'll keep going and fix it later", "when": "after ZOH responds to her comparing it to books she loves, with a thought or a question about it", "length": "short", "optional": true },
+    { "say": "works for me", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "getting Theo and Mara in the same room was the scene you'd been building toward",
+    "8 pm at the kitchen table for 20 minutes works tomorrow"
   ],
   "whatWentWrong": "New for #211: the risk is that holding the next step makes ZOH ask about every thread they mention (the nerves, the win, the cold tea) before it moves on.",
   "shouldHaveHappened": "ZOH counts the screenshot and celebrates scene 4. From the first answer it follows what matters for her (the worry that it's garbage, or what made it feel good), lightly nods to the rest or lets it go (never a question about the cold tea), and doesn't propose tomorrow in that reply. Once she's said she compares it to books she loves and decided to keep going and fix it later, the talk has landed: ZOH moves to tomorrow's step built on that (keep going, no editing yet; fully defined, asked if it works), never a question per thread. After \"works for me\" it confirms in a line with no new question.",

@@ -30,8 +30,12 @@
   },
   "testerLines": [
     "honestly feeling kinda down today. everyone at that gym looks like they've been going for years",
-    "yeah I'll still go, just needed to say it",
-    "how's your day going lol"
+    { "say": "yeah I'll still go, just needed to say it", "means": "she'll still go; she just needed to vent", "when": "after a ZOH text that doesn't ask her something else", "length": "short" },
+    { "say": "how's your day going lol", "starts": true }
+  ],
+  "facts": [
+    "everyone at that gym looks like they've been going for years",
+    "you'll still go; you just needed to say it"
   ],
   "whatWentWrong": "New for #162: the contrast case. With search available, the risk is looking things up (\"tips for gym anxiety\") when they just need ZOH.",
   "shouldHaveHappened": "No ZOH LOOKED UP lines at all: this is feelings, a check-in and small talk. ZOH meets the feeling first (understanding, maybe a light reframe: most people there started where she is), no push in that text, no links or articles. When she says she'll still go, a warm short line. The small-talk question gets a light, short answer and back to her. Short texts.",

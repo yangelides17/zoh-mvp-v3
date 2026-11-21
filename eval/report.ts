@@ -337,17 +337,22 @@ export function renderMarkdown(r: ReportData): string {
   );
   const counted = r.conversations.filter((c) => c.lines);
   if (counted.length) {
-    // #230: how the cases' waiting lines went out, and the runs that never reached a line's moment.
-    // Reports from before the trial's fixes have no `skipped`.
-    const sum = (k: "exact" | "adapted" | "waited" | "skipped") => counted.reduce((n, c) => n + (c.lines![k] ?? 0), 0);
+    // #230: how the cases' waiting lines went out, ZOH's misses, and the runs whose case needs fixing.
+    // Reports from before these counts existed lack some of them.
+    const sum = (k: "exact" | "adapted" | "waited" | "skipped" | "passed") => counted.reduce((n, c) => n + (c.lines![k] ?? 0), 0);
     const problems = counted.filter((c) => c.lines!.problem);
+    const missed = counted.filter((c) => c.lines!.missed);
     lines.push(
-      `Tester lines: ${sum("exact")} word for word, ${sum("adapted")} changed to fit, ${sum("skipped")} skipped (already said), ${sum("waited")} extra replies while a line waited, ${problems.length} case problem${problems.length === 1 ? "" : "s"}.`,
+      `Tester lines: ${sum("exact")} word for word, ${sum("adapted")} changed to fit, ${sum("skipped")} skipped (already said), ${sum("passed")} passed (optional), ${sum("waited")} extra replies while a line waited, ${missed.length} where ZOH never reached a moment it should have (graded as usual), ${problems.length} case problem${problems.length === 1 ? "" : "s"}.`,
       "",
     );
     if (problems.length) {
-      lines.push("## Case problems", "", "A line never found its moment, so these runs weren't graded; the case needs fixing, not ZOH. Transcripts are under Conversations.", "");
-      for (const c of problems) lines.push(`- ${c.plan.title} (\`${c.plan.key}\`): ${c.lines!.problem}`);
+      lines.push("## Case problems", "", "A line never found its moment for a reason that isn't ZOH's, so these runs are kept out of the scores; the case needs fixing. Their grades are shown for a look. Transcripts and each line's decisions are under Conversations.", "");
+      for (const c of problems) {
+        const g = c.problemGrade;
+        const failed = g ? [...new Set([...g.texts.flatMap((t) => t.checks), ...g.conversation].filter((x) => !x.pass).map((x) => `\`${x.rule}\``))] : [];
+        lines.push(`- ${c.plan.title} (\`${c.plan.key}\`): ${c.lines!.problem}.${g ? ` Grade, not scored: ${failed.length ? `failed ${failed.join(", ")}` : "every check passed"}.` : ""}`);
+      }
       lines.push("");
     }
   }
@@ -421,6 +426,13 @@ export function renderMarkdown(r: ReportData): string {
       lines.push(`- ${c.pass ? (c.borderline ? "~" : "✓") : "✗"} \`${c.rule}\` (${label.get(c.rule) ?? c.rule}): ${c.reason}`);
     }
     lines.push("", "</details>", "");
+    // #230: each waiting line's decision and the simulator's reason, so a review needn't guess why a line went out.
+    if (conv.lines?.log?.length) {
+      lines.push("<details><summary>Tester line decisions</summary>", "");
+      for (const d of conv.lines.log) lines.push(`- line ${d.line + 1} “${d.say}”: **${d.decision}**: ${d.reason}`);
+      lines.push("", "</details>", "");
+    }
+    if (conv.lines?.missed) lines.push(`**ZOH's miss:** ${conv.lines.missed}`, "");
     if (conv.memory) lines.push("Memory after the overnight pass:", "", "```", conv.memory, "```", "");
     lines.push("Saved state:", "");
     const tables = Object.keys(conv.savedState);
@@ -461,7 +473,7 @@ export function summaryLines(r: ReportData, files: { md: string; json: string })
   const problems = r.conversations.filter((c) => c.error || c.gradeError).length;
   if (problems) out.push(`${problems} conversation(s) hit an error; see the report.`);
   const caseProblems = r.conversations.filter((c) => c.lines?.problem).length;
-  if (caseProblems) out.push(`${caseProblems} case problem(s): a line never fit, so not graded; see the report.`);
+  if (caseProblems) out.push(`${caseProblems} case problem(s): a line never fit, so not scored; see the report.`);
   out.push(`Report: ${files.md}`, `        ${files.json}`);
   return out;
 }

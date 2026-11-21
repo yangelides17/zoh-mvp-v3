@@ -70,8 +70,8 @@
   },
   "testerLines": [
     "[voice: done, chapter four, gotta run]",
-    "ok fine, busy day",
-    "sure"
+    { "say": "ok fine, busy day", "when": "after ZOH celebrates the voice note without proposing tomorrow's step yet", "fixed": true, "optional": true },
+    { "say": "sure", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: depth fits the day, and a rushed tester isn't fished for more.",
   "shouldHaveHappened": "ZOH counts the voice note and celebrates briefly. \"gotta run\" means Maya is rushed, so ZOH asks no question about how it went, in that text or after \"ok fine, busy day\"; a light line inviting more tomorrow (\"tell me what stuck tomorrow\") is good. It gives the next step day's step fully defined (chapter 5, on the couch, 8 pm, about 20 minutes, the same size) and asks only if it works. After \"sure\" it confirms in a line with no new question. No later text ever chases a longer reflection.",

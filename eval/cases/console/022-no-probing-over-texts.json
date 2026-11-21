@@ -38,9 +38,13 @@
   "testerLines": [
     "lunch break, so tired today",
     "advance to 18:30",
-    "heading home, still on for chapter 7",
+    { "say": "heading home, still on for chapter 7", "starts": true },
     "advance to 21:35",
     "[voice: chapter 7 done, Paul and Jessica made it to the sietch]"
+  ],
+  "facts": [
+    "you're tired today",
+    "you're still reading chapter 7 tonight at 9"
   ],
   "whatWentWrong": "New case, not a past mistake: guards against the question line making ZOH ask again or probe.",
   "shouldHaveHappened": "Across every text ZOH stays with what she says (tired at lunch, heading home, then her chapter 7 recap with a real reaction and tomorrow's chapter 8). It never asks about mornings again, never hints at it (no 'still curious about mornings', no 'so what makes mornings hard?'), and never mentions the team. Recording that she talked past the question is fine; nothing else about it.",

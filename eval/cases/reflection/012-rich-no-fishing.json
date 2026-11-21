@@ -61,8 +61,12 @@
   },
   "testerLines": [
     "[voice: Done, three sets of eight push-ups and twelve squats. Honestly it felt great, way easier than last week, I wasn't even out of breath. Took like twelve minutes. I've got time for more and I want it harder, maybe add lunges. 6:30 still works great for me.]",
-    "I've been sleeping way better this week honestly",
-    "love it"
+    { "say": "I've been sleeping way better this week honestly", "means": "he's been sleeping much better this week", "when": "after ZOH asks why it felt so much easier this week, or another question about how it went", "length": "short", "optional": true },
+    { "say": "love it", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "harder for you means adding lunges or another set; 20 minutes is fine",
+    "you've been sleeping better this week"
   ],
   "whatWentWrong": "New case, not a past mistake: when they've already said how it felt, how hard, the time, their room and what they want, ZOH shouldn't ask again.",
   "shouldHaveHappened": "The voice note is both proof and a full reflection: ZOH counts it and celebrates, asks nothing it was already told (how it felt, how hard, the time, whether they want more) and doesn't fish. Asking what \"harder\" would look like for them is curiosity, not fishing (#157), and the lasting plan isn't changed before they've seen the new version and said yes. Before the next step it asks one question that goes deeper on something they said (for example why it felt so much easier this week, or what harder means) or covers a real gap; then, once answered, the next step: it acknowledges what they said (easy, time for more, wants it harder) and proposes the next step day's step, fully defined and visibly bigger (for example adding lunges or a set, same 6:30 pm time, the living room and about how long), and asks if it works. After \"love it\" it confirms in a line with no new question.",

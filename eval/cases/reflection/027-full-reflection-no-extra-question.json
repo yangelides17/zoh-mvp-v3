@@ -1,0 +1,89 @@
+{
+  "id": "full-reflection-no-extra-question",
+  "title": "A full reflection has already landed: ZOH acknowledges it and moves to tomorrow, no extra \"how did it feel?\"",
+  "origin": "#230 (v0.3.0 readout: the clearest pattern was ZOH adding a question after the reflection had landed)",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": {
+      "what": "Atomic Habits",
+      "where": "on the couch",
+      "when": "8 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "zoh",
+        "text": "Chapter 4 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap."
+      },
+      {
+        "from": "tester",
+        "text": "yep"
+      }
+    ],
+    "plan": {
+      "step": "Read chapter 1 of Atomic Habits on the couch",
+      "destination": "finish Atomic Habits this month",
+      "place": "on the couch",
+      "time": "20:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a short voice recap of what you read",
+      "reason": "Putting it in your own words is what makes it stick.",
+      "minutes": 20,
+      "started_days_ago": 3
+    },
+    "step_days": [
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Read chapter 1 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: small habits compound"
+      },
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Chapter 2 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: identity-based habits"
+      },
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Chapter 3 of Atomic Habits on the couch",
+        "proof_seen": "voice recap: the four laws"
+      }
+    ],
+    "today_step": {
+      "step": "Chapter 4 of Atomic Habits on the couch at 8 pm (about 20 min), then a voice recap",
+      "agreed_hours_ago": 10
+    }
+  },
+  "testerLines": [
+    "[voice: Done, chapter four. Habit stacking finally clicked for me. Last night I stretched right after brushing my teeth without even thinking about it, so tying the new thing to the old one actually works. Tonight it felt easy, I read the whole chapter in one go. Next I want to try reading right after I do the dishes.]",
+    {
+      "say": "sounds good",
+      "when": "after ZOH proposes tomorrow's step and asks if it works",
+      "fixed": true,
+      "expected": true
+    }
+  ],
+  "facts": [
+    "8 pm on the couch works for chapter 5 tomorrow",
+    "dishes are usually done around 7:45"
+  ],
+  "whatWentWrong": "Seen across reflection cases at v0.3.0: after a reflection that already said what clicked, how it went and what she'd do next, ZOH asked one more \"how did tonight's reading feel?\" before getting to tomorrow.",
+  "shouldHaveHappened": "ZOH counts the voice note and celebrates. Her recap is already a full reflection (what clicked, that it worked last night, how tonight felt, what she wants to try next), so ZOH acknowledges something specific in it in a line or two and moves straight to tomorrow's step in the same text or the next, building in her idea (reading right after the dishes) with chapter 5, the place, the time and about 20 minutes, and asks if it works. It doesn't ask how the reading felt, what she learned or anything else the recap already answered. After \"sounds good\" it confirms in a line with no new question.",
+  "startTime": "20:30",
+  "timeZone": "America/New_York"
+}

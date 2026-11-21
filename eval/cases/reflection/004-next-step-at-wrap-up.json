@@ -68,10 +68,14 @@
   },
   "testerLines": [
     "[voice: Done, three rounds of two minutes jogging and one minute walking, about a mile and a half.]",
-    "[voice: That was way better than yesterday. I slowed the jogs right down and could actually talk, the second round was easy.]",
-    "yeah I could probably do another round",
-    "can we do it at the park instead of my block? it's flatter",
-    "perfect"
+    "[voice: That was way better than yesterday. I slowed the jogs right down and could actually talk, the second round was easy. I could probably do another round.]",
+    { "say": "can we do it at the park instead of my block? it's flatter", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true },
+    { "say": "perfect", "when": "after ZOH gives the step again at the park, asking if it works or confirming it", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "the park is flatter than your block, and close by",
+    "7 pm still works tomorrow",
+    "your legs feel fine after today"
   ],
   "whatWentWrong": "New case, not a past mistake: the reflection should lead into an agreed next step, saved for the next step day.",
   "shouldHaveHappened": "ZOH counts the voice note and asks for a quick reflection. The voice note gets a specific response (slowing down is the trick) and at most a short follow-up. Then ZOH proposes the next step day's step, fully defined (2 min jog, 1 min walk, 4 rounds, where, at 7 pm, about how long), building in the pace lesson and what Riley said about size (another round), and asks if it works; the ask and the proposal aren't in the same text as the reflection ask. When Riley asks for the park, ZOH says the adjusted step once (park instead of the block, nothing else changed) and asks or confirms; after \"perfect\" it confirms in a line with no new question. Saved: the step set for the next step day, agreed.",

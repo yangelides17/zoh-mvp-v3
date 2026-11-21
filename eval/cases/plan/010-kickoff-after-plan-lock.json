@@ -20,9 +20,14 @@
   },
   "testerLines": [
     "I want to do 10 real push-ups in a row by Christmas. Every day except Sunday works",
-    "love it",
-    "Yes, I'm committing to it. Let's start tomorrow",
+    { "say": "love it", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "Yes, I'm committing to it. Let's start tomorrow", "when": "after ZOH asks for their commitment", "fixed": true, "expected": true },
     "advance to 09:05"
+  ],
+  "facts": [
+    "you do push-ups at home at 6:30 pm",
+    "you can do about 3 real push-ups now",
+    "you just use your phone camera"
   ],
   "whatWentWrong": "On Oct 30 the plan was locked for the next day with a clear yes, and the next morning's kickoff restated the step correctly but ended \"You in?\", as if asking for the first time.",
   "shouldHaveHappened": "The plan text opens with one short line reacting to something specific Jordan shared (10 push-ups by Christmas, starting from 3), not a canned \"That's everything I need\", then the plan and one question. After \"love it\" ZOH asks for the commitment in its own words; after the yes it locks the plan with day 1 tomorrow and a hype line, with no question. The next morning one kickoff goes out: warm, with Jordan's name, today's step in a sentence or two (at home, 6:30 pm), and one light question that shows Jordan already committed (like \"still good for 6:30?\" or \"you still in?\"), never a first-time \"you in?\". It doesn't ask what time and doesn't ask for the commitment again.",

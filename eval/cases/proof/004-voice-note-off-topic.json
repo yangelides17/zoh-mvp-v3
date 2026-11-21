@@ -30,8 +30,8 @@
   },
   "testerLines": [
     "[voice: Ugh today was so long. Work was nonstop and then I made pasta for my roommates and we watched a movie.]",
-    "oh lol yeah I read my pages earlier",
-    "[voice: Okay, ten pages done. Chapter three, the part about identity-based habits, how you vote for who you want to be.]"
+    { "say": "oh lol yeah I read my pages earlier", "means": "says they did read the ten pages earlier", "when": "after ZOH asks about the reading or for the reading note", "length": "short", "expected": true },
+    { "say": "[voice: Okay, ten pages done. Chapter three, the part about identity-based habits, how you vote for who you want to be.]", "when": "after ZOH asks for a quick voice note saying what they read", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: a voice note that doesn't mention the step isn't proof, and their word alone isn't either.",
   "shouldHaveHappened": "The first voice note never mentions reading: ZOH responds warmly to their day but notes it didn't hear anything about the pages and asks naturally for the reading note. \"I read my pages earlier\" alone isn't proof: ZOH stays light and asks for the quick voice note saying what they read. The second voice note names the pages and chapter: ZOH celebrates and counts it, maybe referencing what they read (identity-based habits), without inventing anything.",

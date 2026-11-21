@@ -39,10 +39,14 @@
   },
   "testerLines": [
     "[voice: did the two laps again, legs felt heavy at the start]",
-    "heavy at first but it loosened up, kept the talk pace the whole way",
-    "that's about it",
-    "more of the same honestly, maybe a bit longer",
-    "yep"
+    { "say": "heavy at first but it loosened up, kept the talk pace the whole way", "means": "legs were heavy at first but loosened up; kept the talk-test pace the whole way", "when": "after ZOH reacts to the voice note or asks how the run went", "length": "short", "optional": true },
+    { "say": "that's about it", "when": "after ZOH asks if there's anything else about today, or another question about today's run", "fixed": true, "optional": true },
+    { "say": "more of the same honestly, maybe a bit longer", "means": "same again, maybe a bit longer", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "short", "expected": true },
+    { "say": "yep", "when": "after ZOH proposes the next step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you don't time your runs or track distance",
+    "7 am at the park loop works Monday"
   ],
   "whatWentWrong": "New case built from #103: on Oct 31 a recap said \"Thursday took three minutes once you started\", a detail nothing saved supports, and called recalls ZOH asked for \"unprompted\".",
   "shouldHaveHappened": "After the reflection runs its course, the recap names 2 to 4 pieces of progress, each matching the seeded record and what he said today: one lap with walk breaks Monday, the talk-test pace recalled Wednesday and applied since, two laps Friday and today. It invents no times, paces, distances or durations nothing saved or said supports (no \"in 12 minutes\", no \"without walking\" for Monday), and never calls the Wednesday recall unprompted or done on his own. Where he stands vs. a mile without stopping, honestly. One question. Then a fully defined next step that's a bit longer, asked if it works; after \"yep\", a one-line confirm.",

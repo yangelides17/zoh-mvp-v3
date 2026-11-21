@@ -62,9 +62,14 @@
   },
   "testerLines": [
     "[voice: Done. I learned discovery calls should start with their problem, not my pitch. I wrote my question: what's the hardest part of keeping members past month two?]",
-    "honestly it felt kind of awkward writing it, like I was guessing what they'd say",
-    "yeah I think talking to an actual owner would help",
-    "sounds good"
+    { "say": "honestly it felt kind of awkward writing it, like I was guessing what they'd say", "means": "writing it felt awkward, like guessing what an owner would say", "when": "after ZOH asks how writing the question went or how it felt", "length": "short", "expected": true },
+    { "say": "yeah I think talking to an actual owner would help", "means": "talking to an actual gym owner would help", "when": "after ZOH asks about the awkwardness or what would make it feel less like guessing", "length": "short", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you've never talked to a gym owner about their business",
+    "the article's point that you start with their problem was new to you",
+    "7 pm at your desk for 15 minutes works tomorrow"
   ],
   "whatWentWrong": "After a screenshot and a typed lesson, ZOH celebrated and went straight to tomorrow's step: it never learned how the step felt or what size suited them (Oct 30 live check).",
   "shouldHaveHappened": "ZOH counts the voice note and celebrates the lesson specifically. A lesson they volunteer is worth following (#160, Yanni Nov 16), and how it went still matters: its question picks up the lesson or how writing the question went, tied to what Riley said, never a list, and how it felt is covered before the next step. It follows the awkwardness with at most one more specific question, then turns naturally to the next step: it acknowledges what Riley shared (it felt like guessing; a real owner would help) and proposes the next step day's step, fully defined (what, at the desk, 7 pm, 15 min), visibly using what Riley said (moving toward a real owner, or preparing for that), and asks if it works. One question per text. After \"sounds good\" it confirms in a line with no new question.",

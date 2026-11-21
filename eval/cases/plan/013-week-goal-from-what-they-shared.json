@@ -20,8 +20,14 @@
   },
   "testerLines": [
     "not sure honestly, a full portfolio site eventually. I'd hand-code it, and weeknights work best",
-    "yeah that sounds good",
-    "I'm in!"
+    { "say": "yeah that sounds good", "when": "after ZOH suggests a goal for the week (on its own or in the plan) and asks what they think", "fixed": true, "expected": true },
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "optional": true },
+    { "say": "I'm in!", "when": "after ZOH asks for their commitment (if they're in)", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're a graphic designer with a few pieces you'd want to show",
+    "you did a bit of HTML in school",
+    "you'd hand-code it on your laptop, weeknights at 9, about 30 minutes"
   ],
   "whatWentWrong": "New case, not a past mistake (#165).",
   "shouldHaveHappened": "ZOH helps Jordan land on a goal for the week built on what they shared (a designer, a bit of HTML, wants a portfolio site eventually): something exciting and reachable in about 3 to 7 steps, for example a one-page site with their name and a few pieces of work, live by Sunday, with a short reason, as a suggestion they can change, never pushed. It comes before or in the plan; the plan shows it as where they're headed, with day 1 fully defined as its first step (weeknights at 9 pm, 30 min, at the laptop) and proof that fits. Not a far-off goal (the full portfolio) and not something far too hard for a week. After 'yeah that sounds good' it asks for the commitment in natural words; after 'I'm in!' it locks.",

@@ -4,9 +4,13 @@
   "origin": "Decision on GitHub issue #21 (Yanni, Oct 27): the city question moves to plan agreement",
   "testerLines": [
     "Hey! I'm Jordan, I want to read every day",
-    "mostly sci-fi, I've got a kindle and read in bed",
-    "before bed around 10, like 20 min",
-    "nah I don't track it"
+    { "say": "mostly sci-fi, I've got a kindle and read in bed", "means": "mostly sci-fi, on a Kindle, in bed", "when": "after ZOH asks what they like to read", "length": "short" },
+    { "say": "before bed around 10, like 20 min", "means": "before bed around 10, about 20 minutes", "when": "after ZOH asks when or how long they'd read", "length": "short" },
+    { "say": "nah I don't track it", "means": "doesn't track their reading", "when": "after ZOH asks if they track their reading or how they'd show it", "length": "thin", "optional": true }
+  ],
+  "facts": [
+    "you live in Chicago",
+    "you don't track your reading anywhere"
   ],
   "whatWentWrong": "Before the fix, ZOH asked \"What city are you in?\" before the last plan question for any number outside Eastern.",
   "shouldHaveHappened": "ZOH never asks Jordan's city, location or time zone during onboarding, and never mentions time zones. Reading's onboarding questions are only what, when and how long, so onboarding is over once \"before bed around 10, like 20 min\" is answered; the later \"nah I don't track it\" answers nothing onboarding asked. Once onboarding's questions are done, ZOH carries straight on into the plan (asks what the plan still needs, or shows it), with no recap and no \"plan is on its way\" line, and only then may it ask Jordan's city for the plan.",

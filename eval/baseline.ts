@@ -31,7 +31,7 @@ export const PRODUCER_LABELS: Record<keyof Producer, string> = {
 };
 
 /** A stored run: what re-grading and scoring need, with the plan's case definition left out (it's in the repo). */
-export type StoredRun = Pick<GradedConversation, "context" | "transcript" | "endedBy" | "memory" | "record" | "saved" | "error" | "grade" | "gradeError"> & {
+export type StoredRun = Pick<GradedConversation, "context" | "transcript" | "endedBy" | "memory" | "record" | "saved" | "knew" | "lines" | "error" | "grade" | "gradeError"> & {
   plan: Omit<ConversationPlan, "regression" | "scenario" | "seed">;
 };
 
@@ -150,6 +150,9 @@ function toStored(c: GradedConversation): StoredRun {
     error: c.error,
     grade: c.grade,
     gradeError: c.gradeError,
+    // #230: what ZOH could see (so a re-grade judges with it) and how the tester's lines went out.
+    ...(c.knew ? { knew: c.knew } : {}),
+    ...(c.lines ? { lines: c.lines } : {}),
   };
 }
 

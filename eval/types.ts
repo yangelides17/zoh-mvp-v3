@@ -226,11 +226,13 @@ export type ScenarioInput = z.input<typeof scenarioSchema>;
 
 /**
  * #230: a tester line that waits for the moment it answers. `say` is its wording; `when` is the moment in ZOH's
- * texts it fits ("after ZOH asks what went wrong"). Until then the simulated tester answers ZOH from the case's
- * facts. An anchored line (the default) may be changed as little as possible to answer what ZOH actually said,
- * keeping `means` and `length`; a `fixed` one goes out word for word or not at all. `lead: false`: the waiting
- * replies don't steer toward it (the case tests whether ZOH gets there itself). `starts`: the tester starts a new
- * exchange (texting first), so it's sent without waiting.
+ * texts it fits, named by what ZOH does ("after ZOH asks what went wrong"). Until then the simulated tester
+ * answers ZOH, without seeing the line. An anchored line (the default) may be changed as little as possible to
+ * answer what ZOH asked, keeping `means` and `length`; a `fixed` one goes out word for word or not at all, and is
+ * never skipped. `optional`: the line only applies if ZOH asks for it, so it's dropped when ZOH moves past it.
+ * `expected`: its moment is what the case expects ZOH to reach (proposing tomorrow's step, say); if ZOH never gets
+ * there, the run ends and is graded as ZOH's miss, not a case problem. `starts`: the tester's own move (texting
+ * first, telling the next part of a story), sent as written without waiting.
  */
 export const LINE_LENGTHS = ["thin", "short", "full"] as const;
 export const caseLineSchema = z
@@ -240,13 +242,15 @@ export const caseLineSchema = z
     when: z.string().min(1).optional(),
     length: z.enum(LINE_LENGTHS).optional(),
     fixed: z.boolean().default(false),
-    lead: z.boolean().default(true),
+    optional: z.boolean().default(false),
+    expected: z.boolean().default(false),
     starts: z.boolean().default(false),
   })
   .strict()
   .superRefine((l, ctx) => {
     if (!l.starts && !l.when) ctx.addIssue({ code: "custom", message: "a line that answers ZOH needs `when` (or `starts: true`)" });
     if (!l.starts && !l.fixed && !l.means) ctx.addIssue({ code: "custom", message: "an anchored line needs `means` (or `fixed: true`)" });
+    if (l.optional && l.expected) ctx.addIssue({ code: "custom", message: "a line can't be both `optional` and `expected`" });
   });
 export type CaseLine = z.infer<typeof caseLineSchema>;
 
@@ -325,11 +329,16 @@ export interface ConversationResult {
   /** The seeded conversation before this run's first text; context only, never graded. */
   context: TranscriptLine[];
   transcript: TranscriptLine[];
-  /** "case-problem" (#230): a line never found its moment, so the run isn't graded. */
+  /**
+   * "case-problem" (#230): a line never found its moment for a reason that isn't ZOH's to fix; the run is graded
+   * but kept out of the scores. A line ZOH was expected to reach and didn't ends the run "by script", graded as usual.
+   */
   endedBy: "simulator" | "turn-cap" | "script" | "error" | "case-problem";
   error?: string;
-  /** #230: how a case's waiting lines went out; `problem` says which line never fit. */
+  /** #230: how a case's waiting lines went out, with each decision and its reason. */
   lines?: LineCounts;
+  /** #230: ZOH's own status sheet at the start of a seeded conversation, so the grader knows what ZOH knew. */
+  knew?: string;
   /** The tester's memory pages after the run (memory feature only), as the coach reads them. */
   memory?: string;
   /** The tester's dated step log at the start (console feature): what ZOH could see, so the grader can check its facts. */
@@ -344,14 +353,31 @@ export interface ConversationResult {
   usage: TokenUsage;
 }
 
-/** #230: waiting lines sent word for word, changed to fit, skipped (their point already made), and the extra replies sent while one waited. */
+/**
+ * #230: waiting lines sent word for word, changed to fit, skipped (their point already made), passed (optional,
+ * ZOH moved past them) and the extra replies sent while one waited. `missed`: a line ZOH was expected to reach and
+ * didn't (graded as ZOH's miss); `problem`: a line that never fit for another reason (a case problem).
+ */
 export interface LineCounts {
   exact: number;
   adapted: number;
   waited: number;
   skipped: number;
+  passed: number;
+  missed?: string;
   problem?: string;
+  log: LineDecision[];
 }
+
+/** #230: one simulator decision on a waiting line, with its one-sentence reason. Report only; never shown to ZOH or the grader. */
+export interface LineDecision {
+  line: number;
+  say: string;
+  decision: LineVerdict;
+  reason: string;
+}
+export const LINE_VERDICTS = ["said", "fits", "close", "wait", "passed"] as const;
+export type LineVerdict = (typeof LINE_VERDICTS)[number];
 
 export interface TokenUsage {
   input: number;
@@ -385,4 +411,6 @@ export type Grade = z.infer<typeof gradeSchema>;
 export interface GradedConversation extends ConversationResult {
   grade?: Grade;
   gradeError?: string;
+  /** #230: a case problem's grade, shown beside it but kept out of every score and comparison. */
+  problemGrade?: Grade;
 }
