@@ -46,32 +46,45 @@ ZOH's reply before sending the next one.
 
 ## Lines that wait for their moment (#230)
 
-A plain line is sent as written, in order, whatever ZOH just said. A line that answers ZOH can instead wait for the
-moment it fits, so it never lands after a text it doesn't answer:
+A plain line is sent as written, in order, whatever ZOH just said. A line that answers ZOH waits for the moment it
+fits instead, so it never lands after a text it doesn't answer:
 
 ```json
 { "say": "probably looking down at my left hand too early", "means": "it's looking down early, not speeding up",
-  "when": "after ZOH asks what causes the jump to go wrong", "length": "short" }
+  "when": "after ZOH asks what makes the jump go wrong", "length": "short" }
 ```
 
 | Field | Meaning |
 | --- | --- |
 | `say` | The wording. Sent word for word when ZOH's latest text fits it. |
-| `when` | The moment in ZOH's texts it answers. Required, unless `starts`. |
-| `means` | What it must get across. Required for an anchored line (the default). |
+| `when` | The moment it answers, named by what ZOH does ("after ZOH asks…", "after ZOH proposes…"). Required, unless `starts`. |
+| `means` | Its point. Required for an anchored line (the default). |
 | `length` | `thin` (1 to 4 words), `short` (a sentence) or `full`. |
-| `fixed` | `true`: word for word or not at all, never changed to fit (when the exact words are the test). |
-| `lead` | `false`: while it waits, the tester doesn't steer toward it (the case tests whether ZOH gets there itself). |
-| `starts` | `true`: the tester starts a new exchange (texting first), so it's sent without waiting. |
+| `fixed` | `true`: word for word or not at all; never changed or skipped (when the exact words are the test, and for agreements). |
+| `optional` | `true`: only applies if ZOH asks for it, so it's dropped when ZOH moves past it. |
+| `expected` | `true`: its moment is what the case expects ZOH to reach (a proposal, the week talk). If ZOH never gets there, that's ZOH's miss. |
+| `starts` | `true`: the tester's own move (texting first, the next part of a story, raising something new), sent as written. |
 
-Before each such line, the simulated tester (`EVAL_SIM_MODEL`) reads the conversation and decides: its point was
-**already said** (skipped, so the tester never repeats itself), it **fits** (the wording is sent), it's **close**
-(the wording changed as little as possible to answer what ZOH actually said, carrying only its own point; never for
-a fixed line) or **not yet** (a natural reply from the case's `facts`). While a line waits, leading only steers the
-topic toward it and never asks ZOH to suggest, plan or decide; set `lead: false` on cases that test whether ZOH
-takes that step itself. After 2 extra replies on one line, or 4 in the case, the run stops as a **case problem**: not
-graded, listed in the report's "Case problems" with the line that never fit. The report counts lines sent word for
-word, changed to fit and the extra replies. Actions (`advance to`, `console …`), commands and photos stay plain lines.
+Before each such line, one call to the simulated tester (`EVAL_SIM_MODEL`) decides, with a one-sentence reason that
+the report shows: the tester's own earlier texts **already said** it (skipped), it **fits** (the wording itself is
+sent), it's **close** (ZOH asked for this very point in other words; a second call changes the wording just enough,
+carrying only its point), **passed** (optional lines only) or **not yet** (a second call replies to just what ZOH
+asked, from the case's `facts`, without seeing the line, and never proposes, agrees to or decides anything).
+After 2 extra replies on one line, or 4 in the case, the run ends: an `expected` line is **ZOH's miss**, graded as
+usual; any other is a **case problem**, graded for a look but kept out of every score. An empty reply is a case
+problem too. Every run is graded, so no ZOH mistake is hidden.
+
+**Writing cases.** The test is fair when what's tested is what's actually tested; small invented details from the
+tester are fine if they're plausible and change nothing (Yanni, Nov 21).
+- Anchor only the tester's answers to ZOH and agreements. The tester's own moves are `starts`.
+- A `when` names something ZOH does, never "after ZOH does the right thing": a line waiting on ZOH's good behavior
+  turns ZOH's mistake into a case problem. Where the case does expect ZOH to get somewhere, mark the line `expected`.
+- Agreements ("works", "sounds good") are `fixed` and `expected`.
+- A line that only makes sense if ZOH asks for it is `optional`.
+- `facts` are what's true about the tester, for questions the lines don't cover. No fact may hold the answer ZOH
+  is meant to come up with.
+- The case ends at the moment it tests, with a line there.
+- Actions (`advance to`, `console …`), commands and photos stay plain lines.
 
 ## Adding one
 

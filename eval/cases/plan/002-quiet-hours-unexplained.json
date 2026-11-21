@@ -4,32 +4,10 @@
   "origin": "Yanni live, 2026-10-27 (issue #36); the empty reply and \"already set up\" plan are #37; rewritten for #48 (quiet hours move to fit the step time)",
   "testerLines": [
     "I think I should be done eating for the day around 11pm because usually I like to have a late night snack every day",
-    {
-      "say": "like 5 minutes",
-      "means": "about 5 minutes",
-      "when": "after ZOH asks how long it takes",
-      "length": "thin"
-    },
-    {
-      "say": "not sure yet, just want to hit it most days",
-      "means": "no specific target, just wants to do it most days",
-      "when": "after ZOH asks about a target or where they want to get",
-      "length": "short"
-    },
-    {
-      "say": "looks good",
-      "means": "the plan looks good",
-      "when": "after ZOH shows the plan and asks about it",
-      "length": "thin",
-      "lead": false
-    },
-    {
-      "say": "I'm in",
-      "means": "commits",
-      "when": "after ZOH asks if they're in or for their commitment",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "like 5 minutes", "means": "about 5 minutes", "when": "after ZOH asks how long it takes or how much time they have", "length": "thin", "optional": true },
+    { "say": "not sure yet, just want to hit it most days", "means": "no specific target, just wants to do it most days", "when": "after ZOH asks about a target or where they want to get", "length": "short", "optional": true },
+    { "say": "looks good", "when": "after ZOH shows the plan and asks what they think", "fixed": true, "expected": true },
+    { "say": "I'm in", "when": "after ZOH asks if they're in or for their commitment", "fixed": true, "expected": true }
   ],
   "facts": [
     "you log everything in MyFitnessPal",

@@ -278,14 +278,16 @@ async function play(
     const result = await runConversation(plan, tester, { maxTurns, index, env: deps.env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const out: GradedConversation = { ...result };
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
-    // A case problem is the case's fault, not ZOH's: listed in the report, never graded.
-    if (result.endedBy !== "case-problem" && (!result.error || result.transcript.length > 0)) {
+    // Every run is graded, so no ZOH mistake is hidden (#230). A case problem's grade is shown beside it but kept
+    // out of the scores: the case, not ZOH, needs fixing.
+    if (!result.error || result.transcript.length > 0) {
       try {
         const g = await gradeConversation(
-          { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, saved: result.saved, rubric, pages },
+          { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, saved: result.saved, knew: result.knew, rubric, pages },
           deps.complete,
         );
-        out.grade = g.grade;
+        if (result.endedBy === "case-problem") out.problemGrade = g.grade;
+        else out.grade = g.grade;
         out.gradeError = g.error;
         out.usage = addUsage(out.usage, g.usage);
       } catch (err) {
@@ -296,10 +298,12 @@ async function play(
     const status = out.error
       ? `error: ${out.error}`
       : result.lines?.problem
-        ? `case problem, not graded: ${result.lines.problem}`
+        ? `case problem, graded but not scored: ${result.lines.problem}`
         : out.gradeError
           ? `not graded: ${out.gradeError}`
-          : "graded";
+          : result.lines?.missed
+            ? `graded (${result.lines.missed})`
+            : "graded";
     console.log(`  [${done}/${plans.length}] ${feature.name} ${plan.key}: ${zohCount} ZOH texts, ended by ${result.endedBy}, ${status}`);
     return out;
   });

@@ -62,21 +62,11 @@
   },
   "testerLines": [
     "[voice: Okay, Lena's scene. Backstage the night before opening, Lena hems the understudy's costume while the understudy talks about her mother flying in to see her. Lena keeps her eyes on the needle. Hold still, she says. The understudy asks if Lena's mad. Lena bites the thread.]",
-    {
-      "say": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part",
-      "when": "after ZOH replies to the scene",
-      "fixed": true
-    },
-    {
-      "say": "yeah that works",
-      "means": "agrees to the step ZOH proposed",
-      "when": "after ZOH proposes tomorrow's step and asks if it works",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "I think she should just say \"I finally got the sleeves to fit.\" That's the whole line. She made that costume for herself weeks ago, so it's really her letting go of the part", "when": "after ZOH asks about the scene's ending, Lena's last line, or what she'd change", "fixed": true },
+    { "say": "yeah that works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
-    "the scene's last line is the hard part: you want Lena's line to be about the costume, really about giving up the part",
+    "the scene's last line is the part you're still working out",
     "the next thing to write is the opening-night scene, from Lena's side",
     "8 pm at your desk for 30 minutes works tomorrow"
   ],

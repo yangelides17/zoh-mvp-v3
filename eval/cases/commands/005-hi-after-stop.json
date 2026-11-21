@@ -63,16 +63,8 @@
   },
   "testerLines": [
     "stop",
-    {
-      "say": "hi",
-      "starts": true
-    },
-    {
-      "say": "how's your day going lol",
-      "means": "light small talk: asks how ZOH's day is going",
-      "when": "after ZOH replies to hi",
-      "length": "thin"
-    },
+    { "say": "hi", "starts": true },
+    { "say": "how's your day going lol", "starts": true },
     "advance to 21:59"
   ],
   "facts": [

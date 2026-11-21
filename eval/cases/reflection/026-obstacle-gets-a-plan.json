@@ -8,34 +8,17 @@
     "goal": "deep_work",
     "phase": "active",
     "history_hours_ago": 2,
-    "answers": {
-      "what": "write my thesis chapter, I keep putting it off",
-      "where": "at the library",
-      "when": "8 am",
-      "how_long": "45 min"
-    },
+    "answers": { "what": "write my thesis chapter, I keep putting it off", "where": "at the library", "when": "8 am", "how_long": "45 min" },
     "history": [
-      {
-        "from": "zoh",
-        "text": "Morning Priya! 45 min on the methods section at the library at 8, phone in your bag. Screenshot of the word count after."
-      },
-      {
-        "from": "tester",
-        "text": "on it"
-      }
+      { "from": "zoh", "text": "Morning Priya! 45 min on the methods section at the library at 8, phone in your bag. Screenshot of the word count after." },
+      { "from": "tester", "text": "on it" }
     ],
     "plan": {
       "step": "45 min of thesis writing at the library, phone in your bag",
       "destination": "a full first draft of the methods section by Sunday",
       "place": "at the library",
       "time": "08:00",
-      "days": [
-        "mon",
-        "tue",
-        "wed",
-        "thu",
-        "fri"
-      ],
+      "days": ["mon", "tue", "wed", "thu", "fri"],
       "proof": "screenshot",
       "proof_note": "the doc's word count",
       "reason": "Mornings before anyone needs you are your best focus.",
@@ -43,57 +26,21 @@
       "started_days_ago": 3
     },
     "step_days": [
-      {
-        "days_ago": 3,
-        "status": "done",
-        "step": "45 min outlining the methods section at the library",
-        "proof_seen": "screenshot: outline, 9 headings"
-      },
-      {
-        "days_ago": 2,
-        "status": "done",
-        "step": "45 min writing the first two methods subsections",
-        "proof_seen": "screenshot: 480 words"
-      },
-      {
-        "days_ago": 1,
-        "status": "done",
-        "step": "45 min writing the next methods subsection",
-        "proof_seen": "screenshot: 1,050 words total"
-      }
+      { "days_ago": 3, "status": "done", "step": "45 min outlining the methods section at the library", "proof_seen": "screenshot: outline, 9 headings" },
+      { "days_ago": 2, "status": "done", "step": "45 min writing the first two methods subsections", "proof_seen": "screenshot: 480 words" },
+      { "days_ago": 1, "status": "done", "step": "45 min writing the next methods subsection", "proof_seen": "screenshot: 1,050 words total" }
     ],
-    "today_step": {
-      "step": "45 min on the methods section at the library at 8 am, phone in your bag",
-      "agreed_hours_ago": 3
-    }
+    "today_step": { "step": "45 min on the methods section at the library at 8 am, phone in your bag", "agreed_hours_ago": 3 }
   },
   "testerLines": [
     "[photo thesis-wordcount.jpg: a screenshot of the thesis doc, Chapter 3: Methods, with the word count open: 1,640 words] good session, wrote almost 600 words",
-    {
-      "say": "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes",
-      "means": "nearly quit in the first 10 minutes because her roommate wanted breakfast",
-      "when": "after ZOH replies to the screenshot",
-      "length": "short"
-    },
-    {
-      "say": "she'll probably ask again tomorrow honestly, she's off this week",
-      "means": "the roommate will likely ask again tomorrow since she's off this week",
-      "when": "after ZOH replies to what she said about the roommate",
-      "length": "short",
-      "lead": false
-    },
-    {
-      "say": "works",
-      "means": "agrees to the step ZOH proposed",
-      "when": "after ZOH proposes tomorrow's step and asks if it works",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "the first 10 min I almost bailed though, my roommate wanted to grab breakfast and I nearly said yes", "starts": true },
+    { "say": "she'll probably ask again tomorrow honestly, she's off this week", "means": "her roommate will likely ask again tomorrow, since she's off this week", "when": "after ZOH asks about her roommate, or about tomorrow", "length": "short" },
+    { "say": "works", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
     "you wrote about 600 words of the methods section",
-    "your roommate is off work this week and likes to grab breakfast in the morning",
-    "you'd happily have breakfast with her after the writing",
+    "what kept you in the chair: you told yourself you'd eat after the session",
     "8 am at the library still works for tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake (#164).",

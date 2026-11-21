@@ -7,36 +7,17 @@
     "goal": "reading",
     "phase": "active",
     "history_hours_ago": 2,
-    "answers": {
-      "what": "Atomic Habits",
-      "where": "on the couch",
-      "when": "8 pm",
-      "how_long": "20 min"
-    },
+    "answers": { "what": "Atomic Habits", "where": "on the couch", "when": "8 pm", "how_long": "20 min" },
     "history": [
-      {
-        "from": "zoh",
-        "text": "Chapter 5 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap."
-      },
-      {
-        "from": "tester",
-        "text": "yep"
-      }
+      { "from": "zoh", "text": "Chapter 5 tonight, Maya: 8 pm on the couch, about 20 minutes. Then a quick voice recap." },
+      { "from": "tester", "text": "yep" }
     ],
     "plan": {
       "step": "Read chapter 1 of Atomic Habits on the couch",
       "destination": "finish Atomic Habits this month",
       "place": "on the couch",
       "time": "20:00",
-      "days": [
-        "mon",
-        "tue",
-        "wed",
-        "thu",
-        "fri",
-        "sat",
-        "sun"
-      ],
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "voice",
       "proof_note": "a short voice recap of what you read",
       "reason": "Putting it in your own words is what makes it stick.",
@@ -44,54 +25,21 @@
       "started_days_ago": 4
     },
     "step_days": [
-      {
-        "days_ago": 2,
-        "status": "done",
-        "step": "Chapter 3 of Atomic Habits on the couch"
-      },
-      {
-        "days_ago": 1,
-        "status": "done",
-        "step": "Chapter 4 of Atomic Habits on the couch"
-      }
+      { "days_ago": 2, "status": "done", "step": "Chapter 3 of Atomic Habits on the couch" },
+      { "days_ago": 1, "status": "done", "step": "Chapter 4 of Atomic Habits on the couch" }
     ],
-    "today_step": {
-      "step": "Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min)",
-      "agreed_hours_ago": 2
-    }
+    "today_step": { "step": "Chapter 5 of Atomic Habits on the couch at 8 pm (about 20 min)", "agreed_hours_ago": 2 }
   },
   "testerLines": [
     "[voice: Done with chapter 5. It's about habit stacking, linking a new habit to one you already do.]",
-    {
-      "say": "so the first half went fine but then",
-      "when": "after ZOH replies to the voice note",
-      "fixed": true
-    },
-    {
-      "say": "my roommate came home and sat down next to me and started talking about her day, and I read the same page like four times",
-      "means": "her roommate came home and talked to her, so she kept rereading the same page",
-      "when": "after ZOH replies to 'so the first half went fine but then'",
-      "length": "short"
-    },
-    {
-      "say": "yeah. I think I need to read before she gets home, she's back around 8:15",
-      "means": "she'd read before her roommate's back around 8:15",
-      "when": "after ZOH replies to the roommate story",
-      "length": "short",
-      "lead": false
-    },
-    {
-      "say": "sounds good",
-      "means": "agrees to the step ZOH proposed",
-      "when": "after ZOH proposes tomorrow's step and asks if it works",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "so the first half went fine but then", "starts": true },
+    { "say": "my roommate came home and sat down next to me and started talking about her day, and I read the same page like four times", "starts": true },
+    { "say": "yeah. I think I need to read before she gets home, she's back around 8:15", "means": "she'd read before her roommate's back around 8:15", "when": "after ZOH asks about the roommate interruption or what she'd do differently", "length": "short", "optional": true },
+    { "say": "sounds good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
     "chapter 5 was about habit stacking",
-    "the first half went fine, then your roommate came home, sat next to you and talked about her day; you read the same page about four times",
-    "she's usually back around 8:15, so reading before then would work"
+    "your roommate is usually back around 8:15"
   ],
   "whatWentWrong": "New case: ZOH tends to propose tomorrow's step as soon as it has something, even while the tester is mid-story.",
   "shouldHaveHappened": "ZOH counts the proof and celebrates. After \"so the first half went fine but then\" it lets the story come (a short \"and then?\" or similar), with no next step in that text. After the roommate part it stays on it: understanding, and a question about it, or what they'd do differently. Their fix (reading before she's back at 8:15) is what they'd do differently, said after a real reflection, so it can go straight into the next step day's step (an acknowledgement or a one-line playback first is a plus): fully defined, using it (an earlier time, before the roommate's back), and asking if it works. What fails is a step before the story is told. After \"sounds good\" it confirms in a line.",

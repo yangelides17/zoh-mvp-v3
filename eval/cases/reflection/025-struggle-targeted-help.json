@@ -8,35 +8,17 @@
     "goal": "fun_skill",
     "phase": "active",
     "history_hours_ago": 1,
-    "answers": {
-      "what": "learn piano, I can read music a little",
-      "where": "at my keyboard",
-      "when": "7 pm",
-      "how_long": "15 min"
-    },
+    "answers": { "what": "learn piano, I can read music a little", "where": "at my keyboard", "when": "7 pm", "how_long": "15 min" },
     "history": [
-      {
-        "from": "zoh",
-        "text": "Evening Theo! Tonight: the first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7. Voice note of you playing when you're done."
-      },
-      {
-        "from": "tester",
-        "text": "yep"
-      }
+      { "from": "zoh", "text": "Evening Theo! Tonight: the first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7. Voice note of you playing when you're done." },
+      { "from": "tester", "text": "yep" }
     ],
     "plan": {
       "step": "Practice Gymnopédie No. 1, slow, 15 min",
       "destination": "play the first 16 bars of Gymnopédie No. 1 hands together, slowly, by Sunday",
       "place": "at the keyboard",
       "time": "19:00",
-      "days": [
-        "mon",
-        "tue",
-        "wed",
-        "thu",
-        "fri",
-        "sat"
-      ],
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
       "proof": "voice",
       "proof_note": "a voice note of you playing",
       "reason": "Hearing yourself back is how you catch what to fix.",
@@ -44,57 +26,21 @@
       "started_days_ago": 4
     },
     "step_days": [
-      {
-        "days_ago": 4,
-        "status": "done",
-        "step": "First 8 bars, right hand only, slow, 15 min",
-        "proof_seen": "voice: right hand, steady"
-      },
-      {
-        "days_ago": 3,
-        "status": "done",
-        "step": "First 8 bars, left hand only, slow, 15 min",
-        "proof_seen": "voice: left hand, a few stops at the jumps"
-      },
-      {
-        "days_ago": 2,
-        "status": "done",
-        "step": "First 4 bars hands together, slow, 15 min",
-        "proof_seen": "voice: bars 1 to 4 hands together, steady",
-        "reflection": "hands together felt weird at first, then clicked"
-      }
+      { "days_ago": 4, "status": "done", "step": "First 8 bars, right hand only, slow, 15 min", "proof_seen": "voice: right hand, steady" },
+      { "days_ago": 3, "status": "done", "step": "First 8 bars, left hand only, slow, 15 min", "proof_seen": "voice: left hand, a few stops at the jumps" },
+      { "days_ago": 2, "status": "done", "step": "First 4 bars hands together, slow, 15 min", "proof_seen": "voice: bars 1 to 4 hands together, steady", "reflection": "hands together felt weird at first, then clicked" }
     ],
-    "today_step": {
-      "step": "The first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7 pm",
-      "agreed_hours_ago": 3
-    }
+    "today_step": { "step": "The first 8 bars of Gymnopédie No. 1 hands together, slow, 15 min at the keyboard at 7 pm", "agreed_hours_ago": 3 }
   },
   "testerLines": [
     "[voice: (piano) bars 1 to 4 hands together, steady; at bar 5 the left hand jumps and misses, stops, restarts bar 5, stops again, then plays 6 to 8 unevenly] done, bar 5 keeps falling apart though",
-    {
-      "say": "I think the left hand jump is too far and I kind of panic before it",
-      "means": "bar 5's left-hand jump feels too far and he panics right before it",
-      "when": "after ZOH replies to the voice note",
-      "length": "short"
-    },
-    {
-      "say": "probably looking down at my left hand too early",
-      "means": "it's looking down at the left hand right before the jump, not speeding up",
-      "when": "after ZOH replies to what he said about the jump",
-      "length": "short"
-    },
-    {
-      "say": "ok yeah",
-      "means": "agrees to the step ZOH proposed",
-      "when": "after ZOH proposes tomorrow's step and asks if it works",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "I think the left hand jump is too far and I kind of panic before it", "means": "bar 5's left-hand jump feels too far and he panics right before it", "when": "after ZOH asks what happened at bar 5, or how it went", "length": "short" },
+    { "say": "probably looking down at my left hand too early", "means": "it's looking down at the left hand right before the jump", "when": "after ZOH asks or guesses what makes the jump go wrong", "length": "short" },
+    { "say": "ok yeah", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
     "bars 1 to 4 felt steady hands together",
-    "at bar 5 the left hand has to jump down; right before it you look down at your left hand and lose your place",
-    "you don't speed up; you tense a little only after you've missed",
+    "you don't speed up before the jump",
     "15 minutes at 7 pm at the keyboard works again tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake (#164).",

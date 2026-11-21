@@ -6,32 +6,14 @@
     "name": "Priya",
     "goal": "reading",
     "phase": "active",
-    "answers": {
-      "what": "Dune",
-      "where": "the couch",
-      "when": "7 pm",
-      "how_long": "20 min"
-    },
-    "history": [
-      {
-        "from": "zoh",
-        "text": "Kalimera Priya! Ten pages of Dune on the couch at 7 tonight. You in?"
-      }
-    ],
+    "answers": { "what": "Dune", "where": "the couch", "when": "7 pm", "how_long": "20 min" },
+    "history": [{ "from": "zoh", "text": "Kalimera Priya! Ten pages of Dune on the couch at 7 tonight. You in?" }],
     "history_hours_ago": 1,
     "plan": {
       "step": "10 pages of Dune",
       "place": "the couch",
       "time": "19:00",
-      "days": [
-        "mon",
-        "tue",
-        "wed",
-        "thu",
-        "fri",
-        "sat",
-        "sun"
-      ],
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "proof": "photo",
       "proof_note": "the page you stop on",
       "reason": "Ten pages a night builds the habit without eating your evening.",
@@ -39,53 +21,20 @@
       "started_days_ago": 5
     },
     "step_days": [
-      {
-        "days_ago": 1,
-        "status": "done"
-      },
-      {
-        "days_ago": 2,
-        "status": "done"
-      }
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
     ]
   },
   "testerLines": [
     "yes! I'm in",
-    {
-      "say": "btw is it weird that I skip the appendices",
-      "means": "asks if it's weird she skips the appendices",
-      "when": "after ZOH replies to her yes",
-      "length": "short"
-    },
-    {
-      "say": "work is insane today",
-      "means": "work is really busy today",
-      "when": "after ZOH answers about the appendices",
-      "length": "thin"
-    },
-    {
-      "say": "omg my boss just asked me to stay late, can we do 8:30 instead?",
-      "means": "has to stay late and asks to move today's reading to 8:30",
-      "when": "after ZOH replies to work being busy",
-      "length": "short"
-    },
-    {
-      "say": "cool cool",
-      "means": "acknowledges",
-      "when": "after ZOH replies to the 8:30 request",
-      "length": "thin",
-      "fixed": true
-    },
-    {
-      "say": "what time was it again?",
-      "when": "after ZOH replies to 'cool cool'",
-      "fixed": true
-    }
+    { "say": "btw is it weird that I skip the appendices", "starts": true },
+    { "say": "work is insane today", "starts": true },
+    { "say": "omg my boss just asked me to stay late, can we do 8:30 instead?", "starts": true },
+    { "say": "cool cool", "when": "after ZOH confirms the new time", "fixed": true },
+    { "say": "what time was it again?", "starts": true }
   ],
   "facts": [
     "you're reading Dune",
-    "you skip the appendices",
-    "work is insane today",
     "your boss asked you to stay late, so 8:30 works instead of 7"
   ],
   "whatWentWrong": "On Oct 28 ZOH restated the step and time in nearly every text.",

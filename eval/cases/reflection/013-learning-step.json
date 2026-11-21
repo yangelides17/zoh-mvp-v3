@@ -70,30 +70,12 @@
   },
   "testerLines": [
     "[voice: Okay done, finished chapter four.]",
-    {
-      "say": "the habit stacking part, like tying a new habit to one you already do",
-      "means": "habit stacking stuck: tying a new habit to one you already do",
-      "when": "after ZOH asks what stuck, clicked or what she learned",
-      "length": "short"
-    },
-    {
-      "say": "yeah maybe after I brush my teeth I could stretch",
-      "means": "she could stretch right after brushing her teeth",
-      "when": "after ZOH replies to what she said about habit stacking",
-      "length": "short"
-    },
-    {
-      "say": "ok cool",
-      "means": "agrees to the step ZOH proposed",
-      "when": "after ZOH proposes tomorrow's step and asks if it works",
-      "length": "thin",
-      "lead": false
-    }
+    { "say": "the habit stacking part, like tying a new habit to one you already do", "means": "habit stacking stuck: tying a new habit to one you already do", "when": "after ZOH asks what stuck, clicked or what she learned", "length": "short" },
+    { "say": "yeah maybe after I brush my teeth I could stretch", "means": "she could stretch right after brushing her teeth", "when": "after ZOH asks how she might use it or where it could fit", "length": "short" },
+    { "say": "ok cool", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
   ],
   "facts": [
     "chapter 4 went quickly; you read it in one go on the couch",
-    "the part that stuck: habit stacking, tying a new habit to one you already do",
-    "you'd use it by stretching right after you brush your teeth at night",
     "8 pm on the couch works for chapter 5 tomorrow"
   ],
   "whatWentWrong": "New case, not a past mistake: a learning step's reflection starts with what landed, asked like a friend, not a test.",

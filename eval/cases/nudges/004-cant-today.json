@@ -7,37 +7,17 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 14,
-    "answers": {
-      "what": "running",
-      "where": "the park by my place",
-      "when": "6 pm",
-      "how_long": "30 min",
-      "tracks_with": "Strava"
-    },
+    "answers": { "what": "running", "where": "the park by my place", "when": "6 pm", "how_long": "30 min", "tracks_with": "Strava" },
     "history": [
-      {
-        "from": "zoh",
-        "text": "Plan's yours, Jordan. I'll hold you to it. You in?"
-      },
-      {
-        "from": "tester",
-        "text": "let's do it"
-      },
-      {
-        "from": "zoh",
-        "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃"
-      }
+      { "from": "zoh", "text": "Plan's yours, Jordan. I'll hold you to it. You in?" },
+      { "from": "tester", "text": "let's do it" },
+      { "from": "zoh", "text": "LET'S GO. Day 1 was Saturday, keep it rolling 🏃" }
     ],
     "plan": {
       "step": "30 min run around the park",
       "place": "the park by your place",
       "time": "18:00",
-      "days": [
-        "mon",
-        "wed",
-        "fri",
-        "sat"
-      ],
+      "days": ["mon", "wed", "fri", "sat"],
       "proof": "screenshot",
       "proof_note": "Strava run summary",
       "reason": "Four runs a week builds the base without wrecking your legs.",
@@ -47,38 +27,20 @@
   },
   "testerLines": [
     "advance to 09:00",
-    {
-      "say": "can't today, slammed at work until 8",
-      "means": "can't do today's run, busy at work until 8",
-      "when": "after ZOH's morning text about today's run",
-      "length": "short"
-    },
-    {
-      "say": "seriously no way I get 30 min in",
-      "means": "the full 30 minutes really won't fit today",
-      "when": "after ZOH replies to 'can't today'",
-      "length": "short"
-    },
-    {
-      "say": "ok 15 min at 8:30 I can do",
-      "means": "offers 15 minutes at 8:30",
-      "when": "after ZOH replies again (whatever it suggests)",
-      "length": "short"
-    },
+    { "say": "can't today, slammed at work until 8", "means": "can't do today's run, busy at work until 8", "when": "after ZOH's morning text about today's run", "length": "short" },
+    { "say": "seriously no way I get 30 min in", "means": "the full 30 minutes really won't fit today", "when": "after ZOH holds the line (the full 30 minutes, maybe at a later time)", "length": "short", "optional": true },
+    { "say": "ok 15 min at 8:30 I can do", "when": "after ZOH suggests a smaller or later run", "fixed": true, "expected": true },
     "advance to 20:20",
-    {
-      "say": "done, 15 min ✅",
-      "starts": true
-    },
+    "advance to 20:50",
+    { "say": "done, 15 min ✅", "starts": true },
     "advance to 21:59"
   ],
   "facts": [
-    "you're slammed at work until 8 tonight",
-    "the full 30-minute run won't fit today at all",
-    "15 minutes at 8:30 is what you can do"
+    "you run with Strava",
+    "work ends at 8 tonight"
   ],
   "whatWentWrong": "New case, not a past mistake: the hold-the-line, then smaller-version path.",
-  "shouldHaveHappened": "A warm morning kickoff naming the 30 minute run at 6. The first \"can't today\" gets the line held once, warmly and without guilt (the full 30, maybe at a later time). The second gets a smaller version in the same ballpark (about 15 minutes, or a nearby option). \"15 min at 8:30\" gets a short confirmation. Around 8:20 pm ZOH starts a short check-in for the 8:30 run (not the original 6 pm time; nothing goes out around 5:50 pm or 7 pm). \"done, 15 min\" gets a real celebration that counts it. Nothing after that.",
+  "shouldHaveHappened": "A warm morning kickoff naming the 30 minute run at 6. The first \"can't today\" gets the line held once, warmly and without guilt (the full 30, maybe at a later time). The second gets a smaller version in the same ballpark (about 15 minutes, or a nearby option). \"15 min at 8:30\" gets a short confirmation. Around 8:20 pm ZOH starts a short check-in for the 8:30 run (not the original 6 pm time; nothing goes out around 5:50 pm or 7 pm). \"done, 15 min\" gets real energy and a quick ask for the Strava screenshot, with no check mark until it comes. Beyond a reminder for the screenshot, nothing after that.",
   "startTime": "08:30",
   "timeZone": "America/New_York"
 }
