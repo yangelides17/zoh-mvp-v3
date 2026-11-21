@@ -54,6 +54,8 @@ export function estimateCost(
     coachModel: string;
     evalModel: string;
     simModel?: string;
+    /** #230: the model a case's waiting lines use (decisions and replies); the scenario simulator's if not given. */
+    caseSimModel?: string;
     memory?: boolean;
     gradeOnly?: boolean;
     /** Grader calls per conversation: one, plus one per `alone` rule (#197). */
@@ -75,11 +77,13 @@ export function estimateCost(
   const coachPrice = priceOf(opts.coachModel);
   const evalPrice = priceOf(opts.evalModel);
   const simPrice = priceOf(opts.simModel ?? opts.evalModel);
+  const caseSimPrice = priceOf(opts.caseSimModel ?? opts.simModel ?? opts.evalModel);
   const total = (turnsFor: (p: ConversationPlan) => number) => {
     let tokens = 0;
     let dollars = 0;
     for (const p of plans) {
       const r = run(turnsFor(p), p.kind === "scenario" || waits(p));
+      const sp = waits(p) ? caseSimPrice : simPrice;
       if (opts.memory && !opts.gradeOnly) {
         // One overnight pass per conversation, on the coach's model.
         r.coach.input += KEEPER.input;
@@ -89,8 +93,8 @@ export function estimateCost(
       dollars +=
         (r.coach.input * coachPrice.input +
           r.coach.output * coachPrice.output +
-          r.sim.input * simPrice.input +
-          r.sim.output * simPrice.output +
+          r.sim.input * sp.input +
+          r.sim.output * sp.output +
           r.grader.input * evalPrice.input +
           r.grader.output * evalPrice.output) /
         1_000_000;

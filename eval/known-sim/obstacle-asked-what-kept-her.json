@@ -1,0 +1,27 @@
+{
+  "id": "obstacle-asked-what-kept-her",
+  "why": "ZOH asked what she told herself to stay; that her roommate will ask again tomorrow doesn't answer it.",
+  "case": "reflection/obstacle-gets-a-plan",
+  "line": 2,
+  "expect": [
+    "wait"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[photo thesis-wordcount.jpg: a screenshot of the thesis doc, Chapter 3: Methods, with the word count open: 1,640 words] good session, wrote almost 600 words"
+    },
+    {
+      "from": "zoh",
+      "text": "Priya, 1,640 words and a four-day streak 🔥 That's a big jump from yesterday's 1,050. What made today flow so well?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly the first 10 min i almost bailed, my roommate wanted breakfast and i nearly said yes. i just kept at it"
+    },
+    {
+      "from": "zoh",
+      "text": "Nearly saying yes to breakfast and staying put anyway is the real win today, Priya. What did you tell yourself in that moment to stay in the chair?"
+    }
+  ]
+}

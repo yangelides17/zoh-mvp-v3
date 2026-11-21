@@ -1,0 +1,24 @@
+{
+  "id": "cant-today-held-the-line",
+  "why": "ZOH held the line: the full 30 minutes at 8:30.",
+  "case": "nudges/cant-today",
+  "line": 2,
+  "expect": [
+    "fits",
+    "close"
+  ],
+  "transcript": [
+    {
+      "from": "zoh",
+      "text": "Kalimera Jordan! Today's run is 30 minutes around the park at 6, easy conversational pace. You said \"I'm in\" and I know you'll show up. Still in?"
+    },
+    {
+      "from": "tester",
+      "text": "can't today, slammed at work until 8"
+    },
+    {
+      "from": "zoh",
+      "text": "Slammed days are exactly when this counts, Jordan. Work's done at 8, so what about a full 30-minute run at 8:30 instead? You'd still finish well before bed. Can you make that happen?"
+    }
+  ]
+}

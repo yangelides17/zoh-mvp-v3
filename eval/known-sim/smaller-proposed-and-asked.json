@@ -1,0 +1,27 @@
+{
+  "id": "smaller-proposed-and-asked",
+  "why": "ZOH proposed a specific smaller version and asked if it works.",
+  "case": "proof/zoh-suggests-smaller",
+  "line": 2,
+  "expect": [
+    "fits"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "ugh I'm wiped from work, not feeling 3 rounds tonight"
+    },
+    {
+      "from": "zoh",
+      "text": "Wiped after work is real, Sam. But tonight is exactly when it counts, and you've got 2 in the bank already. It's only 5:30, so how about a short rest first, then shoes on at 7 for the full 3 rounds? 💪"
+    },
+    {
+      "from": "tester",
+      "text": "honestly I don't think I've got it in me today"
+    },
+    {
+      "from": "zoh",
+      "text": "Fair, Sam, a wiped day is real. Let's not make it a zero though. How about 2 rounds instead of 3 (2 min jog, 1 min walk, around the block, about 10 minutes), any time tonight, and you still send the Strava screenshot? That keeps your 3-day run going. Work for you?"
+    }
+  ]
+}

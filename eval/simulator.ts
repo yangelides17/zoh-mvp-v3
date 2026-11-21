@@ -155,7 +155,7 @@ export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine)
     fits: `"fits": ZOH's latest text is that moment and the wording answers it as written.`,
     close: `"close": ZOH's latest text asks for exactly this text's point, but in other words, so the wording needs a small change to answer it. If ZOH asked about anything else, or proposed something, it is not close: choose "wait".`,
     wait: `"wait": ZOH isn't at that moment yet (it asked or said something else). You'll reply to that instead and keep this text for later.`,
-    passed: `"passed": this text only applies if ZOH asks for it, and ZOH has moved past that point (it won't ask now). It's dropped.`,
+    passed: `"passed": this text only applies at its moment, and ZOH has moved on to something else (another topic, the week, a proposal for tomorrow), so that moment is behind you. It's dropped and you go on to what comes next.`,
   };
   return [
     conversationForTester(transcript),
@@ -193,7 +193,7 @@ export function waitingReplyPrompt(transcript: TranscriptLine[]): string {
   ].join("\n");
 }
 
-function decisionSchema(line: CaseLine): Record<string, unknown> {
+export function decisionSchema(line: CaseLine): Record<string, unknown> {
   return {
     type: "object",
     properties: { reason: { type: "string" }, decision: { type: "string", enum: verdictsFor(line) } },
@@ -269,6 +269,14 @@ export function caseTester(c: RegressionCase, complete: Completer): Tester & { l
           i += 1;
           waitsOnLine = 0;
           return write(closeLinePrompt(transcript, line), line, "for");
+        }
+        // An optional line ZOH still hasn't asked for after its extra replies is dropped, never a case problem.
+        if (line.optional && waitsOnLine >= WAITS_PER_LINE) {
+          counts.log.push({ line: i, say: line.say, decision: "passed", reason: `ZOH didn't ask for it in ${waitsOnLine} more texts` });
+          counts.passed += 1;
+          i += 1;
+          waitsOnLine = 0;
+          continue;
         }
         if (waitsOnLine >= WAITS_PER_LINE || counts.waited >= WAITS_PER_CASE) {
           const where = waitsOnLine >= WAITS_PER_LINE ? `${waitsOnLine} extra replies on it` : `${counts.waited} extra replies in the case`;

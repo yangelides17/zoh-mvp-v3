@@ -1,0 +1,20 @@
+{
+  "id": "learning-asked-what-stuck",
+  "why": "ZOH asked what idea stuck.",
+  "case": "reflection/learning-step",
+  "line": 1,
+  "expect": [
+    "fits",
+    "close"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Okay done, finished chapter four.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Maya! Chapter four done, and that's 4 days in a row 🔥 What's one idea from it that stuck with you?"
+    }
+  ]
+}

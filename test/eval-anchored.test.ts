@@ -11,6 +11,7 @@ import { graderUserPrompt } from "../eval/grader.js";
 import { runConversation, scriptedTester } from "../eval/harness.js";
 import { loadCases, planConversations } from "../eval/load.js";
 import { aggregate, renderMarkdown, type ReportData } from "../eval/report.js";
+import { checkPoint, loadSimPoints } from "../eval/sim-check.js";
 import { caseTester, verdictsFor } from "../eval/simulator.js";
 import { caseSchema, type GradedConversation, type LineVerdict, type RegressionCase } from "../eval/types.js";
 
@@ -249,6 +250,24 @@ describe("eval: case lines that wait for their moment (#230)", () => {
     expect(md).toMatch(/## Case problems[\s\S]*Case case:b[\s\S]*never fit[\s\S]*Grade, not scored: failed `regression`/);
     expect(md).toContain("**fits**: ZOH proposed tomorrow and asked");
     expect(md).toContain("**ZOH's miss:** ZOH never reached it");
+  });
+
+  it("sim-check: every known moment loads against its case's current line, and a moment is right only if every run is", async () => {
+    const points = await loadSimPoints();
+    expect(points.length).toBeGreaterThanOrEqual(12);
+    const p = points.find((x) => x.point.id === "engaged-asked-to-explain-a-fix")!;
+    // Right: waits each run, and the reply keeps clear of the phone.
+    const good = fakeSim(["wait", "wait"], ["he rigs a centrifuge out of spare parts, kind of genius", "honestly I'd have to reread it"]);
+    const ok = await checkPoint(p, good.complete, "fake", 2);
+    expect(ok.result).toMatchObject({ right: true, decisions: ["wait", "wait"] });
+    // The waiting reply was written from a prompt that never names the pending line (the seed's own step text does say "dresser").
+    expect(content(good.wrote()[0]!)).not.toContain("the whole trick");
+    // Wrong: one run gives away what the later line is for.
+    const leaky = await checkPoint(p, fakeSim(["wait", "wait"], ["fine", "the phone on the dresser is the real trick"]).complete, "fake", 2);
+    expect(leaky.result.right).toBe(false);
+    // Wrong: one run decides something the moment doesn't allow.
+    const forced = await checkPoint(p, fakeSim(["wait", "fits"], ["fine"]).complete, "fake", 2);
+    expect(forced.result.right).toBe(false);
   });
 
   it("counts the extra texts a waiting line can add in the cost estimate", () => {

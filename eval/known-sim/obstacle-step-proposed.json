@@ -1,0 +1,43 @@
+{
+  "id": "obstacle-step-proposed",
+  "why": "ZOH proposed tomorrow's step with a plan for invitations and asked if it works.",
+  "case": "reflection/obstacle-gets-a-plan",
+  "line": 3,
+  "expect": [
+    "fits"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[photo thesis-wordcount.jpg: a screenshot of the thesis doc, Chapter 3: Methods, with the word count open: 1,640 words] good session, wrote almost 600 words"
+    },
+    {
+      "from": "zoh",
+      "text": "Priya, 1,640 words and a four-day streak 🔥 That's a big jump from yesterday's 1,050. What made today flow so well?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly the first 10 min i almost bailed, my roommate wanted breakfast and i nearly said yes. i just kept at it"
+    },
+    {
+      "from": "zoh",
+      "text": "Nearly saying yes to breakfast and staying put anyway is the real win today, Priya. What did you tell yourself in that moment to stay in the chair?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly i just told myself she'll probably ask again tomorrow since she's off this week"
+    },
+    {
+      "from": "zoh",
+      "text": "That's a smart trick, Priya: you didn't say no to breakfast, you said later. Does it work the same when the pull is your phone or something else, or is it mostly for people asking you to hang out?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly not sure. phone's easier to ignore than my roommate lol. i think it's mostly people asking me stuff though"
+    },
+    {
+      "from": "zoh",
+      "text": "Makes sense, Priya: people asking you stuff is the pull, so let's plan for it. Tomorrow at 8, 45 min at the library on the next methods subsection, phone in your bag. If someone invites you to something, text back \"after my session\" before you start. Work for you?"
+    }
+  ]
+}
