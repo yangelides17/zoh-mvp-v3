@@ -23,6 +23,8 @@ import { loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
 import { addRequest, addThreadLine, claimRequest, closeRequest, COACH_AUTHOR } from "../src/console/requests.js";
+import { addGuidance } from "../src/coaching/coaching.js";
+import { listGuidance } from "../src/coaching/guidance.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { startPause } from "../src/testers/pauses.js";
@@ -626,6 +628,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   for (const t of seed.team) {
     const at = new Date(now.getTime() - t.hours_ago * 60 * 60_000);
     if (t.kind === "note") await addThreadLine(app.db, { testerId: tester!.id, kind: "note", author: "Yanni", body: t.body, at });
+    else if (t.kind === "guidance") await addGuidance(app.db, tester!, t.body, "Yanni", at);
     else if (t.kind === "file") {
       // #168: as the console coach finds it once a founder's file has been read (the eval keeps no files).
       const name = t.name ?? "file.txt";
@@ -937,7 +940,9 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
   const questions = (await app.db.select().from(schema.consoleMessages).where(and(eq(schema.consoleMessages.testerId, tester.id), eq(schema.consoleMessages.question, true)))).filter(
     (q) => q.answerStatus,
   );
-  const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
+  const style = `Style now: ${tester.styleNotes ? `notes: ${tester.styleNotes}` : "no notes"}${tester.stoppedAt ? "; stopped" : ""}`;
+  // #158: a guidance line their own request overrode (save_preference named it).
+  const overridden = (await listGuidance(app.db, tester.id)).filter((g) => g.overriddenBy);
   const lines = [
     ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
     ...paused.map((x) => `Pause: ${x.reason ?? "no reason"}${x.until ? `, back on ${x.until}` : ""}`),
@@ -948,6 +953,7 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
     ...days.flatMap((d) => [...(d.canDo ? [`Can now do (${d.date}): ${d.canDo}`] : []), ...(d.gaps ? [`Gaps (${d.date}): ${d.gaps}`] : [])]),
     ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
     ...questions.map((q) => `Team question "${q.body}": ${q.answerStatus === "answered" ? `recorded their answer: ${q.answer}` : "recorded that they talked past it"}`),
+    ...overridden.map((g) => `Team guidance "${g.text}": marked overridden by their request "${g.overriddenBy}"`),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");
 }

@@ -77,7 +77,6 @@ const testerUpdateEvent = z.object({
     quiet_hours_chosen: z.boolean().optional(),
     time_zone: z.string().optional(),
     time_zone_status: z.enum(["assumed_eastern", "needs_city", "confirmed"]).optional(),
-    pushiness: z.string().optional(),
     style_notes: z.string().optional(),
   }).strict(),
 }).strict();
@@ -492,7 +491,6 @@ export async function loadScenarioIncremental(
           if (s.quiet_hours_chosen !== undefined) patch.quietHoursChosen = s.quiet_hours_chosen;
           if (s.time_zone !== undefined) patch.timeZone = s.time_zone;
           if (s.time_zone_status !== undefined) patch.timeZoneStatus = s.time_zone_status;
-          if (s.pushiness !== undefined) patch.pushiness = s.pushiness;
           if (s.style_notes !== undefined) patch.styleNotes = s.style_notes;
           if (Object.keys(patch).length > 0) {
             await db.update(testers).set(patch).where(eq(testers.id, tester.id));

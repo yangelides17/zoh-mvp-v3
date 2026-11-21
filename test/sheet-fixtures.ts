@@ -86,6 +86,7 @@ export function state(o: Partial<CoachState> = {}): CoachState {
     maintenanceSteps: {},
     earlierAnswers: [],
     teamNotes: [],
+    guidance: [],
     teamRequests: [],
     teamRequestsDone: [],
     teamQuestions: [],

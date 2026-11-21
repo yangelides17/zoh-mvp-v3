@@ -145,7 +145,7 @@ describe("the 6 pm Sunday recap", () => {
 
     const base: NudgeInput = {
       now: at(SUN2, "18:00"),
-      tester: { timeZone: TZ, quietHoursStart: "22:00", quietHoursEnd: "09:00", phase: "active", pushiness: "pushy", stoppedAt: null, autoTextsPausedAt: null },
+      tester: { timeZone: TZ, quietHoursStart: "22:00", quietHoursEnd: "09:00", phase: "active", stoppedAt: null, autoTextsPausedAt: null },
       plan: { stepTime: "19:00", days: ["mon", "tue", "wed", "thu", "fri", "sat"], startDate: MON, minutes: 20, lockedAt: at(SUN, "12:00") },
       claimedToday: ["kickoff"],
       nudgesSinceReply: 1,
@@ -160,8 +160,6 @@ describe("the 6 pm Sunday recap", () => {
     expect(dueNudge({ ...base, nudgesSinceReply: 3, now: at(SUN2, "17:55") })).toMatchObject({ action: "none" });
     expect(dueNudge({ ...base, nudgesSinceReply: 3, tester: { ...base.tester, stoppedAt: at(SAT, "10:00") } })).toMatchObject({ action: "none" });
     expect(dueNudge({ ...base, nudgesSinceReply: 3, tester: { ...base.tester, autoTextsPausedAt: at(SAT, "10:00") } })).toMatchObject({ action: "none" });
-    // Gentle's own cap is 1, but the recap's is the spec's 3.
-    expect(dueNudge({ ...base, tester: { ...base.tester, pushiness: "gentle" } })).toMatchObject({ action: "send" });
     // On the slip ladder, its one text a day stays the only one: never owed either.
     expect(dueNudge({ ...base, missesInARow: 2 })).toMatchObject({ action: "none" });
     expect(dueNudge({ ...base, missesInARow: 2, nudgesSinceReply: 3 })).toMatchObject({ action: "none" });
@@ -269,15 +267,7 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
     expect(await stateAt(at(TUE2, "10:00"))).not.toContain("LOOK-BACK");
   });
 
-  it("steady, or a Sunday with a reply: the recap goes Sunday evening as before, and Monday is a normal one", async () => {
-    const sam = await runner();
-    await updateTester(t.db, sam.id, { pushiness: "steady" });
-    await done(sam, ...WEEK);
-    expect(await day(SUN2, "09:00", "23:55")).toEqual(["kickoff@09:00", "followup@18:40", "lookback@19:35"]);
-    expect(await stateAt(at(MON2, "09:00"), "after_miss")).not.toContain("LAST WEEK'S LOOK-BACK");
-  });
-
-  it("pushy with one Sunday morning reply: the recap goes Sunday evening", async () => {
+  it("one Sunday morning reply: the recap goes Sunday evening", async () => {
     const sam = await runner();
     await done(sam, ...WEEK);
     expect(await day(SUN2, "09:00", "09:00")).toEqual(["kickoff@09:00"]);
@@ -288,10 +278,11 @@ describe("a silent Sunday: the recap moves to Monday's morning text (#110)", () 
 
   it("a recap ZOH declined, or a Sunday evening the app missed: nothing on Monday", async () => {
     const sam = await runner();
-    await updateTester(t.db, sam.id, { pushiness: "steady" });
     await done(sam, ...WEEK);
     t.replier.holdNudges = ["lookback"];
-    await day(SUN2, "09:00", "23:55");
+    await day(SUN2, "09:00", "09:00");
+    await say(sam, "inbound", at(SUN2, "09:30"), "yep, tonight");
+    await day(SUN2, "09:35", "23:55");
     expect(await lookbackRow()).toMatchObject({ status: "held" });
     await day(MON2, "08:55", "08:55");
     expect(await stateAt(at(MON2, "09:00"), "after_miss")).not.toContain("LAST WEEK'S LOOK-BACK");

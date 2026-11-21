@@ -92,6 +92,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   not a script; every starter needs what, when and how long (Get fitter also where).
 - Onboarding asks name and goal together in the first text; no "why" question; no pushiness
   question; asks at most once about apps or tools they already use.
+- No push levels (#158, replacing Pushy / Steady / Gentle): every tester gets the one default rhythm
+  (up to 3 unanswered texts, `UNANSWERED_CAP`), and how ZOH coaches each person comes from their own
+  style requests, what it learned and the team's guidance on the Coaching card (up to 10 lines of 200
+  characters; their request beats it). `testers.pushiness` is unused and is dropped in a later release.
 - How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always

@@ -29,7 +29,7 @@ afterEach(async () => {
 });
 
 /** A tester with a locked reading plan (every day at 7 pm, 20 minutes, from Monday), locked Sunday noon. */
-async function setup(o: { phone?: string; locked?: boolean; stopped?: boolean; pushiness?: string } = {}): Promise<Tester> {
+async function setup(o: { phone?: string; locked?: boolean; stopped?: boolean } = {}): Promise<Tester> {
   const phone = o.phone ?? DEV;
   const lockedAt = at(SUN, "12:00");
   const [tester] = await t.db
@@ -41,7 +41,6 @@ async function setup(o: { phone?: string; locked?: boolean; stopped?: boolean; p
       phase: o.locked === false ? "onboarding" : "active",
       timeZone: TZ,
       timeZoneStatus: "assumed_eastern",
-      pushiness: o.pushiness ?? "pushy",
       isTestUser: phone === DEV,
       consentAt: at(SUN, "10:00"),
       contextStartedAt: at(SUN, "10:00"),

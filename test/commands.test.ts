@@ -58,7 +58,6 @@ async function setup(): Promise<Tester> {
       timeZoneStatus: "assumed_eastern",
       quietHoursStart: "22:00",
       quietHoursEnd: "09:00",
-      pushiness: "pushy",
       consentAt: at(SUN, "10:00"),
       contextStartedAt: at(SUN, "10:00"),
     })
