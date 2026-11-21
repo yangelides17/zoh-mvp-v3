@@ -195,8 +195,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
         ? textsTabHtml(from, header.tester, now, CHUNK, { target: msg })
         : textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK, { missing: msg !== undefined });
     }
-    else if (tab === "memory") content = coachingCardHtml(await coachingCard(opts.db, header.tester, now), id) + memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
-    else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
+    else if (tab === "memory") content = memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
+    else content = coachingCardHtml(await coachingCard(opts.db, header.tester, now), id) + progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
     return html(reply, testerView(header, tab, content, name, notice), code);
   };
 
@@ -216,15 +216,15 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       if (!tester) return reply.code(404).send({ error: "not found" });
       if (!owns(routing, tester.phone, tester.route)) {
         const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't change their coaching.`;
-        return (await testerHtml(reply, id, "memory", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+        return (await testerHtml(reply, id, "progress", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
       }
       try {
         await handler(tester, request, name, await nowFor(id));
       } catch (err) {
-        if (err instanceof CoachingError) return (await testerHtml(reply, id, "memory", name, `Not saved: ${err.message}`, 409)) ?? reply.code(409).send({ error: err.message });
+        if (err instanceof CoachingError) return (await testerHtml(reply, id, "progress", name, `Not saved: ${err.message}`, 409)) ?? reply.code(409).send({ error: err.message });
         throw err;
       }
-      return reply.redirect(`/console/testers/${encodeURIComponent(id)}?tab=memory#coaching`, 303);
+      return reply.redirect(`/console/testers/${encodeURIComponent(id)}?tab=progress#coaching`, 303);
     });
   const formText = (request: FastifyRequest<{ Body: Form }>) => (typeof request.body?.text === "string" ? request.body.text : "");
   const idParam = (request: FastifyRequest<{ Params: Params }>, key: "gid" | "fid" | "nid") => {

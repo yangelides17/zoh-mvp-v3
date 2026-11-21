@@ -4,7 +4,7 @@ import type { CoachingCard } from "../coaching-card.js";
 import { esc, when } from "./shared.js";
 
 /**
- * #158: the Coaching card, first on the Memory tab: the team's guidance, their own style requests, what ZOH
+ * #158: the Coaching card, folded at the top of the Progress tab: the team's guidance, their own style requests, what ZOH
  * has learned, the notes it reads now, their saved plan settings and every change, with who made it.
  */
 
@@ -66,11 +66,11 @@ export function coachingCardHtml(card: CoachingCard, testerId: string): string {
     : `<div class="muted">No plan locked yet.</div>`;
   const quiet = `<div class="muted">Quiet hours ${esc(card.quiet.start)} to ${esc(card.quiet.end)} (${card.quiet.chosen ? "they chose these" : "default"})</div>`;
   const history = card.history.length ? `<ul>${card.history.map(change).join("")}</ul>` : `<p class="muted">No changes yet.</p>`;
-  return `<section id="coaching" class="card coaching"><h2>Coaching</h2>
+  return `<details id="coaching" class="card coaching"><summary><h2 style="display:inline">Coaching</h2></summary>
 <h3>Team guidance</h3><p class="muted">Lasting. ZOH follows it where it applies and never mentions it; their own requests win.</p><ul>${guidance}</ul>${add}
 <h3>Their style requests</h3>${style}
 <h3>Learned preferences</h3>${learned}
 <h3>Recent notes</h3>${notes}
-<h3>Saved plan settings</h3>${plan}${quiet}<p class="muted"><a href="/console/testers/${esc(testerId)}?tab=progress#plans">Plan versions</a> · to change them, ask in console chat (the tester agrees first).</p>
-<details><summary><h3 style="display:inline">History</h3></summary>${history}</details></section>`;
+<h3>Saved plan settings</h3>${plan}${quiet}<p class="muted"><a href="#plans">Plan versions</a> · to change them, ask in console chat (the tester agrees first).</p>
+<details><summary><h3 style="display:inline">History</h3></summary>${history}</details></details>`;
 }

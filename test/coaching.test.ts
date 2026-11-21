@@ -178,9 +178,23 @@ describe("team guidance on the Coaching card", () => {
     const tester = await seed();
     await addGuidance(t.db, tester, "More curious with her", "Yanni", now);
     await savePreference(tester, "no emojis");
-    const res = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}?tab=memory`, headers: { cookie: cookie("Yanni") } });
+    const res = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}?tab=progress`, headers: { cookie: cookie("Yanni") } });
     expect(res.statusCode).toBe(200);
     for (const text of ["Coaching", "More curious with her", "no emojis", "texted", "Saved plan settings", "10 pages", "19:00", "photo"]) expect(res.body).toContain(text);
+  });
+
+  it("the card sits folded at the top of the Progress tab, not on Memory, and a change lands back on it", async () => {
+    const tester = await seed();
+    const tab = async (name: string) =>
+      (await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}?tab=${name}`, headers: { cookie: cookie("Yanni") } })).body;
+    const progress = await tab("progress");
+    const card = progress.indexOf(`<details id="coaching"`);
+    expect(card).toBeGreaterThan(-1);
+    expect(progress.slice(card, progress.indexOf(">", card))).not.toContain(" open");
+    expect(card).toBeLessThan(progress.indexOf("10 pages"));
+    expect(await tab("memory")).not.toContain(`id="coaching"`);
+    const res = await post(`/console/testers/${tester.id}/coaching/guidance`, { text: "More curious with her" });
+    expect(res.headers.location).toBe(`/console/testers/${tester.id}?tab=progress#coaching`);
   });
 });
 
