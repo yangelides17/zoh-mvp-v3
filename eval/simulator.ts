@@ -120,7 +120,9 @@ export function caseTesterSystemPrompt(c: RegressionCase): string {
     `You are ${c.seed?.name ?? "a person"}, texting ZOH, a coaching service, from your phone.${c.seed ? ` What you're working on with it: ${c.seed.goal}.` : ""}`,
     "",
     "What's true about you (answer from this; if you're asked something it doesn't cover, give a plain, plausible answer that fits):",
-    ...(c.facts?.length ? c.facts.map((f) => `- ${f}`) : ["- Nothing beyond what the conversation shows."]),
+    // #230 spot check: without the setup, a reply invented a "main character" for a nonfiction book.
+    ...setupFacts(c).map((f) => `- ${f}`),
+    ...(c.facts?.length ? c.facts.map((f) => `- ${f}`) : setupFacts(c).length ? [] : ["- Nothing beyond what the conversation shows."]),
     "",
     `How you text: ${c.persona ? PERSONA_STYLE[c.persona] : CASE_STYLE}`,
     "",
@@ -128,6 +130,19 @@ export function caseTesterSystemPrompt(c: RegressionCase): string {
     "- Write only text messages exactly as you'd type them. No quotes, names or stage directions.",
     "- Never mention or hint that you are an AI, a simulation or a test.",
   ].join("\n");
+}
+
+/** What the tester set up with ZOH, from the case's seed: their saved answers and the plan's step. */
+function setupFacts(c: RegressionCase): string[] {
+  const s = c.seed;
+  if (!s) return [];
+  const a = s.answers;
+  const labels: [keyof typeof a, string][] = [["what", "what you're doing"], ["where", "where"], ["when", "when"], ["how_long", "how long"], ["tracks_with", "you track it with"]];
+  return [
+    ...labels.filter(([k]) => a[k]).map(([k, label]) => `${label}: ${a[k]}`),
+    ...(s.plan ? [`your plan's step: ${s.plan.step}${s.plan.destination ? `, heading toward: ${s.plan.destination}` : ""}`] : []),
+    ...(s.today_step ? [`today's step: ${s.today_step.step}`] : []),
+  ];
 }
 
 /** The conversation as the tester saw it, with ZOH's texts since their last one called out. */

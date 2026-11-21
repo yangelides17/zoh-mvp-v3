@@ -13,7 +13,7 @@ import { MEDIA_LINE } from "../eval/media.js";
 import { loadCases, planConversations } from "../eval/load.js";
 import { aggregate, renderMarkdown, type ReportData } from "../eval/report.js";
 import { checkPoint, loadSimPoints } from "../eval/sim-check.js";
-import { caseTester, verdictsFor } from "../eval/simulator.js";
+import { caseTester, caseTesterSystemPrompt, verdictsFor } from "../eval/simulator.js";
 import { caseSchema, type GradedConversation, type LineVerdict, type RegressionCase } from "../eval/types.js";
 
 /** Echoes the tester so each reply shows which text it answered. */
@@ -192,6 +192,13 @@ describe("eval: case lines that wait for their moment (#230)", () => {
     expect(testerTexts).toEqual(["Start", "o1", "o2", "a1", "a2", "a", "b1", "b2", "b"]);
     expect(result.endedBy).toBe("script");
     expect(result.lines).toMatchObject({ exact: 2, passed: 1, waited: 6 });
+  });
+
+  it("tells the tester its own setup from the seed (what, where, when, today's step), so replies can't contradict it", async () => {
+    const c = (await loadCases("reflection")).find((x) => x.id === "rushed")!;
+    const system = caseTesterSystemPrompt(c);
+    expect(system).toContain("what you're doing: Atomic Habits");
+    expect(system).toMatch(/today's step: Chapter 4 of Atomic Habits/);
   });
 
   it("makes an empty reply a case problem, never a stand-in 'ok'", async () => {
