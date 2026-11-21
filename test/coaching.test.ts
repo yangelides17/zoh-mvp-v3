@@ -180,7 +180,7 @@ describe("team guidance on the Coaching card", () => {
     await savePreference(tester, "no emojis");
     const res = await t.app.inject({ method: "GET", url: `/console/testers/${tester.id}?tab=progress`, headers: { cookie: cookie("Yanni") } });
     expect(res.statusCode).toBe(200);
-    for (const text of ["Coaching", "More curious with her", "no emojis", "texted", "Saved plan settings", "10 pages", "19:00", "photo"]) expect(res.body).toContain(text);
+    for (const text of [">Coaching Preferences</h2>", "More curious with her", "no emojis", "texted", "Saved plan settings", "10 pages", "19:00", "photo"]) expect(res.body).toContain(text);
   });
 
   it("the card sits folded at the top of the Progress tab, not on Memory, and a change lands back on it", async () => {

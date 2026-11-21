@@ -66,7 +66,7 @@ export function coachingCardHtml(card: CoachingCard, testerId: string): string {
     : `<div class="muted">No plan locked yet.</div>`;
   const quiet = `<div class="muted">Quiet hours ${esc(card.quiet.start)} to ${esc(card.quiet.end)} (${card.quiet.chosen ? "they chose these" : "default"})</div>`;
   const history = card.history.length ? `<ul>${card.history.map(change).join("")}</ul>` : `<p class="muted">No changes yet.</p>`;
-  return `<details id="coaching" class="card coaching"><summary><h2 style="display:inline">Coaching</h2></summary>
+  return `<details id="coaching" class="card coaching"><summary><h2 style="display:inline">Coaching Preferences</h2></summary>
 <h3>Team guidance</h3><p class="muted">Lasting. ZOH follows it where it applies and never mentions it; their own requests win.</p><ul>${guidance}</ul>${add}
 <h3>Their style requests</h3>${style}
 <h3>Learned preferences</h3>${learned}
