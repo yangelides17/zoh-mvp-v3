@@ -1,0 +1,77 @@
+{
+  "scenario": "rob",
+  "week": 4,
+  "format": 1,
+  "notes": "Days 22-28: Sunday chili pays off, the new territory, Emma's decision due Friday, Rob asks for help with dinners, and Emma picks Clemson.",
+  "tester": {
+    "phone": "+15555550103",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "19:42" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 22, "status": "done", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Sunday chili, first day on the south side", "proof_verdict": "clear", "proof_seen": "A container of chili and a spoon on a truck dashboard" },
+    { "kind": "takeaway", "day": 22, "time": "12:50", "goal": "nutrition",
+      "text": "Cooking a big batch on Sunday makes weekday lunches easy.", "evidence": "explained" },
+    { "kind": "step_day", "day": 23, "status": "done", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Chili again", "proof_verdict": "clear", "proof_seen": "A container of chili on a clipboard" },
+    { "kind": "step_day", "day": 24, "status": "done", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Chili, day three", "proof_verdict": "plausible", "proof_seen": "A container of chili on a truck seat" },
+    { "kind": "suggestion", "day": 24, "time": "21:10", "goal": "nutrition", "suggestion_kind": "deepen", "raised_by": "tester",
+      "proposal": "Add cooking a simple dinner at home on Tuesdays and Thursdays.",
+      "reasoning": "Lunches are steady; Rob asked for help with dinners because he and Emma eat a lot of pizza.",
+      "decision": "approved", "decided_at": { "day": 25, "time": "10:00" },
+      "outcome": "agreed", "delivered_at": { "day": 26, "time": "18:30" }, "outcome_at": { "day": 26, "time": "19:05" } },
+    { "kind": "step_day", "day": 25, "status": "done_reduced", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Client took him to a steakhouse; he ordered salmon instead", "proof_verdict": "clear", "proof_seen": "Grilled salmon and green beans on a restaurant plate" },
+    { "kind": "plan_locked", "day": 26, "time": "19:05", "plan": {
+      "version": 4, "goal": "nutrition",
+      "step": "Pack lunch Mon to Thu, and cook a simple dinner at home on Tue and Thu",
+      "place": "in the truck and at home", "step_time": "12:30", "days": ["mon", "tue", "wed", "thu"],
+      "proof": "photo", "proof_note": "a photo of the lunch, and of dinner on Tue and Thu",
+      "reason": "Lunches are steady after four weeks; dinners are the next place takeout wins.",
+      "commitment": "Im in. Emma says she'll help", "start_day": 29, "change_kind": "deepen" } }
+  ],
+  "messages": [
+    { "day": 22, "time": "07:30", "from": "zoh", "text": "Morning Rob! First day on the south side. Chili's ready to go? 🍲" },
+    { "day": 22, "time": "07:45", "from": "tester", "text": "Yep. Also Emma has to pick her school by friday so the house is tense lol", "tests": "Event: Emma's college decision due Friday (day 26); relative date" },
+    { "day": 22, "time": "07:46", "from": "zoh", "text": "Big week for her! Rooting for Clemson? 😄" },
+    { "day": 22, "time": "12:45", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A container of chili and a spoon on a truck dashboard." } },
+    { "day": 22, "time": "12:46", "from": "tester", "text": "Making a big batch sunday is the move. Didnt have to think about it at all" },
+    { "day": 22, "time": "12:47", "from": "zoh", "text": "That's the real lesson: cook once on Sunday, lunch is handled all week 🙌" },
+
+    { "day": 23, "time": "12:38", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A container of chili on a clipboard." } },
+    { "day": 23, "time": "12:39", "from": "zoh", "text": "Chili, round two 💪" },
+    { "day": 23, "time": "15:20", "from": "tester", "text": "Dave brought a birthday cake to the office. I had a small piece. Its called balance", "tests": "passing detail" },
+    { "day": 23, "time": "15:21", "from": "zoh", "text": "Balance is the whole game 😄" },
+
+    { "day": 24, "time": "12:52", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A container of chili on a truck seat." } },
+    { "day": 24, "time": "12:52", "from": "tester", "text": "Chili day 3. Might need a new recipe next week" },
+    { "day": 24, "time": "12:53", "from": "zoh", "text": "Ha, chili fatigue is real. We'll find you a second one 😄" },
+    { "day": 24, "time": "21:05", "from": "tester", "text": "Can you help me with dinner too? Emma is with me every other week and we eat a lot of pizza. Id like to actually cook for her", "tests": "a request to add dinners (Emma lives with him every other week)" },
+    { "day": 24, "time": "21:10", "from": "zoh", "text": "I love that. Let me think about the best way to add it and I'll come back to you this week." },
+
+    { "day": 25, "time": "07:30", "from": "zoh", "text": "Morning Rob! Lunch packed?" },
+    { "day": 25, "time": "13:30", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "Grilled salmon and green beans on a restaurant plate." } },
+    { "day": 25, "time": "13:30", "from": "tester", "text": "Client took me to a steakhouse. Got the salmon" },
+    { "day": 25, "time": "13:31", "from": "zoh", "text": "At a steakhouse? That's a pro move 🐟" },
+
+    { "day": 26, "time": "16:05", "from": "tester", "text": "SHE PICKED CLEMSON 🐯🐯🐯", "tests": "Emma's decision made: Clemson; the Friday deadline is now past" },
+    { "day": 26, "time": "16:06", "from": "zoh", "text": "GO TIGERS!! 🐯🎉 Tell Emma congrats from me!" },
+    { "day": 26, "time": "18:30", "from": "zoh", "text": "About dinners: how about you keep packing lunch Mon to Thu, and on Tuesday and Thursday you cook one simple dinner at home, with a photo? Starting Monday." },
+    { "day": 26, "time": "19:05", "from": "tester", "text": "Im in. Emma says she'll help" },
+    { "day": 26, "time": "19:05", "from": "zoh", "text": "Love it 🍳 Locked in. Team dinner starts Monday." },
+
+    { "day": 27, "time": "19:40", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A plate of tacos with ground turkey, lettuce and salsa on a kitchen table." } },
+    { "day": 27, "time": "19:40", "from": "tester", "text": "Practice run. Emma made the salsa" },
+    { "day": 27, "time": "19:41", "from": "zoh", "text": "Those look great! Chef Emma 👩‍🍳" },
+
+    { "day": 28, "time": "10:15", "from": "tester", "text": "Down 6 lbs since I started btw", "tests": "progress he's proud of; fine to keep" },
+    { "day": 28, "time": "10:16", "from": "zoh", "text": "Six pounds in four weeks, just from lunches! 🙌 That's all you, Rob." },
+    { "day": 28, "time": "10:30", "from": "tester", "text": "Also found a park on the south side to eat lunch at. Better than the truck" },
+    { "day": 28, "time": "10:31", "from": "zoh", "text": "Lunch with a view 🌳 Love that." },
+    { "day": 28, "time": "16:20", "from": "tester", "text": "Neighbors tree came down in the storm last night. Missed my truck by a foot", "tests": "passing detail" },
+    { "day": 28, "time": "16:21", "from": "zoh", "text": "Whoa, glad the truck's okay!" }
+  ]
+}
