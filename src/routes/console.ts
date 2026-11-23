@@ -42,6 +42,7 @@ import { addGuidance, CoachingError, deleteLearnedPreference, editGuidance, remo
 import { coachingCard } from "../console/coaching-card.js";
 import { coachingCardHtml } from "../console/views/coaching.js";
 import { testerNow } from "../testers/clock.js";
+import { NAME_MAX, updateTester } from "../testers/testers.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
 import { MAX_UPLOAD_BYTES, type SendblueClient } from "../sendblue/client.js";
@@ -338,6 +339,24 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     }
     return reply.header("set-cookie", sessionCookie(encodeSession(newSession(clock()), opts.sessionSecret!))).redirect("/console", 303);
   });
+
+  // A tester's name, fixed by a founder: the same column the coach's save_name writes and its state block reads.
+  app.post("/console/testers/:id/name", action(async (request, reply, name) => {
+    const { id } = request.params;
+    if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    const value = typeof request.body?.name === "string" ? request.body.name.trim() : "";
+    if (!value || value.length > NAME_MAX) {
+      return (await testerHtml(reply, id, "console", name, `Not saved: a name is 1 to ${NAME_MAX} characters.`, 400)) ?? reply.code(400).send({ error: "bad name" });
+    }
+    if (!owns(routing, tester.phone, tester.route)) {
+      const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't change their name.`;
+      return (await testerHtml(reply, id, "console", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+    }
+    await updateTester(opts.db, id, { name: value });
+    return reply.redirect(`/console/testers/${encodeURIComponent(id)}`, 303);
+  }));
 
   app.post<{ Body: Form }>("/console/name", async (request, reply) => {
     if (!configured) return html(reply, notConfiguredPage(), 503);

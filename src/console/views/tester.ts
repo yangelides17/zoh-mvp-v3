@@ -1,6 +1,7 @@
 import { aheadBy } from "../../testers/clock.js";
 import { maskNumber } from "../../pipeline/inbound.js";
 import type { GoalView, TesterHeader } from "../data.js";
+import { NAME_MAX } from "../../testers/testers.js";
 import { layout } from "./layout.js";
 import { esc, hitRatePct, initials } from "./shared.js";
 
@@ -49,6 +50,8 @@ function headerHtml(h: TesterHeader): string {
     focus ? goalLine(focus, "Focus") : `<div class="muted">No focus goal yet</div>`,
     ...maintenance.map((m) => goalLine(m, "Also keeping up", ` · ${m.current?.length ?? 0} day streak (maintenance)`)),
     `<div class="muted">${esc(t.timeZone)} · quiet ${esc(t.quietHoursStart)} to ${esc(t.quietHoursEnd)}</div>`,
+    // The same name the coach saves (save_name) and reads, so a founder's fix reaches ZOH too.
+    `<form class="row" method="post" action="/console/testers/${esc(t.id)}/name"><input name="name" value="${esc(t.name ?? "")}" maxlength="${NAME_MAX}" placeholder="Their first name" aria-label="Name" required><button class="small">Save name</button></form>`,
   ].join("");
   return `<details class="card hdr"><summary><span class="avatar">${esc(initials(t.name))}</span><h1>${esc(t.name ?? "Unnamed")}</h1>
 <span class="chip">${esc(t.phase)}</span>${status.map((s) => `<span class="chip${s === "synthetic" ? "" : " warn"}">${esc(s)}</span>`).join("")}<span class="muted">${esc(maskNumber(t.phone))}</span>

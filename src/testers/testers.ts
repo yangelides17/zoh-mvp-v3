@@ -88,6 +88,9 @@ export async function getTester(db: Db, id: string): Promise<Tester | undefined>
   return rows[0];
 }
 
+/** The longest name the coach (save_name) or a founder (the console) can save. */
+export const NAME_MAX = 60;
+
 export async function updateTester(db: Db, id: string, patch: TesterPatch): Promise<Tester> {
   const rows = await db
     .update(testers)

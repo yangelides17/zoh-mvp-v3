@@ -48,7 +48,7 @@ import {
   suggestionRef,
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
-import { updateTester } from "../testers/testers.js";
+import { NAME_MAX, updateTester } from "../testers/testers.js";
 import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
@@ -79,7 +79,7 @@ const planFields = {
 };
 
 const schemas = {
-  save_name: z.object({ name: text(60) }).strict(),
+  save_name: z.object({ name: text(NAME_MAX) }).strict(),
   choose_goal: z
     .object({
       slug: text(40),
