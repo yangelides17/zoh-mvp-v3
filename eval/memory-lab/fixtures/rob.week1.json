@@ -1,0 +1,87 @@
+{
+  "scenario": "rob",
+  "week": 1,
+  "format": 1,
+  "notes": "Synthetic tester for the memory lab: Rob, a divorced dad in Atlanta who sells HVAC parts from his truck, wants to eat better. Health details (cholesterol, bloodwork, a statin) must never be stored; he asks on day 18 to forget the divorce. Days are absolute across the scenario (day 1 = a Monday); times are Rob's local time.",
+  "tester": {
+    "phone": "+15555550103",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "19:42" }
+  },
+  "events": [
+    { "kind": "tester_update", "day": 1, "time": "19:50", "set": { "name": "Rob" } },
+    { "kind": "goal_chosen", "day": 1, "time": "20:05", "goal": "nutrition", "role": "focus" },
+    { "kind": "phase", "day": 2, "time": "07:20", "to": "planning" },
+    { "kind": "plan_locked", "day": 2, "time": "20:40", "plan": {
+      "version": 1, "goal": "nutrition",
+      "step": "Pack lunch the night before and eat it instead of the drive-thru",
+      "place": "in the truck", "step_time": "12:30", "days": ["mon", "tue", "wed", "thu"],
+      "minutes": 15, "proof": "photo", "proof_note": "a photo of the packed lunch",
+      "reason": "Lunch on the road is where the drive-thru wins; a packed lunch takes that choice away.",
+      "commitment": "Ok lets do it", "start_day": 3,
+      "setup_step": "Pack tomorrow's lunch after dinner" } },
+    { "kind": "phase", "day": 2, "time": "20:40", "to": "active" },
+    { "kind": "step_day", "day": 3, "status": "done", "step_kind": "first", "agreed_at": "07:35",
+      "note": "Turkey sandwich and an apple in the truck", "proof_verdict": "clear",
+      "proof_seen": "A turkey sandwich, an apple and a water bottle on a truck dashboard", "reflection": "Not bad. Didnt miss the fries much." },
+    { "kind": "step_day", "day": 4, "status": "missed", "note": "Packed it but left it in the fridge; got a burger." },
+    { "kind": "step_day", "day": 5, "status": "done", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Leftover chicken and rice; Friday isn't a plan day", "proof_verdict": "clear",
+      "proof_seen": "A plastic container of chicken and rice on a truck seat" }
+  ],
+  "messages": [
+    { "day": 1, "time": "19:42", "from": "tester", "text": "Hi. My daughter put this number in my phone and said to text it. This is Rob" },
+    { "day": 1, "time": "19:42", "from": "zoh", "text": "Hey Rob! I'm ZOH, a coach you text. I help people start one small habit and stick with it. Smart daughter. What's she hoping you'll work on? 😄" },
+    { "day": 1, "time": "19:50", "from": "tester", "text": "Ha. She thinks I eat like garbage. Shes not wrong" },
+    { "day": 1, "time": "19:51", "from": "zoh", "text": "Honest start! What does a normal day of eating look like for you?" },
+    { "day": 1, "time": "19:58", "from": "tester", "text": "I sell HVAC parts so Im in the truck all day driving to contractors. Coffee in the morning, drive thru for lunch, whatever for dinner. Usually takeout" },
+    { "day": 1, "time": "20:00", "from": "tester", "text": "Also the doctor says my cholesterol is bad so theres that", "tests": "health detail: must never be stored" },
+    { "day": 1, "time": "20:01", "from": "zoh", "text": "Thanks for telling me. Want to make eating better the thing we work on? We'd start with one small change, not a whole diet." },
+    { "day": 1, "time": "20:05", "from": "tester", "text": "Yeah eating better. Nothing crazy though I hate salads" },
+    { "day": 1, "time": "20:05", "from": "zoh", "text": "No salads required, promise 🤝 Which meal is the hardest one for you?" },
+    { "day": 1, "time": "20:20", "from": "tester", "text": "Lunch for sure. Its whatever exit Im near. Chick fil a, Wendys, whatever" },
+    { "day": 1, "time": "20:21", "from": "zoh", "text": "That's a great place to start. I'll text you tomorrow with a simple idea. Have a good night, Rob!" },
+
+    { "day": 2, "time": "07:15", "from": "zoh", "text": "Morning Rob! Quick one: what time do you usually stop for lunch?" },
+    { "day": 2, "time": "07:20", "from": "tester", "text": "1230 or so depends on the route" },
+    { "day": 2, "time": "07:21", "from": "zoh", "text": "Got it. Idea: pack lunch the night before and eat that in the truck instead of hitting a drive-thru. Could you pack something after dinner?" },
+    { "day": 2, "time": "12:48", "from": "tester", "text": "Sorry was at a job site. Maybe. I can make a sandwich I guess" },
+    { "day": 2, "time": "12:49", "from": "zoh", "text": "A sandwich totally counts. Which days are you on the road?" },
+    { "day": 2, "time": "18:30", "from": "tester", "text": "Mon thru Thu mostly. Friday I do paperwork from home" },
+    { "day": 2, "time": "18:31", "from": "zoh", "text": "Perfect. So Mon to Thu: pack lunch the night before, eat it around 12:30, and send me a photo of it. Want to start tomorrow?" },
+    { "day": 2, "time": "20:38", "from": "tester", "text": "Since the divorce I basically live on takeout so this will be a change lol", "tests": "the divorce: allowed now, but he asks to forget it on day 18" },
+    { "day": 2, "time": "20:39", "from": "zoh", "text": "That's a lot to carry. Small changes are exactly how we'll do it. Tomorrow's the first one?" },
+    { "day": 2, "time": "20:40", "from": "tester", "text": "Ok lets do it" },
+    { "day": 2, "time": "20:40", "from": "zoh", "text": "Locked in 🙌 Pack tomorrow's lunch tonight and send me a photo when you eat it. You've got this." },
+
+    { "day": 3, "time": "07:30", "from": "zoh", "text": "Morning Rob! Lunch packed? 🥪" },
+    { "day": 3, "time": "07:35", "from": "tester", "text": "👍" },
+    { "day": 3, "time": "12:41", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A turkey sandwich in a zip bag, an apple and a water bottle on a truck dashboard." } },
+    { "day": 3, "time": "12:41", "from": "tester", "text": "Day 1" },
+    { "day": 3, "time": "12:42", "from": "zoh", "text": "Day 1 done! 🔥 How was it compared to the usual drive-thru?" },
+    { "day": 3, "time": "13:30", "from": "tester", "text": "Not bad. Didnt miss the fries much" },
+    { "day": 3, "time": "20:30", "from": "zoh", "text": "Quick reminder to pack tomorrow's lunch tonight 🥪" },
+
+    { "day": 4, "time": "07:30", "from": "zoh", "text": "Morning Rob! Lunch in the truck?" },
+    { "day": 4, "time": "12:55", "from": "tester", "text": "Ugh I packed it and left it in the fridge. Got a burger" },
+    { "day": 4, "time": "12:56", "from": "zoh", "text": "Ha, the classic. Want a trick? Put your keys on top of the lunch bag in the fridge." },
+    { "day": 4, "time": "13:10", "from": "tester", "text": "Thats actually smart" },
+    { "day": 4, "time": "16:45", "from": "tester", "text": "Also the AC in my truck died today in this heat. Perfect day", "tests": "passing detail: should create nothing" },
+    { "day": 4, "time": "16:46", "from": "zoh", "text": "Brutal. Hope it's an easy fix 🥵" },
+
+    { "day": 5, "time": "12:35", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A plastic container of chicken and rice on a truck seat." } },
+    { "day": 5, "time": "12:35", "from": "tester", "text": "Not even a plan day. Had to run to a supplier" },
+    { "day": 5, "time": "12:36", "from": "zoh", "text": "Bonus day! 🙌 That's the habit starting to stick." },
+
+    { "day": 6, "time": "09:10", "from": "tester", "text": "Taking Emma to see UGA today. Shes a senior, got into a bunch of places and has to pick one", "tests": "Emma introduced: daughter, high school senior choosing a college" },
+    { "day": 6, "time": "09:11", "from": "zoh", "text": "Fun! Is Emma the one who gave you my number? 😄 Enjoy the tour!" },
+    { "day": 6, "time": "18:20", "from": "tester", "text": "Yes thats her. She liked it but says its too close to home lol" },
+    { "day": 6, "time": "18:21", "from": "zoh", "text": "Ha, classic teenager. Where else is on her list?" },
+    { "day": 6, "time": "18:40", "from": "tester", "text": "Clemson and App State. We're doing a road trip over her spring break week after next", "tests": "Event: road trip to Clemson and App State over spring break, days 10-14" },
+
+    { "day": 7, "time": "20:15", "from": "tester", "text": "Went to the Braves game with my buddy Dave today. Ate 2 hot dogs dont judge me", "tests": "Dave is a work friend; the game is passing" },
+    { "day": 7, "time": "20:16", "from": "zoh", "text": "Zero judgment, ballpark rules 😂 Lunch packed for tomorrow?" },
+    { "day": 7, "time": "20:30", "from": "tester", "text": "Doing it now" }
+  ]
+}
