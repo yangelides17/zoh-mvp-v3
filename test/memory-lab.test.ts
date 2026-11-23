@@ -634,8 +634,8 @@ describe("report assertion details (#150)", () => {
       mustNotHoldScore: 1,
       probeScore: 0.5,
       nearDuplicates: [] as string[],
-      mustHold: [{ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" }],
-      mustNotHold: [{ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" }],
+      mustHold: [{ id: "mh-1", present: "yes", evidence: "some quote", decided: "present", passed: true, contradicted: false, reasoning: "Fact is present" }],
+      mustNotHold: [{ id: "mnh-1", present: "no", evidence: "none", decided: "absent", passed: true, contradicted: false, reasoning: "Not in memory" }],
       probes: [{ id: "p-1", correct: true, reasoning: "Answer matches" }],
     };
 
@@ -662,11 +662,11 @@ describe("report assertion details (#150)", () => {
 
     // mustHold array with id, present, evidence, contradicted, reasoning
     expect(cp.mustHold).toHaveLength(1);
-    expect(cp.mustHold[0]).toEqual({ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" });
+    expect(cp.mustHold[0]).toEqual({ id: "mh-1", present: "yes", evidence: "some quote", decided: "present", passed: true, contradicted: false, reasoning: "Fact is present" });
 
-    // mustNotHold array with id, present, evidence, contradicted, reasoning
+    // mustNotHold array with id, present, evidence, decided, passed, contradicted, reasoning
     expect(cp.mustNotHold).toHaveLength(1);
-    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" });
+    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", present: "no", evidence: "none", decided: "absent", passed: true, contradicted: false, reasoning: "Not in memory" });
 
     // probes array with id, correct, reasoning
     expect(cp.probes).toHaveLength(1);
@@ -918,6 +918,81 @@ describe("grader evidence-based verdicts (#152)", () => {
     expect(normalizeForMatch("\u201CHello\u201D")).toBe('"hello"');
     expect(normalizeForMatch("it\u2019s  a   test")).toBe("it's a test");
     expect(normalizeForMatch("  UPPER  case  ")).toBe("upper case");
+  });
+
+  it("normalizeForMatch drops backslashes so escaped quotes match unescaped ones", () => {
+    const raw = `Used to run in college, "kinda"; been a while.`;
+    const escaped = `Used to run in college, \\"kinda\\"; been a while.`;
+    expect(normalizeForMatch(escaped)).toBe(normalizeForMatch(raw));
+    // Also matches when the memory text itself has the backslashes
+    const memoryWithBackslash = JSON.stringify({ text: raw });
+    expect(normalizeForMatch(memoryWithBackslash)).toContain(normalizeForMatch(raw));
+  });
+
+  it("must_hold verdict includes decided and passed fields", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found it", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustHold[0]!.decided).toBe("present");
+    expect(cp.mustHold[0]!.passed).toBe(true);
+  });
+
+  it("must_not_hold absent verdict has decided 'absent' and passed true", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-1", reasoning: "not found", present: "no", evidence: "none" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-1", statement: "Tester has a cat" }]);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.decided).toBe("absent");
+    expect(cp.mustNotHold[0]!.passed).toBe(true);
+  });
+
+  it("must_not_hold present verdict has decided 'present' and passed false", async () => {
+    const dogFact = "neighbor has a large golden retriever named Buddy";
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-dog", reasoning: "found it", present: "yes", evidence: dogFact }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-dog", statement: "Memory mentions neighbor's dog" }]);
+    const snaps = new Map([[7, makeSnapshot([dogFact])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.decided).toBe("present");
+    expect(cp.mustNotHold[0]!.passed).toBe(false);
+  });
+
+  it("grader prompt includes contextual presence instruction", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    await gradeRun(model, key, snaps);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).toContain("current fact");
+    expect(prompt).toContain("joke");
+    expect(prompt).toContain("fictional character");
   });
 });
 

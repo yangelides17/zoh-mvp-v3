@@ -18,6 +18,10 @@ export interface StatementVerdict {
   present: "yes" | "no";
   evidence: string;
   reasoning: string;
+  /** What the code decided after evidence matching: "present" or "absent". */
+  decided: "present" | "absent";
+  /** Whether this verdict counts as a pass (must_hold: decided present; must_not_hold: decided absent). */
+  passed: boolean;
   /** True when the code-decided answer (from evidence matching) differs from the model's `present`. */
   contradicted: boolean;
 }
@@ -87,7 +91,7 @@ const MIN_QUOTE_LENGTH = 4;
  */
 export function normalizeForMatch(text: string): string {
   return text
-    .replace(/\\"/g, '"')           // JSON-escaped double quotes → straight
+    .replace(/\\/g, "")             // drop all backslashes (escaped quotes in JSON etc.)
     .replace(/\u201C|\u201D/g, '"') // curly double quotes → straight
     .replace(/\u2018|\u2019/g, "'") // curly single quotes / apostrophes → straight
     .replace(/\s+/g, " ")           // collapse whitespace
@@ -131,8 +135,8 @@ export async function gradeRun(
       // Record the error for this checkpoint and continue with the rest
       checkpoints.push({
         afterDay: cp.after_day,
-        mustHold: cp.must_hold.map((s) => ({ ...s, present: "no" as const, evidence: "none", reasoning: "Checkpoint grading failed", contradicted: false })),
-        mustNotHold: cp.must_not_hold.map((s) => ({ ...s, present: "yes" as const, evidence: "none", reasoning: "Checkpoint grading failed", contradicted: false })),
+        mustHold: cp.must_hold.map((s) => ({ ...s, present: "no" as const, evidence: "none", reasoning: "Checkpoint grading failed", decided: "absent" as const, passed: false, contradicted: false })),
+        mustNotHold: cp.must_not_hold.map((s) => ({ ...s, present: "yes" as const, evidence: "none", reasoning: "Checkpoint grading failed", decided: "present" as const, passed: false, contradicted: false })),
         probes: cp.probes.map((p) => ({ ...p, answer: "(grading failed)", correct: false, reasoning: "Checkpoint grading failed" })),
         nearDuplicates: [],
         mustHoldScore: 0,
@@ -173,6 +177,7 @@ STATEMENTS TO CHECK:
 ${statementsBlock}
 
 For each statement, decide whether the information described is present in the memory above.
+- Answer "present: yes" only if memory states this as a current fact. A mention that memory itself marks as a joke, a past event, a dated statement from an earlier day, or a fictional character does not count.
 - If present, set "present" to "yes" and "evidence" to an exact quote from the memory JSON that supports it.
 - If not present, set "present" to "no" and "evidence" to "none".
 
@@ -209,13 +214,19 @@ Respond with JSON only, no other text:
       for (const v of verdicts) {
         // Code-decided presence: does the evidence quote actually appear in memory?
         const codePresent = evidenceFoundInMemory(v.evidence, memoryJson);
+        const decided: "present" | "absent" = codePresent ? "present" : "absent";
         const contradicted = (v.present === "yes") !== codePresent;
+
+        const isMustHold = cp.must_hold.some((s) => s.id === v.id);
+        const passed = isMustHold ? decided === "present" : decided === "absent";
 
         const verdict: Omit<StatementVerdict, "statement"> = {
           id: v.id,
           present: codePresent ? "yes" : "no",
           evidence: v.evidence,
           reasoning: v.reasoning,
+          decided,
+          passed,
           contradicted,
         };
         const mh = cp.must_hold.find((s) => s.id === v.id);
@@ -225,8 +236,8 @@ Respond with JSON only, no other text:
       }
     } catch {
       // If parsing fails, mark all as unknown
-      for (const s of cp.must_hold) mustHold.push({ ...s, present: "no", evidence: "none", reasoning: "Grader response parsing failed", contradicted: false });
-      for (const s of cp.must_not_hold) mustNotHold.push({ ...s, present: "yes", evidence: "none", reasoning: "Grader response parsing failed", contradicted: false });
+      for (const s of cp.must_hold) mustHold.push({ ...s, present: "no", evidence: "none", reasoning: "Grader response parsing failed", decided: "absent" as const, passed: false, contradicted: false });
+      for (const s of cp.must_not_hold) mustNotHold.push({ ...s, present: "yes", evidence: "none", reasoning: "Grader response parsing failed", decided: "present" as const, passed: false, contradicted: false });
     }
   }
 

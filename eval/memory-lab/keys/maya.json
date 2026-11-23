@@ -31,7 +31,7 @@
       ],
       "must_not_hold": [
         { "id": "lily-still-fighting", "statement": "Maya and Lily are currently fighting or not talking." },
-        { "id": "no-connell-person", "statement": "Connell as a person in Maya's life (he's a character in her book)." }
+        { "id": "no-connell-person", "statement": "Connell recorded as a real person Maya knows. (Mentioning Connell as a character in her book is fine and does not count.)" }
       ],
       "probes": [
         { "id": "who-lily", "question": "Who is Lily, and how are things between her and Maya?", "expected": "Her roommate; they had a fight over dishes but made up." }
@@ -78,8 +78,8 @@
       "must_not_hold": [
         { "id": "not-switching-majors-28", "statement": "Maya is switching or considering switching majors." },
         { "id": "no-lost-id-28", "statement": "Anything about Maya losing her student ID." },
-        { "id": "no-connell-person-28", "statement": "Connell as a person in Maya's life." },
-        { "id": "midterms-not-upcoming", "statement": "Maya's midterms described as still upcoming." }
+        { "id": "no-connell-person-28", "statement": "Connell recorded as a real person Maya knows. (Mentioning Connell as a character in her book is fine and does not count.)" },
+        { "id": "midterms-not-upcoming", "statement": "Memory presents Maya's midterms as still ahead of her as of now. (Dated past mentions, like what she said on an earlier day, are fine and do not count.)" }
       ],
       "probes": [
         { "id": "still-reading", "question": "Is Maya still reading?", "expected": "Yes: she finished Normal People and wants the next Sally Rooney book." },
