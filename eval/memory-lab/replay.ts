@@ -157,7 +157,7 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
   if (opts.memoryVersion && opts.memoryVersion !== "current" && opts.memoryVersion !== "v2") {
     throw new Error(`Unknown memory version "${opts.memoryVersion}"; supported: "current", "v2".`);
   }
-  if (isV2 && !opts.checkerModel) {
+  if (isV2 && !opts.checkerModel && !opts.dryRun) {
     throw new Error("v2 memory requires a checkerModel (Haiku) for the sensitive check.");
   }
 
