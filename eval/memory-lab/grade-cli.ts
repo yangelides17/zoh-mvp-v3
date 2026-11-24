@@ -169,7 +169,8 @@ async function main() {
 
   console.log(`\nGrading with ${graderModelName}...`);
 
-  const grading: GradeResult = await gradeRun(graderModel, answerKey, snapshotMap);
+  const startDate = report.startDate ? new Date(`${report.startDate}T00:00:00Z`) : undefined;
+  const grading: GradeResult = await gradeRun(graderModel, answerKey, snapshotMap, startDate);
   const gradingSpend = dollarsFor(grading.usage, graderModelName);
 
   // Check cost caps

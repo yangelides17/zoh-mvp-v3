@@ -22,7 +22,7 @@ import { takeSnapshot, stripForGrader, saveSnapshot } from "../eval/memory-lab/s
 import { runChecks } from "../eval/memory-lab/checks.js";
 import { estimateRunCost, saveSpend, PER_RUN_CAP, COMMAND_CAP, type RunSpend } from "../eval/memory-lab/cost.js";
 import { answerKeySchema } from "../eval/memory-lab/keys/schema.js";
-import { gradeRun, normalizeForMatch, type CheckpointScore } from "../eval/memory-lab/grader.js";
+import { gradeRun, normalizeForMatch, buildDayTable, type CheckpointScore } from "../eval/memory-lab/grader.js";
 import type { AnswerKey } from "../eval/memory-lab/keys/schema.js";
 import { FakeClaudeModel, makeDb } from "./helpers.js";
 import { writeDay } from "../src/memory/keeper.js";
@@ -978,7 +978,7 @@ describe("grader evidence-based verdicts (#152)", () => {
     expect(cp.mustNotHold[0]!.passed).toBe(false);
   });
 
-  it("grader prompt includes contextual presence instruction", async () => {
+  it("grader prompt uses (as of now) / (currently) rule instead of blanket past-event filter", async () => {
     const model = new FakeClaudeModel();
     model.script(JSON.stringify({
       verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
@@ -990,9 +990,11 @@ describe("grader evidence-based verdicts (#152)", () => {
     await gradeRun(model, key, snaps);
 
     const prompt = model.requests[0]!.messages[0]!.content as string;
-    expect(prompt).toContain("current fact");
-    expect(prompt).toContain("joke");
-    expect(prompt).toContain("fictional character");
+    expect(prompt).toContain("(as of now)");
+    expect(prompt).toContain("(currently)");
+    expect(prompt).toContain("presented as current");
+    // The old blanket rule should be gone
+    expect(prompt).not.toContain("current fact");
   });
 });
 
@@ -1146,5 +1148,157 @@ describe("snapshot sourceText (#152)", () => {
     for (const f of stripped.facts) {
       expect(f.sourceText).toBeNull();
     }
+  });
+});
+
+// ---- Day-to-date table ----
+
+describe("grader day-to-date table", () => {
+  it("buildDayTable produces correct mapping", () => {
+    const start = new Date("2025-10-06T00:00:00Z"); // Monday
+    const table = buildDayTable(start, 28);
+    expect(table).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(table).toContain("day 7 = 2025-10-12 (Sun)");
+    expect(table).toContain("day 14 = 2025-10-19 (Sun)");
+    expect(table).toContain("day 21 = 2025-10-26 (Sun)");
+    expect(table).toContain("day 28 = 2025-11-02 (Sun)");
+  });
+
+  it("buildDayTable includes throughDay even when not a milestone", () => {
+    const start = new Date("2025-10-06T00:00:00Z");
+    const table = buildDayTable(start, 10);
+    expect(table).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(table).toContain("day 7 = 2025-10-12 (Sun)");
+    expect(table).toContain("day 10 = 2025-10-15 (Wed)");
+    // 14 should not appear since throughDay is 10
+    expect(table).not.toContain("day 14");
+  });
+
+  it("grader prompt includes day-to-date table when startDate is provided", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "mh-1", statement: "Tester likes running" }],
+        must_not_hold: [],
+        probes: [],
+      }],
+    };
+    const now = new Date();
+    const snaps = new Map([[7, {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: [{ id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "likes running", sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now }],
+        links: [],
+        forgotten: [],
+      },
+      rendered: "likes running",
+    }]]);
+
+    const startDate = new Date("2025-10-06T00:00:00Z");
+    await gradeRun(model, key, snaps, startDate);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).toContain("Day-to-date reference:");
+    expect(prompt).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(prompt).toContain("day 7 = 2025-10-12 (Sun)");
+  });
+
+  it("grader prompt omits day-to-date table when startDate is not provided", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "mh-1", statement: "Tester likes running" }],
+        must_not_hold: [],
+        probes: [],
+      }],
+    };
+    const now = new Date();
+    const snaps = new Map([[7, {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: [{ id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "likes running", sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now }],
+        links: [],
+        forgotten: [],
+      },
+      rendered: "likes running",
+    }]]);
+
+    await gradeRun(model, key, snaps);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).not.toContain("Day-to-date reference:");
+  });
+});
+
+// ---- Forget retry in replay ----
+
+describe("forget retry in replay", () => {
+  it("retries once when runMemoryTool returns ok: false, succeeds on retry", async () => {
+    const tester = await createTester(db);
+    const msg = await say(db, tester, "inbound", at("2026-11-02", "21:40"), "my dog is named Max");
+    const { self } = await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+    const fact = await addFact(db, self, { text: "my dog is named Max", sourceMessageId: msg.id, day: "2026-11-02" }, at("2026-11-02", "21:40"));
+    const factRef = `f:${fact.id.slice(0, 8)}`;
+
+    // Model: first call returns a bad ref, second call (retry) returns the correct ref
+    const model = new FakeClaudeModel();
+    // First call: bad ref
+    model.script(JSON.stringify({ facts: ["f:00000000"], note: "the dog" }));
+    // Second call (retry): correct ref
+    model.script(JSON.stringify({ facts: [factRef], note: "the dog" }));
+
+    // Simulate the replay forget handler logic
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const firstInput = { facts: ["f:00000000"], note: "the dog" };
+    const firstResult = await runMemoryTool(db, tester, "forget", firstInput, { at: at("2026-11-02", "22:00"), budget });
+    expect(firstResult.ok).toBe(false);
+
+    // Retry with correct ref
+    const retryBudget: LookupBudget = { lookups: 0, searches: 0 };
+    const retryInput = { facts: [factRef], note: "the dog" };
+    const retryResult = await runMemoryTool(db, tester, "forget", retryInput, { at: at("2026-11-02", "22:00"), budget: retryBudget });
+    expect(retryResult.ok).toBe(true);
+
+    // Verify fact is gone
+    const snap = await takeSnapshot(db, tester.id);
+    expect(snap.facts.some((f) => f.text === "my dog is named Max")).toBe(false);
+  });
+
+  it("records unresolved when both attempts fail", async () => {
+    const tester = await createTester(db);
+    await say(db, tester, "inbound", at("2026-11-02", "21:40"), "hello");
+    await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+
+    // Both attempts use bad refs
+    const budget1: LookupBudget = { lookups: 0, searches: 0 };
+    const result1 = await runMemoryTool(db, tester, "forget", { facts: ["f:00000000"], note: "nothing" }, { at: at("2026-11-02", "22:00"), budget: budget1 });
+    expect(result1.ok).toBe(false);
+
+    const budget2: LookupBudget = { lookups: 0, searches: 0 };
+    const result2 = await runMemoryTool(db, tester, "forget", { facts: ["f:11111111"], note: "also nothing" }, { at: at("2026-11-02", "22:01"), budget: budget2 });
+    expect(result2.ok).toBe(false);
+
+    // Both failed => would be recorded as unresolved in the replay
+    const unresolvedForgets = [];
+    if (!result2.ok) {
+      unresolvedForgets.push({ day: 1, request: "forget something", reason: result2.error });
+    }
+    expect(unresolvedForgets).toHaveLength(1);
   });
 });

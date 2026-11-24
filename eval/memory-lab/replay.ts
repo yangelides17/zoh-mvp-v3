@@ -270,8 +270,41 @@ ${fullMemory}`;
           if (result.ok) {
             tester = result.tester;
           } else {
-            // Forget tool returned an error (#149)
-            unresolvedForgets.push({ day, request: w.request, reason: result.error });
+            // First attempt failed — retry once with the error fed back to the model
+            const retryPrompt = `Your previous forget attempt failed with this error: "${result.error}"
+
+The tester said: "${w.request}". Please try different refs. Here is the memory again:
+
+MEMORY:
+${fullMemory}
+
+Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }`;
+            const retryResponse = await opts.keeperModel.create({
+              system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
+              messages: [{ role: "user", content: retryPrompt }],
+              tools: [],
+            });
+            const retryUsage = retryResponse.usage ?? { input: 0, output: 0 };
+            totalForgetSpend += dollarsFor(retryUsage, opts.keeperModelName);
+
+            const retryText = retryResponse.content.find((b) => b.type === "text")?.text ?? "{}";
+            const retryJsonStr = retryText.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
+            try {
+              const retryInput = JSON.parse(retryJsonStr) as Record<string, unknown>;
+              const retryBudget: LookupBudget = { lookups: 0, searches: 0 };
+              const retryResult = await runMemoryTool(db, tester, "forget", retryInput, { at: forgetAt, budget: retryBudget });
+              if (retryResult.ok) {
+                tester = retryResult.tester;
+              } else {
+                unresolvedForgets.push({ day, request: w.request, reason: retryResult.error });
+              }
+            } catch (retryErr) {
+              unresolvedForgets.push({
+                day,
+                request: w.request,
+                reason: retryErr instanceof Error ? retryErr.message : String(retryErr),
+              });
+            }
           }
         } catch (err) {
           // JSON parse failed or other error (#149)
@@ -355,7 +388,7 @@ ${fullMemory}`;
       for (const n of nights) {
         if (!n.failed) snapshotMap.set(n.day, { snapshot: n.snapshot, rendered: n.rendered });
       }
-      grading = await gradeRun(opts.graderModel, answerKey, snapshotMap);
+      grading = await gradeRun(opts.graderModel, answerKey, snapshotMap, opts.startDate);
       gradingSpend = dollarsFor(grading.usage, opts.graderModelName);
     } catch (err) {
       gradingError = err instanceof Error ? err.message : String(err);

@@ -108,14 +108,35 @@ function evidenceFoundInMemory(evidence: string, memoryJson: string): boolean {
   return normalizeForMatch(memoryJson).includes(normalizeForMatch(evidence));
 }
 
+/** Build a compact day-to-date reference table for the grader prompt. */
+export function buildDayTable(startDate: Date, throughDay: number): string {
+  const milestones = [1, 7, 14, 21, 28].filter((d) => d <= throughDay);
+  if (!milestones.includes(throughDay) && throughDay > 1) milestones.push(throughDay);
+  milestones.sort((a, b) => a - b);
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const parts = milestones.map((d) => {
+    const dt = new Date(startDate);
+    dt.setUTCDate(dt.getUTCDate() + (d - 1));
+    const iso = dt.toISOString().slice(0, 10);
+    const dow = dayNames[dt.getUTCDay()]!;
+    return `day ${d} = ${iso} (${dow})`;
+  });
+  return `Day-to-date reference: ${parts.join(", ")}`;
+}
+
 /** Grade all checkpoint nights for one run. Each checkpoint is graded independently — if one fails, the rest still run. */
 export async function gradeRun(
   model: ClaudeModel,
   answerKey: AnswerKey,
   snapshots: Map<number, { snapshot: MemorySnapshot; rendered: string }>,
+  startDate?: Date,
 ): Promise<GradeResult> {
   const totalUsage = { input: 0, output: 0 };
   const checkpoints: CheckpointScore[] = [];
+
+  // Build the day-to-date table if startDate is provided
+  const maxDay = Math.max(...[...snapshots.keys()]);
+  const dayTable = startDate ? buildDayTable(startDate, maxDay) : undefined;
 
   for (const cp of answerKey.checkpoints) {
     const entry = snapshots.get(cp.after_day);
@@ -129,7 +150,7 @@ export async function gradeRun(
         links: stripped.links.map((l) => ({ fromPageId: l.fromPageId, toPageId: l.toPageId, kind: l.kind })),
       }, null, 2);
 
-      const score = await gradeCheckpoint(model, cp, memoryJson, entry.rendered, totalUsage);
+      const score = await gradeCheckpoint(model, cp, memoryJson, entry.rendered, totalUsage, dayTable);
       checkpoints.push(score);
     } catch (err) {
       // Record the error for this checkpoint and continue with the rest
@@ -156,6 +177,7 @@ async function gradeCheckpoint(
   memoryJson: string,
   rendered: string,
   usage: { input: number; output: number },
+  dayTable?: string,
 ): Promise<CheckpointScore> {
   const mustHold: StatementVerdict[] = [];
   const mustNotHold: StatementVerdict[] = [];
@@ -168,8 +190,9 @@ async function gradeCheckpoint(
       ...cp.must_not_hold.map((s) => `[${s.id}] "${s.statement}"`),
     ].join("\n");
 
+    const dayTableLine = dayTable ? `\n${dayTable}\n` : "";
     const prompt = `You are checking a coaching app's memory system. Below is the structured memory (JSON) for a tester after day ${cp.after_day}.
-
+${dayTableLine}
 MEMORY (JSON):
 ${memoryJson}
 
@@ -177,7 +200,8 @@ STATEMENTS TO CHECK:
 ${statementsBlock}
 
 For each statement, decide whether the information described is present in the memory above.
-- Answer "present: yes" only if memory states this as a current fact. A mention that memory itself marks as a joke, a past event, a dated statement from an earlier day, or a fictional character does not count.
+- Answer "present: yes" if the memory contains this information.
+- For statements that include "(as of now)" or "(currently)", a dated past mention or a joke does not count — the information must be presented as current.
 - If present, set "present" to "yes" and "evidence" to an exact quote from the memory JSON that supports it.
 - If not present, set "present" to "no" and "evidence" to "none".
 
