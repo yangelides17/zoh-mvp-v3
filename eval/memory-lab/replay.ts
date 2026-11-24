@@ -17,6 +17,7 @@ import type { Db } from "../../src/db/client.js";
 import { migrationsFolder } from "../../src/db/paths.js";
 import type { ClaudeModel } from "../../src/claude/replier.js";
 import { writeDay } from "../../src/memory/keeper.js";
+import { writeV2Day, renderV2Memory } from "../../src/memory/v2-keeper.js";
 import { memoryBlock } from "../../src/memory/context.js";
 import { runMemoryTool, type LookupBudget } from "../../src/memory/coach-tools.js";
 import { getPages } from "../../src/memory/store.js";
@@ -43,10 +44,12 @@ export interface ReplayOptions {
   scenario: string;
   startDate: Date;
   throughDay?: number;
-  /** Memory version: "current" uses the real writeDay; future versions will be added. */
+  /** Memory version: "current" uses the real writeDay; "v2" uses the v2 writer. */
   memoryVersion?: string;
   /** Keeper model (the one that writes memory). */
   keeperModel: ClaudeModel;
+  /** #250: checker model (Haiku, for the v2 sensitive check). Required when memoryVersion is "v2". */
+  checkerModel?: ClaudeModel;
   /** Grader model (scores checkpoints). */
   graderModel: ClaudeModel;
   /** Model name for cost estimation (e.g. "claude-haiku-5-5"). */
@@ -150,8 +153,12 @@ function countCheckpointBatches(scenario: string, throughDay: number): number {
  * Run a single replay. Importable for tests.
  */
 export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
-  if (opts.memoryVersion && opts.memoryVersion !== "current") {
-    throw new Error(`Unknown memory version "${opts.memoryVersion}"; only "current" is supported.`);
+  const isV2 = opts.memoryVersion === "v2";
+  if (opts.memoryVersion && opts.memoryVersion !== "current" && opts.memoryVersion !== "v2") {
+    throw new Error(`Unknown memory version "${opts.memoryVersion}"; supported: "current", "v2".`);
+  }
+  if (isV2 && !opts.checkerModel) {
+    throw new Error("v2 memory requires a checkerModel (Haiku) for the sensitive check.");
   }
 
   const fixtures = loadFixtures(opts.scenario);
@@ -201,6 +208,11 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
     const inc = await loadScenarioIncremental(db, fixtures, opts.startDate);
     let tester: Tester = inc.tester;
 
+    // #250: set tester to v2 if running in v2 mode
+    if (isV2) {
+      tester = await updateTester(db, tester.id, { memoryVersion: "v2" });
+    }
+
     const nights: NightResult[] = [];
     const nightSpends: NightSpend[] = [];
     let totalForgetSpend = 0;
@@ -220,9 +232,10 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       const [freshAfterLoad] = await db.select().from(testers).where(eq(testers.id, tester.id)).limit(1);
       if (freshAfterLoad) tester = freshAfterLoad;
 
-      // 1. Apply stated_preference events for this day
+      // 1. Apply stated_preference events for this day (#250: skipped under v2)
       for (const w of inc.liveWrites) {
         if (w.kind !== "stated_preference" || w.day !== day) continue;
+        if (isV2) continue; // v2 writer discovers stated preferences from texts
         const prefAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
         // Find the nearest inbound message to use as source
         const [nearestMsg] = await db
@@ -340,7 +353,23 @@ Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref
           const fresh = await db.select().from(testers).where(eq(testers.id, tester.id)).limit(1);
           if (fresh[0]) tester = fresh[0];
 
-          await writeDay(db, trackingModel, tester, date, at3am);
+          if (isV2) {
+            // #250: v2 writer with sensitive checker
+            const trackingChecker: ClaudeModel = {
+              async create(req) {
+                const resp = await opts.checkerModel!.create(req);
+                if (resp.usage) {
+                  nightUsage.input += resp.usage.input;
+                  nightUsage.output += resp.usage.output;
+                }
+                return resp;
+              },
+              async check() { await opts.checkerModel!.check(); },
+            };
+            await writeV2Day(db, trackingModel, trackingChecker, tester, date, at3am);
+          } else {
+            await writeDay(db, trackingModel, tester, date, at3am);
+          }
           failed = false;
           error = undefined;
           break;
@@ -356,13 +385,18 @@ Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref
 
       // 4. Update memory_through
       if (!failed) {
-        await updateTester(db, tester.id, { memoryThrough: date });
-        tester.memoryThrough = date;
+        if (isV2) {
+          await updateTester(db, tester.id, { memoryV2Through: date });
+          tester.memoryV2Through = date;
+        } else {
+          await updateTester(db, tester.id, { memoryThrough: date });
+          tester.memoryThrough = date;
+        }
       }
 
       // 5. Snapshot
-      const snapshot = await takeSnapshot(db, tester.id);
-      const rendered = await memoryBlock(db, tester);
+      const snapshot = await takeSnapshot(db, tester.id, isV2);
+      const rendered = isV2 ? await renderV2Memory(db, tester) : await memoryBlock(db, tester);
 
       // 6. Save snapshot
       saveSnapshot(opts.outputDir, day, snapshot, rendered);
