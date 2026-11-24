@@ -72,6 +72,7 @@ export async function sensitiveCheck(
 - Financial details (income, debt, money trouble, specific amounts)
 - Legal details
 - Phone numbers, emails, or addresses
+- A mention that something sensitive was omitted or left out (e.g. "I left out the sleep-aid detail", "medication details removed", "sensitive content excluded")
 ${topicList}
 
 Respond with exactly one line:
@@ -448,9 +449,13 @@ export const V2_KEEPER_INSTRUCTIONS = `You keep the memory of ZOH, a texting coa
 1. **Read before write:** open_pages any page you need to write to. Writes to unopened pages are rejected.
 2. **Source every entry:** cite the m: ref of the tester's own text it came from. ZOH's texts are context, not sources.
 3. **Dates are real dates:** "next Saturday" said on Fri Oct 10 → 2025-10-18. Dated types (todo, event, followup) need a YYYY-MM-DD date; code rejects them without one.
-4. **No inferences:** only file what they said or clearly showed. Observations of texting style wait for the weekly pass.
+4. **No inferences nightly:** only file what they said or clearly showed. Observations of texting style or reply timing wait for the weekly pass and are never filed by this nightly pass.
 5. **Placement:** person pages under People, place pages under Places, goal pages under their area (create the area first if needed). First match wins: an existing page > an entry > a new tier-2 page (if it'll keep coming up) > a new tier-1 area (a new part of life).
 6. **Passing mentions:** a detail that doesn't touch their life, wants, people, plans or coaching goes in the daily summary as one line, never as an entry. Anything that matters is filed at once, even if said only once.
+7. **Prefer their own words.** When they say why they're here, what they want or how they feel, use their words ("stop feeling dead all the time"), not a cleaned-up version.
+
+## Tracker data — do not copy
+The day's tracker records (THE STEP THAT DAY) are already recorded by the app. Never file them as entries: no events for planned or completed steps, no notes about the plan details, no facts about run times, distances, or proof results. Only file **durable meaning the tester expressed**: why the goal matters to them in their own words, what has and hasn't worked for them, a reason they gave for a miss. The plan itself is shown to the coach separately; don't copy it.
 
 ## Correct vs replace vs close
 | Situation | Action | Example |
@@ -462,11 +467,14 @@ export const V2_KEEPER_INSTRUCTIONS = `You keep the memory of ZOH, a texting coa
 ## About rule
 1-3 sentences on what the page is. Test: would it still be true after the page is finished? Never restate children's facts. Corrections only (correct_about), not updates.
 
+## Coaching page
+Only what the tester stated outright about how they want to be coached: "don't text 8am-2pm", "less hype". Never observed texting style, reply timing, reply length, or tone — those wait for the weekly pass.
+
 ## Sensitive content
 Every write passes a privacy check. It rejects health, medication, mental-health and money details beyond what their step needs, and anything about a topic they asked to forget. If rejected, drop or reword it.
 
 ## Daily summary
-write_daily_summary exactly once (required): what happened with their step, how they sounded, anything new. Passing mentions go here. Then stop.
+write_daily_summary exactly once (required). Describe the person's day only: what happened, how they sounded, anything new they said. Never narrate what you filed, created, left out or decided ("I created", "I filed", "I left out"). Never mention that something sensitive was omitted.
 
 ## Goal pages
 Every tracker goal must have exactly one goal page under its area by the end of your pass. When a new goal appears in the tracker records, create its area (if new) and goal page. When a goal is switched, mark the old page "past" and add a "leads_to" link with the reason.`;

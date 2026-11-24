@@ -430,6 +430,15 @@ describe("v2 writer tools", () => {
     if (!result.ok) expect(result.error).toContain("Not saved");
   });
 
+  it("sensitive check rejects meta-narration about omitted sensitive content", async () => {
+    const { ctx } = await makeCtx({ checker: rejectChecker("mentions that sensitive content was omitted") });
+    const result = await runV2KeeperTool(ctx, "write_daily_summary", {
+      text: "Sam talked about running. I left out the sleep-aid detail for privacy.",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("Not saved");
+  });
+
   it("replace via tool sets replaces_id and expires old", async () => {
     const { ctx, root } = await makeCtx();
     ctx.openedPages.add(root.id);
