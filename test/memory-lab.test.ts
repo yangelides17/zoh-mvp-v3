@@ -1026,7 +1026,7 @@ describe("grader scope: pages", () => {
     };
   }
 
-  it("dog in daily summary only: scope 'pages' must_not_hold passes", async () => {
+  it("dog in daily summary only: scope 'pages' must_not_hold passes; daily text not in scoped prompt", async () => {
     const model = new FakeClaudeModel();
     // The scoped batch only sees pages (no daily), so model says "no"
     model.script(JSON.stringify({
@@ -1056,6 +1056,14 @@ describe("grader scope: pages", () => {
     const cp = result.checkpoints[0]!;
     expect(cp.mustNotHold[0]!.passed).toBe(true);
     expect(cp.mustNotHold[0]!.present).toBe("no");
+
+    // The scoped batch (second call) must not contain the daily-only text
+    expect(model.requests.length).toBe(2);
+    const scopedPrompt = model.requests[1]!.messages[0]!.content as string;
+    expect(scopedPrompt).not.toContain("neighbor's dog was barking");
+    // But the unscoped batch (first call) should still have it
+    const unscopedPrompt = model.requests[0]!.messages[0]!.content as string;
+    expect(unscopedPrompt).toContain("neighbor's dog was barking");
   });
 
   it("dog on a page: scope 'pages' must_not_hold fails", async () => {
