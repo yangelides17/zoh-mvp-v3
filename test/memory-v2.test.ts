@@ -30,8 +30,10 @@ import {
   v2EntryRef,
 } from "../src/memory/v2-store.js";
 import { runV2KeeperTool, sensitiveCheck, writeV2Day } from "../src/memory/v2-keeper.js";
+import { createMemoryKeeper, type MemoryKeeper } from "../src/memory/keeper.js";
 import { zonedTime } from "../src/nudges/schedule.js";
-import { FakeClaudeModel, makeDb } from "./helpers.js";
+import { FakeClaudeModel, makeDb, ME } from "./helpers.js";
+import type { Logger } from "../src/pipeline/inbound.js";
 
 const TZ = "America/New_York";
 const PHONE = "+19085550100";
@@ -550,5 +552,106 @@ describe("writeV2Day", () => {
     );
     const goalPrompt = allUserMsgs.some((content) => content.includes("tracker goals still need a goal page"));
     expect(goalPrompt).toBe(true);
+  });
+});
+
+// ─── Keeper integration: both passes ─────────────────────────────────
+
+describe("keeper integration", () => {
+  const noopLog = { info: () => {}, warn: () => {}, error: () => {} } as unknown as Logger;
+
+  it("v1 tester writes nothing to v2 tables", async () => {
+    // The default tester has memoryVersion='v2', make a v1 one
+    const earlyAt = zonedTime("2025-10-05", "00:00", TZ);
+    const [v1Tester] = await db
+      .insert(testers)
+      .values({
+        phone: "+15550001111",
+        name: "V1 tester",
+        phase: "active",
+        timeZone: TZ,
+        timeZoneStatus: "confirmed",
+        consentAt: earlyAt,
+        contextStartedAt: earlyAt,
+        memoryVersion: "v1",
+      })
+      .returning();
+
+    // Add a message on a day that needs filing
+    const dayAt = zonedTime("2025-10-06", "10:00", TZ);
+    await db.insert(messages).values({
+      direction: "inbound", contactNumber: v1Tester!.phone, content: "Hello",
+      sentAt: dayAt, createdAt: dayAt,
+    });
+
+    const model = new FakeClaudeModel();
+    // Script: v1 keeper's writeDay will get a call, write a daily doc
+    model.script(
+      { tools: [{ name: "write_daily_doc", input: { title: "Mon Oct 6", summary: "A day", body: "Nothing happened" } }] },
+    );
+
+    const checker = new FakeClaudeModel("SAFE");
+    const keeper = createMemoryKeeper({
+      db, log: noopLog, model, checker, allowedNumbers: ["*"],
+      now: () => zonedTime("2025-10-07", "03:00", TZ),
+    });
+
+    await keeper.tick();
+
+    // V2 tables should be empty for this tester
+    const v2Pages = await getV2Pages(db, v1Tester!.id);
+    expect(v2Pages).toHaveLength(0);
+  });
+
+  it("v2 tester runs both v1 and v2 passes", async () => {
+    const earlyAt = zonedTime("2025-10-05", "00:00", TZ);
+    const [v2Tester] = await db
+      .insert(testers)
+      .values({
+        phone: "+15550002222",
+        name: "V2 tester",
+        phase: "active",
+        timeZone: TZ,
+        timeZoneStatus: "confirmed",
+        consentAt: earlyAt,
+        contextStartedAt: earlyAt,
+        memoryVersion: "v2",
+      })
+      .returning();
+
+    const dayAt = zonedTime("2025-10-06", "10:00", TZ);
+    await db.insert(messages).values({
+      direction: "inbound", contactNumber: v2Tester!.phone, content: "Hey coach",
+      sentAt: dayAt, createdAt: dayAt,
+    });
+
+    const model = new FakeClaudeModel();
+    // V1 pass: write_daily_doc
+    model.script(
+      { tools: [{ name: "write_daily_doc", input: { title: "Mon Oct 6", summary: "A day", body: "Nothing" } }] },
+    );
+    // V2 pass: write_daily_summary
+    model.script(
+      { tools: [{ name: "write_daily_summary", input: { text: "V2 tester texted about their day." } }] },
+    );
+
+    const checker = new FakeClaudeModel("SAFE");
+    const keeper = createMemoryKeeper({
+      db, log: noopLog, model, checker, allowedNumbers: ["*"],
+      now: () => zonedTime("2025-10-07", "03:00", TZ),
+    });
+
+    await keeper.tick();
+
+    // V1 should have written something (memoryPages)
+    const { memoryPages: mp } = await import("../src/db/schema.js");
+    const v1Pages = await db.select().from(mp).where(eq(mp.testerId, v2Tester!.id));
+    expect(v1Pages.length).toBeGreaterThan(0);
+
+    // V2 should have written something (required pages + daily summary)
+    const v2Pages = await getV2Pages(db, v2Tester!.id);
+    expect(v2Pages.length).toBeGreaterThan(0); // at least root, coaching, people, places
+    const v2Dailies = await db.select().from(memoryV2Daily).where(eq(memoryV2Daily.testerId, v2Tester!.id));
+    expect(v2Dailies.length).toBeGreaterThan(0);
   });
 });

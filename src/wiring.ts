@@ -118,6 +118,10 @@ export function nudgeSchedulerFor(deps: AppDeps, log: Logger, lineNumber?: strin
   });
 }
 
+/** #250: Haiku model for the v2 sensitive check. */
+const CHECKER_MODEL = "claude-haiku-4-5-20251001";
+const CHECKER_MAX_TOKENS = 256;
+
 /** The overnight memory pass over the same database, allowed numbers and clock as the app, on the coach's model. */
 export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): MemoryKeeper {
   const p = deps.pipeline;
@@ -131,6 +135,14 @@ export function memoryKeeperFor(config: Config, deps: AppDeps, log: Logger): Mem
           maxTokens: KEEPER_MAX_TOKENS,
           effort: "medium",
           timeoutMs: 120_000,
+        })
+      : undefined,
+    checker: config.claude.apiKey
+      ? createClaudeModel({
+          apiKey: config.claude.apiKey,
+          model: CHECKER_MODEL,
+          maxTokens: CHECKER_MAX_TOKENS,
+          timeoutMs: 15_000,
         })
       : undefined,
     allowedNumbers: p.allowedNumbers,
