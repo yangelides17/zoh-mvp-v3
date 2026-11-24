@@ -321,6 +321,11 @@ export async function runV2KeeperTool(ctx: V2DayContext, name: string, rawInput:
       const rejection = await sensitiveCheck(ctx.checker, toCheck, ctx.forgetTopics);
       if (rejection) return { ok: false, error: `Not saved: ${rejection}` };
 
+      // Validate goal_slug exists in the goals table
+      if (input.goal_slug) {
+        const goalTitle = await getGoalTitle(ctx.db, input.goal_slug);
+        if (!goalTitle) return { ok: false, error: `No goal with slug "${input.goal_slug}". Use the exact slug from the TRACKER GOALS list.` };
+      }
       const pageInput: CreateV2PageInput = {
         kind: input.kind, title: input.title, about: input.about,
         otherNames: input.other_names, goalSlug: input.goal_slug, parentId: parent.id,
@@ -488,8 +493,19 @@ async function v2ContextBlock(db: Db, tester: Tester, date: string): Promise<str
   const dailies = await getV2Dailies(db, tester.id, 7);
   const dailyLines = dailies.map((d) => `${d.date}: ${d.summary}`);
 
+  // Tracker goals (so the writer knows the slugs)
+  const goalRows = await db.select().from(testerGoals).where(eq(testerGoals.testerId, tester.id));
+  const goalSlugs = goalRows.map((r) => r.goalSlug);
+  const goalInfos: string[] = [];
+  for (const slug of goalSlugs) {
+    const title = await getGoalTitle(db, slug);
+    const hasPage = await getV2GoalPage(db, tester.id, slug);
+    goalInfos.push(`${slug} "${title ?? slug}" (role: ${goalRows.find((r) => r.goalSlug === slug)?.role ?? "unknown"}${hasPage ? ", has goal page" : ", needs goal page"})`);
+  }
+
   return [
     `TESTER: ${tester.name ?? "(name not given)"}, phase ${tester.phase}. Today you're filing ${weekdayOf(date)} ${date} (their time).`,
+    goalInfos.length > 0 ? `TRACKER GOALS (use the slug as goal_slug when creating a goal page)\n${goalInfos.join("\n")}` : "",
     `TREE MAP (every page's path, kind, status, About — no entries; use open_pages to read)\n${treeLines.join("\n") || "(no pages yet)"}`,
     openDated.length > 0 ? `OPEN DATED ITEMS (todos, events, follow-ups)\n${datedLines.join("\n")}` : "",
     dailies.length > 0 ? `LAST ${dailies.length} DAILY SUMMARIES\n${dailyLines.join("\n")}` : "",
@@ -560,35 +576,14 @@ export async function writeV2Day(
 
   // End-of-pass: check for missing goal pages
   const missing = await missingGoalPages(db, tester);
-  if (missing.length > 0 && !ctx.wroteDaily) {
-    // Give the writer one more chance to create them
-    const goalNames: string[] = [];
+  if (missing.length > 0) {
+    const goalDescs: string[] = [];
     for (const slug of missing) {
       const title = await getGoalTitle(db, slug);
-      goalNames.push(title ?? slug);
+      goalDescs.push(`"${title ?? slug}" (goal_slug: "${slug}")`);
     }
-    const prompt = `These tracker goals still need a goal page (create each under the right area, creating the area if needed): ${goalNames.join(", ")}. Then write the daily summary and stop.`;
-    claudeMessages.push({ role: "user", content: prompt });
-    for (let round = 0; round < 4; round++) {
-      const response = await writerModel.create({ system, messages: claudeMessages, tools: V2_KEEPER_TOOLS, toolChoice: round === 3 ? "none" : "auto" });
-      const calls = response.content.filter((b) => b.type === "tool_use");
-      if (calls.length === 0) break;
-      const results: Anthropic.ToolResultBlockParam[] = [];
-      for (const call of calls) {
-        const outcome = await runV2KeeperTool(ctx, call.name, call.input);
-        results.push({ type: "tool_result", tool_use_id: call.id, ...(outcome.ok ? { content: outcome.message } : { content: outcome.error, is_error: true }) });
-      }
-      claudeMessages.push({ role: "assistant", content: response.raw ?? (response.content as Anthropic.ContentBlockParam[]) });
-      claudeMessages.push({ role: "user", content: results });
-    }
-  } else if (missing.length > 0 && ctx.wroteDaily) {
-    // Daily already written but goals missing — give extra rounds for pages only
-    const goalNames: string[] = [];
-    for (const slug of missing) {
-      const title = await getGoalTitle(db, slug);
-      goalNames.push(title ?? slug);
-    }
-    const prompt = `These tracker goals still need a goal page (create each under the right area, creating the area if needed): ${goalNames.join(", ")}.`;
+    const suffix = ctx.wroteDaily ? "" : " Then write the daily summary and stop.";
+    const prompt = `These tracker goals still need a goal page (create each under the right area, creating the area if needed; use the goal_slug shown): ${goalDescs.join(", ")}.${suffix}`;
     claudeMessages.push({ role: "user", content: prompt });
     for (let round = 0; round < 4; round++) {
       const response = await writerModel.create({ system, messages: claudeMessages, tools: V2_KEEPER_TOOLS, toolChoice: round === 3 ? "none" : "auto" });
