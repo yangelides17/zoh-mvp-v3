@@ -3797,6 +3797,55 @@
    "change": "unchanged"
   },
   {
+   "text": "Rewrite this daily summary, removing any mention of this topic: \"${trimmedNote ?? pageTitles.join(\"; \") ?? \"the forgotten content\"}\". Keep everything else. If nothing remains, write \"No notable events.\"",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rewritePrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Original summary: ${daily.summary}",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rewritePrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "the forgotten content",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rewritePrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > response > system > text",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "No notable events.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rewritten",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "No notable events.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Asked to forget something on ${localDate(at, tester.timeZone)}.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > text",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
    "text": "Forgotten${removed.length ? `: ${removed.join(\"; \")}` : \"\"}${forgetNote ? ` (won't keep: ${forgetNote})` : \"\"}.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > message",

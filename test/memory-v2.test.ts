@@ -2,8 +2,10 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   goals,
+  memoryForgotten,
   memoryV2Daily,
   memoryV2Entries,
+  memoryV2ForgetTopics,
   memoryV2Pages,
   messages,
   testerGoals,
@@ -11,6 +13,7 @@ import {
   type Message,
   type Tester,
 } from "../src/db/schema.js";
+import { runMemoryTool, type LookupBudget } from "../src/memory/coach-tools.js";
 import type { Db } from "../src/db/client.js";
 import {
   addV2Entry,
@@ -653,5 +656,115 @@ describe("keeper integration", () => {
     expect(v2Pages.length).toBeGreaterThan(0); // at least root, coaching, people, places
     const v2Dailies = await db.select().from(memoryV2Daily).where(eq(memoryV2Daily.testerId, v2Tester!.id));
     expect(v2Dailies.length).toBeGreaterThan(0);
+  });
+});
+
+// ─── V2 forget tests ────────────────────────────────────────────────
+
+describe("v2 forget", () => {
+  it("deletes entry and its replace chain, marks messages forgotten, records topic", async () => {
+    const { root, coaching } = await ensureV2RequiredPages(db, tester, at);
+    // Create an entry and its replacement
+    const e1 = await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Heading to Clemson", sourceMessageId: msgId }, at);
+    const m2 = await say(tester, "Emma chose Clemson");
+    const e2 = await replaceV2Entry(db, e1, { pageId: root.id, testerId: tester.id, type: "fact", text: "Emma chose Clemson", sourceMessageId: m2.id }, at);
+    // Write a daily summary that references the message
+    await writeV2Daily(db, tester.id, "2025-10-06", "Sam talked about Clemson.", [msgId, m2.id], at);
+
+    const checker = new FakeClaudeModel("No notable events.");
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "forget", {
+      facts: [v2EntryRef(e2.id)],
+      note: "Clemson",
+    }, { at, budget, sourceMessageId: msgId, checker });
+
+    expect(result.ok).toBe(true);
+
+    // Both entries in the chain should be deleted
+    const entries = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.testerId, tester.id));
+    // Only the coaching note should remain
+    const nonCoaching = entries.filter((e) => e.pageId !== coaching.id);
+    expect(nonCoaching).toHaveLength(0);
+
+    // Messages should be marked forgotten
+    const forgotten = await db.select().from(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
+    expect(forgotten.length).toBeGreaterThan(0);
+
+    // Topic should be recorded
+    const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
+    expect(topics.length).toBe(1);
+    expect(topics[0]!.topic).toBe("Clemson");
+
+    // Daily summary should have been rewritten
+    const [daily] = await db.select().from(memoryV2Daily).where(eq(memoryV2Daily.testerId, tester.id));
+    expect(daily!.summary).toBe("No notable events.");
+  });
+
+  it("500-character topic still works", async () => {
+    await ensureV2RequiredPages(db, tester, at);
+    const longTopic = "a".repeat(500);
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "forget", {
+      note: longTopic,
+    }, { at, budget, sourceMessageId: msgId });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("root page can't be deleted via forget", async () => {
+    const { root } = await ensureV2RequiredPages(db, tester, at);
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    // Try to forget the root page — it should fail at the v1 level (not a person/subject)
+    // and the v2 deleteV2Page also rejects it
+    const result = await runMemoryTool(db, tester, "forget", {
+      pages: [v2PageRef(root.id)],
+      note: "root",
+    }, { at, budget, sourceMessageId: msgId });
+
+    // The v1 forget will fail on this ref (not found in v1) and the v2 deleteV2Page rejects root
+    // But the note still gets recorded, so it returns ok
+    // Actually, the v1 path skips if not found and moves to v2 path, which rejects root deletion
+    // but doesn't return an error — it just continues. The forget still succeeds with just the note.
+    expect(result.ok).toBe(true);
+    // Root page should still exist
+    const pages = await getV2Pages(db, tester.id);
+    const rootPage = pages.find((p) => p.kind === "root");
+    expect(rootPage).toBeDefined();
+  });
+
+  it("v2 forget also removes v1 memory (switching back never restores it)", async () => {
+    // Create v1 memory too (a fact on a person page)
+    const { memoryPages: mp, memoryFacts: mf } = await import("../src/db/schema.js");
+    const [v1Page] = await db.insert(mp).values({
+      testerId: tester.id, kind: "person", title: "Ana", summary: "His sister",
+    }).returning();
+    await db.insert(mf).values({
+      pageId: v1Page!.id, testerId: tester.id, text: "Ana is his sister", sourceMessageId: msgId,
+    });
+
+    // Create v2 person page under People
+    const { people } = await ensureV2RequiredPages(db, tester, at);
+    const personResult = await createV2Page(db, tester.id, { kind: "person", title: "Ana", parentId: people.id }, at);
+    expect(personResult.ok).toBe(true);
+    if (!personResult.ok) return;
+    await addV2Entry(db, { pageId: personResult.value.id, testerId: tester.id, type: "fact", text: "Ana is his sister", sourceMessageId: msgId }, at);
+
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    // Forget the v1 person page (the v2 page has a different ref, so we target the v1 one)
+    const { pageRef } = await import("../src/memory/store.js");
+    const result = await runMemoryTool(db, tester, "forget", {
+      pages: [pageRef(v1Page!.id)],
+      note: "Ana",
+    }, { at, budget, sourceMessageId: msgId });
+
+    expect(result.ok).toBe(true);
+    // V1 page should be deleted
+    const v1Pages = await db.select().from(mp).where(eq(mp.testerId, tester.id));
+    const v1Person = v1Pages.find((p) => p.kind === "person");
+    expect(v1Person).toBeUndefined();
+
+    // Source messages should be marked forgotten
+    const forgotten = await db.select().from(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
+    expect(forgotten.length).toBeGreaterThan(0);
   });
 });
