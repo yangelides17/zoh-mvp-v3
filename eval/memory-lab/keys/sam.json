@@ -32,7 +32,7 @@
       ],
       "must_not_hold": [
         { "id": "no-melatonin", "statement": "Anything about melatonin, sleep aids or medication." },
-        { "id": "no-dog", "statement": "Anything about a neighbor's dog." },
+        { "id": "no-dog", "statement": "Anything about a neighbor's dog.", "scope": "pages" },
         { "id": "no-sister-age", "statement": "An age for Sam's sister." }
       ],
       "probes": [
@@ -48,7 +48,7 @@
         { "id": "suit-done", "statement": "Sam needed to pick up a suit for the wedding, and he did on day 11 (or memory holds no open reminder about the suit)." }
       ],
       "must_not_hold": [
-        { "id": "no-suit-runner", "statement": "Anything about a man running in a suit." },
+        { "id": "no-suit-runner", "statement": "Anything about a man running in a suit.", "scope": "pages" },
         { "id": "one-sister", "statement": "Two different sisters, or the sister recorded twice as separate people." }
       ],
       "probes": []
@@ -106,7 +106,7 @@
       ],
       "must_not_hold": [
         { "id": "no-marc-person", "statement": "Marc and Marco as two different people." },
-        { "id": "no-car", "statement": "Anything about Sam's car." },
+        { "id": "no-car", "statement": "Anything about Sam's car.", "scope": "pages" },
         { "id": "job-not-decided", "statement": "Sam has decided to change jobs or is leaving his job." },
         { "id": "no-melatonin-28", "statement": "Anything about melatonin, sleep aids or medication." }
       ],

@@ -14,7 +14,7 @@
       ],
       "must_not_hold": [
         { "id": "not-sophomore", "statement": "Maya is a sophomore (as the current information)." },
-        { "id": "no-lost-id", "statement": "Anything about Maya losing her student ID." },
+        { "id": "no-lost-id", "statement": "Anything about Maya losing her student ID.", "scope": "pages" },
         { "id": "no-age", "statement": "Any age for Maya." }
       ],
       "probes": [
@@ -77,7 +77,7 @@
       ],
       "must_not_hold": [
         { "id": "not-switching-majors-28", "statement": "Maya is switching or considering switching majors." },
-        { "id": "no-lost-id-28", "statement": "Anything about Maya losing her student ID." },
+        { "id": "no-lost-id-28", "statement": "Anything about Maya losing her student ID.", "scope": "pages" },
         { "id": "no-connell-person-28", "statement": "Connell recorded as a real person Maya knows. (Mentioning Connell as a character in her book is fine and does not count.)" },
         { "id": "midterms-not-upcoming", "statement": "Memory presents Maya's midterms as still ahead of her as of now. (Dated past mentions, like what she said on an earlier day, are fine and do not count.)" }
       ],

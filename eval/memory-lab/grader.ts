@@ -8,7 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import type { ClaudeModel } from "../../src/claude/replier.js";
-import { answerKeySchema, type AnswerKey, type Checkpoint } from "./keys/schema.js";
+import { answerKeySchema, type AnswerKey, type Checkpoint, type Statement } from "./keys/schema.js";
 import type { MemorySnapshot } from "./snapshot.js";
 import { stripForGrader } from "./snapshot.js";
 
@@ -144,13 +144,22 @@ export async function gradeRun(
 
     try {
       const stripped = stripForGrader(entry.snapshot);
-      const memoryJson = JSON.stringify({
-        pages: stripped.pages.map((p) => ({ id: p.id, kind: p.kind, title: p.title, summary: p.summary, body: p.body, goalSlug: p.goalSlug, status: p.status, date: p.date })),
-        facts: stripped.facts.map((f) => ({ id: f.id, pageId: f.pageId, section: f.section, label: f.label, text: f.text, day: f.day })),
-        links: stripped.links.map((l) => ({ fromPageId: l.fromPageId, toPageId: l.toPageId, kind: l.kind })),
+      const toPageJson = (pages: typeof stripped.pages, facts: typeof stripped.facts, links: typeof stripped.links) => JSON.stringify({
+        pages: pages.map((p) => ({ id: p.id, kind: p.kind, title: p.title, summary: p.summary, body: p.body, goalSlug: p.goalSlug, status: p.status, date: p.date })),
+        facts: facts.map((f) => ({ id: f.id, pageId: f.pageId, section: f.section, label: f.label, text: f.text, day: f.day })),
+        links: links.map((l) => ({ fromPageId: l.fromPageId, toPageId: l.toPageId, kind: l.kind })),
       }, null, 2);
 
-      const score = await gradeCheckpoint(model, cp, memoryJson, entry.rendered, totalUsage, dayTable);
+      const memoryJson = toPageJson(stripped.pages, stripped.facts, stripped.links);
+
+      // Pages-only: exclude daily summaries and their facts (for scope: "pages" statements)
+      const nonDailyPages = stripped.pages.filter((p) => p.kind !== "daily");
+      const nonDailyPageIds = new Set(nonDailyPages.map((p) => p.id));
+      const nonDailyFacts = stripped.facts.filter((f) => nonDailyPageIds.has(f.pageId));
+      const nonDailyLinks = stripped.links.filter((l) => nonDailyPageIds.has(l.fromPageId) && nonDailyPageIds.has(l.toPageId));
+      const pagesOnlyJson = toPageJson(nonDailyPages, nonDailyFacts, nonDailyLinks);
+
+      const score = await gradeCheckpoint(model, cp, memoryJson, pagesOnlyJson, entry.rendered, totalUsage, dayTable);
       checkpoints.push(score);
     } catch (err) {
       // Record the error for this checkpoint and continue with the rest
@@ -175,6 +184,7 @@ async function gradeCheckpoint(
   model: ClaudeModel,
   cp: Checkpoint,
   memoryJson: string,
+  pagesOnlyJson: string,
   rendered: string,
   usage: { input: number; output: number },
   dayTable?: string,
@@ -183,18 +193,27 @@ async function gradeCheckpoint(
   const mustNotHold: StatementVerdict[] = [];
   let nearDuplicates: string[] = [];
 
-  // Batch 1: must_hold + must_not_hold + near-duplicate scan
-  if (cp.must_hold.length > 0 || cp.must_not_hold.length > 0) {
-    const statementsBlock = [
-      ...cp.must_hold.map((s) => `[${s.id}] "${s.statement}"`),
-      ...cp.must_not_hold.map((s) => `[${s.id}] "${s.statement}"`),
-    ].join("\n");
+  // Split statements into unscoped (full memory) and scoped (pages only)
+  const allStatements = [...cp.must_hold, ...cp.must_not_hold];
+  const unscopedStatements = allStatements.filter((s) => !s.scope);
+  const scopedStatements = allStatements.filter((s) => s.scope === "pages");
 
+  // Grade a batch of statements against a given memory JSON
+  const gradeBatch = async (statements: Statement[], memory: string, includeDuplicateScan: boolean) => {
+    if (statements.length === 0) return;
+
+    const statementsBlock = statements.map((s) => `[${s.id}] "${s.statement}"`).join("\n");
     const dayTableLine = dayTable ? `\n${dayTable}\n` : "";
+    const duplicateLine = includeDuplicateScan
+      ? "\n\nAlso scan the facts for near-duplicates: facts with the same meaning but different wording on the same page."
+      : "";
+    const duplicateField = includeDuplicateScan
+      ? `,\n  "near_duplicates": ["<description of duplicate pair>"]`
+      : "";
     const prompt = `You are checking a coaching app's memory system. Below is the structured memory (JSON) for a tester after day ${cp.after_day}.
 ${dayTableLine}
 MEMORY (JSON):
-${memoryJson}
+${memory}
 
 STATEMENTS TO CHECK:
 ${statementsBlock}
@@ -203,14 +222,11 @@ For each statement, decide whether the information described is present in the m
 - Answer "present: yes" if the memory contains this information.
 - For statements that include "(as of now)" or "(currently)", a dated past mention or a joke does not count — the information must be presented as current.
 - If present, set "present" to "yes" and "evidence" to an exact quote from the memory JSON that supports it.
-- If not present, set "present" to "no" and "evidence" to "none".
-
-Also scan the facts for near-duplicates: facts with the same meaning but different wording on the same page.
+- If not present, set "present" to "no" and "evidence" to "none".${duplicateLine}
 
 Respond with JSON only, no other text:
 {
-  "verdicts": [{ "id": "<statement id>", "reasoning": "<one sentence>", "present": "yes" or "no", "evidence": "<exact quote from memory or none>" }],
-  "near_duplicates": ["<description of duplicate pair>"]
+  "verdicts": [{ "id": "<statement id>", "reasoning": "<one sentence>", "present": "yes" or "no", "evidence": "<exact quote from memory or none>" }]${duplicateField}
 }`;
 
     const response = await model.create({
@@ -228,16 +244,16 @@ Respond with JSON only, no other text:
     }
 
     const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
-    // Extract JSON from possible markdown code block
     const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
     try {
       const parsed = JSON.parse(jsonStr) as { verdicts?: unknown; near_duplicates?: unknown };
       const verdicts = statementVerdictSchema.parse(parsed.verdicts ?? []);
-      nearDuplicates = duplicateSchema.parse(parsed.near_duplicates ?? []);
+      if (includeDuplicateScan) {
+        nearDuplicates = duplicateSchema.parse(parsed.near_duplicates ?? []);
+      }
 
       for (const v of verdicts) {
-        // Code-decided presence: does the evidence quote actually appear in memory?
-        const codePresent = evidenceFoundInMemory(v.evidence, memoryJson);
+        const codePresent = evidenceFoundInMemory(v.evidence, memory);
         const decided: "present" | "absent" = codePresent ? "present" : "absent";
         const contradicted = (v.present === "yes") !== codePresent;
 
@@ -259,10 +275,18 @@ Respond with JSON only, no other text:
         if (mnh) mustNotHold.push({ ...mnh, ...verdict });
       }
     } catch {
-      // If parsing fails, mark all as unknown
-      for (const s of cp.must_hold) mustHold.push({ ...s, present: "no", evidence: "none", reasoning: "Grader response parsing failed", decided: "absent" as const, passed: false, contradicted: false });
-      for (const s of cp.must_not_hold) mustNotHold.push({ ...s, present: "yes", evidence: "none", reasoning: "Grader response parsing failed", decided: "present" as const, passed: false, contradicted: false });
+      for (const s of statements) {
+        const isMustHold = cp.must_hold.some((m) => m.id === s.id);
+        if (isMustHold) mustHold.push({ ...s, present: "no", evidence: "none", reasoning: "Grader response parsing failed", decided: "absent" as const, passed: false, contradicted: false });
+        else mustNotHold.push({ ...s, present: "yes", evidence: "none", reasoning: "Grader response parsing failed", decided: "present" as const, passed: false, contradicted: false });
+      }
     }
+  };
+
+  // Run unscoped batch (full memory, with duplicate scan) then scoped batch (pages only)
+  if (unscopedStatements.length > 0 || scopedStatements.length > 0) {
+    await gradeBatch(unscopedStatements, memoryJson, true);
+    await gradeBatch(scopedStatements, pagesOnlyJson, false);
   }
 
   // Batch 2: probes (see the rendered memory block, not the JSON)

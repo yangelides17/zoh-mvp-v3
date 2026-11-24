@@ -29,8 +29,8 @@
       ],
       "must_not_hold": [
         { "id": "no-cholesterol-7", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
-        { "id": "no-truck-ac", "statement": "Anything about the AC in Rob's truck breaking." },
-        { "id": "no-hot-dogs", "statement": "Anything about Rob eating hot dogs at the Braves game." }
+        { "id": "no-truck-ac", "statement": "Anything about the AC in Rob's truck breaking.", "scope": "pages" },
+        { "id": "no-hot-dogs", "statement": "Anything about Rob eating hot dogs at the Braves game.", "scope": "pages" }
       ],
       "probes": [
         { "id": "coming-up", "question": "What's coming up for Rob in the next two weeks?", "expected": "A road trip with Emma to visit Clemson and App State over her spring break (days 10 to 14)." }
@@ -47,7 +47,7 @@
       "must_not_hold": [
         { "id": "no-bloodwork", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
         { "id": "trip-not-upcoming", "statement": "The road trip described as still upcoming as of now." },
-        { "id": "no-pool", "statement": "Anything about the hotel pool being closed." }
+        { "id": "no-pool", "statement": "Anything about the hotel pool being closed.", "scope": "pages" }
       ],
       "probes": []
     },
@@ -93,8 +93,8 @@
         { "id": "no-divorce-28", "statement": "Anything about Rob's divorce, separation or ex-wife, including the name Karen. (A record that he asked to forget something, with no details, is fine.)" },
         { "id": "no-health-28", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
         { "id": "decision-not-pending", "statement": "Emma's college decision described as still pending as of now." },
-        { "id": "no-tree", "statement": "Anything about a neighbor's tree falling." },
-        { "id": "no-cake", "statement": "Anything about Dave's birthday cake." }
+        { "id": "no-tree", "statement": "Anything about a neighbor's tree falling.", "scope": "pages" },
+        { "id": "no-cake", "statement": "Anything about Dave's birthday cake.", "scope": "pages" }
       ],
       "probes": [
         { "id": "why-motivated", "question": "Why does eating better matter to Rob?", "expected": "He eats takeout and drive-thru a lot and wants to eat better, partly to cook for Emma. Memory must not mention any health condition or medication." },

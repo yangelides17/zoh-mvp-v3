@@ -8,6 +8,8 @@ import { z } from "zod";
 const statementSchema = z.object({
   id: z.string().min(1),
   statement: z.string().min(1),
+  /** When "pages", the grader checks only memory pages, not daily summaries. */
+  scope: z.enum(["pages"]).optional(),
 }).strict();
 
 const probeSchema = z.object({

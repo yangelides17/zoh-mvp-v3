@@ -998,6 +998,108 @@ describe("grader evidence-based verdicts (#152)", () => {
   });
 });
 
+// ---- Grader: scope: "pages" ----
+
+describe("grader scope: pages", () => {
+  /** Build a snapshot with a daily page (kind "daily") and a self page. */
+  function makeSnapshotWithDaily(dailyFacts: string[], pageFacts: string[]) {
+    const now = new Date();
+    const dailyPage = { id: "p-daily", testerId: "t1", kind: "daily" as const, title: "Day 7", summary: "", body: "", goalSlug: null, status: "active" as const, date: "2026-11-08", createdAt: now, updatedAt: now };
+    const selfPage = { id: "p-self", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now };
+    return {
+      snapshot: {
+        pages: [selfPage, dailyPage],
+        facts: [
+          ...pageFacts.map((text, i) => ({
+            id: `fp${i}`, pageId: "p-self", testerId: "t1", section: "", label: null,
+            text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+          })),
+          ...dailyFacts.map((text, i) => ({
+            id: `fd${i}`, pageId: "p-daily", testerId: "t1", section: "", label: null,
+            text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+          })),
+        ],
+        links: [],
+        forgotten: [],
+      },
+      rendered: [...pageFacts, ...dailyFacts].join("\n"),
+    };
+  }
+
+  it("dog in daily summary only: scope 'pages' must_not_hold passes", async () => {
+    const model = new FakeClaudeModel();
+    // The scoped batch only sees pages (no daily), so model says "no"
+    model.script(JSON.stringify({
+      verdicts: [{ id: "unscoped-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+    model.script(JSON.stringify({
+      verdicts: [{ id: "no-dog", reasoning: "not found in pages", present: "no", evidence: "none" }],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "unscoped-1", statement: "Tester likes running" }],
+        must_not_hold: [{ id: "no-dog", statement: "Anything about a neighbor's dog.", scope: "pages" }],
+        probes: [],
+      }],
+    };
+    const snaps = new Map([[7, makeSnapshotWithDaily(
+      ["neighbor's dog was barking all morning"],  // daily only
+      ["likes running"],                           // on a page
+    )]]);
+
+    const result = await gradeRun(model, key, snaps);
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.passed).toBe(true);
+    expect(cp.mustNotHold[0]!.present).toBe("no");
+  });
+
+  it("dog on a page: scope 'pages' must_not_hold fails", async () => {
+    const model = new FakeClaudeModel();
+    // Unscoped batch
+    model.script(JSON.stringify({
+      verdicts: [{ id: "unscoped-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+    // Scoped batch: model sees the dog on a page and says yes with evidence
+    model.script(JSON.stringify({
+      verdicts: [{ id: "no-dog", reasoning: "found on page", present: "yes", evidence: "neighbor's dog was barking all morning" }],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "unscoped-1", statement: "Tester likes running" }],
+        must_not_hold: [{ id: "no-dog", statement: "Anything about a neighbor's dog.", scope: "pages" }],
+        probes: [],
+      }],
+    };
+    const snaps = new Map([[7, makeSnapshotWithDaily(
+      [],                                                 // nothing in daily
+      ["likes running", "neighbor's dog was barking all morning"],  // dog on a page
+    )]]);
+
+    const result = await gradeRun(model, key, snaps);
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.passed).toBe(false);
+    expect(cp.mustNotHold[0]!.present).toBe("yes");
+  });
+
+  it("answer keys with scope: pages validate", () => {
+    for (const file of ["sam.json", "maya.json", "rob.json"]) {
+      const raw = fs.readFileSync(path.resolve(import.meta.dirname, `../eval/memory-lab/keys/${file}`), "utf-8");
+      const result = answerKeySchema.safeParse(JSON.parse(raw));
+      expect(result.success, `${file} validation failed`).toBe(true);
+    }
+  });
+});
+
 // ---- Grader: per-checkpoint error isolation ----
 
 describe("grader per-checkpoint error isolation", () => {
