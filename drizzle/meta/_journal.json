@@ -211,6 +211,13 @@
       "when": 1795043730111,
       "tag": "0029_yummy_selene",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795555069559,
+      "tag": "0030_big_swordsman",
+      "breakpoints": true
     }
   ]
 }
