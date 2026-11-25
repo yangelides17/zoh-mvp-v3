@@ -8,49 +8,46 @@
     "goal": "nutrition",
     "phase": "active",
     "history_hours_ago": 20,
-    "answers": { "what": "pack lunch the night before", "when": "9 pm", "tracks_with": "photo of the packed lunch" },
+    "answers": { "what": "pack lunch Mon-Thu, cook dinner Tue/Thu", "when": "Sunday batch cook", "tracks_with": "photo of lunch + dinner" },
     "history": [
       { "from": "zoh", "text": "Rob! Lunch packed for tomorrow?" },
       { "from": "tester", "text": "yep turkey wrap, easy" },
       { "from": "zoh", "text": "Perfect. That's day 28 done." }
     ],
     "plan": {
-      "step": "Pack lunch the night before",
+      "step": "Pack lunch Mon-Thu + cook dinner Tue/Thu",
       "place": "kitchen",
-      "time": "21:00",
+      "time": "18:00",
       "days": ["sun", "mon", "tue", "wed", "thu"],
       "proof": "photo",
-      "reason": "Packing the night before means you're not scrambling in the morning or buying food.",
-      "minutes": 15,
+      "proof_note": "photo of lunch + dinner",
+      "reason": "She thinks I eat like garbage. She's not wrong.",
+      "minutes": 30,
       "started_days_ago": 28
     },
     "step_days": [
-      { "days_ago": 1, "status": "done" },
-      { "days_ago": 2, "status": "done" }
+      { "days_ago": 1, "status": "done", "note": "Down 6 lbs, found park on south side for lunch" },
+      { "days_ago": 2, "status": "done", "note": "Practice taco night with Emma" }
     ],
     "memory_v2": {
       "pages": [
         {
           "kind": "root",
           "title": "Rob",
-          "about": "Rob is focused on eating healthier. Packs lunches for work.",
-          "entries": [
-            { "type": "fact", "text": "Works in construction, long days" },
-            { "type": "fact", "text": "Trying to eat better for his health, not for weight loss" }
-          ]
+          "about": "Sells HVAC parts, drives a truck to contractors Mon-Thu. Fridays paperwork from home. Weekends family time. \"She thinks I eat like garbage. She's not wrong.\" (Emma put ZOH's number in his phone). Atlanta, GA. Down 6 lbs."
         },
         {
           "kind": "coaching",
           "title": "Coaching",
           "about": "How Rob likes to be coached",
           "entries": [
-            { "type": "fact", "text": "Prefers short direct texts, no fluff" }
+            { "type": "fact", "text": "\"can you not text me on weekends unless I text you. Weekends are my time with Emma\"" }
           ]
         },
         {
           "kind": "people",
           "title": "People",
-          "about": "Everyone in Rob's life"
+          "about": "People in Rob's life"
         },
         {
           "kind": "places",
@@ -59,33 +56,57 @@
         },
         {
           "kind": "area",
-          "title": "Eating",
-          "about": "Rob's eating habits and lunch packing",
+          "title": "Nutrition",
+          "about": "Rob's focus goal — eating better, packing lunches, cooking dinners with Emma",
           "parent_title": "Rob"
         },
         {
           "kind": "goal",
-          "title": "Eating goal",
-          "about": "Pack lunch the night before, Sun–Thu",
-          "parent_title": "Eating",
+          "title": "Nutrition goal",
+          "about": "Plan v4: Pack lunch Mon-Thu + cook dinner Tue/Thu. Photo of lunch + dinner. Emma helping. Previous: packed lunch only, then road-trip rules, then back to packed lunch. Keys-on-the-bag trick. Sunday batch cooking (\"Making a big batch sunday is the move\"). What works: batch cooking, keys trick.",
+          "parent_title": "Nutrition",
           "goal_slug": "nutrition"
         },
         {
           "kind": "person",
           "title": "Emma",
-          "about": "Rob's daughter, senior in high school, chose Clemson",
+          "about": "Rob's daughter, high school senior, picked Clemson (day 26), wore the orange on road trip, lives with Rob every other week, offered to help cook, made salsa for taco night",
           "parent_title": "People",
           "entries": [
-            { "type": "fact", "text": "Rob's daughter, 17 years old" },
-            { "type": "fact", "text": "Senior in high school" },
-            { "type": "fact", "text": "Chose Clemson for college — Rob is proud" },
-            { "type": "event", "text": "Clemson campus visit coming up", "when": "2026-11-15", "status": "open" }
+            { "type": "fact", "text": "High school senior" },
+            { "type": "fact", "text": "Picked Clemson for college (day 26), wore the orange on road trip" },
+            { "type": "fact", "text": "Lives with Rob every other week" },
+            { "type": "fact", "text": "Offered to help cook, made salsa for taco night" },
+            { "type": "fact", "text": "Put ZOH's number in Rob's phone" }
           ]
+        },
+        {
+          "kind": "person",
+          "title": "Dave",
+          "about": "Friend/work buddy. Went to Braves game (day 7). Brought birthday cake (day 23).",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "Friend and work buddy" },
+            { "type": "event", "text": "Went to Braves game together day 7" },
+            { "type": "event", "text": "Brought birthday cake day 23" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "South side territory",
+          "about": "New sales area since day 22",
+          "parent_title": "Places"
+        },
+        {
+          "kind": "place",
+          "title": "Park on the south side",
+          "about": "Found day 28, eats lunch there",
+          "parent_title": "Places"
         }
       ],
       "daily": [
-        { "date": "2026-10-31", "summary": "Packed turkey wrap. Quick check-in." },
-        { "date": "2026-10-30", "summary": "Packed chicken salad. Rob mentioned Emma got her Clemson acceptance packet." }
+        { "date": "2026-10-31", "summary": "Down 6 lbs, found park on south side for lunch." },
+        { "date": "2026-10-30", "summary": "Practice taco night with Emma." }
       ],
       "forget_topics": ["the divorce and Karen"]
     }
@@ -93,5 +114,5 @@
   "startTime": "18:30",
   "testerLines": ["emma's mom is picking her up from practice tomorrow"],
   "whatWentWrong": "New case: v2 forget integrity test.",
-  "shouldHaveHappened": "Rob asked to forget the divorce and Karen. When he mentions 'Emma's mom', ZOH says nothing about Karen by name, the divorce, or any detail from the forgotten content. It responds naturally about Emma (the practice pickup, the Clemson visit maybe) without connecting to the erased context. It does NOT ask who Emma's mom is or probe for details about the relationship."
+  "shouldHaveHappened": "Rob asked to forget the divorce and Karen. When he mentions 'Emma's mom', ZOH says nothing about Karen by name, the divorce, or any detail from the forgotten content. It responds naturally about Emma (the practice pickup, maybe Clemson) without connecting to the erased context. It does NOT ask who Emma's mom is or probe for details about the relationship."
 }

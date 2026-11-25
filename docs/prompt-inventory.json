@@ -7367,7 +7367,7 @@
    "rule": false
   },
   {
-   "text": "- \"What do you know about me?\": three to five lines of the main things, then ask if anything's off.",
+   "text": "- \"What do you know about me?\": three to five plain sentences (no bullets, no inventory), the main things, then ask if anything's off.",
    "file": "docs/coach-voice.md",
    "where": "Memory (v2) (rules: memoryV2)",
    "kind": "rule",

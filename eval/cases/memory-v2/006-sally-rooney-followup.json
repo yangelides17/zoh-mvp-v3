@@ -5,49 +5,63 @@
   "suite": "capability",
   "seed": {
     "name": "Maya",
-    "goal": "reading",
+    "goal": "deep_work",
     "phase": "active",
     "history_hours_ago": 2,
-    "answers": { "what": "read 20 pages", "where": "the couch", "when": "9 pm", "how_long": "25 min" },
+    "answers": { "what": "one 45-min study block, phone in another room", "where": "her desk", "when": "10 pm", "how_long": "45 min" },
+    "quiet_hours": { "start": "02:00", "end": "11:00" },
     "history": [
-      { "from": "zoh", "text": "Maya! 20 pages on the couch at 9 tonight." },
+      { "from": "zoh", "text": "Maya! 45-min study block at 10 tonight, phone in the other room." },
       { "from": "tester", "text": "yep on it" },
       { "from": "zoh", "text": "Let's go." }
     ],
     "plan": {
-      "step": "Read 20 pages",
-      "place": "the couch",
-      "time": "21:00",
-      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-      "proof": "photo",
-      "proof_note": "the page you stop on",
-      "reason": "Twenty pages a night finishes a book every two weeks.",
-      "minutes": 25,
+      "step": "One 45-min study block, phone in another room",
+      "place": "her desk",
+      "time": "22:00",
+      "days": ["sun", "mon", "tue", "thu"],
+      "proof": "screenshot",
+      "proof_note": "timer screenshot",
+      "reason": "i used to read so much and now i just scroll",
+      "minutes": 45,
       "started_days_ago": 28
     },
     "step_days": [
       { "days_ago": 1, "status": "done" },
       { "days_ago": 2, "status": "done" }
     ],
+    "maintenance": [
+      {
+        "goal": "reading",
+        "step": "15 pages of Normal People by Sally Rooney",
+        "time": "23:30",
+        "since_days_ago": 13,
+        "streak_days": 12,
+        "checkins": [
+          { "days_ago": 7, "answer": "kept_up" },
+          { "days_ago": 1, "answer": "kept_up" }
+        ]
+      }
+    ],
     "memory_v2": {
       "pages": [
         {
           "kind": "root",
           "title": "Maya",
-          "about": "Maya loves reading. Works as a graphic designer.",
-          "entries": [
-            { "type": "fact", "text": "Works as a graphic designer at a small agency" }
-          ]
+          "about": "College junior, economics major, in Boston. Night owl, texts 10pm-2am. \"i used to read so much and now i just scroll\"."
         },
         {
           "kind": "coaching",
           "title": "Coaching",
-          "about": "How Maya likes to be coached"
+          "about": "How Maya likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Quiet hours 2am-11am (chosen)" }
+          ]
         },
         {
           "kind": "people",
           "title": "People",
-          "about": "Everyone in Maya's life"
+          "about": "People in Maya's life"
         },
         {
           "kind": "places",
@@ -57,44 +71,78 @@
         {
           "kind": "area",
           "title": "Reading",
-          "about": "Maya's reading habit",
+          "about": "Maya's reading habit — maintenance goal since she switched focus to deep work for midterms",
+          "parent_title": "Maya"
+        },
+        {
+          "kind": "area",
+          "title": "Studying/Deep Work",
+          "about": "Maya's focus since day 15 — midterms",
           "parent_title": "Maya"
         },
         {
           "kind": "goal",
+          "title": "Deep work goal",
+          "about": "Plan v2: One 45-min study block, phone in another room, Sun/Mon/Tue/Thu at 10pm. Switched from reading to deep_work for midterms (day 15). Takeaway: practice problems > rereading notes. Midterms done day 25.",
+          "parent_title": "Studying/Deep Work",
+          "goal_slug": "deep_work"
+        },
+        {
+          "kind": "goal",
           "title": "Reading goal",
-          "about": "Read 20 pages every night at 9 pm on the couch",
+          "about": "15 pages of Normal People by Sally Rooney, Sun-Thu 11:30pm. Book borrowed from a friend \"like a year ago\". Finished Normal People on the train home day 28. Wants next Sally Rooney — ZOH said \"Let me think on it.\"",
           "parent_title": "Reading",
           "goal_slug": "reading",
           "entries": [
-            { "type": "fact", "text": "Currently reading Intermezzo by Sally Rooney" },
-            { "type": "fact", "text": "Finished Normal People two weeks ago" },
+            { "type": "fact", "text": "Finished Normal People on the train home day 28" },
             {
               "type": "followup",
-              "text": "Ask Lena about borrowing her copy of Beautiful World, Where Are You (the next Sally Rooney)",
-              "when": "2026-10-28",
+              "text": "Wants next Sally Rooney book — ZOH said \"Let me think on it\"",
+              "when": "2026-10-31",
               "status": "open"
             }
           ]
         },
         {
           "kind": "person",
-          "title": "Lena",
-          "about": "Maya's best friend, also reads a lot",
+          "title": "Lily",
+          "about": "Roommate. Had a dishes conflict days 9-11, Lily apologized day 12.",
           "parent_title": "People",
           "entries": [
-            { "type": "fact", "text": "Maya's best friend from college" },
-            { "type": "fact", "text": "Lent Maya the Sally Rooney books" }
+            { "type": "fact", "text": "Roommate" },
+            { "type": "fact", "text": "Dishes conflict days 9-11, Lily apologized day 12" }
           ]
+        },
+        {
+          "kind": "person",
+          "title": "Devon",
+          "about": "Cafe manager, assigned her 3 closes during midterms (day 19)",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "Cafe manager" },
+            { "type": "fact", "text": "Assigned Maya 3 closes during midterms (day 19)" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "Her desk",
+          "about": "Where Maya does study blocks",
+          "parent_title": "Places"
+        },
+        {
+          "kind": "place",
+          "title": "Her bed",
+          "about": "Where Maya reads",
+          "parent_title": "Places"
         }
       ],
       "daily": [
-        { "date": "2026-10-31", "summary": "Read 20 pages of Intermezzo. Getting close to the end." }
+        { "date": "2026-10-31", "summary": "\"exams are DONE\", finished Normal People on train, wants next Sally Rooney." }
       ]
     }
   },
-  "startTime": "19:00",
+  "startTime": "22:30",
   "testerLines": ["is the sally rooney thing still on"],
   "whatWentWrong": "New case: v2 search and followup item lookup.",
-  "shouldHaveHappened": "Maya has an open followup entry about asking Lena for the next Sally Rooney book (Beautiful World, Where Are You). ZOH finds it from the v2 memory and answers about its status — that it's still open, mentions Lena and the book by name. It doesn't invent details or confuse it with something else."
+  "shouldHaveHappened": "Maya has an open followup entry about wanting the next Sally Rooney book (ZOH said 'Let me think on it'). ZOH finds it from the v2 memory and answers about its status — that it hasn't forgotten, acknowledges she finished Normal People. It doesn't invent a specific book title or confuse it with something else."
 }

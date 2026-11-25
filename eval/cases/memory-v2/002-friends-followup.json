@@ -8,20 +8,22 @@
     "goal": "exercise",
     "phase": "active",
     "history_hours_ago": 20,
-    "answers": { "what": "run 2 miles", "where": "Forest Park", "when": "7 am", "how_long": "25 min" },
+    "answers": { "what": "run 1.5 miles", "where": "Forest Park", "when": "7:45 am", "how_long": "20 min", "tracks_with": "Strava screenshot" },
+    "quiet_hours": { "start": "08:00", "end": "14:00" },
     "history": [
-      { "from": "zoh", "text": "Kalimera Sam! 2 miles in Forest Park at 7. You in?" },
+      { "from": "zoh", "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?" },
       { "from": "tester", "text": "yep already did it" },
       { "from": "zoh", "text": "Crushed it. Day 28 done." }
     ],
     "plan": {
-      "step": "Run 2 miles in Forest Park",
+      "step": "Run 1.5 miles in Forest Park",
       "place": "Forest Park",
-      "time": "07:00",
-      "days": ["mon", "tue", "wed", "thu", "fri"],
-      "proof": "photo",
-      "reason": "Morning runs build the habit before the day gets away from you.",
-      "minutes": 25,
+      "time": "07:45",
+      "days": ["wed", "thu", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava screenshot",
+      "reason": "Running right after my shift would be easier, im already up and wired.",
+      "minutes": 20,
       "started_days_ago": 28
     },
     "step_days": [
@@ -34,25 +36,21 @@
         {
           "kind": "root",
           "title": "Sam",
-          "about": "Sam works at a tech company. Runs mornings in Forest Park.",
-          "entries": [
-            {
-              "type": "followup",
-              "text": "Sam wants to make friends through running — ZOH can't coach friendships yet, check back",
-              "when": "2026-10-28",
-              "status": "open"
-            }
-          ]
+          "about": "Nurse, ER, works nights. Sleep 9am-3pm. Texts afternoons/evenings. \"not feel dead all the time\". Near Forest Park."
         },
         {
           "kind": "coaching",
           "title": "Coaching",
-          "about": "How Sam likes to be coached"
+          "about": "How Sam likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Quiet hours 8am-2pm (chosen)" },
+            { "type": "fact", "text": "Keeps texts short and direct" }
+          ]
         },
         {
           "kind": "people",
           "title": "People",
-          "about": "Everyone in Sam's life"
+          "about": "People in Sam's life"
         },
         {
           "kind": "places",
@@ -62,39 +60,71 @@
         {
           "kind": "area",
           "title": "Running",
-          "about": "Sam's running habit — 2 miles in Forest Park",
+          "about": "Sam's focus goal — running post-shift in Forest Park",
           "parent_title": "Sam"
+        },
+        {
+          "kind": "area",
+          "title": "Socializing",
+          "about": "Sam mentioned wanting to make friends — no coaching on this yet",
+          "parent_title": "Sam",
+          "entries": [
+            {
+              "type": "followup",
+              "text": "Socializing/friends request — ZOH said \"I haven't forgotten\"",
+              "when": "2026-10-28",
+              "status": "open"
+            }
+          ]
         },
         {
           "kind": "goal",
           "title": "Exercise goal",
-          "about": "Run 2 miles in Forest Park every weekday morning",
+          "about": "Plan v3: Run 1.5 miles in Forest Park, Wed/Thu/Sat 7:45am, Strava screenshot. Previous: walk-run 1 mile, then run post-shift. Switched from afternoons to post-shift: \"running right after my shift would be easier, im already up and wired\". What works: running post-shift, running with someone (\"way easier with someone ngl\"). Why: \"not feel dead all the time\".",
           "parent_title": "Running",
           "goal_slug": "exercise"
         },
         {
           "kind": "person",
           "title": "Marco",
-          "about": "Sam's coworker who runs with him in Forest Park",
+          "about": "Coworker, runs in Forest Park with Sam. \"he talks the whole time\". Might keep running Thursdays.",
           "parent_title": "People",
           "other_names": ["Marc"],
           "entries": [
-            { "type": "fact", "text": "Coworker at Sam's tech company" },
-            { "type": "fact", "text": "Runs with Sam in Forest Park" }
+            { "type": "fact", "text": "Coworker at the hospital" },
+            { "type": "fact", "text": "Runs in Forest Park with Sam" },
+            { "type": "unsure", "text": "Might keep running Thursdays", "status": "open" }
           ]
+        },
+        {
+          "kind": "person",
+          "title": "Anna",
+          "about": "Sam's sister, got married day 13, Sam gave the toast",
+          "parent_title": "People",
+          "other_names": ["Ana"],
+          "entries": [
+            { "type": "fact", "text": "Sam's sister (corrected from Ana)" },
+            { "type": "event", "text": "Got married day 13, Sam gave the toast" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "Forest Park",
+          "about": "Where Sam runs",
+          "parent_title": "Places"
         }
       ],
       "daily": [
-        { "date": "2026-10-31", "summary": "Ran 2 miles. Quick morning run, all good." },
-        { "date": "2026-10-30", "summary": "Ran 2 miles with Marco." }
+        { "date": "2026-10-31", "summary": "Plan upgrade to 1.5 mi accepted. Marco might keep running Thursdays. Friends request mentioned again." },
+        { "date": "2026-10-30", "summary": "Showed up tired, walked most of it, 1.0 miles." }
       ]
     }
   },
-  "startTime": "09:00",
+  "startTime": "15:00",
   "testerLines": [
     "had a good run this morning, feeling great",
     { "say": "yeah i'm still thinking about it honestly", "when": "after ZOH mentions the friends thing or asks what's on his mind", "means": "Sam is still mulling over wanting to make friends", "optional": true }
   ],
   "whatWentWrong": "New case: v2 followup item and honest coaching limits.",
-  "shouldHaveHappened": "Sam has an open followup about wanting to make friends through running. If ZOH brings it up, it does so naturally (not as a list) and once at most, and is honest it can't coach friendships yet. It doesn't ignore the item or pretend it can coach anything. If it doesn't bring it up, that's acceptable too — the key is it doesn't lie about its abilities."
+  "shouldHaveHappened": "Sam has an open followup about wanting to make friends/socializing. If ZOH brings it up, it does so naturally (not as a list) and once at most, and is honest it can't coach friendships yet. It doesn't ignore the item or pretend it can coach anything. If it doesn't bring it up, that's acceptable too — the key is it doesn't lie about its abilities."
 }

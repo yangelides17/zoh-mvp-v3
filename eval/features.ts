@@ -366,7 +366,6 @@ export const FEATURES: Record<string, FeatureDef> = {
       { id: "v2-add-item", scope: "conversation", group: "flow", label: "add_item creates a dated todo or followup; the reply promises only the next text ZOH will actually send, not the requested time" },
       { id: "v2-what-you-know", scope: "text", group: "flow", label: "Answers 'what do you know about me' with a short honest summary from v2 memory, then asks if anything's off" },
       { id: "v2-honest-limits", scope: "text", group: "conversation", label: "When the tester wants something ZOH can't coach yet, the coach is honest about its limits" },
-      { id: "short", scope: "text", group: "style", label: "Short: one to three sentences, at most one question, at the end" },
     ],
   },
   /** Step log and next step (#9): cases only, each seeded with goals and next steps. Target 80%. */
