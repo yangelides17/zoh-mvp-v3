@@ -17,7 +17,7 @@ const collapse = (text: string) => text.replace(/\n{3,}/g, "\n\n").trim();
 
 /** #196: the page's rule sections, each under a heading marked `<!-- rules: <key> -->`. */
 // #200: plan agreement, nudges and next steps split where they mix moments (planChange, nudgeReplies, nextStepsTeam).
-export const RULE_KEYS = ["tools", "plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "proof", "nextStep", "weekLookback", "nextSteps", "nextStepsTeam", "team", "memory"] as const;
+export const RULE_KEYS = ["tools", "plan", "planChange", "nudges", "nudgeReplies", "todaysStep", "proof", "nextStep", "weekLookback", "nextSteps", "nextStepsTeam", "team", "memory", "memoryV2"] as const;
 export type RuleKey = (typeof RULE_KEYS)[number];
 
 export interface VoiceSections {

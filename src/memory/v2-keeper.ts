@@ -680,3 +680,114 @@ export async function renderV2Memory(db: Db, tester: Tester): Promise<string> {
 
   return sections.join("\n\n");
 }
+
+// ─── Coach-facing v2 functions (#253) ──────────────────────────────────
+
+/** Render a v2 page for the coach's open_pages tool. When history is true, include expired/done/dropped entries. */
+export async function renderV2PageForCoach(db: Db, tester: Tester, page: MemoryV2Page, opts: { history: boolean } = { history: false }): Promise<string> {
+  const path = await pagePath(db, page);
+  const lines = [`${v2PageRef(page.id)} ${path} [${page.kind}${page.status !== "active" ? `, ${page.status}` : ""}]`];
+  if (page.otherNames.length > 0) lines.push(`Also known as: ${page.otherNames.join(", ")}`);
+  if (page.about) lines.push(`About: ${page.about}`);
+
+  const entries = await getV2Entries(db, page.id);
+  const current = entries.filter((e) => e.status === "current" || e.status === "open");
+  const history = entries.filter((e) => e.status === "expired" || e.status === "done" || e.status === "dropped");
+
+  for (const e of current) {
+    const people = await getV2EntryPeople(db, e.id);
+    const ppl = people.length > 0 ? ` [people: ${people.map((p) => v2PageRef(p.id)).join(", ")}]` : "";
+    const when = e.when ? ` (${e.when})` : "";
+    const asOf = e.asOf && !e.text.includes(e.asOf) ? ` (as of ${e.asOf})` : "";
+    lines.push(`- ${v2EntryRef(e.id)} [${e.type}] ${e.text}${when}${asOf}${ppl}`);
+    if (e.detail) lines.push(`  Detail: ${e.detail}`);
+  }
+
+  if (opts.history && history.length > 0) {
+    lines.push(`History (${history.length}):`);
+    for (const e of history) {
+      lines.push(`- ${v2EntryRef(e.id)} [${e.type}, ${e.status}] ${e.text}`);
+    }
+  } else if (history.length > 0) {
+    lines.push(`History: ${history.length} older entries (open_pages with history: true to see them)`);
+  }
+
+  const children = await getV2Children(db, page.id);
+  if (children.length > 0) {
+    lines.push("Children:");
+    for (const c of children) {
+      lines.push(`  ${v2PageRef(c.id)} [${c.kind}${c.status !== "active" ? `, ${c.status}` : ""}] ${c.title}${c.about ? ` — ${c.about}` : ""}`);
+    }
+  }
+
+  const links = await getV2Links(db, page.id);
+  if (links.length > 0) {
+    const linkLines: string[] = [];
+    for (const l of links) {
+      const other = l.fromPageId === page.id ? l.toPageId : l.fromPageId;
+      const otherPage = await findV2Page(db, tester.id, other);
+      if (otherPage) linkLines.push(`${l.kind}: ${v2PageRef(otherPage.id)} ${otherPage.title}`);
+    }
+    if (linkLines.length > 0) lines.push(`Links: ${linkLines.join("; ")}`);
+  }
+
+  return lines.join("\n");
+}
+
+/** Search hit from v2 memory. */
+export interface V2SearchHit {
+  ref: string;
+  where: string;
+  date: string;
+  text: string;
+}
+
+/**
+ * Search v2 memory: entries, page titles + about + other_names, daily summaries, and messages.
+ * Uses simple word matching (same approach as v1 searchMemory but on v2 tables).
+ */
+export async function searchV2Memory(db: Db, tester: Tester, query: string, limit: number): Promise<V2SearchHit[]> {
+  const { searchMemory, messageRef, messageTime: msgTime } = await import("./store.js");
+  const { localDate: ld } = await import("../coach/state.js");
+  const hits: V2SearchHit[] = [];
+
+  // Search v2 entries
+  const allEntries = await import("./v2-store.js").then((m) => m.getV2EntriesByTester(db, tester.id));
+  const lowerQuery = query.toLowerCase();
+  const words = lowerQuery.split(/\s+/).filter((w) => w.length > 1);
+  for (const e of allEntries) {
+    if (e.status === "expired" || e.status === "dropped") continue;
+    const haystack = e.text.toLowerCase();
+    if (words.some((w) => haystack.includes(w))) {
+      hits.push({ ref: v2EntryRef(e.id), where: "entry", date: e.learnedOn ?? ld(e.createdAt, tester.timeZone), text: e.text });
+    }
+  }
+
+  // Search v2 page titles, about, and other_names
+  const pages = await getV2Pages(db, tester.id);
+  for (const p of pages) {
+    const haystack = [p.title, p.about ?? "", ...p.otherNames].join(" ").toLowerCase();
+    if (words.some((w) => haystack.includes(w))) {
+      hits.push({ ref: v2PageRef(p.id), where: "page", date: ld(p.createdAt, tester.timeZone), text: `${p.title}${p.about ? ` — ${p.about}` : ""}` });
+    }
+  }
+
+  // Search daily summaries
+  const dailies = await getV2Dailies(db, tester.id, 1000);
+  for (const d of dailies) {
+    const haystack = d.summary.toLowerCase();
+    if (words.some((w) => haystack.includes(w))) {
+      hits.push({ ref: `d:${d.date}`, where: "daily", date: d.date, text: d.summary });
+    }
+  }
+
+  // Also search messages (same as v1) — texts not yet filed
+  const msgHits = await searchMemory(db, tester, query, limit);
+  for (const h of msgHits) {
+    if (!hits.some((existing) => existing.text === h.text)) {
+      hits.push({ ref: h.ref, where: h.where, date: ld(h.at, tester.timeZone), text: h.text });
+    }
+  }
+
+  return hits.slice(0, limit);
+}

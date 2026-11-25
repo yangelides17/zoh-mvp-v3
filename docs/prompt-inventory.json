@@ -1739,6 +1739,20 @@
    "change": "new"
   },
   {
+   "text": "- [${i.type}] ${i.text} (${i.when}${overdue}) on ${i.pagePath} — ${i.ref}",
+   "file": "src/coach/prompt.ts",
+   "where": "openItemLines > lines",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
+   "text": "Items still open:",
+   "file": "src/coach/prompt.ts",
+   "where": "openItemLines",
+   "kind": "status sheet",
+   "change": "new"
+  },
+  {
    "text": "[Your text can't be only a save confirmation: they never hear about saves. Write the whole text to them now, answering their last text and then its next move if it needs one (the next question, the plan or the proposal). Don't mention saving or this note.]",
    "file": "src/coach/coach.ts",
    "where": "SAVE_ONLY_NOTE",
@@ -3678,6 +3692,90 @@
    "change": "unchanged"
   },
   {
+   "text": "Save something they say about how they want to be coached (style, nudging, proof, timing: \"no emojis\", \"chill out\", \"voice notes instead of photos\"; proof can change form, never be dropped) the moment they say it. replaces: e: refs of learned preferences it overrides. overrides_guidance: refs of team guidance lines it goes against (they win; the team is told).",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > save_preference > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "e: refs",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > save_preference > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "g: refs",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > save_preference > description",
+   "kind": "tool description",
+   "change": "moved from src/memory/coach-tools.ts (MEMORY_TOOL_DEFINITIONS > save_preference > description)"
+  },
+  {
+   "text": "Read v2 memory pages in full (p: refs from the tree map). history: true to include expired/done/dropped entries. Up to ${MAX_LOOKUPS} lookups a reply.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > open_pages > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "Include expired/done/dropped entries",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > open_pages > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "Word search over v2 entries, page titles, daily summaries and every older text, photo, voice note and document (by its words). Quoted phrases and OR work. At most ${MAX_SEARCHES} a reply.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > search_memory > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "Open a file they sent before (an m: ref from search_memory): a document in full, a photo to look at again, a voice note's words, a video watched again with your question. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > open_file > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "For a video: what to look for (their question)",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > open_file > description",
+   "kind": "tool description",
+   "change": "moved from src/memory/coach-tools.ts (MEMORY_TOOL_DEFINITIONS > open_file > description)"
+  },
+  {
+   "text": "They asked you to forget something. facts: the e: refs to remove. pages: p: refs of a person or subject page to remove whole (\"forget my dog\"). note: a few neutral words naming it (\"his job\", \"his ex\"), always: later replies and the overnight pass see it was forgotten on purpose and never file it again. everything: true only for \"forget everything\".",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > forget > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "Add a reminder or follow-up they asked for. type: 'todo' (a task they want to do) or 'followup' (something to bring up later). date: YYYY-MM-DD when it's due; proposes a date if they don't give one. page: p: ref of the page it belongs to (default: root).",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > add_item > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "p: ref (optional, default root)",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > add_item > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
+   "text": "Close an open item (todo or followup) when it's done or no longer relevant. ref: the e: ref of the entry. status: 'done' or 'dropped'.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "V2_MEMORY_TOOL_DEFINITIONS > close_item > description",
+   "kind": "tool description",
+   "change": "new"
+  },
+  {
    "text": "Unknown tool \"${name}\"",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > error",
@@ -3704,6 +3802,13 @@
    "where": "runMemoryTool > notes",
    "kind": "tool result",
    "change": "unchanged"
+  },
+  {
+   "text": "Asked not to bring up a personal topic.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > text",
+   "kind": "tool result",
+   "change": "new"
   },
   {
    "text": "Dropped the learned preference it overrides: ${dropped.map((f) => f.text).join(\"; \")}.",
@@ -3734,11 +3839,32 @@
    "change": "unchanged"
   },
   {
+   "text": "${ref}: no such page",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
    "text": "Nothing found for \"${query}\". Try another phrasing, or say you don't know.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > message",
    "kind": "tool result",
    "change": "unchanged"
+  },
+  {
+   "text": "${h.ref} (${h.where}, ${h.date}): ${h.text}",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > lines",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Nothing found for \"${query}\". Try another phrasing, or say you don't know.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > message",
+   "kind": "tool result",
+   "change": "new"
   },
   {
    "text": "${h.ref} (${h.where}, ${localDate(h.at, tester.timeZone)}): ${h.text}",
@@ -3951,6 +4077,69 @@
    "change": "unchanged"
   },
   {
+   "text": "add_item is only available for v2 testers.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "date must be YYYY-MM-DD.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Not saved: ${rejection}",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "No page ${page} for this tester.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "No source message found.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Added ${v2EntryRef(entry.id)} [${itemType}] \"${itemText}\" due ${date}.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > message",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "close_item is only available for v2 testers.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "No entry ${ref} for this tester.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
+   "text": "Closed ${v2EntryRef(entry.id)}: ${status}.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > message",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
    "text": "(their words with it: \"${m.content.trim()}\")",
    "file": "src/memory/coach-tools.ts",
    "where": "openFile > said",
@@ -4065,37 +4254,191 @@
   {
    "text": "MEMORY (what you know about them beyond the recent texts; updated overnight)",
    "file": "src/memory/context.ts",
-   "where": "memoryBlock",
+   "where": "v1MemoryBlock",
    "kind": "memory block",
-   "change": "unchanged"
+   "change": "moved from src/memory/context.ts (memoryBlock)"
   },
   {
    "text": "(nothing filed yet: memory is written overnight)",
    "file": "src/memory/context.ts",
-   "where": "memoryBlock",
+   "where": "v1MemoryBlock",
    "kind": "memory block",
-   "change": "unchanged"
+   "change": "moved from src/memory/context.ts (memoryBlock)"
   },
   {
    "text": "RECENT DAYS (newest first)",
    "file": "src/memory/context.ts",
-   "where": "memoryBlock",
+   "where": "v1MemoryBlock",
    "kind": "memory block",
-   "change": "unchanged"
+   "change": "moved from src/memory/context.ts (memoryBlock)"
   },
   {
    "text": "(none yet)",
    "file": "src/memory/context.ts",
-   "where": "memoryBlock",
+   "where": "v1MemoryBlock",
    "kind": "memory block",
-   "change": "unchanged"
+   "change": "moved from src/memory/context.ts (memoryBlock)"
   },
   {
    "text": "INDEX (newest first; open_pages for p: refs, search_memory for anything older)",
    "file": "src/memory/context.ts",
-   "where": "memoryBlock",
+   "where": "v1MemoryBlock",
    "kind": "memory block",
-   "change": "unchanged"
+   "change": "moved from src/memory/context.ts (memoryBlock)"
+  },
+  {
+   "text": "(as of ${e.asOf})",
+   "file": "src/memory/context.ts",
+   "where": "renderV2Entry > asOf",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "- ${v2EntryRef(e.id)} [${e.type}] ${e.text}${when}${asOf}${status}",
+   "file": "src/memory/context.ts",
+   "where": "renderV2Entry",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "MEMORY (a tree of what you know about them; updated overnight)",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > sections",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "${v2PageRef(root.id)} ${root.title ?? tester.name ?? \"Root\"} [root]",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > rootLines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "About: ${root.about}",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > rootLines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "Map:",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "${v2PageRef(p.id)} [${p.kind}] ${p.title}${p.about ? ` — ${p.about}` : \"\"}",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "— ${p.about}",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "${v2PageRef(coaching.id)} Coaching [coaching]",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > coachingLines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "About: ${coaching.about}",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > coachingLines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "RECENT DAYS (newest first)",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock > dailyLines",
+   "kind": "memory block",
+   "change": "moved from src/memory/context.ts (memoryBlock)"
+  },
+  {
+   "text": "${d.date}: ${d.summary}",
+   "file": "src/memory/context.ts",
+   "where": "v2MemoryBlock",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "${v2PageRef(goalPage.id)} ${goalPage.title} [goal, focus]",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > lines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "Area: ${parent.title} — ${parent.about}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > lines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "About: ${goalPage.about}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > lines",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "v${v.version}: ${v.step}${v.destination ? ` → ${v.destination}` : \"\"}${v.endsOn ? ` (lighter, through ${v.endsOn})` : \"\"}${v.id === latest.id ? \" (current)\" : \"\"}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > steps",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "→ ${v.destination}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > steps",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "(lighter, through ${v.endsOn})",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > steps",
+   "kind": "memory block",
+   "change": "moved from src/memory/render.ts (goalLines > steps)"
+  },
+  {
+   "text": "Step path: ${steps.join(\" → \")}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "Current plan: ${describePlan(latest)}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection",
+   "kind": "memory block",
+   "change": "moved from src/memory/render.ts (goalLines)"
+  },
+  {
+   "text": "${pair}: ${r.reason}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection > entries",
+   "kind": "memory block",
+   "change": "new"
+  },
+  {
+   "text": "Goal switches: ${entries.join(\"; \")}",
+   "file": "src/memory/context.ts",
+   "where": "renderGoalSection",
+   "kind": "memory block",
+   "change": "new"
   },
   {
    "text": "Stated (they said so; always wins)",
@@ -6945,6 +7288,78 @@
    "kind": "rule",
    "change": "moved from src/coach/prompt.ts (MEMORY)",
    "reason": "they need to feel ZOH is on their side"
+  },
+  {
+   "text": "MEMORY (phase \"active\", v2): the MEMORY block is a tree: the root page (About + entries), a map of tier-1 pages (each with its About), Coaching in full, the focus goal page with tracker data, and the last 7 daily summaries.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "the focus goal page with tracker data, and the last 7 daily summaries"
+  },
+  {
+   "text": "- Walk the tree: open_pages (p: refs) for a full briefing on any page; search_memory for anything not routed by the tree.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "search_memory for anything not routed by the tree"
+  },
+  {
+   "text": "- Items: add_item for a reminder or follow-up they ask for (a real date; proposes one if none given), close_item when it's done or off. Bring up at most one open item that's due or overdue in any text, the way a friend would, only when it fits, never as a list.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "the way a friend would, only when it fits, never as a list"
+  },
+  {
+   "text": "- Honest timing: never promise a time ZOH can't keep; \"remind me at 3\" → \"I'll bring it up next time I text you\" until the scheduler exists.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "never promise a time ZOH can't keep"
+  },
+  {
+   "text": "- Unsure entries: confirmed when they come up naturally, never asked about as a quiz.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "confirmed when they come up naturally, never asked about as a quiz"
+  },
+  {
+   "text": "- \"Forget that\": forget by e: and p: refs, plus a note, confirm in one line, never bring it up again even in recent texts.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "never bring it up again even in recent texts"
+  },
+  {
+   "text": "- \"What do you know about me?\": a short honest summary, then ask if anything's off.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "a short honest summary, then ask if anything's off"
+  },
+  {
+   "text": "- Remembering is not agreeing to coach: a want ZOH can't coach yet stays open, and the coach is honest.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "a want ZOH can't coach yet stays open, and the coach is honest"
+  },
+  {
+   "text": "- Remember like a friend: show you know when they mention someone in memory; bring a detail up only when it fits, in passing, never as a list. No guesses said as facts.",
+   "file": "docs/coach-voice.md",
+   "where": "Memory (v2) (rules: memoryV2)",
+   "kind": "rule",
+   "change": "new",
+   "reason": "bring a detail up only when it fits, in passing, never as a list"
   },
   {
    "text": "## What it never does",

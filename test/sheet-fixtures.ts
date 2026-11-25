@@ -94,6 +94,7 @@ export function state(o: Partial<CoachState> = {}): CoachState {
     lastZohText: "",
     isFirstText: false,
     justFinished: false,
+    openItems: [],
     now: at("2026-11-10T15:00:00Z"),
     ...o,
   };

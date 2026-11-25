@@ -13,17 +13,23 @@ import type { VideoWatcher } from "../video/gemini.js";
 import { renderPage } from "./render.js";
 import { addFact, ensureCorePages, factsOf, findFact, findMessage, findPage, mediaLabel, messageTime, removeFact, searchMemory } from "./store.js";
 import {
+  addV2Entry,
   addV2ForgetTopic,
   clearV2ForgetTopics,
+  closeV2Entry,
   deleteV2Memory,
   deleteV2Page,
   ensureV2RequiredPages,
   findV2Entry,
+  findV2MessageForSource,
   findV2Page,
   getV2DailiesWithMessages,
   getV2Entries,
+  getV2ForgetTopics,
   getV2ReplacesChain,
   updateV2DailySummary,
+  v2EntryRef,
+  v2PageRef,
 } from "./v2-store.js";
 // sensitiveCheck imported lazily to avoid circular imports through keeper.ts → coach.ts
 const loadSensitiveCheck = () => import("./v2-keeper.js").then((m) => m.sensitiveCheck);
@@ -42,7 +48,7 @@ const text = (max: number) => z.string().trim().min(1).max(max);
 
 const schemas = {
   save_preference: z.object({ preference: text(160), replaces: z.array(text(40)).max(5).optional(), overrides_guidance: z.array(text(40)).max(5).optional() }).strict(),
-  open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS) }).strict(),
+  open_pages: z.object({ pages: z.array(text(40)).min(1).max(MAX_LOOKUPS), history: z.boolean().optional() }).strict(),
   search_memory: z.object({ query: text(120) }).strict(),
   open_file: z.object({ ref: text(40), question: text(300).optional() }).strict(),
   forget: z
@@ -54,6 +60,8 @@ const schemas = {
       everything: z.boolean().optional(),
     })
     .strict(),
+  add_item: z.object({ type: z.enum(["todo", "followup"]), text: text(300), date: text(10), page: text(40).optional() }).strict(),
+  close_item: z.object({ ref: text(40), status: z.enum(["done", "dropped"]) }).strict(),
 };
 
 export type MemoryToolName = keyof typeof schemas;
@@ -109,6 +117,83 @@ export const MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
   },
 ];
 
+/** #253: V2 memory tool definitions: same lookups plus add_item and close_item, e:/p: refs instead of f:. */
+export const V2_MEMORY_TOOL_DEFINITIONS: Anthropic.Tool[] = [
+  {
+    name: "save_preference",
+    description:
+      'Save something they say about how they want to be coached (style, nudging, proof, timing: "no emojis", "chill out", "voice notes instead of photos"; proof can change form, never be dropped) the moment they say it. replaces: e: refs of learned preferences it overrides. overrides_guidance: refs of team guidance lines it goes against (they win; the team is told).',
+    input_schema: {
+      type: "object",
+      properties: {
+        preference: { type: "string" },
+        replaces: { type: "array", items: { type: "string" }, description: "e: refs" },
+        overrides_guidance: { type: "array", items: { type: "string" }, description: "g: refs" },
+      },
+      required: ["preference"],
+    },
+  },
+  {
+    name: "open_pages",
+    description: `Read v2 memory pages in full (p: refs from the tree map). history: true to include expired/done/dropped entries. Up to ${MAX_LOOKUPS} lookups a reply.`,
+    input_schema: {
+      type: "object",
+      properties: { pages: { type: "array", items: { type: "string" } }, history: { type: "boolean", description: "Include expired/done/dropped entries" } },
+      required: ["pages"],
+    },
+  },
+  {
+    name: "search_memory",
+    description: `Word search over v2 entries, page titles, daily summaries and every older text, photo, voice note and document (by its words). Quoted phrases and OR work. At most ${MAX_SEARCHES} a reply.`,
+    input_schema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
+  },
+  {
+    name: "open_file",
+    description: `Open a file they sent before (an m: ref from search_memory): a document in full, a photo to look at again, a voice note's words, a video watched again with your question. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.`,
+    input_schema: {
+      type: "object",
+      properties: { ref: { type: "string" }, question: { type: "string", description: "For a video: what to look for (their question)" } },
+      required: ["ref"],
+    },
+  },
+  {
+    name: "forget",
+    description:
+      "They asked you to forget something. facts: the e: refs to remove. pages: p: refs of a person or subject page to remove whole (\"forget my dog\"). note: a few neutral words naming it (\"his job\", \"his ex\"), always: later replies and the overnight pass see it was forgotten on purpose and never file it again. everything: true only for \"forget everything\".",
+    input_schema: {
+      type: "object",
+      properties: {
+        facts: { type: "array", items: { type: "string" } },
+        pages: { type: "array", items: { type: "string" } },
+        note: { type: "string" }, everything: { type: "boolean" } },
+    },
+  },
+  {
+    name: "add_item",
+    description:
+      "Add a reminder or follow-up they asked for. type: 'todo' (a task they want to do) or 'followup' (something to bring up later). date: YYYY-MM-DD when it's due; proposes a date if they don't give one. page: p: ref of the page it belongs to (default: root).",
+    input_schema: {
+      type: "object",
+      properties: {
+        type: { type: "string", enum: ["todo", "followup"] },
+        text: { type: "string" },
+        date: { type: "string", description: "YYYY-MM-DD" },
+        page: { type: "string", description: "p: ref (optional, default root)" },
+      },
+      required: ["type", "text", "date"],
+    },
+  },
+  {
+    name: "close_item",
+    description: "Close an open item (todo or followup) when it's done or no longer relevant. ref: the e: ref of the entry. status: 'done' or 'dropped'.",
+    input_schema: {
+      type: "object",
+      properties: { ref: { type: "string" }, status: { type: "string", enum: ["done", "dropped"] } },
+      required: ["ref", "status"],
+    },
+  },
+];
+
 /** Lookups used so far in one reply. */
 export interface LookupBudget {
   lookups: number;
@@ -144,6 +229,7 @@ export async function runMemoryTool(
   switch (name as MemoryToolName) {
     case "save_preference": {
       const { preference, replaces, overrides_guidance } = parsed.data as z.infer<typeof schemas.save_preference>;
+      // V1 save (always, so switching back is clean)
       const { preferences } = await ensureCorePages(db, tester, at);
       await addFact(db, preferences, { text: preference, sourceMessageId: ctx.sourceMessageId ?? null, section: "stated", day: localDate(at, tester.timeZone) }, at, "tester");
       const dropped: MemoryFact[] = [];
@@ -164,6 +250,35 @@ export async function runMemoryTool(
         const line = await markOverridden(db, tester, ref, preference, at);
         if (line) clashed.push(line.text);
       }
+      // #253: v2 testers also save the preference as an entry on Coaching
+      if (tester.memoryVersion === "v2") {
+        const sourceId = ctx.sourceMessageId ?? await findV2MessageForSource(db, tester);
+        if (sourceId) {
+          const doSensitiveCheck = await loadSensitiveCheck();
+          const { coaching } = await ensureV2RequiredPages(db, tester, at);
+          const fTopics = await getV2ForgetTopics(db, tester.id);
+          const rejection = ctx.checker ? await doSensitiveCheck(ctx.checker, preference, fTopics) : null;
+          if (rejection) {
+            // Check for avoidance language: "don't bring up", "don't mention", "forget about", etc.
+            const avoidancePattern = /(?:don'?t\s+(?:bring up|mention|talk about|ask about)|forget about|stop talking about)/i;
+            if (avoidancePattern.test(preference)) {
+              await addV2Entry(db, {
+                pageId: coaching.id, testerId: tester.id, type: "note",
+                text: "Asked not to bring up a personal topic.",
+                sourceMessageId: sourceId, learnedOn: localDate(at, tester.timeZone),
+              }, at);
+              // Record the original words as a forget topic
+              await addV2ForgetTopic(db, tester.id, preference, at);
+            }
+          } else {
+            await addV2Entry(db, {
+              pageId: coaching.id, testerId: tester.id, type: "note",
+              text: preference,
+              sourceMessageId: sourceId, learnedOn: localDate(at, tester.timeZone),
+            }, at);
+          }
+        }
+      }
       const extra = [
         dropped.length ? ` Dropped the learned preference it overrides: ${dropped.map((f) => f.text).join("; ")}.` : "",
         clashed.length ? ` Follow it over the team's guidance: ${clashed.join("; ")}.` : "",
@@ -172,13 +287,21 @@ export async function runMemoryTool(
     }
 
     case "open_pages": {
-      const { pages } = parsed.data as z.infer<typeof schemas.open_pages>;
+      const { pages, history } = parsed.data as z.infer<typeof schemas.open_pages>;
       if (budget.lookups + pages.length > MAX_LOOKUPS) return { ok: false, error: spent };
       budget.lookups += pages.length;
       const out: string[] = [];
-      for (const ref of pages) {
-        const page = await findPage(db, tester.id, ref);
-        out.push(page ? await renderPage(db, tester, page, { refs: true }) : `${ref}: no such page`);
+      if (tester.memoryVersion === "v2") {
+        const { renderV2PageForCoach } = await import("./v2-keeper.js");
+        for (const ref of pages) {
+          const page = await findV2Page(db, tester.id, ref);
+          out.push(page ? await renderV2PageForCoach(db, tester, page, { history: !!history }) : `${ref}: no such page`);
+        }
+      } else {
+        for (const ref of pages) {
+          const page = await findPage(db, tester.id, ref);
+          out.push(page ? await renderPage(db, tester, page, { refs: true }) : `${ref}: no such page`);
+        }
       }
       return { ok: true, message: out.join("\n\n"), tester };
     }
@@ -188,6 +311,13 @@ export async function runMemoryTool(
       if (budget.lookups + 1 > MAX_LOOKUPS || budget.searches + 1 > MAX_SEARCHES) return { ok: false, error: spent };
       budget.lookups += 1;
       budget.searches += 1;
+      if (tester.memoryVersion === "v2") {
+        const { searchV2Memory } = await import("./v2-keeper.js");
+        const hits = await searchV2Memory(db, tester, query, 8);
+        if (hits.length === 0) return { ok: true, message: `Nothing found for "${query}". Try another phrasing, or say you don't know.`, tester };
+        const lines = hits.map((h) => `${h.ref} (${h.where}, ${h.date}): ${h.text}`);
+        return { ok: true, message: lines.join("\n"), tester };
+      }
       const hits = await searchMemory(db, tester, query, 8);
       if (hits.length === 0) return { ok: true, message: `Nothing found for "${query}". Try another phrasing, or say you don't know.`, tester };
       const lines = hits.map((h) => `${h.ref} (${h.where}, ${localDate(h.at, tester.timeZone)}): ${h.text}`);
@@ -426,6 +556,45 @@ ${v2Memory}`;
         await addFact(db, preferences, { text: forgetNote, sourceMessageId: ctx.sourceMessageId ?? null, section: "forget", day: localDate(at, tester.timeZone) }, at);
       }
       return { ok: true, message: `Forgotten${removed.length ? `: ${removed.join("; ")}` : ""}${forgetNote ? ` (won't keep: ${forgetNote})` : ""}.`, tester, memoryChanged: true };
+    }
+
+    case "add_item": {
+      if (tester.memoryVersion !== "v2") return { ok: false, error: "add_item is only available for v2 testers." };
+      const { type: itemType, text: itemText, date, page } = parsed.data as z.infer<typeof schemas.add_item>;
+      // Validate date format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: "date must be YYYY-MM-DD." };
+      const doSensitiveCheck = await loadSensitiveCheck();
+      const fTopics = await getV2ForgetTopics(db, tester.id);
+      const rejection = ctx.checker ? await doSensitiveCheck(ctx.checker, itemText, fTopics) : null;
+      if (rejection) return { ok: false, error: `Not saved: ${rejection}` };
+      // Find the target page (default to root)
+      let targetPageId: string;
+      if (page) {
+        const p = await findV2Page(db, tester.id, page);
+        if (!p) return { ok: false, error: `No page ${page} for this tester.` };
+        targetPageId = p.id;
+      } else {
+        const { root } = await ensureV2RequiredPages(db, tester, at);
+        targetPageId = root.id;
+      }
+      const sourceId = ctx.sourceMessageId ?? await findV2MessageForSource(db, tester);
+      if (!sourceId) return { ok: false, error: "No source message found." };
+      const entry = await addV2Entry(db, {
+        pageId: targetPageId, testerId: tester.id, type: itemType,
+        text: itemText, when: date,
+        sourceMessageId: sourceId, learnedOn: localDate(at, tester.timeZone),
+      }, at);
+      return { ok: true, message: `Added ${v2EntryRef(entry.id)} [${itemType}] "${itemText}" due ${date}.`, tester, memoryChanged: true };
+    }
+
+    case "close_item": {
+      if (tester.memoryVersion !== "v2") return { ok: false, error: "close_item is only available for v2 testers." };
+      const { ref, status } = parsed.data as z.infer<typeof schemas.close_item>;
+      const entry = await findV2Entry(db, tester.id, ref);
+      if (!entry) return { ok: false, error: `No entry ${ref} for this tester.` };
+      const result = await closeV2Entry(db, entry, status, at);
+      if (!result.ok) return { ok: false, error: result.error };
+      return { ok: true, message: `Closed ${v2EntryRef(entry.id)}: ${status}.`, tester, memoryChanged: true };
     }
   }
 }
