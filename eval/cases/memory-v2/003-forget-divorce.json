@@ -1,11 +1,96 @@
 {
-  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
   "id": "forget-divorce",
   "title": "After forget, nothing about divorce or Karen even when Rob mentions Emma's mom",
   "origin": "#253 (memory v2 part B): forget works with v2, no leaks through daily summaries or entries",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
+  "seed": {
+    "name": "Rob",
+    "goal": "eating",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "pack lunch the night before", "where": "kitchen", "when": "9 pm", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Rob! Lunch packed for tomorrow?" },
+      { "from": "tester", "text": "yep turkey wrap, easy" },
+      { "from": "zoh", "text": "Perfect. That's day 28 done." }
+    ],
+    "plan": {
+      "step": "Pack lunch the night before",
+      "place": "kitchen",
+      "time": "21:00",
+      "days": ["sun", "mon", "tue", "wed", "thu"],
+      "proof": "photo",
+      "reason": "Packing the night before means you're not scrambling in the morning or buying food.",
+      "minutes": 15,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Rob",
+          "about": "Rob is focused on eating healthier. Packs lunches for work.",
+          "entries": [
+            { "type": "fact", "text": "Works in construction, long days" },
+            { "type": "fact", "text": "Trying to eat better for his health, not for weight loss" }
+          ]
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Rob likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Prefers short direct texts, no fluff" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Rob's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Rob"
+        },
+        {
+          "kind": "area",
+          "title": "Eating",
+          "about": "Rob's eating habits and lunch packing",
+          "parent_title": "Rob"
+        },
+        {
+          "kind": "goal",
+          "title": "Eating goal",
+          "about": "Pack lunch the night before, Sun–Thu",
+          "parent_title": "Eating",
+          "goal_slug": "eating"
+        },
+        {
+          "kind": "person",
+          "title": "Emma",
+          "about": "Rob's daughter, senior in high school, chose Clemson",
+          "entries": [
+            { "type": "fact", "text": "Rob's daughter, 17 years old" },
+            { "type": "fact", "text": "Senior in high school" },
+            { "type": "fact", "text": "Chose Clemson for college — Rob is proud" },
+            { "type": "event", "text": "Clemson campus visit coming up", "when": "2026-11-15", "status": "open" }
+          ]
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Packed turkey wrap. Quick check-in." },
+        { "date": "2026-10-30", "summary": "Packed chicken salad. Rob mentioned Emma got her Clemson acceptance packet." }
+      ],
+      "forget_topics": ["the divorce and Karen"]
+    }
+  },
   "startTime": "18:30",
   "testerLines": ["emma's mom is picking her up from practice tomorrow"],
   "whatWentWrong": "New case: v2 forget integrity test.",
-  "shouldHaveHappened": "Rob asked to forget the divorce and Karen. When he mentions 'Emma's mom', ZOH says nothing about Karen, the divorce, or any detail from the forgotten content. It responds naturally about Emma without connecting to the erased context."
+  "shouldHaveHappened": "Rob asked to forget the divorce and Karen. When he mentions 'Emma's mom', ZOH says nothing about Karen by name, the divorce, or any detail from the forgotten content. It responds naturally about Emma (the practice pickup, the Clemson visit maybe) without connecting to the erased context. It does NOT ask who Emma's mom is or probe for details about the relationship."
 }

@@ -1,11 +1,102 @@
 {
-  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
   "id": "what-you-know",
   "title": "Honest summary from v2 memory, asks if anything is off",
   "origin": "#253 (memory v2 part B): 'what do you know about me' from v2 tree",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "read 20 pages", "where": "the couch", "when": "9 pm", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Maya! 20 pages on the couch at 9 tonight." },
+      { "from": "tester", "text": "read 22 actually! loving this book" },
+      { "from": "zoh", "text": "Overachiever. Nice." }
+    ],
+    "plan": {
+      "step": "Read 20 pages",
+      "place": "the couch",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Twenty pages a night finishes a book every two weeks.",
+      "minutes": 25,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "missed" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Maya",
+          "about": "Maya loves reading. Works as a graphic designer. Lives in Portland.",
+          "entries": [
+            { "type": "fact", "text": "Works as a graphic designer at a small agency" },
+            { "type": "fact", "text": "Lives in Portland, OR" },
+            { "type": "fact", "text": "Has a cat named Pepper" }
+          ]
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Maya likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Likes a mix of encouragement and accountability" },
+            { "type": "fact", "text": "Prefers no emojis" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Maya's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Maya"
+        },
+        {
+          "kind": "area",
+          "title": "Reading",
+          "about": "Maya's reading habit — 20 pages a night on the couch",
+          "parent_title": "Maya"
+        },
+        {
+          "kind": "goal",
+          "title": "Reading goal",
+          "about": "Read 20 pages every night at 9 pm on the couch",
+          "parent_title": "Reading",
+          "goal_slug": "reading",
+          "entries": [
+            { "type": "fact", "text": "Currently reading Intermezzo by Sally Rooney" },
+            { "type": "fact", "text": "Finished Normal People two weeks ago" }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Lena",
+          "about": "Maya's best friend, also reads a lot",
+          "entries": [
+            { "type": "fact", "text": "Maya's best friend from college" },
+            { "type": "fact", "text": "Lent Maya the Sally Rooney book" }
+          ]
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Read 22 pages of Intermezzo. Really enjoying the book." },
+        { "date": "2026-10-30", "summary": "Read 20 pages. Quiet night." },
+        { "date": "2026-10-29", "summary": "Missed — said she had a late work deadline." }
+      ]
+    }
+  },
   "startTime": "11:00",
   "testerLines": ["what do you know about me"],
   "whatWentWrong": "New case: v2 'what do you know about me' response.",
-  "shouldHaveHappened": "ZOH gives a short honest summary drawn from the v2 tree (root entries, person pages, goal context), then asks if anything's off. It doesn't list every fact or invent details. It doesn't claim to know things that aren't in memory."
+  "shouldHaveHappened": "ZOH gives a short honest summary drawn from the v2 tree: Maya the graphic designer in Portland, the reading goal, the cat Pepper, friend Lena, the Sally Rooney book. A few sentences, not a list of every fact. Then asks if anything's off or missing. It doesn't claim to know things that aren't in memory or recite an exhaustive inventory."
 }

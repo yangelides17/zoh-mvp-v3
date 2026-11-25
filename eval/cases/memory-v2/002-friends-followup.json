@@ -1,11 +1,99 @@
 {
-  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
   "id": "friends-followup",
   "title": "Brings up open followup about making friends honestly",
   "origin": "#253 (memory v2 part B): open items surfaced naturally, with honest limits",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "run 2 miles", "where": "Forest Park", "when": "7 am", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Kalimera Sam! 2 miles in Forest Park at 7. You in?" },
+      { "from": "tester", "text": "yep already did it" },
+      { "from": "zoh", "text": "Crushed it. Day 28 done." }
+    ],
+    "plan": {
+      "step": "Run 2 miles in Forest Park",
+      "place": "Forest Park",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "photo",
+      "reason": "Morning runs build the habit before the day gets away from you.",
+      "minutes": 25,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "missed" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Sam",
+          "about": "Sam works at a tech company. Runs mornings in Forest Park.",
+          "entries": [
+            {
+              "type": "followup",
+              "text": "Sam wants to make friends through running — ZOH can't coach friendships yet, check back",
+              "when": "2026-10-28",
+              "status": "open"
+            }
+          ]
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Sam likes to be coached"
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Sam's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Sam"
+        },
+        {
+          "kind": "area",
+          "title": "Running",
+          "about": "Sam's running habit — 2 miles in Forest Park",
+          "parent_title": "Sam"
+        },
+        {
+          "kind": "goal",
+          "title": "Exercise goal",
+          "about": "Run 2 miles in Forest Park every weekday morning",
+          "parent_title": "Running",
+          "goal_slug": "exercise"
+        },
+        {
+          "kind": "person",
+          "title": "Marco",
+          "about": "Sam's coworker who runs with him in Forest Park",
+          "other_names": ["Marc"],
+          "entries": [
+            { "type": "fact", "text": "Coworker at Sam's tech company" },
+            { "type": "fact", "text": "Runs with Sam in Forest Park" }
+          ]
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Ran 2 miles. Quick morning run, all good." },
+        { "date": "2026-10-30", "summary": "Ran 2 miles with Marco." }
+      ]
+    }
+  },
   "startTime": "09:00",
-  "testerLines": ["had a good run this morning, feeling great"],
+  "testerLines": [
+    "had a good run this morning, feeling great",
+    { "say": "yeah i'm still thinking about it honestly", "when": "after ZOH mentions the friends thing or asks what's on his mind", "means": "Sam is still mulling over wanting to make friends", "optional": true }
+  ],
   "whatWentWrong": "New case: v2 followup item and honest coaching limits.",
-  "shouldHaveHappened": "Sam has an open followup about wanting to make friends through running. ZOH brings it up once, naturally (not as a list), and is honest it can't coach friendships yet. It doesn't ignore the item or pretend it can coach anything."
+  "shouldHaveHappened": "Sam has an open followup about wanting to make friends through running. If ZOH brings it up, it does so naturally (not as a list) and once at most, and is honest it can't coach friendships yet. It doesn't ignore the item or pretend it can coach anything. If it doesn't bring it up, that's acceptable too — the key is it doesn't lie about its abilities."
 }

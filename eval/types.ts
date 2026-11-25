@@ -194,6 +194,38 @@ export const seedSchema = z.object({
       earlier_goals: z.array(z.object({ goal: z.string(), reason: z.string(), days_ago: z.number().int().min(1).max(60) })).default([]),
     })
     .optional(),
+  /**
+   * V2 coach memory (#253): a tree of pages with typed entries, daily summaries and forget topics.
+   * When present, the tester is created with memoryVersion "v2".
+   */
+  memory_v2: z
+    .object({
+      pages: z.array(
+        z.object({
+          kind: z.enum(["root", "coaching", "people", "places", "area", "project", "goal", "person", "place"]),
+          title: z.string(),
+          about: z.string().default(""),
+          other_names: z.array(z.string()).default([]),
+          parent_title: z.string().optional(),
+          goal_slug: z.string().optional(),
+          status: z.enum(["active", "paused", "done", "past"]).default("active"),
+          entries: z
+            .array(
+              z.object({
+                type: z.enum(["fact", "note", "unsure", "todo", "event", "followup"]),
+                text: z.string(),
+                detail: z.string().optional(),
+                when: z.string().optional(),
+                status: z.enum(["current", "expired", "open", "done", "dropped"]).default("current"),
+              }),
+            )
+            .default([]),
+        }),
+      ),
+      daily: z.array(z.object({ date: z.string(), summary: z.string() })).default([]),
+      forget_topics: z.array(z.string()).default([]),
+    })
+    .optional(),
 });
 export type Seed = z.infer<typeof seedSchema>;
 

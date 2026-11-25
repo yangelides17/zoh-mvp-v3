@@ -1,11 +1,73 @@
 {
-  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
   "id": "add-item-groceries",
   "title": "add_item dated Thursday, promises only next text not 3pm",
   "origin": "#253 (memory v2 part B): honest timing on items, no false promises",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
+  "seed": {
+    "name": "Rob",
+    "goal": "eating",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "pack lunch the night before", "where": "kitchen", "when": "9 pm", "how_long": "15 min" },
+    "history": [
+      { "from": "zoh", "text": "Morning Rob! Lunch packing at 9 tonight. You in?" },
+      { "from": "tester", "text": "yep already got the stuff ready" },
+      { "from": "zoh", "text": "Love it. Easy night ahead." }
+    ],
+    "plan": {
+      "step": "Pack lunch the night before",
+      "place": "kitchen",
+      "time": "21:00",
+      "days": ["sun", "mon", "tue", "wed", "thu"],
+      "proof": "photo",
+      "reason": "Packing the night before means you're not scrambling in the morning or buying food.",
+      "minutes": 15,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Rob",
+          "about": "Rob is focused on eating healthier. Packs lunches for work."
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Rob likes to be coached"
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Rob's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Rob"
+        },
+        {
+          "kind": "area",
+          "title": "Eating",
+          "about": "Rob's eating habits and lunch packing",
+          "parent_title": "Rob"
+        },
+        {
+          "kind": "goal",
+          "title": "Eating goal",
+          "about": "Pack lunch the night before, Sun–Thu",
+          "parent_title": "Eating",
+          "goal_slug": "eating"
+        }
+      ]
+    }
+  },
   "startTime": "10:00",
   "testerLines": ["remind me thursday at 3 to grab groceries"],
   "whatWentWrong": "New case: v2 add_item with honest timing.",
-  "shouldHaveHappened": "ZOH calls add_item with type 'todo', the Thursday date, and 'grab groceries'. It promises to bring it up next time it texts, NOT at 3pm (until the scheduler exists). The item is saved on the root page."
+  "shouldHaveHappened": "ZOH calls add_item with type 'todo', the Thursday date (2026-11-05), and text about grabbing groceries. It promises to bring it up when it next texts him (Thursday morning, or similar honest framing), NOT at 3 pm specifically. ZOH can't schedule an exact time reminder — it should be honest about that."
 }

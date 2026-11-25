@@ -1,9 +1,8 @@
 {
-  "_note": "Needs v2 seed mechanism in harness (extend seedSchema + seedV2Memory). Placeholder until then.",
   "id": "recall-marco",
   "title": "Recalls Marco from v2 memory tree when Sam mentions 'marc'",
   "origin": "#253 (memory v2 part B): the coach reads v2 memory and uses it naturally",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
   "seed": {
     "name": "Sam",
     "goal": "exercise",
@@ -26,11 +25,77 @@
       "started_days_ago": 28
     },
     "step_days": [
-      { "days_ago": 1, "status": "done" }
-    ]
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Sam",
+          "about": "Sam works at a tech company. Runs in the mornings."
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Sam likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Keeps texts short and direct" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Sam's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Sam"
+        },
+        {
+          "kind": "area",
+          "title": "Running",
+          "about": "Sam's running habit — 2 miles in Forest Park",
+          "parent_title": "Sam"
+        },
+        {
+          "kind": "goal",
+          "title": "Exercise goal",
+          "about": "Run 2 miles in Forest Park every weekday morning",
+          "parent_title": "Running",
+          "goal_slug": "exercise"
+        },
+        {
+          "kind": "person",
+          "title": "Marco",
+          "about": "Sam's coworker who runs with him in Forest Park",
+          "other_names": ["Marc"],
+          "entries": [
+            { "type": "fact", "text": "Coworker at Sam's tech company" },
+            { "type": "fact", "text": "Runs with Sam in Forest Park on weekday mornings" },
+            { "type": "fact", "text": "Training for a half marathon" }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Anna",
+          "about": "Sam's sister, lives nearby",
+          "entries": [
+            { "type": "fact", "text": "Sam's younger sister" },
+            { "type": "fact", "text": "Lives about 20 minutes away" }
+          ]
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Ran 2 miles in Forest Park. Quick check-in, done before work." },
+        { "date": "2026-10-30", "summary": "Ran 2 miles with Marco. Said Marco is getting faster." }
+      ]
+    }
   },
   "startTime": "09:00",
   "testerLines": ["ran w marc today, he's getting faster"],
   "whatWentWrong": "New case: v2 memory recall test.",
-  "shouldHaveHappened": "ZOH knows Marco is Sam's coworker who runs in Forest Park (from a v2 person page under People) and shows it naturally: by name, maybe the detail that matters. No list of facts, nothing invented."
+  "shouldHaveHappened": "ZOH knows Marco is Sam's coworker who runs in Forest Park (from a v2 person page under People) and shows it naturally: by name, maybe the detail that matters (half marathon training, runs together). No list of facts, nothing invented."
 }

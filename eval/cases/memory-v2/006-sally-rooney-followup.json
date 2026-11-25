@@ -1,11 +1,99 @@
 {
-  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
   "id": "sally-rooney-followup",
   "title": "Finds the followup entry about the Sally Rooney book",
   "origin": "#253 (memory v2 part B): search and open items from v2 entries",
-  "now": "2025-11-03T14:00:00Z",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 2,
+    "answers": { "what": "read 20 pages", "where": "the couch", "when": "9 pm", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Maya! 20 pages on the couch at 9 tonight." },
+      { "from": "tester", "text": "yep on it" },
+      { "from": "zoh", "text": "Let's go." }
+    ],
+    "plan": {
+      "step": "Read 20 pages",
+      "place": "the couch",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Twenty pages a night finishes a book every two weeks.",
+      "minutes": 25,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Maya",
+          "about": "Maya loves reading. Works as a graphic designer.",
+          "entries": [
+            { "type": "fact", "text": "Works as a graphic designer at a small agency" }
+          ]
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Maya likes to be coached"
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "Everyone in Maya's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Maya"
+        },
+        {
+          "kind": "area",
+          "title": "Reading",
+          "about": "Maya's reading habit",
+          "parent_title": "Maya"
+        },
+        {
+          "kind": "goal",
+          "title": "Reading goal",
+          "about": "Read 20 pages every night at 9 pm on the couch",
+          "parent_title": "Reading",
+          "goal_slug": "reading",
+          "entries": [
+            { "type": "fact", "text": "Currently reading Intermezzo by Sally Rooney" },
+            { "type": "fact", "text": "Finished Normal People two weeks ago" },
+            {
+              "type": "followup",
+              "text": "Ask Lena about borrowing her copy of Beautiful World, Where Are You (the next Sally Rooney)",
+              "when": "2026-10-28",
+              "status": "open"
+            }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Lena",
+          "about": "Maya's best friend, also reads a lot",
+          "entries": [
+            { "type": "fact", "text": "Maya's best friend from college" },
+            { "type": "fact", "text": "Lent Maya the Sally Rooney books" }
+          ]
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Read 20 pages of Intermezzo. Getting close to the end." }
+      ]
+    }
+  },
   "startTime": "19:00",
   "testerLines": ["is the sally rooney thing still on"],
   "whatWentWrong": "New case: v2 search and followup item lookup.",
-  "shouldHaveHappened": "Maya has a followup entry about borrowing a Sally Rooney book from a friend. ZOH finds it (via search_memory or the MEMORY block) and answers about the status. It doesn't invent details or confuse it with something else."
+  "shouldHaveHappened": "Maya has an open followup entry about asking Lena for the next Sally Rooney book (Beautiful World, Where Are You). ZOH finds it from the v2 memory and answers about its status — that it's still open, mentions Lena and the book by name. It doesn't invent details or confuse it with something else."
 }
