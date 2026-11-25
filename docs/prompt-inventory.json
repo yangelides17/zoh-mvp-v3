@@ -3839,6 +3839,13 @@
    "change": "new"
   },
   {
+   "text": "Could not identify what to forget — please try again.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > error",
+   "kind": "tool error",
+   "change": "new"
+  },
+  {
    "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > rwResp > system > text",

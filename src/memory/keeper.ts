@@ -422,6 +422,8 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
 
   /** After a failed day, that tester waits this long before the next try, so an outage can't burn calls every minute. */
   const retryAfter = new Map<string, number>();
+  /** #253: separate retry timer for the v2 pass so a v2 failure never blocks v1. */
+  const retryAfterV2 = new Map<string, number>();
 
   async function run(now: Date): Promise<Map<string, string[]>> {
     const written = new Map<string, string[]>();
@@ -454,8 +456,8 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
         break;
       }
     }
-    // #250: V2 pass (only for v2 testers, with its own through marker)
-    if (tester.memoryVersion === "v2" && deps.model && deps.checker) {
+    // #250: V2 pass (only for v2 testers, with its own through marker and retry timer)
+    if (tester.memoryVersion === "v2" && deps.model && deps.checker && (retryAfterV2.get(tester.id) ?? 0) <= now.getTime()) {
       const v2Days = daysDueV2(tester, now);
       for (const date of v2Days) {
         try {
@@ -464,7 +466,7 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
           tester.memoryV2Through = date;
         } catch (err) {
           deps.log.error({ ...ctx, date, err: safeError(err) }, "V2 memory pass failed; will retry in an hour");
-          retryAfter.set(tester.id, now.getTime() + RETRY_AFTER_MS);
+          retryAfterV2.set(tester.id, now.getTime() + RETRY_AFTER_MS);
           break;
         }
       }

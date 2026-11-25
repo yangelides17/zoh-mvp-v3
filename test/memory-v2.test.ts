@@ -735,6 +735,12 @@ describe("v2 forget", () => {
     await writeV2Daily(db, tester.id, "2025-10-06", "Sam talked about Clemson.", [msgId, m2.id], at);
 
     const checker = new FakeClaudeModel("No notable events.");
+    // Script the identification step to return empty JSON (entries already deleted by ref),
+    // then the daily rewrite (via forgotten message IDs) uses the default text "No notable events."
+    checker.script(JSON.stringify({ entries: [], pages: [], summaries: [] }));
+    // The sensitive check for the daily summary rewrite uses the default text "SAFE" won't work:
+    // the default text is "No notable events." so the rewrite returns that; then sensitiveCheck
+    // also gets "No notable events." which is fine (not "REJECT").
     const budget: LookupBudget = { lookups: 0, searches: 0 };
     const result = await runMemoryTool(db, tester, "forget", {
       facts: [v2EntryRef(e2.id)],
@@ -910,5 +916,96 @@ describe("v2 forget", () => {
     // Neutral note on Coaching
     const coachingEntries = await getV2Entries(db, coaching.id);
     expect(coachingEntries.some((e) => e.text.includes("Asked to forget something"))).toBe(true);
+  });
+
+  it("returns ok:false and skips topic recording when model returns bad JSON twice (#252)", async () => {
+    await ensureV2RequiredPages(db, tester, at);
+    // Script checker to return invalid JSON twice (retry fails too)
+    const checker = new FakeClaudeModel();
+    checker.script("not json at all");
+    checker.script("still not json {{{}}}");
+
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "forget", {
+      note: "the divorce",
+    }, { at, budget, sourceMessageId: msgId, checker });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("Could not identify what to forget");
+
+    // Topic should NOT be recorded
+    const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
+    expect(topics).toHaveLength(0);
+  });
+});
+
+// ─── V2 retry timer separation (#252) ──────────────────────────────
+
+describe("v2 retry timer separation", () => {
+  const noopLog = { info: () => {}, warn: () => {}, error: () => {} } as unknown as Logger;
+
+  it("v1 pass runs even when v2 is in retry cooldown (#252)", async () => {
+    const earlyAt = zonedTime("2025-10-05", "00:00", TZ);
+    const [v2Tester] = await db
+      .insert(testers)
+      .values({
+        phone: "+15550003333",
+        name: "V2 retry tester",
+        phase: "active",
+        timeZone: TZ,
+        timeZoneStatus: "confirmed",
+        consentAt: earlyAt,
+        contextStartedAt: earlyAt,
+        memoryVersion: "v2",
+      })
+      .returning();
+
+    const dayAt = zonedTime("2025-10-06", "10:00", TZ);
+    await db.insert(messages).values({
+      direction: "inbound", contactNumber: v2Tester!.phone, content: "Hey coach",
+      sentAt: dayAt, createdAt: dayAt,
+    });
+
+    const model = new FakeClaudeModel();
+    // V1 pass: round 1 returns write_daily_doc tool, round 2 ends the loop (no tools)
+    model.script(
+      { tools: [{ name: "write_daily_doc", input: { title: "Mon Oct 6", summary: "A day", body: "Nothing" } }] },
+      "Done filing.",
+    );
+    // V2 pass: throw to trigger retry cooldown
+    model.script(new Error("V2 model failure"));
+
+    const checker = new FakeClaudeModel("SAFE");
+    const tickTime = zonedTime("2025-10-07", "03:00", TZ);
+    const keeper = createMemoryKeeper({
+      db, log: noopLog, model, checker, allowedNumbers: ["*"],
+      now: () => tickTime,
+    });
+
+    // First tick: v1 succeeds, v2 fails → sets retryAfterV2
+    await keeper.tick();
+
+    // V1 should have advanced memoryThrough to the last day
+    const after1 = await db.select().from(testers).where(eq(testers.id, v2Tester!.id));
+    expect(after1[0]!.memoryThrough).toBe("2025-10-06");
+    // V2 should have advanced through the no-message day but failed on the message day
+    expect(after1[0]!.memoryV2Through).toBe("2025-10-05");
+
+    // Second tick (immediately, before retry timer expires):
+    // V1 has no more days to write, but v2 would need "2025-10-06" if it ran.
+    // If v2 ran, it would consume this script step — but retryAfterV2 should block it.
+    model.script(
+      { tools: [{ name: "write_daily_summary", input: { text: "Should not be called" } }] },
+      "Done.",
+    );
+
+    await keeper.tick();
+
+    // V2 should STILL be stuck at "2025-10-05" (retry timer blocks the "2025-10-06" day)
+    const after2 = await db.select().from(testers).where(eq(testers.id, v2Tester!.id));
+    expect(after2[0]!.memoryV2Through).toBe("2025-10-05");
+
+    // V1 stays at "2025-10-06" (no more days to process, still not blocked)
+    expect(after2[0]!.memoryThrough).toBe("2025-10-06");
   });
 });

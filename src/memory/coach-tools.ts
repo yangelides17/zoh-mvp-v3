@@ -317,15 +317,28 @@ Return JSON only:
 
 MEMORY:
 ${v2Memory}`;
-          const response = await ctx.checker.create({
-            system: [{ type: "text", text: "Identify memory items about a topic to forget. Return JSON only." }],
-            messages: [{ role: "user", content: identifyPrompt }],
-            tools: [], toolChoice: "none",
-          });
-          const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
-          const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
-          try {
-            const identified = JSON.parse(jsonStr) as { entries?: string[]; pages?: string[]; summaries?: string[] };
+          // Try up to 2 attempts to get valid JSON from the identification model.
+          let identified: { entries?: string[]; pages?: string[]; summaries?: string[] } | undefined;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const response = await ctx.checker.create({
+              system: [{ type: "text", text: "Identify memory items about a topic to forget. Return JSON only." }],
+              messages: [{ role: "user", content: identifyPrompt }],
+              tools: [], toolChoice: "none",
+            });
+            const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+            const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
+            try {
+              identified = JSON.parse(jsonStr) as { entries?: string[]; pages?: string[]; summaries?: string[] };
+              break;
+            } catch {
+              if (attempt === 1) {
+                console.error("V2 forget identification failed after retry", { testerId: tester.id, topic: topicText });
+                return { ok: false, error: "Could not identify what to forget — please try again." };
+              }
+            }
+          }
+
+          if (identified) {
             // Delete identified entries
             for (const ref of identified.entries ?? []) {
               const entry = await findV2Entry(db, tester.id, ref);
@@ -369,8 +382,6 @@ ${v2Memory}`;
               await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
               rewrittenDailies.add(dateStr);
             }
-          } catch {
-            // Model returned bad JSON — still record the topic so it's not refiled
           }
         }
 
