@@ -307,13 +307,20 @@ export function resolveTime(startDate: Date, day: number, time: string, timeZone
   // How far off is the guess from the desired local time?
   const diffMs = ((h - localH) * 60 + (m - localM)) * 60_000;
   const adjusted = new Date(guess.getTime() + diffMs);
-  // Verify the day is right (DST can shift it)
+  // Verify the day is right (DST can shift it). Compare full dates, not just the day
+  // number, since a month-boundary rollover makes the day-number difference huge.
   const checkParts = formatter.formatToParts(adjusted);
+  const checkY = Number(checkParts.find((p) => p.type === "year")?.value ?? "0");
+  const checkM = Number(checkParts.find((p) => p.type === "month")?.value ?? "0");
   const checkD = Number(checkParts.find((p) => p.type === "day")?.value ?? "0");
+  const wantY = Number(dateStr.slice(0, 4));
+  const wantM = Number(dateStr.slice(5, 7));
   const wantD = Number(dateStr.slice(8, 10));
-  if (checkD !== wantD) {
-    // Day rolled over; add/subtract a day
-    return new Date(adjusted.getTime() + (wantD - checkD) * 86400_000);
+  if (checkY !== wantY || checkM !== wantM || checkD !== wantD) {
+    // Off by a day — nudge by ±24h and re-check
+    const target = new Date(`${dateStr}T12:00:00Z`).getTime();
+    const delta = target - new Date(`${checkY}-${String(checkM).padStart(2, "0")}-${String(checkD).padStart(2, "0")}T12:00:00Z`).getTime();
+    return new Date(adjusted.getTime() + delta);
   }
   return adjusted;
 }

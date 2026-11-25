@@ -133,6 +133,7 @@ const schemas = {
     goal_slug: text(40).optional(),
   }).strict(),
   add_other_name: z.object({ page: ref, name: text(80) }).strict(),
+  correct_title: z.object({ page: ref, title: text(100) }).strict(),
   correct_about: z.object({ page: ref, about: text(500) }).strict(),
   write_daily_summary: z.object({ text: text(2000) }).strict(),
 };
@@ -164,6 +165,7 @@ export const V2_KEEPER_TOOLS: Anthropic.Tool[] = [
     }, ["parent", "kind", "title"]),
   },
   { name: "add_other_name", description: "Add an alternate name to a page (Ana for Anna).", input_schema: obj({ page: str("p: ref"), name: str() }, ["page", "name"]) },
+  { name: "correct_title", description: "Fix a page title (corrections only: 'Ana' → 'Anna', 'Daughter' → 'Emma'). Keeps the old title as an other_name.", input_schema: obj({ page: str("p: ref"), title: str("The correct title") }, ["page", "title"]) },
   { name: "correct_about", description: "Correct a page's About (corrections only, not updates for new information).", input_schema: obj({ page: str("p: ref"), about: str("1-3 sentences") }, ["page", "about"]) },
   { name: "write_daily_summary", description: "Write the day's summary. Exactly once, required. What happened with their step, how they sounded, anything new. Passing mentions go here as one line, not as entries.", input_schema: obj({ text: str("A few sentences") }, ["text"]) },
 ];
@@ -347,6 +349,16 @@ export async function runV2KeeperTool(ctx: V2DayContext, name: string, rawInput:
       return { ok: true, message: `Added other name "${input.name}" to ${v2PageRef(page.id)}` };
     }
 
+    case "correct_title": {
+      const input = parsed.data as z.infer<typeof schemas.correct_title>;
+      const page = await findV2Page(ctx.db, ctx.tester.id, input.page);
+      if (!page) return { ok: false, error: `No page ${input.page} for this tester.` };
+      // Keep the old title as an other_name
+      const otherNames = page.otherNames.includes(page.title) ? page.otherNames : [...page.otherNames, page.title];
+      await updateV2Page(ctx.db, page, { title: input.title, otherNames }, ctx.at);
+      return { ok: true, message: `Corrected title: ${page.title} → ${input.title} (old kept as other name)` };
+    }
+
     case "correct_about": {
       const input = parsed.data as z.infer<typeof schemas.correct_about>;
       const page = await findV2Page(ctx.db, ctx.tester.id, input.page);
@@ -489,7 +501,7 @@ When ZOH says it will look into something or the tester asks for something ("can
 1-3 sentences on what the page is. Test: would it still be true after the page is finished? Never restate children's facts. Corrections only (correct_about), not updates.
 
 ## Coaching page
-Only what the tester stated or agreed to about how they want to be coached. A "yes" or "ya" to ZOH's proposal counts as stated ("Want me to keep texts out of 2am to 11am?" + "yes pls" → stated: don't text 2am-11am). Never observed texting style, reply timing, reply length, or tone — those wait for the weekly pass.
+Only what the tester stated or agreed to about how they want to be coached: quiet hours, nudging style, tone requests. A "yes" or "ya" to ZOH's proposal counts as stated ("Want me to keep texts out of 2am to 11am?" + "yes pls" → stated: don't text 2am-11am). Never observed texting style, reply timing, reply length, or tone — those wait for the weekly pass. Never put tracker data here (the plan, step schedule, study plan details): those are recorded by the app.
 
 ## Goal pages
 Every tracker goal must have exactly one goal page under its area by the end of your pass. Goal pages hold only lasting lessons: what works, what doesn't, why the goal matters, a reason they gave for a miss. When a new goal appears in the tracker records, create its area (if new) and goal page. When a goal is switched, mark the old page "past" and add a "leads_to" link with the reason.

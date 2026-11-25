@@ -249,6 +249,14 @@ describe("entry operations", () => {
     expect(all[0]!.text).toBe("Anna is his sister");
   });
 
+  it("resolveTime handles month-boundary rollover correctly", async () => {
+    const { resolveTime } = await import("../src/synthetic/loader.js");
+    const start = new Date("2025-10-06T00:00:00Z");
+    // Day 27 → Nov 1; at3am should be Nov 1 03:00 ET, not Oct 1
+    const at3am = resolveTime(start, 27, "03:00", TZ);
+    expect(at3am.toISOString()).toMatch(/^2025-11-01/);
+  });
+
   it("replace on an event closes old as 'dropped' (not 'expired')", async () => {
     const { root } = await ensureV2RequiredPages(db, tester, at);
     const event = await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "event", text: "Road trip days 10-14", when: "2025-10-15", sourceMessageId: msgId }, at);
@@ -522,6 +530,27 @@ describe("v2 writer tools", () => {
     ).resolves.toBeDefined(); // "inferred" is a valid enum value at the DB level
     // But the writer tools always set origin="stated" — there's no way for the model to pass it.
     // This is a code-level enforcement, not a DB constraint.
+  });
+
+  it("correct_title fixes title and keeps old as other_name", async () => {
+    const { ctx, people } = await makeCtx();
+    // Create a person page with the wrong name
+    const createResult = await runV2KeeperTool(ctx, "create_page", {
+      parent: v2PageRef(people.id), kind: "person", title: "Ana",
+    });
+    expect(createResult.ok).toBe(true);
+    const pages = await getV2Pages(db, tester.id);
+    const ana = pages.find((p) => p.title === "Ana")!;
+
+    const result = await runV2KeeperTool(ctx, "correct_title", {
+      page: v2PageRef(ana.id), title: "Anna",
+    });
+    expect(result.ok).toBe(true);
+
+    const updated = await getV2Pages(db, tester.id);
+    const anna = updated.find((p) => p.id === ana.id)!;
+    expect(anna.title).toBe("Anna");
+    expect(anna.otherNames).toContain("Ana");
   });
 
   it("allows writes to created pages (not just opened)", async () => {
