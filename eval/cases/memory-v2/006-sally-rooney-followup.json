@@ -81,6 +81,7 @@
           "kind": "person",
           "title": "Lena",
           "about": "Maya's best friend, also reads a lot",
+          "parent_title": "People",
           "entries": [
             { "type": "fact", "text": "Maya's best friend from college" },
             { "type": "fact", "text": "Lent Maya the Sally Rooney books" }

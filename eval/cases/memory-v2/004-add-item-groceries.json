@@ -5,10 +5,10 @@
   "suite": "capability",
   "seed": {
     "name": "Rob",
-    "goal": "eating",
+    "goal": "nutrition",
     "phase": "active",
     "history_hours_ago": 1,
-    "answers": { "what": "pack lunch the night before", "where": "kitchen", "when": "9 pm", "how_long": "15 min" },
+    "answers": { "what": "pack lunch the night before", "when": "9 pm", "tracks_with": "photo of the packed lunch" },
     "history": [
       { "from": "zoh", "text": "Morning Rob! Lunch packing at 9 tonight. You in?" },
       { "from": "tester", "text": "yep already got the stuff ready" },
@@ -61,7 +61,7 @@
           "title": "Eating goal",
           "about": "Pack lunch the night before, Sun–Thu",
           "parent_title": "Eating",
-          "goal_slug": "eating"
+          "goal_slug": "nutrition"
         }
       ]
     }

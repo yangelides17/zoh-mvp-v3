@@ -76,6 +76,7 @@
           "kind": "person",
           "title": "Marco",
           "about": "Sam's coworker who runs with him in Forest Park",
+          "parent_title": "People",
           "other_names": ["Marc"],
           "entries": [
             { "type": "fact", "text": "Coworker at Sam's tech company" },

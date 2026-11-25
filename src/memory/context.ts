@@ -126,7 +126,14 @@ async function v2MemoryBlock(db: Db, tester: Tester): Promise<string> {
   if (tier1.length) {
     rootLines.push("Map:");
     for (const p of tier1) {
-      rootLines.push(`  ${v2PageRef(p.id)} [${p.kind}] ${p.title}${p.about ? ` — ${p.about}` : ""}`);
+      const names = p.otherNames?.length ? ` (also: ${p.otherNames.join(", ")})` : "";
+      rootLines.push(`  ${v2PageRef(p.id)} [${p.kind}] ${p.title}${names}${p.about ? ` — ${p.about}` : ""}`);
+      // Show tier-2 children as a brief sub-list (title + About) so the coach knows who's in People, etc.
+      const children = allPages.filter((c) => c.parentId === p.id);
+      for (const c of children) {
+        const cNames = c.otherNames?.length ? ` (also: ${c.otherNames.join(", ")})` : "";
+        rootLines.push(`    ${v2PageRef(c.id)} [${c.kind}] ${c.title}${cNames}${c.about ? ` — ${c.about}` : ""}`);
+      }
     }
   }
   sections.push(rootLines.join("\n"));

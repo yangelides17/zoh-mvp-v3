@@ -71,6 +71,7 @@
           "kind": "person",
           "title": "Marco",
           "about": "Sam's coworker who runs with him in Forest Park",
+          "parent_title": "People",
           "other_names": ["Marc"],
           "entries": [
             { "type": "fact", "text": "Coworker at Sam's tech company" },
@@ -82,6 +83,7 @@
           "kind": "person",
           "title": "Anna",
           "about": "Sam's sister, lives nearby",
+          "parent_title": "People",
           "entries": [
             { "type": "fact", "text": "Sam's younger sister" },
             { "type": "fact", "text": "Lives about 20 minutes away" }

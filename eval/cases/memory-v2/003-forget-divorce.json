@@ -5,10 +5,10 @@
   "suite": "capability",
   "seed": {
     "name": "Rob",
-    "goal": "eating",
+    "goal": "nutrition",
     "phase": "active",
     "history_hours_ago": 20,
-    "answers": { "what": "pack lunch the night before", "where": "kitchen", "when": "9 pm", "how_long": "15 min" },
+    "answers": { "what": "pack lunch the night before", "when": "9 pm", "tracks_with": "photo of the packed lunch" },
     "history": [
       { "from": "zoh", "text": "Rob! Lunch packed for tomorrow?" },
       { "from": "tester", "text": "yep turkey wrap, easy" },
@@ -68,12 +68,13 @@
           "title": "Eating goal",
           "about": "Pack lunch the night before, Sun–Thu",
           "parent_title": "Eating",
-          "goal_slug": "eating"
+          "goal_slug": "nutrition"
         },
         {
           "kind": "person",
           "title": "Emma",
           "about": "Rob's daughter, senior in high school, chose Clemson",
+          "parent_title": "People",
           "entries": [
             { "type": "fact", "text": "Rob's daughter, 17 years old" },
             { "type": "fact", "text": "Senior in high school" },
