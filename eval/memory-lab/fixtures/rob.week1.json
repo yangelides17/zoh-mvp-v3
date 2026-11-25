@@ -78,7 +78,7 @@
     { "day": 6, "time": "09:11", "from": "zoh", "text": "Fun! Is Emma the one who gave you my number? 😄 Enjoy the tour!" },
     { "day": 6, "time": "18:20", "from": "tester", "text": "Yes thats her. She liked it but says its too close to home lol" },
     { "day": 6, "time": "18:21", "from": "zoh", "text": "Ha, classic teenager. Where else is on her list?" },
-    { "day": 6, "time": "18:40", "from": "tester", "text": "Clemson and App State. We're doing a road trip over her spring break week after next", "tests": "Event: road trip to Clemson and App State over spring break, days 10-14" },
+    { "day": 6, "time": "18:40", "from": "tester", "text": "Clemson and App State. We're doing a road trip over her spring break next week", "tests": "Event: road trip to Clemson and App State over spring break, days 10-14" },
 
     { "day": 7, "time": "20:15", "from": "tester", "text": "Went to the Braves game with my buddy Dave today. Ate 2 hot dogs dont judge me", "tests": "Dave is a work friend; the game is passing" },
     { "day": 7, "time": "20:16", "from": "zoh", "text": "Zero judgment, ballpark rules 😂 Lunch packed for tomorrow?" },

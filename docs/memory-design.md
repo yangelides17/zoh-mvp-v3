@@ -52,7 +52,7 @@ Rules:
 
 | Part | Holds | Stored |
 | --- | --- | --- |
-| Label | Title, other names (Ana / Anna), parent, kind (root, area, project, person, place, coaching, people, places), status (active, paused, done, past), hint links | On the page row, once |
+| Label | Title, other names (Ana / Anna), parent, kind (root, area, project, goal, person, place, coaching, people, places), status (active, paused, done, past), hint links | On the page row, once |
 | About | 1 to 3 sentences on what the page is | On the page row, once |
 | Entries | Everything else, typed rows | Entry rows pointing to the page |
 | Children | Pages under this one | Not stored; found by their parent |

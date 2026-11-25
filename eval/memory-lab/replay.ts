@@ -17,6 +17,8 @@ import type { Db } from "../../src/db/client.js";
 import { migrationsFolder } from "../../src/db/paths.js";
 import type { ClaudeModel } from "../../src/claude/replier.js";
 import { writeDay } from "../../src/memory/keeper.js";
+import { writeV2Day, renderV2Memory } from "../../src/memory/v2-keeper.js";
+import { getV2Pages, findV2Page, getV2Entries, v2PageRef, v2EntryRef } from "../../src/memory/v2-store.js";
 import { memoryBlock } from "../../src/memory/context.js";
 import { runMemoryTool, type LookupBudget } from "../../src/memory/coach-tools.js";
 import { getPages } from "../../src/memory/store.js";
@@ -43,10 +45,12 @@ export interface ReplayOptions {
   scenario: string;
   startDate: Date;
   throughDay?: number;
-  /** Memory version: "current" uses the real writeDay; future versions will be added. */
+  /** Memory version: "current" uses the real writeDay; "v2" uses the v2 writer. */
   memoryVersion?: string;
   /** Keeper model (the one that writes memory). */
   keeperModel: ClaudeModel;
+  /** #250: checker model (Haiku, for the v2 sensitive check). Required when memoryVersion is "v2". */
+  checkerModel?: ClaudeModel;
   /** Grader model (scores checkpoints). */
   graderModel: ClaudeModel;
   /** Model name for cost estimation (e.g. "claude-haiku-5-5"). */
@@ -150,8 +154,12 @@ function countCheckpointBatches(scenario: string, throughDay: number): number {
  * Run a single replay. Importable for tests.
  */
 export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
-  if (opts.memoryVersion && opts.memoryVersion !== "current") {
-    throw new Error(`Unknown memory version "${opts.memoryVersion}"; only "current" is supported.`);
+  const isV2 = opts.memoryVersion === "v2";
+  if (opts.memoryVersion && opts.memoryVersion !== "current" && opts.memoryVersion !== "v2") {
+    throw new Error(`Unknown memory version "${opts.memoryVersion}"; supported: "current", "v2".`);
+  }
+  if (isV2 && !opts.checkerModel && !opts.dryRun) {
+    throw new Error("v2 memory requires a checkerModel (Haiku) for the sensitive check.");
   }
 
   const fixtures = loadFixtures(opts.scenario);
@@ -201,6 +209,11 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
     const inc = await loadScenarioIncremental(db, fixtures, opts.startDate);
     let tester: Tester = inc.tester;
 
+    // #250: set tester to v2 if running in v2 mode
+    if (isV2) {
+      tester = await updateTester(db, tester.id, { memoryVersion: "v2" });
+    }
+
     const nights: NightResult[] = [];
     const nightSpends: NightSpend[] = [];
     let totalForgetSpend = 0;
@@ -220,9 +233,10 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       const [freshAfterLoad] = await db.select().from(testers).where(eq(testers.id, tester.id)).limit(1);
       if (freshAfterLoad) tester = freshAfterLoad;
 
-      // 1. Apply stated_preference events for this day
+      // 1. Apply stated_preference events for this day (#250: skipped under v2)
       for (const w of inc.liveWrites) {
         if (w.kind !== "stated_preference" || w.day !== day) continue;
+        if (isV2) continue; // v2 writer discovers stated preferences from texts
         const prefAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
         // Find the nearest inbound message to use as source
         const [nearestMsg] = await db
@@ -243,71 +257,54 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       for (const w of inc.liveWrites) {
         if (w.kind !== "forget" || w.day !== day) continue;
         const forgetAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
-        // Render every page with refs so the model sees p: and f: identifiers (#149)
-        const allPages = await getPages(db, tester.id);
-        const renderedPages = await Promise.all(
-          allPages.map((page) => renderPage(db, tester, page, { refs: true })),
-        );
-        const fullMemory = renderedPages.join("\n\n");
-        const forgetPrompt = `The tester said: "${w.request}". Based on their memory below, identify which facts and/or pages to forget. Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }
+        // #250: render v2 pages for v2 mode so the model sees v2 refs (e: and p:)
+        let fullMemory: string;
+        let refKindLabel: string;
+        if (isV2) {
+          fullMemory = await renderV2Memory(db, tester);
+          refKindLabel = `"facts": ["e:ref", ...], "pages": ["p:ref", ...]`;
+        } else {
+          const allPages = await getPages(db, tester.id);
+          const renderedPages = await Promise.all(
+            allPages.map((page) => renderPage(db, tester, page, { refs: true })),
+          );
+          fullMemory = renderedPages.join("\n\n");
+          refKindLabel = `"facts": ["f:ref", ...], "pages": ["p:ref", ...]`;
+        }
+        const forgetPrompt = `The tester said: "${w.request}". Based on their memory below, identify which facts and/or pages to forget. Return a JSON object with the fields the forget tool expects: { ${refKindLabel}, "note": "brief description" }
 
 MEMORY:
 ${fullMemory}`;
-        const response = await opts.keeperModel.create({
-          system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
-          messages: [{ role: "user", content: forgetPrompt }],
-          tools: [],
-        });
-        const forgetUsage = response.usage ?? { input: 0, output: 0 };
-        totalForgetSpend += dollarsFor(forgetUsage, opts.keeperModelName);
 
-        const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
-        const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
-        try {
+        const doForget = async (prompt: string): Promise<boolean> => {
+          const response = await opts.keeperModel.create({
+            system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
+            messages: [{ role: "user", content: prompt }],
+            tools: [],
+          });
+          const usage = response.usage ?? { input: 0, output: 0 };
+          totalForgetSpend += dollarsFor(usage, opts.keeperModelName);
+          const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+          const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
           const forgetInput = JSON.parse(jsonStr) as Record<string, unknown>;
+          // #250: for v2, remap "facts" key to use e: refs (the model returns e: refs from v2 rendering)
           const budget: LookupBudget = { lookups: 0, searches: 0 };
-          const result = await runMemoryTool(db, tester, "forget", forgetInput, { at: forgetAt, budget });
-          if (result.ok) {
-            tester = result.tester;
-          } else {
-            // First attempt failed — retry once with the error fed back to the model
-            const retryPrompt = `Your previous forget attempt failed with this error: "${result.error}"
+          const result = await runMemoryTool(db, tester, "forget", forgetInput, {
+            at: forgetAt, budget, checker: isV2 ? opts.checkerModel : undefined,
+          });
+          if (result.ok) { tester = result.tester; return true; }
+          return false;
+        };
 
-The tester said: "${w.request}". Please try different refs. Here is the memory again:
-
-MEMORY:
-${fullMemory}
-
-Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }`;
-            const retryResponse = await opts.keeperModel.create({
-              system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
-              messages: [{ role: "user", content: retryPrompt }],
-              tools: [],
-            });
-            const retryUsage = retryResponse.usage ?? { input: 0, output: 0 };
-            totalForgetSpend += dollarsFor(retryUsage, opts.keeperModelName);
-
-            const retryText = retryResponse.content.find((b) => b.type === "text")?.text ?? "{}";
-            const retryJsonStr = retryText.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
-            try {
-              const retryInput = JSON.parse(retryJsonStr) as Record<string, unknown>;
-              const retryBudget: LookupBudget = { lookups: 0, searches: 0 };
-              const retryResult = await runMemoryTool(db, tester, "forget", retryInput, { at: forgetAt, budget: retryBudget });
-              if (retryResult.ok) {
-                tester = retryResult.tester;
-              } else {
-                unresolvedForgets.push({ day, request: w.request, reason: retryResult.error });
-              }
-            } catch (retryErr) {
-              unresolvedForgets.push({
-                day,
-                request: w.request,
-                reason: retryErr instanceof Error ? retryErr.message : String(retryErr),
-              });
-            }
+        try {
+          const ok = await doForget(forgetPrompt);
+          if (!ok) {
+            // Retry once
+            const retryPrompt = `Your previous forget attempt failed. The tester said: "${w.request}". Try again with the correct refs.\n\nMEMORY:\n${fullMemory}\n\nReturn JSON: { ${refKindLabel}, "note": "brief description" }`;
+            const ok2 = await doForget(retryPrompt);
+            if (!ok2) unresolvedForgets.push({ day, request: w.request, reason: "retry also failed" });
           }
         } catch (err) {
-          // JSON parse failed or other error (#149)
           unresolvedForgets.push({
             day,
             request: w.request,
@@ -340,7 +337,23 @@ Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref
           const fresh = await db.select().from(testers).where(eq(testers.id, tester.id)).limit(1);
           if (fresh[0]) tester = fresh[0];
 
-          await writeDay(db, trackingModel, tester, date, at3am);
+          if (isV2) {
+            // #250: v2 writer with sensitive checker
+            const trackingChecker: ClaudeModel = {
+              async create(req) {
+                const resp = await opts.checkerModel!.create(req);
+                if (resp.usage) {
+                  nightUsage.input += resp.usage.input;
+                  nightUsage.output += resp.usage.output;
+                }
+                return resp;
+              },
+              async check() { await opts.checkerModel!.check(); },
+            };
+            await writeV2Day(db, trackingModel, trackingChecker, tester, date, at3am);
+          } else {
+            await writeDay(db, trackingModel, tester, date, at3am);
+          }
           failed = false;
           error = undefined;
           break;
@@ -356,13 +369,18 @@ Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref
 
       // 4. Update memory_through
       if (!failed) {
-        await updateTester(db, tester.id, { memoryThrough: date });
-        tester.memoryThrough = date;
+        if (isV2) {
+          await updateTester(db, tester.id, { memoryV2Through: date });
+          tester.memoryV2Through = date;
+        } else {
+          await updateTester(db, tester.id, { memoryThrough: date });
+          tester.memoryThrough = date;
+        }
       }
 
       // 5. Snapshot
-      const snapshot = await takeSnapshot(db, tester.id);
-      const rendered = await memoryBlock(db, tester);
+      const snapshot = await takeSnapshot(db, tester.id, isV2);
+      const rendered = isV2 ? await renderV2Memory(db, tester) : await memoryBlock(db, tester);
 
       // 6. Save snapshot
       saveSnapshot(opts.outputDir, day, snapshot, rendered);

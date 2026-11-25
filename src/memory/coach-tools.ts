@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
 import { clearCoaching, dropStyleNote, markOverridden } from "../coaching/coaching.js";
-import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, type MemoryFact, type Message, type Tester } from "../db/schema.js";
+import { memoryFacts, memoryForgotten, memoryLinks, memoryPages, memoryV2Entries, type MemoryFact, type Message, type Tester } from "../db/schema.js";
 import { localDate } from "../coach/state.js";
 import { readDocument } from "../media/documents.js";
 import { prepareImageForClaude } from "../media/images.js";
@@ -12,6 +12,21 @@ import { updateTester } from "../testers/testers.js";
 import type { VideoWatcher } from "../video/gemini.js";
 import { renderPage } from "./render.js";
 import { addFact, ensureCorePages, factsOf, findFact, findMessage, findPage, mediaLabel, messageTime, removeFact, searchMemory } from "./store.js";
+import {
+  addV2ForgetTopic,
+  clearV2ForgetTopics,
+  deleteV2Memory,
+  deleteV2Page,
+  ensureV2RequiredPages,
+  findV2Entry,
+  findV2Page,
+  getV2DailiesWithMessages,
+  getV2Entries,
+  getV2ReplacesChain,
+  updateV2DailySummary,
+} from "./v2-store.js";
+// sensitiveCheck imported lazily to avoid circular imports through keeper.ts → coach.ts
+const loadSensitiveCheck = () => import("./v2-keeper.js").then((m) => m.sensitiveCheck);
 
 /**
  * The coach's memory tools (spec: GitHub issue "Coach memory"): saving a stated preference the
@@ -34,7 +49,8 @@ const schemas = {
     .object({
       facts: z.array(text(40)).max(10).optional(),
       pages: z.array(text(40)).max(5).optional(),
-      note: text(120).optional(),
+      // #250 decision 8: no length limit can make forget fail; a long topic is trimmed, not rejected.
+      note: z.string().trim().min(1).optional(),
       everything: z.boolean().optional(),
     })
     .strict(),
@@ -115,7 +131,7 @@ export async function runMemoryTool(
   tester: Tester,
   name: string,
   rawInput: unknown,
-  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string; media?: MediaStore; watcher?: VideoWatcher },
+  ctx: { at: Date; budget: LookupBudget; sourceMessageId?: string; media?: MediaStore; watcher?: VideoWatcher; checker?: import("../claude/replier.js").ClaudeModel },
 ): Promise<MemoryToolResult> {
   if (!(name in schemas)) return { ok: false, error: `Unknown tool "${name}"` };
   const parsed = schemas[name as MemoryToolName].safeParse(rawInput ?? {});
@@ -190,48 +206,210 @@ export async function runMemoryTool(
 
     case "forget": {
       const { facts, pages, note, everything } = parsed.data as z.infer<typeof schemas.forget>;
+      const isV2 = tester.memoryVersion === "v2";
+      // #250 decision 8: trim a long topic, never reject it.
+      const trimmedNote = note ? note.slice(0, 500) : undefined;
+
       if (everything) {
+        // V1 forget (always, so switching back is clean)
         await db.delete(memoryLinks).where(eq(memoryLinks.testerId, tester.id));
         await db.delete(memoryFacts).where(eq(memoryFacts.testerId, tester.id));
         await db.delete(memoryPages).where(eq(memoryPages.testerId, tester.id));
         await db.delete(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
-        // From here memory reads nothing older, and the overnight pass doesn't refile it.
+        // #250: also delete all v2 memory and clear forget topics
+        if (isV2) {
+          await deleteV2Memory(db, tester.id);
+          await clearV2ForgetTopics(db, tester.id);
+        }
         const updated = await updateTester(db, tester.id, { memorySince: at, styleNotes: "" });
-        // #158: the team's guidance is often about them too, and the history would keep the old wording.
         await clearCoaching(db, tester.id, "they asked ZOH to forget everything", at);
         return { ok: true, message: "Forgot everything: memory is empty and older texts won't be read again.", tester: updated, memoryChanged: true };
       }
-      if (!facts?.length && !pages?.length && !note) return { ok: false, error: "Give the facts' or pages' refs, a note, or everything: true." };
+      if (!facts?.length && !pages?.length && !trimmedNote) return { ok: false, error: "Give the facts' or pages' refs, a note, or everything: true." };
       const removed: string[] = [];
       const pageTitles: string[] = [];
+      const forgottenMsgIds: string[] = [];
+
+      // --- V1 forget (always runs, so switching back never restores forgotten content) ---
       for (const ref of pages ?? []) {
         const page = await findPage(db, tester.id, ref);
-        if (!page) return { ok: false, error: `No page ${ref} for this tester.` };
-        // Their own page, preferences, goals and days stay: forget the facts on them instead.
+        if (!page) {
+          // #250: for v2 testers, also try v2 pages
+          if (!isV2) return { ok: false, error: `No page ${ref} for this tester.` };
+          continue; // Will be handled in v2 section
+        }
         if (page.kind !== "person" && page.kind !== "subject") return { ok: false, error: `${ref} is their ${page.kind} page: forget its facts instead.` };
         const sources = (await factsOf(db, [page.id])).flatMap((f) => (f.sourceMessageId ? [f.sourceMessageId] : []));
         if (sources.length) {
           await db.insert(memoryForgotten).values(sources.map((messageId) => ({ testerId: tester.id, messageId }))).onConflictDoNothing();
+          forgottenMsgIds.push(...sources);
         }
-        // Its facts and links go with it.
         await db.delete(memoryPages).where(eq(memoryPages.id, page.id));
         removed.push(page.title);
         pageTitles.push(page.title);
       }
       for (const ref of facts ?? []) {
         const f = await findFact(db, tester.id, ref);
-        if (!f) return { ok: false, error: `No fact ${ref} for this tester.` };
+        if (!f) {
+          // #250: for v2 testers, also try v2 entries
+          if (!isV2) return { ok: false, error: `No fact ${ref} for this tester.` };
+          continue; // Will be handled in v2 section
+        }
         await removeFact(db, f, at, "tester");
-        // #158: a style request also lives on the tester (what onboarding reads): it goes there too.
         if (f.section === "stated") tester = await dropStyleNote(db, tester, f.text);
         if (f.sourceMessageId) {
           await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: f.sourceMessageId }).onConflictDoNothing();
+          forgottenMsgIds.push(f.sourceMessageId);
         }
         removed.push(f.text);
       }
-      // Always leave a note: without it a later reply sees its own earlier words missing from memory
-      // and thinks it made them up, and the overnight pass could file it again from today's texts.
-      const forgetNote = note ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
+
+      // --- V2 forget (only for v2 testers) ---
+      if (isV2) {
+        const {
+          addV2Entry: addEntry, getV2EntriesByTester, getV2ForgetTopics,
+          findV2MessageForSource, getV2Pages: getAllV2Pages, getV2Dailies,
+        } = await import("./v2-store.js");
+        const doSensitiveCheck = await loadSensitiveCheck();
+        const { renderV2Memory } = await import("./v2-keeper.js");
+        const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
+
+        // 1. Delete v2 entries/pages by ref (when the caller passes e:/p: refs, e.g. from the lab)
+        for (const ref of facts ?? []) {
+          const entry = await findV2Entry(db, tester.id, ref);
+          if (!entry) continue;
+          const chain = await getV2ReplacesChain(db, entry.id);
+          for (const id of [entry.id, ...chain]) {
+            const [e] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
+            if (e?.sourceMessageId) {
+              await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+              forgottenMsgIds.push(e.sourceMessageId);
+            }
+            await db.delete(memoryV2Entries).where(eq(memoryV2Entries.id, id));
+          }
+          removed.push(entry.text);
+        }
+        for (const ref of pages ?? []) {
+          const page = await findV2Page(db, tester.id, ref);
+          if (!page) continue;
+          const entries = await getV2Entries(db, page.id);
+          for (const e of entries) {
+            if (e.sourceMessageId) {
+              await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+              forgottenMsgIds.push(e.sourceMessageId);
+            }
+          }
+          const result = await deleteV2Page(db, page);
+          if (result.ok) { removed.push(page.title); pageTitles.push(page.title); }
+        }
+
+        const rewrittenDailies = new Set<string>();
+        // 2. Model-based identification: ask Haiku which v2 entries, pages and summaries
+        //    are ABOUT the topic, then delete/rewrite only those.
+        if (topicText && ctx.checker) {
+          const v2Memory = await renderV2Memory(db, tester);
+          const identifyPrompt = `The tester asked to forget: "${topicText}"
+
+Here is their memory. Identify which entries, pages and daily summaries are ABOUT this topic and should be removed or rewritten. Be precise: only items directly about the topic, not items that merely mention a person or place also involved in unrelated context. For example, if forgetting "the divorce and Karen", delete Karen's page and entries about the divorce, but do NOT delete Emma's page or entries about Emma that aren't about the divorce.
+
+Return JSON only:
+{ "entries": ["e:ref", ...], "pages": ["p:ref", ...], "summaries": ["YYYY-MM-DD", ...] }
+
+MEMORY:
+${v2Memory}`;
+          const response = await ctx.checker.create({
+            system: [{ type: "text", text: "Identify memory items about a topic to forget. Return JSON only." }],
+            messages: [{ role: "user", content: identifyPrompt }],
+            tools: [], toolChoice: "none",
+          });
+          const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+          const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
+          try {
+            const identified = JSON.parse(jsonStr) as { entries?: string[]; pages?: string[]; summaries?: string[] };
+            // Delete identified entries
+            for (const ref of identified.entries ?? []) {
+              const entry = await findV2Entry(db, tester.id, ref);
+              if (!entry) continue;
+              const chain = await getV2ReplacesChain(db, entry.id);
+              for (const id of [entry.id, ...chain]) {
+                const [e] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
+                if (e?.sourceMessageId) {
+                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+                  forgottenMsgIds.push(e.sourceMessageId);
+                }
+                await db.delete(memoryV2Entries).where(eq(memoryV2Entries.id, id));
+              }
+            }
+            // Delete identified pages
+            for (const ref of identified.pages ?? []) {
+              const page = await findV2Page(db, tester.id, ref);
+              if (!page) continue;
+              const entries = await getV2Entries(db, page.id);
+              for (const e of entries) {
+                if (e.sourceMessageId) {
+                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+                  forgottenMsgIds.push(e.sourceMessageId);
+                }
+              }
+              await deleteV2Page(db, page);
+            }
+            // Rewrite identified daily summaries
+            for (const dateStr of identified.summaries ?? []) {
+              const allDailies = await getV2Dailies(db, tester.id, 1000);
+              const daily = allDailies.find((d) => d.date === dateStr);
+              if (!daily) continue;
+              const rwResp = await ctx.checker.create({
+                system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
+                messages: [{ role: "user", content: `Rewrite removing any mention of "${topicText}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
+                tools: [], toolChoice: "none",
+              });
+              const rewritten = rwResp.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
+              const fTopics = await getV2ForgetTopics(db, tester.id);
+              const rejection = await doSensitiveCheck(ctx.checker, rewritten, fTopics);
+              await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
+              rewrittenDailies.add(dateStr);
+            }
+          } catch {
+            // Model returned bad JSON — still record the topic so it's not refiled
+          }
+        }
+
+        // Also rewrite any summaries with matching forgotten message IDs
+        // (only those not already rewritten by the model identification above)
+        if (forgottenMsgIds.length > 0 && ctx.checker) {
+          const topic = topicText ?? "the forgotten content";
+          const affected = await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds);
+          for (const daily of affected) {
+            if (rewrittenDailies.has(daily.date)) continue; // already handled by model identification
+            const rwResp = await ctx.checker.create({
+              system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
+              messages: [{ role: "user", content: `Rewrite removing any mention of "${topic}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
+              tools: [], toolChoice: "none",
+            });
+            const rewritten = rwResp.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
+            const fTopics = await getV2ForgetTopics(db, tester.id);
+            const rejection = await doSensitiveCheck(ctx.checker, rewritten, fTopics);
+            await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
+          }
+        }
+
+        // 3. Record the forget topic
+        if (topicText) await addV2ForgetTopic(db, tester.id, topicText, at);
+
+        // 4. Neutral note on Coaching ("asked to forget something on <date>")
+        const { coaching } = await ensureV2RequiredPages(db, tester, at);
+        const sourceForNote = ctx.sourceMessageId ?? await findV2MessageForSource(db, tester);
+        if (sourceForNote) {
+          await addEntry(db, {
+            pageId: coaching.id, testerId: tester.id, type: "note",
+            text: `Asked to forget something on ${localDate(at, tester.timeZone)}.`,
+            sourceMessageId: sourceForNote, learnedOn: localDate(at, tester.timeZone),
+          }, at);
+        }
+      }
+
+      // V1 forget note (always leave one)
+      const forgetNote = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
       if (forgetNote) {
         const { preferences } = await ensureCorePages(db, tester, at);
         await addFact(db, preferences, { text: forgetNote, sourceMessageId: ctx.sourceMessageId ?? null, section: "forget", day: localDate(at, tester.timeZone) }, at);

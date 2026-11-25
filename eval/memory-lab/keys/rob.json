@@ -23,7 +23,7 @@
       "after_day": 7,
       "must_hold": [
         { "id": "emma", "statement": "Rob's daughter is Emma, a high school senior choosing a college." },
-        { "id": "road-trip", "statement": "Rob and Emma plan a road trip to Clemson and App State over her spring break, days 10 to 14 (the week after next as of day 6)." },
+        { "id": "road-trip", "statement": "Rob and Emma plan a road trip to Clemson and App State over her spring break, days 10 to 14 (the following week, as of day 6)." },
         { "id": "keys-trick", "statement": "Putting his keys on the lunch bag in the fridge helps Rob remember his packed lunch." },
         { "id": "friday-home", "statement": "Rob works from home on Fridays (paperwork) and is on the road Monday to Thursday." }
       ],
