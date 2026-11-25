@@ -259,16 +259,16 @@ export async function runMemoryTool(
           const fTopics = await getV2ForgetTopics(db, tester.id);
           const rejection = ctx.checker ? await doSensitiveCheck(ctx.checker, preference, fTopics) : null;
           if (rejection) {
-            // Check for avoidance language: "don't bring up", "don't mention", "forget about", etc.
-            const avoidancePattern = /(?:don'?t\s+(?:bring up|mention|talk about|ask about)|forget about|stop talking about)/i;
-            if (avoidancePattern.test(preference)) {
+            // #253: model-based classification — ask Haiku whether this is a topic-avoidance request
+            const { classifyPreference } = await import("./v2-keeper.js");
+            const classification = ctx.checker ? await classifyPreference(ctx.checker, preference) : null;
+            if (classification) {
               await addV2Entry(db, {
                 pageId: coaching.id, testerId: tester.id, type: "note",
-                text: "Asked not to bring up a personal topic.",
+                text: classification.neutral,
                 sourceMessageId: sourceId, learnedOn: localDate(at, tester.timeZone),
               }, at);
-              // Record the original words as a forget topic
-              await addV2ForgetTopic(db, tester.id, preference, at);
+              await addV2ForgetTopic(db, tester.id, classification.topic, at);
             }
           } else {
             await addV2Entry(db, {

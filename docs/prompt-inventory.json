@@ -3804,13 +3804,6 @@
    "change": "unchanged"
   },
   {
-   "text": "Asked not to bring up a personal topic.",
-   "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > text",
-   "kind": "tool result",
-   "change": "new"
-  },
-  {
    "text": "Dropped the learned preference it overrides: ${dropped.map((f) => f.text).join(\"; \")}.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > extra",

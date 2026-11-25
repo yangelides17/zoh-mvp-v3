@@ -89,6 +89,38 @@ REJECT: <brief reason> — if the text should not be stored` }],
   return reason || "Contains sensitive content";
 }
 
+/**
+ * Classifies a stated preference that the sensitive check rejected. If the preference is a
+ * request to avoid a topic ("don't bring up my health", "stop asking about my ex"), returns
+ * the neutral wording to save on Coaching and the topic to record as a forget topic.
+ * Returns null if the preference is not an avoidance request.
+ */
+export async function classifyPreference(
+  checker: ClaudeModel,
+  preference: string,
+): Promise<{ neutral: string; topic: string } | null> {
+  const response = await checker.create({
+    system: [{ type: "text", text: `A tester's stated coaching preference was rejected by the privacy filter. Decide whether it is a request to AVOID a sensitive topic (e.g. "don't bring up my health", "stop mentioning my ex", "I don't want to talk about money").
+
+If YES — respond with exactly two lines:
+AVOID
+NEUTRAL: <a short neutral version to save, e.g. "Asked not to bring up a personal topic">
+TOPIC: <the topic they want avoided, e.g. "their health", "their ex">
+
+If NO — the preference was rejected for another reason (it contains sensitive detail itself):
+NOT_AVOIDANCE` }],
+    messages: [{ role: "user", content: preference }],
+    tools: [],
+    toolChoice: "none",
+  });
+  const reply = response.content.find((b) => b.type === "text")?.text?.trim() ?? "";
+  if (!reply.startsWith("AVOID")) return null;
+  const neutralMatch = reply.match(/^NEUTRAL:\s*(.+)$/m);
+  const topicMatch = reply.match(/^TOPIC:\s*(.+)$/m);
+  if (!neutralMatch || !topicMatch) return null;
+  return { neutral: neutralMatch[1]!.trim(), topic: topicMatch[1]!.trim() };
+}
+
 // ─── Writer tools ───────────────────────────────────────────────────────
 
 const text = (max: number) => z.string().trim().min(1).max(max);

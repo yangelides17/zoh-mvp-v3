@@ -1009,3 +1009,58 @@ describe("v2 retry timer separation", () => {
     expect(after2[0]!.memoryThrough).toBe("2025-10-06");
   });
 });
+
+// ─── save_preference avoidance detection (model-based) ──────────────
+
+describe("save_preference avoidance detection", () => {
+  it("saves a sensitive-topic avoidance preference in neutral words and records the topic (#253)", async () => {
+    const { coaching } = await ensureV2RequiredPages(db, tester, at);
+
+    // The checker model: first call is the sensitive check → REJECT, second is classifyPreference → AVOID
+    const checker = new FakeClaudeModel();
+    checker.script("REJECT: mentions health details");
+    checker.script("AVOID\nNEUTRAL: Asked not to discuss a health topic\nTOPIC: their health");
+
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "save_preference", {
+      preference: "please don't bring up my health stuff",
+    }, { at, budget, sourceMessageId: msgId, checker });
+
+    expect(result.ok).toBe(true);
+
+    // The neutral wording should be on Coaching
+    const coachingEntries = await getV2Entries(db, coaching.id);
+    expect(coachingEntries.some((e) => e.text === "Asked not to discuss a health topic")).toBe(true);
+    // The raw preference should NOT be on Coaching
+    expect(coachingEntries.some((e) => e.text.includes("health stuff"))).toBe(false);
+
+    // The topic should be recorded in forget topics
+    const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
+    expect(topics.some((t) => t.topic === "their health")).toBe(true);
+  });
+
+  it("does not save when sensitive check rejects and model says NOT_AVOIDANCE (#253)", async () => {
+    await ensureV2RequiredPages(db, tester, at);
+
+    const checker = new FakeClaudeModel();
+    checker.script("REJECT: contains medication details");
+    checker.script("NOT_AVOIDANCE");
+
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "save_preference", {
+      preference: "I take melatonin every night at 10",
+    }, { at, budget, sourceMessageId: msgId, checker });
+
+    // The preference is still saved to v1 (styleNotes), but the v2 entry is NOT written
+    expect(result.ok).toBe(true);
+
+    // No v2 coaching entry for this preference (rejected, not avoidance)
+    const { coaching } = await ensureV2RequiredPages(db, tester, at);
+    const coachingEntries = await getV2Entries(db, coaching.id);
+    expect(coachingEntries.some((e) => e.text.includes("melatonin"))).toBe(false);
+
+    // No forget topic recorded
+    const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
+    expect(topics).toHaveLength(0);
+  });
+});
