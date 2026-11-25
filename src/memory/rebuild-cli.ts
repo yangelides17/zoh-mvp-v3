@@ -19,12 +19,14 @@ import type { ClaudeModel, ModelRequest, ModelResponse, TokenUsage } from "../cl
 import { maskNumber } from "../pipeline/inbound.js";
 import { ownsNumber, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { updateTester } from "../testers/testers.js";
-import { daysDue } from "./keeper.js";
+import { daysDue, KEEPER_MAX_TOKENS, MEMORY_RUN_AT } from "./keeper.js";
 import { renderV2Memory, writeV2Day } from "./v2-keeper.js";
+import { zonedTime } from "../nudges/schedule.js";
 import { deleteV2Memory } from "./v2-store.js";
 import { takeSnapshot, saveSnapshot } from "../../eval/memory-lab/snapshot.js";
 
-const WRITER_MODEL = "claude-sonnet-4-5-20250514";
+/** Use the same models the live nightly keeper uses (CLAUDE_MODEL env var, default matches wiring.ts). */
+const WRITER_MODEL = process.env.CLAUDE_MODEL ?? "claude-sonnet-5-5";
 const CHECKER_MODEL = "claude-haiku-4-5-20251001";
 
 function usage(): never {
@@ -130,8 +132,9 @@ try {
 
   // Set up models
   const client = new Anthropic({ apiKey });
-  const writerModel = makeModel(client, WRITER_MODEL, 8000);
+  const writerModel = makeModel(client, WRITER_MODEL, KEEPER_MAX_TOKENS);
   const checkerModel = makeModel(client, CHECKER_MODEL, 256);
+  console.log(`Models: writer=${WRITER_MODEL}, checker=${CHECKER_MODEL}`);
 
   // Replay day by day
   let totalCost = 0;
@@ -139,7 +142,7 @@ try {
   for (let i = 0; i < days.length; i++) {
     const date = days[i]!;
     const dayNumber = i + 1;
-    const at3am = new Date(`${date}T08:00:00Z`); // ~3am Eastern
+    const at3am = zonedTime(date, MEMORY_RUN_AT, tester.timeZone);
     let nightUsage = { input: 0, output: 0 };
     const tracking: ClaudeModel = {
       async create(req) {
