@@ -32,7 +32,13 @@
     "today_step": { "step": "2 min jog, 1 min walk, 4 rounds around the block at 7 pm (about 15 min)", "agreed_hours_ago": 13 },
     "takeaways": [{ "days_ago": 1, "text": "Slow enough to talk is the right jogging pace", "evidence": "explained" }]
   },
-  "testerLines": ["advance to 09:05", "👍", "advance to 18:55", "slow enough to talk"],
+  "testerLines": [
+    "advance to 09:05",
+    { "say": "slow enough to talk", "when": "after ZOH asks what yesterday's pace rule or lesson was", "fixed": true, "optional": true },
+    { "say": "👍", "when": "after ZOH's morning kickoff or its reply", "fixed": true },
+    "advance to 18:55",
+    { "say": "slow enough to talk", "when": "after ZOH asks what yesterday's pace rule or lesson was", "fixed": true, "optional": true }
+  ],
   "whatWentWrong": "New case, not a past mistake: lessons should come back now and then, naturally.",
   "shouldHaveHappened": "The morning kickoff reminds Dev of the agreed step without asking as if for the first time (a light check that they're still in is fine). Yesterday's pace lesson comes back once during the day, inside a text ZOH sends anyway (the check-in before 7 is the natural place, e.g. a quick \"what's the pace rule from yesterday?\"), never as its own extra text and never framed as a quiz or test. When Dev answers \"slow enough to talk\", ZOH responds in a short line, warmly, without a lecture or a new question beyond getting going.",
   "startTime": "08:50",

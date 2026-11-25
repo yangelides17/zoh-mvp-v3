@@ -1,7 +1,7 @@
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, ne, or } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { raiseAlert } from "./alerts.js";
-import { consoleMessages, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
+import { consoleMessages, type AnswerStatus, type ConsoleMessage, type RequestDelivery, type Tester } from "../db/schema.js";
 
 /**
  * What the founders send through the console chat (spec: GitHub issue "Founder console", 4 and
@@ -41,11 +41,12 @@ export const findRequest = (list: ConsoleMessage[], ref: string): ConsoleMessage
 /** One line in a tester's console thread. */
 export async function addThreadLine(
   db: Db,
-  line: { testerId: string; kind: "founder" | "coach" | "note"; author: string; body: string; at: Date },
+  line: { testerId: string; kind: "founder" | "coach" | "note"; author: string; body: string; at: Date; attachment?: { key: string; contentType: string; name: string } },
 ): Promise<ConsoleMessage> {
+  const file = line.attachment ? { mediaKey: line.attachment.key, mediaContentType: line.attachment.contentType, mediaName: line.attachment.name } : {};
   const [row] = await db
     .insert(consoleMessages)
-    .values({ testerId: line.testerId, kind: line.kind, author: line.author, body: line.body, createdAt: line.at })
+    .values({ testerId: line.testerId, kind: line.kind, author: line.author, body: line.body, createdAt: line.at, ...file })
     .returning();
   return row!;
 }
@@ -63,12 +64,29 @@ export async function addRequest(
     expiresAt?: Date;
     at: Date;
     status?: "pending" | "cancelled";
+    /** #169: a question whose answer comes back to the founders (an alert unless `alertOnAnswer` is false). */
+    question?: boolean;
+    alertOnAnswer?: boolean;
+    /** #168: a founder's file sent with it (word for word only), already on Sendblue's media host. */
+    media?: { key: string; contentType: string; name: string; account: string; partial: boolean; sendblueUrl: string };
   },
 ): Promise<ConsoleMessage> {
   const [row] = await db
     .insert(consoleMessages)
     .values({
       testerId: opts.testerId,
+      question: opts.question ?? false,
+      alertOnAnswer: opts.alertOnAnswer ?? true,
+      ...(opts.media
+        ? {
+            mediaKey: opts.media.key,
+            mediaContentType: opts.media.contentType,
+            mediaName: opts.media.name,
+            mediaAccount: opts.media.account,
+            mediaPartial: opts.media.partial,
+            sendblueMediaUrl: opts.media.sendblueUrl,
+          }
+        : {}),
       kind: "request",
       author: opts.author,
       body: opts.body,
@@ -246,14 +264,24 @@ export async function cancelStuckRequests(db: Db, tester: Tester, now: Date): Pr
 }
 
 /**
- * Requests the coach marked done in the reply it's writing now (a reply's rounds share one `now`):
- * still shown, so the text that carries one doesn't drop it once it's off the pending list.
+ * Requests the reply being written has claimed (#169): by this draft (a reply's rounds share one `now`) or by
+ * an earlier draft of the same reply that was dropped (`ids`). Still shown, so the text that carries one doesn't
+ * drop it once it's off the pending list. They close only once the reply is sent.
  */
-export async function requestsDoneAt(db: Db, testerId: string, now: Date): Promise<ConsoleMessage[]> {
+export async function requestsClaimed(db: Db, testerId: string, opts: { at: Date[]; ids?: readonly string[] }): Promise<ConsoleMessage[]> {
+  const ids = opts.ids ?? [];
+  if (!opts.at.length && !ids.length) return [];
   return db
     .select()
     .from(consoleMessages)
-    .where(and(eq(consoleMessages.testerId, testerId), eq(consoleMessages.kind, "request"), eq(consoleMessages.requestStatus, "done"), eq(consoleMessages.doneAt, now)))
+    .where(
+      and(
+        eq(consoleMessages.testerId, testerId),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.requestStatus, "sending"),
+        or(...(opts.at.length ? [inArray(consoleMessages.claimedAt, opts.at)] : []), ...(ids.length ? [inArray(consoleMessages.id, [...ids])] : [])),
+      ),
+    )
     .orderBy(asc(consoleMessages.createdAt));
 }
 
@@ -290,8 +318,87 @@ export async function notesForCoach(db: Db, tester: Pick<Tester, "id" | "context
   const rows = await db
     .select()
     .from(consoleMessages)
-    .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note"), gte(consoleMessages.createdAt, since)))
+    // #158: a note made lasting (moved into guidance) is done, and read only as guidance from then on.
+    .where(and(eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note"), isNull(consoleMessages.doneAt), gte(consoleMessages.createdAt, since)))
     .orderBy(desc(consoleMessages.createdAt))
     .limit(NOTES_SHOWN);
   return rows.reverse();
+}
+
+/** #169: how long ZOH listens for the answer to a team question it asked (a dodge included). */
+export const LISTEN_DAYS = 7;
+/** #169: no answer this long after ZOH asked: the founders hear so (once). */
+export const NO_ANSWER_MS = 24 * 3_600_000;
+/** #169: the alert with their answer, and the one for no answer or talking past it (each once per question). */
+export const ANSWER_ALERT = "question_answer";
+export const UNANSWERED_ALERT = "question_unanswered";
+
+/**
+ * #169: team questions ZOH asked and is still listening for: asked (sent) in the last `LISTEN_DAYS` days, since
+ * their context started, not answered yet (a dodge still listens). None once they've stopped. Oldest first.
+ */
+export async function listeningQuestions(db: Db, tester: Pick<Tester, "id" | "contextStartedAt" | "stoppedAt">, now: Date): Promise<ConsoleMessage[]> {
+  if (tester.stoppedAt) return [];
+  const since = new Date(Math.max(tester.contextStartedAt.getTime(), now.getTime() - LISTEN_DAYS * 86_400_000));
+  return db
+    .select()
+    .from(consoleMessages)
+    .where(
+      and(
+        eq(consoleMessages.testerId, tester.id),
+        eq(consoleMessages.kind, "request"),
+        eq(consoleMessages.question, true),
+        eq(consoleMessages.requestStatus, "done"),
+        gte(consoleMessages.doneAt, since),
+        or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered")),
+      ),
+    )
+    .orderBy(asc(consoleMessages.doneAt));
+}
+
+const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 3)}...` : s);
+
+/**
+ * #169: records what came of a question ZOH asked: their answer (close to their words), or that they talked past
+ * it. Saved either way, with a line in the thread; the founders get an alert unless they switched it off. An
+ * answer after a dodge or a no-answer alert still counts. False when it was already answered.
+ */
+export async function recordAnswer(
+  db: Db,
+  opts: { question: ConsoleMessage; status: AnswerStatus; answer?: string; name: string | null; at: Date },
+): Promise<boolean> {
+  const q = opts.question;
+  // The answer, its thread line and its alert land together: a failed alert can't leave the answer saved with no
+  // alert (a retry would find it already answered and raise nothing).
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .update(consoleMessages)
+      .set({ answerStatus: opts.status, answer: opts.answer ?? null, answeredAt: opts.at })
+      .where(and(eq(consoleMessages.id, q.id), or(isNull(consoleMessages.answerStatus), ne(consoleMessages.answerStatus, "answered"))))
+      .returning();
+    if (!row) return false;
+    const who = opts.name ?? "They";
+    const asked = clip(q.body, 120);
+    const body = opts.status === "answered" ? `${who} answered "${asked}": ${opts.answer}` : `${who} talked past "${asked}" (ZOH won't ask again)`;
+    await addThreadLine(tx, { testerId: q.testerId, kind: "coach", author: APP_AUTHOR, body, at: opts.at });
+    if (q.alertOnAnswer) {
+      const topic = opts.status === "answered" ? ANSWER_ALERT : UNANSWERED_ALERT;
+      await raiseAlert(tx, { testerId: q.testerId, topic, key: `${topic}:${q.id}`, body, at: opts.at });
+    }
+    return true;
+  });
+}
+
+/** #169: one alert per question still unanswered `NO_ANSWER_MS` after ZOH asked it (none once they've stopped). */
+export async function alertUnanswered(db: Db, tester: Tester, now: Date): Promise<void> {
+  for (const q of await listeningQuestions(db, tester, now)) {
+    if (!q.alertOnAnswer || q.answerStatus || !q.doneAt || now.getTime() - q.doneAt.getTime() < NO_ANSWER_MS) continue;
+    await raiseAlert(db, {
+      testerId: tester.id,
+      topic: UNANSWERED_ALERT,
+      key: `${UNANSWERED_ALERT}:${q.id}`,
+      body: `No answer yet from ${tester.name ?? "them"} (asked ${founderTime(q.doneAt)}): "${clip(q.body, 120)}"`,
+      at: now,
+    });
+  }
 }

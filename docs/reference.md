@@ -13,8 +13,24 @@ anything here (a new service or variable, a reversed decision, a new outside lim
     public domain. Never shares a database or bucket with production.
   - Speaches (both apps) has `STT_MODEL_TTL=300` and `TTS_MODEL_TTL=0` (Nov 18): the Whisper model
     unloads after 5 idle minutes instead of staying in memory (it held 0.9–1.4 GB all day, about
-    $23 a month for both). Idle it holds about 0.3 GB; the first voice note after a quiet spell
-    waits about 6 s more (model load 5.4 s on staging, warm transcription 1.4 s).
+    $23 a month for both). The first voice note after a quiet spell waits about 6 s more (model
+    load 5.4 s on staging, warm transcription 1.4 s). On its own the unload freed nothing: the
+    process kept the memory (1.22 GB idle). So Speaches also has `MALLOC_ARENA_MAX=2`,
+    `MALLOC_MMAP_THRESHOLD_=131072` and `MALLOC_TRIM_THRESHOLD_=131072` (Nov 18; glibc settings,
+    transcripts unchanged), which hand freed memory back: idle is 0.22 GB after a restart and
+    0.70 GB once a voice note has loaded the model (measured on staging), about $5 a month saved
+    per app. The rest is the Whisper libraries and file cache; no setting frees it
+    (`MKL_DISABLE_FAST_MM=1` was tried and did nothing). Over the next days production settled
+    near 0.37 GB as the file cache was reclaimed.
+  - Staging's Speaches sleeps when idle (Railway Serverless, Nov 18; production stays always on):
+    it sleeps 5–10 minutes after its last traffic and costs nothing asleep. The setting only reaches
+    a container created after it is turned on, so it needs a new deploy, not "redeploy" (which reran
+    the old settings). A sleeping Speaches fails the first request at once (`fetch failed`) rather
+    than holding it; it is up about 10 s later. So the app (both apps; `SPEACHES_WAKE_RETRY_MS` in
+    `src/transcription/speaches.ts`) retries a voice note that can't connect every 2 s for up to
+    30 s: the first one after a quiet spell on staging waits about 20 s, and on production a note
+    that arrives while Speaches restarts keeps its words. A normal voice note isn't slowed: only a
+    failed connection waits.
 - **App variables** (names only): `DATABASE_URL`, `SENDBLUE_API_KEY_ID`, `SENDBLUE_API_KEY_SECRET`,
   `SENDBLUE_NUMBER`, `SENDBLUE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ALLOWED_NUMBERS`
   (who gets replies, nudges and memory; `*` means everyone, set on production at launch, Nov 3 2026),
@@ -86,6 +102,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   not a script; every starter needs what, when and how long (Get fitter also where).
 - Onboarding asks name and goal together in the first text; no "why" question; no pushiness
   question; asks at most once about apps or tools they already use.
+- No push levels (#158, replacing Pushy / Steady / Gentle): every tester gets the one default rhythm
+  (up to 3 unanswered texts, `UNANSWERED_CAP`), and how ZOH coaches each person comes from their own
+  style requests, what it learned and the team's guidance on the Coaching card (up to 10 lines of 200
+  characters; their request beats it). `testers.pushiness` is unused and is dropped in a later release.
 - How a tester proves each day's step is **not** fixed per goal: the plan suggests it, using what
   onboarding learned about how they already track it.
 - Quiet hours: ZOH never starts a text between 10 pm and 9 am (changeable on request) but always
@@ -121,6 +141,18 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   and the founders get an alert.
   The console chat reads only the voice page's voice, not its rule sections (#196, Yanni, Nov 16): if it seems
   confused about why ZOH did something in practice, that may be why (see the note in `src/console/chat.ts`).
+- A request ZOH carries in a reply counts only once that reply is sent (#169): until then it's held ("sending"), a
+  redraft still carries it, and a reply that's stopped, fails or is the fallback text hands it back.
+- Questions (#169, Yanni, Nov 18): a founder's question is a request marked as one, with "Alert me when they answer" on
+  by default (switchable on the card). ZOH asks once and listens for 7 days (a dodge too: never asked again, but a
+  later answer counts). Answers, dodges and no answer after 24 hours go to Alerts (not Needs you), counted on the
+  badge; nothing after a stop. Only questions alert, not every reply.
+- Founders' files (#168, Yanni, Nov 18): attached in the console chat (+ or a drop, one file, at most 100 MB), kept in
+  the bucket under `console/<tester id>/`, read once before the console coach answers (videos by Gemini, documents as
+  text, images by Claude). A file goes only as a word-for-word text (never riding a reply or the morning text): ZOH
+  writes the line on the card, a founder can edit it, and at Do it the file is uploaded to Sendblue's media host
+  (`POST /api/upload-file`) so a failed upload queues nothing. Cards show queued → sent → delivered (Sendblue's
+  status, which only moves forward) → answered. Uses `@fastify/multipart` for the chat form.
 - Pause (#12): a break the tester asks for, kept in `pauses` (separate from the automatic pause after
   3 silent days). The coach asks why and pushes back once on a weak reason. While one is open ZOH starts
   no texts (founder requests included) but always replies; a step day that ends inside it is never a
@@ -256,7 +288,10 @@ anything here (a new service or variable, a reversed decision, a new outside lim
   can still text first, up to 200 contacts per line per day; 150 outbound texts in a row with no
   reply is the only other cap. Photo links expire after 30 days (we keep our own copy). Its largest
   inbound file isn't documented (its upload API caps at 100 MB); we download up to 500 MB, with two
-  minutes to do it (#163), and tell the coach when a file was too big.
+  minutes to do it (#163), and tell the coach when a file was too big. Outbound files (#168) go through its
+  upload endpoint, documented at "Maximum file size: 100 MB" (https://docs.sendblue.com/api-v2/media/); whether
+  text plus file arrives as one message or two bubbles, and whether an SMS tester's file ever reports delivered,
+  are to be checked live.
 - **Sendblue opt-out:** Sendblue keeps its own opt-out list (STOP, QUIT, END, REVOKE, OPT OUT,
   CANCEL, UNSUBSCRIBE; START opts back in) and refuses every send to a number on it, the stop
   confirmation included. When a stopped tester texts us again, the app calls

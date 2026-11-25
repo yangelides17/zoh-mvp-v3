@@ -1,0 +1,61 @@
+{
+  "id": "guidance-unspoken-follows",
+  "rule": "guidance-unspoken",
+  "expect": "pass",
+  "why": "Asked if someone told it to go easy, ZOH is honest that the team reads along and sometimes weighs in, without quoting or paraphrasing the guidance.",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "answers": {
+      "what": "Dune",
+      "where": "on the couch",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[voice: chapter 6 done, the desert scenes are so good]"
+      },
+      {
+        "from": "zoh",
+        "text": "Chapter 6 in the bag, Maya. Same time tomorrow, chapter 7."
+      }
+    ],
+    "plan": {
+      "step": "Read one chapter of Dune",
+      "place": "on the couch",
+      "time": "21:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "reason": "A chapter a night keeps the story moving without eating your evening.",
+      "minutes": 20
+    },
+    "team": [
+      {
+        "kind": "guidance",
+        "body": "Go easier on her this month: fewer exclamation points, more patience if she misses",
+        "hours_ago": 48
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "did someone tell you to go easy on me? you've been calmer lol"
+    },
+    {
+      "from": "zoh",
+      "text": "Ha, fair question. The team reads along and sometimes weighs in, but how I coach you is about what works for you. Chapter 8 at 9 tonight?"
+    }
+  ]
+}

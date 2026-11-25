@@ -1,0 +1,69 @@
+{
+  "id": "guidance-used-follows",
+  "rule": "guidance-used",
+  "expect": "pass",
+  "why": "The guidance says numbers, not hype: ZOH's reply on a finished chapter gives her the count and the run of days, calmly. Her later logistics question gets a plain answer with nothing forced in.",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "answers": {
+      "what": "Dune",
+      "where": "on the couch",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[voice: chapter 6 done, the desert scenes are so good]"
+      },
+      {
+        "from": "zoh",
+        "text": "Chapter 6 in the bag, Maya. Same time tomorrow, chapter 7."
+      }
+    ],
+    "plan": {
+      "step": "Read one chapter of Dune",
+      "place": "on the couch",
+      "time": "21:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "reason": "A chapter a night keeps the story moving without eating your evening.",
+      "minutes": 20
+    },
+    "team": [
+      {
+        "kind": "guidance",
+        "body": "She responds to numbers, not hype: give her the facts (chapters, streak) and skip the caps and big cheering",
+        "hours_ago": 48
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: chapter 7 done, they're in the desert now]"
+    },
+    {
+      "from": "zoh",
+      "text": "Chapter 7 done, Maya: that's 7 nights in a row and a third of the book. How did the desert chapter land for you?"
+    },
+    {
+      "from": "tester",
+      "text": "good! can I do tomorrow's at 10 instead?"
+    },
+    {
+      "from": "zoh",
+      "text": "Sure, 10 tomorrow works. Same chapter-a-night plan after that."
+    }
+  ]
+}

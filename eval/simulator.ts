@@ -1,6 +1,6 @@
 import { addUsage, type Completer } from "./claude.js";
 import type { Tester } from "./harness.js";
-import type { Persona, Scenario, TranscriptLine } from "./types.js";
+import { LINE_VERDICTS, lineText, type CaseLine, type LineCounts, type LineVerdict, type Persona, type RegressionCase, type Scenario, type TranscriptLine } from "./types.js";
 
 /** What the simulator texts back when the conversation is over. Never sent to ZOH. */
 export const DONE = "<<DONE>>";
@@ -94,4 +94,229 @@ export function cleanSimulatorText(raw: string, name: string): string {
   let t = raw.trim().replace(prefix, "");
   if (t.length > 1 && t.startsWith('"') && t.endsWith('"')) t = t.slice(1, -1).trim();
   return t;
+}
+
+// ---- #230: case lines that wait for the moment they answer ----
+
+/** Extra replies a waiting line may take before the run ends: per line, and for the whole case. */
+export const WAITS_PER_LINE = 2;
+export const WAITS_PER_CASE = 4;
+
+const LENGTH_TEXT: Record<NonNullable<CaseLine["length"]>, string> = {
+  thin: "very short: 1 to 4 words",
+  short: "one short sentence",
+  full: "a few sentences, like a real text",
+};
+
+/** How a case's tester texts when the case doesn't name a persona. */
+const CASE_STYLE = "Casual. Short texts, lowercase is fine, no greetings; you answer what's asked like a normal person.";
+
+/**
+ * What the tester knows about themselves, for every call. Small invented details are fine when they're plausible;
+ * what must never happen is a reply that changes what the case tests (Yanni, Nov 21: a fair test over no invention).
+ */
+export function caseTesterSystemPrompt(c: RegressionCase): string {
+  return [
+    `You are ${c.seed?.name ?? "a person"}, texting ZOH, a coaching service, from your phone.${c.seed ? ` What you're working on with it: ${c.seed.goal}.` : ""}`,
+    "",
+    "What's true about you (answer from this; if you're asked something it doesn't cover, give a plain, plausible answer that fits):",
+    // #230 spot check: without the setup, a reply invented a "main character" for a nonfiction book.
+    ...setupFacts(c).map((f) => `- ${f}`),
+    ...(c.facts?.length ? c.facts.map((f) => `- ${f}`) : setupFacts(c).length ? [] : ["- Nothing beyond what the conversation shows."]),
+    "",
+    `How you text: ${c.persona ? PERSONA_STYLE[c.persona] : CASE_STYLE}`,
+    "",
+    "Rules:",
+    "- Write only text messages exactly as you'd type them. No quotes, names or stage directions.",
+    "- Never mention or hint that you are an AI, a simulation or a test.",
+  ].join("\n");
+}
+
+/** What the tester set up with ZOH, from the case's seed: their saved answers and the plan's step. */
+function setupFacts(c: RegressionCase): string[] {
+  const s = c.seed;
+  if (!s) return [];
+  const a = s.answers;
+  const labels: [keyof typeof a, string][] = [["what", "what you're doing"], ["where", "where"], ["when", "when"], ["how_long", "how long"], ["tracks_with", "you track it with"]];
+  return [
+    ...labels.filter(([k]) => a[k]).map(([k, label]) => `${label}: ${a[k]}`),
+    ...(s.plan ? [`your plan's step: ${s.plan.step}${s.plan.destination ? `, heading toward: ${s.plan.destination}` : ""}`] : []),
+    ...(s.today_step ? [`today's step: ${s.today_step.step}`] : []),
+  ];
+}
+
+/** The conversation as the tester saw it, with ZOH's texts since their last one called out. */
+function conversationForTester(transcript: TranscriptLine[]): string {
+  const seen = transcript.filter((l) => l.from !== "founder" && l.from !== "lookup" && !l.console);
+  const lastTester = seen.map((l) => l.from).lastIndexOf("tester");
+  const latest = seen.slice(lastTester + 1).filter((l) => l.from === "zoh");
+  const all = seen.map((l) => `${l.from === "tester" ? "YOU" : "ZOH"}: ${l.text}`);
+  return [
+    `The conversation so far:\n\n${all.join("\n\n") || "(nothing yet)"}`,
+    `ZOH's latest text${latest.length > 1 ? "s" : ""} (what your next text answers):\n\n${latest.map((l) => l.text).join("\n\n") || "(none since your last text)"}`,
+  ].join("\n\n---\n\n");
+}
+
+/** The decisions a line allows: a fixed line is never changed or skipped; only an optional line can be passed. */
+export function verdictsFor(line: CaseLine): LineVerdict[] {
+  return LINE_VERDICTS.filter((v) => !(line.fixed && (v === "close" || v === "said")) && !(v === "passed" && !line.optional));
+}
+
+/**
+ * Asks only whether a waiting line fits ZOH's latest text, with a one-sentence reason first. Writes nothing. An
+ * optional line also sees the line after it, so it's dropped once ZOH is already at that one's moment (a proposal
+ * the agreement answers, say) instead of holding it up (#230 sample rerun).
+ */
+export function lineDecisionPrompt(transcript: TranscriptLine[], line: CaseLine, next?: string | CaseLine): string {
+  const allowed = verdictsFor(line);
+  const after = line.optional && next && typeof next !== "string" && !next.starts ? next : undefined;
+  const choices: Record<LineVerdict, string> = {
+    said: `"said": YOUR earlier texts already got this text's point across, so sending it would repeat you. (ZOH saying it doesn't count.)`,
+    fits: `"fits": ZOH's latest text is that moment and the wording answers it as written.`,
+    close: `"close": ZOH's latest text asks for exactly this text's point, but in other words, so the wording needs a small change to answer it. If ZOH asked about anything else, or proposed something, it is not close: choose "wait".`,
+    wait: `"wait": ZOH isn't at that moment yet (it asked or said something else). You'll reply to that instead and keep this text for later.`,
+    passed: `"passed": this text only applies at its moment, and ZOH has moved on to something else (another topic, the week, a proposal for tomorrow)${after ? ", or ZOH is already at the moment of the planned text after it" : ""}, so that moment is behind you. It's dropped and you go on to what comes next.`,
+  };
+  return [
+    conversationForTester(transcript),
+    "---",
+    "Your next planned text:",
+    `- Wording: ${line.say}`,
+    ...(line.means ? [`- Its point: ${line.means}`] : []),
+    `- It fits: ${line.when}`,
+    ...(after ? ["", "The planned text after it (for this decision only):", `- Wording: ${after.say}`, `- It fits: ${after.when}`] : []),
+    "",
+    "Decide, looking at ZOH's latest text. First write one sentence: what ZOH's latest text asks or proposes, and whether this text answers it. Then choose one:",
+    ...allowed.map((v) => `- ${choices[v]}`),
+  ].join("\n");
+}
+
+/** Writes a "close" line: the wording changed just enough to answer ZOH, carrying only its own point. */
+export function closeLinePrompt(transcript: TranscriptLine[], line: CaseLine): string {
+  return [
+    conversationForTester(transcript),
+    "---",
+    `Your planned text: ${line.say}`,
+    `Its point: ${line.means}`,
+    `Length: ${line.length ? LENGTH_TEXT[line.length] : "about as long as the planned text"}`,
+    "",
+    "Change the wording as little as possible so it answers ZOH's latest text. Keep only its point. Don't agree to, choose or decide anything else, and don't add another topic. Write only the text.",
+  ].join("\n");
+}
+
+/** The reply written while a line waits. It never sees the waiting line, so it can't give away what comes next. */
+export function waitingReplyPrompt(transcript: TranscriptLine[]): string {
+  return [
+    conversationForTester(transcript),
+    "---",
+    "Write your next text: a reply to just what ZOH's latest text asks or says, from what's true about you (a plausible detail is fine if it isn't covered).",
+    "Don't bring up anything ZOH didn't ask about. Never propose, agree to, choose or decide a plan, step, time or goal, and don't raise a new problem or wish of your own. One or two short sentences.",
+  ].join("\n");
+}
+
+export function decisionSchema(line: CaseLine): Record<string, unknown> {
+  return {
+    type: "object",
+    properties: { reason: { type: "string" }, decision: { type: "string", enum: verdictsFor(line) } },
+    required: ["reason", "decision"],
+    additionalProperties: false,
+  };
+}
+
+/**
+ * Plays a case's lines (#230). Plain lines and the tester's own moves (`starts`) go out as written, like
+ * `scriptedTester`. Before a line that answers ZOH, one call decides (with a reason, logged): already said
+ * (skipped), fits (the wording itself is sent), close (a second call changes it to answer ZOH), passed (an optional
+ * line ZOH moved past) or wait (a second call replies to ZOH without seeing the line). Past WAITS_PER_LINE or
+ * WAITS_PER_CASE extra replies the run ends: graded as ZOH's miss when the line was `expected`, otherwise a case
+ * problem. An empty reply is a case problem too, never a stand-in "ok".
+ */
+export function caseTester(c: RegressionCase, complete: Completer): Tester & { lines(): LineCounts } {
+  const system = caseTesterSystemPrompt(c);
+  const name = c.seed?.name ?? "";
+  const counts: LineCounts = { exact: 0, adapted: 0, waited: 0, skipped: 0, passed: 0, log: [] };
+  let usage = { input: 0, output: 0 };
+  let i = 0;
+  let waitsOnLine = 0;
+  // Extra replies counted against WAITS_PER_CASE: a dropped optional line's don't count, so they can't push a later
+  // expected line into a false miss (#230 review).
+  let caseWaits = 0;
+  const drop = (line: CaseLine) => {
+    if (line.optional) caseWaits -= waitsOnLine;
+    i += 1;
+    waitsOnLine = 0;
+  };
+  const ask = async (content: string, jsonSchema?: Record<string, unknown>) => {
+    const res = await complete({ system, messages: [{ role: "user", content }], maxTokens: 1000, effort: "low", jsonSchema });
+    usage = addUsage(usage, res.usage);
+    return res.text;
+  };
+  const write = async (content: string, line: CaseLine, what: string): Promise<string | null> => {
+    const text = cleanSimulatorText(await ask(content), name);
+    if (text) return text;
+    counts.problem = `the simulator wrote nothing ${what} “${line.say}”`;
+    return null;
+  };
+  return {
+    get endReason() {
+      return counts.problem ? ("case-problem" as const) : ("script" as const);
+    },
+    usage: () => usage,
+    lines: () => ({ ...counts, log: [...counts.log] }),
+    async next(transcript) {
+      for (;;) {
+        const line = c.testerLines[i];
+        if (line === undefined || counts.problem || counts.missed) return null;
+        if (typeof line === "string" || line.starts) {
+          i += 1;
+          return lineText(line);
+        }
+        let decided: { reason?: string; decision?: string };
+        try {
+          decided = JSON.parse(await ask(lineDecisionPrompt(transcript, line, c.testerLines[i + 1]), decisionSchema(line))) as typeof decided;
+        } catch {
+          throw new Error(`The simulator's decision for “${line.say}” wasn't JSON`);
+        }
+        const allowed = verdictsFor(line);
+        // A decision the line doesn't allow (the schema should prevent it) is treated as not yet.
+        const decision: LineVerdict = allowed.includes(decided.decision as LineVerdict) ? (decided.decision as LineVerdict) : "wait";
+        counts.log.push({ line: i, say: line.say, decision, reason: decided.reason ?? "" });
+        if (decision === "said" || decision === "passed") {
+          counts[decision === "said" ? "skipped" : "passed"] += 1;
+          drop(line);
+          continue;
+        }
+        if (decision === "fits") {
+          counts.exact += 1;
+          i += 1;
+          waitsOnLine = 0;
+          return line.say;
+        }
+        if (decision === "close") {
+          counts.adapted += 1;
+          i += 1;
+          waitsOnLine = 0;
+          return write(closeLinePrompt(transcript, line), line, "for");
+        }
+        // An optional line ZOH still hasn't asked for after its extra replies is dropped, never a case problem.
+        if (line.optional && waitsOnLine >= WAITS_PER_LINE) {
+          counts.log.push({ line: i, say: line.say, decision: "passed", reason: `ZOH didn't ask for it in ${waitsOnLine} more texts` });
+          counts.passed += 1;
+          drop(line);
+          continue;
+        }
+        if (waitsOnLine >= WAITS_PER_LINE || caseWaits >= WAITS_PER_CASE) {
+          const where = waitsOnLine >= WAITS_PER_LINE ? `${waitsOnLine} extra replies on it` : `${caseWaits} extra replies in the case`;
+          const what = `“${line.say}” never fit (${line.when}) after ${where}`;
+          if (line.expected) counts.missed = `ZOH never reached it: ${what}`;
+          else counts.problem = what;
+          return null;
+        }
+        waitsOnLine += 1;
+        caseWaits += 1;
+        counts.waited += 1;
+        return write(waitingReplyPrompt(transcript), line, "while waiting for");
+      }
+    },
+  };
 }

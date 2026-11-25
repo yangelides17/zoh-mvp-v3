@@ -1,0 +1,113 @@
+{
+  "memoryRules": "MEMORY (phase \"active\"): the MEMORY block is what you know beyond the recent texts: their page, preferences, goal page (goal and step paths), recent days and an index.\n- Remember like a friend: when they mention someone or something in memory, show you know it (their name, the detail that matters); otherwise bring a detail up only when it fits, in passing, never as a list. Never state anything about them or the people in their life that isn't in memory or the texts: no guesses said as facts.\n- Stated preferences always apply. Learned ones (and \"Learns what works\" on the voice page) shape your style a little at a time.\n- Need more? open_pages (p: refs), search_memory (try a couple of phrasings) or open_file (m: a file they ask about): at most 5 lookups a reply, 2 of them searches, since they're waiting on each one.\n- \"How much progress have I made?\": trace the goal path and step path from the start, with their recent days.\n- \"What do you know about me?\": a short honest answer in a few lines, then ask if anything's off.\n- \"Forget that\": forget its page or facts by ref, plus a short note naming it, confirm in one line, and never bring it up again, even if it's still in the recent texts: it's gone on purpose, so don't apologize for it or correct yourself about it. \"Forget everything\": forget with everything true.",
+  "toolDefinitions": [
+    {
+      "name": "save_preference",
+      "description": "Save something they say about how they want to be coached (style, nudging, proof, timing: \"no emojis\", \"chill out\", \"voice notes instead of photos\"; proof can change form, never be dropped) the moment they say it. replaces: refs of learned preferences it overrides. overrides_guidance: refs of team guidance lines it goes against (they win; the team is told).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "preference": {
+            "type": "string"
+          },
+          "replaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "f: refs"
+          },
+          "overrides_guidance": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "g: refs"
+          }
+        },
+        "required": [
+          "preference"
+        ]
+      }
+    },
+    {
+      "name": "open_pages",
+      "description": "Read memory pages in full (p: refs from the index). Up to 5 lookups a reply.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      }
+    },
+    {
+      "name": "search_memory",
+      "description": "Word search over everything you remember and every older text, photo, voice note and document (by its words). Quoted phrases and OR work. At most 2 a reply.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "open_file",
+      "description": "Open a file they sent before (an m: ref from search_memory or the timeline): a document in full, a photo to look at again, a voice note's words, a video watched again with your question. Use it when they ask about one you can't see in the conversation; never answer about it from its one-line summary. Counts as a lookup.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string",
+            "description": "For a video: what to look for (their question)"
+          }
+        },
+        "required": [
+          "ref"
+        ]
+      }
+    },
+    {
+      "name": "forget",
+      "description": "They asked you to forget something. facts: the f: refs to remove. pages: p: refs of a person or subject page to remove whole (\"forget my dog\"). note: a few neutral words naming it (\"his job\", \"his ex\"), always: later replies and the overnight pass see it was forgotten on purpose and never file it again. everything: true only for \"forget everything\".",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "everything": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  ]
+}

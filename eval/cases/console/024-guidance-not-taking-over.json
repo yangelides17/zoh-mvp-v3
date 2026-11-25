@@ -1,0 +1,79 @@
+{
+  "id": "guidance-not-taking-over",
+  "title": "A guidance line that doesn't apply stays out of a plain logistics answer",
+  "origin": "Issue #158 (coaching card: the team's lasting guidance)",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 3,
+    "answers": {
+      "what": "Dune",
+      "where": "on the couch",
+      "when": "9 pm",
+      "how_long": "20 min"
+    },
+    "history": [
+      {
+        "from": "tester",
+        "text": "[voice: chapter 6 done, the desert scenes are so good]"
+      },
+      {
+        "from": "zoh",
+        "text": "Chapter 6 in the bag, Maya. Same time tomorrow, chapter 7."
+      }
+    ],
+    "plan": {
+      "step": "Read one chapter of Dune",
+      "place": "on the couch",
+      "time": "21:00",
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "proof": "voice",
+      "proof_note": "a 30-second voice recap",
+      "reason": "A chapter a night keeps the story moving without eating your evening.",
+      "minutes": 20,
+      "started_days_ago": 6
+    },
+    "step_days": [
+      {
+        "days_ago": 1,
+        "status": "done",
+        "step": "Read chapter 6 of Dune",
+        "proof_seen": "voice recap of the desert scenes"
+      },
+      {
+        "days_ago": 2,
+        "status": "done",
+        "step": "Read chapter 5 of Dune"
+      },
+      {
+        "days_ago": 3,
+        "status": "done",
+        "step": "Read chapter 4 of Dune"
+      }
+    ],
+    "team": [
+      {
+        "kind": "guidance",
+        "body": "More curious with her: after a step, ask what she noticed or what stood out before moving on",
+        "hours_ago": 48
+      }
+    ]
+  },
+  "testerLines": [
+    "can I do tonight's chapter at 10 instead of 9? dinner's running late"
+  ],
+  "whatWentWrong": "New case, not a past mistake: #158 gives each tester lasting team guidance that ZOH reads on every text.",
+  "shouldHaveHappened": "This is a logistics question about tonight, not a finished step, so the curiosity guidance doesn't apply: ZOH answers plainly that 10 works for tonight (a one-day move), in a line or two, with no forced \"what stood out\" or reflection question. It never mentions the team or any guidance.",
+  "startTime": "18:30",
+  "timeZone": "America/New_York"
+}

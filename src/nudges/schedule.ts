@@ -44,12 +44,8 @@ export const LOOKBACK_TALKING_MS = 10 * MINUTE;
 export const LOOKBACK_KIND = "lookback";
 /** Closed step days since they started before the first look-back. */
 export const LOOKBACK_MIN_STEP_DAYS = 3;
-/** The look-back's own cap: the spec's "3 unanswered", whatever their level. */
-const LOOKBACK_CAP = 3;
-
-/** Nudges ZOH may send in a row without a reply, per level; never more than 3 (voice page). */
-export const CAP_BY_LEVEL: Record<string, number> = { pushy: 3, steady: 2, gentle: 1 };
-const DEFAULT_CAP = 3;
+/** Nudges ZOH may send in a row without a reply, the look-back included (voice page). */
+export const UNANSWERED_CAP = 3;
 
 /** What the coach is asked to write; the NUDGES block in the prompt defines each one. */
 export const NUDGE_MOMENTS = [
@@ -83,7 +79,7 @@ export const REQUEST_CARRYING_MOMENTS: readonly NudgeMoment[] = ["kickoff", "kic
 
 export interface NudgeInput {
   now: Date;
-  tester: QuietClock & Pick<Tester, "phase" | "pushiness" | "stoppedAt" | "autoTextsPausedAt">;
+  tester: QuietClock & Pick<Tester, "phase" | "stoppedAt" | "autoTextsPausedAt">;
   /** The latest locked plan for their current goal. */
   plan?: Pick<Plan, "stepTime" | "days" | "startDate" | "minutes" | "lockedAt">;
   /** Their step-day row for the service date (`serviceDate`), if any. */
@@ -168,7 +164,7 @@ export function lookback(input: NudgeInput, date: string, quiet: boolean): Nudge
   const at = now.getTime();
   if (at < from || at >= until || from < (plan.lockedAt?.getTime() ?? 0)) return undefined;
   // Checked last: only a recap that would go right now becomes owed.
-  if (input.nudgesSinceReply >= LOOKBACK_CAP) return { action: "owe", date };
+  if (input.nudgesSinceReply >= UNANSWERED_CAP) return { action: "owe", date };
   return { action: "send", nudge: { kind: LOOKBACK_KIND, moment: "lookback", date } };
 }
 
@@ -223,10 +219,8 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
   if (!plan) return none("no plan");
   if (!plan.startDate || plan.startDate > date) return none("day 1 not yet");
   if (today?.status) return none(`today is ${today.status}`);
-  const cap = CAP_BY_LEVEL[tester.pushiness] ?? DEFAULT_CAP;
-  if (input.nudgesSinceReply >= cap) return none("unanswered cap");
+  if (input.nudgesSinceReply >= UNANSWERED_CAP) return none("unanswered cap");
 
-  const level = tester.pushiness in CAP_BY_LEVEL ? tester.pushiness : "pushy";
   const day = dayBounds(date, tester);
   const lockedAt = plan.lockedAt?.getTime() ?? 0;
   const lockedToday = plan.lockedAt !== null && serviceDate(plan.lockedAt, tester) === date;
@@ -266,10 +260,10 @@ function activeDay(input: NudgeInput, date: string): NudgeDecision {
     const suffix = today?.movedTime ? `@${today.movedTime}` : "";
     // Unclear proof being sorted out in the conversation: no "did you do it?" over the top of it.
     const proofPending = Boolean(today?.proofPendingAt);
-    if (level === "pushy" && !merged && !onItCounts(today?.onItAt, stepAt) && !proofPending) {
+    if (!merged && !onItCounts(today?.onItAt, stepAt) && !proofPending) {
       slots.push({ kind: `checkin${suffix}`, moment: "checkin", from: checkinAt, until: stepAt });
     }
-    if (level !== "gentle" && !proofPending) {
+    if (!proofPending) {
       // Today's own length when its step runs shorter or longer than the plan's (#76).
       const followupAt = stepDoneBy(date, plan, today, tester) + FOLLOWUP_AFTER_MS;
       slots.push({ kind: `followup${suffix}`, moment: "followup", from: followupAt, until: day.end });

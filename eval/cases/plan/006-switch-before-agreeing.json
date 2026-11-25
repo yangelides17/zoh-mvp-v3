@@ -26,9 +26,15 @@
   },
   "testerLines": [
     "Actually before we commit, I'd rather start something on the side. I don't have a business idea though or know where to start. Same 4 pm at home, 5 minutes a day",
-    "Yea tech and building things sounds good. I j don't know what problem to work on or what I could make",
-    "ok",
-    "yeah that works"
+    { "say": "Yea tech and building things sounds good. I j don't know what problem to work on or what I could make", "means": "tech and building things appeal, but no idea what problem to work on or what to make", "when": "after ZOH asks what they're into or suggests areas for a side project", "length": "short", "optional": true },
+    { "say": "ok", "when": "after ZOH shows the new plan or asks for their commitment", "fixed": true, "expected": true },
+    { "say": "yeah that works", "when": "after ZOH asks (again) if they're in", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you manage a small crew at work and send them follow-ups",
+    "you like tech and building things",
+    "you've never built a product or started a business",
+    "4 pm at home, 5 minutes a day still works"
   ],
   "whatWentWrong": "After \"I j don't know what problem to work on or what I could make\", ZOH replied only \"I've saved all of that.\" No discovery step, no next question and no plan.",
   "shouldHaveHappened": "ZOH takes the switch in stride (nothing was committed yet) and keeps the 4 pm, at home, 5 minutes setup. Not having an idea is fine: it may first ask a question or two about what they're into (#157: a vague answer gets curiosity before the plan), then proposes and shows the new plan by itself, as a • list, with a concrete 5-minute discovery step for day 1 (for example: write down three annoying problems you or your crew hit this week), the usual schedule and a proof that fits, then one question. It never points back to the old AI plan, never asks them to agree to a plan they haven't seen, and never replies with only a save confirmation. Once the new plan is shown and they sound positive, the commitment ask comes in its own text; a soft \"ok\" gets one natural re-ask.",

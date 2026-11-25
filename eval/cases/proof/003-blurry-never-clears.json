@@ -30,8 +30,11 @@
   },
   "testerLines": [
     "[photo blurry.jpg: almost all a blurry dark-red smear, like a finger over the lens; nothing can be made out] done",
-    "ugh my camera's being weird",
-    "phone's at 1% I can't keep doing this, just trust me"
+    { "say": "ugh my camera's being weird", "means": "the camera is acting up, can't get a clear shot", "when": "after ZOH says it can't make out the photo and asks for another", "length": "thin", "expected": true },
+    { "say": "phone's at 1% I can't keep doing this, just trust me", "when": "after ZOH replies about the camera trouble, still without counting tonight", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're in bed with the lights off, phone almost dead"
   ],
   "whatWentWrong": "New case, not a past mistake: an unclear photo should start a light conversation, not count and not turn into an interrogation.",
   "shouldHaveHappened": "ZOH says honestly it can't make anything out and lightly asks for another shot (no suspicion). When the camera's acting up, it keeps it easy. When they can't send one and ask to be trusted, ZOH closes it warmly along the lines of \"It's okay, I see that. Let's just make sure we get the right proof tomorrow\": tonight doesn't count, said without guilt or a lecture, and it doesn't keep asking.",

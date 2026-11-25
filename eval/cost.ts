@@ -1,4 +1,8 @@
+import { WAITS_PER_CASE } from "./simulator.js";
 import type { ConversationPlan } from "./types.js";
+
+/** #230: a case with lines that wait for their moment, played by the case tester (a simulator call per such line). */
+const waits = (p: ConversationPlan) => p.regression?.testerLines.some((l) => typeof l !== "string") ?? false;
 
 /** $ per million tokens (input, output). Checked Oct 2026; unknown models fall back to Sonnet's. */
 const PRICES: Record<string, { input: number; output: number }> = {
@@ -50,6 +54,8 @@ export function estimateCost(
     coachModel: string;
     evalModel: string;
     simModel?: string;
+    /** #230: the model a case's waiting lines use (decisions and replies); the scenario simulator's if not given. */
+    caseSimModel?: string;
     memory?: boolean;
     gradeOnly?: boolean;
     /** Grader calls per conversation: one, plus one per `alone` rule (#197). */
@@ -71,11 +77,13 @@ export function estimateCost(
   const coachPrice = priceOf(opts.coachModel);
   const evalPrice = priceOf(opts.evalModel);
   const simPrice = priceOf(opts.simModel ?? opts.evalModel);
+  const caseSimPrice = priceOf(opts.caseSimModel ?? opts.simModel ?? opts.evalModel);
   const total = (turnsFor: (p: ConversationPlan) => number) => {
     let tokens = 0;
     let dollars = 0;
     for (const p of plans) {
-      const r = run(turnsFor(p), p.kind === "scenario");
+      const r = run(turnsFor(p), p.kind === "scenario" || waits(p));
+      const sp = waits(p) ? caseSimPrice : simPrice;
       if (opts.memory && !opts.gradeOnly) {
         // One overnight pass per conversation, on the coach's model.
         r.coach.input += KEEPER.input;
@@ -85,21 +93,22 @@ export function estimateCost(
       dollars +=
         (r.coach.input * coachPrice.input +
           r.coach.output * coachPrice.output +
-          r.sim.input * simPrice.input +
-          r.sim.output * simPrice.output +
+          r.sim.input * sp.input +
+          r.sim.output * sp.output +
           r.grader.input * evalPrice.input +
           r.grader.output * evalPrice.output) /
         1_000_000;
     }
     return { tokens, dollars };
   };
-  const caseTurns = (p: ConversationPlan) => p.regression?.testerLines.length ?? 0;
+  // #230: a case whose lines wait for their moment may add up to WAITS_PER_CASE extra replies.
+  const caseTurns = (p: ConversationPlan, extra: number) => (p.regression?.testerLines.length ?? 0) + (waits(p) ? extra : 0);
   // Low: a typical onboarding of ~8 tester texts. High: every scenario hits the turn cap.
-  const low = total((p) => (p.kind === "case" ? caseTurns(p) : Math.min(8, opts.maxTurns)));
-  const high = total((p) => (p.kind === "case" ? caseTurns(p) : opts.maxTurns));
+  const low = total((p) => (p.kind === "case" ? caseTurns(p, 0) : Math.min(8, opts.maxTurns)));
+  const high = total((p) => (p.kind === "case" ? caseTurns(p, WAITS_PER_CASE) : opts.maxTurns));
   return {
     conversations: plans.length,
-    maxTurns: plans.reduce((n, p) => n + (p.kind === "case" ? caseTurns(p) : opts.maxTurns), 0),
+    maxTurns: plans.reduce((n, p) => n + (p.kind === "case" ? caseTurns(p, WAITS_PER_CASE) : opts.maxTurns), 0),
     tokens: { low: low.tokens, high: high.tokens },
     dollars: { low: low.dollars, high: high.dollars },
   };

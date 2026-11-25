@@ -47,9 +47,13 @@
   "testerLines": [
     "[video change.mov: A person on a couch switching between G and C chords on an acoustic guitar, slowly, about 15 seconds. The C rings out muffled twice. Nobody speaks.]",
     "done but my fingertips are killing me and the C keeps buzzing. can tomorrow be shorter?",
-    "mostly my ring finger, it doesn't land on the string cleanly when I switch fast",
-    "yeah I guess going slower and getting it clean is better than rushing",
-    "ok good"
+    { "say": "mostly my ring finger, it doesn't land on the string cleanly when I switch fast", "means": "her ring finger doesn't land cleanly when she switches fast", "when": "after ZOH asks about the buzzing C", "length": "short", "expected": true },
+    { "say": "yeah I guess going slower and getting it clean is better than rushing", "means": "going slower and clean beats rushing", "when": "after ZOH asks what she's taking from it, or suggests slowing the change down", "length": "short", "optional": true },
+    { "say": "ok good", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you've only been playing about a week, and your fingertips have been sore since you started",
+    "7 pm on the couch works tomorrow"
   ],
   "whatWentWrong": "New for #211: two ways to get it wrong. Treating the question about tomorrow as wanting to wrap up (proposing tomorrow right away, the reflection over), or dodging the question entirely while asking more.",
   "shouldHaveHappened": "ZOH counts the video and celebrates. To \"can tomorrow be shorter?\" it gives a short real answer or nod (sore fingertips are normal early on, and they'll shape tomorrow together in a moment) and keeps reflecting on what's behind the buzzing C, one question per text; it doesn't propose tomorrow in that reply, and doesn't ignore the question. Once Ana has said what's happening with her ring finger and what she's taking from it, it moves to tomorrow's step, answering the shorter question (shorter or the same, with a reason tied to what she said), fully defined, and asks if it works. After \"ok good\" it confirms in a line with no new question.",

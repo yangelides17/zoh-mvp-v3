@@ -5,6 +5,7 @@ import { mediaKind } from "../src/media/storage.js";
 import sharp from "sharp";
 import { prepareImageForClaude, sniffImageFormat } from "../src/media/images.js";
 import { createSendblueClient, SendblueError } from "../src/sendblue/client.js";
+import { createSpeachesTranscriber } from "../src/transcription/speaches.js";
 import type { CheckinAnswer, Weekday } from "../src/db/schema.js";
 import { addDays } from "../src/nudges/schedule.js";
 import { hitRate, maintenanceStreak, streakRuns } from "../src/nudges/streak.js";
@@ -101,6 +102,44 @@ describe("sendblue client", () => {
 
     respond = () => new Response("", { status: 503 });
     expect(await client.sendTypingIndicator("+19085550100")).toBe(false);
+  });
+});
+
+describe("speaches client: waiting for a Speaches that is asleep or restarting", () => {
+  const ok = () => new Response(JSON.stringify({ text: " hello there " }), { status: 200 });
+  const refused = () => Promise.reject(new TypeError("fetch failed"));
+  const audio = new Uint8Array([1, 2, 3]);
+
+  it("retries a request that can't connect until Speaches is up (asleep on staging, restarting on production)", async () => {
+    let calls = 0;
+    const fetch = (() => (++calls < 3 ? refused() : Promise.resolve(ok()))) as unknown as typeof globalThis.fetch;
+    const t = createSpeachesTranscriber({ url: "http://s", model: "m", fetch, wakeRetryMs: 1_000, retryEveryMs: 1 });
+    expect(await t.transcribe(audio, "v.m4a", "audio/mp4")).toBe("hello there");
+    expect(calls).toBe(3);
+  });
+
+  it("doesn't retry unless asked (tests, eval): one attempt, the same error as before", async () => {
+    let calls = 0;
+    const fetch = (() => (calls++, refused())) as unknown as typeof globalThis.fetch;
+    const t = createSpeachesTranscriber({ url: "http://s", model: "m", fetch });
+    await expect(t.transcribe(audio, "v.m4a", "audio/mp4")).rejects.toThrow("fetch failed");
+    expect(calls).toBe(1);
+  });
+
+  it("doesn't retry an answer from Speaches, only a failed connection", async () => {
+    let calls = 0;
+    const fetch = (() => (calls++, Promise.resolve(new Response("boom", { status: 500 })))) as unknown as typeof globalThis.fetch;
+    const t = createSpeachesTranscriber({ url: "http://s", model: "m", fetch, wakeRetryMs: 1_000, retryEveryMs: 1 });
+    await expect(t.transcribe(audio, "v.m4a", "audio/mp4")).rejects.toThrow("HTTP 500");
+    expect(calls).toBe(1);
+  });
+
+  it("gives up with the connection error once the wait runs out", async () => {
+    let calls = 0;
+    const fetch = (() => (calls++, refused())) as unknown as typeof globalThis.fetch;
+    const t = createSpeachesTranscriber({ url: "http://s", model: "m", fetch, wakeRetryMs: 30, retryEveryMs: 5 });
+    await expect(t.transcribe(audio, "v.m4a", "audio/mp4")).rejects.toThrow("fetch failed");
+    expect(calls).toBeGreaterThan(1);
   });
 });
 

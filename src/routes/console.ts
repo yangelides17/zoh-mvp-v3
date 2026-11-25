@@ -32,15 +32,22 @@ import { metricsView } from "../console/views/metrics.js";
 import { progressTabHtml } from "../console/views/progress.js";
 import { asTab, testerView, type Tab } from "../console/views/tester.js";
 import { coachThinking, consoleTabHtml, itemHtml, newest, sideHtml, textItemsHtml, textsTabHtml, thinkingLabel, threadItemsHtml, type ThreadContext } from "../console/views/threads.js";
-import { confirmDraft, postFounderMessage, type ConsoleCoach } from "../console/chat.js";
+import { confirmDraft, editDraft, postFounderMessage, type ConsoleCoach } from "../console/chat.js";
 import { cancelDraft } from "../console/drafts.js";
 import { owns, PRODUCTION_ONLY, routeOf, type BuildInfo, type Routing } from "../testers/env.js";
 import { addThreadLine, cancelRequest, COACH_AUTHOR } from "../console/requests.js";
 import type { Db } from "../db/client.js";
-import { consoleMessages, SUGGESTION_KINDS, testers, type Tester } from "../db/schema.js";
+import { consoleMessages, memoryFacts, SUGGESTION_KINDS, testers, type Tester } from "../db/schema.js";
+import { addGuidance, CoachingError, deleteLearnedPreference, editGuidance, removeGuidance, removeStatedPreference } from "../coaching/coaching.js";
+import { coachingCard } from "../console/coaching-card.js";
+import { coachingCardHtml } from "../console/views/coaching.js";
 import { testerNow } from "../testers/clock.js";
+import { NAME_MAX, updateTester } from "../testers/testers.js";
 import { safeError } from "../errors.js";
 import type { MediaStore } from "../media/storage.js";
+import { MAX_UPLOAD_BYTES, type SendblueClient } from "../sendblue/client.js";
+import multipart from "@fastify/multipart";
+import { storeAttachment } from "../console/attachments.js";
 import type { TaskQueue } from "../pipeline/task-queue.js";
 
 /**
@@ -52,6 +59,8 @@ import type { TaskQueue } from "../pipeline/task-queue.js";
 export interface ConsoleRouteOptions extends ConsoleConfig {
   db: Db;
   media?: MediaStore;
+  /** #168: a founder's file goes to Sendblue's media host at Do it. */
+  sendblue?: SendblueClient;
   /** The console chat's coach; without it, the chat says it isn't set up. */
   chat?: ConsoleCoach;
   /** Where the coach's answer runs, after the page has redirected; without one, before. */
@@ -62,6 +71,9 @@ export interface ConsoleRouteOptions extends ConsoleConfig {
   now?: () => Date;
 }
 
+/** #168: a file from the chat box. */
+type UploadedFile = { bytes: Uint8Array; contentType: string; name: string };
+
 /** Longest message the chat box takes. */
 export const MAX_CHAT_CHARS = 2000;
 /** Most new items one live update carries; the rest come on the next. */
@@ -70,7 +82,7 @@ const LIVE_MAX = 200;
 const LIVE_CARDS = 100;
 
 type Form = Record<string, string | undefined>;
-type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string; did: string };
+type Params = { id: string; sid: string; aid: string; mid: string; rid: string; pid: string; did: string; gid: string; fid: string; nid: string };
 
 export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOptions): Promise<void> {
   const clock = opts.now ?? (() => new Date());
@@ -81,6 +93,8 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.addContentTypeParser("application/x-www-form-urlencoded", { parseAs: "string" }, (_req, body, done) => {
     done(null, Object.fromEntries(new URLSearchParams(body as string)));
   });
+  // #168: the chat box can carry one file, at most Sendblue's limit.
+  await app.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 4 } });
 
   const routing = opts.routing ?? PRODUCTION_ONLY;
   const html = (reply: FastifyReply, page: string, code = 200) =>
@@ -129,16 +143,13 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   };
 
   /** A founder's line in the console chat, answered by the console coach in the background (spec 4). */
-  const chatLine = async (request: FastifyRequest, reply: FastifyReply, tester: Tester, name: string, body: string) => {
+  const chatLine = async (request: FastifyRequest, reply: FastifyReply, tester: Tester, name: string, body: string, file?: UploadedFile) => {
     const id = tester.id;
     const now = testerNow(tester, clock());
-    const { needsAnswer } = await postFounderMessage(opts.db, {
-      tester,
-      founder: name,
-      body,
-      now,
-      elsewhere: owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route),
-    });
+    const elsewhere = owns(routing, tester.phone, tester.route) ? undefined : routeOf(routing, tester.phone, tester.route);
+    // #168: kept in our private bucket on their line (never for a number this app doesn't text).
+    const attachment = file && !elsewhere && opts.media ? { key: await storeAttachment(opts.media, id, file), contentType: file.contentType, name: file.name } : undefined;
+    const { needsAnswer } = await postFounderMessage(opts.db, { tester, founder: name, body, now, elsewhere, ...(attachment ? { attachment } : {}) });
     if (needsAnswer) {
       const answer = async () => {
         try {
@@ -186,7 +197,7 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
         : textsTabHtml(await textsChunk(opts.db, header.tester), header.tester, now, CHUNK, { missing: msg !== undefined });
     }
     else if (tab === "memory") content = memoryTabHtml(await memoryCards(opts.db, header.tester, now), id);
-    else content = progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
+    else content = coachingCardHtml(await coachingCard(opts.db, header.tester, now), id) + progressTabHtml(header.goals, await progressTab(opts.db, header.tester), id, header.titles);
     return html(reply, testerView(header, tab, content, name, notice), code);
   };
 
@@ -195,6 +206,59 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     if (!isUuid(id)) return html(reply, "Not found", 404);
     const { tab, msg } = query(request);
     return (await testerHtml(reply, id, asTab(tab), name, undefined, 200, typeof msg === "string" ? msg : undefined)) ?? html(reply, "Not found", 404);
+  }));
+
+  // #158: the Coaching card's changes, each saved with the founder's name; back to the card, or the card saying why not.
+  const coaching = (handler: (tester: Tester, request: FastifyRequest<{ Params: Params; Body: Form }>, name: string, now: Date) => Promise<void>) =>
+    action(async (request, reply, name) => {
+      const { id } = request.params;
+      if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+      const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+      if (!tester) return reply.code(404).send({ error: "not found" });
+      if (!owns(routing, tester.phone, tester.route)) {
+        const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't change their coaching.`;
+        return (await testerHtml(reply, id, "progress", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+      }
+      try {
+        await handler(tester, request, name, await nowFor(id));
+      } catch (err) {
+        if (err instanceof CoachingError) return (await testerHtml(reply, id, "progress", name, `Not saved: ${err.message}`, 409)) ?? reply.code(409).send({ error: err.message });
+        throw err;
+      }
+      return reply.redirect(`/console/testers/${encodeURIComponent(id)}?tab=progress#coaching`, 303);
+    });
+  const formText = (request: FastifyRequest<{ Body: Form }>) => (typeof request.body?.text === "string" ? request.body.text : "");
+  const idParam = (request: FastifyRequest<{ Params: Params }>, key: "gid" | "fid" | "nid") => {
+    const value = request.params[key];
+    if (!isUuid(value)) throw new CoachingError("That's gone.");
+    return value;
+  };
+
+  app.post("/console/testers/:id/coaching/guidance", coaching(async (tester, request, name, now) => {
+    await addGuidance(opts.db, tester, formText(request), name, now);
+  }));
+  app.post("/console/testers/:id/coaching/guidance/:gid", coaching(async (tester, request, name, now) => {
+    await editGuidance(opts.db, tester, idParam(request, "gid"), formText(request), name, now);
+  }));
+  app.post("/console/testers/:id/coaching/guidance/:gid/remove", coaching(async (tester, request, name, now) => {
+    await removeGuidance(opts.db, tester, idParam(request, "gid"), name, now);
+  }));
+  // A style request (stated) or a learned preference: removed wherever the coach reads it.
+  app.post("/console/testers/:id/coaching/facts/:fid/remove", coaching(async (tester, request, name, now) => {
+    const [fact] = await opts.db.select().from(memoryFacts).where(and(eq(memoryFacts.id, idParam(request, "fid")), eq(memoryFacts.testerId, tester.id)));
+    if (!fact) return;
+    if (fact.section === "stated") await removeStatedPreference(opts.db, tester, fact, name, now);
+    else await deleteLearnedPreference(opts.db, tester, fact, name, now);
+  }));
+  // Make it lasting: the (trimmed) note becomes guidance, and the note stops being read so it isn't read twice.
+  app.post("/console/testers/:id/coaching/notes/:nid/lasting", coaching(async (tester, request, name, now) => {
+    const [note] = await opts.db
+      .select()
+      .from(consoleMessages)
+      .where(and(eq(consoleMessages.id, idParam(request, "nid")), eq(consoleMessages.testerId, tester.id), eq(consoleMessages.kind, "note")));
+    if (!note) throw new CoachingError("That note is gone.");
+    await addGuidance(opts.db, tester, formText(request), name, now);
+    await opts.db.update(consoleMessages).set({ doneAt: now }).where(eq(consoleMessages.id, note.id));
   }));
 
   // One memory page (#63), only under its own tester.
@@ -276,6 +340,24 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
     return reply.header("set-cookie", sessionCookie(encodeSession(newSession(clock()), opts.sessionSecret!))).redirect("/console", 303);
   });
 
+  // A tester's name, fixed by a founder: the same column the coach's save_name writes and its state block reads.
+  app.post("/console/testers/:id/name", action(async (request, reply, name) => {
+    const { id } = request.params;
+    if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
+    const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
+    if (!tester) return reply.code(404).send({ error: "not found" });
+    const value = typeof request.body?.name === "string" ? request.body.name.trim() : "";
+    if (!value || value.length > NAME_MAX) {
+      return (await testerHtml(reply, id, "console", name, `Not saved: a name is 1 to ${NAME_MAX} characters.`, 400)) ?? reply.code(400).send({ error: "bad name" });
+    }
+    if (!owns(routing, tester.phone, tester.route)) {
+      const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't change their name.`;
+      return (await testerHtml(reply, id, "console", name, `Not saved: ${why}`, 409)) ?? reply.code(409).send({ error: why });
+    }
+    await updateTester(opts.db, id, { name: value });
+    return reply.redirect(`/console/testers/${encodeURIComponent(id)}`, 303);
+  }));
+
   app.post<{ Body: Form }>("/console/name", async (request, reply) => {
     if (!configured) return html(reply, notConfiguredPage(), 503);
     const session = sessionOf(request);
@@ -329,11 +411,31 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
   app.post("/console/testers/:id/chat", action(async (request, reply, name) => {
     const { id } = request.params;
     if (!isUuid(id)) return reply.code(404).send({ error: "not found" });
-    const body = request.body?.text?.trim();
-    if (!body || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters is needed` });
+    // #168: with a file, the form is multipart; the file alone is a message too.
+    let text = request.body?.text;
+    let file: UploadedFile | undefined;
+    if (request.isMultipart()) {
+      try {
+        for await (const part of request.parts()) {
+          if (part.type === "file") {
+            const bytes = await part.toBuffer();
+            if (part.filename && bytes.length) file = { bytes: new Uint8Array(bytes), contentType: part.mimetype || "application/octet-stream", name: part.filename };
+          } else if (part.fieldname === "text") text = String(part.value);
+        }
+      } catch (err) {
+        if (err instanceof app.multipartErrors.RequestFileTooLargeError) {
+          const why = "That file is over 100 MB, Sendblue's limit, so it wasn't attached.";
+          return (await testerHtml(reply, id, "console", name, `Not sent: ${why}`, 413)) ?? reply.code(413).send({ error: why });
+        }
+        throw err;
+      }
+    }
+    const body = text?.trim() ?? "";
+    if ((!body && !file) || body.length > MAX_CHAT_CHARS) return reply.code(400).send({ error: `a message of 1 to ${MAX_CHAT_CHARS} characters, or a file, is needed` });
+    if (file && !opts.media) return reply.code(503).send({ error: "files can't be attached here (no bucket set up)" });
     const [tester] = await opts.db.select().from(testers).where(eq(testers.id, id));
     if (!tester) return reply.code(404).send({ error: "not found" });
-    return chatLine(request, reply, tester, name, body);
+    return chatLine(request, reply, tester, name, body, file);
   }));
 
   // #155: a founder confirms what the console chat drafted. It happens once, re-checked as things stand now.
@@ -346,9 +448,47 @@ export async function consoleRoutes(app: FastifyInstance, opts: ConsoleRouteOpti
       const why = `This number is on ${routeOf(routing, tester.phone, tester.route)} right now, so this console can't act for them.`;
       return (await testerHtml(reply, id, "console", name, `Not done: ${why}`, 409)) ?? reply.code(409).send({ error: why });
     }
-    const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()) });
+    const done = await confirmDraft(opts.db, { testerId: id, draftId: did, founder: name, now: testerNow(tester, clock()), files: { media: opts.media, sendblue: opts.sendblue } });
     if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not done: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
     return back(reply, id, "chat");
+  }));
+
+  // #169: the "Alert me when they answer" switch on a question's draft card, before Do it.
+  app.post("/console/testers/:id/drafts/:did/answer-alert", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const on = request.body?.on === "true";
+    const done = await editDraft(opts.db, { testerId: id, draftId: did, founder: name, now: await nowFor(id), change: (input) => ({ ...input, alert_on_answer: on }) });
+    if (!done.ok) return reply.code(409).send({ error: done.error });
+    return back(reply, id, "chat");
+  }));
+
+  // #168: a founder edits a card's words before Do it (a word-for-word text, or what ZOH brings up).
+  app.post("/console/testers/:id/drafts/:did/edit", action(async (request, reply, name) => {
+    const { id, did } = request.params;
+    if (!isUuid(id) || !isUuid(did)) return reply.code(404).send({ error: "not found" });
+    const words = request.body?.text?.trim();
+    if (!words || words.length > 1000) return reply.code(400).send({ error: "1 to 1000 characters are needed" });
+    const [draft] = await opts.db.select().from(consoleMessages).where(and(eq(consoleMessages.id, did), eq(consoleMessages.testerId, id), eq(consoleMessages.kind, "draft")));
+    const field = draft?.draftAction === "send_text" ? "words" : draft?.draftAction === "plan_request" ? "what" : undefined;
+    if (!field) return reply.code(409).send({ error: "only a text's or a request's words can be edited here" });
+    const done = await editDraft(opts.db, { testerId: id, draftId: did, founder: name, now: await nowFor(id), change: (input) => ({ ...input, [field]: words }) });
+    if (!done.ok) return (await testerHtml(reply, id, "console", name, `Not saved: ${done.error}.`, 409)) ?? reply.code(409).send({ error: done.error });
+    return back(reply, id, "chat");
+  }));
+
+  // #168: a file the founders attached in the chat, streamed from our private bucket.
+  app.get("/console/testers/:id/files/:mid", action(async (request, reply) => {
+    const { id, mid: fid } = request.params;
+    if (!isUuid(id) || !isUuid(fid) || !opts.media) return reply.code(404).send({ error: "not found" });
+    const [line] = await opts.db.select().from(consoleMessages).where(and(eq(consoleMessages.id, fid), eq(consoleMessages.testerId, id)));
+    const object = line?.mediaKey ? await opts.media.get(line.mediaKey) : undefined;
+    if (!line || !object) return reply.code(404).send({ error: "not found" });
+    return reply
+      .header("cache-control", "private, no-store")
+      .header("content-disposition", `inline; filename="${(line.mediaName ?? "file").replace(/["\\\r\n]/g, "_")}"`)
+      .type(line.mediaContentType ?? object.contentType)
+      .send(Buffer.from(object.bytes));
   }));
 
   app.post("/console/testers/:id/drafts/:did/cancel", action(async (request, reply, name) => {

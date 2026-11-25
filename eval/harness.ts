@@ -16,13 +16,17 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
+import { ensureV2RequiredPages, createV2Page, addV2Entry, writeV2Daily, addV2ForgetTopic, updateV2Page } from "../src/memory/v2-store.js";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
-import { loadCurrentPlan } from "../src/coach/state.js";
+import { buildStateBlock } from "../src/coach/prompt.js";
+import { loadCoachState, loadCurrentPlan } from "../src/coach/state.js";
 import { weekStart } from "../src/coach/week.js";
 import { serviceDate } from "../src/nudges/schedule.js";
-import { addRequest, addThreadLine, COACH_AUTHOR } from "../src/console/requests.js";
+import { addRequest, addThreadLine, claimRequest, closeRequest, COACH_AUTHOR } from "../src/console/requests.js";
+import { addGuidance } from "../src/coaching/coaching.js";
+import { listGuidance } from "../src/coaching/guidance.js";
 import { raiseAlert } from "../src/console/alerts.js";
 import { getTesterByPhone } from "../src/testers/testers.js";
 import { startPause } from "../src/testers/pauses.js";
@@ -32,7 +36,7 @@ import { billedDollars, type BilledUsage } from "./cost.js";
 import { evalMediaFetcher, evalTranscriber, evalWatcher, parseMediaLine } from "./media.js";
 import { localDate } from "../src/coach/state.js";
 import { guessTimeZone } from "../src/testers/area-codes.js";
-import type { ConversationPlan, ConversationResult, Seed, TokenUsage, TranscriptLine } from "./types.js";
+import { lineText, type CaseLine, type ConversationPlan, type ConversationResult, type LineCounts, type Seed, type TokenUsage, type TranscriptLine } from "./types.js";
 
 const WEBHOOK_SECRET = "eval-webhook-secret";
 const CONSOLE_SECRET = "eval-console-secret";
@@ -58,6 +62,10 @@ export class RecordingSendblue implements SendblueClient {
   }
   async optIn(number: string) {
     if (number !== this.allowed) throw new Error("Eval Sendblue only touches its own fake tester");
+  }
+  /** #168: a founder's file is never really uploaded in the eval. */
+  async uploadFile(file: { name: string }) {
+    return `https://cdn.sendblue.eval/${file.name}`;
   }
 }
 
@@ -423,16 +431,18 @@ export interface Tester {
   next(transcript: TranscriptLine[]): Promise<string | null>;
   usage(): TokenUsage;
   /** Why it stopped when next() returned null. */
-  readonly endReason: "simulator" | "script";
+  readonly endReason: "simulator" | "script" | "case-problem";
+  /** #230: how a case's waiting lines went out. */
+  lines?(): LineCounts;
 }
 
-/** Replays a regression case's lines in order, one per turn. */
-export function scriptedTester(lines: string[]): Tester {
+/** Replays a regression case's lines in order, one per turn, as written (a waiting line's wording, #230). */
+export function scriptedTester(lines: (string | CaseLine)[]): Tester {
   let i = 0;
   return {
     endReason: "script",
     async next() {
-      return i < lines.length ? (lines[i++] as string) : null;
+      return i < lines.length ? lineText(lines[i++]!) : null;
     },
     usage: () => ({ input: 0, output: 0 }),
   };
@@ -495,6 +505,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       consentAt: contextStart,
       contextStartedAt: contextStart,
       ...(seed.quiet_hours ? { quietHoursStart: seed.quiet_hours.start, quietHoursEnd: seed.quiet_hours.end, quietHoursChosen: true } : {}),
+      ...(seed.memory_v2 ? { memoryVersion: "v2" as const } : {}),
       styleNotes: (seed.memory?.pages ?? [])
         .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
         .join("; "),
@@ -620,7 +631,22 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   for (const t of seed.team) {
     const at = new Date(now.getTime() - t.hours_ago * 60 * 60_000);
     if (t.kind === "note") await addThreadLine(app.db, { testerId: tester!.id, kind: "note", author: "Yanni", body: t.body, at });
-    else await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at });
+    else if (t.kind === "guidance") await addGuidance(app.db, tester!, t.body, "Yanni", at);
+    else if (t.kind === "file") {
+      // #168: as the console coach finds it once a founder's file has been read (the eval keeps no files).
+      const name = t.name ?? "file.txt";
+      const line = await addThreadLine(app.db, { testerId: tester!.id, kind: "founder", author: "Yanni", body: t.body, at, attachment: { key: `eval/${name}`, contentType: t.content_type ?? "text/plain", name } });
+      await app.db.update(schema.consoleMessages).set({ mediaAccount: t.account ?? "" }).where(eq(schema.consoleMessages.id, line.id));
+      await addThreadLine(app.db, { testerId: tester!.id, kind: "coach", author: COACH_AUTHOR, body: "Got it, I've read it.", at: new Date(at.getTime() + 1000) });
+    } else {
+      const request = await addRequest(app.db, { testerId: tester!.id, author: "Yanni", body: t.body, exact: false, sendNow: false, delivery: t.delivery, at, question: t.question });
+      if (t.asked_hours_ago !== undefined) {
+        // #169: ZOH already asked it then, in a text that went out.
+        const asked = new Date(now.getTime() - t.asked_hours_ago * 60 * 60_000);
+        await claimRequest(app.db, request.id, asked);
+        await closeRequest(app.db, { request, status: "done", at: asked, line: "Done (seeded)" });
+      }
+    }
   }
   if (seed.pause) {
     const { started_hours_ago, until_days, reason } = seed.pause;
@@ -654,6 +680,11 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     context.push({ from: line.from, text: shown, at: at.toISOString() });
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
+  if (seed.memory_v2) await seedV2Memory(app, tester!, seed.memory_v2, now);
+  // #168: a founder's file, as the grader needs it to judge the line ZOH writes about it.
+  for (const t of seed.team.filter((x) => x.kind === "file")) {
+    context.push({ from: "founder", text: `Yanni attached "${t.name ?? "file.txt"}" (what's in it: ${t.account ?? "not read"})`, at: new Date(now.getTime() - t.hours_ago * 60 * 60_000).toISOString() });
+  }
   return context;
 }
 
@@ -731,15 +762,19 @@ async function seedNextSteps(app: EvalApp, tester: schema.Tester, seed: Seed, ve
 
 /** How many days back a seed's memory reaches (0 without one). */
 function memoryDays(seed: Seed): number {
-  const m = seed.memory;
-  if (!m) return 0;
-  return Math.max(
-    0,
-    ...m.pages.flatMap((p) => p.facts.map((f) => f.days_ago)),
-    ...m.daily.map((d) => d.days_ago),
-    ...m.earlier_plans.map((e) => e.days_ago),
-    ...m.earlier_goals.map((g) => g.days_ago),
-  );
+  const v1 = seed.memory;
+  const v1Days = v1
+    ? Math.max(
+        0,
+        ...v1.pages.flatMap((p) => p.facts.map((f) => f.days_ago)),
+        ...v1.daily.map((d) => d.days_ago),
+        ...v1.earlier_plans.map((e) => e.days_ago),
+        ...v1.earlier_goals.map((g) => g.days_ago),
+      )
+    : 0;
+  // V2 memory doesn't use days_ago; use 30 as a safe upper bound when present (matches 28-day plans).
+  const v2Days = seed.memory_v2 ? 30 : 0;
+  return Math.max(v1Days, v2Days);
 }
 
 /** Files a seed's memory the way the overnight pass would have, dated on the eval clock. */
@@ -777,6 +812,147 @@ async function seedMemory(app: EvalApp, tester: schema.Tester, memory: NonNullab
   await app.db.update(schema.testers).set({ memoryThrough: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
 }
 
+/** #253: seeds v2 memory — the page tree, entries, dailies and forget topics — from a case's memory_v2 field. */
+async function seedV2Memory(app: EvalApp, tester: schema.Tester, v2: NonNullable<Seed["memory_v2"]>, now: Date): Promise<void> {
+  const at = new Date(now.getTime() - 30 * DAY_MS); // pages created ~30 days ago
+
+  // 1. Create a placeholder inbound message to use as source for entries.
+  const [sourceMsg] = await app.db
+    .insert(schema.messages)
+    .values({
+      direction: "inbound",
+      contactNumber: app.phone,
+      lineNumber: LINE,
+      content: "(v2 memory seed source)",
+      createdAt: at,
+      sentAt: at,
+    })
+    .returning();
+  const sourceId = sourceMsg!.id;
+
+  // 2. Create the four required pages (root, Coaching, People, Places).
+  const required = await ensureV2RequiredPages(app.db, tester, at);
+
+  // Build a map from page title to page for parent lookups.
+  const pageByTitle = new Map<string, schema.MemoryV2Page>();
+  pageByTitle.set(required.root.title, required.root);
+  pageByTitle.set("Coaching", required.coaching);
+  pageByTitle.set("People", required.people);
+  pageByTitle.set("Places", required.places);
+
+  // 3. Update required pages with case data (about, entries on root, etc.).
+  for (const p of v2.pages) {
+    if (p.kind === "root" || p.kind === "coaching" || p.kind === "people" || p.kind === "places") {
+      const page =
+        p.kind === "root" ? required.root
+        : p.kind === "coaching" ? required.coaching
+        : p.kind === "people" ? required.people
+        : required.places;
+      // Update about and other_names if the case provided them.
+      if (p.about || p.other_names.length > 0) {
+        await updateV2Page(app.db, page, { about: p.about || undefined, otherNames: p.other_names.length > 0 ? p.other_names : undefined }, at);
+      }
+      // Add entries on the required page.
+      for (const e of p.entries) {
+        const entry = await addV2Entry(app.db, {
+          pageId: page.id,
+          testerId: tester.id,
+          type: e.type,
+          text: e.text,
+          detail: e.detail,
+          when: e.when,
+          sourceMessageId: sourceId,
+        }, at);
+        // Honour non-default status (e.g. an entry seeded as "open" for followups gets that from addV2Entry,
+        // but "expired" or "done" need an explicit update).
+        if (e.status !== "current" && e.status !== "open") {
+          await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+        }
+      }
+    }
+  }
+
+  // 4. Create tier-1 pages (area, project) first, so tier-2 pages can find their parent.
+  for (const p of v2.pages) {
+    if (p.kind !== "area" && p.kind !== "project") continue;
+    const parentId = p.parent_title ? pageByTitle.get(p.parent_title)?.id ?? required.root.id : required.root.id;
+    const result = await createV2Page(app.db, tester.id, {
+      kind: p.kind,
+      title: p.title,
+      about: p.about,
+      otherNames: p.other_names,
+      status: p.status,
+      goalSlug: p.goal_slug,
+      parentId,
+    }, at);
+    if (!result.ok) throw new Error(`seedV2Memory area/project: ${result.error}`);
+    pageByTitle.set(p.title, result.value);
+    for (const e of p.entries) {
+      const entry = await addV2Entry(app.db, {
+        pageId: result.value.id,
+        testerId: tester.id,
+        type: e.type,
+        text: e.text,
+        detail: e.detail,
+        when: e.when,
+        sourceMessageId: sourceId,
+      }, at);
+      if (e.status !== "current" && e.status !== "open") {
+        await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+      }
+    }
+  }
+
+  // 5. Create tier-2 pages (goal, person, place).
+  for (const p of v2.pages) {
+    if (p.kind !== "goal" && p.kind !== "person" && p.kind !== "place") continue;
+    const defaultParent =
+      p.kind === "person" ? required.people
+      : p.kind === "place" ? required.places
+      : undefined; // goal needs an area parent
+    const parentId = p.parent_title ? pageByTitle.get(p.parent_title)?.id ?? defaultParent?.id : defaultParent?.id;
+    if (!parentId) throw new Error(`seedV2Memory: ${p.kind} page "${p.title}" needs a parent (parent_title or a default)`);
+    const result = await createV2Page(app.db, tester.id, {
+      kind: p.kind,
+      title: p.title,
+      about: p.about,
+      otherNames: p.other_names,
+      status: p.status,
+      goalSlug: p.goal_slug,
+      parentId,
+    }, at);
+    if (!result.ok) throw new Error(`seedV2Memory ${p.kind}: ${result.error}`);
+    pageByTitle.set(p.title, result.value);
+    for (const e of p.entries) {
+      const entry = await addV2Entry(app.db, {
+        pageId: result.value.id,
+        testerId: tester.id,
+        type: e.type,
+        text: e.text,
+        detail: e.detail,
+        when: e.when,
+        sourceMessageId: sourceId,
+      }, at);
+      if (e.status !== "current" && e.status !== "open") {
+        await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+      }
+    }
+  }
+
+  // 6. Daily summaries.
+  for (const d of v2.daily) {
+    await writeV2Daily(app.db, tester.id, d.date, d.summary, [sourceId], at);
+  }
+
+  // 7. Forget topics.
+  for (const topic of v2.forget_topics) {
+    await addV2ForgetTopic(app.db, tester.id, topic, at);
+  }
+
+  // 8. Mark v2 memory as filed through yesterday.
+  await app.db.update(schema.testers).set({ memoryV2Through: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
+}
+
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */
 export async function runConversation(plan: ConversationPlan, tester: Tester, opts: RunOptions): Promise<ConversationResult> {
   const phone = fakeNumber(plan.areaCode, opts.index);
@@ -784,9 +960,11 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   const app = await startEvalApp({ config: evalConfig(opts.env, phone), phone, clock, replier: opts.replier, consoleCoach: opts.consoleCoach, memory: opts.memory });
   opts.onApp?.(app);
   const context = plan.seed ? await seedTester(app, plan.seed) : [];
+  // #230: what ZOH can see about a seeded tester, from the coach's own status sheet, so the grader judges with it.
+  const knew = plan.seed ? await readCoachSheet(app, clock.now()) : undefined;
   // What ZOH knew going in, so the grader judges a fact it later forgot against memory as it was.
   const memoryBefore = opts.memory ? await readMemory(app) : undefined;
-  const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(l.trim())) ? await readStepLog(app) : undefined;
+  const record = plan.regression?.testerLines.some((l) => CONSOLE_LINE.test(lineText(l).trim())) ? await readStepLog(app) : undefined;
   const savedBefore = opts.saved ? await savedIds(app) : undefined;
   const transcript: TranscriptLine[] = [];
   let endedBy: ConversationResult["endedBy"] = "turn-cap";
@@ -835,6 +1013,8 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
       transcript,
       endedBy,
       error,
+      ...(tester.lines ? { lines: tester.lines() } : {}),
+      ...(knew ? { knew } : {}),
       // #103: the look-back's facts include today's step, so its log is read once the conversation is over.
       ...(opts.record ? { record: await readStepLog(app, true) } : record ? { record } : {}),
       ...(savedBefore ? { saved: await readSaved(app, savedBefore) } : {}),
@@ -847,6 +1027,13 @@ export async function runConversation(plan: ConversationPlan, tester: Tester, op
   } finally {
     await app.close();
   }
+}
+
+/** #230: the coach's status sheet for the tester as it would build it now, the same code ZOH's replies read. */
+async function readCoachSheet(app: EvalApp, now: Date): Promise<string | undefined> {
+  const tester = await getTesterByPhone(app.db, app.phone);
+  if (!tester) return undefined;
+  return buildStateBlock(await loadCoachState(app.db, tester, { now, isFirstText: false }));
 }
 
 /**
@@ -908,7 +1095,13 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
   const versions = fresh(await app.db.select().from(schema.plans).where(and(eq(schema.plans.testerId, tester.id), eq(schema.plans.status, "locked"))));
   const lessons = fresh(await app.db.select().from(schema.takeaways).where(eq(schema.takeaways.testerId, tester.id)));
   const days = await app.db.select().from(schema.stepDays).where(eq(schema.stepDays.testerId, tester.id)).orderBy(asc(schema.stepDays.date));
-  const style = `Style now: ${tester.pushiness}${tester.styleNotes ? `; notes: ${tester.styleNotes}` : ""}${tester.stoppedAt ? "; stopped" : ""}`;
+  // #169: what ZOH recorded for the team's questions.
+  const questions = (await app.db.select().from(schema.consoleMessages).where(and(eq(schema.consoleMessages.testerId, tester.id), eq(schema.consoleMessages.question, true)))).filter(
+    (q) => q.answerStatus,
+  );
+  const style = `Style now: ${tester.styleNotes ? `notes: ${tester.styleNotes}` : "no notes"}${tester.stoppedAt ? "; stopped" : ""}`;
+  // #158: a guidance line their own request overrode (save_preference named it).
+  const overridden = (await listGuidance(app.db, tester.id)).filter((g) => g.overriddenBy);
   const lines = [
     ...flagged.map((f) => `Flag ${f.kind}: ${f.detail ?? ""}`),
     ...paused.map((x) => `Pause: ${x.reason ?? "no reason"}${x.until ? `, back on ${x.until}` : ""}`),
@@ -918,6 +1111,8 @@ export async function readSaved(app: EvalApp, before: Set<string>): Promise<stri
     // #160: what the step shows they can now do, and gaps, so the grader can check both against the conversation.
     ...days.flatMap((d) => [...(d.canDo ? [`Can now do (${d.date}): ${d.canDo}`] : []), ...(d.gaps ? [`Gaps (${d.date}): ${d.gaps}`] : [])]),
     ...days.flatMap((d) => (d.step && !d.status ? [`Step set for ${d.date}${d.agreedAt ? ", agreed" : ", not agreed"}: ${d.step}`] : [])),
+    ...questions.map((q) => `Team question "${q.body}": ${q.answerStatus === "answered" ? `recorded their answer: ${q.answer}` : "recorded that they talked past it"}`),
+    ...overridden.map((g) => `Team guidance "${g.text}": marked overridden by their request "${g.overriddenBy}"`),
   ];
   return [...(lines.length ? lines : ["Nothing flagged, paused or changed."]), style].join("\n");
 }

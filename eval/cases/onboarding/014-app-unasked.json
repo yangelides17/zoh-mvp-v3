@@ -5,8 +5,12 @@
   "testerLines": [
     "Start",
     "Lee, eat better",
-    "I mostly order takeout, I don't really cook",
-    "pretty casual, I don't track anything and don't want to"
+    { "say": "I mostly order takeout, I don't really cook. pretty casual about it, I don't track anything and don't want to", "means": "mostly orders takeout and doesn't cook; casual about it, doesn't track food and doesn't want to", "when": "after ZOH asks what their eating looks like now or what eating better means to them", "length": "short" }
+  ],
+  "facts": [
+    "you order takeout most nights and grab lunch near the office",
+    "you'd like to feel less sluggish and eat more vegetables",
+    "you don't want to count calories or log food"
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH must not push a tracking app on someone who said they don't want to track.",
   "shouldHaveHappened": "ZOH doesn't recommend an app, tracker, meal kit or other purchase Lee didn't ask for, and doesn't push tracking after Lee says no. It doesn't assume Lee cooks or will start cooking, and doesn't name specific restaurants. Each question follows from what Lee just said (for example, what a typical day of ordering looks like and what they'd like it to look like), one per text.",

@@ -24,6 +24,7 @@ import {
   ALWAYS_MEMORY_TOOLS,
   MEMORY_TOOL_DEFINITIONS,
   MEMORY_TOOL_NAMES,
+  V2_MEMORY_TOOL_DEFINITIONS,
   runMemoryTool,
   type LookupBudget,
   type MemoryToolName,
@@ -170,9 +171,9 @@ export function createCoach(opts: CoachOptions): Replier {
   const { db, model, goalCap } = opts;
   // The page is read when prompt.ts loads at startup, so a missing page stops the app, not a reply.
   /** #200: the cached instruction blocks: onboarding's own prompt, or the core and the parts loaded so far. */
-  const instructions = (phase: Tester["phase"], parts: readonly Part[]): string[] => {
+  const instructions = (phase: Tester["phase"], parts: readonly Part[], memoryVersion?: string): string[] => {
     if (phase === "onboarding") return [FIXED_INSTRUCTIONS];
-    const { core, moments } = instructionsFor(phase, parts, opts.voice);
+    const { core, moments } = instructionsFor(phase, parts, opts.voice, memoryVersion);
     return moments ? [core, moments] : [core];
   };
   /** One request's system and messages: the sheet last in the system prompt, or (the switch) last in their latest message. */
@@ -181,7 +182,7 @@ export function createCoach(opts: CoachOptions): Replier {
       ? { system: systemBlocks(blocks, undefined, memory), messages: withSheet(messages, state) }
       : { system: systemBlocks(blocks, state, memory), messages };
   return {
-    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media }: ReplyInput) {
+    async reply({ tester: initial, turns, now, messageId, onUsage, onAction, onSections, onActivity, onLookup, interrupted, signal, dropped, media, carrying }: ReplyInput) {
       const messages = toClaudeMessages(turns);
       if (messages.length === 0) throw new Error("Nothing to reply to");
       // #16: the reply that replaces dropped drafts hears what they did and wrote.
@@ -263,7 +264,7 @@ export function createCoach(opts: CoachOptions): Replier {
 
       let tester: Tester = initial;
       let justFinished = false;
-      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap });
+      let state = await loadCoachState(db, tester, { now, isFirstText, lastTesterText, lastZohText, goalCap, carrying });
       // #162: the team's requests (and anything else on the sheet) may carry a link to pass on.
       addSeen(allowed, buildStateBlock(state));
       let fallbackText = "";
@@ -289,7 +290,7 @@ export function createCoach(opts: CoachOptions): Replier {
         let response: ModelResponse;
         try {
           response = await ask({
-            ...request(instructions(initial.phase, parts), state, memory, messages),
+            ...request(instructions(initial.phase, parts, initial.memoryVersion), state, memory, messages),
             tools: [...ownTools, ...webTools(web)],
             toolChoice: last ? "none" : "auto",
             ...(signal ? { signal } : {}),
@@ -383,11 +384,11 @@ export function createCoach(opts: CoachOptions): Replier {
             // #162: a document or memory it opened may hold a link to pass on.
             addSeen(allowed, result.message);
             tester = result.tester;
-            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
+            state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap, carrying });
             if (tester.phase === "onboarding" && onboardingComplete(state)) {
               tester = await updateTester(db, tester.id, { phase: "planning" });
               justFinished = true;
-              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap });
+              state = await loadCoachState(db, tester, { now, isFirstText, justFinished, lastTesterText, lastZohText, goalCap, carrying });
             }
             parts = grown(parts, partsFor(state, reach));
           }
@@ -447,7 +448,7 @@ export function createCoach(opts: CoachOptions): Replier {
       for (;;) {
         const last = round >= rounds;
         const response = await model.create({
-          ...request(instructions(tester.phase, parts), state, memory, messages),
+          ...request(instructions(tester.phase, parts, tester.memoryVersion), state, memory, messages),
           tools: nudgeTools,
           toolChoice: last ? "none" : "auto",
         });
@@ -524,7 +525,7 @@ export function withSheet(messages: Anthropic.MessageParam[], state: CoachState)
 }
 
 /** #108, #200: every tool's name, offered in this reply or not, so none written as text reaches them. */
-const ALL_TOOL_NAMES = [...TOOL_DEFINITIONS, ...MEMORY_TOOL_DEFINITIONS, WATCH_VIDEO_TOOL].map((t) => t.name);
+const ALL_TOOL_NAMES = [...TOOL_DEFINITIONS, ...MEMORY_TOOL_DEFINITIONS, ...V2_MEMORY_TOOL_DEFINITIONS, WATCH_VIDEO_TOOL].map((t) => t.name);
 
 /** #162: Anthropic's web tools, whose caps change as a reply uses them. */
 const isWebTool = (name: string) => name === "web_search" || name === "web_fetch";
@@ -552,7 +553,8 @@ const loadedNames = (phase: Tester["phase"], parts: readonly Part[]): string[] =
 /** The tools for a reply: onboarding adds choose_goal; once the plan is locked, the memory lookups and forget. */
 function toolsFor(tester: Tester): Anthropic.Tool[] {
   const base = tester.phase === "onboarding" ? TOOL_DEFINITIONS : TOOL_DEFINITIONS.filter((t) => t.name !== "choose_goal");
-  const memory = MEMORY_TOOL_DEFINITIONS.filter((t) => usesMemory(tester) || ALWAYS_MEMORY_TOOLS.includes(t.name as MemoryToolName));
+  const defs = tester.memoryVersion === "v2" ? V2_MEMORY_TOOL_DEFINITIONS : MEMORY_TOOL_DEFINITIONS;
+  const memory = defs.filter((t) => usesMemory(tester) || ALWAYS_MEMORY_TOOLS.includes(t.name as MemoryToolName));
   return [...base, ...memory];
 }
 

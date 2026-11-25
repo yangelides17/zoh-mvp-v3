@@ -4,5 +4,6 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/memory/rebuild-cli.ts", "src/memory/show-cli.ts"]
 }

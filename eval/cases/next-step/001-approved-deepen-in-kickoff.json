@@ -39,7 +39,14 @@
       }
     ]
   },
-  "testerLines": ["advance to 09:05", "ooh ok yeah let's try 15"],
+  "testerLines": [
+    "advance to 09:05",
+    { "say": "ooh ok yeah let's try 15", "when": "after ZOH suggests going up to 15 pages a night and asks if she's in", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're on page 212 of The Overstory",
+    "you read in bed at 9 most nights"
+  ],
   "whatWentWrong": "New case, not a past mistake: an approved deepen delivered.",
   "shouldHaveHappened": "The 9 am kickoff raises fifteen pages a night as ZOH's own idea, tied to her two-week streak and The Overstory, in place of the usual commitment question (one question only, no mention of a team, founders or approval). Her yes gets a short confirmation that the plan is now 15 pages of The Overstory at 9 pm in bed, and the streak keeps going. No extra questions.",
   "startTime": "08:55",

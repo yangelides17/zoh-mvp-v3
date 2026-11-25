@@ -1,0 +1,40 @@
+{
+  "id": "engaged-asked-to-explain-a-fix",
+  "why": "ZOH asked him to explain one of the character's fixes; the reply answers that and mustn't hand over the phone point.",
+  "case": "reflection/engaged-gets-to-tomorrow",
+  "line": 3,
+  "expect": [
+    "wait",
+    "passed"
+  ],
+  "replyMustNot": [
+    "phone",
+    "dresser"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Done, page 81 of Project Hail Mary.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Leo! Page 81, and that's 23 pages since last night 📚 Three days in a row. What's pulling you into Project Hail Mary so far?"
+    },
+    {
+      "from": "tester",
+      "text": "the problem solving. he gets stuck then works it out, couldn't stop tonight"
+    },
+    {
+      "from": "zoh",
+      "text": "That stuck-then-works-it-out loop is a great hook, Leo. Was there a moment tonight where you saw the solution coming before he did, or did it catch you off guard?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly didn't see it coming most of the time. he's stuck and i'm stuck with him, then he works it out and i want to know how"
+    },
+    {
+      "from": "zoh",
+      "text": "Stuck with him, then needing to know how. That's a good sign the book fits you. Pick one of his fixes from tonight and tell me how he cracked it, like you'd explain it to a friend."
+    }
+  ]
+}

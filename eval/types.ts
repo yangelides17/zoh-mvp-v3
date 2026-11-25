@@ -79,14 +79,21 @@ export const seedSchema = z.object({
       temporary: z.object({ ends_in_days: z.number().int().min(0).max(30), usual_step: z.string() }).optional(),
     })
     .optional(),
-  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff). */
+  /** #196: what the founders left in the console: notes (context) and requests ("morning" rides the kickoff); #158: guidance lines. */
   team: z
     .array(
       z.object({
-        kind: z.enum(["note", "request"]),
+        /** #168: "file": a founder's line with a file already read (`name`, `content_type`, `account`: what's in it). */
+        kind: z.enum(["note", "request", "file", "guidance"]),
         body: z.string().min(1),
         hours_ago: z.number().min(0).max(72).default(1),
         delivery: z.enum(REQUEST_DELIVERIES).default("natural"),
+        /** #169: a request that's a question; `asked_hours_ago`: ZOH already asked it then (put the asking in `history`). */
+        question: z.boolean().default(false),
+        asked_hours_ago: z.number().min(0).max(240).optional(),
+        name: z.string().optional(),
+        content_type: z.string().optional(),
+        account: z.string().optional(),
       }),
     )
     .default([]),
@@ -187,6 +194,38 @@ export const seedSchema = z.object({
       earlier_goals: z.array(z.object({ goal: z.string(), reason: z.string(), days_ago: z.number().int().min(1).max(60) })).default([]),
     })
     .optional(),
+  /**
+   * V2 coach memory (#253): a tree of pages with typed entries, daily summaries and forget topics.
+   * When present, the tester is created with memoryVersion "v2".
+   */
+  memory_v2: z
+    .object({
+      pages: z.array(
+        z.object({
+          kind: z.enum(["root", "coaching", "people", "places", "area", "project", "goal", "person", "place"]),
+          title: z.string(),
+          about: z.string().default(""),
+          other_names: z.array(z.string()).default([]),
+          parent_title: z.string().optional(),
+          goal_slug: z.string().optional(),
+          status: z.enum(["active", "paused", "done", "past"]).default("active"),
+          entries: z
+            .array(
+              z.object({
+                type: z.enum(["fact", "note", "unsure", "todo", "event", "followup"]),
+                text: z.string(),
+                detail: z.string().optional(),
+                when: z.string().optional(),
+                status: z.enum(["current", "expired", "open", "done", "dropped"]).default("current"),
+              }),
+            )
+            .default([]),
+        }),
+      ),
+      daily: z.array(z.object({ date: z.string(), summary: z.string() })).default([]),
+      forget_topics: z.array(z.string()).default([]),
+    })
+    .optional(),
 });
 export type Seed = z.infer<typeof seedSchema>;
 
@@ -217,6 +256,41 @@ export const scenarioSchema = z.object({
 export type Scenario = z.infer<typeof scenarioSchema>;
 export type ScenarioInput = z.input<typeof scenarioSchema>;
 
+/**
+ * #230: a tester line that waits for the moment it answers. `say` is its wording; `when` is the moment in ZOH's
+ * texts it fits, named by what ZOH does ("after ZOH asks what went wrong"). Until then the simulated tester
+ * answers ZOH, without seeing the line. An anchored line (the default) may be changed as little as possible to
+ * answer what ZOH asked, keeping `means` and `length`; a `fixed` one goes out word for word or not at all, and is
+ * never skipped. `optional`: the line only applies if ZOH asks for it, so it's dropped when ZOH moves past it.
+ * `expected`: its moment is what the case expects ZOH to reach (proposing tomorrow's step, say); if ZOH never gets
+ * there, the run ends and is graded as ZOH's miss, not a case problem. `starts`: the tester's own move (texting
+ * first, telling the next part of a story), sent as written without waiting.
+ */
+export const LINE_LENGTHS = ["thin", "short", "full"] as const;
+export const caseLineSchema = z
+  .object({
+    say: z.string().min(1),
+    means: z.string().min(1).optional(),
+    when: z.string().min(1).optional(),
+    length: z.enum(LINE_LENGTHS).optional(),
+    fixed: z.boolean().default(false),
+    optional: z.boolean().default(false),
+    expected: z.boolean().default(false),
+    starts: z.boolean().default(false),
+  })
+  .strict()
+  .superRefine((l, ctx) => {
+    if (!l.starts && !l.when) ctx.addIssue({ code: "custom", message: "a line that answers ZOH needs `when` (or `starts: true`)" });
+    if (!l.starts && !l.fixed && !l.means) ctx.addIssue({ code: "custom", message: "an anchored line needs `means` (or `fixed: true`)" });
+    if (l.optional && l.expected) ctx.addIssue({ code: "custom", message: "a line can't be both `optional` and `expected`" });
+  });
+export type CaseLine = z.infer<typeof caseLineSchema>;
+
+/** A case line's text as written: the line itself, or an anchored line's wording. */
+export function lineText(line: string | CaseLine): string {
+  return typeof line === "string" ? line : line.say;
+}
+
 /** A regression case: scripted tester lines, fresh ZOH replies, and what should have happened. */
 export const caseSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -228,9 +302,11 @@ export const caseSchema = z.object({
    * time (the next one), running the nudge tick each minute, and ZOH's own texts join the transcript.
    * A line "console Yanni: ..." is a founder's message in the console chat; ZOH's console answer and
    * any draft card it makes join the transcript, marked as console. "console Yanni (do it)" clicks Do it
-   * on the newest open draft (#155).
+   * on the newest open draft (#155). A line can also wait for its moment (#230, `caseLineSchema`).
    */
-  testerLines: z.array(z.string().min(1)).min(1),
+  testerLines: z.array(z.union([z.string().min(1), caseLineSchema])).min(1),
+  /** #230: what's true about the tester, for the replies they send while a line waits. Never shown to ZOH or the grader. */
+  facts: z.array(z.string().min(1)).optional(),
   whatWentWrong: z.string(),
   shouldHaveHappened: z.string(),
   areaCode: z.string().regex(/^\d{3}$/).default("212"),
@@ -285,8 +361,16 @@ export interface ConversationResult {
   /** The seeded conversation before this run's first text; context only, never graded. */
   context: TranscriptLine[];
   transcript: TranscriptLine[];
-  endedBy: "simulator" | "turn-cap" | "script" | "error";
+  /**
+   * "case-problem" (#230): a line never found its moment for a reason that isn't ZOH's to fix; the run is graded
+   * but kept out of the scores. A line ZOH was expected to reach and didn't ends the run "by script", graded as usual.
+   */
+  endedBy: "simulator" | "turn-cap" | "script" | "error" | "case-problem";
   error?: string;
+  /** #230: how a case's waiting lines went out, with each decision and its reason. */
+  lines?: LineCounts;
+  /** #230: ZOH's own status sheet at the start of a seeded conversation, so the grader knows what ZOH knew. */
+  knew?: string;
   /** The tester's memory pages after the run (memory feature only), as the coach reads them. */
   memory?: string;
   /** The tester's dated step log at the start (console feature): what ZOH could see, so the grader can check its facts. */
@@ -300,6 +384,32 @@ export interface ConversationResult {
   appErrors: string[];
   usage: TokenUsage;
 }
+
+/**
+ * #230: waiting lines sent word for word, changed to fit, skipped (their point already made), passed (optional,
+ * ZOH moved past them) and the extra replies sent while one waited. `missed`: a line ZOH was expected to reach and
+ * didn't (graded as ZOH's miss); `problem`: a line that never fit for another reason (a case problem).
+ */
+export interface LineCounts {
+  exact: number;
+  adapted: number;
+  waited: number;
+  skipped: number;
+  passed: number;
+  missed?: string;
+  problem?: string;
+  log: LineDecision[];
+}
+
+/** #230: one simulator decision on a waiting line, with its one-sentence reason. Report only; never shown to ZOH or the grader. */
+export interface LineDecision {
+  line: number;
+  say: string;
+  decision: LineVerdict;
+  reason: string;
+}
+export const LINE_VERDICTS = ["said", "fits", "close", "wait", "passed"] as const;
+export type LineVerdict = (typeof LINE_VERDICTS)[number];
 
 export interface TokenUsage {
   input: number;
@@ -333,4 +443,6 @@ export type Grade = z.infer<typeof gradeSchema>;
 export interface GradedConversation extends ConversationResult {
   grade?: Grade;
   gradeError?: string;
+  /** #230: a case problem's grade, shown beside it but kept out of every score and comparison. */
+  problemGrade?: Grade;
 }

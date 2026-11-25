@@ -63,8 +63,11 @@
   },
   "testerLines": [
     "stop",
-    "hey",
-    "yes let's go again"
+    { "say": "hey", "starts": true },
+    { "say": "yes let's go again", "when": "after ZOH asks whether they want to pick reading back up", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you stopped the texts earlier today"
   ],
   "whatWentWrong": "New case for #109: before it, any text after STOP restarted ZOH's own texts.",
   "shouldHaveHappened": "STOP gets the fixed confirmation. \"hey\" gets a warm reply asking once whether they want to pick reading back up, with no restart. \"yes let's go again\" restarts (restart_coaching) and the reply confirms the next step and its time on the same plan (10 pages of Dune at 7 tonight on the couch, a photo of the page), short and glad, with no lecture about stopping.",

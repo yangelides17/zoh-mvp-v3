@@ -54,6 +54,12 @@ report says so.
 again in a comparison; then set `"suite": "regression"`) or `replay` (a real tester conversation: reported apart,
 never tuned against). Simulated scenarios count as regression.
 
+**Checking the simulated tester** (`npm run sim-check -- [--model <id>]... [--runs 3] [--point <id>]`, #230): each file in
+`eval/known-sim/` is a moment from a real run (the conversation up to a ZOH text, the case line that was waiting)
+with the decisions a fair tester could make there. It asks the case tester's decision (and, while waiting, its
+reply) a few times per model; a moment counts only if every run was right. Nov 21: Sonnet 13 of 13, Haiku 8 of 12.
+About $0.14 for all of them × 3 runs on Sonnet. Add a moment whenever a run shows the tester deciding wrong.
+
 **Checking the grader** (`npm run grader-check -- <feature | all> [--runs 3] [--report <report.json> --sample 4]`):
 - *Rules, against known answers:* each file in `eval/known/<feature>/` is a short conversation written to
   follow or break one rule (`expect: pass | fail`). Graded as usual, they give each rule's catch rate (breaks
@@ -87,7 +93,7 @@ Other flags: `--max-turns <n>` (tester texts before a conversation is cut off, d
 `--concurrency <n>` (conversations at once, default 3), `--over-budget` (only with Yanni's OK).
 The grader runs on Haiku (`claude-haiku-5-5`), the same on both sides of a comparison and in the stored
 baselines; `--final` grades with the coach's `CLAUDE_MODEL` instead (a comparison then needs a baseline
-re-graded with it), and `EVAL_MODEL` overrides both. `EVAL_SIM_MODEL` sets the simulated tester (default Haiku).
+re-graded with it), and `EVAL_MODEL` overrides both. `EVAL_SIM_MODEL` sets the simulated tester in scenarios (default Haiku); a case's waiting lines (#230) use Sonnet (`EVAL_CASE_SIM_MODEL` overrides), chosen by the simulator check below, for about $0.02 a case.
 In an 8-case calibration (#174) Haiku caught every planted past mistake and agreed with Sonnet on 97% of checks
 at about 1/14 of the grading cost, but named fewer secondary problems.
 
@@ -112,7 +118,9 @@ $0.16 for seven. (Until then the coach was estimated at about a fifth of that, s
    local time. Every tester text goes in through the real `/webhooks/sendblue` route. The coach is
    whatever `src/wiring.ts` builds, so a new coach is evaluated without touching the eval.
 3. **Simulate.** For scenarios, a Claude plays the tester from the persona, goal and hidden facts
-   and stops when ZOH wraps up (or at the turn cap). Cases send their scripted lines instead.
+   and stops when ZOH wraps up (or at the turn cap). Cases send their scripted lines instead; a line that waits for
+   its moment (#230) is held until ZOH's latest text fits it, with the simulated tester answering from the case's
+   facts meanwhile, and a case whose line never fits is a "case problem", not graded (see `eval/cases/README.md`).
 4. **Grade.** A separate Claude call sees only the transcript (with local times and the tester's
    area code), the feature's approved checks (the rubric in `eval/features.ts`, copied from the
    spec's "Should" list) and the whole voice page (`docs/coach-voice.md`), read at run time. It scores each ZOH text per rule and the conversation as a whole, as structured

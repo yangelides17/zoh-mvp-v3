@@ -169,7 +169,8 @@ async function main() {
 
   console.log(`\nGrading with ${graderModelName}...`);
 
-  const grading: GradeResult = await gradeRun(graderModel, answerKey, snapshotMap);
+  const startDate = report.startDate ? new Date(`${report.startDate}T00:00:00Z`) : undefined;
+  const grading: GradeResult = await gradeRun(graderModel, answerKey, snapshotMap, startDate);
   const gradingSpend = dollarsFor(grading.usage, graderModelName);
 
   // Check cost caps
@@ -202,8 +203,8 @@ async function main() {
         probeScore: c.probeScore,
         nearDuplicates: c.nearDuplicates,
         error: c.error,
-        mustHold: c.mustHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, contradicted: v.contradicted, reasoning: v.reasoning })),
-        mustNotHold: c.mustNotHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, contradicted: v.contradicted, reasoning: v.reasoning })),
+        mustHold: c.mustHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, decided: v.decided, passed: v.passed, contradicted: v.contradicted, reasoning: v.reasoning })),
+        mustNotHold: c.mustNotHold.map((v) => ({ id: v.id, present: v.present, evidence: v.evidence, decided: v.decided, passed: v.passed, contradicted: v.contradicted, reasoning: v.reasoning })),
         probes: c.probes.map((v) => ({ id: v.id, correct: v.correct, reasoning: v.reasoning })),
       })),
     },

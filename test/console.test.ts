@@ -603,6 +603,32 @@ describe("#106: compact header and side tab rail", () => {
   });
 });
 
+describe("editing a tester's name", () => {
+  it("shows a name box under More and saves the name where the coach reads it", async () => {
+    const s = await seed(ME, "Sam");
+    await t.db.update(testers).set({ name: null }).where(eq(testers.id, s.tester.id));
+    const page = (await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body;
+    expect(page).toContain(`action="/console/testers/${s.tester.id}/name"`);
+    expect(page).toContain("<h1>Unnamed</h1>");
+
+    const res = await post(`/console/testers/${s.tester.id}/name`, { name: "  Alex  " }, cookieFor("Yanni"));
+    expect(res.statusCode).toBe(303);
+    const [row] = await t.db.select().from(testers).where(eq(testers.id, s.tester.id));
+    expect(row!.name).toBe("Alex");
+    expect((await get(`/console/testers/${s.tester.id}`, cookieFor("Yanni"))).body).toContain("<h1>Alex</h1>");
+  });
+
+  it("leaves the name alone when the box is blank or too long, and needs a login", async () => {
+    const s = await seed(ME, "Sam");
+    expect((await post(`/console/testers/${s.tester.id}/name`, { name: "Alex" })).statusCode).toBe(401);
+    for (const name of ["   ", "x".repeat(61)]) {
+      expect((await post(`/console/testers/${s.tester.id}/name`, { name }, cookieFor("Yanni"))).statusCode).toBe(400);
+    }
+    const [row] = await t.db.select().from(testers).where(eq(testers.id, s.tester.id));
+    expect(row!.name).toBe("Sam");
+  });
+});
+
 describe("#107: pauses in the step log", () => {
   const progressOf = async (id: string) => (await get(`/console/testers/${id}?tab=progress`, cookieFor("Yanni"))).body;
   const goalNumbers = (page: string) => page.slice(page.indexOf('id="goals"'), page.indexOf('id="learnings"')).match(/<b>[^<]*<\/b>/g);

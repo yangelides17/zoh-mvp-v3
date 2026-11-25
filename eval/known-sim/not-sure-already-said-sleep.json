@@ -1,0 +1,52 @@
+{
+  "id": "not-sure-already-said-sleep",
+  "why": "The tester's own last text already said sleeping better would be huge; the optional line is skipped as said or dropped as passed, which send the same nothing.",
+  "case": "onboarding/not-sure",
+  "line": 4,
+  "expect": [
+    "said",
+    "passed"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "Start"
+    },
+    {
+      "from": "zoh",
+      "text": "Hey, I'm ZOH, your texting coach! I'll help you get better at one thing with one small step a day. Text \"stop\" anytime, and you can change how I coach whenever you want, just say \"chill out\" or \"push me harder.\"\n\nWhat's your name, and what are you looking to work on?\n\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together"
+    },
+    {
+      "from": "tester",
+      "text": "Jordan. honestly not sure"
+    },
+    {
+      "from": "zoh",
+      "text": "That's fine, Jordan, we'll figure it out together. What do you do for work, or what fills most of your days?"
+    },
+    {
+      "from": "tester",
+      "text": "I'm a nurse, I work night shifts"
+    },
+    {
+      "from": "zoh",
+      "text": "Night shifts, respect. What do you do to unwind or have fun when you're off the clock?"
+    },
+    {
+      "from": "tester",
+      "text": "cards and poker with the crew on breaks, and I used to read a lot before nights"
+    },
+    {
+      "from": "zoh",
+      "text": "Cards on breaks, and you used to read a lot before nights, I like that. What pulled you away from reading once the night shifts started?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly nights just wiped me out. by the time i'm off i'm too tired to focus on a book. sleeping better would be huge tbh"
+    },
+    {
+      "from": "zoh",
+      "text": "Sleep it is, Jordan, and for a night nurse that's a big one. When you get home after a shift, what usually happens between walking in the door and falling asleep?"
+    }
+  ]
+}

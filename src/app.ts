@@ -61,7 +61,7 @@ export async function buildApp(deps: AppDeps): Promise<BuiltApp> {
   app.get("/", async () => ({ name: "zoh-mvp-v3", ok: true }));
   await app.register(healthRoutes, health);
   await app.register(webhookRoutes, { webhookSecret: deps.webhookSecret, pipeline, queue, jumper: deps.jumper?.(app.log) });
-  await app.register(consoleRoutes, { names: [], ...deps.console, routing: routingOf(pipeline), build: pipeline.build, db: pipeline.db, media: pipeline.media, chat: deps.consoleCoach, queue, now: pipeline.now });
+  await app.register(consoleRoutes, { names: [], ...deps.console, routing: routingOf(pipeline), build: pipeline.build, db: pipeline.db, media: pipeline.media, sendblue: pipeline.sendblue, chat: deps.consoleCoach, queue, now: pipeline.now });
 
   return { app, queue };
 }

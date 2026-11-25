@@ -108,7 +108,7 @@ describe("set_today_step", () => {
     const before = await block(at(WED, "09:00"));
     // #199: the sheet states it isn't set; when to pick it is TODAY'S STEP's.
     expect(before).toContain("Today's step: not set yet (the plan's step applies until it is).");
-    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
+    expect(TODAYS_STEP).toContain("Today's: the first time you talk about today");
     expect(dayStep((await allPlans())[0]!, await row(WED)).step).toBe("1 min easy jog, 2 min walk, 3 rounds around the block");
 
     expect(await tool("set_today_step", { kind: "same", step: TODAY_STEP }, at(WED, "09:00"))).toMatchObject({ ok: true });

@@ -32,7 +32,10 @@
     ],
     "takeaways": [{ "days_ago": 3, "text": "A follow-up about what they just said keeps a conversation going", "evidence": "explained" }]
   },
-  "testerLines": ["advance to 09:05", "yeah ok I'm in"],
+  "testerLines": [
+    "advance to 09:05",
+    { "say": "yeah ok I'm in", "when": "after ZOH's morning kickoff gives today's step and asks if they're in", "fixed": true, "expected": true }
+  ],
   "whatWentWrong": "New case, not a past mistake: lessons should be put to use again a few days later.",
   "shouldHaveHappened": "The morning kickoff gives today's step fully defined (who or where, at lunch around 12:30, about how long) and builds in the follow-up lesson from three days ago, since yesterday's chat died after two minutes (for example: talk to the new guy again and ask a follow-up about whatever he says). It reads as coaching, not a quiz, and asks one thing (are they in). After \"yeah ok I'm in\" ZOH answers in a short line without restating the step.",
   "startTime": "08:50",

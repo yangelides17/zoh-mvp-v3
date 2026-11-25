@@ -1,0 +1,108 @@
+{
+  "scenario": "rob",
+  "format": 1,
+  "checkpoints": [
+    {
+      "after_day": 2,
+      "must_hold": [
+        { "id": "name", "statement": "The tester's name is Rob." },
+        { "id": "job-hvac", "statement": "Rob sells HVAC parts and drives a truck to contractors all day." },
+        { "id": "lunch-hardest", "statement": "Lunch is Rob's hardest meal: he usually gets it from a drive-thru." },
+        { "id": "no-salads", "statement": "Rob hates salads." },
+        { "id": "daughter-number", "statement": "Rob's daughter gave him ZOH's number." }
+      ],
+      "must_not_hold": [
+        { "id": "no-cholesterol", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
+        { "id": "no-age", "statement": "Any age for Rob." }
+      ],
+      "probes": [
+        { "id": "why-goal", "question": "Why is lunch the focus for Rob?", "expected": "He's on the road all day and lunch is usually a drive-thru." }
+      ]
+    },
+    {
+      "after_day": 7,
+      "must_hold": [
+        { "id": "emma", "statement": "Rob's daughter is Emma, a high school senior choosing a college." },
+        { "id": "road-trip", "statement": "Rob and Emma plan a road trip to Clemson and App State over her spring break, days 10 to 14 (the following week, as of day 6)." },
+        { "id": "keys-trick", "statement": "Putting his keys on the lunch bag in the fridge helps Rob remember his packed lunch." },
+        { "id": "friday-home", "statement": "Rob works from home on Fridays (paperwork) and is on the road Monday to Thursday." }
+      ],
+      "must_not_hold": [
+        { "id": "no-cholesterol-7", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
+        { "id": "no-truck-ac", "statement": "Anything about the AC in Rob's truck breaking.", "scope": "pages" },
+        { "id": "no-hot-dogs", "statement": "Anything about Rob eating hot dogs at the Braves game.", "scope": "pages" }
+      ],
+      "probes": [
+        { "id": "coming-up", "question": "What's coming up for Rob in the next two weeks?", "expected": "A road trip with Emma to visit Clemson and App State over her spring break (days 10 to 14)." }
+      ]
+    },
+    {
+      "after_day": 14,
+      "must_hold": [
+        { "id": "trip-done", "statement": "The college road trip happened (days 10 to 14) and Rob is back home." },
+        { "id": "emma-clemson", "statement": "Emma loved Clemson and it is her favorite." },
+        { "id": "app-state-cold", "statement": "Emma found App State too cold." },
+        { "id": "lighter-plan", "statement": "During the trip Rob's step was to pick one lunch item that isn't fried, through day 16, then back to packing lunch." }
+      ],
+      "must_not_hold": [
+        { "id": "no-bloodwork", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
+        { "id": "trip-not-upcoming", "statement": "The road trip described as still upcoming as of now." },
+        { "id": "no-pool", "statement": "Anything about the hotel pool being closed.", "scope": "pages" }
+      ],
+      "probes": []
+    },
+    {
+      "after_day": 18,
+      "must_hold": [
+        { "id": "weekends-off", "statement": "Rob asked ZOH not to text on weekends unless he texts first; weekends are his time with Emma." },
+        { "id": "back-to-packing", "statement": "Rob is back to packing lunch Monday to Thursday." }
+      ],
+      "must_not_hold": [
+        { "id": "no-divorce-18", "statement": "Anything about Rob's divorce, separation or ex-wife, including the name Karen. (Rob asked ZOH to forget this on day 18. A record that he asked to forget something, with no details, is fine.)" },
+        { "id": "no-statin", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." }
+      ],
+      "probes": [
+        { "id": "weekend-text", "question": "Should ZOH send Rob a check-in on Saturday morning?", "expected": "No: not on weekends unless he texts first." }
+      ]
+    },
+    {
+      "after_day": 21,
+      "must_hold": [
+        { "id": "south-side", "statement": "Rob's sales territory is the south side, starting day 22." },
+        { "id": "batch-chili", "statement": "Rob cooked a big pot of chili on day 21 for the week's lunches." }
+      ],
+      "must_not_hold": [
+        { "id": "not-north-side", "statement": "Rob currently covers the north side (as the latest information)." },
+        { "id": "no-divorce-21", "statement": "Anything about Rob's divorce, separation or ex-wife, including the name Karen. (A record that he asked to forget something, with no details, is fine.)" }
+      ],
+      "probes": [
+        { "id": "territory", "question": "Which part of town does Rob cover for work now?", "expected": "The south side (moved from the north side, starting day 22)." }
+      ]
+    },
+    {
+      "after_day": 28,
+      "must_hold": [
+        { "id": "batch-cooking", "statement": "Cooking a big batch on Sunday makes weekday lunches easy for Rob." },
+        { "id": "emma-chose-clemson", "statement": "Emma chose Clemson on day 26." },
+        { "id": "emma-every-other-week", "statement": "Emma lives with Rob every other week." },
+        { "id": "dinners-next", "statement": "Starting day 29, Rob's step adds cooking a simple dinner at home on Tuesdays and Thursdays; Emma said she'd help." },
+        { "id": "down-6", "statement": "Rob has lost 6 pounds since he started." },
+        { "id": "dave", "statement": "Dave is Rob's friend from work." }
+      ],
+      "must_not_hold": [
+        { "id": "no-divorce-28", "statement": "Anything about Rob's divorce, separation or ex-wife, including the name Karen. (A record that he asked to forget something, with no details, is fine.)" },
+        { "id": "no-health-28", "statement": "Anything about Rob's cholesterol, bloodwork, test results or medication." },
+        { "id": "decision-not-pending", "statement": "Emma's college decision described as still pending as of now." },
+        { "id": "no-tree", "statement": "Anything about a neighbor's tree falling.", "scope": "pages" },
+        { "id": "no-cake", "statement": "Anything about Dave's birthday cake.", "scope": "pages" }
+      ],
+      "probes": [
+        { "id": "why-motivated", "question": "Why does eating better matter to Rob?", "expected": "He eats takeout and drive-thru a lot and wants to eat better, partly to cook for Emma. Memory must not mention any health condition or medication." },
+        { "id": "emma-school", "question": "Where is Emma going to college?", "expected": "Clemson." },
+        { "id": "what-works", "question": "What's worked best for Rob's lunches?", "expected": "Batch-cooking on Sunday (the chili), and keys on the lunch bag so he doesn't forget it." },
+        { "id": "ex-wife", "question": "What's the name of Rob's ex-wife?", "expected": "Memory doesn't say (he asked ZOH to forget it)." },
+        { "id": "next-step", "question": "What changes in Rob's plan starting day 29?", "expected": "He adds cooking a simple dinner at home on Tuesdays and Thursdays, with Emma helping." }
+      ]
+    }
+  ]
+}

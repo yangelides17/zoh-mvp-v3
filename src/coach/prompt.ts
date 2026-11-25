@@ -1,5 +1,6 @@
 import type { Plan, PlanQuestion, StepDayStatus, Suggestion, Weekday } from "../db/schema.js";
 import { addDays, isStepDay, nextStepDay, serviceDate, weekdayOf } from "../nudges/schedule.js";
+import { guidanceRef } from "../coaching/guidance.js";
 import { requestRef } from "../console/requests.js";
 import { approvedKind, approvedProposal, awaitingAnswer, checkinOwed, readyToRaise, suggestionRef } from "./next-steps.js";
 import { dayStep, insideQuietHours, isDefaultQuietHours, localDate, localTime, PLAN_FIELDS, REFLECTION_LITTLE_BACK, REFLECTION_SAFETY_NET, type CoachState, type ReflectionClose } from "./state.js";
@@ -22,34 +23,42 @@ import { evidenceText, type WeekLookback } from "./week.js";
 // #201: core and voice raised for weighing their idea and no assumptions in questions (a line each, with reasons),
 // and the voice's "make it harder" example made a contrasting pair.
 // #160: voice +100 for what they did and noticed beside how it felt, in Proof's reflection line.
+// #164/#165 (Yanni, Nov 18: prioritize it working, lean, trim later in #231): todaysStep +980 for how any step is
+// chosen (five practices, each with its reason) and the near goal it heads toward, which has to live here because
+// plan agreement isn't loaded after lock; plan +240 for the destination as a near goal; nextStep +80 for pointing
+// to TODAY'S STEP and the obstacle; weekLookback +130 for weighing the destination each week, before the next step, saved once they agree.
 export const PROMPT_BUDGET_CHARS = {
   core: 5280,
   onboarding: 3700,
   examples: 800,
   /** The voice page without its rule sections. #211: +150 for why ZOH reflects (Proof). */
   voice: 26_900,
-  tools: 2800,
+  // #158: +60 for their style request beating team guidance, naming the line it overrides.
+  tools: 2860,
   // #163: +50 for the new proof kinds (document, a 1-2 min video) and writing's two ways in the plan's example.
   // #200: plan, nudges and next steps split where they mix moments; each pair's budgets add up to the old one.
   // #201 review: +160 for rest days where the step needs recovery (Yanni, Nov 16).
-  plan: 4230,
+  plan: 4470,
   planChange: 590,
   nudges: 1872,
   nudgeReplies: 708,
   // #211: the next step's lines left proof for their own section (loaded once a reflection lands); +560 between
   // them for what to go deeper on, when it has landed and a rushed tester leaving with the next step; +10 each for
   // the pointers that now name it.
-  todaysStep: 1900,
+  todaysStep: 2880,
   proof: 3600,
-  nextStep: 560,
-  weekLookback: 2400,
+  nextStep: 640,
+  weekLookback: 2530,
   // #196: +30 for two phrases merged in from the voice page's copy, which went.
   nextSteps: 1250,
   // #211: +10 for "once today's talk has landed".
   nextStepsTeam: 800,
   // #214: +30 for the team text carrying a founder's next step or plan change, not only a request.
-  team: 750,
+  // #169: +100 for the team question line (ask once, listen, never chase).
+  // #158: +50 for guidance alongside notes: where it applies, never the topic of a text.
+  team: 900,
   memory: 1350,
+  memoryV2: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
 /** The page's voice and rule sections, read once when this module loads at startup (a broken page stops the app). */
@@ -73,12 +82,14 @@ export const NEXT_STEPS = [PAGE.rules.nextSteps, PAGE.rules.nextStepsTeam].join(
 export const TEAM = PAGE.rules.team;
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = PAGE.rules.memory;
+/** #253: v2 memory rules, used instead of MEMORY for v2 testers. */
+export const MEMORY_V2 = PAGE.rules.memoryV2;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
  * Keep it in sync with the page.
  */
-export const CORE_VOICE = `You are ZOH, a texting coach (iMessage). What you're for: most people have something they want, and the friction between wanting it and doing it stops them. You turn it into one small step a day and keep them taking it until they're making real progress, as the friend who knows they're capable, wakes them up when they drift and won't let them slip. You speak from belief, never judgment, with big warm energy by default (Pushy level): real enthusiasm about their goal and what they do ("Let's go!"), and real interest in what they tell you, never polite neutrality.
+export const CORE_VOICE = `You are ZOH, a texting coach (iMessage). What you're for: most people have something they want, and the friction between wanting it and doing it stops them. You turn it into one small step a day and keep them taking it until they're making real progress, as the friend who knows they're capable, wakes them up when they drift and won't let them slip. You speak from belief, never judgment, with big warm energy by default: real enthusiasm about their goal and what they do ("Let's go!"), and real interest in what they tell you, never polite neutrality.
 When values pull apart, the earlier wins: 1) their wellbeing and trust (nobody can be coached once they stop replying); 2) understanding them, never at the cost of their time; 3) their direction is their call; 4) holding them to their word: one response on why it matters, then their call; 5) the process, which bends, except proof for a check mark and a clear yes to lock a plan. When nothing below fits a moment, do what serves this.
 
 How you ask (curious by default: understand, then prescribe):
@@ -132,7 +143,7 @@ Then:
 - Save an answer only once it's concrete enough to plan ("when" = a time of day; don't ask which days, the plan settles that. "how long" = minutes, "what" = the actual activity). A loose answer counts ("25 min or 20 pages"). Partial or vague ("whenever", "mornings", "yea" to an either/or): ask once more, kindly, saying why (a set time makes it stick) and offering a choice ("which works better, 5:30 or 6?"), never correcting them; if still vague, save a sensible default and say they can change it.
 - Reality check: if what they want doesn't fit the time or resources they've said they have, say so and agree something realistic before saving. No gear: offer a version that works with what they have.
 - Goal questions get a one-line answer, off-topic a short light one, then the next open question.
-- Never ask how pushy to be.
+- Never ask how hard to push.
 - No recap or plan talk until the state says onboarding just finished. Then, in that same text, carry straight on into PLAN AGREEMENT with no recap (a first text's intro still comes first): ask the next thing the plan needs without saying you have everything, or bridge into the plan and save it with propose_plan.`;
 
 /** A handful of model exchanges; every other example lives in eval/cases. */
@@ -238,10 +249,11 @@ export function partsFor(s: CoachState, reach: Reach = {}): Part[] {
  * #200: the instructions after onboarding, as two cached blocks: the core, the same for every reply in a phase
  * (memory's rules once the plan is locked), then the parts this reply loads, each with its voice section first.
  */
-export function instructionsFor(phase: "planning" | "active", parts: readonly Part[], voice: string = PAGE.voice): { core: string; moments: string } {
+export function instructionsFor(phase: "planning" | "active", parts: readonly Part[], voice: string = PAGE.voice, memoryVersion?: string): { core: string; moments: string } {
   const sections = voiceSections(voice);
   const coreVoice = sections.filter((v) => !PART_HEADINGS.has(v.heading)).map((v) => v.text).join("\n\n");
-  const core = [FULL_VOICE_INTRO, `VOICE PAGE\n${coreVoice}`, TOOL_RULES, TEAM, ...(phase === "active" ? [MEMORY] : [])].join("\n\n");
+  const memoryRules = memoryVersion === "v2" ? MEMORY_V2 : MEMORY;
+  const core = [FULL_VOICE_INTRO, `VOICE PAGE\n${coreVoice}`, TOOL_RULES, TEAM, ...(phase === "active" ? [memoryRules] : [])].join("\n\n");
   const loaded = parts.flatMap((p) => {
     const { heading, rule } = PART_SOURCES[p];
     return [...sections.filter((v) => heading && v.heading === heading).map((v) => v.text), ...(rule ? [PAGE.rules[rule]] : [])];
@@ -301,7 +313,7 @@ export function moments(s: CoachState): Moment[] {
       m.push("Next steps and maintenance");
     }
   }
-  if (s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length) m.push("The team");
+  if (s.guidance.length || s.teamNotes.length || s.teamRequests.length || s.teamRequestsDone.length || s.teamQuestions.length) m.push("The team");
   // Paused or stopped: the guidance for both is in the saving rules, read in every phase (onboarding too).
   if (s.pause || s.stopped) m.push("Saving, style and requests");
   return m;
@@ -439,7 +451,8 @@ function themLines(s: CoachState): string[] {
   const moved = q.start !== t.quietHoursStart || q.end !== t.quietHoursEnd;
   const whose = t.quietHoursChosen ? " (they chose these)" : moved ? ` (today's, moved to fit the step; usually ${usual})` : isDefaultQuietHours(t) ? " (default)" : "";
   lines.push(`Quiet hours: ${q.start} to ${q.end}${whose}`);
-  lines.push(`Style notes: ${t.styleNotes || "none"}`);
+  // V2 testers have style notes in Coaching entries instead of here.
+  if (t.memoryVersion !== "v2") lines.push(`Style notes: ${t.styleNotes || "none"}`);
   // #75: "something_else" is the hidden off-list route; "Not sure?" isn't a goal, it opens the get-to-know-you chat.
   const listed = s.goals.filter((g) => g.slug !== OFF_LIST_SLUG).map((g) => `• ${g.title}`);
   lines.push(`Goal list:\n${[...listed, `• ${NOT_SURE_LINE}`].join("\n")}`);
@@ -642,10 +655,19 @@ function weekProgress(w: WeekLookback, plan: Plan, which: string): string[] {
 function threadLines(s: CoachState, plan: Plan | undefined): string[] {
   const lines: string[] = [];
   const day = (at: Date) => new Intl.DateTimeFormat("en-US", { timeZone: s.tester.timeZone, month: "short", day: "numeric" }).format(at);
+  if (s.guidance.length) {
+    const g = s.guidance.map((x) => `- [${guidanceRef(x.id)}] ${x.text}${x.overriddenBy ? ` (overridden: they asked "${x.overriddenBy}", which wins)` : ""}`);
+    lines.push(`FROM THE TEAM, guidance (lasting, how to coach them where it applies):\n${g.join("\n")}`);
+  }
   if (s.teamNotes.length) lines.push(`FROM THE TEAM, notes:\n${s.teamNotes.map((n) => `- ${day(n.createdAt)}: ${n.body}`).join("\n")}`);
   const carriedId = s.carry && "requestId" in s.carry ? s.carry.requestId : undefined;
   if (!s.nudgeMoment) {
-    for (const r of s.teamRequests.filter((x) => x.id !== carriedId)) lines.push(`FROM THE TEAM, request [${requestRef(r.id)}], not done yet: ${r.body}`);
+    for (const r of s.teamRequests.filter((x) => x.id !== carriedId)) lines.push(`FROM THE TEAM, ${r.question ? "question" : "request"} [${requestRef(r.id)}], not done yet: ${r.body}`);
+    // #169: asked once; the answer is listened for, never chased.
+    for (const q of s.teamQuestions) {
+      const past = q.answerStatus === "dodged" ? ", they talked past it" : "";
+      lines.push(`FROM THE TEAM, question [${requestRef(q.id)}] you already asked ${day(q.doneAt!)}${past}, the team waiting on their answer (the team's note: ${q.body}). Their answer, or talking past it → record_team_answer.`);
+    }
   }
   if (!plan) return lines;
 
@@ -709,5 +731,22 @@ export function buildStateBlock(s: CoachState): string {
     ...(plan ? [...todayLines(s, plan), ...recentLines(s, plan), ...weekLines(s, plan)] : []),
     ...threadLines(s, plan),
     ...statusLines(s),
+    ...openItemLines(s),
   ].join("\n");
+}
+
+/** #253: v2 open dated items (todo, event, followup), overdue first then by date. */
+function openItemLines(s: CoachState): string[] {
+  if (s.openItems.length === 0) return [];
+  const sorted = [...s.openItems].sort((a, b) => {
+    const aOverdue = a.when < s.today;
+    const bOverdue = b.when < s.today;
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    return a.when.localeCompare(b.when);
+  });
+  const lines = sorted.map((i) => {
+    const overdue = i.when < s.today ? " OVERDUE" : "";
+    return `- [${i.type}] ${i.text} (${i.when}${overdue}) on ${i.pagePath} — ${i.ref}`;
+  });
+  return [`Items still open:\n${lines.join("\n")}`];
 }

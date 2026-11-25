@@ -15,6 +15,7 @@ import {
   plans,
   PROOF_METHODS,
   stepDays,
+  ANSWER_STATUSES,
   SUGGESTION_KINDS,
   suggestions,
   TAKEAWAY_EVIDENCE,
@@ -30,7 +31,7 @@ import {
 } from "../db/schema.js";
 import { alertFeedback, alertRestart, raiseAlert, saveFlag } from "../console/alerts.js";
 import { endPause, startPause } from "../testers/pauses.js";
-import { closeRequest, doneLine, findRequest } from "../console/requests.js";
+import { claimRequest, findRequest, recordAnswer } from "../console/requests.js";
 import { alertAnswer } from "../console/suggestions.js";
 import { optOut } from "../testers/commands.js";
 import { goalMetrics, setFocusGoal } from "../testers/goals.js";
@@ -47,7 +48,7 @@ import {
   suggestionRef,
 } from "./next-steps.js";
 import { onTesterClock } from "../testers/clock.js";
-import { updateTester } from "../testers/testers.js";
+import { NAME_MAX, updateTester } from "../testers/testers.js";
 import { addDays, CHECKIN_LEAD_MS, isStepDay, LOOKBACK_KIND, nextStepDay, onItCounts, quietOn, stepInstant, weekdayOf } from "../nudges/schedule.js";
 import { withDaySteps } from "../nudges/quiet.js";
 import { dayStep, describeDays, insideQuietHours, loadDaySummary, localDate, PLAN_FIELDS, PLAN_KEYS, type CoachState } from "./state.js";
@@ -78,7 +79,7 @@ const planFields = {
 };
 
 const schemas = {
-  save_name: z.object({ name: text(60) }).strict(),
+  save_name: z.object({ name: text(NAME_MAX) }).strict(),
   choose_goal: z
     .object({
       slug: text(40),
@@ -174,6 +175,7 @@ const schemas = {
   save_takeaway: z.object({ text: text(200), evidence: z.enum(TAKEAWAY_EVIDENCE) }).strict(),
   record_week_recap: z.object({}).strict(),
   mark_request_done: z.object({ request: text(40) }).strict(),
+  record_team_answer: z.object({ question: text(40), outcome: z.enum(ANSWER_STATUSES), answer: optionalText(500) }).strict(),
 };
 
 export type ToolName = keyof typeof schemas;
@@ -474,11 +476,21 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
     description: "A FROM THE TEAM request (by its id) that this text carries. Call it in the reply that does it, never before.",
     input_schema: { type: "object", properties: { request: { type: "string" } }, required: ["request"] },
   },
+  {
+    name: "record_team_answer",
+    description:
+      "The team is waiting on a FROM THE TEAM question you already asked: in the reply to their text about it, answered (answer: theirs, close to their words) or dodged (they talked past it).",
+    input_schema: {
+      type: "object",
+      properties: { question: { type: "string" }, outcome: { type: "string", enum: [...ANSWER_STATUSES] }, answer: { type: "string" } },
+      required: ["question", "outcome"],
+    },
+  },
 ];
 
 function planProperties(): Record<string, unknown> {
   return {
-    destination: { type: "string", description: 'Where they\'re headed, if they have somewhere ("run a mile without stopping by Nov 14"); empty removes it' },
+    destination: { type: "string", description: 'Where they\'re headed: a near goal, about 3 to 7 steps out ("jog 5 minutes without stopping by Sunday"); empty removes it' },
     setup_step: { type: "string", description: "One-time step for day 1, only when it helps" },
     step: { type: "string", description: "Day 1's step: what, how much, where when it matters, specific enough to just do it" },
     place: { type: "string" },
@@ -1151,8 +1163,20 @@ export async function runTool(db: Db, state: CoachState, name: string, rawInput:
       const { request: ref } = input as z.infer<typeof schemas.mark_request_done>;
       const found = findRequest(state.teamRequests, ref);
       if (!found) return { ok: false, error: `No open team request ${ref}.` };
-      await closeRequest(db, { request: found, status: "done", at, line: doneLine(found.body, "in a reply", at) });
+      // #169: held for this reply ("sending"); it closes once the reply is sent, and goes back if it isn't.
+      if (!(await claimRequest(db, found.id, at))) return { ok: false, error: `No open team request ${ref}.` };
       return saved(tester, "Marked done. Nothing has been sent yet: your text to them now answers what they said and carries it.");
+    }
+
+    case "record_team_answer": {
+      const { question: ref, outcome, answer } = input as z.infer<typeof schemas.record_team_answer>;
+      const found = findRequest(state.teamQuestions, ref);
+      if (!found) return { ok: false, error: `No team question ${ref} waiting for an answer.` };
+      if (outcome === "answered" && !answer) return { ok: false, error: "answered needs answer: theirs, close to their words." };
+      if (!(await recordAnswer(db, { question: found, status: outcome, ...(outcome === "answered" ? { answer } : {}), name: tester.name, at }))) {
+        return { ok: false, error: `Team question ${ref} is already answered: nothing more to record.` };
+      }
+      return saved(tester, outcome === "answered" ? "Recorded for the team. Your text answers them as usual." : "Recorded; don't ask it again.");
     }
   }
 }

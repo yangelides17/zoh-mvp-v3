@@ -35,7 +35,16 @@
       { "days_ago": 4, "text": "Prep your one line the night before", "evidence": "explained" }
     ]
   },
-  "testerLines": ["advance to 18:01", "meh, felt like a slow week", "ok"],
+  "testerLines": [
+    "advance to 18:01",
+    { "say": "meh, felt like a slow week", "means": "the week felt slow", "when": "after ZOH's recap asks its question (about the week or what to push on next)", "length": "thin", "expected": true },
+    { "say": "ok", "when": "after ZOH proposes Monday's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "Monday's standup is at 10 am as usual",
+    "the prepped line helped because you weren't scrambling for words",
+    "leading a meeting still feels far off"
+  ],
   "whatWentWrong": "New case, not a past mistake: a recap must never inflate a thin week.",
   "shouldHaveHappened": "The 6 pm recap is honest: it names what she actually did (spoke up twice in standup, prepped a line the night before and it helped) as progress made, and treats prepping the line as starting to click, not as something she's mastered or 'can do now'. No claims like 'you've got this down' or 'you can speak up confidently now', no 'couldn't before' framing, no guilt about the misses. Where she stands vs. leading a meeting by the end of the month, lightly. One question. When she says it felt slow, ZOH is warm and specific (two real wins, and the prep trick), then the week talk lands on Monday's step fully defined (e.g. prep one line Sunday night, say it in Monday's 10 am standup, voice note after) and asks if it works.",
   "startTime": "17:00",

@@ -33,7 +33,7 @@
   },
   "testerLines": [
     "[document lighthouse-scene-4.pages: Theo set the ledger down on the counter and didn't open it. Mara kept the second chair.] done!",
-    "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]"
+    { "say": "oh ok, here [document lighthouse-scene-4.pdf: Theo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\"]", "when": "after ZOH says it can't open the Pages file and asks for a PDF, a screenshot or a voice note", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "New case, not a past mistake: ZOH can't open Apple Pages files.",
   "shouldHaveHappened": "ZOH says plainly it can't open a Pages file and asks for a PDF (Share, Export, PDF), a screenshot or a voice note; it never reacts to the scene as if it read it, and it doesn't count it yet. When the PDF comes, it counts it and reacts to something specific in the scene (the second chair), then asks one question. It never asks them to paste it.",

@@ -4,7 +4,7 @@ import { stillOpen } from "../../coach/next-steps.js";
 import { messageTime } from "../../memory/store.js";
 import type { ConsoleTab, SideSection, ThreadItem } from "../data.js";
 import { draftRef } from "../drafts.js";
-import { APP_AUTHOR, awaitingAnswer } from "../requests.js";
+import { APP_AUTHOR, awaitingAnswer, LISTEN_DAYS } from "../requests.js";
 import { alertCard, clock, dayLabel, esc, founderDay, proofHtml, suggestionCard, when } from "./shared.js";
 
 /**
@@ -19,7 +19,20 @@ export interface ThreadContext {
   now: Date;
 }
 
-const REQUEST_STATUS_LABELS: Record<string, string> = { pending: "pending", sending: "going out now", sent: "sent", done: "done", cancelled: "cancelled" };
+/**
+ * #168: where something the founders sent stands: queued → going out now → sent → delivered (Sendblue's report on the
+ * text that carried it) → answered (#169, a question), or didn't send / cancelled.
+ */
+export function deliveryLabel(m: ConsoleMessage, delivery?: string | null): string {
+  const status = m.requestStatus ?? "pending";
+  if (status === "pending") return "queued";
+  if (status === "sending") return "going out now";
+  if (status === "cancelled") return "cancelled";
+  if (m.answerStatus === "answered") return "answered";
+  const d = (delivery ?? "").toUpperCase();
+  if (["ERROR", "DECLINED", "SEND_FAILED"].includes(d)) return "didn't send";
+  return d === "DELIVERED" || d === "READ" ? "delivered" : "sent";
+}
 const DRAFT_STATUS_LABELS: Record<string, string> = { draft: "draft: nothing happens until you confirm", confirmed: "done", cancelled: "cancelled", failed: "not done" };
 
 /** Day dividers in front of the first item and wherever the day changes; the page drops repeats at chunk edges. */
@@ -35,12 +48,17 @@ function withDividers<T>(list: T[], at: (item: T) => Date, render: (item: T) => 
     .join("");
 }
 
-function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
+function lineHtml(m: ConsoleMessage, ctx: ThreadContext, delivery?: string | null): string {
   const id = `data-id="${esc(m.id)}"`;
   const time = esc(clock(m.createdAt));
   switch (m.kind) {
-    case "founder":
-      return `<div class="msg me" ${id}><div class="bubble">${esc(m.body)}</div><div class="meta">${esc(m.author)} · ${time}</div></div>`;
+    case "founder": {
+      // #168: a file they attached, openable from here.
+      const file = m.mediaKey
+        ? `<a class="file-chip" href="/console/testers/${esc(ctx.testerId)}/files/${esc(m.id)}" target="_blank" rel="noopener">📎 <span>${esc(m.mediaName ?? "file")}</span></a>`
+        : "";
+      return `<div class="msg me" ${id}><div class="bubble">${file}${file && m.body ? "<br>" : ""}${esc(m.body)}</div><div class="meta">${esc(m.author)} · ${time}</div></div>`;
+    }
     case "coach":
       if (m.author === APP_AUTHOR) return `<div class="event app" ${id}>${esc(m.body)} · ${time}</div>`;
       return `<div class="msg them" ${id}><div class="bubble">${esc(m.body)}</div><div class="meta">ZOH · ${time}</div></div>`;
@@ -53,18 +71,36 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
           ? `<form class="inline" method="post" action="/console/testers/${esc(ctx.testerId)}/requests/${esc(m.id)}/cancel"><button class="small">Cancel</button></form>`
           : "";
       const how = m.exact ? "word for word" : m.delivery === "own_text" ? "its own text" : m.delivery === "morning" ? "with the morning text" : "for the coach to bring up";
-      const chips = [how, m.sendNow && "even in quiet hours", REQUEST_STATUS_LABELS[status]].filter(Boolean);
+      const label = deliveryLabel(m, delivery);
+      const file = m.mediaName && `with "${m.mediaName}"`;
+      const chips = [m.question && (m.alertOnAnswer ? "question · alert on answer" : "question"), how, file, m.sendNow && "even in quiet hours", label].filter(Boolean);
+      // #169: what came of the question.
+      const answer =
+        m.answerStatus === "answered" ? `<div><b>Answer:</b> ${esc(m.answer ?? "")}</div>` : m.answerStatus === "dodged" ? `<div class="muted">They talked past it; ZOH won't ask again.</div>` : "";
       const timing = [m.dueAt && `${m.delivery === "own_text" ? "at" : "not before"} ${when(m.dueAt)}`, m.expiresAt && `dropped if not out by ${when(m.expiresAt)}`].filter(Boolean);
-      return `<div class="event" ${id}><div class="head">${chips.map((c) => `<span class="chip${c === "pending" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)} · ${time}</span></div>
-<div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${cancel}</div>`;
+      return `<div class="event" ${id}><div class="head">${chips.map((c) => `<span class="chip${c === "queued" || c === "didn't send" ? " warn" : ""}">${esc(c)}</span>`).join("")}<span class="muted">from ${esc(m.author)} · ${time}</span></div>
+<div>${esc(m.body)}</div>${timing.length ? `<div class="muted">${timing.map(esc).join(" · ")}</div>` : ""}${m.doneAt && status !== "pending" ? `<div class="muted">${esc(status)} ${esc(when(m.doneAt))}</div>` : ""}${answer}${cancel}</div>`;
     }
     case "draft": {
       // #155: what the console chat would do, until a founder confirms it.
       const status = m.draftStatus ?? "draft";
       const base = `/console/testers/${esc(ctx.testerId)}/drafts/${esc(m.id)}`;
+      // #169: a question's answer alert, switched before Do it.
+      const input = (m.draftInput ?? {}) as { question?: boolean; alert_on_answer?: boolean };
+      const alertOn = input.alert_on_answer !== false;
+      const answerAlert =
+        m.draftAction === "plan_request" && input.question
+          ? `<form class="inline" method="post" action="${base}/answer-alert"><input type="hidden" name="on" value="${alertOn ? "false" : "true"}"><button class="small" title="Switch the alert for their answer">${alertOn ? "Alert me when they answer: on" : "Alert me when they answer: off"}</button></form>`
+          : "";
+      // #168: the words on a text or request card can be edited right here; anything else, tell ZOH.
+      const words = editableWords(m);
+      const change =
+        words === undefined
+          ? `<label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label>`
+          : `<details class="edit"><summary class="small link">Change</summary><form method="post" action="${base}/edit"><textarea name="text" maxlength="1000" rows="3" required>${esc(words)}</textarea><div class="row"><button class="primary small">Save</button><span class="muted small">or tell ZOH what to change</span></div></form></details>`;
       const actions =
         status === "draft"
-          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form><label class="small link" for="chat-text" title="Tell ZOH what to change">Change</label><form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form></div>`
+          ? `<div class="row" style="margin-top:6px"><form class="inline" method="post" action="${base}/confirm"><button class="primary small">Do it</button></form>${change}<form class="inline" method="post" action="${base}/cancel"><button class="small">Cancel</button></form>${answerAlert}</div>`
           : "";
       const result = m.draftResult && status !== "draft" ? `<div class="muted">${esc(m.draftResult)}</div>` : "";
       // #214: named by its own ref ("draft [ab12cd34]"), apart from the request or next step it makes once done.
@@ -83,7 +119,10 @@ function lineHtml(m: ConsoleMessage, ctx: ThreadContext): string {
 function isLive(i: ThreadItem): boolean {
   if (i.type === "suggestion") return stillOpen(i.suggestion);
   if (i.line.kind === "draft") return i.line.draftStatus === "draft";
-  return i.line.kind === "request" && (i.line.requestStatus === "pending" || i.line.requestStatus === "sending");
+  if (i.line.kind !== "request") return false;
+  if (i.line.requestStatus === "pending" || i.line.requestStatus === "sending") return true;
+  // #169/#168: once it's out, its answer and delivery still come in (as long as ZOH listens for an answer).
+  return !!i.line.doneAt && Date.now() - i.line.doneAt.getTime() < LISTEN_DAYS * 86_400_000;
 }
 
 /**
@@ -91,7 +130,7 @@ function isLive(i: ThreadItem): boolean {
  * say so: the page swaps a card in place when its signature changes (#105).
  */
 export function itemHtml(i: ThreadItem, ctx: ThreadContext): string {
-  const html = i.type === "line" ? lineHtml(i.line, ctx) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true });
+  const html = i.type === "line" ? lineHtml(i.line, ctx, i.delivery) : suggestionCard(i.suggestion, ctx.testerId, ctx.titles, { id: true });
   if (i.type === "line" && i.line.kind !== "request" && i.line.kind !== "draft") return html;
   return html.replace("<div ", `<div data-sig="${cardSig(html)}"${isLive(i) ? " data-live" : ""} `);
 }
@@ -190,8 +229,11 @@ export function consoleTabHtml(tab: ConsoleTab, tester: Tester, ctx: ThreadConte
   const stopped = tester.stoppedAt ? `<p class="muted warn">They texted stop: you can still ask about them, but nothing is sent.</p>` : "";
   return `<section id="chat">${scroller("thread", threadItemsHtml(tab.items, ctx), { before, after, empty: "Nothing yet: ask ZOH about them below." })}
 <div class="typing" id="thinking">${thinkingLabel(thinking)}</div>
-<form method="post" action="/console/testers/${esc(tester.id)}/chat">${stopped}
-<div class="composer"><textarea id="chat-text" name="text" maxlength="2000" rows="1" required placeholder="Ask ZOH, give context, or tell it what to do: it drafts, you confirm"></textarea><button class="primary">Send</button></div></form></section>
+<form id="chat-form" method="post" action="/console/testers/${esc(tester.id)}/chat" enctype="multipart/form-data">${stopped}
+<div class="composer" id="composer"><label class="attach" title="Attach a file (photo, video or document, up to 100 MB), or drop one on the chat" aria-label="Attach a file">+<input type="file" id="chat-file" name="file" hidden></label>
+<div class="composer-main"><div class="file-chip" id="chat-chip" hidden><span id="chat-chip-name"></span><button type="button" class="link small" id="chat-chip-clear" aria-label="Remove the file">×</button></div>
+<textarea id="chat-text" name="text" maxlength="2000" rows="1" placeholder="Ask ZOH, give context, or tell it what to do: it drafts, you confirm (Enter sends, Shift+Enter for a new line)"></textarea></div>
+<button class="primary send" aria-label="Send">↑</button></div></form></section>
 ${side}`;
 }
 
@@ -205,4 +247,12 @@ export function textsTabHtml(texts: Message[], tester: Tester, now: Date, chunk:
   const missing = opts.missing ? `<p class="muted warn" style="margin:8px 4px">Couldn't find that text in the chat.</p>` : "";
   return `<section id="texts">${missing}${scroller("texts", textItemsHtml(texts, now, opts.target), { before, after, empty: "No texts yet." })}
 <p class="muted" style="margin:8px 4px">Their texts on the left, ZOH's on the right. Times are Eastern.</p></section>`;
+}
+
+/** #168: the words a draft card can edit in place: a word-for-word text, or what ZOH brings up. */
+export function editableWords(draft: Pick<ConsoleMessage, "draftAction" | "draftInput">): string | undefined {
+  const input = (draft.draftInput ?? {}) as { words?: unknown; what?: unknown };
+  if (draft.draftAction === "send_text" && typeof input.words === "string") return input.words;
+  if (draft.draftAction === "plan_request" && typeof input.what === "string") return input.what;
+  return undefined;
 }

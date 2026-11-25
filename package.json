@@ -1,6 +1,6 @@
 {
   "name": "zoh-mvp-v3",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "ZOH MVP v3: text-based coach over iMessage (Sendblue + Claude)",
   "type": "module",
@@ -19,8 +19,10 @@
     "db:migrate": "node dist/db/migrate-cli.js",
     "eval": "tsx eval/run.ts",
     "grader-check": "tsx eval/grader-check.ts",
+    "sim-check": "tsx eval/sim-check.ts",
     "real": "tsx eval/real.ts",
     "memory": "tsx src/memory/show-cli.ts",
+    "memory:rebuild": "tsx src/memory/rebuild-cli.ts",
     "load-scenario": "tsx src/synthetic/load-cli.ts",
     "lab:replay": "tsx eval/memory-lab/replay-cli.ts",
     "lab:grade": "tsx eval/memory-lab/grade-cli.ts",
@@ -29,6 +31,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
     "@aws-sdk/client-s3": "^3.1156.0",
+    "@fastify/multipart": "^9.4.0",
     "@google/genai": "^3.3.0",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.7",

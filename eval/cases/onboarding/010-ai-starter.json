@@ -5,9 +5,15 @@
   "testerLines": [
     "Start",
     "Priya. put AI to work for me",
-    "I'm a project manager at a construction company, drowning in meeting notes and status emails",
-    "honestly I've barely used ChatGPT, maybe twice",
-    "weekday mornings around 9:30 after standup, like 15 min"
+    { "say": "I'm a project manager at a construction company, drowning in meeting notes and status emails", "means": "project manager at a construction company, buried in meeting notes and status emails", "when": "after ZOH asks about her work or what she'd like AI to help with", "length": "short", "expected": true },
+    { "say": "honestly I've barely used ChatGPT, maybe twice", "means": "has barely used ChatGPT, maybe twice", "when": "after ZOH asks what she's tried with AI or how much she's used it", "length": "short", "optional": true },
+    { "say": "weekday mornings around 9:30 after standup, like 15 min", "means": "weekday mornings around 9:30 after standup, about 15 minutes", "when": "after ZOH asks when or how long she'd spend on it", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "you're a project manager at a construction company",
+    "meeting notes and status emails take hours of your week",
+    "you've used ChatGPT maybe twice, for nothing serious",
+    "you work on a laptop at the office"
   ],
   "whatWentWrong": "New case, not a past mistake: the AI starter.",
   "shouldHaveHappened": "After Priya picks the AI starter, ZOH asks about her (her work, the tasks she'd like to hand off, what she's tried with AI) one question per text before suggesting any first step, each question following from what she just said. It never asks something her answers already covered (her job, that she's barely used it, her time and minutes) and never grills her like a form. It doesn't push a paid app or product she didn't ask about, invents no features or links, and once what, when and how long are covered it moves toward a plan without re-asking them.",

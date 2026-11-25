@@ -68,7 +68,6 @@ export type NewMessage = typeof messages.$inferInsert;
 export const TESTER_PHASES = ["onboarding", "planning", "active"] as const;
 export const TIME_ZONE_STATUSES = ["assumed_eastern", "needs_city", "confirmed"] as const;
 export const DEFAULT_QUIET_HOURS = { start: "22:00", end: "09:00" } as const;
-export const DEFAULT_PUSHINESS = "pushy";
 
 /** One row per person who texts from an allowed number. */
 export const testers = pgTable(
@@ -93,7 +92,8 @@ export const testers = pgTable(
     quietHoursChosen: boolean("quiet_hours_chosen").notNull().default(false),
     /** #48: the step time ZOH last asked about moving chosen quiet hours for ("HH:MM"), so it asks once per time. */
     quietHoursAskedFor: text("quiet_hours_asked_for"),
-    pushiness: text("pushiness").notNull().default(DEFAULT_PUSHINESS),
+    /** Unused since #158 (push levels removed); kept one release so a running older deploy can still read it, then dropped. */
+    pushiness: text("pushiness").notNull().default("pushy"),
     /** What they've asked of the coach's style ("fewer emojis"). */
     styleNotes: text("style_notes").notNull().default(""),
     /** Dev accounts (DEV_NUMBERS): can text "reset". */
@@ -116,6 +116,10 @@ export const testers = pgTable(
     route: text("route", { enum: ["production", "staging"] }).notNull().default("production"),
     /** Synthetic testers (#142): the fixture scenario name; null for real testers. */
     scenario: text("scenario"),
+    /** #250: which memory version writes for this tester; the coach still reads v1 (part A). */
+    memoryVersion: text("memory_version").notNull().default("v1"),
+    /** #250: the last local day the v2 nightly pass has written; separate from memoryThrough so both track independently. */
+    memoryV2Through: date("memory_v2_through", { mode: "string" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -123,6 +127,7 @@ export const testers = pgTable(
     check("testers_phase_check", sql`${t.phase} in ('onboarding', 'planning', 'active')`),
     check("testers_time_zone_status_check", sql`${t.timeZoneStatus} in ('assumed_eastern', 'needs_city', 'confirmed')`),
     check("testers_route_check", sql`${t.route} in ('production', 'staging')`),
+    check("testers_memory_version_check", sql`${t.memoryVersion} in ('v1', 'v2')`),
   ],
 );
 
@@ -389,6 +394,9 @@ export type ConsoleKind = (typeof CONSOLE_KINDS)[number];
 export const REQUEST_STATUSES = ["pending", "sending", "sent", "done", "cancelled"] as const;
 /** #155: what the console chat proposes to do for a founder, until one confirms it. */
 export const DRAFT_STATUSES = ["draft", "confirmed", "cancelled", "failed"] as const;
+/** #169: what came of a team question ZOH asked: their answer, or they talked past it. */
+export const ANSWER_STATUSES = ["answered", "dodged"] as const;
+export type AnswerStatus = (typeof ANSWER_STATUSES)[number];
 export type DraftStatus = (typeof DRAFT_STATUSES)[number];
 
 /**
@@ -439,6 +447,24 @@ export const consoleMessages = pgTable(
     draftStatus: text("draft_status", { enum: DRAFT_STATUSES }),
     /** Drafts: what doing it did, or why it couldn't. */
     draftResult: text("draft_result"),
+    /** Requests (#169): a question for the tester, whose answer comes back to the founders. */
+    question: boolean("question").notNull().default(false),
+    /** Requests (#169): raise an alert when they answer, talk past it, or don't answer in a day. */
+    alertOnAnswer: boolean("alert_on_answer").notNull().default(true),
+    /** Requests (#169): their answer, close to their words, or (dodged) what they said instead. */
+    answer: text("answer"),
+    answerStatus: text("answer_status", { enum: ANSWER_STATUSES }),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    /** #168: a file the founders attached (their line, and the request it became), in the private bucket. */
+    mediaKey: text("media_key"),
+    mediaContentType: text("media_content_type"),
+    mediaName: text("media_name"),
+    /** #168: what the file shows or says, read once when it's attached (for the console coach). */
+    mediaAccount: text("media_account"),
+    /** #168: a video longer than ZOH watches: only its start was watched. */
+    mediaPartial: boolean("media_partial").notNull().default(false),
+    /** #168: the file on Sendblue's media host, uploaded at Do it, sent with the text. */
+    sendblueMediaUrl: text("sendblue_media_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -447,8 +473,58 @@ export const consoleMessages = pgTable(
     check("console_messages_request_status_check", sql`${t.requestStatus} in ('pending', 'sending', 'sent', 'done', 'cancelled')`),
     check("console_messages_draft_status_check", sql`${t.draftStatus} in ('draft', 'confirmed', 'cancelled', 'failed')`),
     check("console_messages_delivery_check", sql`${t.delivery} in ('natural', 'morning', 'own_text')`),
+    check("console_messages_answer_status_check", sql`${t.answerStatus} in ('answered', 'dodged')`),
   ],
 );
+
+/**
+ * #158: the team's lasting guidance on how to coach one tester ("more curious with her"). The coach reads every
+ * line on every text, never quotes it, and their own request beats it. Changes only when a founder edits it.
+ */
+export const coachingGuidance = pgTable("coaching_guidance", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  testerId: uuid("tester_id")
+    .notNull()
+    .references(() => testers.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  /** The founder who wrote or last edited it. */
+  author: text("author").notNull(),
+  /** Their own request that overrides it ("chill out"), saved by the coach; cleared when a founder edits the line. */
+  overriddenBy: text("overridden_by"),
+  overriddenAt: timestamp("overridden_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type CoachingGuidance = typeof coachingGuidance.$inferSelect;
+
+export const COACHING_AREAS = ["guidance", "style", "learned"] as const;
+export const COACHING_ACTIONS = ["add", "edit", "remove", "clear"] as const;
+
+/** #158: every change to how one tester is coached (guidance, their style requests, learned preferences), and who made it. */
+export const coachingChanges = pgTable(
+  "coaching_changes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    area: text("area", { enum: COACHING_AREAS }).notNull(),
+    action: text("action", { enum: COACHING_ACTIONS }).notNull(),
+    from: text("from"),
+    to: text("to"),
+    /** A founder's name, "tester" or "ZOH". */
+    by: text("by").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("coaching_changes_tester_at_idx").on(t.testerId, t.at),
+    check("coaching_changes_area_check", sql`${t.area} in ('guidance', 'style', 'learned')`),
+    check("coaching_changes_action_check", sql`${t.action} in ('add', 'edit', 'remove', 'clear')`),
+  ],
+);
+
+export type CoachingChange = typeof coachingChanges.$inferSelect;
 
 /** Things for the founders to look at later (e.g. an off-list goal). Saved only; nobody is notified. */
 export const flags = pgTable(
@@ -758,6 +834,202 @@ export const memoryForgotten = pgTable(
   (t) => [unique("memory_forgotten_unique").on(t.testerId, t.messageId)],
 );
 
+// --- Memory v2 tables (#250) ---
+
+export const MEMORY_V2_PAGE_KINDS = ["root", "coaching", "people", "places", "area", "project", "goal", "person", "place"] as const;
+export type MemoryV2PageKind = (typeof MEMORY_V2_PAGE_KINDS)[number];
+export const MEMORY_V2_PAGE_STATUSES = ["active", "paused", "done", "past"] as const;
+export type MemoryV2PageStatus = (typeof MEMORY_V2_PAGE_STATUSES)[number];
+
+/**
+ * #250: the v2 memory tree. At most 3 tiers (0-2). Root, Coaching, People and Places are required
+ * (one each per tester, created by code). Person pages sit under People, place pages under Places,
+ * goal pages under an area. The tree is the only structure code walks.
+ */
+export const memoryV2Pages = pgTable(
+  "memory_v2_pages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    parentId: uuid("parent_id").references((): AnyPgColumn => memoryV2Pages.id, { onDelete: "cascade" }),
+    tier: integer("tier").notNull(),
+    kind: text("kind", { enum: MEMORY_V2_PAGE_KINDS }).notNull(),
+    title: text("title").notNull(),
+    /** Alternate names (Ana / Anna, Marc / Marco). */
+    otherNames: text("other_names").array().notNull().default(sql`'{}'::text[]`),
+    /** 1 to 3 sentences, permanent facts only. */
+    about: text("about").notNull().default(""),
+    status: text("status", { enum: MEMORY_V2_PAGE_STATUSES }).notNull().default("active"),
+    /** Goal pages only; references the tracker goal. */
+    goalSlug: text("goal_slug").references(() => goals.slug),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("memory_v2_pages_tester_idx").on(t.testerId),
+    // Exactly one root per tester
+    uniqueIndex("memory_v2_pages_one_root_idx").on(t.testerId).where(sql`${t.kind} = 'root'`),
+    // Exactly one coaching per tester
+    uniqueIndex("memory_v2_pages_one_coaching_idx").on(t.testerId).where(sql`${t.kind} = 'coaching'`),
+    // Exactly one people per tester
+    uniqueIndex("memory_v2_pages_one_people_idx").on(t.testerId).where(sql`${t.kind} = 'people'`),
+    // Exactly one places per tester
+    uniqueIndex("memory_v2_pages_one_places_idx").on(t.testerId).where(sql`${t.kind} = 'places'`),
+    // One goal page per tester and goal
+    uniqueIndex("memory_v2_pages_one_goal_idx").on(t.testerId, t.goalSlug).where(sql`${t.kind} = 'goal'`),
+    check("memory_v2_pages_kind_check", sql`${t.kind} in ('root', 'coaching', 'people', 'places', 'area', 'project', 'goal', 'person', 'place')`),
+    check("memory_v2_pages_status_check", sql`${t.status} in ('active', 'paused', 'done', 'past')`),
+    check("memory_v2_pages_tier_check", sql`${t.tier} >= 0 and ${t.tier} <= 2`),
+    // Root has no parent; everyone else does
+    check("memory_v2_pages_parent_check", sql`(${t.kind} = 'root' and ${t.parentId} is null) or (${t.kind} != 'root' and ${t.parentId} is not null)`),
+  ],
+);
+
+export const MEMORY_V2_ENTRY_TYPES = ["fact", "note", "unsure", "todo", "event", "followup"] as const;
+export type MemoryV2EntryType = (typeof MEMORY_V2_ENTRY_TYPES)[number];
+export const MEMORY_V2_ENTRY_STATUSES = ["current", "expired", "open", "done", "dropped"] as const;
+export type MemoryV2EntryStatus = (typeof MEMORY_V2_ENTRY_STATUSES)[number];
+export const MEMORY_V2_ORIGINS = ["stated", "inferred"] as const;
+export type MemoryV2Origin = (typeof MEMORY_V2_ORIGINS)[number];
+
+/**
+ * #250: typed entries on v2 pages. Six types with status and optional dates.
+ * A changed fact is a new entry that replaces the old one (replaces_id); corrections edit in place.
+ */
+export const memoryV2Entries = pgTable(
+  "memory_v2_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    pageId: uuid("page_id")
+      .notNull()
+      .references(() => memoryV2Pages.id, { onDelete: "cascade" }),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    type: text("type", { enum: MEMORY_V2_ENTRY_TYPES }).notNull(),
+    status: text("status", { enum: MEMORY_V2_ENTRY_STATUSES }).notNull(),
+    text: text("text").notNull(),
+    detail: text("detail"),
+    /** Required for todo, event, followup. */
+    when: date("when", { mode: "string" }),
+    /** The date the fact was true as of. */
+    asOf: date("as_of", { mode: "string" }),
+    origin: text("origin", { enum: MEMORY_V2_ORIGINS }).notNull().default("stated"),
+    /** The tester's own text this came from (required). */
+    sourceMessageId: uuid("source_message_id")
+      .notNull()
+      .references(() => messages.id, { onDelete: "set null" }),
+    /** The entry this one replaced (the world changed). */
+    replacesId: uuid("replaces_id").references((): AnyPgColumn => memoryV2Entries.id, { onDelete: "set null" }),
+    /** The tester's local date this was learned. */
+    learnedOn: date("learned_on", { mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("memory_v2_entries_page_idx").on(t.pageId),
+    index("memory_v2_entries_tester_idx").on(t.testerId),
+    check("memory_v2_entries_type_check", sql`${t.type} in ('fact', 'note', 'unsure', 'todo', 'event', 'followup')`),
+    check("memory_v2_entries_status_check", sql`${t.status} in ('current', 'expired', 'open', 'done', 'dropped')`),
+    // Valid type/status pairs: fact/note/unsure → current|expired; todo/event/followup → open|done|dropped
+    check(
+      "memory_v2_entries_type_status_check",
+      sql`(${t.type} in ('fact', 'note', 'unsure') and ${t.status} in ('current', 'expired'))
+          or (${t.type} in ('todo', 'event', 'followup') and ${t.status} in ('open', 'done', 'dropped'))`,
+    ),
+    // Dated types require a when
+    check(
+      "memory_v2_entries_when_check",
+      sql`${t.type} in ('fact', 'note', 'unsure') or ${t.when} is not null`,
+    ),
+    check("memory_v2_entries_origin_check", sql`${t.origin} in ('stated', 'inferred')`),
+  ],
+);
+
+/** #250: people linked to an entry (person pages, never locations). */
+export const memoryV2EntryPeople = pgTable(
+  "memory_v2_entry_people",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entryId: uuid("entry_id")
+      .notNull()
+      .references(() => memoryV2Entries.id, { onDelete: "cascade" }),
+    pageId: uuid("page_id")
+      .notNull()
+      .references(() => memoryV2Pages.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    unique("memory_v2_entry_people_unique").on(t.entryId, t.pageId),
+    index("memory_v2_entry_people_entry_idx").on(t.entryId),
+  ],
+);
+
+export const MEMORY_V2_LINK_KINDS = ["related", "leads_to"] as const;
+export type MemoryV2LinkKind = (typeof MEMORY_V2_LINK_KINDS)[number];
+
+/** #250: hint links between v2 pages. Shown to the model, never followed by code. */
+export const memoryV2Links = pgTable(
+  "memory_v2_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    fromPageId: uuid("from_page_id")
+      .notNull()
+      .references(() => memoryV2Pages.id, { onDelete: "cascade" }),
+    toPageId: uuid("to_page_id")
+      .notNull()
+      .references(() => memoryV2Pages.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: MEMORY_V2_LINK_KINDS }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("memory_v2_links_unique").on(t.fromPageId, t.toPageId, t.kind),
+    check("memory_v2_links_kind_check", sql`${t.kind} in ('related', 'leads_to')`),
+  ],
+);
+
+/**
+ * #250: one daily summary per tester and local date. A log beside the tree (decision 7).
+ * Forget rewrites any summary whose day included a forgotten message.
+ */
+export const memoryV2Daily = pgTable(
+  "memory_v2_daily",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    date: date("date", { mode: "string" }).notNull(),
+    summary: text("summary").notNull(),
+    /** All message IDs from that day, filled by code (for forget to find affected summaries). */
+    sourceMessageIds: text("source_message_ids").array().notNull().default(sql`'{}'::text[]`),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("memory_v2_daily_tester_date_unique").on(t.testerId, t.date),
+    index("memory_v2_daily_tester_idx").on(t.testerId),
+  ],
+);
+
+/**
+ * #250: topics a tester asked to forget. The sensitive check reads these so a forgotten
+ * topic is never refiled when it comes up again. Never shown to the coach, never rendered.
+ */
+export const memoryV2ForgetTopics = pgTable(
+  "memory_v2_forget_topics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    testerId: uuid("tester_id")
+      .notNull()
+      .references(() => testers.id, { onDelete: "cascade" }),
+    topic: text("topic").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("memory_v2_forget_topics_tester_idx").on(t.testerId)],
+);
+
 /**
  * Test mode (#14): each "jump" a dev account texted. The jump text is never a message (a ghost);
  * this is its record, and its Sendblue handle keeps a retried webhook from jumping twice.
@@ -797,4 +1069,8 @@ export type TesterGoal = typeof testerGoals.$inferSelect;
 export type MaintenanceCheckin = typeof maintenanceCheckins.$inferSelect;
 export type Suggestion = typeof suggestions.$inferSelect;
 export type ConsoleMessage = typeof consoleMessages.$inferSelect;
+export type MemoryV2Page = typeof memoryV2Pages.$inferSelect;
+export type MemoryV2Entry = typeof memoryV2Entries.$inferSelect;
+export type MemoryV2Link = typeof memoryV2Links.$inferSelect;
+export type MemoryV2Daily = typeof memoryV2Daily.$inferSelect;
 export type Jump = typeof jumps.$inferSelect;

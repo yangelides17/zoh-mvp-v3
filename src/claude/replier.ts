@@ -46,6 +46,8 @@ export interface ReplyInput {
   onActivity?: (kind: WebActivity) => void;
   /** #162: told each search, page and video as it finishes (a line on what it asked and found), for the record. */
   onLookup?: (line: string) => void;
+  /** #169: team requests earlier drafts of this reply claimed (dropped before sending): this text still carries them. */
+  carrying?: readonly string[];
 }
 
 /** #162: what ZOH is doing that takes a while: searching, reading a page, watching a video. */

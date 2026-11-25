@@ -1,0 +1,35 @@
+{
+  "id": "plan-asked-for-a-number",
+  "why": "ZOH asked what number feels doable; 'looks good' only fits once ZOH shows the plan and asks.",
+  "case": "plan/quiet-hours-unexplained",
+  "line": 3,
+  "expect": [
+    "wait"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "I think I should be done eating for the day around 11pm because usually I like to have a late night snack every day"
+    },
+    {
+      "from": "zoh",
+      "text": "Late-night snack counts, Yanni, so we'll log it too and the 160 g reflects your real day. How many minutes a day can you give to logging and checking your protein, 5, 10, or something else?"
+    },
+    {
+      "from": "tester",
+      "text": "like 5 minutes"
+    },
+    {
+      "from": "zoh",
+      "text": "Late-night snack counts, Yanni, so we're logging it and the 160 g reflects your real day. Here's the plan:\n\n• Where you're headed: hit 160 g protein 5 days in a row by Sunday\n• Day 1 (tonight): log everything in MyFitnessPal, snack included, and check your protein total against 160 g\n• When: 11 pm every day, about 5 minutes. I'll still reach you at 10:50 pm with a heads-up.\n• Proof: a screenshot of your MyFitnessPal daily protein total. A photo of the screen works too.\n• Why: the screenshot shows the number, so we both see how close you got.\n\nEach day's result shapes the next step. If you come up short on protein, we'll figure out where to add some. What do you think?"
+    },
+    {
+      "from": "tester",
+      "text": "not sure about 160 g yet, i just want to hit it most days"
+    },
+    {
+      "from": "zoh",
+      "text": "Fair, Yanni, and \"most days\" is a solid way to build this. What number feels doable to you? Or tell me roughly what you weigh and we can set a starting point from that."
+    }
+  ]
+}

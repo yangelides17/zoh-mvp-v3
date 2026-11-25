@@ -27,7 +27,7 @@
   },
   "testerLines": [
     "can you pause for a while, I'm just not feeling it",
-    "nah I really want a break",
+    { "say": "nah I really want a break", "means": "still wants a break, not a smaller step", "when": "after ZOH pushes back or offers a smaller step instead of a pause", "length": "thin", "expected": true },
     "advance to 21:59"
   ],
   "whatWentWrong": "New case, not a past mistake: the weak-reason pause path.",

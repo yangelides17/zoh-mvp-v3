@@ -22,7 +22,7 @@ import { takeSnapshot, stripForGrader, saveSnapshot } from "../eval/memory-lab/s
 import { runChecks } from "../eval/memory-lab/checks.js";
 import { estimateRunCost, saveSpend, PER_RUN_CAP, COMMAND_CAP, type RunSpend } from "../eval/memory-lab/cost.js";
 import { answerKeySchema } from "../eval/memory-lab/keys/schema.js";
-import { gradeRun, normalizeForMatch, type CheckpointScore } from "../eval/memory-lab/grader.js";
+import { gradeRun, normalizeForMatch, buildDayTable, type CheckpointScore } from "../eval/memory-lab/grader.js";
 import type { AnswerKey } from "../eval/memory-lab/keys/schema.js";
 import { FakeClaudeModel, makeDb } from "./helpers.js";
 import { writeDay } from "../src/memory/keeper.js";
@@ -634,8 +634,8 @@ describe("report assertion details (#150)", () => {
       mustNotHoldScore: 1,
       probeScore: 0.5,
       nearDuplicates: [] as string[],
-      mustHold: [{ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" }],
-      mustNotHold: [{ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" }],
+      mustHold: [{ id: "mh-1", present: "yes", evidence: "some quote", decided: "present", passed: true, contradicted: false, reasoning: "Fact is present" }],
+      mustNotHold: [{ id: "mnh-1", present: "no", evidence: "none", decided: "absent", passed: true, contradicted: false, reasoning: "Not in memory" }],
       probes: [{ id: "p-1", correct: true, reasoning: "Answer matches" }],
     };
 
@@ -662,11 +662,11 @@ describe("report assertion details (#150)", () => {
 
     // mustHold array with id, present, evidence, contradicted, reasoning
     expect(cp.mustHold).toHaveLength(1);
-    expect(cp.mustHold[0]).toEqual({ id: "mh-1", present: "yes", evidence: "some quote", contradicted: false, reasoning: "Fact is present" });
+    expect(cp.mustHold[0]).toEqual({ id: "mh-1", present: "yes", evidence: "some quote", decided: "present", passed: true, contradicted: false, reasoning: "Fact is present" });
 
-    // mustNotHold array with id, present, evidence, contradicted, reasoning
+    // mustNotHold array with id, present, evidence, decided, passed, contradicted, reasoning
     expect(cp.mustNotHold).toHaveLength(1);
-    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", present: "no", evidence: "none", contradicted: false, reasoning: "Not in memory" });
+    expect(cp.mustNotHold[0]).toEqual({ id: "mnh-1", present: "no", evidence: "none", decided: "absent", passed: true, contradicted: false, reasoning: "Not in memory" });
 
     // probes array with id, correct, reasoning
     expect(cp.probes).toHaveLength(1);
@@ -919,6 +919,193 @@ describe("grader evidence-based verdicts (#152)", () => {
     expect(normalizeForMatch("it\u2019s  a   test")).toBe("it's a test");
     expect(normalizeForMatch("  UPPER  case  ")).toBe("upper case");
   });
+
+  it("normalizeForMatch drops backslashes so escaped quotes match unescaped ones", () => {
+    const raw = `Used to run in college, "kinda"; been a while.`;
+    const escaped = `Used to run in college, \\"kinda\\"; been a while.`;
+    expect(normalizeForMatch(escaped)).toBe(normalizeForMatch(raw));
+    // Also matches when the memory text itself has the backslashes
+    const memoryWithBackslash = JSON.stringify({ text: raw });
+    expect(normalizeForMatch(memoryWithBackslash)).toContain(normalizeForMatch(raw));
+  });
+
+  it("must_hold verdict includes decided and passed fields", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found it", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustHold[0]!.decided).toBe("present");
+    expect(cp.mustHold[0]!.passed).toBe(true);
+  });
+
+  it("must_not_hold absent verdict has decided 'absent' and passed true", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-1", reasoning: "not found", present: "no", evidence: "none" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-1", statement: "Tester has a cat" }]);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.decided).toBe("absent");
+    expect(cp.mustNotHold[0]!.passed).toBe(true);
+  });
+
+  it("must_not_hold present verdict has decided 'present' and passed false", async () => {
+    const dogFact = "neighbor has a large golden retriever named Buddy";
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mnh-dog", reasoning: "found it", present: "yes", evidence: dogFact }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([], [{ id: "mnh-dog", statement: "Memory mentions neighbor's dog" }]);
+    const snaps = new Map([[7, makeSnapshot([dogFact])]]);
+    const result = await gradeRun(model, key, snaps);
+
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.decided).toBe("present");
+    expect(cp.mustNotHold[0]!.passed).toBe(false);
+  });
+
+  it("grader prompt uses (as of now) / (currently) rule instead of blanket past-event filter", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key = makeAnswerKey([{ id: "mh-1", statement: "Tester likes running" }], []);
+    const snaps = new Map([[7, makeSnapshot(["likes running"])]]);
+    await gradeRun(model, key, snaps);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).toContain("(as of now)");
+    expect(prompt).toContain("(currently)");
+    expect(prompt).toContain("presented as current");
+    // The old blanket rule should be gone
+    expect(prompt).not.toContain("current fact");
+  });
+});
+
+// ---- Grader: scope: "pages" ----
+
+describe("grader scope: pages", () => {
+  /** Build a snapshot with a daily page (kind "daily") and a self page. */
+  function makeSnapshotWithDaily(dailyFacts: string[], pageFacts: string[]) {
+    const now = new Date();
+    const dailyPage = { id: "p-daily", testerId: "t1", kind: "daily" as const, title: "Day 7", summary: "", body: "", goalSlug: null, status: "active" as const, date: "2026-11-08", createdAt: now, updatedAt: now };
+    const selfPage = { id: "p-self", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now };
+    return {
+      snapshot: {
+        pages: [selfPage, dailyPage],
+        facts: [
+          ...pageFacts.map((text, i) => ({
+            id: `fp${i}`, pageId: "p-self", testerId: "t1", section: "", label: null,
+            text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+          })),
+          ...dailyFacts.map((text, i) => ({
+            id: `fd${i}`, pageId: "p-daily", testerId: "t1", section: "", label: null,
+            text, sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now,
+          })),
+        ],
+        links: [],
+        forgotten: [],
+      },
+      rendered: [...pageFacts, ...dailyFacts].join("\n"),
+    };
+  }
+
+  it("dog in daily summary only: scope 'pages' must_not_hold passes; daily text not in scoped prompt", async () => {
+    const model = new FakeClaudeModel();
+    // The scoped batch only sees pages (no daily), so model says "no"
+    model.script(JSON.stringify({
+      verdicts: [{ id: "unscoped-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+    model.script(JSON.stringify({
+      verdicts: [{ id: "no-dog", reasoning: "not found in pages", present: "no", evidence: "none" }],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "unscoped-1", statement: "Tester likes running" }],
+        must_not_hold: [{ id: "no-dog", statement: "Anything about a neighbor's dog.", scope: "pages" }],
+        probes: [],
+      }],
+    };
+    const snaps = new Map([[7, makeSnapshotWithDaily(
+      ["neighbor's dog was barking all morning"],  // daily only
+      ["likes running"],                           // on a page
+    )]]);
+
+    const result = await gradeRun(model, key, snaps);
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.passed).toBe(true);
+    expect(cp.mustNotHold[0]!.present).toBe("no");
+
+    // The scoped batch (second call) must not contain the daily-only text
+    expect(model.requests.length).toBe(2);
+    const scopedPrompt = model.requests[1]!.messages[0]!.content as string;
+    expect(scopedPrompt).not.toContain("neighbor's dog was barking");
+    // But the unscoped batch (first call) should still have it
+    const unscopedPrompt = model.requests[0]!.messages[0]!.content as string;
+    expect(unscopedPrompt).toContain("neighbor's dog was barking");
+  });
+
+  it("dog on a page: scope 'pages' must_not_hold fails", async () => {
+    const model = new FakeClaudeModel();
+    // Unscoped batch
+    model.script(JSON.stringify({
+      verdicts: [{ id: "unscoped-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+    // Scoped batch: model sees the dog on a page and says yes with evidence
+    model.script(JSON.stringify({
+      verdicts: [{ id: "no-dog", reasoning: "found on page", present: "yes", evidence: "neighbor's dog was barking all morning" }],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "unscoped-1", statement: "Tester likes running" }],
+        must_not_hold: [{ id: "no-dog", statement: "Anything about a neighbor's dog.", scope: "pages" }],
+        probes: [],
+      }],
+    };
+    const snaps = new Map([[7, makeSnapshotWithDaily(
+      [],                                                 // nothing in daily
+      ["likes running", "neighbor's dog was barking all morning"],  // dog on a page
+    )]]);
+
+    const result = await gradeRun(model, key, snaps);
+    const cp = result.checkpoints[0]!;
+    expect(cp.mustNotHold[0]!.passed).toBe(false);
+    expect(cp.mustNotHold[0]!.present).toBe("yes");
+  });
+
+  it("answer keys with scope: pages validate", () => {
+    for (const file of ["sam.json", "maya.json", "rob.json"]) {
+      const raw = fs.readFileSync(path.resolve(import.meta.dirname, `../eval/memory-lab/keys/${file}`), "utf-8");
+      const result = answerKeySchema.safeParse(JSON.parse(raw));
+      expect(result.success, `${file} validation failed`).toBe(true);
+    }
+  });
 });
 
 // ---- Grader: per-checkpoint error isolation ----
@@ -1071,5 +1258,157 @@ describe("snapshot sourceText (#152)", () => {
     for (const f of stripped.facts) {
       expect(f.sourceText).toBeNull();
     }
+  });
+});
+
+// ---- Day-to-date table ----
+
+describe("grader day-to-date table", () => {
+  it("buildDayTable produces correct mapping", () => {
+    const start = new Date("2025-10-06T00:00:00Z"); // Monday
+    const table = buildDayTable(start, 28);
+    expect(table).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(table).toContain("day 7 = 2025-10-12 (Sun)");
+    expect(table).toContain("day 14 = 2025-10-19 (Sun)");
+    expect(table).toContain("day 21 = 2025-10-26 (Sun)");
+    expect(table).toContain("day 28 = 2025-11-02 (Sun)");
+  });
+
+  it("buildDayTable includes throughDay even when not a milestone", () => {
+    const start = new Date("2025-10-06T00:00:00Z");
+    const table = buildDayTable(start, 10);
+    expect(table).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(table).toContain("day 7 = 2025-10-12 (Sun)");
+    expect(table).toContain("day 10 = 2025-10-15 (Wed)");
+    // 14 should not appear since throughDay is 10
+    expect(table).not.toContain("day 14");
+  });
+
+  it("grader prompt includes day-to-date table when startDate is provided", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "mh-1", statement: "Tester likes running" }],
+        must_not_hold: [],
+        probes: [],
+      }],
+    };
+    const now = new Date();
+    const snaps = new Map([[7, {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: [{ id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "likes running", sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now }],
+        links: [],
+        forgotten: [],
+      },
+      rendered: "likes running",
+    }]]);
+
+    const startDate = new Date("2025-10-06T00:00:00Z");
+    await gradeRun(model, key, snaps, startDate);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).toContain("Day-to-date reference:");
+    expect(prompt).toContain("day 1 = 2025-10-06 (Mon)");
+    expect(prompt).toContain("day 7 = 2025-10-12 (Sun)");
+  });
+
+  it("grader prompt omits day-to-date table when startDate is not provided", async () => {
+    const model = new FakeClaudeModel();
+    model.script(JSON.stringify({
+      verdicts: [{ id: "mh-1", reasoning: "found", present: "yes", evidence: "likes running" }],
+      near_duplicates: [],
+    }));
+
+    const key: AnswerKey = {
+      scenario: "test",
+      format: 1,
+      checkpoints: [{
+        after_day: 7,
+        must_hold: [{ id: "mh-1", statement: "Tester likes running" }],
+        must_not_hold: [],
+        probes: [],
+      }],
+    };
+    const now = new Date();
+    const snaps = new Map([[7, {
+      snapshot: {
+        pages: [{ id: "p1", testerId: "t1", kind: "self" as const, title: "Me", summary: "", body: "", goalSlug: null, status: "active" as const, date: null, createdAt: now, updatedAt: now }],
+        facts: [{ id: "f1", pageId: "p1", testerId: "t1", section: "", label: null, text: "likes running", sourceMessageId: null, sourceText: null, day: null, createdAt: now, updatedAt: now }],
+        links: [],
+        forgotten: [],
+      },
+      rendered: "likes running",
+    }]]);
+
+    await gradeRun(model, key, snaps);
+
+    const prompt = model.requests[0]!.messages[0]!.content as string;
+    expect(prompt).not.toContain("Day-to-date reference:");
+  });
+});
+
+// ---- Forget retry in replay ----
+
+describe("forget retry in replay", () => {
+  it("retries once when runMemoryTool returns ok: false, succeeds on retry", async () => {
+    const tester = await createTester(db);
+    const msg = await say(db, tester, "inbound", at("2026-11-02", "21:40"), "my dog is named Max");
+    const { self } = await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+    const fact = await addFact(db, self, { text: "my dog is named Max", sourceMessageId: msg.id, day: "2026-11-02" }, at("2026-11-02", "21:40"));
+    const factRef = `f:${fact.id.slice(0, 8)}`;
+
+    // Model: first call returns a bad ref, second call (retry) returns the correct ref
+    const model = new FakeClaudeModel();
+    // First call: bad ref
+    model.script(JSON.stringify({ facts: ["f:00000000"], note: "the dog" }));
+    // Second call (retry): correct ref
+    model.script(JSON.stringify({ facts: [factRef], note: "the dog" }));
+
+    // Simulate the replay forget handler logic
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const firstInput = { facts: ["f:00000000"], note: "the dog" };
+    const firstResult = await runMemoryTool(db, tester, "forget", firstInput, { at: at("2026-11-02", "22:00"), budget });
+    expect(firstResult.ok).toBe(false);
+
+    // Retry with correct ref
+    const retryBudget: LookupBudget = { lookups: 0, searches: 0 };
+    const retryInput = { facts: [factRef], note: "the dog" };
+    const retryResult = await runMemoryTool(db, tester, "forget", retryInput, { at: at("2026-11-02", "22:00"), budget: retryBudget });
+    expect(retryResult.ok).toBe(true);
+
+    // Verify fact is gone
+    const snap = await takeSnapshot(db, tester.id);
+    expect(snap.facts.some((f) => f.text === "my dog is named Max")).toBe(false);
+  });
+
+  it("records unresolved when both attempts fail", async () => {
+    const tester = await createTester(db);
+    await say(db, tester, "inbound", at("2026-11-02", "21:40"), "hello");
+    await ensureCorePages(db, tester, at("2026-11-02", "21:40"));
+
+    // Both attempts use bad refs
+    const budget1: LookupBudget = { lookups: 0, searches: 0 };
+    const result1 = await runMemoryTool(db, tester, "forget", { facts: ["f:00000000"], note: "nothing" }, { at: at("2026-11-02", "22:00"), budget: budget1 });
+    expect(result1.ok).toBe(false);
+
+    const budget2: LookupBudget = { lookups: 0, searches: 0 };
+    const result2 = await runMemoryTool(db, tester, "forget", { facts: ["f:11111111"], note: "also nothing" }, { at: at("2026-11-02", "22:01"), budget: budget2 });
+    expect(result2.ok).toBe(false);
+
+    // Both failed => would be recorded as unresolved in the replay
+    const unresolvedForgets = [];
+    if (!result2.ok) {
+      unresolvedForgets.push({ day: 1, request: "forget something", reason: result2.error });
+    }
+    expect(unresolvedForgets).toHaveLength(1);
   });
 });

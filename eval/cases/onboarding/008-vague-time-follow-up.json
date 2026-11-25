@@ -2,7 +2,14 @@
   "id": "vague-time-follow-up",
   "title": "\"Yea\" to an either/or time gets a blunt correction",
   "origin": "Yanni live, 2026-10-27 (issue #34)",
-  "testerLines": ["Yea", "I would say 6"],
+  "testerLines": [
+    "Yea",
+    { "say": "I would say 6", "means": "6 pm", "when": "after ZOH asks again which time, 5:30 or 6", "length": "thin", "expected": true }
+  ],
+  "facts": [
+    "you lift for about an hour",
+    "you go on weekdays after work"
+  ],
   "whatWentWrong": "ZOH asked \"About what time do you usually get to the gym after work, like 5:30 or 6?\", Yanni said \"Yea\", and ZOH replied \"Ha, I need a number to plan around. Is it closer to 5:30 or 6 when you walk into the gym?\"",
   "shouldHaveHappened": "After \"Yea\", ZOH asks once more, kindly: it gives a short reason a set time helps (staying consistent) and asks which works better, 5:30 or 6, without correcting or teasing them (no \"Ha, I need a number\"). After \"I would say 6\", it saves 6 pm and moves on to the next thing.",
   "areaCode": "212",

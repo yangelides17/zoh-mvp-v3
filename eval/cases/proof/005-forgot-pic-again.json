@@ -32,8 +32,12 @@
   },
   "testerLines": [
     "went to the gym, forgot to take the pic AGAIN. I swear I went",
-    "nah I don't track anything, I just lift",
-    "yeah honestly I always forget the selfie, I'm in the zone"
+    { "say": "nah I don't track anything, I just lift", "means": "no app, watch or check-in to show; they just lift", "when": "after ZOH asks whether they can still send anything for today (an app, a watch, a check-in screenshot)", "length": "short", "expected": true },
+    { "say": "yeah honestly I always forget the selfie, I'm in the zone", "means": "admits they always forget the selfie once they're lifting", "when": "after ZOH says today won't count without proof, or brings up the forgotten pics", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "you lift at the gym after work, about 45 minutes",
+    "you don't use a gym app, a watch or a check-in"
   ],
   "whatWentWrong": "New case, not a past mistake: no proof means no check mark, warmly, and repeated trouble should lead to a proof that fits them.",
   "shouldHaveHappened": "ZOH first asks whether they can still send anything today (a gym app or check-in screenshot, a watch, a quick voice note). When they can't, today's a miss, said warmly with no accusation (\"I believe you, but no proof, no check mark\"). Because the selfie keeps getting forgotten, ZOH offers to change how they prove it to something that fits them (for example a quick voice note or photo on the way out, or a screenshot of the gym check-in) and doesn't drop proof altogether.",

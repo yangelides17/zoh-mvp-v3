@@ -70,7 +70,6 @@ interface Setup {
   phone?: string;
   phase?: Tester["phase"];
   quiet?: [string, string];
-  pushiness?: string;
   days?: Plan["days"];
   time?: string;
   minutes?: number | null;
@@ -94,7 +93,6 @@ async function setup(o: Setup = {}): Promise<Tester> {
       timeZoneStatus: "assumed_eastern",
       quietHoursStart: o.quiet?.[0] ?? "22:00",
       quietHoursEnd: o.quiet?.[1] ?? "09:00",
-      pushiness: o.pushiness ?? "pushy",
       consentAt: at(SUN, "10:00"),
       contextStartedAt: at(SUN, "10:00"),
     })
@@ -330,23 +328,6 @@ describe("rule 4: never more than 3 unanswered texts in a row", () => {
     await say(tester, "inbound", at(MON, "19:15"), "reading now");
     await say(tester, "outbound", at(MON, "19:15"), "Let's go");
     expect(await day(MON, "19:20", "21:59")).toEqual(["followup@19:25"]);
-  });
-
-  it("Steady: kickoff and follow-up", async () => {
-    await setup({ pushiness: "steady" });
-    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00", "followup@19:25"]);
-  });
-
-  it("Steady: an early chat still leaves kickoff and follow-up", async () => {
-    const tester = await setup({ pushiness: "steady" });
-    await say(tester, "inbound", at(MON, "08:00"), "up early");
-    await say(tester, "outbound", at(MON, "08:00"), "Love it");
-    expect(await day(MON, "08:30", "21:59")).toEqual(["kickoff@09:00", "followup@19:25"]);
-  });
-
-  it("Gentle: kickoff only", async () => {
-    await setup({ pushiness: "gentle" });
-    expect(await day(MON, "08:00", "21:59")).toEqual(["kickoff@09:00"]);
   });
 });
 
@@ -600,7 +581,6 @@ describe("dueNudge", () => {
       quietHoursStart: "22:00",
       quietHoursEnd: "09:00",
       phase: "active",
-      pushiness: "pushy",
       stoppedAt: null,
       autoTextsPausedAt: null,
     },
@@ -767,7 +747,7 @@ describe("the state block for an active tester", () => {
     const block = buildStateBlock(state);
     expect(block).toContain("Today: Mon 2026-11-02, a step day at 20:15 (moved for today only; usually 19:00). Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. They said they're on it (Mon 8:10 PM).");
     // #199: picking it and saving it is TODAY'S STEP's guidance, not the sheet's.
-    expect(TODAYS_STEP).toContain("Pick it the first time you talk about today");
+    expect(TODAYS_STEP).toContain("Today's: the first time you talk about today");
     expect(TODAYS_STEP).toContain("set_today_step saves it");
     expect(block).toContain("Next step day: Wed 2026-11-04.");
     await doneWithPhoto("full", at(MON, "20:40"), "10 pages");

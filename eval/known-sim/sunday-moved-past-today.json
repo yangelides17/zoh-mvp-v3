@@ -1,0 +1,43 @@
+{
+  "id": "sunday-moved-past-today",
+  "why": "ZOH has already moved on to the week and tomorrow, so 'that's about it for today' no longer applies.",
+  "case": "lookback/sunday-flow",
+  "line": 2,
+  "expect": [
+    "passed"
+  ],
+  "transcript": [
+    {
+      "from": "tester",
+      "text": "[voice: Done, chapter six. The make it obvious part clicked, I left the book on my pillow this morning so I'd see it tonight.]"
+    },
+    {
+      "from": "zoh",
+      "text": "Maya, the book on your pillow is a smart move. You turned chapter 6 into a cue you'll actually see tonight 🔥 What made that idea click for you today, compared with the earlier chapters?"
+    },
+    {
+      "from": "tester",
+      "text": "honestly seeing the book first thing this morning, i didn't have to remember anything. and the phone was in the kitchen again, zero buzzing"
+    },
+    {
+      "from": "zoh",
+      "text": "Zero things to remember is the whole point of that law, Maya. And the phone staying in the kitchen is a big change from Monday, when it kept buzzing. How did the reading itself feel tonight with it out of reach?"
+    },
+    {
+      "from": "tester",
+      "text": "yeah it felt easier with the phone out of reach, i didn't keep checking it"
+    },
+    {
+      "from": "zoh",
+      "text": "Easier with the phone away is a real finding, Maya. And here's the progress you made this week:\n• 6 of 7 days done in full, with a voice recap each time (Mon, Tue, Wed, Fri, Sat, Sun)\n• You applied \"make it obvious\" today by leaving the book on your pillow\n• The phone in the kitchen went from a Monday problem to your routine, and you now read right after the dishes\n• You're on chapter 6 and headed for finishing Atomic Habits by Nov 30\n\nWhat do you want to push on next week?"
+    },
+    {
+      "from": "tester",
+      "text": "this week went pretty well honestly. i want to see if i can keep the phone thing going, but let me think about next week first"
+    },
+    {
+      "from": "zoh",
+      "text": "Take your time, Maya. Keeping the phone in the kitchen is a good thing to hold onto, since it's what made reading easier for you. For tomorrow, the step stays the same: chapter 7 on the couch at 8 pm, about 20 minutes, phone in the kitchen, then a voice recap. Does that work for you?"
+    }
+  ]
+}

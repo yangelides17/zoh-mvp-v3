@@ -46,7 +46,10 @@
     }
   },
   "startTime": "18:00",
-  "testerLines": ["Done. 20 minutes, and my fastest pace yet.", "Honestly feeling great about this week."],
+  "testerLines": [
+    "Done. 20 minutes, and my fastest pace yet.",
+    { "say": "Honestly feeling great about this week.", "starts": true }
+  ],
   "whatWentWrong": "New case, not a past mistake: a stated preference, six days on.",
   "shouldHaveHappened": "ZOH celebrates the fastest pace sincerely but calmly: no emojis, no caps, no string of exclamation points, because Priya asked for that six days ago. Still warm and specific."
 }

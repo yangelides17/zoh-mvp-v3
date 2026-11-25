@@ -2,12 +2,12 @@
   "feature": "nudges",
   "id": "case:kickoff-day-four",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:14:29.872Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T18:35:56.065Z",
+  "branch": "feature/164-165-next-step-week-goal",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "a83434aad938",
-    "voice": "b413875b3c11",
+    "voice": "81c33e6b3872",
     "instructions": "c7348af58300",
     "script": "a0a60a0bb4b8"
   },
@@ -70,31 +70,37 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Names the step: 2 min walk, 3 min jog, 1 min walk, 3 rounds, around the block, at 6:30 pm."
+                "reason": "Names today's step (2 min walk, 3 min jog, 1 min walk, 3 rounds), the time (6:30 pm) and the place (around your block)."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Morning, Sam!' as a self-started text."
+                "reason": "Opens with \"Morning, Sam!\" as a text ZOH starts itself."
               },
               {
-                "rule": "kickoff-one-ask",
+                "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Asks one thing, 'You in?', and never asks what time."
-              },
-              {
-                "rule": "step-defined",
-                "pass": true,
-                "borderline": true,
-                "reason": "What, where and when are given, but total duration is only implied by '3 rounds' rather than stated."
+                "reason": "\"You said you'd get to that mile, and this gets you closer\" points forward without shaming."
               },
               {
                 "rule": "short",
                 "pass": false,
                 "borderline": true,
-                "reason": "Runs about five sentences, more than the one-to-three-sentence limit, though it is one question at the end."
+                "reason": "Runs to about six short sentences with the step list, though it has only one question at the end."
+              },
+              {
+                "rule": "kickoff-one-ask",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks only \"You in?\" and does not re-ask the time."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": true,
+                "reason": "Gives what, where, when and rounds; total length is only implied by the rounds."
               },
               {
                 "rule": "plain-words",
@@ -106,7 +112,7 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm, sincere, energetic without being overfamiliar."
+                "reason": "Energetic, warm and sincere, with no overfamiliarity."
               }
             ]
           },
@@ -117,19 +123,31 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences, no question, emoji used as punctuation."
+                "reason": "Two short sentences with an emoji and no question."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "Upbeat with no pressure."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain words, no markdown."
+                "reason": "Plain words, emoji used as punctuation."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Excited and warm, with a single emoji."
+                "reason": "Warm and energetic, appropriate to a Pushy tester."
+              },
+              {
+                "rule": "no-guilt",
+                "pass": true,
+                "borderline": false,
+                "reason": "No guilt or fake urgency in the reply."
               }
             ]
           },
@@ -140,37 +158,43 @@
                 "rule": "names-commitment",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the new step with time, place and steps: 2 min walk, 3 min jog, 1 min walk, 3 rounds, at 6:30."
+                "reason": "Names the new step (2 min walk, 3 min jog, 1 min walk, 3 rounds), the time (6:30) and the place (the block)."
               },
               {
                 "rule": "warm-open",
                 "pass": true,
                 "borderline": false,
-                "reason": "Opens with 'Hey Sam!' as a self-started text."
+                "reason": "Opens with \"Hey Sam!\" as a text ZOH starts itself."
               },
               {
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Three short sentences and no question."
+                "reason": "Three sentences with no question."
               },
               {
                 "rule": "no-guilt",
                 "pass": true,
                 "borderline": false,
-                "reason": "Purely encouraging, with no guilt or urgency."
+                "reason": "Friendly reminder with no guilt or urgency."
+              },
+              {
+                "rule": "step-defined",
+                "pass": true,
+                "borderline": false,
+                "reason": "Step, place, time and proof are all stated."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with one emoji at the end."
+                "reason": "Plain text, emoji as a single punctuation mark."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic, appropriate for a check-in."
+                "reason": "Warm and firm, matching Pushy energy."
               }
             ]
           }
@@ -178,18 +202,12 @@
         "conversation": [
           {
             "rule": "regression",
-            "pass": true,
-            "borderline": true,
-            "reason": "The 9 am kickoff gives a new step built on the 2-minute jogs rather than the original 1-minute jogs, never asks the time, and the check-in refers to the new step."
-          },
-          {
-            "rule": "no-restating",
             "pass": false,
             "borderline": true,
-            "reason": "The reply to 'yes let's go' restates the time and jog length, though neither had changed and neither was asked about."
+            "reason": "Kickoff gives the new step with no time question, but the reply to \"yes let's go\" restates both the 6:30 time and the 3-minute jogs."
           }
         ],
-        "summary": "ZOH avoided the regression: the kickoff builds on the 2-minute jogs, never re-asks the time, and the 6:20 check-in points to the new step. The main misses are a kickoff that runs past the short-text limit and a confirmation reply that restates the step."
+        "summary": "ZOH avoided the original regression: the 9 am kickoff builds on the 2-minute jogs with a new step, never asks the time again, and the 6:20 pm check-in refers to the new step. The main miss is the reply to \"yes let's go\", which restates the time and jog length instead of staying short, and the kickoff runs a bit long for the short-text rule."
       }
     }
   ]

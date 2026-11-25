@@ -30,9 +30,13 @@
   },
   "testerLines": [
     "[voice: Did it. I gave my update first before anyone. My voice was a bit shaky at the start but it was fine after the first sentence.]",
-    "tomorrow I could maybe ask a question to someone else too",
-    "like I never really engage with what others say, I just give my update and tune out",
-    "yeah that sounds right"
+    { "say": "it got easier once people started nodding. tomorrow I could maybe ask a question to someone else too", "when": "after ZOH reacts to the voice note and asks about the standup (the shaky start, what made it fine, how it went)", "fixed": true },
+    { "say": "like I never really engage with what others say, I just give my update and tune out", "means": "she never engages with what others say; she gives her update and tunes out", "when": "after ZOH asks about her idea: what it would give her, or what usually happens", "length": "short", "expected": true },
+    { "say": "yeah that sounds right", "when": "after ZOH proposes tomorrow's step and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "your voice settled after the first sentence once people started nodding",
+    "standup is at 10 am every weekday"
   ],
   "whatWentWrong": "In #131's eval, a tester's idea for tomorrow pulled the next step into that same text.",
   "shouldHaveHappened": "ZOH counts the proof and celebrates, then asks one question (the shaky start, or what made it fine after the first sentence). The idea for tomorrow gets a question or a short acknowledgement and more curiosity (what it would give them, what usually happens), not an instant step. Once they've said why (tuning out), ZOH may play it back in a line, draws out what went well (going first worked) and proposes the next step day's step, fully defined, using both, and asks if it works. \"yeah that sounds right\" is a yes to it.",

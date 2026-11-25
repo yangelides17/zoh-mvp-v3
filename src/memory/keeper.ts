@@ -13,6 +13,7 @@ import { maskNumber, type Logger } from "../pipeline/inbound.js";
 import { isJumping, testerNow } from "../testers/clock.js";
 import { getTester, updateTester } from "../testers/testers.js";
 import { renderPage, renderTimeline } from "./render.js";
+import { writeV2Day } from "./v2-keeper.js";
 import {
   addFact,
   createPage,
@@ -379,11 +380,25 @@ export function daysDue(tester: Tester, now: Date): string[] {
   return days;
 }
 
+/** #250: same as daysDue but uses memoryV2Through. */
+export function daysDueV2(tester: Tester, now: Date): string[] {
+  const today = localDate(now, tester.timeZone);
+  const last = localClock(now, tester.timeZone) >= MEMORY_RUN_AT ? addDays(today, -1) : addDays(today, -2);
+  const firstAllowed = localDate(tester.memorySince && tester.memorySince > tester.contextStartedAt ? tester.memorySince : tester.contextStartedAt, tester.timeZone);
+  let from = tester.memoryV2Through ? addDays(tester.memoryV2Through, 1) : addDays(last, -(BACKFILL_DAYS - 1));
+  if (from < firstAllowed) from = firstAllowed;
+  const days: string[] = [];
+  for (let d = from; d <= last; d = addDays(d, 1)) days.push(d);
+  return days;
+}
+
 export interface MemoryKeeperDeps {
   db: Db;
   log: Logger;
   /** Without a model the pass never runs (and never marks a day done). */
   model?: ClaudeModel;
+  /** #250: a Haiku model for the v2 sensitive check. Without it, v2 testers skip the v2 pass. */
+  checker?: ClaudeModel;
   /** Only these testers get memory (ALLOWED_NUMBERS). */
   allowedNumbers: string[];
   /** Staging and production (#82): only numbers this app owns. Production-only when missing. */
@@ -407,6 +422,8 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
 
   /** After a failed day, that tester waits this long before the next try, so an outage can't burn calls every minute. */
   const retryAfter = new Map<string, number>();
+  /** #253: separate retry timer for the v2 pass so a v2 failure never blocks v1. */
+  const retryAfterV2 = new Map<string, number>();
 
   async function run(now: Date): Promise<Map<string, string[]>> {
     const written = new Map<string, string[]>();
@@ -427,9 +444,9 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
     const written: string[] = [];
     if (!deps.model || (retryAfter.get(tester.id) ?? 0) > now.getTime()) return written;
     const ctx = { contact: maskNumber(tester.phone) };
+    // V1 pass (runs for everyone — v2 testers keep v1 current so switching back is instant)
     for (const date of daysDue(tester, now)) {
       try {
-        // Reloaded per day: the day before may have changed the tester's pages, never the row itself.
         if (await writeDay(deps.db, deps.model, tester, date, now, deps.log)) written.push(date);
         await updateTester(deps.db, tester.id, { memoryThrough: date });
         tester.memoryThrough = date;
@@ -437,6 +454,21 @@ export function createMemoryKeeper(deps: MemoryKeeperDeps): MemoryKeeper {
         deps.log.error({ ...ctx, date, err: safeError(err) }, "Memory pass failed; will retry in an hour");
         retryAfter.set(tester.id, now.getTime() + RETRY_AFTER_MS);
         break;
+      }
+    }
+    // #250: V2 pass (only for v2 testers, with its own through marker and retry timer)
+    if (tester.memoryVersion === "v2" && deps.model && deps.checker && (retryAfterV2.get(tester.id) ?? 0) <= now.getTime()) {
+      const v2Days = daysDueV2(tester, now);
+      for (const date of v2Days) {
+        try {
+          await writeV2Day(deps.db, deps.model, deps.checker, tester, date, now, deps.log);
+          await updateTester(deps.db, tester.id, { memoryV2Through: date });
+          tester.memoryV2Through = date;
+        } catch (err) {
+          deps.log.error({ ...ctx, date, err: safeError(err) }, "V2 memory pass failed; will retry in an hour");
+          retryAfterV2.set(tester.id, now.getTime() + RETRY_AFTER_MS);
+          break;
+        }
       }
     }
     return written;

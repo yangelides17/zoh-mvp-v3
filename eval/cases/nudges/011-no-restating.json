@@ -27,11 +27,15 @@
   },
   "testerLines": [
     "yes! I'm in",
-    "btw is it weird that I skip the appendices",
-    "work is insane today",
-    "omg my boss just asked me to stay late, can we do 8:30 instead?",
-    "cool cool",
-    "what time was it again?"
+    { "say": "btw is it weird that I skip the appendices", "starts": true },
+    { "say": "work is insane today", "starts": true },
+    { "say": "omg my boss just asked me to stay late, can we do 8:30 instead?", "starts": true },
+    { "say": "cool cool", "when": "after ZOH confirms the new time", "fixed": true, "expected": true },
+    { "say": "what time was it again?", "starts": true }
+  ],
+  "facts": [
+    "you're reading Dune",
+    "your boss asked you to stay late, so 8:30 works instead of 7"
   ],
   "whatWentWrong": "On Oct 28 ZOH restated the step and time in nearly every text.",
   "shouldHaveHappened": "Each reply answers what Priya said. ZOH doesn't tack \"ten pages at 7\" onto every reply: after her yes it's settled. When she asks to move to 8:30, ZOH moves today's time and confirms the new time once. \"cool cool\" gets a short reply with no restated step. When she asks what time it was, ZOH says 8:30 plainly.",

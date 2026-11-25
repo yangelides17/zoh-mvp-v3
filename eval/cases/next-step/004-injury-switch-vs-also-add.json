@@ -28,9 +28,7 @@
     ]
   },
   "testerLines": [
-    "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks",
-    "could we do upper body stuff at home instead while it heals?",
-    "and separately I've been wanting to get my protein up too, like on top of the workouts"
+    "bad news, rolled my ankle on the run yesterday. doctor says no running for 6 weeks +++ could we do upper body stuff at home instead while it heals? +++ and separately I've been wanting to get my protein up too, like on top of the workouts"
   ],
   "whatWentWrong": "New case, not a past mistake: telling a change from an add.",
   "shouldHaveHappened": "The ankle is handled right away as a change to his one goal: sympathy without medical advice (pointing back to his doctor is fine), then work on an adjusted exercise plan (upper body at home) starts with him right away (asking what it needs, or showing it), never sent off to be thought about. The protein target on top is an add: a warm \"let me think on it\" with no promise and no nutrition questions or plan. ZOH never mentions a team, founders or approval.",

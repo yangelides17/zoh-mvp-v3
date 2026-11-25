@@ -30,8 +30,12 @@
   },
   "testerLines": [
     "honestly this is getting too easy, I want it harder from now on",
-    "like I'm not even sore anymore. more of a challenge I guess, maybe add a plank or something",
-    "yes let's do that"
+    { "say": "like I'm not even sore anymore. more of a challenge I guess, maybe add a plank or something", "means": "he's not sore anymore; he wants more of a challenge, maybe adding a plank", "when": "after ZOH asks what harder would look like for him", "length": "short", "expected": true },
+    { "say": "yes let's do that", "when": "after ZOH shows the harder version and asks if it works", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're doing today's session at 6:30 tonight as planned",
+    "15 to 20 minutes is still fine for you"
   ],
   "whatWentWrong": "In #131's eval, \"I want it harder, maybe add lunges\" made ZOH upgrade the plan at once, without asking what harder meant or showing the new version.",
   "shouldHaveHappened": "ZOH acknowledges warmly and asks what harder would look like for them (open, no menu of guesses), with no plan change and no new step in that text. After their answer it shows the new version in full (what, how much, the time and about how long) and asks if it works. Only after \"yes let's do that\" is it saved as a lasting change, confirmed in a line, and today's step is still clear.",

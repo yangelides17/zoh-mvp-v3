@@ -3,6 +3,8 @@
 Status: proposed design, agreed by Stamati on 2026-11-01. Not built yet. Specs that build it say
 "follows docs/memory-design.md" and live in their issues as usual. The testing plan that comes first
 is `docs/memory-lab.md`.
+The lab baseline (2026-11-23) added the decisions in "Decisions from the lab baseline" below; where they
+differ from an earlier section, they win.
 
 ## Summary
 
@@ -50,7 +52,7 @@ Rules:
 
 | Part | Holds | Stored |
 | --- | --- | --- |
-| Label | Title, other names (Ana / Anna), parent, kind (root, area, project, person, place, coaching, people, places), status (active, paused, done, past), hint links | On the page row, once |
+| Label | Title, other names (Ana / Anna), parent, kind (root, area, project, goal, person, place, coaching, people, places), status (active, paused, done, past), hint links | On the page row, once |
 | About | 1 to 3 sentences on what the page is | On the page row, once |
 | Entries | Everything else, typed rows | Entry rows pointing to the page |
 | Children | Pages under this one | Not stored; found by their parent |
@@ -126,7 +128,7 @@ otherwise or later evidence contradicts them.
 | Block | Contents | Rebuilt |
 | --- | --- | --- |
 | Fixed instructions | Voice page + feature rules | Cached |
-| Memory block | Root rendered (its entries + every tier-1 About); Coaching; focus goal's page with parent About and live coaching section; last 7 daily summaries | Overnight or after a live write |
+| Memory block | Root rendered (its entries + every tier-1 About + their tier-2 children's title, other names and About); Coaching; focus goal's page with parent About and live coaching section; last 7 daily summaries | Overnight or after a live write |
 | Live summary (state block) | As today, plus today's and this week's open to-dos, events, follow-ups | Every call |
 | Texts | Every text since the last filed day (cap, never fewer than 30) | Every call |
 
@@ -174,26 +176,46 @@ entries (type, status, date, as of, replaces, people links, origin, detail); tes
 The database enforces one parent, depth ≤ tier 2, valid type/status pairs, dates on dated types, one root
 and one each of Coaching, People, Places.
 
-Conversion when a tester is switched: own page → root (texting style → Coaching); preferences →
-Coaching; observations kept as history; person pages → under People; subject pages → under an area or
-Places (one-time Claude pass); goal pages → under their area, goal path kept; daily summaries, forgotten
-texts and forget notes unchanged.
+Switching a tester **rebuilds** their tree: their saved texts are replayed night by night through the new
+nightly pass (the memory lab's replay path), so there is one code path, not a separate conversion. Their
+old memory is left untouched, and while on trial both nightly passes keep running, so switching back is
+instant. Daily summaries, forgotten texts and forget notes carry over as they are.
 
 Also fixed: stated preferences live only on Coaching (today they are also copied into `styleNotes`, so a
 forget leaves a copy); the coach reads all unfiled texts so a failed night leaves no gap.
 
 ## Rollout
 
-Before any of this: the memory lab (`docs/memory-lab.md`) baselines today's memory and then tests the new
-design on synthetic testers.
+Before any of this: the memory lab (`docs/memory-lab.md`) baselined today's memory (2026-11-23).
 
-1. Spec 1, the tree: parents and typed entries, new nightly pass, conversion, the switch. Gate: founders'
-   numbers switched, trees look right.
-2. Spec 2, live use: reminders, done/dropped, forget on entries, new memory block, open items, unfiled
-   texts, prompt rewrite with evals. Gate: a few testers switched, memory evals pass.
-3. Spec 3, weekly pass. Gate: everyone switched, no regressions.
-4. Spec 4, console: tree view, open items, count of wants ZOH can't coach yet (can run alongside).
-5. Retire the old code after a few stable weeks.
+1. Spec A, the tree: pages with parents, typed entries, the new nightly pass with the sensitive check,
+   forget on entries, the switch and rebuild. Runs in the lab with `--memory v2`; the coach doesn't read
+   it yet. Gate: Sam, Maya and Rob on v2 have zero sensitive or forgotten details, and recall about as
+   good as today's.
+2. Spec B, live use: the new memory block, open items in the state block, unfiled texts, live tools
+   (reminders, done/dropped), prompt changes with evals. Gate: founders switched and texting it for a
+   few days, then 3 to 5 testers.
+3. Later: the weekly pass, the console tree view (with a count of wants ZOH can't coach yet), more
+   testers, then retiring the old code after a few stable weeks.
+
+## Decisions from the lab baseline (2026-11-24)
+
+The baseline showed today's memory recalls almost everything but stores sensitive and passing details,
+never replaces stale facts, keeps relative dates, lets a forget fail on a long note and grows every
+night. These decisions answer that.
+
+| # | Decision | Why |
+| --- | --- | --- |
+| 1 | **A separate sensitive check in code.** Every new entry and every daily summary line passes a narrow model check (Haiku) before it is saved; health, medication, mental-health and money details, and anything matching a forget, are rejected. The prompt rule stays too. | The prompt rule alone stored Sam's melatonin in 2 of 3 runs. |
+| 2 | **Passing mentions are kept, not shown.** A detail that doesn't touch their life, wants, people, plans or coaching becomes one line in that day's summary, never an entry or a page. The weekly pass may promote it if it recurs. Anything that does matter is filed at once, even if said only once. | Throwing the first mention away makes a second one impossible to notice; filing it on a page put the neighbor's dog in front of the coach forever. |
+| 3 | **The nightly pass reads before it writes.** It sees in full every page the day's texts touch, plus all open To-dos, Events and Follow-ups, and must correct, replace or close any entry the day contradicts. | "She picked Clemson", "finished Normal People" and "the wedding happened" never replaced the old facts. |
+| 4 | **Correct, replace and forget stay distinct.** Correct fixes an error in place (the wrong version isn't kept). Replace adds a new entry pointing to the old one, which becomes history. Forget deletes with no history or copies and leaves a neutral note. | Each behaves differently later: history is findable, a forget never is. |
+| 5 | **Dates are real dates.** Dated entries store a calendar date worked out from the text's own timestamp ("next Saturday" said on Fri Oct 10 → Sat Oct 18); code rejects a dated type without one. | "Getting married next Saturday" was unreadable a week later. |
+| 6 | **Texting style only when stated.** The nightly pass writes how they text or want to be coached only when they say it; observed patterns wait for the weekly pass (3+ days of evidence). | Sam had 17 overlapping "how he texts" notes after a month. |
+| 7 | **Daily summaries stay as they are** (a log beside the tree, last 7 shown to the coach) **but follow the page rules**: the sensitive check, and a forget removes its details from past summaries too (#104). | Today a forget leaves copies in the summaries. |
+| 8 | **Forget works by reference and can't fail on wording.** No length limit on a note can block it; a forget either completes or tells the coach exactly why not. | Rob's forget failed because its note was over 120 characters. |
+| 9 | **Sonnet writes nightly; Haiku checks.** Target cost: about today's 5 cents a night per tester. | Today's misses were missing rules, not judgment. |
+| 10 | **Judge v2 on what it keeps and drops first.** Some misfiling (a fact on the root instead of Work) is expected until the weekly pass exists. | Placement is the weekly pass's job. |
 
 ## Deferred
 

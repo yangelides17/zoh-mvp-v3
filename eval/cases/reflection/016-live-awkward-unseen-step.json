@@ -69,8 +69,8 @@
   },
   "testerLines": [
     "[photo alex-draft.jpg: an unsent Notes draft to Alex asking for 10 minutes, no pitch]",
-    "It felt a little awkward",
-    "Asking for his time. I worry it’ll feel like I’m bothering him"
+    { "say": "It felt a little awkward", "when": "after ZOH counts the draft and asks about it (how it went, how it felt, or about writing it)", "fixed": true },
+    { "say": "Asking for his time. I worry it’ll feel like I’m bothering him", "means": "the awkward part is asking for his time; he worries he's bothering Alex", "when": "after ZOH asks what felt awkward about it", "length": "short", "expected": true }
   ],
   "whatWentWrong": "Sorry, I got ahead of myself there. I'm still waiting on your answer: does tomorrow's step work for you?",
   "shouldHaveHappened": "ZOH goes deeper on the worry about bothering Alex before any next step, and never asks agreement to a step the tester hasn't seen.",

@@ -120,6 +120,13 @@ export function parseEvalArgs(argv: string[]): EvalArgs {
 export const HAIKU = "claude-haiku-5-5";
 
 /**
+ * #230: the model that decides when a case's waiting lines fit and writes the tester's replies. Sonnet, not Haiku:
+ * on the simulator check (`npm run sim-check`, Nov 21) Sonnet got all 12 known moments right on every run and Haiku 8,
+ * for about $0.02 a case. `EVAL_CASE_SIM_MODEL` overrides it.
+ */
+export const CASE_SIM_MODEL = "claude-sonnet-5-5";
+
+/**
  * The grader's model: EVAL_MODEL if set; otherwise the coach's model for a --final run, Haiku while iterating.
  * Haiku caught every known mistake in an 8-case calibration (#174) but names fewer secondary problems,
  * so the results Yanni reads come from a --final run.

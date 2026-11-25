@@ -1,6 +1,8 @@
 import { and, asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
+import { listGuidance } from "../src/coaching/guidance.js";
+import { coachingHistory } from "../src/coaching/history.js";
 import { CAPABILITIES, CONSOLE_INSTRUCTIONS, createConsoleCoach, nextChance, stepLog } from "../src/console/chat.js";
 import { addRequest, addThreadLine, APP_AUTHOR, claimRequest, COACH_AUTHOR, NOT_SENT_TOPIC, requestRef } from "../src/console/requests.js";
 import { createCoach } from "../src/coach/coach.js";
@@ -239,7 +241,7 @@ describe("console chat route", () => {
 
 describe("console coach capabilities", () => {
   it("is a list of capabilities, each drafted for a founder to confirm (#155)", () => {
-    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "plan_request", "send_text", "suggest_next_step", "propose_plan_change", "decide_suggestion", "cancel", "take_back", "mark_alert"]);
+    expect(Object.keys(CAPABILITIES)).toEqual(["save_note", "add_guidance", "plan_request", "send_text", "suggest_next_step", "propose_plan_change", "decide_suggestion", "cancel", "take_back", "mark_alert"]);
   });
 
   it("suggest_next_step files the founder's next step as approved by them, shown in the chat as a card (#63)", async () => {
@@ -289,6 +291,18 @@ describe("console coach capabilities", () => {
     await confirmNewest(tester, "Yanni");
     const [note] = (await thread(tester.id)).filter((r) => r.kind === "note");
     expect(note).toMatchObject({ author: "Yanni", body: "Traveling next week; go easy" });
+  });
+
+  it("#158 add_guidance drafts a lasting line; nothing is saved until Do it, then it's on the card under the founder's name", async () => {
+    const tester = await seed();
+    model.script({ tools: [{ name: "add_guidance", input: { line: "Push harder on weekends" } }] }, "Drafted: a lasting line for weekends.");
+    await chat(tester, "remember to push her harder on weekends");
+    expect(await listGuidance(t.db, tester.id)).toEqual([]);
+    const draft = (await thread(tester.id)).find((r) => r.kind === "draft");
+    expect(draft?.body).toContain('Add to Sam\'s team guidance');
+    await confirmNewest(tester, "Stamati");
+    expect(await listGuidance(t.db, tester.id)).toMatchObject([{ text: "Push harder on weekends", author: "Stamati" }]);
+    expect(await coachingHistory(t.db, tester.id)).toMatchObject([{ area: "guidance", action: "add", to: "Push harder on weekends", by: "Stamati" }]);
   });
 
   it("plan_request queues a request (with a not-before time in their zone); cancel_request cancels it", async () => {
@@ -406,7 +420,7 @@ describe("the texting coach and the team", () => {
   it("TEAM rules are in both prompts and within budget", () => {
     expect(FIXED_INSTRUCTIONS).toContain(TEAM);
     expect(fullVoiceInstructions()).toContain(TEAM);
-    expect(TEAM).toContain("never quote it");
+    expect(TEAM).toContain("never quote them");
     expect(TEAM).toContain("Never deny it");
     expect(loadVoiceDoc()).toContain('Asked "did someone tell you to say that?"');
   });
@@ -422,7 +436,7 @@ describe("the texting coach and the team", () => {
     // #199: the sheet lists them as facts; never quoting a note, and doing a request as your own idea, are THE TEAM's.
     expect(block).toContain("FROM THE TEAM, notes:\n- Nov 3: Traveling next week");
     expect(block).toContain(`FROM THE TEAM, request [${requestRef(due.id)}], not done yet: Share https://example.com/sleep`);
-    expect(TEAM).toContain("A note is context: let it shape how you coach; never quote it or say where it came from.");
+    expect(TEAM).toContain("Notes and guidance are context: let them shape how you coach where they apply, never the topic of a text; never quote them or say where they came from.");
     expect(TEAM).toContain("A request: do it as your own idea, in your voice, at a natural moment (this text if it fits), then mark_request_done.");
     expect(block).not.toContain("LATER ONE");
     expect(block).not.toContain("EXACT ONE");
@@ -439,16 +453,14 @@ describe("the texting coach and the team", () => {
     expect(buildStateBlock(await loadCoachState(t.db, tester, { now: later, isFirstText: false }))).not.toContain("Old news");
   });
 
-  it("mark_request_done closes the request once, with a Done line for the founders", async () => {
+  it("mark_request_done claims the request once for this reply (#169: it closes when the reply is sent)", async () => {
     const tester = await seed();
     const request = await addRequest(t.db, { testerId: tester.id, author: "Yanni", body: "Share the sleep article", exact: false, sendNow: false, at: now });
     const state = await loadCoachState(t.db, tester, { now, isFirstText: false });
     const result = await runTool(t.db, state, "mark_request_done", { request: requestRef(request.id) }, now);
     expect(result.ok).toBe(true);
     const rows = await thread(tester.id);
-    expect(rows.find((r) => r.id === request.id)).toMatchObject({ requestStatus: "done", doneAt: now });
-    expect(rows.at(-1)).toMatchObject({ kind: "coach", author: APP_AUTHOR });
-    expect(rows.at(-1)!.body).toMatch(/^Done \(in a reply, Tue 12:00 PM\): Share the sleep article$/);
+    expect(rows.find((r) => r.id === request.id)).toMatchObject({ requestStatus: "sending", claimedAt: now, doneAt: null });
     // Later rounds of the same reply still see it, so the text doesn't drop it (eval: article-link).
     const sameReply = await loadCoachState(t.db, tester, { now, isFirstText: false });
     // #199: under "This text carries", so the text doesn't drop it.

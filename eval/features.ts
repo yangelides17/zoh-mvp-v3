@@ -167,13 +167,14 @@ export const FEATURES: Record<string, FeatureDef> = {
         scope: "conversation",
         group: "flow",
         label:
-          "The first plan shows the destination (if they named one), day 1's step, the usual schedule and the proof, plus a short general line on how progression works from here; no list or path of future steps",
+          "The first plan shows the destination (if one was agreed), day 1's step, the usual schedule and the proof, plus a short general line on how progression works from here; no list or path of future steps",
       },
       {
         id: "destination",
         scope: "conversation",
         group: "flow",
-        label: "No destination given: at most one light ask, and the plan still locks smoothly without one",
+        label:
+          "No destination given: at most one light ask; a near one ZOH suggests is built only on what they shared, with a reason, and left to them; with too little to go on no guess, and the plan still locks smoothly without one",
       },
       {
         id: "step-defined",
@@ -353,6 +354,20 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** Memory v2 part B (#253): the coach reads and uses v2 memory. Cases only, each seeded with v2 memory. */
+  "memory-v2": {
+    name: "memory-v2",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      { id: "v2-recall", scope: "text", group: "flow", label: "Uses a detail from v2 memory naturally (a person, a place, a fact from the tree)" },
+      { id: "v2-followup", scope: "text", group: "flow", label: "Brings up an open follow-up or todo at most once, only when it fits, never as a list" },
+      { id: "v2-forget", scope: "conversation", group: "flow", label: "Never mentions a forgotten topic (entries, pages, or daily summaries about it), even when prompted" },
+      { id: "v2-add-item", scope: "conversation", group: "flow", label: "add_item creates a dated todo or followup; the reply promises only the next text ZOH will actually send, not the requested time" },
+      { id: "v2-what-you-know", scope: "text", group: "flow", label: "Answers 'what do you know about me' with a short honest summary from v2 memory, then asks if anything's off" },
+      { id: "v2-honest-limits", scope: "text", group: "conversation", label: "When the tester wants something ZOH can't coach yet, the coach is honest about its limits" },
+    ],
+  },
   /** Step log and next step (#9): cases only, each seeded with goals and next steps. Target 80%. */
   "next-step": {
     name: "next-step",
@@ -412,7 +427,40 @@ export const FEATURES: Record<string, FeatureDef> = {
         label:
           "When ZOH texts first to raise a change to their plan or a next step, it asks their OK in its own voice as its own idea, reads naturally with nothing from them before it, and never says the plan already changed",
       },
+      // #169: a team question is asked once and listened for, not chased.
+      { id: "asks-once", scope: "conversation", group: "conversation", label: "ZOH asks a team question once, naturally, without saying it came from the team" },
+      {
+        id: "answer-recorded",
+        scope: "conversation",
+        group: "flow",
+        label:
+          "When they answer a team question, ZOH records it (close to their words); when they talk past it, ZOH records a dodge and doesn't re-ask; an unrelated text isn't recorded as an answer",
+      },
+      // #168: a founder's file goes out with a line true to what's in it.
+      {
+        id: "file-framing",
+        scope: "conversation",
+        group: "flow",
+        label: "The framing line matches what's actually in the file (nothing invented or contradicted, like its length; it needn't list every detail) and ties to their step",
+      },
+      // #158: the team's lasting guidance on how to coach them (skip all three when the state has none).
+      {
+        id: "guidance-used",
+        scope: "conversation",
+        group: "conversation",
+        label:
+          "Only where the team left guidance lines (not notes): when a line applies to what's happening, ZOH's reply visibly follows it; where none applies, ZOH reads as it would with no guidance (it doesn't force the guidance in)",
+      },
+      { id: "guidance-unspoken", scope: "conversation", group: "conversation", label: "ZOH never reveals, quotes or credits the team's guidance; asked directly, it's honest that the team reads along" },
+      {
+        id: "guidance-tester-wins",
+        scope: "conversation",
+        group: "flow",
+        label: "When their own request goes against a team guidance line, ZOH follows their request, not the guidance",
+      },
     ],
+    // #169: the grader sees what ZOH recorded for the team's questions.
+    saved: true,
   },
   /** Commands and safety (#12): pause and feedback, cases only, each seeded with a locked plan. Target 80%. */
   commands: {

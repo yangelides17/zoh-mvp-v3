@@ -71,7 +71,7 @@
   },
   "testerLines": [
     "here's tonight's scene:\n\nTheo set the ledger down on the counter and didn't open it. \"You kept the second chair,\" he said. Mara shrugged, wiping a glass that was already dry. \"Somebody had to.\" He sat. Neither of them said the name. Outside, the lamp turned over once, twice, and the harbor went white and dark again.",
-    "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]"
+    { "say": "[photo notes-scene-screenshot.jpg: a Notes screenshot titled \"Lighthouse - scene 4\": Theo sets the ledger down, Mara says she kept the second chair, the lamp turns over the harbor]", "when": "after ZOH asks for a screenshot of the scene where they wrote it", "fixed": true, "expected": true }
   ],
   "whatWentWrong": "In the Nov 1 writing run, a scene pasted as text was accepted as the step's proof.",
   "shouldHaveHappened": "ZOH responds warmly to the writing but doesn't check it off yet: it asks for a quick screenshot of where they wrote it, saying why in its own words (real proof keeps it honest; words alone would be easy to game), never suspicious. Once the screenshot arrives it counts the day and celebrates, and since it already has the text it can comment on the scene; one question at most per text.",

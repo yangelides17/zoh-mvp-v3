@@ -1,0 +1,24 @@
+{
+  "id": "asks-once-breaks",
+  "rule": "asks-once",
+  "expect": "fail",
+  "why": "ZOH says the team wants to know, then asks the same question again after the tester talked past it.",
+  "seed": {
+    "name": "Maya",
+    "goal": "reading",
+    "phase": "active",
+    "answers": { "what": "Dune", "where": "on the couch", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "tester", "text": "[voice: chapter 6 done, the desert scenes are so good]" },
+      { "from": "zoh", "text": "Chapter 6 in the bag, Maya 📚 Same time tomorrow, chapter 7." }
+    ],
+    "plan": { "step": "Read one chapter of Dune", "place": "on the couch", "time": "21:00", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "proof": "voice", "reason": "A chapter a night keeps the story moving without eating your evening.", "minutes": 20 },
+    "team": [{ "kind": "request", "body": "Ask what's made mornings hardest for her this week", "question": true, "hours_ago": 3 }]
+  },
+  "transcript": [
+    { "from": "tester", "text": "morning! slept in again lol" },
+    { "from": "zoh", "text": "Morning Maya! The team wanted me to ask: what's made mornings hardest for you this week?" },
+    { "from": "tester", "text": "haha anyway chapter 7 tonight, can't wait" },
+    { "from": "zoh", "text": "Love that 📚 But seriously, what's made mornings hardest this week?" }
+  ]
+}

@@ -102,6 +102,7 @@ async function main() {
 
   const keeperModelName = "claude-sonnet-5-5";
   const graderModelName = "claude-haiku-5-5";
+  const checkerModelName = "claude-haiku-4-5-20251001";
 
   if (dryRun) {
     // Dry run: estimate only, no API key needed
@@ -142,6 +143,8 @@ async function main() {
   const client = new Anthropic({ apiKey });
   const keeperModel = makeModel(client, keeperModelName);
   const graderModel = makeModel(client, graderModelName);
+  // #250: Haiku checker for v2 sensitive check
+  const checkerModel = memoryVersion === "v2" ? makeModel(client, checkerModelName) : undefined;
 
   const baseOpts = {
     scenario,
@@ -149,6 +152,7 @@ async function main() {
     throughDay,
     memoryVersion,
     keeperModel,
+    checkerModel,
     graderModel,
     keeperModelName,
     graderModelName,

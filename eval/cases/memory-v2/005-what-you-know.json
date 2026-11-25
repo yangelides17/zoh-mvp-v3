@@ -1,0 +1,150 @@
+{
+  "id": "what-you-know",
+  "title": "Honest summary from v2 memory, asks if anything is off",
+  "origin": "#253 (memory v2 part B): 'what do you know about me' from v2 tree",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "one 45-min study block, phone in another room", "where": "her desk", "when": "10 pm", "how_long": "45 min" },
+    "quiet_hours": { "start": "02:00", "end": "11:00" },
+    "history": [
+      { "from": "zoh", "text": "Maya! 45-min study block at 10 tonight, phone in the other room." },
+      { "from": "tester", "text": "did it, practice problems this time" },
+      { "from": "zoh", "text": "Nice. Practice problems over rereading — that's the move." }
+    ],
+    "plan": {
+      "step": "One 45-min study block, phone in another room",
+      "place": "her desk",
+      "time": "22:00",
+      "days": ["sun", "mon", "tue", "thu"],
+      "proof": "screenshot",
+      "proof_note": "timer screenshot",
+      "reason": "i used to read so much and now i just scroll",
+      "minutes": 45,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "note": "Paper submitted 11:58pm" },
+      { "days_ago": 3, "status": "done", "note": "Paper halfway written" }
+    ],
+    "maintenance": [
+      {
+        "goal": "reading",
+        "step": "15 pages of Normal People by Sally Rooney",
+        "time": "23:30",
+        "since_days_ago": 13,
+        "streak_days": 12,
+        "checkins": [
+          { "days_ago": 7, "answer": "kept_up" },
+          { "days_ago": 1, "answer": "kept_up" }
+        ]
+      }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Maya",
+          "about": "College junior, economics major, in Boston. Night owl, texts 10pm-2am. \"i used to read so much and now i just scroll\"."
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Maya likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Quiet hours 2am-11am (chosen)" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "People in Maya's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Maya"
+        },
+        {
+          "kind": "area",
+          "title": "Reading",
+          "about": "Maya's reading habit — maintenance goal since she switched focus to deep work for midterms",
+          "parent_title": "Maya"
+        },
+        {
+          "kind": "area",
+          "title": "Studying/Deep Work",
+          "about": "Maya's focus since day 15 — midterms",
+          "parent_title": "Maya"
+        },
+        {
+          "kind": "goal",
+          "title": "Deep work goal",
+          "about": "Plan v2: One 45-min study block, phone in another room, Sun/Mon/Tue/Thu at 10pm. Switched from reading to deep_work for midterms (day 15). Takeaway: practice problems > rereading notes. Midterms done day 25.",
+          "parent_title": "Studying/Deep Work",
+          "goal_slug": "deep_work"
+        },
+        {
+          "kind": "goal",
+          "title": "Reading goal",
+          "about": "15 pages of Normal People by Sally Rooney, Sun-Thu 11:30pm. Book borrowed from a friend \"like a year ago\". Finished Normal People on the train home day 28. Wants next Sally Rooney — ZOH said \"Let me think on it.\"",
+          "parent_title": "Reading",
+          "goal_slug": "reading",
+          "entries": [
+            { "type": "fact", "text": "Finished Normal People on the train home day 28" },
+            {
+              "type": "followup",
+              "text": "Wants next Sally Rooney book — ZOH said \"Let me think on it\"",
+              "when": "2026-10-31",
+              "status": "open"
+            }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Lily",
+          "about": "Roommate. Had a dishes conflict days 9-11, Lily apologized day 12.",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "Roommate" },
+            { "type": "fact", "text": "Dishes conflict days 9-11, Lily apologized day 12" }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Devon",
+          "about": "Cafe manager, assigned her 3 closes during midterms (day 19)",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "Cafe manager" },
+            { "type": "fact", "text": "Assigned Maya 3 closes during midterms (day 19)" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "Her desk",
+          "about": "Where Maya does study blocks",
+          "parent_title": "Places"
+        },
+        {
+          "kind": "place",
+          "title": "Her bed",
+          "about": "Where Maya reads",
+          "parent_title": "Places"
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "\"exams are DONE\", finished Normal People on train, wants next Sally Rooney." },
+        { "date": "2026-10-30", "summary": "ZOH asked about reading, unanswered." },
+        { "date": "2026-10-29", "summary": "Paper submitted 11:58pm." }
+      ]
+    }
+  },
+  "startTime": "22:30",
+  "testerLines": ["what do you know about me"],
+  "whatWentWrong": "New case: v2 'what do you know about me' response.",
+  "shouldHaveHappened": "ZOH gives a short honest summary drawn from the v2 tree: Maya the college junior in Boston, economics, the deep work and reading goals, Lily the roommate, Devon the cafe manager, finished Normal People, wants the next Sally Rooney. A few sentences, not a list of every fact. Then asks if anything's off or missing. It doesn't claim to know things that aren't in memory or recite an exhaustive inventory. NOTE: The 'short' (1-3 sentence) check should be relaxed for this case — a 'what do you know' answer will naturally run longer than a normal coaching text."
+}

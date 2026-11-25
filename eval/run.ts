@@ -12,7 +12,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "../src/config.js";
 import { fromStored, loadBaseline, producerChanges, producerFor, PRODUCER_LABELS, storeBaseline, type BaselineEntry } from "./baseline.js";
 import { addUsage, createCompleter } from "./claude.js";
-import { HAIKU, USAGE, UsageError, evalApiKey, graderModel, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
+import { CASE_SIM_MODEL, HAIKU, USAGE, UsageError, evalApiKey, graderModel, missingKeyMessage, parseEvalArgs, type EvalArgs } from "./cli.js";
 import { budgetFor, currentBranch, overBudgetMessage, readLedger, recordSpend, RELEASE_BUDGET_USD } from "./budget.js";
 import { billedDollars, estimateCost, type Estimate } from "./cost.js";
 import { FEATURES, REPO_ROOT, REPORTS_DIR, getFeature, readPages, rubricFor, type FeatureDef, type RubricRule } from "./features.js";
@@ -30,7 +30,7 @@ import {
   type ReportData,
 } from "./report.js";
 import { caseIdOf, compareScores, groupScores, scoreCases, type CaseScore } from "./score.js";
-import { simulatedTester } from "./simulator.js";
+import { caseTester, simulatedTester, WAITS_PER_CASE, WAITS_PER_LINE } from "./simulator.js";
 import type { ConversationPlan, GradedConversation } from "./types.js";
 
 /** One feature's share of the run: what to play (or re-grade), and the baseline to compare with. */
@@ -74,13 +74,14 @@ async function main(): Promise<number> {
   const coachModel = loadConfig({ DATABASE_URL: "unused", CLAUDE_MODEL: env.CLAUDE_MODEL }).claude.model;
   const evalModel = graderModel(env, coachModel, args.final);
   const simModel = env.EVAL_SIM_MODEL?.trim() || HAIKU;
+  const caseSimModel = env.EVAL_CASE_SIM_MODEL?.trim() || CASE_SIM_MODEL;
   const all = args.feature === "all";
   const features = all ? Object.values(FEATURES) : [getFeature(args.feature)!];
 
   const jobs: Job[] = [];
   for (const feature of features) {
     try {
-      jobs.push(await prepare(feature, args, { all, coachModel, evalModel, simModel }));
+      jobs.push(await prepare(feature, args, { all, coachModel, evalModel, simModel, caseSimModel }));
     } catch (err) {
       console.error((err as Error).message);
       return 1;
@@ -106,7 +107,7 @@ async function main(): Promise<number> {
   }
   console.log(
     [
-      `Models: coach ${coachModel}, simulator ${simModel}, grader ${evalModel}${args.final ? " (final run)" : ""}.`,
+      `Models: coach ${coachModel}, simulator ${simModel} (case lines ${caseSimModel}), grader ${evalModel}${args.final ? " (final run)" : ""}.`,
       `Rough cost: ${fmtTokens(tokens.low)}–${fmtTokens(tokens.high)} tokens, about $${total.low.toFixed(2)}–$${total.high.toFixed(2)}.`,
     ].join("\n"),
   );
@@ -154,6 +155,7 @@ async function main(): Promise<number> {
   const restoreFetch = guardFetch(meter);
   const complete = createCompleter({ apiKey: evalApiKey(env)!, model: evalModel });
   const simulate = createCompleter({ apiKey: evalApiKey(env)!, model: simModel });
+  const caseSimulate = createCompleter({ apiKey: evalApiKey(env)!, model: caseSimModel });
   for (const job of runnable) {
     const startedAt = new Date();
     const spentBefore = meter.dollars;
@@ -162,7 +164,7 @@ async function main(): Promise<number> {
       graded = (await regradeConversations(job.saved, { rubric: job.rubric, pages: job.pages, complete, concurrency: args.concurrency })).convs;
       console.log(`  ${job.feature.name}: re-graded ${graded.filter((c) => c.grade).length} of ${graded.length} conversations`);
     } else {
-      graded = await play(job, args, { env, complete, simulate });
+      graded = await play(job, args, { env, complete, simulate, caseSimulate });
     }
     await writeReport(job, graded, args, { startedAt, coachModel, evalModel, simModel, costUsd: meter.dollars - spentBefore });
     if (args.storeBaseline || args.regradeBaseline) {
@@ -186,7 +188,7 @@ async function main(): Promise<number> {
 }
 
 /** What a feature's run plays or re-grades, and the baseline it compares with. */
-async function prepare(feature: FeatureDef, args: EvalArgs, models: { all: boolean; coachModel: string; evalModel: string; simModel: string }): Promise<Job> {
+async function prepare(feature: FeatureDef, args: EvalArgs, models: { all: boolean; coachModel: string; evalModel: string; simModel: string; caseSimModel: string }): Promise<Job> {
   const rubric = rubricFor(feature);
   const pages = await readPages(feature);
   const scenarios = loadScenarios(feature);
@@ -229,6 +231,7 @@ async function prepare(feature: FeatureDef, args: EvalArgs, models: { all: boole
     coachModel: models.coachModel,
     evalModel: models.evalModel,
     simModel: models.simModel,
+    caseSimModel: models.caseSimModel,
     memory: feature.memory,
     gradeOnly: !!job.saved,
     graderCalls: graderCalls(rubric),
@@ -264,24 +267,32 @@ async function regradeEstimate(job: Job, ids: string[], models: { coachModel: st
 async function play(
   job: Job,
   args: EvalArgs,
-  deps: { env: NodeJS.ProcessEnv; complete: ReturnType<typeof createCompleter>; simulate: ReturnType<typeof createCompleter> },
+  deps: { env: NodeJS.ProcessEnv; complete: ReturnType<typeof createCompleter>; simulate: ReturnType<typeof createCompleter>; caseSimulate: ReturnType<typeof createCompleter> },
 ): Promise<GradedConversation[]> {
   const { feature, plans, rubric, pages } = job;
   let done = 0;
   const graded = await mapLimit(plans, args.concurrency, async (plan, index): Promise<GradedConversation> => {
-    const tester = plan.kind === "case" ? scriptedTester(plan.regression!.testerLines) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
-    // A case gets one turn past its script so it ends "by script", not by the cap.
-    const maxTurns = plan.kind === "case" ? plan.regression!.testerLines.length + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
+    const c = plan.regression;
+    // #230: a case whose lines wait for their moment gets the case tester; plain cases replay as before.
+    const waits = c?.testerLines.some((l) => typeof l !== "string") ?? false;
+    const tester = c ? (waits ? caseTester(c, deps.caseSimulate) : scriptedTester(c.testerLines)) : simulatedTester(plan.scenario!, deps.simulate, feature.doneWhen);
+    // A case gets one turn past its script (and any extra replies a waiting line may take) so it ends "by script", not by the cap.
+    // Optional lines' extra replies come on top of the case's (a dropped one's are given back).
+    const optional = c?.testerLines.filter((l) => typeof l !== "string" && l.optional).length ?? 0;
+    const maxTurns = c ? c.testerLines.length + (waits ? WAITS_PER_CASE + WAITS_PER_LINE * optional : 0) + 1 : (plan.scenario!.maxTurns ?? args.maxTurns);
     const result = await runConversation(plan, tester, { maxTurns, index, env: deps.env, memory: feature.memory, saved: feature.saved, record: feature.record });
     const out: GradedConversation = { ...result };
     const zohCount = result.transcript.filter((l) => l.from === "zoh").length;
+    // Every run is graded, so no ZOH mistake is hidden (#230). A case problem's grade is shown beside it but kept
+    // out of the scores: the case, not ZOH, needs fixing.
     if (!result.error || result.transcript.length > 0) {
       try {
         const g = await gradeConversation(
-          { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, saved: result.saved, rubric, pages },
+          { plan, context: result.context, transcript: result.transcript, memory: result.memory, record: result.record, saved: result.saved, knew: result.knew, rubric, pages },
           deps.complete,
         );
-        out.grade = g.grade;
+        if (result.endedBy === "case-problem") out.problemGrade = g.grade;
+        else out.grade = g.grade;
         out.gradeError = g.error;
         out.usage = addUsage(out.usage, g.usage);
       } catch (err) {
@@ -289,7 +300,15 @@ async function play(
       }
     }
     done += 1;
-    const status = out.error ? `error: ${out.error}` : out.gradeError ? `not graded: ${out.gradeError}` : "graded";
+    const status = out.error
+      ? `error: ${out.error}`
+      : result.lines?.problem
+        ? `case problem, graded but not scored: ${result.lines.problem}`
+        : out.gradeError
+          ? `not graded: ${out.gradeError}`
+          : result.lines?.missed
+            ? `graded (${result.lines.missed})`
+            : "graded";
     console.log(`  [${done}/${plans.length}] ${feature.name} ${plan.key}: ${zohCount} ZOH texts, ended by ${result.endedBy}, ${status}`);
     return out;
   });

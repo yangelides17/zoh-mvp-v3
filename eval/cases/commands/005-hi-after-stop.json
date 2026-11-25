@@ -63,9 +63,13 @@
   },
   "testerLines": [
     "stop",
-    "hi",
-    "how's your day going lol",
+    { "say": "hi", "starts": true },
+    { "say": "how's your day going lol", "starts": true },
     "advance to 21:59"
+  ],
+  "facts": [
+    "you stopped the texts earlier today",
+    "you're just saying hi, not sure about picking reading back up"
   ],
   "whatWentWrong": "Live Nov 1: after STOP then \"hi\", a second text went out saying \"I'm not sending this text. Yanni opted out…\", because \"hi\" had quietly restarted ZOH's own texts.",
   "shouldHaveHappened": "STOP gets the fixed confirmation. \"hi\" gets a warm reply that answers it and asks once, without pushing, whether they want to pick reading back up; it doesn't restart anything, mention today's step or ask for proof. The chat line gets a light, friendly answer with no second restart question. ZOH starts no texts for the rest of the day (no kickoff, check-in or follow-up), and no text is ever about not sending.",

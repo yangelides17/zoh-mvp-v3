@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, gte, inArray, isNotNull, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import type { Db } from "../db/client.js";
+import { logCoachingChange } from "../coaching/history.js";
 import {
   flags,
   goals,
@@ -159,6 +160,7 @@ export async function addFact(
   page: MemoryPage,
   values: { text: string; sourceMessageId: string | null; section?: string; label?: string; day?: string },
   at: Date,
+  by = "ZOH",
 ): Promise<MemoryFact> {
   const [fact] = await db
     .insert(memoryFacts)
@@ -166,6 +168,8 @@ export async function addFact(
     .returning();
   if (!fact) throw new Error("addFact returned no row");
   await touch(db, page.id, at);
+  const area = coachingArea(fact);
+  if (area) await logCoachingChange(db, { testerId: fact.testerId, area, action: "add", to: fact.text, by, at });
   return fact;
 }
 
@@ -174,6 +178,7 @@ export async function updateFact(
   fact: MemoryFact,
   patch: { text: string; sourceMessageId?: string | null; day?: string },
   at: Date,
+  by = "ZOH",
 ): Promise<MemoryFact> {
   const [updated] = await db
     .update(memoryFacts)
@@ -182,12 +187,21 @@ export async function updateFact(
     .returning();
   if (!updated) throw new Error("updateFact found no row");
   await touch(db, fact.pageId, at);
+  const area = coachingArea(fact);
+  if (area && updated.text !== fact.text) await logCoachingChange(db, { testerId: fact.testerId, area, action: "edit", from: fact.text, to: updated.text, by, at });
   return updated;
 }
 
-export async function removeFact(db: Db, fact: MemoryFact, at: Date): Promise<void> {
+export async function removeFact(db: Db, fact: MemoryFact, at: Date, by = "ZOH"): Promise<void> {
   await db.delete(memoryFacts).where(eq(memoryFacts.id, fact.id));
   await touch(db, fact.pageId, at);
+  const area = coachingArea(fact);
+  if (area) await logCoachingChange(db, { testerId: fact.testerId, area, action: "remove", from: fact.text, by, at });
+}
+
+/** #158: a stated preference is one of their style requests, a learned one ZOH's; both go in the coaching history. */
+function coachingArea(fact: MemoryFact): "style" | "learned" | undefined {
+  return fact.section === "stated" ? "style" : fact.section === "learned" ? "learned" : undefined;
 }
 
 export async function factsOf(db: Db, pageIds: string[]): Promise<MemoryFact[]> {
@@ -282,7 +296,7 @@ export async function ensureCorePages(db: Db, tester: Tester, at: Date): Promise
     const notes = tester.styleNotes.split(";").map((n) => n.trim()).filter(Boolean);
     // A millisecond apart, so they keep the order they were said in.
     for (const [i, note] of notes.entries()) {
-      await addFact(db, preferences, { text: note, sourceMessageId: null, section: "stated" }, new Date(at.getTime() + i));
+      await addFact(db, preferences, { text: note, sourceMessageId: null, section: "stated" }, new Date(at.getTime() + i), "tester");
     }
   }
   return { self, preferences };
@@ -362,15 +376,19 @@ export async function timeline(db: Db, tester: Tester, limit = 30): Promise<Time
   const media = await db
     .select()
     .from(messages)
+    // Their files, and (#168) the founders' files ZOH sent them, labeled as such.
     .where(and(eq(messages.contactNumber, tester.phone), isNotNull(messages.mediaUrl), gte(messages.createdAt, memoryStart(tester))))
     .orderBy(desc(sentTime), desc(messages.id))
     .limit(limit);
   const items: TimelineItem[] = [
     ...pages.map((p) => ({ ref: pageRef(p.id), kind: p.kind, title: p.title, summary: p.summary, at: p.updatedAt })),
-    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: mediaLabel(m), summary: mediaText(m), at: messageTime(m) })),
+    ...media.map((m) => ({ ref: messageRef(m.id), kind: mediaLabel(m), title: m.direction === "outbound" ? SENT_BY_ZOH : mediaLabel(m), summary: mediaText(m), at: messageTime(m) })),
   ];
   return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
 }
+
+/** #168: how a founder's file ZOH sent them is named in memory, so it's never taken for one of theirs. */
+export const SENT_BY_ZOH = "Sent by ZOH (from the team)";
 
 export function mediaLabel(m: Message): TimelineItem["kind"] {
   const kind = mediaKind(m.mediaContentType ?? undefined, m.mediaUrl ?? "");

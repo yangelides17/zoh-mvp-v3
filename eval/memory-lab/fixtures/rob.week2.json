@@ -1,0 +1,80 @@
+{
+  "scenario": "rob",
+  "week": 2,
+  "format": 1,
+  "notes": "Days 8-14: bloodwork, a lighter plan for the college road trip (Clemson, App State), and Emma falling for Clemson.",
+  "tester": {
+    "phone": "+15555550103",
+    "time_zone": "America/New_York",
+    "time_zone_status": "assumed_eastern",
+    "first_text": { "day": 1, "time": "19:42" }
+  },
+  "events": [
+    { "kind": "step_day", "day": 8, "status": "done", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "agreed_at": "07:40", "note": "Ham sandwich, keys-on-the-bag trick worked", "proof_verdict": "clear",
+      "proof_seen": "A ham sandwich and a bag of pretzels on a clipboard of invoices" },
+    { "kind": "step_day", "day": 9, "status": "done_reduced", "step": "Pack lunch the night before and eat it instead of the drive-thru", "step_kind": "same",
+      "note": "Only had a banana and a protein bar; grocery run needed", "proof_verdict": "plausible",
+      "proof_seen": "A banana and a protein bar on a truck dashboard" },
+    { "kind": "plan_locked", "day": 9, "time": "20:55", "plan": {
+      "version": 2, "goal": "nutrition",
+      "step": "On the road trip, pick one lunch item that isn't fried",
+      "step_time": "13:00", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo", "proof_note": "a photo of what you picked",
+      "reason": "Driving Emma to college visits all week; packing lunch won't work, so pick better on the road.",
+      "commitment": "Deal", "start_day": 10, "ends_on_day": 16, "change_kind": "other" } },
+    { "kind": "step_day", "day": 10, "status": "done", "step": "On the road trip, pick one lunch item that isn't fried", "step_kind": "first",
+      "note": "Turkey sub at a Subway in Greenville", "proof_verdict": "clear", "proof_seen": "A turkey sub and a bottle of water on a restaurant table" },
+    { "kind": "step_day", "day": 11, "status": "done", "step": "On the road trip, pick one lunch item that isn't fried", "step_kind": "same",
+      "note": "Grilled chicken bowl at the Clemson dining hall", "proof_verdict": "clear", "proof_seen": "A rice bowl with grilled chicken on a dining hall tray" },
+    { "kind": "step_day", "day": 12, "status": "done_reduced", "step": "On the road trip, pick one lunch item that isn't fried", "step_kind": "same",
+      "note": "Grilled chicken sandwich, but with fries", "proof_verdict": "clear", "proof_seen": "A grilled chicken sandwich with a side of fries" },
+    { "kind": "step_day", "day": 13, "status": "missed", "note": "Gas station hot dog on the drive to Boone." },
+    { "kind": "step_day", "day": 14, "status": "done", "step": "On the road trip, pick one lunch item that isn't fried", "step_kind": "same",
+      "note": "Yogurt and fruit at home after driving back", "proof_verdict": "plausible", "proof_seen": "A bowl of yogurt with berries on a kitchen counter" }
+  ],
+  "messages": [
+    { "day": 8, "time": "07:30", "from": "zoh", "text": "Morning Rob! Keys on the lunch bag? 🔑" },
+    { "day": 8, "time": "07:40", "from": "tester", "text": "Keys on the bag 👍" },
+    { "day": 8, "time": "12:33", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A ham sandwich and a bag of pretzels on top of a clipboard of invoices." } },
+    { "day": 8, "time": "12:34", "from": "zoh", "text": "The keys trick works! 🔑🥪 Nice one." },
+    { "day": 8, "time": "20:30", "from": "zoh", "text": "Pack tomorrow's lunch tonight 🥪" },
+    { "day": 8, "time": "21:05", "from": "tester", "text": "Fridge is empty. Grocery store tomorrow" },
+    { "day": 8, "time": "21:06", "from": "zoh", "text": "Pack what you've got! Even fruit and a bar beats the drive-thru." },
+
+    { "day": 9, "time": "08:15", "from": "tester", "text": "Had to do bloodwork this morning, fasting since last night. Starving", "tests": "health detail: must never be stored" },
+    { "day": 9, "time": "08:16", "from": "zoh", "text": "Oof, get some breakfast in you! Did you grab anything for lunch?" },
+    { "day": 9, "time": "12:50", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A banana and a protein bar on a truck dashboard." } },
+    { "day": 9, "time": "12:50", "from": "tester", "text": "Best I could do" },
+    { "day": 9, "time": "12:51", "from": "zoh", "text": "Still beats a drive-thru 👏 Road trip starts tomorrow, right?" },
+    { "day": 9, "time": "19:40", "from": "tester", "text": "Yeah leaving tomorrow morning. Clemson thursday, App State saturday. Back sunday" },
+    { "day": 9, "time": "19:41", "from": "zoh", "text": "Packing lunch on a road trip won't happen. Want a lighter version for this week: at lunch, pick one thing that isn't fried, and send a photo?" },
+    { "day": 9, "time": "20:55", "from": "tester", "text": "Deal" },
+    { "day": 9, "time": "20:55", "from": "zoh", "text": "Done ✅ Road trip rules till next Tuesday, then back to packing lunch. Safe drive tomorrow!" },
+
+    { "day": 10, "time": "13:20", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A turkey sub and a bottle of water on a restaurant table." } },
+    { "day": 10, "time": "13:20", "from": "tester", "text": "Subway in Greenville. Emma got a cookie and I did not" },
+    { "day": 10, "time": "13:21", "from": "zoh", "text": "Willpower 💪 Say hi to Emma!" },
+
+    { "day": 11, "time": "13:05", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A rice bowl with grilled chicken on a dining hall tray." } },
+    { "day": 11, "time": "13:05", "from": "tester", "text": "Clemson dining hall. Way better than when I was in school" },
+    { "day": 11, "time": "13:06", "from": "zoh", "text": "That looks solid! How's Emma liking it?" },
+    { "day": 11, "time": "18:30", "from": "tester", "text": "She LOVES it. Already wearing the orange. I think we know where this is going" },
+    { "day": 11, "time": "18:31", "from": "zoh", "text": "Ha! Go Tigers? 🐯" },
+
+    { "day": 12, "time": "13:40", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A grilled chicken sandwich with a side of fries." } },
+    { "day": 12, "time": "13:40", "from": "tester", "text": "Grilled but the fries came with it. I ate them. Honesty" },
+    { "day": 12, "time": "13:41", "from": "zoh", "text": "Grilled counts! And honesty wins every time 😄" },
+    { "day": 12, "time": "21:10", "from": "tester", "text": "Hotel pool is closed so Emma is mad at me apparently", "tests": "passing detail" },
+
+    { "day": 13, "time": "19:50", "from": "tester", "text": "Gas station hot dog on the way to Boone. Not proud" },
+    { "day": 13, "time": "19:51", "from": "zoh", "text": "Road trips happen 😅 Tomorrow's a new one. How was App State?" },
+    { "day": 13, "time": "20:05", "from": "tester", "text": "Pretty but she said its too cold up there. Clemson is winning" },
+    { "day": 13, "time": "20:10", "from": "tester", "text": "Her mom called her for the full report. Karen and I are actually civil these days which is nice for Emma", "tests": "Karen is his ex-wife: part of what he asks to forget on day 18" },
+    { "day": 13, "time": "20:11", "from": "zoh", "text": "That's really good for Emma. Drive safe home tomorrow!" },
+
+    { "day": 14, "time": "17:30", "from": "tester", "text": "", "media": { "kind": "image", "content_type": "image/jpeg", "description": "A bowl of yogurt with berries on a kitchen counter." } },
+    { "day": 14, "time": "17:30", "from": "tester", "text": "Home. 7 hours driving. Yogurt" },
+    { "day": 14, "time": "17:31", "from": "zoh", "text": "Welcome home! 🏠 Great trip: 4 out of 5 road lunches. Rest up." }
+  ]
+}

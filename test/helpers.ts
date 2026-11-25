@@ -52,7 +52,7 @@ export async function makeDb(): Promise<{ db: Db; client: PGlite }> {
 }
 
 export class FakeSendblue implements SendblueClient {
-  calls: { kind: "typing" | "send" | "opt_in"; number: string; content?: string; state?: string; at: number }[] = [];
+  calls: { kind: "typing" | "send" | "opt_in"; number: string; content?: string; mediaUrl?: string; state?: string; at: number }[] = [];
   failSend = false;
   failOptIn = false;
   async optIn(number: string) {
@@ -60,8 +60,16 @@ export class FakeSendblue implements SendblueClient {
     if (this.failOptIn) throw new Error("Sendblue opt-in failed (HTTP 500)");
   }
   private n = 0;
-  async sendMessage(input: { number: string; content?: string }) {
-    this.calls.push({ kind: "send", number: input.number, content: input.content, at: performance.now() });
+  /** #168: files put on Sendblue's media host. */
+  uploads: { name: string; contentType: string; bytes: number }[] = [];
+  failUpload = false;
+  async uploadFile(file: { bytes: Uint8Array; contentType: string; name: string }) {
+    if (this.failUpload) throw new Error("Sendblue upload failed (HTTP 500)");
+    this.uploads.push({ name: file.name, contentType: file.contentType, bytes: file.bytes.length });
+    return `https://cdn.sendblue.test/${this.uploads.length}/${file.name}`;
+  }
+  async sendMessage(input: { number: string; content?: string; mediaUrl?: string }) {
+    this.calls.push({ kind: "send", number: input.number, content: input.content, ...(input.mediaUrl ? { mediaUrl: input.mediaUrl } : {}), at: performance.now() });
     if (this.failSend) throw new Error("Sendblue send failed (HTTP 500)");
     this.n += 1;
     return { messageHandle: `out-${this.n}`, status: "QUEUED", raw: { status: "QUEUED" } };

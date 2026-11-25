@@ -31,7 +31,13 @@
       { "goal": "bedtime", "step": "in bed, lights out, by 10:30", "time": "22:30", "since_days_ago": 6, "streak_days": 21 }
     ]
   },
-  "testerLines": ["advance to 09:05", "on it! and mostly, missed one night this week lol"],
+  "testerLines": [
+    "advance to 09:05",
+    { "say": "on it! and mostly, missed one night this week lol", "means": "she's on today's workout; she's mostly kept her bedtime, missing one night this week", "when": "after ZOH's morning text asks if she's still in bed by 10:30", "length": "short", "fixed": true, "expected": true }
+  ],
+  "facts": [
+    "you're doing today's push-ups and squats at home at 6"
+  ],
   "whatWentWrong": "New case, not a past mistake: a maintenance check-in.",
   "shouldHaveHappened": "The 9 am kickoff names today's 20 push-ups and 30 squats and folds in one light line asking if she's still in bed by 10:30, as its only question; no push or proof ask about bedtime. Her \"mostly, missed one night\" is taken lightly as still keeping it up (no guilt, no plan talk about bedtime, no lecture), and the reply stays short and points to today's workout.",
   "startTime": "08:55",

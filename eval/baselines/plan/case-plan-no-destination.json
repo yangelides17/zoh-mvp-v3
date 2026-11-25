@@ -2,12 +2,12 @@
   "feature": "plan",
   "id": "case:plan-no-destination",
   "suite": "regression",
-  "storedAt": "2026-11-18T06:13:13.096Z",
-  "branch": "dev",
+  "storedAt": "2026-11-18T18:32:13.845Z",
+  "branch": "feature/164-165-next-step-week-goal",
   "producer": {
     "grader": "claude-haiku-5-5",
-    "checks": "fe7bb86f7cc7",
-    "voice": "b413875b3c11",
+    "checks": "d432e193977e",
+    "voice": "91115d89bc5f",
     "instructions": "c7348af58300",
     "script": "d01ffb4470f6"
   },
@@ -76,39 +76,33 @@
             "checks": [
               {
                 "rule": "short",
-                "pass": true,
-                "borderline": true,
-                "reason": "Plan text runs about 10 short lines including intro and closer, a bit over the roughly 8-line plan allowance."
+                "pass": false,
+                "borderline": false,
+                "reason": "Plan text is about 12 lines including a non-list opener and closer; exceeds about 8 lines limit for plan presentation."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a plain bullet list with no markdown, hashtags or filler."
+                "reason": "Uses a plain bullet list, no markdown headings or hashtags or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
-                "borderline": false,
-                "reason": "Warm and direct with no overfamiliarity, and no emoji row."
+                "borderline": true,
+                "reason": "Warm and reasonable, though energy is calm rather than pushy-level; acceptable for a plan presentation."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses the tester's 20 minutes, nightstand and 9 pm, plus ZOH's own suggested voice-note proof."
+                "reason": "Uses only what Jordan said: Atomic Habits, nightstand, 20 minutes, 9 pm, no app."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 gives what (Atomic Habits), how long (20 minutes), where (in bed) and when (9 pm every day)."
-              },
-              {
-                "rule": "no-saved-dead-end",
-                "pass": true,
-                "borderline": false,
-                "reason": "Not a save confirmation; it presents the plan and carries the next move."
+                "reason": "Step gives what (Atomic Habits), how long (20 min), where (in bed), when (9 pm daily) and proof."
               },
               {
                 "rule": "one-question",
@@ -125,37 +119,37 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two short sentences."
+                "reason": "Two sentences with one question."
               },
               {
                 "rule": "plain-words",
                 "pass": true,
                 "borderline": false,
-                "reason": "Plain text with no markdown or filler."
+                "reason": "Plain text, no markdown or filler."
               },
               {
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Warm and energetic without overfamiliarity."
+                "reason": "Warm, uses name, not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates only the plan the tester agreed to, with no invented facts."
+                "reason": "Restates only known facts."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Restates the step with the amount and time, both already defined."
+                "reason": "Restates the defined step without new ambiguity."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Not a save confirmation; it moves to the commitment ask."
+                "reason": "Carries the commitment question forward."
               },
               {
                 "rule": "one-question",
@@ -172,7 +166,7 @@
                 "rule": "short",
                 "pass": true,
                 "borderline": false,
-                "reason": "Two sentences, within the limit."
+                "reason": "Two sentences, within limit."
               },
               {
                 "rule": "plain-words",
@@ -184,25 +178,25 @@
                 "rule": "voice",
                 "pass": true,
                 "borderline": false,
-                "reason": "Hype line for the lock, warm and not overfamiliar."
+                "reason": "Hype line for a clear yes, warm and not overfamiliar."
               },
               {
                 "rule": "honest",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses only the agreed details: 9 pm, 20 minutes, Atomic Habits, voice note."
+                "reason": "Only restates the agreed step and proof."
               },
               {
                 "rule": "step-defined",
                 "pass": true,
                 "borderline": false,
-                "reason": "Day 1 is fully defined: what, how long, where and when."
+                "reason": "Day 1 time, amount, place and proof all stated."
               },
               {
                 "rule": "no-saved-dead-end",
                 "pass": true,
                 "borderline": false,
-                "reason": "Locks the plan and states the next move, day 1 tonight."
+                "reason": "Gives the next move: day 1 tonight with proof."
               },
               {
                 "rule": "one-question",
@@ -218,52 +212,88 @@
             "rule": "no-seam",
             "pass": true,
             "borderline": false,
-            "reason": "No extra plan questions were needed; it moves from the plan to the commitment without a seam."
+            "reason": "No extra questions needed; plan locks without a stray that's-everything gap."
           },
           {
             "rule": "plan-shape",
             "pass": true,
-            "borderline": false,
-            "reason": "Concrete on what, how much, where, when and every day, with a voice-note proof that works without an app."
+            "borderline": true,
+            "reason": "Concrete with what, how much, where, when, daily schedule and voice note proof that fits a no-app user."
           },
           {
             "rule": "first-plan",
-            "pass": true,
-            "borderline": false,
-            "reason": "Shows day 1, the schedule, the proof and a short progression line, with no list of future steps."
+            "pass": false,
+            "borderline": true,
+            "reason": "Includes a progression line and a future-tweak note, but the 'Easy alternative' bullet is a plan element; no list of future steps, so mostly fine."
           },
           {
             "rule": "destination",
             "pass": true,
             "borderline": false,
-            "reason": "Does not re-ask the destination; only a light later mention, and the plan locks smoothly."
+            "reason": "Did not re-ask destination; one light mention that it can come later, then locked smoothly."
           },
           {
             "rule": "commitment",
             "pass": true,
             "borderline": false,
-            "reason": "Asks naturally whether they're officially committing, not a stock line."
+            "reason": "Asked 'Are you officially committing to this?' after 'looks good', a natural real commitment ask."
           },
           {
             "rule": "day-one",
             "pass": true,
             "borderline": false,
-            "reason": "Day 1 is set for tonight at 9 pm."
+            "reason": "Day 1 set for tonight at 9 pm, no pushback needed."
+          },
+          {
+            "rule": "quiet-hours",
+            "pass": true,
+            "borderline": false,
+            "reason": "9 pm step is outside default quiet hours, so no note needed."
+          },
+          {
+            "rule": "quiet-hours-after-lock",
+            "pass": true,
+            "borderline": false,
+            "reason": "No quiet hours raised after lock."
+          },
+          {
+            "rule": "quiet-hours-chosen",
+            "pass": true,
+            "borderline": false,
+            "reason": "No self-set quiet hours involved."
+          },
+          {
+            "rule": "nutrition",
+            "pass": true,
+            "borderline": false,
+            "reason": "Nutrition not relevant to this goal."
+          },
+          {
+            "rule": "goal-switch",
+            "pass": true,
+            "borderline": false,
+            "reason": "No goal switch occurred."
+          },
+          {
+            "rule": "revisions",
+            "pass": true,
+            "borderline": false,
+            "reason": "No revisions requested."
           },
           {
             "rule": "plan-shown",
             "pass": true,
             "borderline": false,
-            "reason": "The plan was shown as a bullet list and ended with one question."
+            "reason": "Plan shown as a bullet list in ZOH 1, ending with one question."
           },
           {
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Skips the destination ask, gives a full day 1 plan with proof and progression line, asks the commitment naturally, and locks on 'I'm in'."
+            "reason": "Did not re-ask destination, gave plan with defined day 1 step, schedule, no-app proof, progression line and locked on 'I'm in' without friction."
           }
         ],
-        "summary": "ZOH handled the no-destination case well: it skipped the destination ask, showed a complete, concrete first plan with a voice-note proof, and locked smoothly after a natural commitment ask. The only soft spot is that the plan text runs slightly long for a plan message."
+        "summary": "ZOH handled the no-destination case well: it skipped re-asking for a destination, showed a concrete plan with a no-app voice-note proof, asked for commitment naturally, and locked smoothly on 'I'm in'. The main weakness is that the plan text runs a bit long for the 8-line limit and its closing progression line is slightly wordy."
       }
     }
   ]

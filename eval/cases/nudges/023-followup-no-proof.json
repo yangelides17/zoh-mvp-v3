@@ -57,7 +57,11 @@
   "testerLines": [
     "advance to 19:15",
     "did it! legs are dead lol",
-    "I forgot to record it on Strava"
+    { "say": "I forgot to record it on Strava", "means": "didn't record the run, so there's no Strava screenshot", "when": "after ZOH asks for the run's screenshot or other proof", "length": "short", "expected": true }
+  ],
+  "facts": [
+    "you ran the 30 minutes around the park around 6, easy pace",
+    "you didn't start Strava, so there's no record of the run"
   ],
   "whatWentWrong": "New case, not a past mistake: no case covered the follow-up nudge and what comes after it.",
   "shouldHaveHappened": "A short check-in shortly before 6 is fine. With no word after the step's time and length, one follow-up text ZOH starts itself, asking how it went (1 to 3 sentences, no lecture). \"did it!\" gets real energy and a quick ask for the run's proof, with no check mark yet. When he forgot to record it, ZOH stays warm and asks for anything he can still send today (a photo or another screenshot, a voice note), says in a few words why proof matters, never accuses him and never caves into counting it without proof.",

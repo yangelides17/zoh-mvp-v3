@@ -144,6 +144,13 @@ describe("which parts each reply loads (#200)", () => {
     expect(FIXED_INSTRUCTIONS).toContain(GUIDANCE["Plan agreement"]);
   });
 
+  it("a reply that can propose the next step also reads today's step, where it's chosen (#164)", () => {
+    for (const { name, state: s, reach } of CASES.filter((c) => !c.state.nudgeMoment)) {
+      const parts = partsFor(s, reach);
+      if (parts.includes("nextStep")) expect(parts, name).toContain("todaysStep");
+    }
+  });
+
   it("every moment that applies has its guidance in what loads", () => {
     for (const { name, state: s, reach } of CASES) {
       const text = read(s, reach);
@@ -170,7 +177,8 @@ describe("no reply reads more than before (#200)", () => {
   it("with every part loaded, it's the whole page and every rule section, nothing dropped", () => {
     const page = splitVoicePage(loadVoiceDoc());
     const lines = (text: string) => text.split("\n").filter(Boolean).sort();
-    const whole = [FULL_VOICE_INTRO, `VOICE PAGE\n${page.voice}`, ...RULE_KEYS.map((k) => page.rules[k])].join("\n");
+    // memoryV2 is an alternative to memory (used for v2 testers); fullVoiceInstructions uses v1 memory only.
+    const whole = [FULL_VOICE_INTRO, `VOICE PAGE\n${page.voice}`, ...RULE_KEYS.filter((k) => k !== "memoryV2").map((k) => page.rules[k])].join("\n");
     expect(lines(before)).toEqual(lines(whole));
     expect(partsFor(state(), { media: true }).length).toBeLessThan(PARTS.length);
   });
