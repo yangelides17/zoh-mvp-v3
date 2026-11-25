@@ -334,10 +334,11 @@ export async function replaceV2Entry(
   newInput: Omit<CreateV2EntryInput, "replacesId">,
   at: Date,
 ): Promise<MemoryV2Entry> {
-  // Expire the old entry (resilient: may already be expired or gone on a retry)
-  const rows = await db.update(memoryV2Entries).set({ status: "expired", updatedAt: at }).where(eq(memoryV2Entries.id, oldEntry.id)).returning();
-  // Create the replacement, linking only if the old entry still exists
-  return addV2Entry(db, { ...newInput, replacesId: rows.length > 0 ? oldEntry.id : undefined }, at);
+  // Dated types (todo/event/followup) can only be open|done|dropped — close as "dropped".
+  // Non-dated types (fact/note/unsure) → "expired".
+  const closeStatus = ["todo", "event", "followup"].includes(oldEntry.type) ? "dropped" : "expired";
+  await db.update(memoryV2Entries).set({ status: closeStatus, updatedAt: at }).where(eq(memoryV2Entries.id, oldEntry.id));
+  return addV2Entry(db, { ...newInput, replacesId: oldEntry.id }, at);
 }
 
 /** Close a dated entry (todo/event/followup): done or dropped. */
@@ -521,6 +522,17 @@ export async function v2AllMessageIdsOn(db: Db, tester: Tester, date: string): P
     .from(messages)
     .where(and(eq(messages.contactNumber, tester.phone), sql`${messages.createdAt} >= ${memoryStart(tester)}`, sql`${sentTime} >= ${start}`, sql`${sentTime} < ${end}`));
   return rows.map((r) => r.id);
+}
+
+/** Find the most recent inbound message for a tester, to use as source for notes without a specific text. */
+export async function findV2MessageForSource(db: Db, tester: Tester): Promise<string | undefined> {
+  const [row] = await db
+    .select({ id: messages.id })
+    .from(messages)
+    .where(and(eq(messages.contactNumber, tester.phone), eq(messages.direction, "inbound")))
+    .orderBy(desc(messages.createdAt))
+    .limit(1);
+  return row?.id;
 }
 
 // ─── Bulk delete for rebuild ────────────────────────────────────────────

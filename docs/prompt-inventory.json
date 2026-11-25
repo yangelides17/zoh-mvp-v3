@@ -3797,30 +3797,30 @@
    "change": "unchanged"
   },
   {
-   "text": "Rewrite this daily summary, removing any mention of this topic: \"${trimmedNote ?? pageTitles.join(\"; \") ?? \"the forgotten content\"}\". Keep everything else. If nothing remains, write \"No notable events.\"",
-   "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > rewritePrompt",
-   "kind": "tool result",
-   "change": "new"
-  },
-  {
-   "text": "Original summary: ${daily.summary}",
-   "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > rewritePrompt",
-   "kind": "tool result",
-   "change": "new"
-  },
-  {
    "text": "the forgotten content",
    "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > rewritePrompt",
+   "where": "runMemoryTool > topic",
    "kind": "tool result",
-   "change": "new"
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > rewritePrompt)"
   },
   {
    "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > response > system > text",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Rewrite this daily summary, removing any mention of \"${topic}\". Keep everything else. If nothing remains, write \"No notable events.\"",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > response > messages > content",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Original: ${daily.summary}",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > response > messages > content",
    "kind": "tool result",
    "change": "new"
   },

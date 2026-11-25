@@ -266,14 +266,15 @@ export async function runMemoryTool(
 
       // --- V2 forget (only for v2 testers) ---
       if (isV2) {
-        // Delete v2 entries by ref (entries the v1 path didn't find)
+        const { addV2Entry: addEntry, getV2EntriesByTester, getV2ForgetTopics, findV2MessageForSource } = await import("./v2-store.js");
+        const doSensitiveCheck = await loadSensitiveCheck();
+
+        // 1. Delete v2 entries by ref (when the caller passes e: refs, e.g. from the lab)
         for (const ref of facts ?? []) {
           const entry = await findV2Entry(db, tester.id, ref);
-          if (!entry) continue; // already handled by v1 or truly not found
-          // Delete the entry and its full replace chain
+          if (!entry) continue;
           const chain = await getV2ReplacesChain(db, entry.id);
-          const allIds = [entry.id, ...chain];
-          for (const id of allIds) {
+          for (const id of [entry.id, ...chain]) {
             const [e] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
             if (e?.sourceMessageId) {
               await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
@@ -283,11 +284,10 @@ export async function runMemoryTool(
           }
           removed.push(entry.text);
         }
-        // Delete v2 pages by ref
+        // 2. Delete v2 pages by ref
         for (const ref of pages ?? []) {
           const page = await findV2Page(db, tester.id, ref);
           if (!page) continue;
-          // Get all entries on this page and their sources
           const entries = await getV2Entries(db, page.id);
           for (const e of entries) {
             if (e.sourceMessageId) {
@@ -296,51 +296,81 @@ export async function runMemoryTool(
             }
           }
           const result = await deleteV2Page(db, page);
-          if (result.ok) {
-            removed.push(page.title);
-            pageTitles.push(page.title);
+          if (result.ok) { removed.push(page.title); pageTitles.push(page.title); }
+        }
+
+        // 3. Topic-based v2 deletion (production: coach uses v1 refs, so v2 entries
+        //    are found by matching the topic text against entry text, page titles and Abouts).
+        const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
+        if (topicText) {
+          // Match any significant word in the topic (3+ chars) against entry text
+          const topicWords = topicText.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
+          const matchesTopic = (text: string) => {
+            const lower = text.toLowerCase();
+            return topicWords.some((w) => lower.includes(w));
+          };
+          // Search v2 entries by text match
+          const allV2Entries = await getV2EntriesByTester(db, tester.id);
+          for (const e of allV2Entries) {
+            if (matchesTopic(e.text) || (e.detail && matchesTopic(e.detail))) {
+              const chain = await getV2ReplacesChain(db, e.id);
+              for (const id of [e.id, ...chain]) {
+                const [row] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
+                if (row?.sourceMessageId) {
+                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: row.sourceMessageId }).onConflictDoNothing();
+                  forgottenMsgIds.push(row.sourceMessageId);
+                }
+                await db.delete(memoryV2Entries).where(eq(memoryV2Entries.id, id));
+              }
+            }
+          }
+          // Search v2 pages (person/place only) by title/about match
+          const { getV2Pages: getAllPages } = await import("./v2-store.js");
+          const allV2Pages = await getAllPages(db, tester.id);
+          for (const p of allV2Pages) {
+            if (p.kind !== "person" && p.kind !== "place") continue;
+            if (matchesTopic(p.title) || matchesTopic(p.about)) {
+              const entries = await getV2Entries(db, p.id);
+              for (const e of entries) {
+                if (e.sourceMessageId) {
+                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+                  forgottenMsgIds.push(e.sourceMessageId);
+                }
+              }
+              await deleteV2Page(db, p);
+            }
           }
         }
-        // Rewrite affected v2 daily summaries
+
+        // 4. Rewrite affected v2 daily summaries
         if (forgottenMsgIds.length > 0 && ctx.checker) {
+          const topic = topicText ?? "the forgotten content";
           const affected = await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds);
           for (const daily of affected) {
-            const rewritePrompt = `Rewrite this daily summary, removing any mention of this topic: "${trimmedNote ?? pageTitles.join("; ") ?? "the forgotten content"}". Keep everything else. If nothing remains, write "No notable events."
-
-Original summary: ${daily.summary}`;
             const response = await ctx.checker.create({
               system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
-              messages: [{ role: "user", content: rewritePrompt }],
-              tools: [],
-              toolChoice: "none",
+              messages: [{ role: "user", content: `Rewrite this daily summary, removing any mention of "${topic}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
+              tools: [], toolChoice: "none",
             });
             const rewritten = response.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
-            // Run sensitive check on the rewritten summary
-            const { getV2ForgetTopics } = await import("./v2-store.js");
-            const forgetTopics = await getV2ForgetTopics(db, tester.id);
-            const doSensitiveCheck = await loadSensitiveCheck();
-            const rejection = await doSensitiveCheck(ctx.checker, rewritten, forgetTopics);
+            const fTopics = await getV2ForgetTopics(db, tester.id);
+            const rejection = await doSensitiveCheck(ctx.checker, rewritten, fTopics);
             await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
           }
         }
-        // Record the forget topic
-        const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
-        if (topicText) {
-          await addV2ForgetTopic(db, tester.id, topicText, at);
-        }
-        // Add a neutral note on Coaching
+
+        // 5. Record the forget topic
+        if (topicText) await addV2ForgetTopic(db, tester.id, topicText, at);
+
+        // 6. Neutral note on Coaching ("asked to forget something on <date>")
         const { coaching } = await ensureV2RequiredPages(db, tester, at);
-        const { addV2Entry: addEntry } = await import("./v2-store.js");
-        // Find any inbound message to use as source
-        const sourceMsg = ctx.sourceMessageId;
-        if (sourceMsg) {
+        // Find the source message: the text being answered, or the most recent inbound
+        const sourceForNote = ctx.sourceMessageId ?? await findV2MessageForSource(db, tester);
+        if (sourceForNote) {
           await addEntry(db, {
-            pageId: coaching.id,
-            testerId: tester.id,
-            type: "note",
+            pageId: coaching.id, testerId: tester.id, type: "note",
             text: `Asked to forget something on ${localDate(at, tester.timeZone)}.`,
-            sourceMessageId: sourceMsg,
-            learnedOn: localDate(at, tester.timeZone),
+            sourceMessageId: sourceForNote, learnedOn: localDate(at, tester.timeZone),
           }, at);
         }
       }

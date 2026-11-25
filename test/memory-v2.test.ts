@@ -249,6 +249,20 @@ describe("entry operations", () => {
     expect(all[0]!.text).toBe("Anna is his sister");
   });
 
+  it("replace on an event closes old as 'dropped' (not 'expired')", async () => {
+    const { root } = await ensureV2RequiredPages(db, tester, at);
+    const event = await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "event", text: "Road trip days 10-14", when: "2025-10-15", sourceMessageId: msgId }, at);
+    expect(event.status).toBe("open");
+
+    const m2 = await say(tester, "Trip got cancelled");
+    const replacement = await replaceV2Entry(db, event, { pageId: root.id, testerId: tester.id, type: "event", text: "Trip cancelled, staying home", when: "2025-10-15", sourceMessageId: m2.id }, at);
+
+    expect(replacement.replacesId).toBe(event.id);
+    // Old event should be "dropped" (not "expired" — events can't be expired)
+    const [old] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, event.id));
+    expect(old!.status).toBe("dropped");
+  });
+
   it("close works for dated types and rejects non-dated", async () => {
     const { root } = await ensureV2RequiredPages(db, tester, at);
     const todo = await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "todo", text: "Pick a school", when: "2025-10-31", sourceMessageId: msgId }, at);
@@ -786,5 +800,44 @@ describe("v2 forget", () => {
     // Source messages should be marked forgotten
     const forgotten = await db.select().from(memoryForgotten).where(eq(memoryForgotten.testerId, tester.id));
     expect(forgotten.length).toBeGreaterThan(0);
+  });
+
+  it("topic-based forget deletes matching v2 entries and pages (production path)", async () => {
+    const { root, coaching, people } = await ensureV2RequiredPages(db, tester, at);
+    // Create a person page and an entry that mentions "divorce"
+    const personResult = await createV2Page(db, tester.id, { kind: "person", title: "Karen", parentId: people.id }, at);
+    expect(personResult.ok).toBe(true);
+    if (!personResult.ok) return;
+    await addV2Entry(db, { pageId: personResult.value.id, testerId: tester.id, type: "fact", text: "Karen is his ex-wife, divorce ongoing", sourceMessageId: msgId }, at);
+    await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Going through a divorce", sourceMessageId: msgId }, at);
+
+    // Forget by topic only (no refs — this is the production path)
+    const budget: LookupBudget = { lookups: 0, searches: 0 };
+    const result = await runMemoryTool(db, tester, "forget", {
+      note: "his divorce",
+    }, { at, budget, sourceMessageId: msgId });
+    expect(result.ok).toBe(true);
+
+    // The entry mentioning "divorce" on root should be gone
+    const rootEntries = await getV2Entries(db, root.id);
+    expect(rootEntries.filter((e) => e.text.includes("divorce"))).toHaveLength(0);
+
+    // The Karen page (person with "divorce" in entry) should be gone or its entries deleted
+    const pages = await getV2Pages(db, tester.id);
+    const karen = pages.find((p) => p.title === "Karen");
+    // Karen page may still exist (title doesn't contain "divorce") but its entry does
+    // The entry matching "divorce" is deleted by the topic search
+    if (karen) {
+      const karenEntries = await getV2Entries(db, karen.id);
+      expect(karenEntries.filter((e) => e.text.includes("divorce"))).toHaveLength(0);
+    }
+
+    // Topic recorded
+    const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
+    expect(topics.some((t) => t.topic === "his divorce")).toBe(true);
+
+    // Neutral note on Coaching
+    const coachingEntries = await getV2Entries(db, coaching.id);
+    expect(coachingEntries.some((e) => e.text.includes("Asked to forget something"))).toBe(true);
   });
 });
