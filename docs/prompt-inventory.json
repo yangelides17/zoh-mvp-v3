@@ -3797,32 +3797,67 @@
    "change": "unchanged"
   },
   {
-   "text": "the forgotten content",
+   "text": "The tester asked to forget: \"${topicText}\"",
    "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > topic",
+   "where": "runMemoryTool > identifyPrompt",
    "kind": "tool result",
-   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > rewritePrompt)"
+   "change": "new"
   },
   {
-   "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
+   "text": "Here is their memory. Identify which entries, pages and daily summaries are ABOUT this topic and should be removed or rewritten. Be precise: only items directly about the topic, not items that merely mention a person or place also involved in unrelated context. For example, if forgetting \"the divorce and Karen\", delete Karen's page and entries about the divorce, but do NOT delete Emma's page or entries about Emma that aren't about the divorce.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > identifyPrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Return JSON only:",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > identifyPrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "{ \"entries\": [\"e:ref\", ...], \"pages\": [\"p:ref\", ...], \"summaries\": [\"YYYY-MM-DD\", ...] }",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > identifyPrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "MEMORY:",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > identifyPrompt",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Identify memory items about a topic to forget. Return JSON only.",
    "file": "src/memory/coach-tools.ts",
    "where": "runMemoryTool > response > system > text",
    "kind": "tool result",
    "change": "new"
   },
   {
-   "text": "Rewrite this daily summary, removing any mention of \"${topic}\". Keep everything else. If nothing remains, write \"No notable events.\"",
+   "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
    "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > response > messages > content",
+   "where": "runMemoryTool > rwResp > system > text",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > response > system > text)"
+  },
+  {
+   "text": "Rewrite removing any mention of \"${topicText}\". Keep everything else. If nothing remains, write \"No notable events.\"",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rwResp > messages > content",
    "kind": "tool result",
    "change": "new"
   },
   {
    "text": "Original: ${daily.summary}",
    "file": "src/memory/coach-tools.ts",
-   "where": "runMemoryTool > response > messages > content",
+   "where": "runMemoryTool > rwResp > messages > content",
    "kind": "tool result",
-   "change": "new"
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > response > messages > content)"
   },
   {
    "text": "No notable events.",
@@ -3837,6 +3872,48 @@
    "where": "runMemoryTool",
    "kind": "tool result",
    "change": "new"
+  },
+  {
+   "text": "the forgotten content",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > topic",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > rewritePrompt)"
+  },
+  {
+   "text": "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rwResp > system > text",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > response > system > text)"
+  },
+  {
+   "text": "Rewrite removing any mention of \"${topic}\". Keep everything else. If nothing remains, write \"No notable events.\"",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rwResp > messages > content",
+   "kind": "tool result",
+   "change": "new"
+  },
+  {
+   "text": "Original: ${daily.summary}",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rwResp > messages > content",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > response > messages > content)"
+  },
+  {
+   "text": "No notable events.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool > rewritten",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool)"
+  },
+  {
+   "text": "No notable events.",
+   "file": "src/memory/coach-tools.ts",
+   "where": "runMemoryTool",
+   "kind": "tool result",
+   "change": "moved from src/memory/coach-tools.ts (runMemoryTool > rewritten)"
   },
   {
    "text": "Asked to forget something on ${localDate(at, tester.timeZone)}.",

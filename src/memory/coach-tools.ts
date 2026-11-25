@@ -266,10 +266,15 @@ export async function runMemoryTool(
 
       // --- V2 forget (only for v2 testers) ---
       if (isV2) {
-        const { addV2Entry: addEntry, getV2EntriesByTester, getV2ForgetTopics, findV2MessageForSource } = await import("./v2-store.js");
+        const {
+          addV2Entry: addEntry, getV2EntriesByTester, getV2ForgetTopics,
+          findV2MessageForSource, getV2Pages: getAllV2Pages, getV2Dailies,
+        } = await import("./v2-store.js");
         const doSensitiveCheck = await loadSensitiveCheck();
+        const { renderV2Memory } = await import("./v2-keeper.js");
+        const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
 
-        // 1. Delete v2 entries by ref (when the caller passes e: refs, e.g. from the lab)
+        // 1. Delete v2 entries/pages by ref (when the caller passes e:/p: refs, e.g. from the lab)
         for (const ref of facts ?? []) {
           const entry = await findV2Entry(db, tester.id, ref);
           if (!entry) continue;
@@ -284,7 +289,6 @@ export async function runMemoryTool(
           }
           removed.push(entry.text);
         }
-        // 2. Delete v2 pages by ref
         for (const ref of pages ?? []) {
           const page = await findV2Page(db, tester.id, ref);
           if (!page) continue;
@@ -299,78 +303,101 @@ export async function runMemoryTool(
           if (result.ok) { removed.push(page.title); pageTitles.push(page.title); }
         }
 
-        // 3. Topic-based v2 deletion (production: coach uses v1 refs, so v2 entries
-        //    are found by matching the topic text against entry text, page titles and Abouts).
-        const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
-        // Match any significant word in the topic (3+ chars)
-        const topicWords = topicText ? topicText.toLowerCase().split(/\s+/).filter((w) => w.length >= 3) : [];
-        const matchesTopic = (text: string) => {
-          const lower = text.toLowerCase();
-          return topicWords.some((w) => lower.includes(w));
-        };
-        if (topicText) {
-          // Search v2 entries by text match
-          const allV2Entries = await getV2EntriesByTester(db, tester.id);
-          for (const e of allV2Entries) {
-            if (matchesTopic(e.text) || (e.detail && matchesTopic(e.detail))) {
-              const chain = await getV2ReplacesChain(db, e.id);
-              for (const id of [e.id, ...chain]) {
-                const [row] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
-                if (row?.sourceMessageId) {
-                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: row.sourceMessageId }).onConflictDoNothing();
-                  forgottenMsgIds.push(row.sourceMessageId);
+        const rewrittenDailies = new Set<string>();
+        // 2. Model-based identification: ask Haiku which v2 entries, pages and summaries
+        //    are ABOUT the topic, then delete/rewrite only those.
+        if (topicText && ctx.checker) {
+          const v2Memory = await renderV2Memory(db, tester);
+          const identifyPrompt = `The tester asked to forget: "${topicText}"
+
+Here is their memory. Identify which entries, pages and daily summaries are ABOUT this topic and should be removed or rewritten. Be precise: only items directly about the topic, not items that merely mention a person or place also involved in unrelated context. For example, if forgetting "the divorce and Karen", delete Karen's page and entries about the divorce, but do NOT delete Emma's page or entries about Emma that aren't about the divorce.
+
+Return JSON only:
+{ "entries": ["e:ref", ...], "pages": ["p:ref", ...], "summaries": ["YYYY-MM-DD", ...] }
+
+MEMORY:
+${v2Memory}`;
+          const response = await ctx.checker.create({
+            system: [{ type: "text", text: "Identify memory items about a topic to forget. Return JSON only." }],
+            messages: [{ role: "user", content: identifyPrompt }],
+            tools: [], toolChoice: "none",
+          });
+          const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+          const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
+          try {
+            const identified = JSON.parse(jsonStr) as { entries?: string[]; pages?: string[]; summaries?: string[] };
+            // Delete identified entries
+            for (const ref of identified.entries ?? []) {
+              const entry = await findV2Entry(db, tester.id, ref);
+              if (!entry) continue;
+              const chain = await getV2ReplacesChain(db, entry.id);
+              for (const id of [entry.id, ...chain]) {
+                const [e] = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.id, id)).limit(1);
+                if (e?.sourceMessageId) {
+                  await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
+                  forgottenMsgIds.push(e.sourceMessageId);
                 }
                 await db.delete(memoryV2Entries).where(eq(memoryV2Entries.id, id));
               }
             }
-          }
-          // Search v2 pages (person/place only) by title/about match
-          const { getV2Pages: getAllPages } = await import("./v2-store.js");
-          const allV2Pages = await getAllPages(db, tester.id);
-          for (const p of allV2Pages) {
-            if (p.kind !== "person" && p.kind !== "place") continue;
-            if (matchesTopic(p.title) || matchesTopic(p.about)) {
-              const entries = await getV2Entries(db, p.id);
+            // Delete identified pages
+            for (const ref of identified.pages ?? []) {
+              const page = await findV2Page(db, tester.id, ref);
+              if (!page) continue;
+              const entries = await getV2Entries(db, page.id);
               for (const e of entries) {
                 if (e.sourceMessageId) {
                   await db.insert(memoryForgotten).values({ testerId: tester.id, messageId: e.sourceMessageId }).onConflictDoNothing();
                   forgottenMsgIds.push(e.sourceMessageId);
                 }
               }
-              await deleteV2Page(db, p);
+              await deleteV2Page(db, page);
             }
+            // Rewrite identified daily summaries
+            for (const dateStr of identified.summaries ?? []) {
+              const allDailies = await getV2Dailies(db, tester.id, 1000);
+              const daily = allDailies.find((d) => d.date === dateStr);
+              if (!daily) continue;
+              const rwResp = await ctx.checker.create({
+                system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
+                messages: [{ role: "user", content: `Rewrite removing any mention of "${topicText}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
+                tools: [], toolChoice: "none",
+              });
+              const rewritten = rwResp.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
+              const fTopics = await getV2ForgetTopics(db, tester.id);
+              const rejection = await doSensitiveCheck(ctx.checker, rewritten, fTopics);
+              await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
+              rewrittenDailies.add(dateStr);
+            }
+          } catch {
+            // Model returned bad JSON — still record the topic so it's not refiled
           }
         }
 
-        // 4. Rewrite affected v2 daily summaries (by message ID AND by topic text match)
-        if (ctx.checker) {
+        // Also rewrite any summaries with matching forgotten message IDs
+        // (only those not already rewritten by the model identification above)
+        if (forgottenMsgIds.length > 0 && ctx.checker) {
           const topic = topicText ?? "the forgotten content";
-          const { getV2Dailies } = await import("./v2-store.js");
-          // Find all dailies: by message overlap and by topic text match
-          const byMsgId = forgottenMsgIds.length > 0 ? await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds) : [];
-          const allDailies = await getV2Dailies(db, tester.id, 1000);
-          const byText = topicText ? allDailies.filter((d) => matchesTopic(d.summary)) : [];
-          const seen = new Set<string>();
-          const affected = [...byMsgId, ...byText].filter((d) => { if (seen.has(d.id)) return false; seen.add(d.id); return true; });
+          const affected = await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds);
           for (const daily of affected) {
-            const response = await ctx.checker.create({
+            if (rewrittenDailies.has(daily.date)) continue; // already handled by model identification
+            const rwResp = await ctx.checker.create({
               system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
-              messages: [{ role: "user", content: `Rewrite this daily summary, removing any mention of "${topic}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
+              messages: [{ role: "user", content: `Rewrite removing any mention of "${topic}". Keep everything else. If nothing remains, write "No notable events."\n\nOriginal: ${daily.summary}` }],
               tools: [], toolChoice: "none",
             });
-            const rewritten = response.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
+            const rewritten = rwResp.content.find((b) => b.type === "text")?.text?.trim() ?? "No notable events.";
             const fTopics = await getV2ForgetTopics(db, tester.id);
             const rejection = await doSensitiveCheck(ctx.checker, rewritten, fTopics);
             await updateV2DailySummary(db, daily, rejection ? "No notable events." : rewritten, at);
           }
         }
 
-        // 5. Record the forget topic
+        // 3. Record the forget topic
         if (topicText) await addV2ForgetTopic(db, tester.id, topicText, at);
 
-        // 6. Neutral note on Coaching ("asked to forget something on <date>")
+        // 4. Neutral note on Coaching ("asked to forget something on <date>")
         const { coaching } = await ensureV2RequiredPages(db, tester, at);
-        // Find the source message: the text being answered, or the most recent inbound
         const sourceForNote = ctx.sourceMessageId ?? await findV2MessageForSource(db, tester);
         if (sourceForNote) {
           await addEntry(db, {

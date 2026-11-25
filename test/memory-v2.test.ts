@@ -802,39 +802,81 @@ describe("v2 forget", () => {
     expect(forgotten.length).toBeGreaterThan(0);
   });
 
-  it("topic-based forget deletes matching v2 entries and pages (production path)", async () => {
+  it("topic-based forget uses model judgment: deletes Karen's page and divorce entry, leaves Emma", async () => {
     const { root, coaching, people } = await ensureV2RequiredPages(db, tester, at);
-    // Create a person page and an entry that mentions "divorce"
-    const personResult = await createV2Page(db, tester.id, { kind: "person", title: "Karen", parentId: people.id }, at);
-    expect(personResult.ok).toBe(true);
-    if (!personResult.ok) return;
-    await addV2Entry(db, { pageId: personResult.value.id, testerId: tester.id, type: "fact", text: "Karen is his ex-wife, divorce ongoing", sourceMessageId: msgId }, at);
-    await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Going through a divorce", sourceMessageId: msgId }, at);
+    // Create distinct source messages for each entry/daily so forget doesn't cascade by message ID
+    const mKaren = await say(tester, "Karen called");
+    const mDivorce = await say(tester, "divorce stuff");
+    const mEmma = await say(tester, "Emma's doing well");
+    const mOct7 = await say(tester, "day 7 text");
+    const mOct18 = await say(tester, "day 18 text");
+    const mOct10 = await say(tester, "day 10 text");
 
-    // Forget by topic only (no refs — this is the production path)
+    // Create Karen (person) and Emma (person)
+    const karenResult = await createV2Page(db, tester.id, { kind: "person", title: "Karen", parentId: people.id }, at);
+    expect(karenResult.ok).toBe(true);
+    if (!karenResult.ok) return;
+    const emmaResult = await createV2Page(db, tester.id, { kind: "person", title: "Emma", parentId: people.id }, at);
+    expect(emmaResult.ok).toBe(true);
+    if (!emmaResult.ok) return;
+    // Entries
+    const karenEntry = await addV2Entry(db, { pageId: karenResult.value.id, testerId: tester.id, type: "fact", text: "Karen is his ex-wife", sourceMessageId: mKaren.id }, at);
+    const divorceEntry = await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Going through a civil divorce", sourceMessageId: mDivorce.id }, at);
+    const emmaEntry = await addV2Entry(db, { pageId: emmaResult.value.id, testerId: tester.id, type: "fact", text: "Emma is his daughter, senior in high school", sourceMessageId: mEmma.id }, at);
+    // Daily summaries: Oct 7 mentions Karen, Oct 18 mentions Karen, Oct 10 doesn't
+    await writeV2Daily(db, tester.id, "2025-10-07", "Rob mentioned Karen called about paperwork.", [mOct7.id], at);
+    await writeV2Daily(db, tester.id, "2025-10-18", "Karen called Emma about the trip.", [mOct18.id], at);
+    await writeV2Daily(db, tester.id, "2025-10-10", "Rob packed lunch and ran errands.", [mOct10.id], at);
+
+    // The checker model: scripted to return identification JSON, then rewrite summaries, then SAFE checks
+    const checker = new FakeClaudeModel();
+    // 1. Identify step: return refs for Karen's page, divorce entry, and summaries mentioning Karen
+    checker.script(
+      JSON.stringify({
+        entries: [v2EntryRef(karenEntry.id), v2EntryRef(divorceEntry.id)],
+        pages: [v2PageRef(karenResult.value.id)],
+        summaries: ["2025-10-07", "2025-10-18"],
+      }),
+    );
+    // 2-3. Rewrite Oct 7 summary, then its sensitive check
+    checker.script("Rob discussed some paperwork.");
+    checker.script("SAFE");
+    // 4-5. Rewrite Oct 18 summary, then its sensitive check
+    checker.script("Emma got a call about the trip.");
+    checker.script("SAFE");
+
     const budget: LookupBudget = { lookups: 0, searches: 0 };
     const result = await runMemoryTool(db, tester, "forget", {
-      note: "his divorce",
-    }, { at, budget, sourceMessageId: msgId });
+      note: "the divorce and Karen",
+    }, { at, budget, sourceMessageId: msgId, checker });
     expect(result.ok).toBe(true);
 
-    // The entry mentioning "divorce" on root should be gone
-    const rootEntries = await getV2Entries(db, root.id);
-    expect(rootEntries.filter((e) => e.text.includes("divorce"))).toHaveLength(0);
-
-    // The Karen page (person with "divorce" in entry) should be gone or its entries deleted
+    // Karen's page should be gone
     const pages = await getV2Pages(db, tester.id);
-    const karen = pages.find((p) => p.title === "Karen");
-    // Karen page may still exist (title doesn't contain "divorce") but its entry does
-    // The entry matching "divorce" is deleted by the topic search
-    if (karen) {
-      const karenEntries = await getV2Entries(db, karen.id);
-      expect(karenEntries.filter((e) => e.text.includes("divorce"))).toHaveLength(0);
-    }
+    expect(pages.find((p) => p.title === "Karen")).toBeUndefined();
+
+    // Divorce entry on root should be gone
+    const rootEntries = await getV2Entries(db, root.id);
+    expect(rootEntries.filter((e) => e.text.includes("divorce") || e.text.includes("civil"))).toHaveLength(0);
+
+    // Emma's page and entry should be untouched
+    const emma = pages.find((p) => p.title === "Emma");
+    expect(emma).toBeDefined();
+    const emmaEntries = await getV2Entries(db, emma!.id);
+    expect(emmaEntries.some((e) => e.text.includes("daughter"))).toBe(true);
+
+    // Oct 7 and Oct 18 summaries rewritten; Oct 10 untouched
+    const dailies = await db.select().from(memoryV2Daily).where(eq(memoryV2Daily.testerId, tester.id));
+    const oct7 = dailies.find((d) => d.date === "2025-10-07");
+    expect(oct7!.summary).toBe("Rob discussed some paperwork.");
+    const oct18 = dailies.find((d) => d.date === "2025-10-18");
+    expect(oct18!.summary).toBe("Emma got a call about the trip.");
+    const oct10 = dailies.find((d) => d.date === "2025-10-10");
+    expect(oct10!.summary).toBe("Rob packed lunch and ran errands.");
 
     // Topic recorded
     const topics = await db.select().from(memoryV2ForgetTopics).where(eq(memoryV2ForgetTopics.testerId, tester.id));
-    expect(topics.some((t) => t.topic === "his divorce")).toBe(true);
+    expect(topics.some((t) => t.topic === "the divorce and Karen")).toBe(true);
 
     // Neutral note on Coaching
     const coachingEntries = await getV2Entries(db, coaching.id);
