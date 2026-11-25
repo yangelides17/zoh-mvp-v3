@@ -23,7 +23,6 @@ import { daysDue, KEEPER_MAX_TOKENS, MEMORY_RUN_AT } from "./keeper.js";
 import { renderV2Memory, writeV2Day } from "./v2-keeper.js";
 import { zonedTime } from "../nudges/schedule.js";
 import { deleteV2Memory } from "./v2-store.js";
-import { takeSnapshot, saveSnapshot } from "../../eval/memory-lab/snapshot.js";
 
 /** Use the same models the live nightly keeper uses (CLAUDE_MODEL env var, default matches wiring.ts). */
 const WRITER_MODEL = process.env.CLAUDE_MODEL ?? "claude-sonnet-5-5";
@@ -172,8 +171,9 @@ try {
     nightRecords.push({ day: dayNumber, date, dollars: cost, usage: nightUsage });
     console.log(`  ${date}: ${wrote ? "written" : "no texts"} ($${cost.toFixed(3)})`);
 
-    // Write snapshot if requested
+    // Write snapshot if requested (dynamic import: eval/ is outside src/ rootDir)
     if (snapshotsDir) {
+      const { takeSnapshot, saveSnapshot } = await import("../../eval/memory-lab/snapshot.js");
       const snapshot = await takeSnapshot(db, tester.id, true);
       const rendered = await renderV2Memory(db, tester);
       saveSnapshot(snapshotsDir, dayNumber, snapshot, rendered);
