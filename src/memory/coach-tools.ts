@@ -302,13 +302,13 @@ export async function runMemoryTool(
         // 3. Topic-based v2 deletion (production: coach uses v1 refs, so v2 entries
         //    are found by matching the topic text against entry text, page titles and Abouts).
         const topicText = trimmedNote ?? (pageTitles.length ? pageTitles.join("; ") : undefined);
+        // Match any significant word in the topic (3+ chars)
+        const topicWords = topicText ? topicText.toLowerCase().split(/\s+/).filter((w) => w.length >= 3) : [];
+        const matchesTopic = (text: string) => {
+          const lower = text.toLowerCase();
+          return topicWords.some((w) => lower.includes(w));
+        };
         if (topicText) {
-          // Match any significant word in the topic (3+ chars) against entry text
-          const topicWords = topicText.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
-          const matchesTopic = (text: string) => {
-            const lower = text.toLowerCase();
-            return topicWords.some((w) => lower.includes(w));
-          };
           // Search v2 entries by text match
           const allV2Entries = await getV2EntriesByTester(db, tester.id);
           for (const e of allV2Entries) {
@@ -342,10 +342,16 @@ export async function runMemoryTool(
           }
         }
 
-        // 4. Rewrite affected v2 daily summaries
-        if (forgottenMsgIds.length > 0 && ctx.checker) {
+        // 4. Rewrite affected v2 daily summaries (by message ID AND by topic text match)
+        if (ctx.checker) {
           const topic = topicText ?? "the forgotten content";
-          const affected = await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds);
+          const { getV2Dailies } = await import("./v2-store.js");
+          // Find all dailies: by message overlap and by topic text match
+          const byMsgId = forgottenMsgIds.length > 0 ? await getV2DailiesWithMessages(db, tester.id, forgottenMsgIds) : [];
+          const allDailies = await getV2Dailies(db, tester.id, 1000);
+          const byText = topicText ? allDailies.filter((d) => matchesTopic(d.summary)) : [];
+          const seen = new Set<string>();
+          const affected = [...byMsgId, ...byText].filter((d) => { if (seen.has(d.id)) return false; seen.add(d.id); return true; });
           for (const daily of affected) {
             const response = await ctx.checker.create({
               system: [{ type: "text", text: "Rewrite the summary without the specified topic. Output only the rewritten summary, nothing else." }],
