@@ -358,6 +358,66 @@ describe("deleteV2Memory (rebuild)", () => {
   });
 });
 
+// ─── Rebuild --snapshots ──────────────────────────────────────────────
+
+describe("rebuild snapshots", () => {
+  it("takeSnapshot + saveSnapshot writes night-NN.json, .txt, and report.json loads in lab format", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const os = await import("node:os");
+    const { takeSnapshot, saveSnapshot } = await import("../eval/memory-lab/snapshot.js");
+    const { renderV2Memory } = await import("../src/memory/v2-keeper.js");
+
+    // Set up v2 memory
+    const { root } = await ensureV2RequiredPages(db, tester, at);
+    await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Likes running", sourceMessageId: msgId }, at);
+    await writeV2Daily(db, tester.id, "2025-10-06", "A good day.", [msgId], at);
+
+    // Take snapshot and save it
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "rebuild-snap-"));
+    try {
+      const snapshot = await takeSnapshot(db, tester.id, true);
+      const rendered = await renderV2Memory(db, tester);
+      saveSnapshot(dir, 1, snapshot, rendered);
+
+      // Verify files exist
+      expect(fs.existsSync(path.join(dir, "night-01.json"))).toBe(true);
+      expect(fs.existsSync(path.join(dir, "night-01.txt"))).toBe(true);
+
+      // Verify JSON structure has the MemorySnapshot shape with sourceText
+      const json = JSON.parse(fs.readFileSync(path.join(dir, "night-01.json"), "utf8"));
+      expect(json.pages).toBeDefined();
+      expect(json.facts).toBeDefined();
+      expect(json.facts.length).toBeGreaterThan(0);
+      expect(json.facts[0]).toHaveProperty("sourceText");
+
+      // Verify .txt is a non-empty rendered memory block
+      const txt = fs.readFileSync(path.join(dir, "night-01.txt"), "utf8");
+      expect(txt.length).toBeGreaterThan(0);
+
+      // Write a report.json in the same format the CLI would
+      const nightRecords = [{ day: 1, date: "2025-10-06", dollars: 0.03, usage: { input: 1000, output: 500 } }];
+      fs.writeFileSync(path.join(dir, "report.json"), JSON.stringify({
+        tester: "Test User",
+        throughDay: 1,
+        nights: nightRecords,
+        spend: { nights: nightRecords, total: 0.03 },
+      }, null, 2));
+
+      const report = JSON.parse(fs.readFileSync(path.join(dir, "report.json"), "utf8"));
+      expect(report.nights).toHaveLength(1);
+      expect(report.nights[0].day).toBe(1);
+      expect(report.nights[0].date).toBe("2025-10-06");
+      expect(report.nights[0].dollars).toBe(0.03);
+      expect(report.nights[0].usage).toEqual({ input: 1000, output: 500 });
+      expect(report.spend.total).toBe(0.03);
+      expect(report.throughDay).toBe(1);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 // ─── V2 writer tool tests ───────────────────────────────────────────
 
 describe("v2 writer tools", () => {

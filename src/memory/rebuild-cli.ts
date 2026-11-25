@@ -2,10 +2,13 @@
 /**
  * Rebuild one tester's v2 memory from their saved texts (#250).
  *
- * Usage: npm run memory:rebuild -- <last 4 digits> [--dry-run]
+ * Usage: npm run memory:rebuild -- <last 4 digits> [--dry-run] [--snapshots <folder>]
  *
  * Deletes their v2 rows (never v1), replays texts day by day through the v2 writer,
  * and sets memory_version = 'v2'. Needs DATABASE_URL and ANTHROPIC_API_KEY.
+ *
+ * --snapshots <folder>: write night-NN.json, night-NN.txt and report.json in the
+ * lab's snapshot format after each night, so the folder loads in the Memory Lab Viewer.
  */
 
 import { eq, like } from "drizzle-orm";
@@ -17,14 +20,15 @@ import { maskNumber } from "../pipeline/inbound.js";
 import { ownsNumber, PRODUCTION_ONLY, type Routing } from "../testers/env.js";
 import { updateTester } from "../testers/testers.js";
 import { daysDue } from "./keeper.js";
-import { writeV2Day } from "./v2-keeper.js";
+import { renderV2Memory, writeV2Day } from "./v2-keeper.js";
 import { deleteV2Memory } from "./v2-store.js";
+import { takeSnapshot, saveSnapshot } from "../../eval/memory-lab/snapshot.js";
 
 const WRITER_MODEL = "claude-sonnet-4-5-20250514";
 const CHECKER_MODEL = "claude-haiku-4-5-20251001";
 
 function usage(): never {
-  console.error("Usage: DATABASE_URL=... ANTHROPIC_API_KEY=... npm run memory:rebuild -- <last 4 digits> [--dry-run]");
+  console.error("Usage: DATABASE_URL=... ANTHROPIC_API_KEY=... npm run memory:rebuild -- <last 4 digits> [--dry-run] [--snapshots <folder>]");
   process.exit(1);
 }
 
@@ -64,6 +68,12 @@ function makeModel(client: Anthropic, modelId: string, maxTokens: number): Claud
 
 const digits = process.argv[2]?.replace(/\D/g, "");
 const dryRun = process.argv.includes("--dry-run");
+const snapshotsIdx = process.argv.indexOf("--snapshots");
+const snapshotsDir = snapshotsIdx !== -1 ? process.argv[snapshotsIdx + 1] : undefined;
+if (snapshotsIdx !== -1 && !snapshotsDir) {
+  console.error("--snapshots requires a folder path");
+  process.exit(1);
+}
 const dbUrl = process.env.DATABASE_URL;
 const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -125,7 +135,10 @@ try {
 
   // Replay day by day
   let totalCost = 0;
-  for (const date of days) {
+  const nightRecords: Array<{ day: number; date: string; dollars: number; usage: { input: number; output: number } }> = [];
+  for (let i = 0; i < days.length; i++) {
+    const date = days[i]!;
+    const dayNumber = i + 1;
     const at3am = new Date(`${date}T08:00:00Z`); // ~3am Eastern
     let nightUsage = { input: 0, output: 0 };
     const tracking: ClaudeModel = {
@@ -153,7 +166,29 @@ try {
     // Rough cost: Sonnet input ~$3/M, output ~$15/M; Haiku is negligible
     const cost = (nightUsage.input * 3 + nightUsage.output * 15) / 1_000_000;
     totalCost += cost;
+    nightRecords.push({ day: dayNumber, date, dollars: cost, usage: nightUsage });
     console.log(`  ${date}: ${wrote ? "written" : "no texts"} ($${cost.toFixed(3)})`);
+
+    // Write snapshot if requested
+    if (snapshotsDir) {
+      const snapshot = await takeSnapshot(db, tester.id, true);
+      const rendered = await renderV2Memory(db, tester);
+      saveSnapshot(snapshotsDir, dayNumber, snapshot, rendered);
+    }
+  }
+
+  // Write report.json if snapshots were requested
+  if (snapshotsDir) {
+    const { mkdirSync, writeFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    mkdirSync(snapshotsDir, { recursive: true });
+    writeFileSync(join(snapshotsDir, "report.json"), JSON.stringify({
+      tester: tester.name ?? maskNumber(tester.phone),
+      throughDay: days.length,
+      nights: nightRecords,
+      spend: { nights: nightRecords, total: totalCost },
+    }, null, 2));
+    console.log(`Snapshots written to ${snapshotsDir}`);
   }
 
   // Set memory_version to v2
