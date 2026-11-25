@@ -22,6 +22,7 @@
     "sim-check": "tsx eval/sim-check.ts",
     "real": "tsx eval/real.ts",
     "memory": "tsx src/memory/show-cli.ts",
+    "memory:rebuild": "tsx src/memory/rebuild-cli.ts",
     "load-scenario": "tsx src/synthetic/load-cli.ts",
     "lab:replay": "tsx eval/memory-lab/replay-cli.ts",
     "lab:grade": "tsx eval/memory-lab/grade-cli.ts",

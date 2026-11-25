@@ -306,22 +306,33 @@ describe("daily summaries", () => {
 
 // ─── Bulk delete for rebuild ─────────────────────────────────────────
 
-describe("deleteV2Memory", () => {
-  it("deletes v2 rows without touching v1 tables", async () => {
+describe("deleteV2Memory (rebuild)", () => {
+  it("deletes v2 rows only, v1 untouched", async () => {
+    // Create v1 memory
+    const { memoryPages: mp } = await import("../src/db/schema.js");
+    const [v1Page] = await db.insert(mp).values({
+      testerId: tester.id, kind: "self", title: "V1 self page", summary: "V1 data",
+    }).returning();
+
+    // Create v2 memory
     const { root } = await ensureV2RequiredPages(db, tester, at);
     await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "A fact", sourceMessageId: msgId }, at);
     await writeV2Daily(db, tester.id, "2025-10-06", "A day.", [msgId], at);
 
-    // Verify rows exist
     expect(await getV2Pages(db, tester.id)).not.toHaveLength(0);
 
     await deleteV2Memory(db, tester.id);
 
+    // V2 gone
     expect(await getV2Pages(db, tester.id)).toHaveLength(0);
     const entries = await db.select().from(memoryV2Entries).where(eq(memoryV2Entries.testerId, tester.id));
     expect(entries).toHaveLength(0);
     const dailies = await db.select().from(memoryV2Daily).where(eq(memoryV2Daily.testerId, tester.id));
     expect(dailies).toHaveLength(0);
+
+    // V1 still there
+    const v1Pages = await db.select().from(mp).where(eq(mp.testerId, tester.id));
+    expect(v1Pages.some((p) => p.id === v1Page!.id)).toBe(true);
   });
 });
 
