@@ -128,7 +128,7 @@ otherwise or later evidence contradicts them.
 | Block | Contents | Rebuilt |
 | --- | --- | --- |
 | Fixed instructions | Voice page + feature rules | Cached |
-| Memory block | Root rendered (its entries + every tier-1 About); Coaching; focus goal's page with parent About and live coaching section; last 7 daily summaries | Overnight or after a live write |
+| Memory block | Root rendered (its entries + every tier-1 About + their tier-2 children's title, other names and About); Coaching; focus goal's page with parent About and live coaching section; last 7 daily summaries | Overnight or after a live write |
 | Live summary (state block) | As today, plus today's and this week's open to-dos, events, follow-ups | Every call |
 | Texts | Every text since the last filed day (cap, never fewer than 30) | Every call |
 

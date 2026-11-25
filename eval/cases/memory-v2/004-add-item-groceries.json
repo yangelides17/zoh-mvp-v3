@@ -1,0 +1,102 @@
+{
+  "id": "add-item-groceries",
+  "title": "add_item dated Thursday, promises only next text not 3pm",
+  "origin": "#253 (memory v2 part B): honest timing on items, no false promises",
+  "suite": "capability",
+  "seed": {
+    "name": "Rob",
+    "goal": "nutrition",
+    "phase": "active",
+    "history_hours_ago": 1,
+    "answers": { "what": "pack lunch Mon-Thu, cook dinner Tue/Thu", "when": "Sunday batch cook", "tracks_with": "photo of lunch + dinner" },
+    "history": [
+      { "from": "zoh", "text": "Morning Rob! Lunch packing tonight. You ready?" },
+      { "from": "tester", "text": "yep already got the stuff ready" },
+      { "from": "zoh", "text": "Love it. Easy night ahead." }
+    ],
+    "plan": {
+      "step": "Pack lunch Mon-Thu + cook dinner Tue/Thu",
+      "place": "kitchen",
+      "time": "18:00",
+      "days": ["sun", "mon", "tue", "wed", "thu"],
+      "proof": "photo",
+      "proof_note": "photo of lunch + dinner",
+      "reason": "She thinks I eat like garbage. She's not wrong.",
+      "minutes": 30,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Rob",
+          "about": "Sells HVAC parts, drives a truck to contractors Mon-Thu. Fridays paperwork from home. Weekends family time. \"She thinks I eat like garbage. She's not wrong.\" (Emma put ZOH's number in his phone). Atlanta, GA. Down 6 lbs."
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Rob likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "\"can you not text me on weekends unless I text you. Weekends are my time with Emma\"" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "People in Rob's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Rob"
+        },
+        {
+          "kind": "area",
+          "title": "Nutrition",
+          "about": "Rob's focus goal — eating better, packing lunches, cooking dinners with Emma",
+          "parent_title": "Rob"
+        },
+        {
+          "kind": "goal",
+          "title": "Nutrition goal",
+          "about": "Plan v4: Pack lunch Mon-Thu + cook dinner Tue/Thu. Photo of lunch + dinner. Emma helping. Keys-on-the-bag trick. Sunday batch cooking (\"Making a big batch sunday is the move\"). What works: batch cooking, keys trick.",
+          "parent_title": "Nutrition",
+          "goal_slug": "nutrition"
+        },
+        {
+          "kind": "person",
+          "title": "Emma",
+          "about": "Rob's daughter, high school senior, picked Clemson, lives with Rob every other week, offered to help cook",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "High school senior, picked Clemson" },
+            { "type": "fact", "text": "Put ZOH's number in Rob's phone" }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Dave",
+          "about": "Friend/work buddy",
+          "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "Friend and work buddy" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "South side territory",
+          "about": "New sales area since day 22",
+          "parent_title": "Places"
+        }
+      ]
+    }
+  },
+  "startTime": "10:00",
+  "testerLines": ["remind me thursday at 3 to grab groceries"],
+  "whatWentWrong": "New case: v2 add_item with honest timing.",
+  "shouldHaveHappened": "ZOH calls add_item with type 'todo', the Thursday date (2025-11-06), and text about grabbing groceries. It promises to bring it up when it next texts him (Thursday morning, or similar honest framing), NOT at 3 pm specifically. ZOH can't schedule an exact time reminder — it should be honest about that."
+}

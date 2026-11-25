@@ -1,0 +1,58 @@
+{
+  "id": "recall-sister",
+  "title": "Remembers who 'my sister' is from two weeks back",
+  "origin": "Spec #8 (coach memory), part 2: uses a detail from 1+ weeks back naturally",
+  "seed": {
+    "name": "Mike",
+    "goal": "reading",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "Project Hail Mary", "where": "bed", "when": "9 pm", "how_long": "20 min" },
+    "history": [
+      { "from": "zoh", "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight." },
+      { "from": "tester", "text": "done, 10 pages" },
+      { "from": "zoh", "text": "Day 13 in the books. Love it." }
+    ],
+    "plan": {
+      "step": "10 pages of Project Hail Mary",
+      "place": "bed",
+      "time": "21:00",
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "proof": "photo",
+      "proof_note": "the page you stop on",
+      "reason": "Ten pages before sleep builds the habit without eating your night.",
+      "minutes": 20,
+      "started_days_ago": 13
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ],
+    "memory": {
+      "pages": [
+        { "kind": "self", "facts": [{ "text": "Works as a nurse, mostly day shifts", "days_ago": 13 }, { "text": "Texts short and lowercase, says lol", "section": "voice", "days_ago": 12 }] },
+        {
+          "kind": "person",
+          "title": "Ana (his sister)",
+          "summary": "His younger sister; started reading with him; reads faster than him.",
+          "related_to_goal": true,
+          "facts": [
+            { "text": "Started reading along with Mike so they could talk about the books", "days_ago": 12 },
+            { "text": "Reads much faster than Mike; he jokes she's always chapters ahead", "days_ago": 11 }
+          ]
+        },
+        { "kind": "goal", "facts": [{ "text": "Wants to read more so he has something to talk about with Ana besides work", "days_ago": 12 }] }
+      ],
+      "daily": [
+        { "days_ago": 12, "title": "Ana joined the reading", "summary": "Mike said his sister Ana is reading with him.", "body": "Mike read his 10 pages and said Ana started reading along; she's faster. Upbeat." },
+        { "days_ago": 2, "title": "10 pages, quiet day", "summary": "Read 10 pages.", "body": "Short check-in, pages done at 9:20." },
+        { "days_ago": 1, "title": "10 pages", "summary": "Read 10 pages.", "body": "Done before 9:30, no photo." }
+      ]
+    }
+  },
+  "startTime": "18:30",
+  "testerLines": ["ugh my sister bailed on our reading thing this week, says she's too busy"],
+  "whatWentWrong": "New case, not a past mistake: a detail from two weeks ago.",
+  "shouldHaveHappened": "ZOH knows 'my sister' is Ana, the one who'd been reading along so they could talk about the books, and shows it naturally in a few words (e.g. by name). It doesn't recite a list of facts, doesn't invent anything that isn't in memory, and keeps Mike on his own 10 pages tonight."
+}

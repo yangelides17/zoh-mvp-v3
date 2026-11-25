@@ -354,6 +354,20 @@ export const FEATURES: Record<string, FeatureDef> = {
       },
     ],
   },
+  /** Memory v2 part B (#253): the coach reads and uses v2 memory. Cases only, each seeded with v2 memory. */
+  "memory-v2": {
+    name: "memory-v2",
+    doneWhen: "you've said what you wanted to say and ZOH has answered it.",
+    scenarios: [],
+    rubric: [
+      { id: "v2-recall", scope: "text", group: "flow", label: "Uses a detail from v2 memory naturally (a person, a place, a fact from the tree)" },
+      { id: "v2-followup", scope: "text", group: "flow", label: "Brings up an open follow-up or todo at most once, only when it fits, never as a list" },
+      { id: "v2-forget", scope: "conversation", group: "flow", label: "Never mentions a forgotten topic (entries, pages, or daily summaries about it), even when prompted" },
+      { id: "v2-add-item", scope: "conversation", group: "flow", label: "add_item creates a dated todo or followup; the reply promises only the next text ZOH will actually send, not the requested time" },
+      { id: "v2-what-you-know", scope: "text", group: "flow", label: "Answers 'what do you know about me' with a short honest summary from v2 memory, then asks if anything's off" },
+      { id: "v2-honest-limits", scope: "text", group: "conversation", label: "When the tester wants something ZOH can't coach yet, the coach is honest about its limits" },
+    ],
+  },
   /** Step log and next step (#9): cases only, each seeded with goals and next steps. Target 80%. */
   "next-step": {
     name: "next-step",

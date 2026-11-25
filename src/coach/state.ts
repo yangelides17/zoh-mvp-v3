@@ -36,6 +36,8 @@ import { mediaKind, type MediaKind } from "../media/storage.js";
 /** What counts as proof: photos and voice notes, and documents and videos since #163. */
 const PROOF_KINDS: MediaKind[] = ["image", "audio", "document", "video"];
 import { addDays, isStepDay, nextStepDay, ONE_A_DAY_AFTER_MISSES, OWED_RECAP_MOMENTS, quietOn, serviceDate, type NudgeCarry, type NudgeMoment } from "../nudges/schedule.js";
+// Loaded lazily to avoid circular import: state.ts → v2-store.ts → store.ts → tools.ts → state.ts
+const loadV2Store = () => import("../memory/v2-store.js");
 import { withDaySteps } from "../nudges/quiet.js";
 import { summarizeDays, type DaySummary } from "../nudges/streak.js";
 import { activePause } from "../testers/pauses.js";
@@ -156,6 +158,8 @@ export interface CoachState {
   isFirstText: boolean;
   /** Onboarding finished during this reply: it must be the recap turn. */
   justFinished: boolean;
+  /** #253: v2 open dated items (todo/event/followup), for the state block. Empty for v1. */
+  openItems: { type: string; text: string; when: string; pagePath: string; ref: string }[];
   now: Date;
 }
 
@@ -287,6 +291,18 @@ export async function loadCoachState(
     lastZohText: opts.lastZohText ?? "",
     isFirstText: opts.isFirstText,
     justFinished: opts.justFinished ?? false,
+    openItems: tester.memoryVersion === "v2"
+      ? await (async () => {
+          const { getV2OpenDated, v2EntryRef } = await loadV2Store();
+          return (await getV2OpenDated(db, tester.id)).map((e) => ({
+            type: e.type,
+            text: e.text,
+            when: e.when!,
+            pagePath: e.pagePath,
+            ref: v2EntryRef(e.id),
+          }));
+        })()
+      : [],
     now: opts.now,
   };
 }

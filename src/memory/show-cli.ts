@@ -24,12 +24,20 @@ try {
     process.exitCode = 1;
   } else {
     const tester = found[0]!;
-    console.log(`${tester.name ?? "(no name)"} ${maskNumber(tester.phone)} · memory written through ${tester.memoryThrough ?? "(not yet)"}\n`);
-    const pages = await db.select().from(memoryPages).where(eq(memoryPages.testerId, tester.id)).orderBy(asc(memoryPages.kind), asc(memoryPages.date), asc(memoryPages.title));
-    const order = ["self", "preferences", "goal", "person", "subject", "daily"];
-    pages.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
-    for (const page of pages) console.log(`${await renderPage(db, tester, page, { refs: true })}\n`);
-    console.log(`TIMELINE (newest first)\n${renderTimeline(await timeline(db, tester, 30), tester)}`);
+    if (tester.memoryVersion === "v2") {
+      // V2 memory: render the v2 tree
+      const { renderV2Memory } = await import("./v2-keeper.js");
+      console.log(`${tester.name ?? "(no name)"} ${maskNumber(tester.phone)} · v2 memory through ${tester.memoryV2Through ?? "(not yet)"} · v1 through ${tester.memoryThrough ?? "(not yet)"}\n`);
+      console.log(await renderV2Memory(db, tester));
+    } else {
+      // V1 memory: existing behavior
+      console.log(`${tester.name ?? "(no name)"} ${maskNumber(tester.phone)} · memory written through ${tester.memoryThrough ?? "(not yet)"}\n`);
+      const pages = await db.select().from(memoryPages).where(eq(memoryPages.testerId, tester.id)).orderBy(asc(memoryPages.kind), asc(memoryPages.date), asc(memoryPages.title));
+      const order = ["self", "preferences", "goal", "person", "subject", "daily"];
+      pages.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+      for (const page of pages) console.log(`${await renderPage(db, tester, page, { refs: true })}\n`);
+      console.log(`TIMELINE (newest first)\n${renderTimeline(await timeline(db, tester, 30), tester)}`);
+    }
   }
 } finally {
   await close();

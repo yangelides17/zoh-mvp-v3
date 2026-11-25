@@ -16,6 +16,7 @@ import { appDeps, memoryKeeperFor, nudgeSchedulerFor } from "../src/wiring.js";
 import type { MemoryKeeper } from "../src/memory/keeper.js";
 import { renderPage } from "../src/memory/render.js";
 import { addFact, createPage, ensureCorePages, ensureGoalPages, getPages, link } from "../src/memory/store.js";
+import { ensureV2RequiredPages, createV2Page, addV2Entry, writeV2Daily, addV2ForgetTopic, updateV2Page } from "../src/memory/v2-store.js";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { encodeSession, newSession, SESSION_COOKIE } from "../src/console/auth.js";
 import { stepLog, type ConsoleCoach } from "../src/console/chat.js";
@@ -504,6 +505,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       consentAt: contextStart,
       contextStartedAt: contextStart,
       ...(seed.quiet_hours ? { quietHoursStart: seed.quiet_hours.start, quietHoursEnd: seed.quiet_hours.end, quietHoursChosen: true } : {}),
+      ...(seed.memory_v2 ? { memoryVersion: "v2" as const } : {}),
       styleNotes: (seed.memory?.pages ?? [])
         .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
         .join("; "),
@@ -678,6 +680,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
     context.push({ from: line.from, text: shown, at: at.toISOString() });
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
+  if (seed.memory_v2) await seedV2Memory(app, tester!, seed.memory_v2, now);
   // #168: a founder's file, as the grader needs it to judge the line ZOH writes about it.
   for (const t of seed.team.filter((x) => x.kind === "file")) {
     context.push({ from: "founder", text: `Yanni attached "${t.name ?? "file.txt"}" (what's in it: ${t.account ?? "not read"})`, at: new Date(now.getTime() - t.hours_ago * 60 * 60_000).toISOString() });
@@ -759,15 +762,19 @@ async function seedNextSteps(app: EvalApp, tester: schema.Tester, seed: Seed, ve
 
 /** How many days back a seed's memory reaches (0 without one). */
 function memoryDays(seed: Seed): number {
-  const m = seed.memory;
-  if (!m) return 0;
-  return Math.max(
-    0,
-    ...m.pages.flatMap((p) => p.facts.map((f) => f.days_ago)),
-    ...m.daily.map((d) => d.days_ago),
-    ...m.earlier_plans.map((e) => e.days_ago),
-    ...m.earlier_goals.map((g) => g.days_ago),
-  );
+  const v1 = seed.memory;
+  const v1Days = v1
+    ? Math.max(
+        0,
+        ...v1.pages.flatMap((p) => p.facts.map((f) => f.days_ago)),
+        ...v1.daily.map((d) => d.days_ago),
+        ...v1.earlier_plans.map((e) => e.days_ago),
+        ...v1.earlier_goals.map((g) => g.days_ago),
+      )
+    : 0;
+  // V2 memory doesn't use days_ago; use 30 as a safe upper bound when present (matches 28-day plans).
+  const v2Days = seed.memory_v2 ? 30 : 0;
+  return Math.max(v1Days, v2Days);
 }
 
 /** Files a seed's memory the way the overnight pass would have, dated on the eval clock. */
@@ -803,6 +810,147 @@ async function seedMemory(app: EvalApp, tester: schema.Tester, memory: NonNullab
   }
   // Memory is filed through yesterday, so the run's overnight pass (if any) only files the run's own day.
   await app.db.update(schema.testers).set({ memoryThrough: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
+}
+
+/** #253: seeds v2 memory — the page tree, entries, dailies and forget topics — from a case's memory_v2 field. */
+async function seedV2Memory(app: EvalApp, tester: schema.Tester, v2: NonNullable<Seed["memory_v2"]>, now: Date): Promise<void> {
+  const at = new Date(now.getTime() - 30 * DAY_MS); // pages created ~30 days ago
+
+  // 1. Create a placeholder inbound message to use as source for entries.
+  const [sourceMsg] = await app.db
+    .insert(schema.messages)
+    .values({
+      direction: "inbound",
+      contactNumber: app.phone,
+      lineNumber: LINE,
+      content: "(v2 memory seed source)",
+      createdAt: at,
+      sentAt: at,
+    })
+    .returning();
+  const sourceId = sourceMsg!.id;
+
+  // 2. Create the four required pages (root, Coaching, People, Places).
+  const required = await ensureV2RequiredPages(app.db, tester, at);
+
+  // Build a map from page title to page for parent lookups.
+  const pageByTitle = new Map<string, schema.MemoryV2Page>();
+  pageByTitle.set(required.root.title, required.root);
+  pageByTitle.set("Coaching", required.coaching);
+  pageByTitle.set("People", required.people);
+  pageByTitle.set("Places", required.places);
+
+  // 3. Update required pages with case data (about, entries on root, etc.).
+  for (const p of v2.pages) {
+    if (p.kind === "root" || p.kind === "coaching" || p.kind === "people" || p.kind === "places") {
+      const page =
+        p.kind === "root" ? required.root
+        : p.kind === "coaching" ? required.coaching
+        : p.kind === "people" ? required.people
+        : required.places;
+      // Update about and other_names if the case provided them.
+      if (p.about || p.other_names.length > 0) {
+        await updateV2Page(app.db, page, { about: p.about || undefined, otherNames: p.other_names.length > 0 ? p.other_names : undefined }, at);
+      }
+      // Add entries on the required page.
+      for (const e of p.entries) {
+        const entry = await addV2Entry(app.db, {
+          pageId: page.id,
+          testerId: tester.id,
+          type: e.type,
+          text: e.text,
+          detail: e.detail,
+          when: e.when,
+          sourceMessageId: sourceId,
+        }, at);
+        // Honour non-default status (e.g. an entry seeded as "open" for followups gets that from addV2Entry,
+        // but "expired" or "done" need an explicit update).
+        if (e.status !== "current" && e.status !== "open") {
+          await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+        }
+      }
+    }
+  }
+
+  // 4. Create tier-1 pages (area, project) first, so tier-2 pages can find their parent.
+  for (const p of v2.pages) {
+    if (p.kind !== "area" && p.kind !== "project") continue;
+    const parentId = p.parent_title ? pageByTitle.get(p.parent_title)?.id ?? required.root.id : required.root.id;
+    const result = await createV2Page(app.db, tester.id, {
+      kind: p.kind,
+      title: p.title,
+      about: p.about,
+      otherNames: p.other_names,
+      status: p.status,
+      goalSlug: p.goal_slug,
+      parentId,
+    }, at);
+    if (!result.ok) throw new Error(`seedV2Memory area/project: ${result.error}`);
+    pageByTitle.set(p.title, result.value);
+    for (const e of p.entries) {
+      const entry = await addV2Entry(app.db, {
+        pageId: result.value.id,
+        testerId: tester.id,
+        type: e.type,
+        text: e.text,
+        detail: e.detail,
+        when: e.when,
+        sourceMessageId: sourceId,
+      }, at);
+      if (e.status !== "current" && e.status !== "open") {
+        await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+      }
+    }
+  }
+
+  // 5. Create tier-2 pages (goal, person, place).
+  for (const p of v2.pages) {
+    if (p.kind !== "goal" && p.kind !== "person" && p.kind !== "place") continue;
+    const defaultParent =
+      p.kind === "person" ? required.people
+      : p.kind === "place" ? required.places
+      : undefined; // goal needs an area parent
+    const parentId = p.parent_title ? pageByTitle.get(p.parent_title)?.id ?? defaultParent?.id : defaultParent?.id;
+    if (!parentId) throw new Error(`seedV2Memory: ${p.kind} page "${p.title}" needs a parent (parent_title or a default)`);
+    const result = await createV2Page(app.db, tester.id, {
+      kind: p.kind,
+      title: p.title,
+      about: p.about,
+      otherNames: p.other_names,
+      status: p.status,
+      goalSlug: p.goal_slug,
+      parentId,
+    }, at);
+    if (!result.ok) throw new Error(`seedV2Memory ${p.kind}: ${result.error}`);
+    pageByTitle.set(p.title, result.value);
+    for (const e of p.entries) {
+      const entry = await addV2Entry(app.db, {
+        pageId: result.value.id,
+        testerId: tester.id,
+        type: e.type,
+        text: e.text,
+        detail: e.detail,
+        when: e.when,
+        sourceMessageId: sourceId,
+      }, at);
+      if (e.status !== "current" && e.status !== "open") {
+        await app.db.update(schema.memoryV2Entries).set({ status: e.status }).where(eq(schema.memoryV2Entries.id, entry.id));
+      }
+    }
+  }
+
+  // 6. Daily summaries.
+  for (const d of v2.daily) {
+    await writeV2Daily(app.db, tester.id, d.date, d.summary, [sourceId], at);
+  }
+
+  // 7. Forget topics.
+  for (const topic of v2.forget_topics) {
+    await addV2ForgetTopic(app.db, tester.id, topic, at);
+  }
+
+  // 8. Mark v2 memory as filed through yesterday.
+  await app.db.update(schema.testers).set({ memoryV2Through: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
 }
 
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */

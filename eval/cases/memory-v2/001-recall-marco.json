@@ -1,0 +1,123 @@
+{
+  "id": "recall-marco",
+  "title": "Recalls Marco from v2 memory tree when Sam mentions 'marc'",
+  "origin": "#253 (memory v2 part B): the coach reads v2 memory and uses it naturally",
+  "suite": "capability",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "run 1.5 miles", "where": "Forest Park", "when": "7:45 am", "how_long": "20 min", "tracks_with": "Strava screenshot" },
+    "quiet_hours": { "start": "08:00", "end": "14:00" },
+    "history": [
+      { "from": "zoh", "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?" },
+      { "from": "tester", "text": "yep heading out now" },
+      { "from": "zoh", "text": "Let's go. Strava screenshot when you're done." }
+    ],
+    "plan": {
+      "step": "Run 1.5 miles in Forest Park",
+      "place": "Forest Park",
+      "time": "07:45",
+      "days": ["wed", "thu", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava screenshot",
+      "reason": "Running right after my shift would be easier, im already up and wired.",
+      "minutes": 20,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done", "note": "1.0 miles, walked most of it, showed up tired" },
+      { "days_ago": 3, "status": "done", "note": "2 miles with Marco, way easier with someone ngl" },
+      { "days_ago": 4, "status": "done", "note": "1.3 miles solo post-shift, felt easy actually" }
+    ],
+    "memory_v2": {
+      "pages": [
+        {
+          "kind": "root",
+          "title": "Sam",
+          "about": "Nurse, ER, works nights. Sleep 9am-3pm. Texts afternoons/evenings. \"not feel dead all the time\". Near Forest Park."
+        },
+        {
+          "kind": "coaching",
+          "title": "Coaching",
+          "about": "How Sam likes to be coached",
+          "entries": [
+            { "type": "fact", "text": "Quiet hours 8am-2pm (chosen)" },
+            { "type": "fact", "text": "Keeps texts short and direct" }
+          ]
+        },
+        {
+          "kind": "people",
+          "title": "People",
+          "about": "People in Sam's life"
+        },
+        {
+          "kind": "places",
+          "title": "Places",
+          "about": "Places that matter to Sam"
+        },
+        {
+          "kind": "area",
+          "title": "Running",
+          "about": "Sam's focus goal — running post-shift in Forest Park",
+          "parent_title": "Sam"
+        },
+        {
+          "kind": "area",
+          "title": "Socializing",
+          "about": "Sam mentioned wanting to make friends — no coaching on this yet",
+          "parent_title": "Sam",
+          "entries": [
+            { "type": "note", "text": "Socializing/friends request — ZOH said \"I haven't forgotten\"", "status": "current" }
+          ]
+        },
+        {
+          "kind": "goal",
+          "title": "Exercise goal",
+          "about": "Plan v3: Run 1.5 miles in Forest Park, Wed/Thu/Sat 7:45am, Strava screenshot. Previous: walk-run 1 mile, then run post-shift. Switched from afternoons to post-shift: \"running right after my shift would be easier, im already up and wired\". What works: running post-shift, running with someone (\"way easier with someone ngl\"). Why: \"not feel dead all the time\".",
+          "parent_title": "Running",
+          "goal_slug": "exercise"
+        },
+        {
+          "kind": "person",
+          "title": "Anna",
+          "about": "Sam's sister, got married day 13, Sam gave the toast",
+          "parent_title": "People",
+          "other_names": ["Ana"],
+          "entries": [
+            { "type": "fact", "text": "Sam's sister (corrected from Ana)" },
+            { "type": "fact", "text": "Got married recently, Sam gave the toast" }
+          ]
+        },
+        {
+          "kind": "person",
+          "title": "Marco",
+          "about": "Coworker, runs in Forest Park with Sam. \"he talks the whole time\". Might keep running Thursdays.",
+          "parent_title": "People",
+          "other_names": ["Marc"],
+          "entries": [
+            { "type": "fact", "text": "Coworker at the hospital" },
+            { "type": "fact", "text": "Runs in Forest Park with Sam" },
+            { "type": "fact", "text": "\"he talks the whole time\"" },
+            { "type": "unsure", "text": "Might keep running Thursdays", "status": "open" }
+          ]
+        },
+        {
+          "kind": "place",
+          "title": "Forest Park",
+          "about": "Where Sam runs",
+          "parent_title": "Places"
+        }
+      ],
+      "daily": [
+        { "date": "2026-10-31", "summary": "Plan upgrade to 1.5 mi accepted. Marco might keep running Thursdays. Friends request mentioned again." },
+        { "date": "2026-10-30", "summary": "Showed up tired, walked most of it, 1.0 miles." }
+      ]
+    }
+  },
+  "startTime": "15:00",
+  "testerLines": ["ran w marc today, he's getting faster"],
+  "whatWentWrong": "New case: v2 memory recall test.",
+  "shouldHaveHappened": "ZOH knows Marco is Sam's coworker who runs in Forest Park (from a v2 person page under People) and shows it naturally: by name, maybe that they run together. No list of facts, nothing invented."
+}

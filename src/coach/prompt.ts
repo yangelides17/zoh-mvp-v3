@@ -58,6 +58,7 @@ export const PROMPT_BUDGET_CHARS = {
   // #158: +50 for guidance alongside notes: where it applies, never the topic of a text.
   team: 900,
   memory: 1350,
+  memoryV2: 1350,
 } as const satisfies Record<RuleKey | "core" | "onboarding" | "examples" | "voice", number>;
 
 /** The page's voice and rule sections, read once when this module loads at startup (a broken page stops the app). */
@@ -81,6 +82,8 @@ export const NEXT_STEPS = [PAGE.rules.nextSteps, PAGE.rules.nextStepsTeam].join(
 export const TEAM = PAGE.rules.team;
 /** Feature 8, coach memory (spec: GitHub issue "Coach memory"). After onboarding only; the MEMORY block appears once the plan is locked. */
 export const MEMORY = PAGE.rules.memory;
+/** #253: v2 memory rules, used instead of MEMORY for v2 testers. */
+export const MEMORY_V2 = PAGE.rules.memoryV2;
 
 /**
  * Condensed docs/coach-voice.md, for onboarding only (after onboarding the coach reads the page itself).
@@ -246,10 +249,11 @@ export function partsFor(s: CoachState, reach: Reach = {}): Part[] {
  * #200: the instructions after onboarding, as two cached blocks: the core, the same for every reply in a phase
  * (memory's rules once the plan is locked), then the parts this reply loads, each with its voice section first.
  */
-export function instructionsFor(phase: "planning" | "active", parts: readonly Part[], voice: string = PAGE.voice): { core: string; moments: string } {
+export function instructionsFor(phase: "planning" | "active", parts: readonly Part[], voice: string = PAGE.voice, memoryVersion?: string): { core: string; moments: string } {
   const sections = voiceSections(voice);
   const coreVoice = sections.filter((v) => !PART_HEADINGS.has(v.heading)).map((v) => v.text).join("\n\n");
-  const core = [FULL_VOICE_INTRO, `VOICE PAGE\n${coreVoice}`, TOOL_RULES, TEAM, ...(phase === "active" ? [MEMORY] : [])].join("\n\n");
+  const memoryRules = memoryVersion === "v2" ? MEMORY_V2 : MEMORY;
+  const core = [FULL_VOICE_INTRO, `VOICE PAGE\n${coreVoice}`, TOOL_RULES, TEAM, ...(phase === "active" ? [memoryRules] : [])].join("\n\n");
   const loaded = parts.flatMap((p) => {
     const { heading, rule } = PART_SOURCES[p];
     return [...sections.filter((v) => heading && v.heading === heading).map((v) => v.text), ...(rule ? [PAGE.rules[rule]] : [])];
@@ -447,7 +451,8 @@ function themLines(s: CoachState): string[] {
   const moved = q.start !== t.quietHoursStart || q.end !== t.quietHoursEnd;
   const whose = t.quietHoursChosen ? " (they chose these)" : moved ? ` (today's, moved to fit the step; usually ${usual})` : isDefaultQuietHours(t) ? " (default)" : "";
   lines.push(`Quiet hours: ${q.start} to ${q.end}${whose}`);
-  lines.push(`Style notes: ${t.styleNotes || "none"}`);
+  // V2 testers have style notes in Coaching entries instead of here.
+  if (t.memoryVersion !== "v2") lines.push(`Style notes: ${t.styleNotes || "none"}`);
   // #75: "something_else" is the hidden off-list route; "Not sure?" isn't a goal, it opens the get-to-know-you chat.
   const listed = s.goals.filter((g) => g.slug !== OFF_LIST_SLUG).map((g) => `• ${g.title}`);
   lines.push(`Goal list:\n${[...listed, `• ${NOT_SURE_LINE}`].join("\n")}`);
@@ -726,5 +731,22 @@ export function buildStateBlock(s: CoachState): string {
     ...(plan ? [...todayLines(s, plan), ...recentLines(s, plan), ...weekLines(s, plan)] : []),
     ...threadLines(s, plan),
     ...statusLines(s),
+    ...openItemLines(s),
   ].join("\n");
+}
+
+/** #253: v2 open dated items (todo, event, followup), overdue first then by date. */
+function openItemLines(s: CoachState): string[] {
+  if (s.openItems.length === 0) return [];
+  const sorted = [...s.openItems].sort((a, b) => {
+    const aOverdue = a.when < s.today;
+    const bOverdue = b.when < s.today;
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    return a.when.localeCompare(b.when);
+  });
+  const lines = sorted.map((i) => {
+    const overdue = i.when < s.today ? " OVERDUE" : "";
+    return `- [${i.type}] ${i.text} (${i.when}${overdue}) on ${i.pagePath} — ${i.ref}`;
+  });
+  return [`Items still open:\n${lines.join("\n")}`];
 }
