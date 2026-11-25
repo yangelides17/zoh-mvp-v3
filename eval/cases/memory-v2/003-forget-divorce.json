@@ -87,8 +87,8 @@
           "parent_title": "People",
           "entries": [
             { "type": "fact", "text": "Friend and work buddy" },
-            { "type": "event", "text": "Went to Braves game together day 7" },
-            { "type": "event", "text": "Brought birthday cake day 23" }
+            { "type": "fact", "text": "Went to Braves game together" },
+            { "type": "fact", "text": "Brought birthday cake to the office" }
           ]
         },
         {

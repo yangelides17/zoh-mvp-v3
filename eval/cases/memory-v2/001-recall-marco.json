@@ -87,7 +87,7 @@
           "other_names": ["Ana"],
           "entries": [
             { "type": "fact", "text": "Sam's sister (corrected from Ana)" },
-            { "type": "event", "text": "Got married day 13, Sam gave the toast" }
+            { "type": "fact", "text": "Got married recently, Sam gave the toast" }
           ]
         },
         {
