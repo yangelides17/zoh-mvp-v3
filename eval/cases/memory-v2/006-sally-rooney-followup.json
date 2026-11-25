@@ -1,0 +1,11 @@
+{
+  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
+  "id": "sally-rooney-followup",
+  "title": "Finds the followup entry about the Sally Rooney book",
+  "origin": "#253 (memory v2 part B): search and open items from v2 entries",
+  "now": "2025-11-03T14:00:00Z",
+  "startTime": "19:00",
+  "testerLines": ["is the sally rooney thing still on"],
+  "whatWentWrong": "New case: v2 search and followup item lookup.",
+  "shouldHaveHappened": "Maya has a followup entry about borrowing a Sally Rooney book from a friend. ZOH finds it (via search_memory or the MEMORY block) and answers about the status. It doesn't invent details or confuse it with something else."
+}

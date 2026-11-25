@@ -1,0 +1,11 @@
+{
+  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
+  "id": "friends-followup",
+  "title": "Brings up open followup about making friends honestly",
+  "origin": "#253 (memory v2 part B): open items surfaced naturally, with honest limits",
+  "now": "2025-11-03T14:00:00Z",
+  "startTime": "09:00",
+  "testerLines": ["had a good run this morning, feeling great"],
+  "whatWentWrong": "New case: v2 followup item and honest coaching limits.",
+  "shouldHaveHappened": "Sam has an open followup about wanting to make friends through running. ZOH brings it up once, naturally (not as a list), and is honest it can't coach friendships yet. It doesn't ignore the item or pretend it can coach anything."
+}

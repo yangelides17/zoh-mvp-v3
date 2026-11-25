@@ -1,0 +1,11 @@
+{
+  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
+  "id": "what-you-know",
+  "title": "Honest summary from v2 memory, asks if anything is off",
+  "origin": "#253 (memory v2 part B): 'what do you know about me' from v2 tree",
+  "now": "2025-11-03T14:00:00Z",
+  "startTime": "11:00",
+  "testerLines": ["what do you know about me"],
+  "whatWentWrong": "New case: v2 'what do you know about me' response.",
+  "shouldHaveHappened": "ZOH gives a short honest summary drawn from the v2 tree (root entries, person pages, goal context), then asks if anything's off. It doesn't list every fact or invent details. It doesn't claim to know things that aren't in memory."
+}

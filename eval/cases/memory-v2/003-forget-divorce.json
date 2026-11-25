@@ -1,0 +1,11 @@
+{
+  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
+  "id": "forget-divorce",
+  "title": "After forget, nothing about divorce or Karen even when Rob mentions Emma's mom",
+  "origin": "#253 (memory v2 part B): forget works with v2, no leaks through daily summaries or entries",
+  "now": "2025-11-03T14:00:00Z",
+  "startTime": "18:30",
+  "testerLines": ["emma's mom is picking her up from practice tomorrow"],
+  "whatWentWrong": "New case: v2 forget integrity test.",
+  "shouldHaveHappened": "Rob asked to forget the divorce and Karen. When he mentions 'Emma's mom', ZOH says nothing about Karen, the divorce, or any detail from the forgotten content. It responds naturally about Emma without connecting to the erased context."
+}

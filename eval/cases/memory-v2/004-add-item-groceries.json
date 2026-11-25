@@ -1,0 +1,11 @@
+{
+  "_note": "Needs v2 seed mechanism in harness. Placeholder until then.",
+  "id": "add-item-groceries",
+  "title": "add_item dated Thursday, promises only next text not 3pm",
+  "origin": "#253 (memory v2 part B): honest timing on items, no false promises",
+  "now": "2025-11-03T14:00:00Z",
+  "startTime": "10:00",
+  "testerLines": ["remind me thursday at 3 to grab groceries"],
+  "whatWentWrong": "New case: v2 add_item with honest timing.",
+  "shouldHaveHappened": "ZOH calls add_item with type 'todo', the Thursday date, and 'grab groceries'. It promises to bring it up next time it texts, NOT at 3pm (until the scheduler exists). The item is saved on the root page."
+}

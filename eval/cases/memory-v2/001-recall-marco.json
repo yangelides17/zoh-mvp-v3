@@ -1,0 +1,36 @@
+{
+  "_note": "Needs v2 seed mechanism in harness (extend seedSchema + seedV2Memory). Placeholder until then.",
+  "id": "recall-marco",
+  "title": "Recalls Marco from v2 memory tree when Sam mentions 'marc'",
+  "origin": "#253 (memory v2 part B): the coach reads v2 memory and uses it naturally",
+  "now": "2025-11-03T14:00:00Z",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "run 2 miles", "where": "Forest Park", "when": "7 am", "how_long": "25 min" },
+    "history": [
+      { "from": "zoh", "text": "Kalimera Sam! 2 miles in Forest Park at 7. You in?" },
+      { "from": "tester", "text": "yep heading out now" },
+      { "from": "zoh", "text": "Let's go! Send a photo when you're done." }
+    ],
+    "plan": {
+      "step": "Run 2 miles in Forest Park",
+      "place": "Forest Park",
+      "time": "07:00",
+      "days": ["mon", "tue", "wed", "thu", "fri"],
+      "proof": "photo",
+      "reason": "Morning runs build the habit before the day gets away from you.",
+      "minutes": 25,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" }
+    ]
+  },
+  "startTime": "09:00",
+  "testerLines": ["ran w marc today, he's getting faster"],
+  "whatWentWrong": "New case: v2 memory recall test.",
+  "shouldHaveHappened": "ZOH knows Marco is Sam's coworker who runs in Forest Park (from a v2 person page under People) and shows it naturally: by name, maybe the detail that matters. No list of facts, nothing invented."
+}
