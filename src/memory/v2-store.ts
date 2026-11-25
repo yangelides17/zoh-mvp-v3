@@ -334,10 +334,10 @@ export async function replaceV2Entry(
   newInput: Omit<CreateV2EntryInput, "replacesId">,
   at: Date,
 ): Promise<MemoryV2Entry> {
-  // Expire the old entry
-  await db.update(memoryV2Entries).set({ status: "expired", updatedAt: at }).where(eq(memoryV2Entries.id, oldEntry.id));
-  // Create the replacement
-  return addV2Entry(db, { ...newInput, replacesId: oldEntry.id }, at);
+  // Expire the old entry (resilient: may already be expired or gone on a retry)
+  const rows = await db.update(memoryV2Entries).set({ status: "expired", updatedAt: at }).where(eq(memoryV2Entries.id, oldEntry.id)).returning();
+  // Create the replacement, linking only if the old entry still exists
+  return addV2Entry(db, { ...newInput, replacesId: rows.length > 0 ? oldEntry.id : undefined }, at);
 }
 
 /** Close a dated entry (todo/event/followup): done or dropped. */

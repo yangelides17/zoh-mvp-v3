@@ -18,6 +18,7 @@ import { migrationsFolder } from "../../src/db/paths.js";
 import type { ClaudeModel } from "../../src/claude/replier.js";
 import { writeDay } from "../../src/memory/keeper.js";
 import { writeV2Day, renderV2Memory } from "../../src/memory/v2-keeper.js";
+import { getV2Pages, findV2Page, getV2Entries, v2PageRef, v2EntryRef } from "../../src/memory/v2-store.js";
 import { memoryBlock } from "../../src/memory/context.js";
 import { runMemoryTool, type LookupBudget } from "../../src/memory/coach-tools.js";
 import { getPages } from "../../src/memory/store.js";
@@ -256,71 +257,54 @@ export async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       for (const w of inc.liveWrites) {
         if (w.kind !== "forget" || w.day !== day) continue;
         const forgetAt = resolveTime(opts.startDate, w.day, w.time, tester.timeZone);
-        // Render every page with refs so the model sees p: and f: identifiers (#149)
-        const allPages = await getPages(db, tester.id);
-        const renderedPages = await Promise.all(
-          allPages.map((page) => renderPage(db, tester, page, { refs: true })),
-        );
-        const fullMemory = renderedPages.join("\n\n");
-        const forgetPrompt = `The tester said: "${w.request}". Based on their memory below, identify which facts and/or pages to forget. Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }
+        // #250: render v2 pages for v2 mode so the model sees v2 refs (e: and p:)
+        let fullMemory: string;
+        let refKindLabel: string;
+        if (isV2) {
+          fullMemory = await renderV2Memory(db, tester);
+          refKindLabel = `"facts": ["e:ref", ...], "pages": ["p:ref", ...]`;
+        } else {
+          const allPages = await getPages(db, tester.id);
+          const renderedPages = await Promise.all(
+            allPages.map((page) => renderPage(db, tester, page, { refs: true })),
+          );
+          fullMemory = renderedPages.join("\n\n");
+          refKindLabel = `"facts": ["f:ref", ...], "pages": ["p:ref", ...]`;
+        }
+        const forgetPrompt = `The tester said: "${w.request}". Based on their memory below, identify which facts and/or pages to forget. Return a JSON object with the fields the forget tool expects: { ${refKindLabel}, "note": "brief description" }
 
 MEMORY:
 ${fullMemory}`;
-        const response = await opts.keeperModel.create({
-          system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
-          messages: [{ role: "user", content: forgetPrompt }],
-          tools: [],
-        });
-        const forgetUsage = response.usage ?? { input: 0, output: 0 };
-        totalForgetSpend += dollarsFor(forgetUsage, opts.keeperModelName);
 
-        const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
-        const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
-        try {
+        const doForget = async (prompt: string): Promise<boolean> => {
+          const response = await opts.keeperModel.create({
+            system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
+            messages: [{ role: "user", content: prompt }],
+            tools: [],
+          });
+          const usage = response.usage ?? { input: 0, output: 0 };
+          totalForgetSpend += dollarsFor(usage, opts.keeperModelName);
+          const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+          const jsonStr = text.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
           const forgetInput = JSON.parse(jsonStr) as Record<string, unknown>;
+          // #250: for v2, remap "facts" key to use e: refs (the model returns e: refs from v2 rendering)
           const budget: LookupBudget = { lookups: 0, searches: 0 };
-          const result = await runMemoryTool(db, tester, "forget", forgetInput, { at: forgetAt, budget });
-          if (result.ok) {
-            tester = result.tester;
-          } else {
-            // First attempt failed — retry once with the error fed back to the model
-            const retryPrompt = `Your previous forget attempt failed with this error: "${result.error}"
+          const result = await runMemoryTool(db, tester, "forget", forgetInput, {
+            at: forgetAt, budget, checker: isV2 ? opts.checkerModel : undefined,
+          });
+          if (result.ok) { tester = result.tester; return true; }
+          return false;
+        };
 
-The tester said: "${w.request}". Please try different refs. Here is the memory again:
-
-MEMORY:
-${fullMemory}
-
-Return a JSON object with the fields the forget tool expects: { "facts": ["f:ref", ...], "pages": ["p:ref", ...], "note": "brief description" }`;
-            const retryResponse = await opts.keeperModel.create({
-              system: [{ type: "text", text: "Identify memory items to forget. Respond with JSON only." }],
-              messages: [{ role: "user", content: retryPrompt }],
-              tools: [],
-            });
-            const retryUsage = retryResponse.usage ?? { input: 0, output: 0 };
-            totalForgetSpend += dollarsFor(retryUsage, opts.keeperModelName);
-
-            const retryText = retryResponse.content.find((b) => b.type === "text")?.text ?? "{}";
-            const retryJsonStr = retryText.replace(/^```json?\s*/m, "").replace(/\s*```\s*$/m, "").trim();
-            try {
-              const retryInput = JSON.parse(retryJsonStr) as Record<string, unknown>;
-              const retryBudget: LookupBudget = { lookups: 0, searches: 0 };
-              const retryResult = await runMemoryTool(db, tester, "forget", retryInput, { at: forgetAt, budget: retryBudget });
-              if (retryResult.ok) {
-                tester = retryResult.tester;
-              } else {
-                unresolvedForgets.push({ day, request: w.request, reason: retryResult.error });
-              }
-            } catch (retryErr) {
-              unresolvedForgets.push({
-                day,
-                request: w.request,
-                reason: retryErr instanceof Error ? retryErr.message : String(retryErr),
-              });
-            }
+        try {
+          const ok = await doForget(forgetPrompt);
+          if (!ok) {
+            // Retry once
+            const retryPrompt = `Your previous forget attempt failed. The tester said: "${w.request}". Try again with the correct refs.\n\nMEMORY:\n${fullMemory}\n\nReturn JSON: { ${refKindLabel}, "note": "brief description" }`;
+            const ok2 = await doForget(retryPrompt);
+            if (!ok2) unresolvedForgets.push({ day, request: w.request, reason: "retry also failed" });
           }
         } catch (err) {
-          // JSON parse failed or other error (#149)
           unresolvedForgets.push({
             day,
             request: w.request,
