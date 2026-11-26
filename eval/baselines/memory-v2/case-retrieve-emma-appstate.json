@@ -2,12 +2,12 @@
   "feature": "memory-v2",
   "id": "case:retrieve-emma-appstate",
   "suite": "capability",
-  "storedAt": "2026-11-26T13:55:43.748Z",
+  "storedAt": "2026-11-26T14:17:57.522Z",
   "branch": "feature/258-v2-search",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "a4a04cef2975",
-    "voice": "58ce479cafc3",
+    "voice": "d6833fbc6a90",
     "instructions": "c7348af58300",
     "script": "84920faf22ad"
   },
@@ -48,8 +48,13 @@
           "at": "2026-11-02T23:30:00.000Z"
         },
         {
+          "from": "lookup",
+          "text": "search_memory({\"query\":\"Emma app\"}) → m:e274b916 (their text, 2026-11-02): what did emma think of app state",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
           "from": "zoh",
-          "text": "Rob, I don't have anything on what Emma thought of the app, and I wasn't in that conversation. All I know is she's the reason you started. Did she say something about it?",
+          "text": "I don't have anything on what Emma thought of it, Rob. You haven't told me she's seen it. Did she try it, or are you wondering what she'd say?\n\nI also jumped the gun earlier. I called today done, but I need a photo of that turkey wrap for the check mark, so send it over when you can.",
           "at": "2026-11-02T23:30:07.000Z"
         }
       ],
@@ -63,19 +68,19 @@
                 "rule": "v2-retrieval",
                 "pass": false,
                 "borderline": false,
-                "reason": "Says it has nothing on what Emma thought of the app, but the App State detail (Emma said it was too cold) is in Emma's page and was not found."
+                "reason": "Says it has nothing on what Emma thought, but Emma's page holds the App State detail (she said it was too cold). ZOH searched once and never opened her page, so the answer isn't from memory."
               },
               {
                 "rule": "v2-recall",
-                "pass": true,
-                "borderline": true,
-                "reason": "Names Emma as the reason Rob started, which matches the saved plan reason, though it doesn't use any detail from her page."
+                "pass": false,
+                "borderline": false,
+                "reason": "Doesn't use any detail from Emma's entries. It asks the tester what Emma would say instead of recalling her reaction."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": false,
-                "reason": "Raises no open follow-up or todo and ends with one question, which is fine."
+                "reason": "Raises one open item, the turkey wrap photo for today's check mark, once and in plain prose, not as a list."
               }
             ]
           }
@@ -85,16 +90,16 @@
             "rule": "v2-forget",
             "pass": true,
             "borderline": false,
-            "reason": "Does not mention Karen or the divorce, so the forgotten topic stays out of the reply."
+            "reason": "No mention of Karen or the divorce, even though the question about Emma could invite it."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "Expected ZOH to open Emma's page and report that she said the app was too cold; instead it claimed no information and asked Rob to supply it."
+            "reason": "The regression case required opening Emma's page and giving the App State detail (too cold). ZOH said it had nothing on Emma's reaction, so the old failure repeats."
           }
         ],
-        "summary": "ZOH failed the regression case: it said it had nothing on Emma's view of the app instead of opening her page and reporting that she found it too cold. It correctly kept the forgotten Karen/divorce topic out of the reply and made no invented claims, but the core retrieval miss is a clear fail."
+        "summary": "ZOH handled the proof follow-up and kept the forgotten topic out of the reply, but it failed the core retrieval test. It searched once, didn't open Emma's page, and told Rob it had nothing when the App State detail (too cold) was in memory."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
     },
@@ -135,7 +140,7 @@
         },
         {
           "from": "zoh",
-          "text": "Rob, I don't have anything on Emma seeing the app, so I can't say what she thought. Did you show it to her? Also, tonight's 6:00 step is on deck, so send me a photo of the lunch and dinner when it's done.",
+          "text": "I haven't heard from Emma, Rob. She's not in this chat, so all I know is that she's the reason you started. Did she say something about it? Also, send me a photo of that turkey wrap and I'll log today.",
           "at": "2026-11-02T23:30:07.000Z"
         }
       ],
@@ -149,19 +154,19 @@
                 "rule": "v2-retrieval",
                 "pass": false,
                 "borderline": false,
-                "reason": "Says it has nothing on Emma seeing the app, but the memory holds her comment that it was too cold; ZOH never opened Emma's page."
+                "reason": "Asked what Emma thought of App State, ZOH said it had not heard from Emma and knew only that she was the reason he started. It never opened Emma's page, so it missed the 'too cold' detail in her entries."
               },
               {
                 "rule": "v2-recall",
                 "pass": false,
                 "borderline": false,
-                "reason": "Uses no detail about Emma from memory; it asks Rob whether he showed her the app instead."
+                "reason": "Emma is in memory, but the reply uses no specific detail about her or the app. It falls back to the plan's generic reason."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": true,
-                "reason": "Mentions tonight's 6:00 step once, which fits the moment, though it is a daily step rather than a memory todo."
+                "reason": "The single photo request for the turkey wrap is one proof ask at the end, not a list of follow-ups, and it fits the moment."
               }
             ]
           }
@@ -171,16 +176,16 @@
             "rule": "v2-forget",
             "pass": true,
             "borderline": false,
-            "reason": "Neither Karen nor the divorce is mentioned, even though the question touched on Emma."
+            "reason": "No mention of Karen or the divorce, even though the question invited recall of Emma-related history."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "The expected fact (Emma said it was too cold, from her entries) is missing; ZOH claimed no memory of it, repeating the failure."
+            "reason": "The expected behavior was to open Emma's page, find that she said App State was too cold, and answer with that fact. ZOH said it had no information from Emma, so the regression still happens."
           }
         ],
-        "summary": "ZOH did not find Emma's App State comment and wrongly said it had nothing on her, so the retrieval regression case fails. It did avoid the forgotten Karen and divorce topics and sensibly reminded Rob of tonight's step."
+        "summary": "ZOH failed the retrieval test: it said it hadn't heard from Emma and never opened her page, so the 'too cold' detail went unused. It did avoid the forgotten Karen and divorce topics, but that doesn't make up for the missed recall."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
     },
@@ -220,8 +225,13 @@
           "at": "2026-11-02T23:30:00.000Z"
         },
         {
+          "from": "lookup",
+          "text": "search_memory({\"query\":\"Emma\"}) → m:bca1a5a2 (their text, 2026-11-02): what did emma think of app state | p:e8febc73 (page, 2026-10-03): Emma — Rob's daughter, high school senior, picked Clemson",
+          "at": "2026-11-02T23:30:07.000Z"
+        },
+        {
           "from": "zoh",
-          "text": "I don't know, Rob. Emma hasn't said anything to me, and I can only go off what you've told me. Did you show her the app, or is that what you're hoping to hear from her? Also, send me a photo of tonight's dinner or tomorrow's packed lunch when it's ready.",
+          "text": "Rob, I don't know what Emma thought of that. \"App state\" looks like a stray paste, and nothing you've told me covers her reaction. What did she say? Also, send me a photo of that turkey wrap so today gets its check mark. I jumped the gun earlier 🥪",
           "at": "2026-11-02T23:30:07.000Z"
         }
       ],
@@ -235,19 +245,19 @@
                 "rule": "v2-retrieval",
                 "pass": false,
                 "borderline": false,
-                "reason": "Says \"Emma hasn't said anything to me\" and that it can only go off what Rob has told it, but Emma's page holds the App State detail that she said it was too cold."
+                "reason": "Search found Emma's page but ZOH never opened it, then said it didn't know what Emma thought and that nothing covers her reaction. The App State detail was on her page, so the answer was missed and the claim was unsupported."
               },
               {
                 "rule": "v2-recall",
                 "pass": false,
                 "borderline": false,
-                "reason": "Uses no detail from Emma's page or memory; it asks whether Rob showed her the app instead of drawing on what's remembered."
+                "reason": "It names Emma but uses no detail from memory: no Clemson, no senior year, no daughter, and no entry content about her reaction."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
-                "borderline": false,
-                "reason": "Its only open item is the photo of tonight's dinner or lunch, which is the daily proof ask and fits the moment, raised once."
+                "borderline": true,
+                "reason": "It raises the turkey wrap photo once as today's check mark, which fits the day's step and isn't a list. Whether the proof ask counts as a follow-up is debatable."
               }
             ]
           }
@@ -257,16 +267,16 @@
             "rule": "v2-forget",
             "pass": true,
             "borderline": false,
-            "reason": "Does not mention Karen or the divorce, and nothing forgotten comes up."
+            "reason": "No forgotten topic such as Karen or the divorce appears in any ZOH text."
           },
           {
             "rule": "regression",
             "pass": false,
             "borderline": false,
-            "reason": "The regression case required opening Emma's page and answering with the too-cold detail; ZOH instead claimed it had nothing on Emma."
+            "reason": "Expected ZOH to open Emma's page and report that she said App State was too cold. ZOH only searched, then said it didn't know and called the message a stray paste."
           }
         ],
-        "summary": "ZOH repeated the known regression: it failed to open Emma's page and said it had no information about what Emma thought, when the too-cold detail was in memory. It did avoid the forgotten Karen and divorce topics and asked a reasonable proof question, but it missed the retrieval the case was built to test."
+        "summary": "ZOH avoided the forgotten topics and kept its proof ask short, but it failed the core retrieval test. It searched Emma's name, saw her page, never opened it, and wrongly said nothing in memory covered her reaction to App State."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
     }

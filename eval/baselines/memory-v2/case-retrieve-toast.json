@@ -2,12 +2,12 @@
   "feature": "memory-v2",
   "id": "case:retrieve-toast",
   "suite": "capability",
-  "storedAt": "2026-11-26T13:55:43.748Z",
+  "storedAt": "2026-11-26T14:17:57.522Z",
   "branch": "feature/258-v2-search",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "a231d13202cf",
-    "voice": "58ce479cafc3",
+    "voice": "d6833fbc6a90",
     "instructions": "c7348af58300",
     "script": "fd1fa8e77ea1"
   },
@@ -48,8 +48,13 @@
           "at": "2026-11-02T20:00:00.000Z"
         },
         {
+          "from": "lookup",
+          "text": "search_memory({\"query\":\"toast\"}) → m:ee17301c (their text, 2026-11-02): how did i say the toast went | e:c180c53d (entry, 2026-10-03): Got married recently, Sam gave the toast | e:da59a56b (entry, 2026-10-03): Toast went well, people cried, Sam was nervous but pulled it off",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
           "from": "zoh",
-          "text": "It went well, Sam. You told me you were nervous, but you pulled it off and people cried. How did it feel standing up there for Anna?",
+          "text": "Sam, you said it went well. People cried, and you were nervous but pulled it off. Giving that toast at Anna's wedding took guts 🥂 How are you feeling about it now?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -61,21 +66,15 @@
             "checks": [
               {
                 "rule": "v2-retrieval",
-                "pass": false,
-                "borderline": true,
-                "reason": "Correct core detail (went well, people cried), but 'you told me you were nervous' is a specific claim not shown in the case and may be invented."
+                "pass": true,
+                "borderline": false,
+                "reason": "The toast details (went well, people cried, Sam was nervous but pulled it off) match the saved entries exactly, with nothing invented."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Naturally uses the toast and Anna from memory, referencing the specific event."
-              },
-              {
-                "rule": "v2-followup",
-                "pass": true,
-                "borderline": false,
-                "reason": "No open follow-up or todo raised; the single question fits the conversation."
+                "reason": "It naturally uses the specific memory of Sam giving the toast at Anna's wedding and the emotional outcome, rather than a generic reply."
               }
             ]
           }
@@ -85,10 +84,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": true,
-            "reason": "Gives the right toast detail from memory without saying it doesn't remember, though the open_pages lookup isn't visible and the nervousness claim is unverified."
+            "reason": "ZOH answered with the correct toast detail from memory and did not guess or claim to forget, but the lookup was search_memory, not the open_pages call the case expected."
           }
         ],
-        "summary": "ZOH answered the toast question correctly and without hedging, giving the detail that it went well and people cried, which is the regression fix. The one weakness is the unverified claim that the tester said they were nervous, which could be an invented detail."
+        "summary": "ZOH recalled the toast correctly and specifically without inventing anything, and it did not claim to forget. The main gap is that it found the detail through search_memory rather than opening Anna's page as the regression case expected, so the regression pass is borderline."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     },
@@ -128,8 +127,18 @@
           "at": "2026-11-02T20:00:00.000Z"
         },
         {
+          "from": "lookup",
+          "text": "search_memory({\"query\":\"toast\"}) → m:ba75ea39 (their text, 2026-11-02): how did i say the toast went | e:b4b6dd54 (entry, 2026-10-03): Got married recently, Sam gave the toast | e:5dd40d33 (entry, 2026-10-03): Toast went well, people cried, Sam was nervous but pulled it off",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
+          "from": "lookup",
+          "text": "open_pages({\"pages\":[\"p:15a4abd9\"]}) → p:15a4abd9 Sam > People > Anna [person] | Also known as: Ana | About: Sam's sister, got married day 13, Sam gave the toast",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
           "from": "zoh",
-          "text": "You said it went well, Sam: you were nervous, but you pulled it off and people cried. Anna's wedding toast, and you nailed it 🥹 How are you feeling about it now?",
+          "text": "Sam, you said it went well. People cried, you were nervous, and you pulled it off 🥹 How are you feeling about it now, looking back?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -142,33 +151,57 @@
               {
                 "rule": "v2-retrieval",
                 "pass": true,
-                "borderline": true,
-                "reason": "Correctly recalls the toast went well and people cried, but adds 'nervous' and 'wedding', which the transcript never confirms, so they may be invented."
+                "borderline": false,
+                "reason": "Toast details (went well, people cried, nervous but pulled it off) match the looked-up entry e:5dd40d33; nothing invented."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses a specific memory detail about Anna's toast naturally, rather than a generic answer."
+                "reason": "Uses the specific toast detail from memory naturally, tied to what the tester asked."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": false,
-                "reason": "No open item or todo is raised; the single closing question simply follows up on how Sam feels now."
+                "reason": "No open item or todo raised; a single natural question ends the text."
+              },
+              {
+                "rule": "v2-what-you-know",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not applicable; the tester did not ask what ZOH knows about them."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not applicable; no coaching request ZOH cannot handle."
               }
             ]
           }
         ],
         "conversation": [
           {
+            "rule": "v2-forget",
+            "pass": true,
+            "borderline": false,
+            "reason": "No forgotten topic was prompted or mentioned in the exchange."
+          },
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": false,
+            "reason": "No add_item request occurred in this conversation."
+          },
+          {
             "rule": "regression",
             "pass": true,
-            "borderline": true,
-            "reason": "ZOH answers with the toast detail (went well, people cried) instead of saying it doesn't remember, but the transcript doesn't show whether it opened Anna's page first."
+            "borderline": false,
+            "reason": "ZOH opened Anna's page via open_pages, then answered with the toast detail from memory without guessing or claiming to forget."
           }
         ],
-        "summary": "ZOH recalled the toast detail correctly and answered directly without saying it didn't remember, which is the regression fix. The unverified additions ('nervous', 'wedding') and the lack of visible page-opening keep it borderline."
+        "summary": "ZOH handled the retrieval regression well: it looked up the toast entries and Anna's page and answered with the correct specific details (went well, people cried, nervous but pulled it off) without inventing anything. The reply is short, warm, and ends with one question, with no extraneous follow-ups."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     },
@@ -208,8 +241,13 @@
           "at": "2026-11-02T20:00:00.000Z"
         },
         {
+          "from": "lookup",
+          "text": "search_memory({\"query\":\"toast\"}) → m:64699807 (their text, 2026-11-02): how did i say the toast went | e:c83c4f75 (entry, 2026-10-03): Got married recently, Sam gave the toast | e:fb73bbd5 (entry, 2026-10-03): Toast went well, people cried, Sam was nervous but pulled it off",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
           "from": "zoh",
-          "text": "Sam, you said it went well: people cried, and you were nervous but pulled it off. Anna's lucky to have had you up there. Did it feel as good to you as it looked from the outside?",
+          "text": "You told me it went well, Sam: people cried, you were nervous but pulled it off. Anna's wedding toast, and you nailed it 🥂 How does it feel looking back on it now?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -221,21 +259,21 @@
             "checks": [
               {
                 "rule": "v2-retrieval",
-                "pass": false,
+                "pass": true,
                 "borderline": true,
-                "reason": "The toast detail (people cried, nervous but pulled it off) matches the expected memory, but the scenario says it should have opened Anna's page; the reply gives no sign it did, and the detail is not checkable against the page here, so it's uncertain whether it was invented or retrieved."
+                "reason": "Toast details match the entries (went well, people cried, nervous but pulled it off), but 'Anna's wedding' is not in the lookup results shown, though it may be on Anna's page; ZOH did not run open_pages in the transcript."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Uses specific details naturally: Anna, the toast, people crying, being nervous."
+                "reason": "Uses the specific toast memory naturally, including the detail that people cried."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": false,
-                "reason": "No open follow-up or todo was raised; the single question is about feelings, which fits."
+                "reason": "No open follow-up or todo was raised; no list used."
               }
             ]
           }
@@ -245,10 +283,10 @@
             "rule": "regression",
             "pass": false,
             "borderline": true,
-            "reason": "The answer gives the right toast detail, but there is no visible open_pages lookup and the expected behavior was to fetch Anna's page first; the content matches, so the failure is about process, not the answer."
+            "reason": "Expected ZOH to open Anna's page with open_pages for the full detail; it only ran search_memory, though it did answer with the right toast detail from memory."
           }
         ],
-        "summary": "ZOH answered the toast question with the correct, specific detail about Anna and the crowd reaction, and kept to a single warm follow-up question. The main doubt is whether it actually opened Anna's page as the regression case required, which makes the retrieval and regression checks borderline rather than clear passes."
+        "summary": "ZOH answered the toast question correctly and warmly from memory, with the specific detail that people cried and no invented facts. It skipped the open_pages step the regression case expected, and naming Anna's wedding is unverified from the lookup shown, so the regression check is borderline."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     }

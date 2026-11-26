@@ -2,12 +2,12 @@
   "feature": "memory-v2",
   "id": "case:retrieve-suit-guy",
   "suite": "capability",
-  "storedAt": "2026-11-26T13:55:43.748Z",
+  "storedAt": "2026-11-26T14:17:57.522Z",
   "branch": "feature/258-v2-search",
   "producer": {
     "grader": "claude-haiku-5-5",
     "checks": "d9ee4587a84a",
-    "voice": "58ce479cafc3",
+    "voice": "d6833fbc6a90",
     "instructions": "c7348af58300",
     "script": "1306c14b7385"
   },
@@ -49,7 +49,7 @@
         },
         {
           "from": "zoh",
-          "text": "Ha, that was from Oct 28, Sam. You saw a man running in a full suit in the park and couldn't stop laughing, and you still got your 1.5 miles in 😄 Do you see him out there often?",
+          "text": "Ha, that one's from Oct 28: you saw a guy running through Forest Park in a full suit and couldn't stop laughing. You still got your 1.5 miles in 😄 Did you see him again?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -63,19 +63,25 @@
                 "rule": "v2-retrieval",
                 "pass": true,
                 "borderline": false,
-                "reason": "Correctly recalls the man running in a full suit in the park and Sam laughing, matching the expected detail without invention."
+                "reason": "Correctly recalls the Oct 28 man running in a full suit in Forest Park and the laughing detail, matching the daily summary without invention."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Naturally uses the park and the Oct 28 memory detail, specific and not listed."
+                "reason": "Naturally uses specific memory details: date, place, and the suit-running man, referenced conversationally."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": false,
-                "reason": "No open follow-up or todo raised; only a light question about the man."
+                "reason": "Ends with one question about seeing him again; no todo or list, so it stays within the at-most-once rule."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a coaching limit situation; the tester asked for recall, and ZOH answered directly."
               }
             ]
           }
@@ -85,10 +91,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Finds the suit-runner detail from the daily summary via memory and answers specifically without inventing or claiming not to know."
+            "reason": "ZOH found the Oct 28 suit-runner detail in memory and answered with the specific detail without inventing or claiming it didn't know."
           }
         ],
-        "summary": "ZOH recalled the Oct 28 memory accurately: a man running in a full suit in Forest Park that made Sam laugh, with no invented details. The regression case is fixed, and the reply is short and warm."
+        "summary": "ZOH retrieved the Oct 28 suit-runner memory accurately and naturally, matching the regression expectation. Its single reply stayed warm, specific, and ended with one question, with no invented details."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     },
@@ -129,7 +135,7 @@
         },
         {
           "from": "zoh",
-          "text": "Ha, that was from Oct 28, Sam. You saw a man running in a full suit in Forest Park and couldn't stop laughing, and you still got your 1.5 miles in 😄 What made it so funny?",
+          "text": "Ha, that was on Oct 28: you saw a guy running in a full suit in Forest Park and couldn't stop laughing, and you still got your 1.5 miles in 😄 Today's a rest day, so next up is Wed at 7:45. What made that one stick with you?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -143,19 +149,19 @@
                 "rule": "v2-retrieval",
                 "pass": true,
                 "borderline": false,
-                "reason": "Correctly recalls the Oct 28 man running in a full suit in Forest Park, matching the expected detail without invention."
+                "reason": "Correctly recalls the Oct 28 man running in a full suit in Forest Park and Sam laughing; no invented details."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Naturally uses the park and the suit-runner detail from memory, which is the specific recall expected."
+                "reason": "Uses the specific place (Forest Park) and the suit detail naturally from memory."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
                 "borderline": false,
-                "reason": "No open follow-up or todo is raised; a single question closes the text."
+                "reason": "Mentions the next step day once in passing and ends with one question; no list of todos."
               }
             ]
           }
@@ -165,10 +171,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "ZOH found the Oct 28 suit-runner detail in Forest Park and answered specifically without saying it didn't know or inventing details."
+            "reason": "ZOH surfaced the specific suit-running detail from the Oct 28 summary instead of saying it doesn't know or inventing anything."
           }
         ],
-        "summary": "ZOH answered the retrieval question correctly with the specific Oct 28 detail about the man running in a full suit in Forest Park, fixing the earlier regression. The reply was short, warm and ended with one question, with no invented facts."
+        "summary": "ZOH recalled the Oct 28 suit-running memory accurately and specifically, with Forest Park and Sam's laughter, and did not invent or deflect. The reply stayed short, natural, and ended with one question, so the regression case passes cleanly."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     },
@@ -209,7 +215,7 @@
         },
         {
           "from": "zoh",
-          "text": "Ha, that was from Oct 28: you saw a guy running in Forest Park in a full suit and couldn't stop laughing 😂 You still did your 1.5 miles that day. Has anything that funny shown up on a run since?",
+          "text": "Ha, that was you on Oct 28, Sam! You saw a man running Forest Park in a full suit and couldn't stop laughing, then still got your 1.5 miles in 😄 Has anyone that committed shown up since?",
           "at": "2026-11-02T20:00:07.000Z"
         }
       ],
@@ -223,19 +229,25 @@
                 "rule": "v2-retrieval",
                 "pass": true,
                 "borderline": false,
-                "reason": "Correctly recalls the Oct 28 man running in a full suit in Forest Park and Sam laughing, matching the expected detail without invention."
+                "reason": "Correctly recalls the man running in a full suit in Forest Park and Sam laughing, matching the required detail without invention."
               },
               {
                 "rule": "v2-recall",
                 "pass": true,
                 "borderline": false,
-                "reason": "Naturally uses the specific place (Forest Park) and the memorable detail from memory."
+                "reason": "Uses specific memory details: Forest Park, the full suit, the Oct 28 date, and Sam's laughter."
               },
               {
                 "rule": "v2-followup",
                 "pass": true,
+                "borderline": true,
+                "reason": "Ends with a question about someone committing, which is a loose follow-up; it is not a list and is a single question."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
                 "borderline": false,
-                "reason": "Only one question at the end, no todo list; fits the conversational moment."
+                "reason": "No coaching limit was requested, so the rule does not meaningfully apply and nothing is violated."
               }
             ]
           }
@@ -245,10 +257,10 @@
             "rule": "regression",
             "pass": true,
             "borderline": false,
-            "reason": "Finds the suit-runner detail from the Oct 28 summary and answers with the specific detail instead of saying it doesn't know."
+            "reason": "ZOH found the Oct 28 daily-summary detail of the man running in a full suit in Forest Park and answered correctly without inventing details or saying it doesn't know."
           }
         ],
-        "summary": "ZOH correctly retrieved the Oct 28 Forest Park suit-runner memory with the right specifics and no invented details, fixing the earlier retrieval failure. The reply is short, warm, and ends with a single natural question."
+        "summary": "ZOH answered the retrieval question accurately, recalling the man in a full suit in Forest Park and Sam's laughter from the Oct 28 summary with no invented details. The only soft spot is the closing question about whether anyone committed has no clear link to the recall, which is borderline."
       },
       "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
     }
