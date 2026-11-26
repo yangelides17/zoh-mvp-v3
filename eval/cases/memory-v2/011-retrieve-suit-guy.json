@@ -1,0 +1,54 @@
+{
+  "id": "retrieve-suit-guy",
+  "title": "Sam asks about a guy in a suit: needs search_memory over daily summaries",
+  "origin": "#258: retrieval scored separately from style",
+  "suite": "capability",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "run 1.5 miles", "where": "Forest Park", "when": "7:45 am", "how_long": "20 min", "tracks_with": "Strava screenshot" },
+    "quiet_hours": { "start": "08:00", "end": "14:00" },
+    "history": [
+      { "from": "zoh", "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?" },
+      { "from": "tester", "text": "yep on it" },
+      { "from": "zoh", "text": "Let's go." }
+    ],
+    "plan": {
+      "step": "Run 1.5 miles in Forest Park",
+      "place": "Forest Park",
+      "time": "07:45",
+      "days": ["wed", "thu", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava screenshot",
+      "reason": "Running right after my shift would be easier, im already up and wired.",
+      "minutes": 20,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        { "kind": "root", "title": "Sam", "about": "Nurse, ER, works nights. Near Forest Park." },
+        { "kind": "coaching", "title": "Coaching", "about": "How Sam likes to be coached" },
+        { "kind": "people", "title": "People", "about": "People in Sam's life" },
+        { "kind": "places", "title": "Places", "about": "Places that matter to Sam" },
+        { "kind": "area", "title": "Running", "about": "Sam's focus goal", "parent_title": "Sam" },
+        { "kind": "goal", "title": "Exercise goal", "about": "Run 1.5 miles in Forest Park", "parent_title": "Running", "goal_slug": "exercise" }
+      ],
+      "daily": [
+        { "date": "2026-10-28", "summary": "Sam saw a man running in a full suit in the park, couldn't stop laughing. Did 1.5 miles." },
+        { "date": "2026-10-29", "summary": "Rainy day, ran anyway, faster than usual." },
+        { "date": "2026-10-30", "summary": "Showed up tired, walked most of it, 1.0 miles." },
+        { "date": "2026-10-31", "summary": "Plan upgrade to 1.5 mi accepted." }
+      ]
+    }
+  },
+  "startTime": "15:00",
+  "testerLines": ["what was that thing about a guy in a suit lol"],
+  "whatWentWrong": "New case: retrieval test — detail in a daily summary, needs search_memory.",
+  "shouldHaveHappened": "ZOH finds the man running in a suit in the park (from the Oct 28 daily summary) by using search_memory. The coach should answer with the specific detail — a man running in a full suit in the park, Sam couldn't stop laughing. It should not make up details or say it doesn't know."
+}

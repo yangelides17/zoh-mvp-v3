@@ -1,0 +1,262 @@
+{
+  "feature": "memory-v2",
+  "id": "case:sally-rooney-followup",
+  "suite": "capability",
+  "storedAt": "2026-11-26T13:55:43.748Z",
+  "branch": "feature/258-v2-search",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "c34a0e8e6a87",
+    "voice": "58ce479cafc3",
+    "instructions": "c7348af58300",
+    "script": "634471caca5b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:sally-rooney-followup#1",
+        "kind": "case",
+        "id": "sally-rooney-followup",
+        "suite": "capability",
+        "title": "Finds the followup entry about the Sally Rooney book",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Maya! 45-min study block at 10 tonight, phone in the other room.",
+          "at": "2026-11-03T01:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep on it",
+          "at": "2026-11-03T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go.",
+          "at": "2026-11-03T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "is the sally rooney thing still on",
+          "at": "2026-11-03T03:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still thinking on it, Maya. I'll tell you as soon as I know more. For now, the 45 minutes is the job tonight. Send me the timer screenshot when you're done 💪",
+          "at": "2026-11-03T03:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly reports the open Sally Rooney followup as still pending and invents no title, author detail, or date."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": false,
+                "borderline": true,
+                "reason": "Refers to the Sally Rooney item but uses no specific memory detail such as Normal People, which the expected answer calls for."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers the tester's direct question about the open followup once, at a fitting moment, without listing other items."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "ZOH finds the followup and avoids inventing a title, but never acknowledges she finished Normal People as the expected answer requires."
+          }
+        ],
+        "summary": "ZOH found the open Sally Rooney followup from memory and gave an honest status without inventing a title or mixing it up with another item. It missed the expected detail that Maya finished Normal People, so the regression case is only partly met."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step; Next steps and maintenance\nFirst text from this tester: no\nTheir local time: Mon 10:30 PM\nName: Maya\nGoal: Focus & get more done [deep_work]\nSaved plan answers:\n- what: one 45-min study block, phone in another room\n- where: her desk\n- when: 10 pm\n- how long: 45 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it, like a focus timer)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 02:00 to 11:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: One 45-min study block, phone in another room; where: her desk; at 22:00, Mon, Tue, Thu, Sun; takes 45 min; proof: screenshot (timer screenshot); reason: i used to read so much and now i just scroll\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 22:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Mon 2026-10-19, done: the plan's step\n- Sun 2026-10-18, done: the plan's step\n- Sat 2026-10-17, done: the plan's step\n- Fri 2026-10-16, done: the plan's step\n- Thu 2026-10-15, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (2 of 3 allowed), each with its own streak: Focus & get more done (focus): 2 step days, not counting today (done today makes it 3); Read & learn more (books, ideas, any topic) (maintenance, self-reported): 24 step days; check-ins kept up 2 of 2, last confirmed 2026-11-01.\nItems still open:\n- [followup] Wants next Sally Rooney book — ZOH said \"Let me think on it\" (2026-10-31 OVERDUE) on Reading goal — e:43142fe4"
+    },
+    {
+      "plan": {
+        "key": "case:sally-rooney-followup#2",
+        "kind": "case",
+        "id": "sally-rooney-followup",
+        "suite": "capability",
+        "title": "Finds the followup entry about the Sally Rooney book",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Maya! 45-min study block at 10 tonight, phone in the other room.",
+          "at": "2026-11-03T01:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep on it",
+          "at": "2026-11-03T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go.",
+          "at": "2026-11-03T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "is the sally rooney thing still on",
+          "at": "2026-11-03T03:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still thinking on it, Maya, and I haven't forgotten. Tonight's job is the 45 minutes at your desk. Send me the timer screenshot when it's done 💪",
+          "at": "2026-11-03T03:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly recalls the open Sally Rooney followup from memory and says it hasn't been forgotten; no invented title or detail."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses the Sally Rooney detail from memory, though it doesn't reference Normal People or any other specific memory detail beyond the topic."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings up the one open followup once, in response to her direct question, and doesn't list items."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Finds the followup from v2 memory and answers its status without inventing a title; it does not acknowledge her finishing Normal People, which the expected behavior called for."
+          }
+        ],
+        "summary": "ZOH correctly found the open Sally Rooney followup in memory, said it hasn't forgotten it, and invented no book title. It missed the expected acknowledgement that Maya finished Normal People, and it returned to her step in the same text, which is reasonable."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step; Next steps and maintenance\nFirst text from this tester: no\nTheir local time: Mon 10:30 PM\nName: Maya\nGoal: Focus & get more done [deep_work]\nSaved plan answers:\n- what: one 45-min study block, phone in another room\n- where: her desk\n- when: 10 pm\n- how long: 45 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it, like a focus timer)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 02:00 to 11:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: One 45-min study block, phone in another room; where: her desk; at 22:00, Mon, Tue, Thu, Sun; takes 45 min; proof: screenshot (timer screenshot); reason: i used to read so much and now i just scroll\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 22:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Mon 2026-10-19, done: the plan's step\n- Sun 2026-10-18, done: the plan's step\n- Sat 2026-10-17, done: the plan's step\n- Fri 2026-10-16, done: the plan's step\n- Thu 2026-10-15, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (2 of 3 allowed), each with its own streak: Focus & get more done (focus): 2 step days, not counting today (done today makes it 3); Read & learn more (books, ideas, any topic) (maintenance, self-reported): 24 step days; check-ins kept up 2 of 2, last confirmed 2026-11-01.\nItems still open:\n- [followup] Wants next Sally Rooney book — ZOH said \"Let me think on it\" (2026-10-31 OVERDUE) on Reading goal — e:4fc07f99"
+    },
+    {
+      "plan": {
+        "key": "case:sally-rooney-followup#3",
+        "kind": "case",
+        "id": "sally-rooney-followup",
+        "suite": "capability",
+        "title": "Finds the followup entry about the Sally Rooney book",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "22:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Maya! 45-min study block at 10 tonight, phone in the other room.",
+          "at": "2026-11-03T01:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep on it",
+          "at": "2026-11-03T01:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go.",
+          "at": "2026-11-03T01:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "is the sally rooney thing still on",
+          "at": "2026-11-03T03:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Still thinking on it, Maya. I haven't forgotten. Your 45 minutes comes first tonight, so phone in the other room, and send me the timer screenshot when you're done 💪",
+          "at": "2026-11-03T03:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": false,
+                "borderline": true,
+                "reason": "Correctly says it hasn't forgotten, but doesn't name the open Sally Rooney followup or its status from memory; it is vague rather than invented, so retrieval is only partly shown."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": false,
+                "borderline": true,
+                "reason": "Does not use a specific memory detail such as Normal People or the Reading goal; it mentions only the 45-minute block from the plan."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings up the Sally Rooney item once, in a single natural line, not as a list."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Not a coaching limit scenario; the book request is handled as an open followup, so no dishonesty arises."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Tracks the open followup and says it hasn't forgotten, but never acknowledges she finished Normal People and gives no specific status beyond 'still thinking on it'."
+          }
+        ],
+        "summary": "ZOH correctly found the open Sally Rooney followup from memory and invented no title, bringing it up once without a list. It missed the expected detail of Maya finishing Normal People and gave a vague status, so the regression case only partly passes."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step; Next steps and maintenance\nFirst text from this tester: no\nTheir local time: Mon 10:30 PM\nName: Maya\nGoal: Focus & get more done [deep_work]\nSaved plan answers:\n- what: one 45-min study block, phone in another room\n- where: her desk\n- when: 10 pm\n- how long: 45 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it, like a focus timer)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 02:00 to 11:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: One 45-min study block, phone in another room; where: her desk; at 22:00, Mon, Tue, Thu, Sun; takes 45 min; proof: screenshot (timer screenshot); reason: i used to read so much and now i just scroll\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 22:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Mon 2026-10-19, done: the plan's step\n- Sun 2026-10-18, done: the plan's step\n- Sat 2026-10-17, done: the plan's step\n- Fri 2026-10-16, done: the plan's step\n- Thu 2026-10-15, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (2 of 3 allowed), each with its own streak: Focus & get more done (focus): 2 step days, not counting today (done today makes it 3); Read & learn more (books, ideas, any topic) (maintenance, self-reported): 24 step days; check-ins kept up 2 of 2, last confirmed 2026-11-01.\nItems still open:\n- [followup] Wants next Sally Rooney book — ZOH said \"Let me think on it\" (2026-10-31 OVERDUE) on Reading goal — e:c5313517"
+    }
+  ]
+}

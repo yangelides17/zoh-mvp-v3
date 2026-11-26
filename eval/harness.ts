@@ -505,7 +505,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
       consentAt: contextStart,
       contextStartedAt: contextStart,
       ...(seed.quiet_hours ? { quietHoursStart: seed.quiet_hours.start, quietHoursEnd: seed.quiet_hours.end, quietHoursChosen: true } : {}),
-      ...(seed.memory_v2 ? { memoryVersion: "v2" as const } : {}),
+      ...(seed.memory_v2 || seed.memory_v2_fixture ? { memoryVersion: "v2" as const } : {}),
       styleNotes: (seed.memory?.pages ?? [])
         .flatMap((p) => (p.kind === "preferences" ? p.facts.filter((f) => f.section === "stated").map((f) => f.text) : []))
         .join("; "),
@@ -681,6 +681,7 @@ export async function seedTester(app: EvalApp, seed: Seed): Promise<TranscriptLi
   }
   if (seed.memory) await seedMemory(app, tester!, seed.memory, now);
   if (seed.memory_v2) await seedV2Memory(app, tester!, seed.memory_v2, now);
+  if (seed.memory_v2_fixture) await seedV2MemoryFromFixture(app, tester!, seed.memory_v2_fixture, now);
   // #168: a founder's file, as the grader needs it to judge the line ZOH writes about it.
   for (const t of seed.team.filter((x) => x.kind === "file")) {
     context.push({ from: "founder", text: `Yanni attached "${t.name ?? "file.txt"}" (what's in it: ${t.account ?? "not read"})`, at: new Date(now.getTime() - t.hours_ago * 60 * 60_000).toISOString() });
@@ -773,7 +774,7 @@ function memoryDays(seed: Seed): number {
       )
     : 0;
   // V2 memory doesn't use days_ago; use 30 as a safe upper bound when present (matches 28-day plans).
-  const v2Days = seed.memory_v2 ? 30 : 0;
+  const v2Days = seed.memory_v2 || seed.memory_v2_fixture ? 30 : 0;
   return Math.max(v1Days, v2Days);
 }
 
@@ -951,6 +952,70 @@ async function seedV2Memory(app: EvalApp, tester: schema.Tester, v2: NonNullable
 
   // 8. Mark v2 memory as filed through yesterday.
   await app.db.update(schema.testers).set({ memoryV2Through: localDate(now, tester.timeZone, -1) }).where(eq(schema.testers.id, tester.id));
+}
+
+/**
+ * #258: seed v2 memory from a lab night-28 fixture (MemorySnapshot format).
+ * Reconstructs the page tree from page kinds and converts mapped facts back to entries.
+ */
+async function seedV2MemoryFromFixture(app: EvalApp, tester: schema.Tester, fixtureName: string, now: Date): Promise<void> {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const fixturePath = path.join(path.dirname(new URL(import.meta.url).pathname), "fixtures", "memory-v2", `${fixtureName}-night-28.json`);
+  const snapshot = JSON.parse(fs.readFileSync(fixturePath, "utf8")) as import("./memory-lab/snapshot.js").MemorySnapshot;
+
+  // Convert the snapshot into the Seed["memory_v2"] format and delegate to seedV2Memory.
+  const pages: NonNullable<Seed["memory_v2"]>["pages"] = [];
+  const daily: NonNullable<Seed["memory_v2"]>["daily"] = [];
+
+  // Separate daily pages from real pages; build a title-to-kind map for parent reconstruction.
+  for (const p of snapshot.pages) {
+    if (p.kind === "daily") {
+      daily.push({ date: p.date ?? p.title, summary: p.summary ?? p.body ?? "" });
+      continue;
+    }
+    // The snapshot maps v2 kinds into the v1 MemoryPage type; cast to access v2-specific kinds.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- v2 kinds aren't in the v1 union
+    const kind = p.kind as any as string;
+    // Skip v1-only kinds that slipped through
+    if (kind === "self" || kind === "preferences" || kind === "subject") continue;
+    const pageId = p.id;
+    // Find this page's facts (entries in the snapshot)
+    const pageFacts = snapshot.facts.filter((f) => f.pageId === pageId);
+    const entries = pageFacts.map((f) => {
+      // section is "${type}:${status}" for v2 entries
+      const [type, status] = f.section.split(":") as [string, string];
+      return {
+        type: type as "fact" | "note" | "unsure" | "todo" | "event" | "followup",
+        text: f.text,
+        when: f.label ?? undefined,
+        status: (status ?? "current") as "current" | "expired" | "open" | "done" | "dropped",
+      };
+    });
+    // Determine parent_title from the kind hierarchy
+    let parent_title: string | undefined;
+    if (kind === "person") parent_title = "People";
+    else if (kind === "place") parent_title = "Places";
+    // goal/area/project: parent is reconstructed by looking for the matching area
+    // For goals, we look for an area page whose title appears in the goal's goalSlug or title
+    else if (kind === "goal") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- "area" is a v2 kind
+      const area = snapshot.pages.find((pp) => (pp.kind as any) === "area" && pp.id !== p.id);
+      parent_title = area?.title;
+    }
+    pages.push({
+      kind: kind as NonNullable<Seed["memory_v2"]>["pages"][0]["kind"],
+      title: p.title,
+      about: p.summary ?? "",
+      other_names: [],
+      parent_title,
+      goal_slug: p.goalSlug ?? undefined,
+      status: (p.status ?? "active") as "active" | "paused" | "done" | "past",
+      entries,
+    });
+  }
+
+  await seedV2Memory(app, tester, { pages, daily, forget_topics: [] }, now);
 }
 
 /** Runs one conversation end to end against a fresh app and reads back what was saved. */

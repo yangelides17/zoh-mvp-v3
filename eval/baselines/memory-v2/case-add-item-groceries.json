@@ -1,0 +1,274 @@
+{
+  "feature": "memory-v2",
+  "id": "case:add-item-groceries",
+  "suite": "capability",
+  "storedAt": "2026-11-26T13:55:43.748Z",
+  "branch": "feature/258-v2-search",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "5e2ab44eca4b",
+    "voice": "58ce479cafc3",
+    "instructions": "c7348af58300",
+    "script": "8119bda15f3b"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:add-item-groceries#1",
+        "kind": "case",
+        "id": "add-item-groceries",
+        "suite": "capability",
+        "title": "add_item dated Thursday, promises only next text not 3pm",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Rob! Lunch packing tonight. You ready?",
+          "at": "2026-11-02T13:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already got the stuff ready",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it. Easy night ahead.",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "remind me thursday at 3 to grab groceries",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Rob. I can't send a text at an exact time, so I'll bring up the groceries the next time I text you Thursday. Those groceries are what makes Thursday's dinner with Emma happen 💪 Tonight's lunch pack photo is the one I'm waiting on.",
+          "at": "2026-11-02T15:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Groceries and Thursday are from the tester's request; the 'dinner with Emma' detail isn't in the visible status sheet, so it may come from memory I can't see."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ties the groceries to Thursday's dinner, a natural link, though the Emma detail can't be verified from the visible state."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings up the grocery todo once, tied to the tester's request, and closes with the existing lunch-photo ask."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says plainly it can't send at an exact time and will bring it up the next time it texts Thursday."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": true,
+            "reason": "Reply promises only the next Thursday text, not 3 pm; the add_item call with type todo and 2025-11-06 isn't visible in the transcript."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Text declines the exact 3 pm time and promises to raise groceries when it next texts Thursday, as required; the tool call itself isn't shown."
+          }
+        ],
+        "summary": "ZOH handled the exact-time request honestly, saying it can't text at 3 pm and will bring up groceries the next time it texts Thursday, which matches the regression case. The main uncertainty is that the add_item call isn't visible, and the Emma detail can't be checked against the visible memory."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 10:00 AM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
+    },
+    {
+      "plan": {
+        "key": "case:add-item-groceries#2",
+        "kind": "case",
+        "id": "add-item-groceries",
+        "suite": "capability",
+        "title": "add_item dated Thursday, promises only next text not 3pm",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Rob! Lunch packing tonight. You ready?",
+          "at": "2026-11-02T13:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already got the stuff ready",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it. Easy night ahead.",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "remind me thursday at 3 to grab groceries",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Rob. I can't promise a text at exactly 3, but I'll bring up the groceries next time I text you Thursday. Do you want to snap a photo of the lunch tonight when it's packed?",
+          "at": "2026-11-02T15:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the request accurately (groceries, Thursday) and invents no facts about the tester or the timing."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": true,
+            "reason": "Promises only the next Thursday text rather than the 3 pm time and says it can't do an exact time; the add_item call and its 2025-11-06 date aren't visible in the transcript."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Honestly declines the exact 3 pm reminder and promises Thursday's next text, matching the expected behavior; the tool call itself isn't visible."
+          }
+        ],
+        "summary": "ZOH handled the regression case well: it was honest that it can't text at exactly 3 pm and promised to raise the groceries at its next Thursday text, with one follow-up question. The add_item call and Thursday date can't be verified from the transcript, so both conversation checks are borderline."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 10:00 AM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
+    },
+    {
+      "plan": {
+        "key": "case:add-item-groceries#3",
+        "kind": "case",
+        "id": "add-item-groceries",
+        "suite": "capability",
+        "title": "add_item dated Thursday, promises only next text not 3pm",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "10:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Morning Rob! Lunch packing tonight. You ready?",
+          "at": "2026-11-02T13:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already got the stuff ready",
+          "at": "2026-11-02T13:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love it. Easy night ahead.",
+          "at": "2026-11-02T13:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "remind me thursday at 3 to grab groceries",
+          "at": "2026-11-02T15:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Got it, Rob. I can't set a timed alarm, but I've noted it and I'll bring it up next time I text you around then. Thursday's grocery run feeds your Tuesday and Thursday dinners with Emma 💪 Send the lunch photo tonight when it's packed.",
+          "at": "2026-11-02T15:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Plan facts (Tue/Thu dinners) match state, but 'Emma' appears nowhere in the status sheet, so it can't be verified as memory."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ties groceries to the Tue/Thu dinners from the plan; the Emma detail may be memory but is unverifiable here."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings up the grocery todo once, in passing, as a single follow-up."
+              },
+              {
+                "rule": "v2-honest-limits",
+                "pass": true,
+                "borderline": false,
+                "reason": "Says plainly 'I can't set a timed alarm' rather than promising the 3 pm reminder."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": true,
+            "reason": "'I've noted it' implies a todo was added, but the reply's 'around then' hints at the 3 pm time it can't keep; no tool call is visible."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Honest that it can't set a timed alarm and promises a next text, not 3 pm; 'around then' is soft, and the Thursday date and add_item call aren't explicit in the text."
+          }
+        ],
+        "summary": "ZOH handled the timed-reminder request honestly by refusing to set an alarm and promising to bring it up at its next text rather than at 3 pm. The main weak spots are the vague 'around then' phrasing, which hints at the requested time, and an unverifiable Emma detail."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 10:00 AM\nName: Rob\nGoal: Eat better [nutrition]\nSaved plan answers:\n- what: pack lunch Mon-Thu, cook dinner Tue/Thu\n- when: Sunday batch cook\n- tracks with: photo of lunch + dinner\nStill open, required: how long [how_long] (minutes a day they can give it, for prep or logging)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Pack lunch Mon-Thu + cook dinner Tue/Thu; where: kitchen; at 18:00, Mon, Tue, Wed, Thu, Sun; takes 30 min; proof: photo (photo of lunch + dinner); reason: She thinks I eat like garbage. She's not wrong.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 18:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\nStreak: 2 step days, not counting today (done today makes it 3). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Eat better (focus): 2 step days, not counting today (done today makes it 3)."
+    }
+  ]
+}

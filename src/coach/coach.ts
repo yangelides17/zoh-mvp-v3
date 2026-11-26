@@ -373,10 +373,17 @@ export function createCoach(opts: CoachOptions): Replier {
             results.push({ type: "tool_result", tool_use_id: call.id, ...(watchedNow.ok ? { content: watchedNow.message } : { content: watchedNow.error, is_error: true }) });
             continue;
           }
-          const result = isMemoryTool(call.name)
+          const isMem = isMemoryTool(call.name);
+          const result = isMem
             ? await runMemoryTool(db, tester, call.name, call.input, { at: now, budget, sourceMessageId: messageId, media: opts.media, watcher: opts.watcher })
             : await runTool(db, state, call.name, call.input, now);
           if (result.ok && "optedOut" in result && result.optedOut) return OPT_OUT_CONFIRMATION;
+          // #258: record memory tool calls so the eval grader can verify retrieval.
+          if (isMem) {
+            const args = JSON.stringify(call.input).slice(0, 200);
+            const brief = result.ok ? result.message.split("\n").slice(0, 3).join(" | ").slice(0, 300) : `error: ${result.error}`;
+            onLookup?.(`${call.name}(${args}) → ${brief}`);
+          }
           if (result.ok) {
             const action = `${call.name} (${result.message.split("\n")[0]!.slice(0, ACTION_RESULT_CHARS)})`;
             done.push(action);

@@ -1,0 +1,54 @@
+{
+  "id": "retrieve-study-trick",
+  "title": "Maya asks about the study trick that worked: practice problems over rereading notes",
+  "origin": "#258: retrieval scored separately from style",
+  "suite": "capability",
+  "seed": {
+    "name": "Maya",
+    "goal": "deep_work",
+    "phase": "active",
+    "history_hours_ago": 14,
+    "answers": { "what": "one 45-min study block, phone in another room", "where": "her desk", "when": "10 pm", "how_long": "45 min" },
+    "quiet_hours": { "start": "02:00", "end": "11:00" },
+    "history": [
+      { "from": "zoh", "text": "Maya! 45-min study block at 10 tonight, phone in the other room." },
+      { "from": "tester", "text": "did it, practice problems this time" },
+      { "from": "zoh", "text": "Nice. Practice problems over rereading — that's the move." }
+    ],
+    "plan": {
+      "step": "One 45-min study block, phone in another room",
+      "place": "her desk",
+      "time": "22:00",
+      "days": ["sun", "mon", "tue", "thu"],
+      "proof": "screenshot",
+      "proof_note": "timer screenshot",
+      "reason": "i used to read so much and now i just scroll",
+      "minutes": 45,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        { "kind": "root", "title": "Maya", "about": "College junior, economics major, in Boston. Night owl." },
+        { "kind": "coaching", "title": "Coaching", "about": "How Maya likes to be coached" },
+        { "kind": "people", "title": "People", "about": "People in Maya's life" },
+        { "kind": "places", "title": "Places", "about": "Places that matter to Maya" },
+        { "kind": "area", "title": "Studying/Deep Work", "about": "Maya's focus since day 15 — midterms", "parent_title": "Maya" },
+        { "kind": "goal", "title": "Deep work goal", "about": "One 45-min study block, phone in another room, Sun/Mon/Tue/Thu at 10pm. Takeaway: practice problems > rereading notes.", "parent_title": "Studying/Deep Work", "goal_slug": "deep_work",
+          "entries": [
+            { "type": "fact", "text": "Practice problems work better than rereading notes — a takeaway from midterm prep" }
+          ]
+        },
+        { "kind": "person", "title": "Lily", "about": "Roommate", "parent_title": "People" },
+        { "kind": "person", "title": "Devon", "about": "Cafe manager", "parent_title": "People" }
+      ]
+    }
+  },
+  "startTime": "22:30",
+  "testerLines": ["what was that study trick that worked"],
+  "whatWentWrong": "New case: retrieval test — detail in the goal page About or entries.",
+  "shouldHaveHappened": "ZOH answers that practice problems worked better than rereading notes. The detail is in the goal page's About and in an entry. The coach may find it from the memory block (the goal page is always shown) or by search. It should not invent a different study technique."
+}

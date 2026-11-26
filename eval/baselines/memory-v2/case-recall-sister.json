@@ -1,0 +1,244 @@
+{
+  "feature": "memory-v2",
+  "id": "case:recall-sister",
+  "suite": "regression",
+  "storedAt": "2026-11-26T13:55:43.748Z",
+  "branch": "feature/258-v2-search",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "973dc85f08ea",
+    "voice": "58ce479cafc3",
+    "instructions": "c7348af58300",
+    "script": "7d720a58ca39"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:recall-sister#1",
+        "kind": "case",
+        "id": "recall-sister",
+        "suite": "regression",
+        "title": "Remembers who 'my sister' is from two weeks back",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight.",
+          "at": "2026-11-02T03:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done, 10 pages",
+          "at": "2026-11-02T03:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 13 in the books. Love it.",
+          "at": "2026-11-02T03:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ugh my sister bailed on our reading thing this week, says she's too busy",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, that's a bummer, Mike. Reading with her was a big part of why you started. How are you feeling about it?\n\nAlso, I jumped the gun earlier. Send a photo of the page you stopped on and today's check mark is official.",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": false,
+                "borderline": true,
+                "reason": "Calls the reading with the sister 'a big part of why you started', a motive not in the status sheet, so it may be invented."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": false,
+                "borderline": true,
+                "reason": "Refers only to 'her' and never names Ana or shows the specific memory of her reading along, so the detail is vague."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Keeps Mike on tonight's pages, but never names Ana as the sister who read along, which the expected behavior calls for."
+          }
+        ],
+        "summary": "ZOH kept Mike on his nightly 10 pages and asked for a proof photo, without reciting anything. It did not name Ana or tie the sister to the reading in a grounded way, and its claim that reading with her was why he started is unsupported."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Mike\nGoal: Read & learn more (books, ideas, any topic) [reading]\nSaved plan answers:\n- what: Project Hail Mary\n- where: bed\n- when: 9 pm\n- how long: 20 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nStyle notes: none\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-20; its step was day 1's, each later day gets its own): step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 21:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 3 step days, not counting today (done today makes it 4). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Read & learn more (books, ideas, any topic) (focus): 3 step days, not counting today (done today makes it 4)."
+    },
+    {
+      "plan": {
+        "key": "case:recall-sister#2",
+        "kind": "case",
+        "id": "recall-sister",
+        "suite": "regression",
+        "title": "Remembers who 'my sister' is from two weeks back",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight.",
+          "at": "2026-11-02T03:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done, 10 pages",
+          "at": "2026-11-02T03:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 13 in the books. Love it.",
+          "at": "2026-11-02T03:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ugh my sister bailed on our reading thing this week, says she's too busy",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ugh, that's a bummer, Mike. Reading with Ana was a big part of why you started. How are you feeling about it?\n\nAlso, I jumped the gun earlier. Send a photo of the page you stopped on and I'll make today's check mark official.",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ana as the reading partner is in memory, but 'a big part of why you started' goes slightly beyond what the scenario establishes."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Ana and ties her to the reading, a natural single detail from memory without a list of facts."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings up no extra open item; tonight's photo ask is the step itself, not a separate follow-up."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "Shows Ana by name in a few words, invents nothing, and keeps Mike on his own 10 pages tonight by asking for the photo."
+          }
+        ],
+        "summary": "ZOH recalled Ana by name in a short, natural line and kept Mike on tonight's 10-page step with a photo ask, which meets the regression case. The one soft spot is the claim that reading with Ana was why he started, which is a small embellishment beyond what the case establishes."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Mike\nGoal: Read & learn more (books, ideas, any topic) [reading]\nSaved plan answers:\n- what: Project Hail Mary\n- where: bed\n- when: 9 pm\n- how long: 20 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nStyle notes: none\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-20; its step was day 1's, each later day gets its own): step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 21:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 3 step days, not counting today (done today makes it 4). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Read & learn more (books, ideas, any topic) (focus): 3 step days, not counting today (done today makes it 4)."
+    },
+    {
+      "plan": {
+        "key": "case:recall-sister#3",
+        "kind": "case",
+        "id": "recall-sister",
+        "suite": "regression",
+        "title": "Remembers who 'my sister' is from two weeks back",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "18:30",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Hey Mike! 10 pages of Project Hail Mary in bed at 9 tonight.",
+          "at": "2026-11-02T03:26:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "done, 10 pages",
+          "at": "2026-11-02T03:27:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Day 13 in the books. Love it.",
+          "at": "2026-11-02T03:28:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "ugh my sister bailed on our reading thing this week, says she's too busy",
+          "at": "2026-11-02T23:30:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Ah, that's a bummer, Mike. Reading with Ana was part of why you started. How are you feeling about it?",
+          "at": "2026-11-02T23:30:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Ana and ties her to the reading, a specific memory detail used naturally in one line."
+              },
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Ana as the reading partner matches the case, but 'part of why you started' goes beyond what the case confirms from memory."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Ana is recalled correctly, but the text never keeps Mike on his own 10 pages tonight; it only asks how he feels, which may be fine under feelings-first."
+          }
+        ],
+        "summary": "ZOH recalled Ana correctly and named her naturally, without listing facts or inventing new ones. It stayed on feelings and didn't bring Mike back to his 10 pages tonight, which the regression case expected, so that is borderline."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nMoments now: Today's step\nFirst text from this tester: no\nTheir local time: Mon 6:30 PM\nName: Mike\nGoal: Read & learn more (books, ideas, any topic) [reading]\nSaved plan answers:\n- what: Project Hail Mary\n- where: bed\n- when: 9 pm\n- how long: 20 min\nStill open, required: none\nStill open, optional: tracks with [tracks_with] (apps or tools they already use for it)\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 22:00 to 09:00 (default)\nStyle notes: none\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-20; its step was day 1's, each later day gets its own): step: 10 pages of Project Hail Mary; where: bed; at 21:00, every day; takes 20 min; proof: photo (the page you stop on); reason: Ten pages before sleep builds the habit without eating your night.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a step day at 21:00. Today's step: not set yet (the plan's step applies until it is). Status: not marked done yet. No photo, screenshot, voice note, video or document from them today.\nNext step day: Tue 2026-11-03.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 3 step days, not counting today (done today makes it 4). Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Read & learn more (books, ideas, any topic) (focus): 3 step days, not counting today (done today makes it 4)."
+    }
+  ]
+}
