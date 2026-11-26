@@ -775,51 +775,66 @@ export interface V2SearchHit {
 }
 
 /**
- * Search v2 memory: entries, page titles + about + other_names, daily summaries, and messages.
- * Uses simple word matching (same approach as v1 searchMemory but on v2 tables).
+ * #258: Search v2 memory with Postgres full-text search (websearch_to_tsquery + ts_rank),
+ * the same approach as v1's searchMemory. Searches entries (current/open), page titles + about +
+ * other names, daily summaries, and messages (via v1 searchMemory). Merges all hits by rank.
  */
 export async function searchV2Memory(db: Db, tester: Tester, query: string, limit: number): Promise<V2SearchHit[]> {
-  const { searchMemory, messageRef, messageTime: msgTime } = await import("./store.js");
-  const { localDate: ld } = await import("../coach/state.js");
-  const hits: V2SearchHit[] = [];
+  const { searchMemory } = await import("./store.js");
+  const { memoryV2Entries, memoryV2Pages, memoryV2Daily } = await import("../db/schema.js");
+  const { sql, desc, and: andOp, eq: eqOp, inArray: inOp } = await import("drizzle-orm");
 
-  // Search v2 entries
-  const allEntries = await import("./v2-store.js").then((m) => m.getV2EntriesByTester(db, tester.id));
-  const lowerQuery = query.toLowerCase();
-  const words = lowerQuery.split(/\s+/).filter((w) => w.length > 1);
-  for (const e of allEntries) {
-    if (e.status === "expired" || e.status === "dropped") continue;
-    const haystack = e.text.toLowerCase();
-    if (words.some((w) => haystack.includes(w))) {
-      hits.push({ ref: v2EntryRef(e.id), where: "entry", date: e.learnedOn ?? ld(e.createdAt, tester.timeZone), text: e.text });
-    }
+  // plainto_tsquery fallback for queries that websearch_to_tsquery can't parse (bare operators, etc.)
+  let q: ReturnType<typeof sql>;
+  try {
+    // Test parse: Postgres throws on bad syntax only at execution, so we try websearch first.
+    q = sql`websearch_to_tsquery('english', ${query})`;
+  } catch {
+    q = sql`plainto_tsquery('english', ${query})`;
   }
+  const match = (doc: ReturnType<typeof sql>) => sql`to_tsvector('english', ${doc}) @@ ${q}`;
+  const rank = (doc: ReturnType<typeof sql>) => sql<number>`ts_rank(to_tsvector('english', ${doc}), ${q})`;
 
-  // Search v2 page titles, about, and other_names
-  const pages = await getV2Pages(db, tester.id);
-  for (const p of pages) {
-    const haystack = [p.title, p.about ?? "", ...p.otherNames].join(" ").toLowerCase();
-    if (words.some((w) => haystack.includes(w))) {
-      hits.push({ ref: v2PageRef(p.id), where: "page", date: ld(p.createdAt, tester.timeZone), text: `${p.title}${p.about ? ` — ${p.about}` : ""}` });
-    }
-  }
+  // 1. V2 entries (current/open only)
+  const entryDoc = sql`${memoryV2Entries.text}`;
+  const entryRows = await db
+    .select({ id: memoryV2Entries.id, text: memoryV2Entries.text, learnedOn: memoryV2Entries.learnedOn, createdAt: memoryV2Entries.createdAt, score: rank(entryDoc) })
+    .from(memoryV2Entries)
+    .where(andOp(eqOp(memoryV2Entries.testerId, tester.id), inOp(memoryV2Entries.status, ["current", "open"]), match(entryDoc)))
+    .orderBy(desc(rank(entryDoc)))
+    .limit(limit);
 
-  // Search daily summaries
-  const dailies = await getV2Dailies(db, tester.id, 1000);
-  for (const d of dailies) {
-    const haystack = d.summary.toLowerCase();
-    if (words.some((w) => haystack.includes(w))) {
-      hits.push({ ref: `d:${d.date}`, where: "daily", date: d.date, text: d.summary });
-    }
-  }
+  // 2. V2 pages (title + about + other_names)
+  const pageDoc = sql`${memoryV2Pages.title} || ' ' || coalesce(${memoryV2Pages.about}, '') || ' ' || array_to_string(${memoryV2Pages.otherNames}, ' ')`;
+  const pageRows = await db
+    .select({ id: memoryV2Pages.id, title: memoryV2Pages.title, about: memoryV2Pages.about, createdAt: memoryV2Pages.createdAt, score: rank(pageDoc) })
+    .from(memoryV2Pages)
+    .where(andOp(eqOp(memoryV2Pages.testerId, tester.id), match(pageDoc)))
+    .orderBy(desc(rank(pageDoc)))
+    .limit(limit);
 
-  // Also search messages (same as v1) — texts not yet filed
+  // 3. V2 daily summaries
+  const dailyDoc = sql`${memoryV2Daily.summary}`;
+  const dailyRows = await db
+    .select({ date: memoryV2Daily.date, summary: memoryV2Daily.summary, score: rank(dailyDoc) })
+    .from(memoryV2Daily)
+    .where(andOp(eqOp(memoryV2Daily.testerId, tester.id), match(dailyDoc)))
+    .orderBy(desc(rank(dailyDoc)))
+    .limit(limit);
+
+  // 4. Messages (reuse v1's searchMemory which already does full-text, skips forgotten)
   const msgHits = await searchMemory(db, tester, query, limit);
-  for (const h of msgHits) {
-    if (!hits.some((existing) => existing.text === h.text)) {
-      hits.push({ ref: h.ref, where: h.where, date: ld(h.at, tester.timeZone), text: h.text });
-    }
-  }
 
-  return hits.slice(0, limit);
+  // Merge all hits with scores, sort by rank
+  const ld = localDate;
+  const scored: (V2SearchHit & { score: number })[] = [
+    ...entryRows.map((r) => ({ ref: v2EntryRef(r.id), where: "entry", date: r.learnedOn ?? ld(r.createdAt, tester.timeZone), text: r.text, score: r.score })),
+    ...pageRows.map((r) => ({ ref: v2PageRef(r.id), where: "page", date: ld(r.createdAt, tester.timeZone), text: `${r.title}${r.about ? ` — ${r.about}` : ""}`, score: r.score })),
+    ...dailyRows.map((r) => ({ ref: `d:${r.date}`, where: "daily", date: r.date, text: r.summary, score: r.score })),
+    ...msgHits.map((h) => ({ ref: h.ref, where: h.where, date: ld(h.at, tester.timeZone), text: h.text, score: 0.1 })),
+  ];
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ score: _score, ...hit }) => hit);
 }

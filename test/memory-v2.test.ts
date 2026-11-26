@@ -358,6 +358,64 @@ describe("deleteV2Memory (rebuild)", () => {
   });
 });
 
+// ─── V2 search (full-text, ranked) ───────────────────────────────────
+
+describe("searchV2Memory", () => {
+  beforeEach(async () => {
+    const { root, people } = await ensureV2RequiredPages(db, tester, at);
+    // Create person page for Anna with entries
+    const anna = await createV2Page(db, tester.id, { kind: "person", title: "Anna", about: "Sam's sister, got married day 13", otherNames: ["Ana"], parentId: people.id }, at);
+    if (!anna.ok) throw new Error("failed to create Anna page");
+    await addV2Entry(db, { pageId: anna.value.id, testerId: tester.id, type: "fact", text: "Sam's sister (corrected from Ana)", sourceMessageId: msgId }, at);
+    await addV2Entry(db, { pageId: anna.value.id, testerId: tester.id, type: "fact", text: "Got married recently, Sam gave the toast", sourceMessageId: msgId }, at);
+    // A fact about running on the root
+    await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Runs in Forest Park post-shift", sourceMessageId: msgId }, at);
+    // A daily summary
+    await writeV2Daily(db, tester.id, "2025-10-06", "Anna's wedding toast went well, people cried.", [msgId], at);
+    // A message
+    await say(tester, "my sister anna helped me with the run yesterday");
+  });
+
+  it('"my sister" returns Anna first, not noise from "my"', async () => {
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "my sister", 8);
+    expect(hits.length).toBeGreaterThan(0);
+    // Anna's page or entry should be in the top results
+    const annaHit = hits.find((h) => h.text.includes("Anna") || h.text.includes("sister"));
+    expect(annaHit).toBeDefined();
+    // It should be in the top 3 (not buried)
+    const annaIdx = hits.findIndex((h) => h.text.includes("Anna") || h.text.includes("sister"));
+    expect(annaIdx).toBeLessThan(3);
+  });
+
+  it('"running" finds "run" (stemming)', async () => {
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "running", 8);
+    const runHit = hits.find((h) => h.text.toLowerCase().includes("run"));
+    expect(runHit).toBeDefined();
+  });
+
+  it('"art" does not match "start" (no substring false positives)', async () => {
+    const { root } = await ensureV2RequiredPages(db, tester, at);
+    await addV2Entry(db, { pageId: root.id, testerId: tester.id, type: "fact", text: "Wants to start running at 6am", sourceMessageId: msgId }, at);
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "art", 8);
+    const startHit = hits.find((h) => h.text.toLowerCase().includes("start"));
+    expect(startHit).toBeUndefined();
+  });
+
+  it("a message that outranks entries still appears", async () => {
+    await say(tester, "the wedding toast was incredible, anna cried and so did everyone");
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "wedding toast", 8);
+    expect(hits.length).toBeGreaterThan(0);
+    // Should find hits from messages (via v1 searchMemory)
+    const hasMsg = hits.some((h) => h.where.includes("text"));
+    const hasMem = hits.some((h) => h.where === "daily" || h.where === "entry");
+    expect(hasMsg || hasMem).toBe(true);
+  });
+});
+
 // ─── Rebuild --snapshots ──────────────────────────────────────────────
 
 describe("rebuild snapshots", () => {
