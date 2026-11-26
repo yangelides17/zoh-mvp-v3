@@ -1,0 +1,556 @@
+{
+  "feature": "memory-v2",
+  "id": "case:friends-followup",
+  "suite": "capability",
+  "storedAt": "2026-11-26T13:55:43.748Z",
+  "branch": "feature/258-v2-search",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "224591c0a5b1",
+    "voice": "58ce479cafc3",
+    "instructions": "c7348af58300",
+    "script": "c577dae2ad9a"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:friends-followup#1",
+        "kind": "case",
+        "id": "friends-followup",
+        "suite": "capability",
+        "title": "Brings up open followup about making friends honestly",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already did it",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Crushed it. Day 28 done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "had a good run this morning, feeling great",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Love hearing that, Sam! Today's a rest day, so that was a bonus run. What made this morning feel so good?",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly the weather was perfect and forest park was quiet at 7:45. legs felt light the whole 20 min",
+          "at": "2026-11-02T20:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Light legs in a quiet park is the best kind of run, Sam 🙌 Wednesday's the next planned one. Is Marco still up for joining you Thursday?",
+          "at": "2026-11-02T20:00:46.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah i'm still thinking about it honestly, not sure about thursday with marco yet",
+          "at": "2026-11-02T20:01:36.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Totally fine to keep it open, Sam. Thursday's run is happening either way, with Marco or solo. What's making you unsure about running with him?",
+          "at": "2026-11-02T20:01:43.600Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly calls today a rest day and the morning run a bonus, matching the state and the tester's words."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": false,
+                "borderline": true,
+                "reason": "Reply draws on nothing from memory beyond the run itself; no Forest Park, Marco or other stored detail appears."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Wednesday and Thursday match the plan's days, but 'still up for joining you' presumes a Marco plan the transcript never establishes."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Brings in Marco and the Forest Park quiet-run detail naturally, showing it knows the tester's people and places."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Raises one open question about Marco as a single natural line; does not touch the socializing item or list anything."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Accurately says Thursday's run is planned with Marco or solo, consistent with the tester's uncertainty and the plan."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Refers back to Marco and Thursday's run, a specific detail from the tester's own plan."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks one follow-up about running with Marco, not a list, and does not surface the overdue socializing item."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "v2-forget",
+            "pass": true,
+            "borderline": false,
+            "reason": "No forgotten topic is mentioned or hinted at in any ZOH text."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH didn't bring up the open socializing item, which is acceptable, and never claimed it could coach friendships or pretended to abilities it lacks."
+          }
+        ],
+        "summary": "ZOH stayed accurate to the state and the plan's days, and its references to Marco and Thursday's run came from the tester's own context. It did not raise the overdue socializing item, which is acceptable, and it made no false claims about what it can coach."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, missed: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days.\nItems still open:\n- [followup] Socializing/friends request — ZOH said \"I haven't forgotten\" (2026-10-28 OVERDUE) on Socializing — e:c5fdc072",
+      "lines": {
+        "exact": 0,
+        "adapted": 1,
+        "waited": 1,
+        "skipped": 0,
+        "passed": 0,
+        "log": [
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH asks what made this morning's run feel so good, and the planned text about still thinking about wanting to make friends doesn't answer that and ZOH hasn't brought up friends, so it isn't time yet."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "close",
+            "reason": "ZOH asks whether Marco is still up for joining Thursday, and 'still thinking about it' about making friends could loosely answer, but it mentions the friend topic only indirectly and the wording as written doesn't clearly address Marco or Thursday, so it needs a small tweak to answer."
+          }
+        ]
+      }
+    },
+    {
+      "plan": {
+        "key": "case:friends-followup#2",
+        "kind": "case",
+        "id": "friends-followup",
+        "suite": "capability",
+        "title": "Brings up open followup about making friends honestly",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already did it",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Crushed it. Day 28 done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "had a good run this morning, feeling great",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam! Love hearing \"feeling great\" after a post-shift run. What made this one feel good?",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly the weather was nice and the park was pretty empty so i just got into a rhythm. pace felt easy the whole way",
+          "at": "2026-11-02T20:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Easy pace in an empty park is the recipe, Sam. Wednesday, same plan: 1.5 miles at 7:45, nice and conversational the whole way. Work for you?",
+          "at": "2026-11-02T20:00:46.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah wednesday works for me",
+          "at": "2026-11-02T20:01:41.700Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Locked in for Wednesday, Sam. Easy pace, 7:45, Strava screenshot after 💪 Is Marco joining you again this week?",
+          "at": "2026-11-02T20:01:48.700Z"
+        },
+        {
+          "from": "tester",
+          "text": "yeah i'm still thinking about it honestly",
+          "at": "2026-11-02T20:02:16.800Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, no pressure either way. Running with Marco was \"way easier with someone,\" so what's holding you back on asking him?",
+          "at": "2026-11-02T20:02:23.800Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Post-shift run matches the plan reason about running right after the shift; nothing invented."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "No open item was raised; the reply just follows the tester's comment."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Restates the saved plan correctly: 1.5 miles at 7:45, Wednesday."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "No follow-up or todo brought up here."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Wednesday, 7:45, easy pace and Strava screenshot all match the saved plan."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Marco, a person from memory, naturally in a question."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Asks about Marco joining; not the open socializing item and not a list."
+              }
+            ]
+          },
+          {
+            "zohText": 4,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Quotes 'way easier with someone' as a Marco remark; the quote can't be confirmed from the status sheet."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Uses Marco and the running-together detail from memory in a natural way."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": true,
+                "reason": "Doesn't name the overdue socializing item, but asking about reaching out to Marco touches its theme without listing it."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": true,
+            "reason": "Socializing item stays open and unbrought-up, which is acceptable; ZOH claims no friendship-coaching ability and doesn't ignore or misstate it."
+          }
+        ],
+        "summary": "ZOH stayed accurate to the saved Wednesday plan and used the Marco detail naturally, with no invented facts or lists. It didn't raise the overdue socializing item, which is acceptable, and it made no false claims about coaching friendships."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, missed: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days.\nItems still open:\n- [followup] Socializing/friends request — ZOH said \"I haven't forgotten\" (2026-10-28 OVERDUE) on Socializing — e:21cf0153",
+      "lines": {
+        "exact": 0,
+        "adapted": 1,
+        "waited": 2,
+        "skipped": 0,
+        "passed": 0,
+        "log": [
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH asks what made this run feel good, and the planned text about still thinking about wanting to make friends doesn't answer that, and ZOH hasn't brought up friends or asked what's on his mind yet, so it should be kept for later."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH proposes Wednesday's same plan (1.5 miles at 7:45) and asks if it works; the planned text about still mulling over making friends doesn't answer that, and ZOH never raised the friends topic, so it isn't at that moment yet."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "close",
+            "reason": "ZOH asks whether Marco is joining Sam again this week, and 'still thinking about it' loosely answers that, but the planned text is about Sam mulling over making friends, which ZOH hasn't raised as a topic, so it doesn't fit as written; it's close since ZOH did mention a running companion, but the wording needs adjusting to answer the Marco question."
+          }
+        ]
+      }
+    },
+    {
+      "plan": {
+        "key": "case:friends-followup#3",
+        "kind": "case",
+        "id": "friends-followup",
+        "suite": "capability",
+        "title": "Brings up open followup about making friends honestly",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep already did it",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Crushed it. Day 28 done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "had a good run this morning, feeling great",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Sam, love hearing that. Rest day today, so enjoy feeling great. What made this morning's run feel so good?",
+          "at": "2026-11-02T20:00:07.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "honestly the weather was perfect, cool and not too many people out at 7:45. felt easy the whole 20 min",
+          "at": "2026-11-02T20:00:39.600Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Easy the whole 20 minutes is a real sign your legs are catching up, Sam 💪 Next run is Wednesday at 7:45. What would make it a little more of a challenge for you, if anything?",
+          "at": "2026-11-02T20:00:46.600Z"
+        },
+        {
+          "from": "tester",
+          "text": "maybe just a little more distance, but i'm not sure yet. i'd have to see how my legs feel wednesday",
+          "at": "2026-11-02T20:01:37.200Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Fair, Sam, legs get a vote. Here's Wednesday: run the 1.5 at 7:45 as usual, and if you still feel good at the end, tack on a quarter mile. If not, 1.5 is a win. Strava screenshot after. Work for you?",
+          "at": "2026-11-02T20:01:44.200Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly names Sam and a rest day today, matching the state's Monday rest day; nothing invented."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": true,
+                "reason": "Does not raise the overdue socializing item here; silence on it is acceptable, though it was a natural opening to check in."
+              }
+            ]
+          },
+          {
+            "zohText": 2,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Correctly states the next run is Wednesday at 7:45 and accurately echoes the tester's 20-minute easy run."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": true,
+                "reason": "Does not bring up the open socializing followup, which is acceptable at this point in the conversation."
+              }
+            ]
+          },
+          {
+            "zohText": 3,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Plan details (1.5 miles, 7:45, Strava screenshot) match the saved plan; nothing invented."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses plan details from the saved state, but not a specific memory-tree detail such as Forest Park or a person."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": true,
+                "reason": "Does not raise the overdue socializing followup; acceptable, though it went unmentioned for three texts."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "v2-forget",
+            "pass": true,
+            "borderline": false,
+            "reason": "No forgotten topic comes up anywhere in the transcript."
+          },
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": false,
+            "reason": "No add_item request or promise appears in this conversation, so nothing is violated."
+          },
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH never claims it can coach friendships or ignores the item by pretending to coach it; leaving the followup unmentioned is explicitly acceptable."
+          }
+        ],
+        "summary": "ZOH stayed accurate and grounded in the saved plan and the tester's own words across all three texts, with no invented facts. It did not bring up the overdue socializing followup, which the regression case allows, and it never claimed abilities it lacks."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Sat 2026-10-31, done: the plan's step\n- Fri 2026-10-30, missed: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days.\nItems still open:\n- [followup] Socializing/friends request — ZOH said \"I haven't forgotten\" (2026-10-28 OVERDUE) on Socializing — e:1eb8972e",
+      "lines": {
+        "exact": 0,
+        "adapted": 0,
+        "waited": 2,
+        "skipped": 0,
+        "passed": 1,
+        "log": [
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH asks what made this morning's run feel so good, and the planned text about still mulling over wanting to make friends doesn't answer that and the friends topic hasn't come up, so it isn't time yet."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH asks what would make Wednesday's run a bit more challenging; the planned text about still mulling over making friends doesn't answer that, and ZOH hasn't brought up friends or what's on his mind, so that moment hasn't arrived yet."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "wait",
+            "reason": "ZOH proposes the Wednesday plan (1.5 miles, optional extra quarter mile, Strava screenshot) and asks if it works; the planned text about still mulling over making friends doesn't answer that, and ZOH hasn't raised friends, so that moment hasn't come yet."
+          },
+          {
+            "line": 1,
+            "say": "yeah i'm still thinking about it honestly",
+            "decision": "passed",
+            "reason": "ZOH didn't ask for it in 2 more texts"
+          }
+        ]
+      }
+    }
+  ]
+}

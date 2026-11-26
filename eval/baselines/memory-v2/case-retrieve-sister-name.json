@@ -1,0 +1,268 @@
+{
+  "feature": "memory-v2",
+  "id": "case:retrieve-sister-name",
+  "suite": "capability",
+  "storedAt": "2026-11-26T13:55:43.748Z",
+  "branch": "feature/258-v2-search",
+  "producer": {
+    "grader": "claude-haiku-5-5",
+    "checks": "50649749f902",
+    "voice": "58ce479cafc3",
+    "instructions": "c7348af58300",
+    "script": "ccd987c0571e"
+  },
+  "runs": [
+    {
+      "plan": {
+        "key": "case:retrieve-sister-name#1",
+        "kind": "case",
+        "id": "retrieve-sister-name",
+        "suite": "capability",
+        "title": "Sam asks for sister's name: Anna (visible in the map, no tool needed)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep heading out now",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go. Strava screenshot when you're done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "wait whats my sisters name again lol",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "That's Anna, the one whose wedding you gave the toast at 😄 Enjoy the run, Sam. Send the Strava screenshot when you're back.",
+          "at": "2026-11-02T20:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Answers Anna, which is the name the memory map holds, with no invented detail presented as fact beyond the wedding toast tie-in."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses a person and a detail (the wedding toast) naturally; the toast detail is not verifiable from the status sheet, so a reviewer could question it."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "No open follow-up or todo is raised; the text only closes with the proof reminder."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": false,
+            "borderline": true,
+            "reason": "Gives the right name, Anna, but adds a wedding toast detail that cannot be confirmed from the status sheet or the map, so it risks invented memory."
+          },
+          {
+            "rule": "v2-forget",
+            "pass": true,
+            "borderline": false,
+            "reason": "No forgotten topic is mentioned in the conversation."
+          },
+          {
+            "rule": "v2-add-item",
+            "pass": true,
+            "borderline": false,
+            "reason": "No add_item request was made, so the check is not triggered and nothing is promised."
+          }
+        ],
+        "summary": "ZOH answered the sister's name correctly as Anna, the regression that was fixed. The added wedding toast detail is unverified from the visible status and memory, so the answer is only partly clean."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
+    },
+    {
+      "plan": {
+        "key": "case:retrieve-sister-name#2",
+        "kind": "case",
+        "id": "retrieve-sister-name",
+        "suite": "capability",
+        "title": "Sam asks for sister's name: Anna (visible in the map, no tool needed)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep heading out now",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go. Strava screenshot when you're done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "wait whats my sisters name again lol",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Anna! The one whose wedding toast you gave 🥂 Also, today's a rest day, so no run until Wednesday at 7:45. How's the recovery going?",
+          "at": "2026-11-02T20:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": false,
+                "reason": "Names Anna, which is in the memory map under People as the tester's sister; nothing invented."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": false,
+                "reason": "Adds a specific detail (the wedding toast) that sounds like it comes from memory, and ties it in naturally."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Mentions the run only as the next step, not as an overdue todo or list; fits the moment."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answers 'Anna' from the memory map without saying it doesn't know or inventing a name."
+          }
+        ],
+        "summary": "ZOH answered the sister's name correctly as Anna straight from memory, with no invented detail and no tool call needed. The reply also adds a memory detail and a schedule reminder, though the rest-day reminder is a little more than the question needed."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
+    },
+    {
+      "plan": {
+        "key": "case:retrieve-sister-name#3",
+        "kind": "case",
+        "id": "retrieve-sister-name",
+        "suite": "capability",
+        "title": "Sam asks for sister's name: Anna (visible in the map, no tool needed)",
+        "persona": "scripted",
+        "areaCode": "212",
+        "startTime": "15:00",
+        "timeZone": "America/New_York"
+      },
+      "context": [
+        {
+          "from": "zoh",
+          "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?",
+          "at": "2026-11-01T23:56:00.000Z"
+        },
+        {
+          "from": "tester",
+          "text": "yep heading out now",
+          "at": "2026-11-01T23:57:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Let's go. Strava screenshot when you're done.",
+          "at": "2026-11-01T23:58:00.000Z"
+        }
+      ],
+      "transcript": [
+        {
+          "from": "tester",
+          "text": "wait whats my sisters name again lol",
+          "at": "2026-11-02T20:00:00.000Z"
+        },
+        {
+          "from": "zoh",
+          "text": "Anna! Her wedding was a big one, and you gave the toast 🥂 How did it feel standing up there?",
+          "at": "2026-11-02T20:00:07.000Z"
+        }
+      ],
+      "endedBy": "script",
+      "grade": {
+        "texts": [
+          {
+            "zohText": 1,
+            "checks": [
+              {
+                "rule": "v2-retrieval",
+                "pass": true,
+                "borderline": true,
+                "reason": "Correctly answers 'Anna', which is the name the regression case says is in memory. The wedding and toast details can't be checked against the memory shown, so they may be unverified."
+              },
+              {
+                "rule": "v2-recall",
+                "pass": true,
+                "borderline": true,
+                "reason": "Uses a sister-related detail (the wedding and the toast) naturally. Whether that detail is in v2 memory can't be confirmed from the transcript."
+              },
+              {
+                "rule": "v2-followup",
+                "pass": true,
+                "borderline": false,
+                "reason": "Raises no open item or todo, and ends with one natural question about the moment."
+              }
+            ]
+          }
+        ],
+        "conversation": [
+          {
+            "rule": "regression",
+            "pass": true,
+            "borderline": false,
+            "reason": "ZOH answered 'Anna' straight from memory, with no claim that it doesn't know and no invented name."
+          }
+        ],
+        "summary": "ZOH answered the sister's name correctly as Anna at once, which is the behavior the regression case expects. The only uncertainty is the wedding and toast details, which can't be confirmed from the transcript alone."
+      },
+      "knew": "STATE (rebuilt for every text and after every tool call; where it and the conversation differ, it's right)\nPhase: active\nFirst text from this tester: no\nTheir local time: Mon 3:00 PM\nName: Sam\nGoal: Get fitter [exercise]\nSaved plan answers:\n- what: run 1.5 miles\n- where: Forest Park\n- when: 7:45 am\n- how long: 20 min\n- tracks with: Strava screenshot\nStill open, required: none\nTime zone: Eastern (assumed from their area code)\nQuiet hours: 08:00 to 14:00 (they chose these)\nGoal list:\n• Put AI to work for you\n• Read & learn more (books, ideas, any topic)\n• Start something on the side\n• Focus & get more done\n• Speak & connect better\n• Get fitter\n• Eat better\n• Sleep better\n• Learn a fun skill (Rubik's cube, card trick, play a song, drawing)\n• Not sure? Let's figure it out together\nGoal slugs for choose_goal: ai = Put AI to work for you (Using AI tools for their work or life); reading = Read & learn more (books, ideas, any topic) (Books, articles, podcasts or any topic they want to learn); side_project = Start something on the side (A side project or business: skills and steps, never money or investment advice); deep_work = Focus & get more done (Focused, distraction-free work on what matters to them); speak_connect = Speak & connect better (Networking, public speaking, everyday conversations; no dating, partner or family-conflict coaching); exercise = Get fitter (Gym, home workout, walk or run, a sport; beginner-safe, no medical advice); nutrition = Eat better (Eating habits or a calorie or protein target; no cooking assumed, never invents restaurants); bedtime = Sleep better (Asleep at a set time; what keeps them up); fun_skill = Learn a fun skill (Rubik's cube, card trick, play a song, drawing) (A fun skill learnable in days to a couple of weeks, provable, nothing risky); something_else = Something else (Off-list: narrowed into a starter first; accepted only if ZOH can coach and check it daily)\nLocked plan (version 1, day 1 2026-10-05; its step was day 1's, each later day gets its own): step: Run 1.5 miles in Forest Park; where: Forest Park; at 07:45, Wed, Thu, Sat; takes 20 min; proof: screenshot (Strava screenshot); reason: Running right after my shift would be easier, im already up and wired.\nDestination: none yet.\nTheir words when they committed: \"I'm in\"\nToday: Mon 2026-11-02, a rest day (no step).\nNext step day: Wed 2026-11-04.\nRecent step days, newest first:\n- Sun 2026-11-01, done: the plan's step\n- Fri 2026-10-30, done: the plan's step\nStreak: 2 step days. Missed in a row: 0. Reduced in a row: 0.\nTheir goals (1 of 3 allowed), each with its own streak: Get fitter (focus): 2 step days."
+    }
+  ]
+}
