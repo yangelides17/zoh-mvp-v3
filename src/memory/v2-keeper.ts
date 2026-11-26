@@ -795,16 +795,18 @@ export async function searchV2Memory(db: Db, tester: Tester, query: string, limi
   const match = (doc: ReturnType<typeof sql>) => sql`to_tsvector('english', ${doc}) @@ ${q}`;
   const rank = (doc: ReturnType<typeof sql>) => sql<number>`ts_rank(to_tsvector('english', ${doc}), ${q})`;
 
-  // 1. V2 entries (current/open only)
-  const entryDoc = sql`${memoryV2Entries.text}`;
+  // 1. V2 entries (current/open), indexed WITH the page's title + other_names so
+  //    "Emma app" matches entries on Emma's page even when the entry text doesn't say "Emma".
+  const entryDoc = sql`${memoryV2Entries.text} || ' ' || ${memoryV2Pages.title} || ' ' || array_to_string(${memoryV2Pages.otherNames}, ' ')`;
   const entryRows = await db
-    .select({ id: memoryV2Entries.id, text: memoryV2Entries.text, learnedOn: memoryV2Entries.learnedOn, createdAt: memoryV2Entries.createdAt, score: rank(entryDoc) })
+    .select({ id: memoryV2Entries.id, text: memoryV2Entries.text, learnedOn: memoryV2Entries.learnedOn, createdAt: memoryV2Entries.createdAt, pageTitle: memoryV2Pages.title, score: rank(entryDoc) })
     .from(memoryV2Entries)
+    .innerJoin(memoryV2Pages, eqOp(memoryV2Pages.id, memoryV2Entries.pageId))
     .where(andOp(eqOp(memoryV2Entries.testerId, tester.id), inOp(memoryV2Entries.status, ["current", "open"]), match(entryDoc)))
     .orderBy(desc(rank(entryDoc)))
     .limit(limit);
 
-  // 2. V2 pages (title + about + other_names)
+  // 2. V2 pages (title + about + other_names). When a page matches, also return its top entries.
   const pageDoc = sql`${memoryV2Pages.title} || ' ' || coalesce(${memoryV2Pages.about}, '') || ' ' || array_to_string(${memoryV2Pages.otherNames}, ' ')`;
   const pageRows = await db
     .select({ id: memoryV2Pages.id, title: memoryV2Pages.title, about: memoryV2Pages.about, createdAt: memoryV2Pages.createdAt, score: rank(pageDoc) })
@@ -812,6 +814,16 @@ export async function searchV2Memory(db: Db, tester: Tester, query: string, limi
     .where(andOp(eqOp(memoryV2Pages.testerId, tester.id), match(pageDoc)))
     .orderBy(desc(rank(pageDoc)))
     .limit(limit);
+  // For each matching page, fetch its current/open entries so the coach sees content, not just the title.
+  const pageEntries = new Map<string, string[]>();
+  if (pageRows.length > 0) {
+    const pageIds = pageRows.map((r) => r.id);
+    const entries = await db
+      .select({ pageId: memoryV2Entries.pageId, text: memoryV2Entries.text })
+      .from(memoryV2Entries)
+      .where(andOp(inOp(memoryV2Entries.pageId, pageIds), inOp(memoryV2Entries.status, ["current", "open"])));
+    for (const e of entries) (pageEntries.get(e.pageId) ?? (pageEntries.set(e.pageId, []), pageEntries.get(e.pageId)!)).push(e.text);
+  }
 
   // 3. V2 daily summaries
   const dailyDoc = sql`${memoryV2Daily.summary}`;
@@ -828,8 +840,12 @@ export async function searchV2Memory(db: Db, tester: Tester, query: string, limi
   // Merge all hits with scores, sort by rank
   const ld = localDate;
   const scored: (V2SearchHit & { score: number })[] = [
-    ...entryRows.map((r) => ({ ref: v2EntryRef(r.id), where: "entry", date: r.learnedOn ?? ld(r.createdAt, tester.timeZone), text: r.text, score: r.score })),
-    ...pageRows.map((r) => ({ ref: v2PageRef(r.id), where: "page", date: ld(r.createdAt, tester.timeZone), text: `${r.title}${r.about ? ` — ${r.about}` : ""}`, score: r.score })),
+    ...entryRows.map((r) => ({ ref: v2EntryRef(r.id), where: `entry on ${r.pageTitle}`, date: r.learnedOn ?? ld(r.createdAt, tester.timeZone), text: r.text, score: r.score })),
+    ...pageRows.map((r) => {
+      const entries = pageEntries.get(r.id) ?? [];
+      const entryPreview = entries.length > 0 ? ` | entries: ${entries.slice(0, 3).join("; ").slice(0, 200)}` : "";
+      return { ref: v2PageRef(r.id), where: "page", date: ld(r.createdAt, tester.timeZone), text: `${r.title}${r.about ? ` — ${r.about}` : ""}${entryPreview}`, score: r.score };
+    }),
     ...dailyRows.map((r) => ({ ref: `d:${r.date}`, where: "daily", date: r.date, text: r.summary, score: r.score })),
     ...msgHits.map((h) => ({ ref: h.ref, where: h.where, date: ld(h.at, tester.timeZone), text: h.text, score: 0.1 })),
   ];

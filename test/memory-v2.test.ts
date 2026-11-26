@@ -411,8 +411,35 @@ describe("searchV2Memory", () => {
     expect(hits.length).toBeGreaterThan(0);
     // Should find hits from messages (via v1 searchMemory)
     const hasMsg = hits.some((h) => h.where.includes("text"));
-    const hasMem = hits.some((h) => h.where === "daily" || h.where === "entry");
+    const hasMem = hits.some((h) => h.where === "daily" || h.where.includes("entry"));
     expect(hasMsg || hasMem).toBe(true);
+  });
+
+  it("entries are indexed with their page title, so 'Emma app' finds entries on Emma's page", async () => {
+    const { people } = await ensureV2RequiredPages(db, tester, at);
+    const emma = await createV2Page(db, tester.id, { kind: "person", title: "Emma", about: "Rob's daughter", parentId: people.id }, at);
+    if (!emma.ok) throw new Error("failed to create Emma page");
+    await addV2Entry(db, { pageId: emma.value.id, testerId: tester.id, type: "fact", text: "Visited App State on the road trip, said it was too cold", sourceMessageId: msgId }, at);
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "Emma app", 8);
+    // The entry about App State should appear because it's on Emma's page
+    const appHit = hits.find((h) => h.text.toLowerCase().includes("app state") || h.text.toLowerCase().includes("too cold"));
+    expect(appHit).toBeDefined();
+  });
+
+  it("a matching page returns its entries in the result", async () => {
+    const { people } = await ensureV2RequiredPages(db, tester, at);
+    const emma = await createV2Page(db, tester.id, { kind: "person", title: "Emma", about: "Rob's daughter, picked Clemson", parentId: people.id }, at);
+    if (!emma.ok) throw new Error("failed to create Emma page");
+    await addV2Entry(db, { pageId: emma.value.id, testerId: tester.id, type: "fact", text: "High school senior", sourceMessageId: msgId }, at);
+    await addV2Entry(db, { pageId: emma.value.id, testerId: tester.id, type: "fact", text: "Visited App State, said it was too cold", sourceMessageId: msgId }, at);
+    const { searchV2Memory } = await import("../src/memory/v2-keeper.js");
+    const hits = await searchV2Memory(db, tester, "Emma", 8);
+    // The page hit should include entries in its text
+    const pageHit = hits.find((h) => h.where === "page" && h.text.includes("Emma"));
+    expect(pageHit).toBeDefined();
+    expect(pageHit!.text).toContain("entries:");
+    expect(pageHit!.text).toContain("High school senior");
   });
 });
 
