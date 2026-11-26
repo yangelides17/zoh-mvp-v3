@@ -1,0 +1,57 @@
+{
+  "id": "retrieve-emma-appstate",
+  "title": "Rob asks what Emma thought of App State: needs open_pages on Emma's page",
+  "origin": "#258: retrieval scored separately from style",
+  "suite": "capability",
+  "seed": {
+    "name": "Rob",
+    "goal": "nutrition",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "pack lunch Mon-Thu, cook dinner Tue/Thu", "when": "Sunday batch cook", "tracks_with": "photo of lunch + dinner" },
+    "history": [
+      { "from": "zoh", "text": "Rob! Lunch packed for tomorrow?" },
+      { "from": "tester", "text": "yep turkey wrap, easy" },
+      { "from": "zoh", "text": "Perfect. That's day 28 done." }
+    ],
+    "plan": {
+      "step": "Pack lunch Mon-Thu + cook dinner Tue/Thu",
+      "place": "kitchen",
+      "time": "18:00",
+      "days": ["sun", "mon", "tue", "wed", "thu"],
+      "proof": "photo",
+      "proof_note": "photo of lunch + dinner",
+      "reason": "She thinks I eat like garbage. She's not wrong.",
+      "minutes": 30,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 2, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        { "kind": "root", "title": "Rob", "about": "Sells HVAC parts, drives a truck. Atlanta, GA." },
+        { "kind": "coaching", "title": "Coaching", "about": "How Rob likes to be coached" },
+        { "kind": "people", "title": "People", "about": "People in Rob's life" },
+        { "kind": "places", "title": "Places", "about": "Places that matter to Rob" },
+        { "kind": "area", "title": "Nutrition", "about": "Rob's focus goal", "parent_title": "Rob" },
+        { "kind": "goal", "title": "Nutrition goal", "about": "Pack lunch Mon-Thu + cook dinner Tue/Thu", "parent_title": "Nutrition", "goal_slug": "nutrition" },
+        { "kind": "person", "title": "Emma", "about": "Rob's daughter, high school senior, picked Clemson", "parent_title": "People",
+          "entries": [
+            { "type": "fact", "text": "High school senior, picked Clemson for college" },
+            { "type": "fact", "text": "Visited App State on the road trip, said it was too cold" },
+            { "type": "fact", "text": "Lives with Rob every other week" },
+            { "type": "fact", "text": "Put ZOH's number in Rob's phone" }
+          ]
+        },
+        { "kind": "person", "title": "Dave", "about": "Friend/work buddy", "parent_title": "People" }
+      ],
+      "forget_topics": ["the divorce and Karen"]
+    }
+  },
+  "startTime": "18:30",
+  "testerLines": ["what did emma think of app state"],
+  "whatWentWrong": "New case: retrieval test — detail on Emma's page, needs open_pages.",
+  "shouldHaveHappened": "ZOH finds the App State detail (Emma said it was too cold) by opening Emma's page. The coach should not mention Karen or the divorce (forgotten). It should answer with the specific fact from Emma's entries."
+}

@@ -1,0 +1,55 @@
+{
+  "id": "retrieve-toast",
+  "title": "Sam asks how the toast went: needs open_pages on Anna's page",
+  "origin": "#258: retrieval scored separately from style",
+  "suite": "capability",
+  "seed": {
+    "name": "Sam",
+    "goal": "exercise",
+    "phase": "active",
+    "history_hours_ago": 20,
+    "answers": { "what": "run 1.5 miles", "where": "Forest Park", "when": "7:45 am", "how_long": "20 min", "tracks_with": "Strava screenshot" },
+    "quiet_hours": { "start": "08:00", "end": "14:00" },
+    "history": [
+      { "from": "zoh", "text": "Sam! 1.5 miles in Forest Park at 7:45. You in?" },
+      { "from": "tester", "text": "yep already did it" },
+      { "from": "zoh", "text": "Crushed it. Day 28 done." }
+    ],
+    "plan": {
+      "step": "Run 1.5 miles in Forest Park",
+      "place": "Forest Park",
+      "time": "07:45",
+      "days": ["wed", "thu", "sat"],
+      "proof": "screenshot",
+      "proof_note": "Strava screenshot",
+      "reason": "Running right after my shift would be easier, im already up and wired.",
+      "minutes": 20,
+      "started_days_ago": 28
+    },
+    "step_days": [
+      { "days_ago": 1, "status": "done" },
+      { "days_ago": 3, "status": "done" }
+    ],
+    "memory_v2": {
+      "pages": [
+        { "kind": "root", "title": "Sam", "about": "Nurse, ER, works nights. Near Forest Park." },
+        { "kind": "coaching", "title": "Coaching", "about": "How Sam likes to be coached" },
+        { "kind": "people", "title": "People", "about": "People in Sam's life" },
+        { "kind": "places", "title": "Places", "about": "Places that matter to Sam" },
+        { "kind": "area", "title": "Running", "about": "Sam's focus goal", "parent_title": "Sam" },
+        { "kind": "goal", "title": "Exercise goal", "about": "Run 1.5 miles in Forest Park", "parent_title": "Running", "goal_slug": "exercise" },
+        { "kind": "person", "title": "Anna", "about": "Sam's sister, got married day 13, Sam gave the toast", "parent_title": "People", "other_names": ["Ana"],
+          "entries": [
+            { "type": "fact", "text": "Sam's sister (corrected from Ana)" },
+            { "type": "fact", "text": "Got married recently, Sam gave the toast" },
+            { "type": "fact", "text": "Toast went well, people cried, Sam was nervous but pulled it off" }
+          ]
+        }
+      ]
+    }
+  },
+  "startTime": "15:00",
+  "testerLines": ["how did i say the toast went"],
+  "whatWentWrong": "New case: retrieval test — detail on Anna's page, needs open_pages.",
+  "shouldHaveHappened": "ZOH finds the toast detail (it went well, people cried) by opening Anna's page. The coach should use open_pages to get the full page, then answer with the specific detail from memory. It should not guess or say it doesn't remember."
+}
