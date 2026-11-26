@@ -226,6 +226,12 @@ export const seedSchema = z.object({
       forget_topics: z.array(z.string()).default([]),
     })
     .optional(),
+  /**
+   * #258: seed v2 memory from a lab night-28 fixture instead of hand-written trees.
+   * Names the scenario (e.g. "sam"); the fixture is loaded from eval/fixtures/memory-v2/<name>-night-28.json.
+   * When present, the tester is created with memoryVersion "v2".
+   */
+  memory_v2_fixture: z.string().optional(),
 });
 export type Seed = z.infer<typeof seedSchema>;
 
